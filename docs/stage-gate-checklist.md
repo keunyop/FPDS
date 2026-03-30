@@ -8,6 +8,7 @@ Source Documents:
 - `docs/plan.md`
 - `docs/WBS.md`
 - `docs/roadmap.md`
+- `docs/scope-baseline.md`
 - `docs/decision-log.md`
 - `docs/raid-log.md`
 - `docs/working-agreement.md`
@@ -64,6 +65,7 @@ Source Documents:
 - KPI, ranking, scatter axis, i18n ownership/fallback 정책이 정의되어 있다.
 - Sprint 0 backlog와 Build Start Gate 점검 항목이 정리되어 있다.
 - WBS `0.x`, `1.x`의 gate 차단 항목이 닫혀 있다.
+- `Build Start Sign-off Package`가 준비되어 있다.
 - Product Owner가 개발 시작을 별도로 승인했다.
 
 통과 산출물:
@@ -189,3 +191,4 @@ Approved By:
 | Date | Change |
 |---|---|
 | 2026-03-29 | Initial stage gate checklist created |
+| 2026-03-30 | Added scope baseline source and Build Start Sign-off Package check to Gate A |

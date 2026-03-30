@@ -53,7 +53,7 @@ Source Documents:
 | R-007 | Medium | Open | dashboard metric 정의 없이 UI 설계를 앞서가면 의미 없는 비교 화면이 나올 수 있다. | 사용자 가치 저하, 재작업 | KPI, ranking, scatter axis를 먼저 확정 | Product Owner, Frontend, Backend | PRD 6, 22 / Plan 7.3, 14 |
 | R-008 | Medium | Monitoring | LLM/API/infra 비용이 초기 예상보다 빠르게 증가할 수 있다. | 운영 비용 증가 | usage dashboard, weekly cost review, stage별 cap 운영 | Product Owner, Backend | PRD 20 / Plan 11 |
 | R-009 | Medium | Open | 다국어 운영 ownership이 불명확하면 EN/KO/JA 품질이 일관되지 않을 수 있다. | public/admin UX 품질 저하 | localization owner와 fallback 정책을 조기에 정의 | Product Owner, Frontend | PRD 14.6, 22 / WBS 1.7.5, 1.7.6 |
-| R-010 | Medium | Open | Prototype 전에 Big 5 전체 커버리지로 범위가 커지면 일정과 품질이 동시에 흔들릴 수 있다. | scope creep, 일정 지연 | Prototype First 원칙 유지, TD Savings 범위 고정 | Product Owner | PRD 21 / Plan 4, 17, 18 |
+| R-010 | Medium | Mitigated | Prototype 전에 Big 5 전체 커버리지로 범위가 커지면 일정과 품질이 동시에 흔들릴 수 있다. | scope creep, 일정 지연 | `docs/scope-baseline.md` 기준으로 Prototype/Phase 1 경계를 고정하고 change control로 관리 | Product Owner | PRD 21 / Plan 4, 17, 18 / `docs/scope-baseline.md` |
 | R-011 | High | Open | Phase 1까지 2인 체제로 운영되므로 설계, 구현, QA, 문서화 병렬 처리 폭이 제한되어 일정 압박이 커질 수 있다. | Phase 1 일정 지연, multitasking overload, 품질 저하 위험 | 단계별 scope 고정, gate discipline 유지, 문서 선행, 병목 조기 식별 | Product Owner, Tech Lead | `docs/roadmap.md` |
 
 ---
@@ -118,3 +118,4 @@ Source Documents:
 |---|---|
 | 2026-03-29 | Initial RAID log created from PRD, plan, WBS, and decision log baseline |
 | 2026-03-29 | Added staffing-related risk and assumption aligned with roadmap planning |
+| 2026-03-30 | Updated scope-creep risk to Mitigated after scope baseline and release cutline approval |

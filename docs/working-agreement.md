@@ -7,6 +7,7 @@ Based on:
 - `docs/FPDS_Requirements_Definition_v1_5.md`
 - `docs/plan.md`
 - `docs/WBS.md`
+- `docs/scope-baseline.md`
 - `docs/decision-log.md`
 - `docs/raid-log.md`
 
@@ -162,6 +163,7 @@ Based on:
 - detailed design 완료
 - prototype backlog 확정
 - Build Start Gate 점검 가능 상태
+- `Build Start Sign-off Package` 준비 완료
 - Product Owner의 명시적 시작 승인
 
 ---
@@ -198,3 +200,4 @@ Based on:
 | 2026-03-29 | Initial working agreement created |
 | 2026-03-29 | Scope change control and stage gate checklist adopted as linked governance documents |
 | 2026-03-29 | Milestone tracker adopted for relative-week schedule governance |
+| 2026-03-30 | Added scope baseline document and Build Start Sign-off Package minimum condition |

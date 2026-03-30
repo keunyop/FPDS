@@ -90,6 +90,10 @@ Status meaning:
 | D-021 | 2026-03-29 | Decided | Scope Governance | FPDS의 범위 변경은 change request와 Product Owner 승인 없이는 공식 범위에 반영하지 않는다. | scope creep를 통제하고 문서 기준 실행을 유지하기 위해 | scope control, WBS, roadmap, approvals | `docs/scope-change-control.md` |
 | D-022 | 2026-03-29 | Decided | Stage Gate Governance | FPDS는 Gate A~D 체크리스트 기준으로 단계 전환을 판단하고, gate 통과 전 다음 단계 구현에 착수하지 않는다. | 설계 미완료 상태의 조기 구현과 단계 전환 착시를 방지하기 위해 | stage transition, approvals, roadmap, WBS | `docs/stage-gate-checklist.md` |
 | D-023 | 2026-03-29 | Decided | Milestone Tracking Model | FPDS의 milestone due date는 공식 실행 시작 전까지 relative week 기준으로 관리하고, 공식 시작일 확정 후 absolute date를 추가한다. | 아직 build start date가 확정되지 않은 상태에서도 일정 추적을 가능하게 하기 위해 | milestone tracking, roadmap, WBS, governance | `docs/milestone-tracker.md` |
+| D-024 | 2026-03-30 | Decided | Scope Baseline | WBS 1.1.1~1.1.5의 공식 기준 문서는 `docs/scope-baseline.md`로 고정한다. | Prototype/Phase 1 범위, 비범위, cutline, 개발 시작 승인 방식을 한 장으로 고정하기 위해 | scope baseline, release cutline, approvals | `docs/scope-baseline.md` |
+| D-025 | 2026-03-30 | Decided | Non-Goals Baseline | 공식 비범위 목록은 WBS의 예시 3개가 아니라 PRD 전체 `Non-Goals` 목록으로 운영한다. | 구현 직전 scope creep를 막고 exclusion list를 완전한 형태로 고정하기 위해 | scope control, roadmap, WBS, change control | `docs/scope-baseline.md`, PRD 3.2, 4.2 |
+| D-026 | 2026-03-30 | Decided | Release Cutline | release cutline은 `Phase 1 release 기준 Must Have / Later`로 관리하며, Phase 2는 계약 범위이지만 Phase 1 release cutline에서는 `Later`로 분리한다. | 계약 범위와 단기 release cutline을 분리해 build sequencing을 명확히 하기 위해 | release planning, WBS, roadmap, change control | `docs/scope-baseline.md` |
+| D-027 | 2026-03-30 | Decided | Build Start Approval | 개발 시작 조건은 `Gate A blocker closed + Product Owner explicit approval`로 정의한다. | 설계 차단 항목이 닫히지 않은 상태에서의 조기 구현을 막기 위해 | gate governance, implementation start, approvals | `docs/scope-baseline.md`, `docs/stage-gate-checklist.md` |
 
 ---
 
@@ -102,3 +106,4 @@ Status meaning:
 | 2026-03-29 | Added staffing model decision linked to roadmap planning |
 | 2026-03-29 | Added scope governance and stage gate governance decisions |
 | 2026-03-29 | Added milestone tracking model decision |
+| 2026-03-30 | Added scope baseline, non-goals baseline, Phase 1 release cutline, and build-start approval decisions |

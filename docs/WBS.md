@@ -26,11 +26,11 @@ Based on:
 
 지금 바로 시작해야 하는 순서는 아래가 가장 맞습니다.
 
-1. 의사결정 로그와 RAID 로그를 만들고 미결정 항목 owner/due date를 배정한다.
-2. FPDS v1 canonical schema, review 상태 모델, BX-PF 인터페이스 초안을 확정한다.
-3. 인증/권한, 보안 정책, public/admin/API 경계를 설계한다.
-4. dashboard KPI, ranking, scatter plot 축 정의를 확정한다.
-5. Prototype 범위를 TD Savings 하나로 고정하고 Sprint 0 backlog를 확정한다.
+1. FPDS v1 canonical schema, review 상태 모델, BX-PF 인터페이스 초안을 확정한다.
+2. 인증/권한, 보안 정책, public/admin/API 경계를 설계한다.
+3. dashboard KPI, ranking, scatter plot 축 정의와 i18n fallback 기준을 확정한다.
+4. TD Savings source inventory와 prototype backlog/acceptance를 고정한다.
+5. Build Start Gate 차단 항목을 정리하고 Gate A review package를 준비한다.
 
 중요 원칙:
 - **개발 시작 금지**: 모든 계획/설계 완료 후 Product Owner가 명시적으로 시작 승인할 때까지 구현하지 않는다.
@@ -119,11 +119,11 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.1.1 | Now | Prototype 범위 고정 | TD Bank + Savings + internal viewer 명시 | Product Owner, Tech Lead | 0.2 |
-| 1.1.2 | Now | Phase 1 v1 범위 고정 | Canada Big 5 + Chequing/Savings/GIC + Public/Admin | Product Owner | 1.1.1 |
-| 1.1.3 | Now | 비범위 항목 재확인 | recommendation, public evidence exposure, billing 제외 명문화 | Product Owner | 1.1.2 |
-| 1.1.4 | Now | release cutline 정의 | Must Have / Later 분리표 | Product Owner, Tech Lead | 1.1.3 |
-| 1.1.5 | Now | 승인 방식 정의 | 어떤 문서가 고정되면 개발 시작 가능한지 정의 | Product Owner | 1.1.4 |
+| 1.1.1 | Completed | Prototype 범위 고정 | `docs/scope-baseline.md` Section 3 | Product Owner, Tech Lead | 0.2 |
+| 1.1.2 | Completed | Phase 1 v1 범위 고정 | `docs/scope-baseline.md` Section 4 | Product Owner | 1.1.1 |
+| 1.1.3 | Completed | 비범위 항목 재확인 | `docs/scope-baseline.md` Section 5 | Product Owner | 1.1.2 |
+| 1.1.4 | Completed | release cutline 정의 | `docs/scope-baseline.md` Section 6 | Product Owner, Tech Lead | 1.1.3 |
+| 1.1.5 | Completed | 승인 방식 정의 | `docs/scope-baseline.md` Section 7 | Product Owner | 1.1.4 |
 
 ### 1.2 Domain Model and Canonical Schema
 
@@ -319,8 +319,6 @@ Based on:
 
 | Priority | Task | Expected Result |
 |---|---|---|
-| P0 | Decision Log / RAID Log 생성 | 논의와 리스크를 통제 가능한 상태로 전환 |
-| P0 | Prototype 범위와 acceptance 고정 | 팀이 무엇을 성공으로 볼지 명확화 |
 | P0 | canonical schema v1 확정 | 이후 API/DB/UI가 같은 기준을 사용 |
 | P0 | validation/confidence 기준 확정 | review queue 범위를 제어 가능 |
 | P0 | BX-PF write contract 초안 확정 | 나중에 연동 때문에 되돌아가지 않도록 방지 |
@@ -353,9 +351,9 @@ Based on:
 
 ## 8. Recommended Sequence
 
-1. WBS 승인
-2. Decision Log / RAID Log 생성
-3. 상세 설계 패키지 작성
+1. scope baseline 승인 및 WBS 1.1 closure 반영
+2. Gate A 차단 상세 설계 패키지 작성
+3. prototype backlog와 acceptance 확정
 4. Build Start Gate 점검
 5. Product Owner의 명시적 개발 시작 승인
 6. 승인 이후에만 Foundation 착수
