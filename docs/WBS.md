@@ -106,12 +106,12 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 0.1 | Now | 프로젝트 운영 방식 확정 | working agreement, sync cadence, 보고 방식 | Product Owner, Tech Lead | 없음 |
+| 0.1 | Completed | 프로젝트 운영 방식 확정 | working agreement, sync cadence, 보고 방식 | Product Owner, Tech Lead | 없음 |
 | 0.2 | Completed | Decision Log 생성 | `docs/decision-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
-| 0.3 | Now | RAID Log 생성 | `docs/raid-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
-| 0.4 | Now | Scope change control 규칙 확정 | 변경 요청 절차 | Product Owner | 0.1 |
-| 0.5 | Now | Stage gate 운영 기준 확정 | Gate A-D checklist | Product Owner, QA | 0.4 |
-| 0.6 | Next | milestone tracking 체계 확정 | 일정판, 책임자, due date | Delivery Lead | 0.5 |
+| 0.3 | Completed | RAID Log 생성 | `docs/raid-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
+| 0.4 | Completed | Scope change control 규칙 확정 | `docs/scope-change-control.md` | Product Owner | 0.1 |
+| 0.5 | Completed | Stage gate 운영 기준 확정 | `docs/stage-gate-checklist.md` | Product Owner, QA | 0.4 |
+| 0.6 | Completed | milestone tracking 체계 확정 | `docs/milestone-tracker.md` | Delivery Lead | 0.5 |
 
 ## WBS 1. Detailed Design Closure
 

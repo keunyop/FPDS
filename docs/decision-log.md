@@ -81,6 +81,16 @@ Status meaning:
 | O-009 | 2026-03-29 | Open | Localization | UI localization ownership and Japanese fallback/glossary ownership | 다국어 운영 일관성에 영향 | PRD 22 / WBS 1.7.5, 1.7.7 |
 | O-010 | 2026-03-29 | Open | External API | API auth, tenant isolation, rate limit/SLA | Phase 2 API 기반 정책 결정 | PRD 22 / WBS 1.6.3, 1.5.5 |
 
+## 4.1 Additional Decided Items
+
+| ID | Date | Status | Area | Decision | Rationale | Affected Areas | Source |
+|---|---|---|---|---|---|---|---|
+| D-019 | 2026-03-29 | Decided | Governance Model | FPDS는 working agreement 기준으로 Product Owner 승인 중심, 문서 우선, gate 기반 방식으로 운영한다. | 협업 방식과 문서 우선순위를 고정해 후속 문서와 실행의 기준을 만들기 위해 | governance, reporting, approvals | `docs/working-agreement.md` |
+| D-020 | 2026-03-29 | Decided | Staffing Model | Phase 1 완료 시점까지는 Product Owner + Codex 2인 체제로 계획하고, Phase 2 시작 시 추가 인력 1명을 투입해 3인 체제로 운영한다. | 일정 추정과 단계별 병렬 처리 한계를 현실적으로 반영하기 위해 | roadmap, staffing, schedule planning, phase sequencing | `docs/roadmap.md` |
+| D-021 | 2026-03-29 | Decided | Scope Governance | FPDS의 범위 변경은 change request와 Product Owner 승인 없이는 공식 범위에 반영하지 않는다. | scope creep를 통제하고 문서 기준 실행을 유지하기 위해 | scope control, WBS, roadmap, approvals | `docs/scope-change-control.md` |
+| D-022 | 2026-03-29 | Decided | Stage Gate Governance | FPDS는 Gate A~D 체크리스트 기준으로 단계 전환을 판단하고, gate 통과 전 다음 단계 구현에 착수하지 않는다. | 설계 미완료 상태의 조기 구현과 단계 전환 착시를 방지하기 위해 | stage transition, approvals, roadmap, WBS | `docs/stage-gate-checklist.md` |
+| D-023 | 2026-03-29 | Decided | Milestone Tracking Model | FPDS의 milestone due date는 공식 실행 시작 전까지 relative week 기준으로 관리하고, 공식 시작일 확정 후 absolute date를 추가한다. | 아직 build start date가 확정되지 않은 상태에서도 일정 추적을 가능하게 하기 위해 | milestone tracking, roadmap, WBS, governance | `docs/milestone-tracker.md` |
+
 ---
 
 ## 5. Change History
@@ -88,3 +98,7 @@ Status meaning:
 | Date | Change |
 |---|---|
 | 2026-03-29 | Initial decision log created from PRD, plan, and WBS baseline |
+| 2026-03-29 | Added governance model decision linked to working agreement |
+| 2026-03-29 | Added staffing model decision linked to roadmap planning |
+| 2026-03-29 | Added scope governance and stage gate governance decisions |
+| 2026-03-29 | Added milestone tracking model decision |
