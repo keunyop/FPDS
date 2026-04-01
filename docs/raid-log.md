@@ -78,8 +78,8 @@ Source Documents:
 | ID | Priority | State | Issue | Current Impact | Next Action | Owner | Source |
 |---|---|---|---|---|---|---|---|
 | I-001 | High | Open | exact BX-PF write contract and field mapping이 아직 미확정이다. | publish flow와 acceptance 기준 고정 불가 | 설계 문서에서 field mapping 초안 작성 | Backend, Tech Lead | PRD 22 / WBS 1.5.4 |
-| I-002 | High | Open | country-specific deposit subtype taxonomy가 아직 미확정이다. | schema/parser/dashboard 기준 불안정 | subtype taxonomy 결정 문서 작성 | Domain Reviewer, Tech Lead | PRD 22 / WBS 1.2.1 |
-| I-003 | High | Open | confidence threshold와 field-level validation rules가 아직 미확정이다. | review queue 기준 불명확 | validation rule spec 작성 | Backend, AI/Data | PRD 22 / WBS 1.2.4, 1.2.5 |
+| I-002 | High | Closed | country-specific deposit subtype taxonomy가 아직 미확정이다. | schema/parser/dashboard 기준 불안정 | `docs/domain-model-canonical-schema.md` Section 3에서 Canada deposit taxonomy와 extensible registry rule을 고정했다. | Domain Reviewer, Tech Lead | `docs/domain-model-canonical-schema.md` / WBS 1.2.1 |
+| I-003 | High | Closed | confidence threshold와 field-level validation rules가 아직 미확정이다. | review queue 기준 불명확 | `docs/domain-model-canonical-schema.md` Sections 5-6에서 validation matrix와 config-backed confidence policy를 고정했다. | Backend, AI/Data | `docs/domain-model-canonical-schema.md` / WBS 1.2.4, 1.2.5 |
 | I-004 | High | Open | admin auth 방식(session vs token)이 아직 미확정이다. | auth/RBAC/CSRF 설계 지연 | auth decision 문서화 | Product Owner, Security | PRD 22 / WBS 1.6.1 |
 | I-005 | High | Open | RBAC role matrix와 승인 권한 범위가 아직 미확정이다. | admin workflow 설계 지연 | role matrix 초안 작성 | Security, Tech Lead | PRD 22 / WBS 1.6.2 |
 | I-006 | Medium | Open | CORS allowlist와 crawler SSRF/egress 정책이 아직 미확정이다. | security architecture note 미완성 | security baseline 문서 초안 작성 | Security | PRD 22 / WBS 1.6.4, 1.6.5 |
@@ -119,3 +119,4 @@ Source Documents:
 | 2026-03-29 | Initial RAID log created from PRD, plan, WBS, and decision log baseline |
 | 2026-03-29 | Added staffing-related risk and assumption aligned with roadmap planning |
 | 2026-03-30 | Updated scope-creep risk to Mitigated after scope baseline and release cutline approval |
+| 2026-03-30 | Closed taxonomy and validation/confidence issues after canonical schema baseline approval |

@@ -26,11 +26,11 @@ Based on:
 
 지금 바로 시작해야 하는 순서는 아래가 가장 맞습니다.
 
-1. FPDS v1 canonical schema, review 상태 모델, BX-PF 인터페이스 초안을 확정한다.
-2. 인증/권한, 보안 정책, public/admin/API 경계를 설계한다.
-3. dashboard KPI, ranking, scatter plot 축 정의와 i18n fallback 기준을 확정한다.
-4. TD Savings source inventory와 prototype backlog/acceptance를 고정한다.
-5. Build Start Gate 차단 항목을 정리하고 Gate A review package를 준비한다.
+1. workflow/state model과 change/review lifecycle을 확정한다.
+2. ERD, evidence 저장 전략, retrieval 시작점을 설계한다.
+3. BX-PF write contract와 public/admin/internal API draft를 정리한다.
+4. 인증/권한, 보안 정책, public/admin/API 경계를 설계한다.
+5. TD Savings source inventory와 prototype backlog/acceptance를 고정한다.
 
 중요 원칙:
 - **개발 시작 금지**: 모든 계획/설계 완료 후 Product Owner가 명시적으로 시작 승인할 때까지 구현하지 않는다.
@@ -129,19 +129,19 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.2.1 | Now | Canada deposit taxonomy 확정 | chequing/savings/GIC subtype 정의 | Domain Reviewer, Tech Lead | 1.1.2 |
-| 1.2.2 | Now | canonical product schema v1 설계 | 필수/선택 필드, 타입, 설명 | Tech Lead, Backend | 1.2.1 |
-| 1.2.3 | Now | source-derived 필드 정책 정의 | product name/description/source language 처리 원칙 | Tech Lead | 1.2.2 |
-| 1.2.4 | Now | field-level validation rules 정의 | 금리, 수수료, minimum balance, term 규칙 | Backend, Domain Reviewer | 1.2.2 |
-| 1.2.5 | Now | confidence scoring/routing 기준 정의 | auto-approve vs review queue 기준 | AI/Data, Tech Lead | 1.2.4 |
-| 1.2.6 | Now | change event model 정의 | New/Updated/Discontinued/Reclassified/Manual override | Backend | 1.2.2 |
-| 1.2.7 | Next | Japan 확장 대비 schema 확인 | Phase 2 확장 가능 여부 검토 메모 | Tech Lead | 1.2.2 |
+| 1.2.1 | Completed | Canada deposit taxonomy 확정 | `docs/domain-model-canonical-schema.md` Section 3 | Domain Reviewer, Tech Lead | 1.1.2 |
+| 1.2.2 | Completed | canonical product schema v1 설계 | `docs/domain-model-canonical-schema.md` Section 4 | Tech Lead, Backend | 1.2.1 |
+| 1.2.3 | Completed | source-derived 필드 정책 정의 | `docs/domain-model-canonical-schema.md` Section 4.7 | Tech Lead | 1.2.2 |
+| 1.2.4 | Completed | field-level validation rules 정의 | `docs/domain-model-canonical-schema.md` Section 5 | Backend, Domain Reviewer | 1.2.2 |
+| 1.2.5 | Completed | confidence scoring/routing 기준 정의 | `docs/domain-model-canonical-schema.md` Section 6 | AI/Data, Tech Lead | 1.2.4 |
+| 1.2.6 | Completed | change event model 정의 | `docs/domain-model-canonical-schema.md` Section 7 | Backend | 1.2.2 |
+| 1.2.7 | Completed | Japan 확장 대비 schema 확인 | `docs/domain-model-canonical-schema.md` Section 8 | Tech Lead | 1.2.2 |
 
 ### 1.3 Workflow and State Design
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.3.1 | Now | end-to-end ingestion flow 상세화 | crawl -> parse -> extract -> normalize -> validate -> review -> publish 흐름도 | Tech Lead, AI/Data | 1.2.2 |
+| 1.3.1 | Completed | end-to-end ingestion flow 상세화 | `docs/workflow-state-ingestion-design.md` Sections 2-9 | Tech Lead, AI/Data | 1.2.2 |
 | 1.3.2 | Now | review state machine 정의 | queued / approved / rejected / edited / deferred 상태도 | Backend | 1.3.1 |
 | 1.3.3 | Now | run lifecycle 정의 | run started/completed/failed/retried 상태 | Backend | 1.3.1 |
 | 1.3.4 | Now | publish lifecycle 정의 | pending / published / retry / reconciliation 상태 | Backend | 1.3.1 |
@@ -319,8 +319,9 @@ Based on:
 
 | Priority | Task | Expected Result |
 |---|---|---|
-| P0 | canonical schema v1 확정 | 이후 API/DB/UI가 같은 기준을 사용 |
-| P0 | validation/confidence 기준 확정 | review queue 범위를 제어 가능 |
+| P0 | review state machine 확정 | review queue와 승인 흐름을 고정 |
+| P0 | run/publish lifecycle 확정 | 운영/배포 상태 추적 기준 통일 |
+| P0 | ERD 초안 작성 | DB/migration/interface 기준 마련 |
 | P0 | BX-PF write contract 초안 확정 | 나중에 연동 때문에 되돌아가지 않도록 방지 |
 | P0 | admin auth / RBAC / security 정책 확정 | 보안을 설계 초기부터 반영 |
 | P0 | KPI/ranking/scatter 정의 확정 | dashboard를 숫자 기준 없이 만들지 않도록 방지 |
@@ -337,8 +338,6 @@ Based on:
 | Decision Area | Decision Needed | Why It Must Be Closed First |
 |---|---|---|
 | BX-PF | exact write contract and field mapping | publish 흐름 재작업 방지 |
-| Taxonomy | country/product subtype 기준 | parser, schema, dashboard 기준 통일 |
-| Validation | field-level rules and thresholds | review queue 품질 좌우 |
 | Auth | admin session vs token | 보안 구조와 구현 방식 결정 |
 | RBAC | role matrix와 승인 권한 범위 | 운영 리스크 방지 |
 | Security | CORS, SSRF, CSP, CSRF 정책 | public/admin/api 경계 보호 |
@@ -351,8 +350,8 @@ Based on:
 
 ## 8. Recommended Sequence
 
-1. scope baseline 승인 및 WBS 1.1 closure 반영
-2. Gate A 차단 상세 설계 패키지 작성
+1. scope baseline 및 canonical schema baseline 승인 반영
+2. workflow/state, ERD, interface draft 작성
 3. prototype backlog와 acceptance 확정
 4. Build Start Gate 점검
 5. Product Owner의 명시적 개발 시작 승인

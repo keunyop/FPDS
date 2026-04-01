@@ -71,8 +71,8 @@ Status meaning:
 | ID | Date | Status | Area | Decision Needed | Why It Matters | Source |
 |---|---|---|---|---|---|---|
 | O-001 | 2026-03-29 | Open | BX-PF | exact BX-PF write contract and field mapping | publish workflow와 acceptance 기준을 결정 | PRD 22 / WBS 1.5.4 |
-| O-002 | 2026-03-29 | Open | Taxonomy | country-specific deposit subtype taxonomy | parser/schema/dashboard 기준을 통일 | PRD 22 / WBS 1.2.1 |
-| O-003 | 2026-03-29 | Open | Validation | confidence threshold and field-level validation rules | review routing 품질에 직접 영향 | PRD 22 / WBS 1.2.4, 1.2.5 |
+| O-002 | 2026-03-29 | Superseded | Taxonomy | Closed by D-028 and D-029 | parser/schema/dashboard 기준을 통일 | `docs/domain-model-canonical-schema.md` / WBS 1.2.1, 1.2.2 |
+| O-003 | 2026-03-29 | Superseded | Validation | Closed by D-030 | review routing 품질에 직접 영향 | `docs/domain-model-canonical-schema.md` / WBS 1.2.4, 1.2.5 |
 | O-004 | 2026-03-29 | Open | Auth | admin auth는 session cookie 기반인지 token 기반인지 | 보안 구조와 구현 방식에 영향 | PRD 22 / WBS 1.6.1 |
 | O-005 | 2026-03-29 | Open | RBAC | role matrix와 승인 권한 범위 | 운영 리스크와 감사 범위 결정 | PRD 22 / WBS 1.6.2 |
 | O-006 | 2026-03-29 | Open | Security | CORS allowlist, crawler SSRF/egress 정책 | public/admin/api/crawler 경계 보호 | PRD 22 / WBS 1.6.4, 1.6.5 |
@@ -94,6 +94,15 @@ Status meaning:
 | D-025 | 2026-03-30 | Decided | Non-Goals Baseline | 공식 비범위 목록은 WBS의 예시 3개가 아니라 PRD 전체 `Non-Goals` 목록으로 운영한다. | 구현 직전 scope creep를 막고 exclusion list를 완전한 형태로 고정하기 위해 | scope control, roadmap, WBS, change control | `docs/scope-baseline.md`, PRD 3.2, 4.2 |
 | D-026 | 2026-03-30 | Decided | Release Cutline | release cutline은 `Phase 1 release 기준 Must Have / Later`로 관리하며, Phase 2는 계약 범위이지만 Phase 1 release cutline에서는 `Later`로 분리한다. | 계약 범위와 단기 release cutline을 분리해 build sequencing을 명확히 하기 위해 | release planning, WBS, roadmap, change control | `docs/scope-baseline.md` |
 | D-027 | 2026-03-30 | Decided | Build Start Approval | 개발 시작 조건은 `Gate A blocker closed + Product Owner explicit approval`로 정의한다. | 설계 차단 항목이 닫히지 않은 상태에서의 조기 구현을 막기 위해 | gate governance, implementation start, approvals | `docs/scope-baseline.md`, `docs/stage-gate-checklist.md` |
+| D-028 | 2026-03-30 | Decided | Taxonomy Model | `product_type`와 `subtype_code`는 country-aware registry 기반 관리형 code로 운영하며, Phase 1 Canada deposit v1 taxonomy는 `chequing`, `savings`, `gic` core type과 extensible subtype registry로 정의한다. | 나라별 상품 분류 확장성과 Phase 1 canonical stability를 함께 확보하기 위해 | taxonomy, schema, parser mapping, dashboard | `docs/domain-model-canonical-schema.md` |
+| D-029 | 2026-03-30 | Decided | Canonical Schema Policy | source-derived product fields는 source language 단일 값으로 유지하고, display/resource label은 별도 localization resource로 관리한다. | 원문 보존과 canonical data, localization boundary를 분리하기 위해 | schema, localization, UI, API | `docs/domain-model-canonical-schema.md`, D-012 |
+| D-030 | 2026-03-30 | Decided | Validation and Confidence Policy | field-level validation rule은 canonical schema 문서 기준으로 고정하고, confidence threshold는 외부 설정값으로 운영하며 Prototype은 전량 review, Phase 1은 policy + config 기준 auto-approve를 허용한다. | review routing 품질을 유지하면서 threshold 변경 비용을 낮추기 위해 | validation, review routing, operations | `docs/domain-model-canonical-schema.md` |
+| D-031 | 2026-03-30 | Decided | Change Event Model | canonical change event는 `New`, `Updated`, `Discontinued`, `Reclassified`, `ManualOverride`를 공식 event type으로 사용한다. | change history, review, publish, audit 흐름을 공통 모델로 맞추기 위해 | change history, audit, publish, admin UX | `docs/domain-model-canonical-schema.md` |
+| D-032 | 2026-03-31 | Decided | Review Queue Unit | ingestion workflow의 review queue 생성 단위는 `candidate` 기준으로 정의한다. | PRD의 review item 구조와 trace/review 흐름을 가장 직접적으로 연결하기 위해 | workflow, admin API, trace viewer, review state | `docs/workflow-state-ingestion-design.md` |
+| D-033 | 2026-03-31 | Decided | Retry Model | ingestion retry 기본 모델은 `source/stage 단위 재시도 + run partial completion 허용 + publish 별도 retry/reconciliation`으로 정의한다. | partial failure를 격리하고 run 전체 재실행을 기본값으로 강제하지 않기 위해 | workflow, run lifecycle, publish lifecycle, operations | `docs/workflow-state-ingestion-design.md` |
+| D-034 | 2026-03-31 | Decided | Source Identity Policy | source identity는 `bank_code + normalized_source_url + source_type`를 기본 키로 하고, `checksum/fingerprint`는 change detection과 idempotency 판단에 사용한다. | source deduplication과 content change detection을 분리해 재수집 안정성을 높이기 위해 | discovery, snapshot, change detection, idempotency | `docs/workflow-state-ingestion-design.md` |
+| D-035 | 2026-03-31 | Decided | Retrieval Boundary | `1.3.1`에서는 retrieval-ready evidence 저장까지를 고정하고, vector index 구현 상세는 `WBS 1.4.4`에서 결정한다. | workflow 상세화와 vector backend 선택 결정을 분리해 Gate A 문서 진행을 막지 않기 위해 | workflow, evidence storage, retrieval design | `docs/workflow-state-ingestion-design.md` |
+| D-036 | 2026-03-31 | Decided | Publish Boundary | `1.3.1`에서는 BX-PF publish를 `interface-first + publish state 중심`으로 정의하고, exact write contract와 field mapping은 `WBS 1.5.4`에서 닫는다. | ingestion 흐름 고정과 BX-PF 상세 계약 결정을 분리하기 위해 | workflow, publish lifecycle, BX-PF contract | `docs/workflow-state-ingestion-design.md` |
 
 ---
 
@@ -107,3 +116,5 @@ Status meaning:
 | 2026-03-29 | Added scope governance and stage gate governance decisions |
 | 2026-03-29 | Added milestone tracking model decision |
 | 2026-03-30 | Added scope baseline, non-goals baseline, Phase 1 release cutline, and build-start approval decisions |
+| 2026-03-30 | Added taxonomy model, canonical schema policy, validation/confidence policy, and change event model decisions |
+| 2026-03-31 | Added ingestion workflow decisions for review unit, retry model, source identity, retrieval boundary, and publish boundary |
