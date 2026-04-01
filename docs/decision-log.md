@@ -103,6 +103,10 @@ Status meaning:
 | D-034 | 2026-03-31 | Decided | Source Identity Policy | source identity는 `bank_code + normalized_source_url + source_type`를 기본 키로 하고, `checksum/fingerprint`는 change detection과 idempotency 판단에 사용한다. | source deduplication과 content change detection을 분리해 재수집 안정성을 높이기 위해 | discovery, snapshot, change detection, idempotency | `docs/workflow-state-ingestion-design.md` |
 | D-035 | 2026-03-31 | Decided | Retrieval Boundary | `1.3.1`에서는 retrieval-ready evidence 저장까지를 고정하고, vector index 구현 상세는 `WBS 1.4.4`에서 결정한다. | workflow 상세화와 vector backend 선택 결정을 분리해 Gate A 문서 진행을 막지 않기 위해 | workflow, evidence storage, retrieval design | `docs/workflow-state-ingestion-design.md` |
 | D-036 | 2026-03-31 | Decided | Publish Boundary | `1.3.1`에서는 BX-PF publish를 `interface-first + publish state 중심`으로 정의하고, exact write contract와 field mapping은 `WBS 1.5.4`에서 닫는다. | ingestion 흐름 고정과 BX-PF 상세 계약 결정을 분리하기 위해 | workflow, publish lifecycle, BX-PF contract | `docs/workflow-state-ingestion-design.md` |
+| D-037 | 2026-04-01 | Decided | Review State Machine | review task state는 `queued`, `approved`, `rejected`, `edited`, `deferred`로 정의하고, `approved/rejected/edited`는 terminal, `deferred`는 requeue 가능한 open state로 정의한다. | PRD review action과 candidate-unit review queue를 충돌 없이 연결하는 baseline을 고정하기 위해 | workflow, admin API, review queue, change history, audit | `docs/review-run-publish-audit-state-design.md` |
+| D-038 | 2026-04-01 | Decided | Run Lifecycle | run lifecycle은 `started`, `completed`, `failed`, `retried`로 정의하고, partial source/stage failure는 `completed + partial_completion_flag`로 표현하며 retry는 별도 run link로 추적한다. | partial failure 허용, run status, retry boundary를 한 모델로 정리하기 위해 | workflow, run history, admin UI, operations | `docs/review-run-publish-audit-state-design.md` |
+| D-039 | 2026-04-01 | Decided | Publish Lifecycle | publish tracker state는 `pending`, `published`, `retry`, `reconciliation`으로 정의하고, publish failure가 canonical approval을 롤백하지 않는 것을 기본 원칙으로 한다. | BX-PF contract 미확정 상태에서도 publish readiness와 retry/reconciliation 추적을 가능하게 하기 위해 | publish monitor, reconciliation, BX-PF readiness | `docs/review-run-publish-audit-state-design.md` |
+| D-040 | 2026-04-01 | Decided | Audit Trail Scope | audit baseline은 review/run/publish/auth/config/usage event를 포함하고, actor, target, state diff, reason, correlation metadata를 필수로 남긴다. exact retention duration은 후속 security policy에서 닫는다. | WBS 1.3.5 범위에서 event taxonomy와 required audit payload를 먼저 고정하기 위해 | audit log, security, admin history, runbook | `docs/review-run-publish-audit-state-design.md` |
 
 ---
 
@@ -118,3 +122,4 @@ Status meaning:
 | 2026-03-30 | Added scope baseline, non-goals baseline, Phase 1 release cutline, and build-start approval decisions |
 | 2026-03-30 | Added taxonomy model, canonical schema policy, validation/confidence policy, and change event model decisions |
 | 2026-03-31 | Added ingestion workflow decisions for review unit, retry model, source identity, retrieval boundary, and publish boundary |
+| 2026-04-01 | Added review state machine, run lifecycle, publish lifecycle, and audit trail scope decisions |

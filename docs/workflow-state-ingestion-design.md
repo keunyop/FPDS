@@ -371,10 +371,7 @@ Source Documents:
 
 아래 항목은 이 문서에서 일부러 열어 둔다.
 
-- exact review state 전이와 terminal state 정의 (`1.3.2`)
-- run started/completed/failed/retried 상태 및 집계 규칙 (`1.3.3`)
-- publish state와 reconciliation state 상세 (`1.3.4`)
-- audit event taxonomy와 retention scope (`1.3.5`)
+- review/run/publish/audit state detail은 `docs/review-run-publish-audit-state-design.md`에서 종료 (`1.3.2` ~ `1.3.5`)
 - vector index 구현 여부와 pgvector 도입 범위 (`1.4.4`)
 - BX-PF exact payload, required fields, response contract (`1.5.4`)
 
@@ -393,3 +390,4 @@ Source Documents:
 | Date | Change |
 |---|---|
 | 2026-03-31 | Initial end-to-end ingestion flow baseline created for WBS 1.3.1 |
+| 2026-04-01 | Closed 1.3.2 - 1.3.5 follow-up items by linking `docs/review-run-publish-audit-state-design.md` |

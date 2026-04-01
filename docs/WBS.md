@@ -142,10 +142,10 @@ Based on:
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
 | 1.3.1 | Completed | end-to-end ingestion flow 상세화 | `docs/workflow-state-ingestion-design.md` Sections 2-9 | Tech Lead, AI/Data | 1.2.2 |
-| 1.3.2 | Now | review state machine 정의 | queued / approved / rejected / edited / deferred 상태도 | Backend | 1.3.1 |
-| 1.3.3 | Now | run lifecycle 정의 | run started/completed/failed/retried 상태 | Backend | 1.3.1 |
-| 1.3.4 | Now | publish lifecycle 정의 | pending / published / retry / reconciliation 상태 | Backend | 1.3.1 |
-| 1.3.5 | Now | audit trail scope 정의 | 어떤 행동을 언제 누가 남기는지 | Backend, Security | 1.3.2 |
+| 1.3.2 | Completed | review state machine 정의 | `docs/review-run-publish-audit-state-design.md` Section 3 | Backend | 1.3.1 |
+| 1.3.3 | Completed | run lifecycle 정의 | `docs/review-run-publish-audit-state-design.md` Section 4 | Backend | 1.3.1 |
+| 1.3.4 | Completed | publish lifecycle 정의 | `docs/review-run-publish-audit-state-design.md` Section 5 | Backend | 1.3.1 |
+| 1.3.5 | Completed | audit trail scope 정의 | `docs/review-run-publish-audit-state-design.md` Section 6 | Backend, Security | 1.3.2 |
 
 ### 1.4 Architecture and Data Storage Design
 
