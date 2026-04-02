@@ -40,7 +40,7 @@ This document applies the already-approved baseline decisions below.
 4. Run retry is `source/stage scoped`, not always full-run restart.
 5. Run partial completion is allowed.
 6. Publish retry and reconciliation are tracked separately from ingestion run retry.
-7. BX-PF publish remains `interface-first`; exact write contract and field mapping stay in `WBS 1.5.4`.
+7. BX-PF publish remains `interface-first`; exact adapter-facing write contract and field mapping stay in `docs/api-interface-contracts.md` Section 7.
 8. FPDS owns operational truth for run, review, audit, publish, and reconciliation metadata.
 
 ---
@@ -412,7 +412,7 @@ This document provides baseline input for:
 - `WBS 4.2`, `4.5`, `4.7`, `6.2`, `6.3` implementation design later
 
 This document does not close:
-- exact BX-PF payload/response contract (`WBS 1.5.4`)
+- exact BX-PF remote payload/response transport contract (`docs/api-interface-contracts.md` Section 7 closes the adapter-facing baseline)
 - vector index implementation detail (`WBS 1.4.4`)
 - exact audit retention duration policy
 

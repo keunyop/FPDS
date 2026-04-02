@@ -65,7 +65,7 @@ Source Documents:
 | A-001 | High | Open | TD Savings는 Prototype용 source로 충분한 구조와 증빙을 제공한다. | source inventory와 spike로 검증 | AI/Data | PRD 4.1, 18.1 / Plan 8, 14 |
 | A-002 | High | Open | Canada Big 5 deposit products는 현재 범위에서 현실적인 Phase 1 커버리지다. | source availability와 parsing 난이도 확인 | Product Owner, AI/Data | PRD 4.1, 18.2 |
 | A-003 | Medium | Open | Next.js + Postgres + Supabase Auth + S3 계열 구성이 Phase 1 속도와 운영성에 적합하다. | architecture workshop에서 재확인 | Tech Lead | PRD 15.2 |
-| A-004 | Medium | Open | pgvector를 초기 retrieval starting point로 써도 Phase 1 요구 수준에는 충분하다. | retrieval 설계 검토로 확인 | Tech Lead, AI/Data | PRD 15.2, 22 |
+| A-004 | Medium | Closed | pgvector를 초기 retrieval starting point로 써도 Phase 1 요구 수준에는 충분하다. | `docs/retrieval-vector-starting-point.md`에서 Phase 1 baseline으로 확정되었다. | Tech Lead, AI/Data | PRD 15.2, 22 / `docs/retrieval-vector-starting-point.md` |
 | A-005 | High | Open | BX-PF는 approved normalized product master의 target store 역할을 계속 유지한다. | BX-PF 계약/환경 확인 | Product Owner, Tech Lead | PRD 6, 16.1 |
 | A-006 | Medium | Open | Public/Admin UI의 EN/KO/JA 3개 언어 운영이 현재 팀 체계로 감당 가능하다. | localization ownership 확정 필요 | Product Owner | PRD 1, 6, 14.6 |
 | A-007 | Medium | Open | Product Grid와 Insight Dashboard는 동일 filter scope를 공유해도 UX 복잡도가 관리 가능하다. | metric/IA 설계에서 검증 | Frontend, Product Owner | PRD FR-PUB-012 |
@@ -77,7 +77,7 @@ Source Documents:
 
 | ID | Priority | State | Issue | Current Impact | Next Action | Owner | Source |
 |---|---|---|---|---|---|---|---|
-| I-001 | High | Open | exact BX-PF write contract and field mapping이 아직 미확정이다. | publish flow와 acceptance 기준 고정 불가 | 설계 문서에서 field mapping 초안 작성 | Backend, Tech Lead | PRD 22 / WBS 1.5.4 |
+| I-001 | High | Closed | exact BX-PF write contract and field mapping이 아직 미확정이다. | `docs/api-interface-contracts.md` Section 7에서 adapter-facing contract 초안이 확정되었다. | Backend, Tech Lead | PRD 22 / `docs/api-interface-contracts.md` |
 | I-002 | High | Closed | country-specific deposit subtype taxonomy가 아직 미확정이다. | schema/parser/dashboard 기준 불안정 | `docs/domain-model-canonical-schema.md` Section 3에서 Canada deposit taxonomy와 extensible registry rule을 고정했다. | Domain Reviewer, Tech Lead | `docs/domain-model-canonical-schema.md` / WBS 1.2.1 |
 | I-003 | High | Closed | confidence threshold와 field-level validation rules가 아직 미확정이다. | review queue 기준 불명확 | `docs/domain-model-canonical-schema.md` Sections 5-6에서 validation matrix와 config-backed confidence policy를 고정했다. | Backend, AI/Data | `docs/domain-model-canonical-schema.md` / WBS 1.2.4, 1.2.5 |
 | I-004 | High | Open | admin auth 방식(session vs token)이 아직 미확정이다. | auth/RBAC/CSRF 설계 지연 | auth decision 문서화 | Product Owner, Security | PRD 22 / WBS 1.6.1 |

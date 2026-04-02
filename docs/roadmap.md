@@ -19,9 +19,9 @@ As of 2026-04-01, WBS 기준 현재 진행 상태는 아래와 같습니다.
 
 | Metric | Value | Basis |
 |---|---|---|
-| Overall WBS Progress | 20.2% complete | 114개 WBS task 중 23개 `Completed` |
-| Current Stage Progress | 42.6% complete | Stage 0 범위인 `0.x + 1.x` 54개 task 중 23개 `Completed` |
-| Estimated Remaining Duration | about 135 working days | Stage 0 잔여분 약 10일 + Stage 1~8 기본 일정 125일 |
+| Overall WBS Progress | 29.8% complete | 114개 WBS task 중 34개 `Completed` |
+| Current Stage Progress | 63.0% complete | Stage 0 범위인 `0.x + 1.x` 54개 task 중 34개 `Completed` |
+| Estimated Remaining Duration | about 131 working days | Stage 0 잔여분 약 6일 + Stage 1~8 기본 일정 125일 |
 
 계산 메모:
 - 전체 진행률은 `Completed task count / 전체 WBS task count` 기준이다.
@@ -31,3 +31,7 @@ As of 2026-04-01, WBS 기준 현재 진행 상태는 아래와 같습니다.
 - 2026-03-30 기준 WBS `1.2.1`~`1.2.7`이 `docs/domain-model-canonical-schema.md` 생성과 함께 완료 처리되었다.
 - 2026-03-31 기준 WBS `1.3.1`이 `docs/workflow-state-ingestion-design.md` 생성과 함께 완료 처리되었다.
 - 2026-04-01 기준 WBS `1.3.2`~`1.3.5`가 `docs/review-run-publish-audit-state-design.md` 생성과 함께 완료 처리되었다.
+- 2026-04-01 기준 WBS `1.4.1`이 `docs/system-context-diagram.md` 생성과 함께 완료 처리되었다.
+- 2026-04-01 기준 WBS `1.4.2`가 `docs/erd-draft.md` 생성과 함께 완료 처리되었다.
+- 2026-04-01 기준 WBS `1.4.3`~`1.4.6`이 storage/retrieval/aggregate/environment 설계 문서 생성과 함께 완료 처리되었다.
+- 2026-04-01 기준 WBS `1.5.1`~`1.5.5`가 `docs/api-interface-contracts.md` 생성과 함께 완료 처리되었다.

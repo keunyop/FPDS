@@ -70,16 +70,16 @@ Status meaning:
 
 | ID | Date | Status | Area | Decision Needed | Why It Matters | Source |
 |---|---|---|---|---|---|---|
-| O-001 | 2026-03-29 | Open | BX-PF | exact BX-PF write contract and field mapping | publish workflow와 acceptance 기준을 결정 | PRD 22 / WBS 1.5.4 |
+| O-001 | 2026-03-29 | Superseded | BX-PF | Closed by D-048 | publish workflow와 acceptance 기준을 결정 | `docs/api-interface-contracts.md` / WBS 1.5.4 |
 | O-002 | 2026-03-29 | Superseded | Taxonomy | Closed by D-028 and D-029 | parser/schema/dashboard 기준을 통일 | `docs/domain-model-canonical-schema.md` / WBS 1.2.1, 1.2.2 |
 | O-003 | 2026-03-29 | Superseded | Validation | Closed by D-030 | review routing 품질에 직접 영향 | `docs/domain-model-canonical-schema.md` / WBS 1.2.4, 1.2.5 |
 | O-004 | 2026-03-29 | Open | Auth | admin auth는 session cookie 기반인지 token 기반인지 | 보안 구조와 구현 방식에 영향 | PRD 22 / WBS 1.6.1 |
 | O-005 | 2026-03-29 | Open | RBAC | role matrix와 승인 권한 범위 | 운영 리스크와 감사 범위 결정 | PRD 22 / WBS 1.6.2 |
 | O-006 | 2026-03-29 | Open | Security | CORS allowlist, crawler SSRF/egress 정책 | public/admin/api/crawler 경계 보호 | PRD 22 / WBS 1.6.4, 1.6.5 |
 | O-007 | 2026-03-29 | Open | Dashboard | KPI formula, ranking 기준, scatter axis | dashboard 의미와 비교 품질 결정 | PRD 22 / WBS 1.7.2, 1.7.3 |
-| O-008 | 2026-03-29 | Open | Retrieval | vector indexing implementation detail | evidence retrieval 구조 시작점 결정 | PRD 22 / WBS 1.4.4 |
+| O-008 | 2026-03-29 | Superseded | Retrieval | Closed by D-042 | evidence retrieval 구조 시작점 결정 | `docs/retrieval-vector-starting-point.md` / WBS 1.4.4 |
 | O-009 | 2026-03-29 | Open | Localization | UI localization ownership and Japanese fallback/glossary ownership | 다국어 운영 일관성에 영향 | PRD 22 / WBS 1.7.5, 1.7.7 |
-| O-010 | 2026-03-29 | Open | External API | API auth, tenant isolation, rate limit/SLA | Phase 2 API 기반 정책 결정 | PRD 22 / WBS 1.6.3, 1.5.5 |
+| O-010 | 2026-03-29 | Open | External API | exact auth mechanism, tenant isolation enforcement, rate limit/SLA | Phase 2 API 기반 정책 결정 | PRD 22 / WBS 1.6.3, 7.6 |
 
 ## 4.1 Additional Decided Items
 
@@ -107,6 +107,15 @@ Status meaning:
 | D-038 | 2026-04-01 | Decided | Run Lifecycle | run lifecycle은 `started`, `completed`, `failed`, `retried`로 정의하고, partial source/stage failure는 `completed + partial_completion_flag`로 표현하며 retry는 별도 run link로 추적한다. | partial failure 허용, run status, retry boundary를 한 모델로 정리하기 위해 | workflow, run history, admin UI, operations | `docs/review-run-publish-audit-state-design.md` |
 | D-039 | 2026-04-01 | Decided | Publish Lifecycle | publish tracker state는 `pending`, `published`, `retry`, `reconciliation`으로 정의하고, publish failure가 canonical approval을 롤백하지 않는 것을 기본 원칙으로 한다. | BX-PF contract 미확정 상태에서도 publish readiness와 retry/reconciliation 추적을 가능하게 하기 위해 | publish monitor, reconciliation, BX-PF readiness | `docs/review-run-publish-audit-state-design.md` |
 | D-040 | 2026-04-01 | Decided | Audit Trail Scope | audit baseline은 review/run/publish/auth/config/usage event를 포함하고, actor, target, state diff, reason, correlation metadata를 필수로 남긴다. exact retention duration은 후속 security policy에서 닫는다. | WBS 1.3.5 범위에서 event taxonomy와 required audit payload를 먼저 고정하기 위해 | audit log, security, admin history, runbook | `docs/review-run-publish-audit-state-design.md` |
+| D-041 | 2026-04-01 | Decided | Evidence Storage Strategy | raw snapshot과 parsed text full body는 private object storage에 두고, source/snapshot/parsed/chunk metadata와 field evidence link는 FPDS DB에 둔다. | object artifact와 운영 조회 메타데이터의 책임을 분리해 traceability와 reprocessing을 동시에 만족시키기 위해 | storage, trace viewer, evidence retrieval, retry | `docs/source-snapshot-evidence-storage-strategy.md` |
+| D-042 | 2026-04-01 | Decided | Retrieval Starting Point | Phase 1 retrieval/vector starting point는 `Postgres + pgvector`로 두고, 범위는 `evidence_chunk` embedding과 retrieval metadata에 한정한다. | separate vector service 복잡도를 미루면서 Phase 1 evidence retrieval 요구를 충족하기 위해 | retrieval, AI pipeline, evidence architecture, cost/ops | `docs/retrieval-vector-starting-point.md` |
+| D-043 | 2026-04-01 | Decided | Aggregate Refresh Strategy | public grid와 dashboard aggregate는 canonical write 이후 asynchronous refresh로 갱신하고, latest successful snapshot serving과 TTL-based API cache invalidation을 기본으로 한다. | public read 성능과 canonical write 안정성을 분리하면서 freshness 추적을 가능하게 하기 위해 | dashboard, public APIs, metric health, cache | `docs/aggregate-cache-refresh-strategy.md` |
+| D-044 | 2026-04-01 | Decided | Environment Separation | 현재 공식 환경 모델은 `dev/prod`로 두고, public/admin surface와 private worker/storage/data boundary를 분리한다. `stg`는 필요 시 후속 확장 환경으로 추가한다. | 1인 개발자 운영 복잡도를 낮추면서도 CORS, SSRF, secret, BX-PF integration, object storage access 정책이 같은 trust model을 참조하도록 만들기 위해 | infra, security, worker boundary, deployment, env setup | `docs/environment-separation-strategy.md` |
+| D-045 | 2026-04-01 | Decided | Public API Contract | public route baseline은 `/api/public/products`, `/filters`, `/dashboard-summary`, `/dashboard-rankings`, `/dashboard-scatter`로 두고 공통 filter scope와 freshness metadata를 공유한다. | public grid와 dashboard가 같은 aggregate/product projection vocabulary를 사용하도록 만들기 위해 | public UI, dashboard, aggregate APIs, caching | `docs/api-interface-contracts.md` |
+| D-046 | 2026-04-01 | Decided | Admin API Contract | admin route baseline은 review task, product, run, change history, BX-PF publish, usage, dashboard health를 포함하고, trace viewer는 evidence summary를 제공하되 raw object artifact direct exposure는 금지한다. | review/run/publish/usage 운영 화면이 같은 admin data contract를 참조하도록 만들기 위해 | admin UI, review queue, operations, trace viewer | `docs/api-interface-contracts.md` |
+| D-047 | 2026-04-01 | Decided | Internal Orchestration Interface | internal orchestration은 browser route가 아닌 private service boundary로 두고, discovery, retrieval, normalization, review queue, usage capture 계약은 `run_id`와 `correlation_id`를 공유한다. | worker pipeline과 API server가 같은 orchestration vocabulary로 연결되도록 만들기 위해 | worker pipeline, retry, observability, usage capture | `docs/api-interface-contracts.md` |
+| D-048 | 2026-04-01 | Decided | BX-PF Adapter Contract | BX-PF exact remote schema 대신 FPDS publish service와 connector 사이의 adapter-facing request/response contract를 먼저 고정하고, publish state 매핑은 `applied/duplicate/retryable_error/contract_error/ambiguous` 기준으로 정한다. | external dependency 미확정 상태에서도 connector와 publish state machine을 구현 가능하게 만들기 위해 | publish connector, reconciliation, retry, target mapping | `docs/api-interface-contracts.md` |
+| D-049 | 2026-04-01 | Decided | External API Draft | Phase 2 external API draft baseline은 `/api/v1/products`, `/products/:id`, `/banks`, `/changes`로 두고, tenant scope는 credential-bound context를 기본으로 한다. exact credential type은 후속 security 결정으로 남긴다. | Phase 2 resource model을 먼저 고정해 auth/rate limit 상세와 분리하기 위해 | SaaS API, tenant isolation, versioning, client integration | `docs/api-interface-contracts.md` |
 
 ---
 
@@ -123,3 +132,5 @@ Status meaning:
 | 2026-03-30 | Added taxonomy model, canonical schema policy, validation/confidence policy, and change event model decisions |
 | 2026-03-31 | Added ingestion workflow decisions for review unit, retry model, source identity, retrieval boundary, and publish boundary |
 | 2026-04-01 | Added review state machine, run lifecycle, publish lifecycle, and audit trail scope decisions |
+| 2026-04-01 | Added evidence storage, retrieval starting point, aggregate refresh, and environment separation decisions |
+| 2026-04-01 | Added public/admin/internal/BX-PF/external API contract decisions |

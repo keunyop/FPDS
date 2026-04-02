@@ -151,22 +151,22 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.4.1 | Now | 시스템 컨텍스트 다이어그램 작성 | public/admin/api/worker/storage/BX-PF 경계도 | Tech Lead | 1.3.1 |
-| 1.4.2 | Now | ERD 초안 작성 | evidence, chunk, candidate, product, review, run, publish, usage 테이블 | Backend | 1.2.2 |
-| 1.4.3 | Now | source snapshot/evidence 저장 전략 확정 | raw snapshot, parsed text, chunk metadata 정책 | AI/Data, Backend | 1.4.2 |
-| 1.4.4 | Now | retrieval/vector 시작점 결정 | pgvector 여부와 도입 범위 | Tech Lead, AI/Data | 1.4.3 |
-| 1.4.5 | Now | aggregate/cache refresh 전략 정의 | grid summary, ranking, scatter refresh/TTL 규칙 | Backend | 1.4.2 |
-| 1.4.6 | Next | 환경 분리 전략 정리 | dev/stg/prod 및 private worker boundary | DevOps | 1.4.1 |
+| 1.4.1 | Completed | 시스템 컨텍스트 다이어그램 작성 | `docs/system-context-diagram.md` Sections 2-7 | Tech Lead | 1.3.1 |
+| 1.4.2 | Completed | ERD 초안 작성 | `docs/erd-draft.md` Sections 2-8 | Backend | 1.2.2 |
+| 1.4.3 | Completed | source snapshot/evidence 저장 전략 확정 | `docs/source-snapshot-evidence-storage-strategy.md` Sections 2-10 | AI/Data, Backend | 1.4.2 |
+| 1.4.4 | Completed | retrieval/vector 시작점 결정 | `docs/retrieval-vector-starting-point.md` Sections 2-9 | Tech Lead, AI/Data | 1.4.3 |
+| 1.4.5 | Completed | aggregate/cache refresh 전략 정의 | `docs/aggregate-cache-refresh-strategy.md` Sections 2-9 | Backend | 1.4.2 |
+| 1.4.6 | Completed | 환경 분리 전략 정리 | `docs/environment-separation-strategy.md` Sections 2-9 | DevOps | 1.4.1 |
 
 ### 1.5 API and Interface Contracts
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.5.1 | Now | public API contract 정의 | products, filters, summary, rankings, scatter 응답 스펙 | Backend, Frontend | 1.2.2 |
-| 1.5.2 | Now | admin API contract 정의 | review task, run, product, change history, usage 스펙 | Backend, Frontend | 1.3.2 |
-| 1.5.3 | Now | internal orchestration interface 정의 | discovery, retrieval, normalization, review queue, usage capture 계약 | Tech Lead | 1.3.1 |
-| 1.5.4 | Now | BX-PF write contract 초안 작성 | field mapping, required fields, publish response 형식 | Backend, Tech Lead | 1.2.2 |
-| 1.5.5 | Later | external SaaS/Open API 초안 작성 | products/banks/changes, auth, tenant scope 스펙 | Backend | 1.5.1 |
+| 1.5.1 | Completed | public API contract 정의 | `docs/api-interface-contracts.md` Section 4 | Backend, Frontend | 1.2.2 |
+| 1.5.2 | Completed | admin API contract 정의 | `docs/api-interface-contracts.md` Section 5 | Backend, Frontend | 1.3.2 |
+| 1.5.3 | Completed | internal orchestration interface 정의 | `docs/api-interface-contracts.md` Section 6 | Tech Lead | 1.3.1 |
+| 1.5.4 | Completed | BX-PF write contract 초안 작성 | `docs/api-interface-contracts.md` Section 7 | Backend, Tech Lead | 1.2.2 |
+| 1.5.5 | Completed | external SaaS/Open API 초안 작성 | `docs/api-interface-contracts.md` Section 8 | Backend | 1.5.1 |
 
 ### 1.6 Security and Access Control Design
 
@@ -211,7 +211,7 @@ Based on:
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
 | 2.1 | Blocked | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A |
-| 2.2 | Blocked | 환경 분리 및 env 템플릿 구성 | dev/stg/prod env spec | DevOps | 2.1 |
+| 2.2 | Blocked | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 |
 | 2.3 | Blocked | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 |
 | 2.4 | Blocked | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 |
 | 2.5 | Blocked | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 |
