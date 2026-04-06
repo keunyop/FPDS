@@ -40,7 +40,7 @@ Source Documents:
 - chart interaction이 Grid 상태에 반영되는 세부 클릭 규칙
 - chart color palette, animation, microcopy wording detail
 
-이 항목은 `5.10`, `5.11`, `1.7.5`, `1.7.6`에서 후속 구현/UX 설계로 닫는다.
+이 항목은 `5.10`, `5.11`, 그리고 `docs/03-design/localization-governance-and-fallback-policy.md`를 반영한 후속 구현/UX 설계에서 닫는다.
 
 ---
 

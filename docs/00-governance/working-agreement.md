@@ -60,20 +60,18 @@ Based on:
 
 ## 4. Current Delivery Mode
 
-현재 FPDS는 `Phase 0. Mobilization & Detailed Design Closure` 단계로 운영한다.
+현재 FPDS는 `Gate A Pass 승인 완료 / Execution Ready` 상태로 운영한다.
 
 현재 단계의 공식 목표:
-- open item closure
-- detailed design completion
-- prototype backlog finalization
-- Build Start Gate 준비
+- Gate A 통과 상태를 기준 문서에 반영한다.
+- Foundation과 Prototype build의 `Next` 작업 순서를 유지한다.
+- 실제 구현 시작 전까지 문서 기준과 execution order를 어긋나지 않게 관리한다.
 
 현재 단계의 금지 항목:
-- parser/crawler/DB/API 구현
-- public/admin UI 구현
-- BX-PF connector 구현
-- 외부 API 구현
-- Product Owner 명시 승인 없는 개발 착수
+- 승인 없이 범위를 확장하는 구현
+- Sprint 0 execution order를 무시한 임의 착수
+- change control 없이 Prototype 범위를 넘어서는 구현
+- scope baseline과 Gate A 결과를 무시한 임의 개발 착수
 
 ---
 
@@ -201,3 +199,4 @@ Based on:
 | 2026-03-29 | Scope change control and stage gate checklist adopted as linked governance documents |
 | 2026-03-29 | Milestone tracker adopted for relative-week schedule governance |
 | 2026-03-30 | Added scope baseline document and Build Start Sign-off Package minimum condition |
+| 2026-04-06 | Updated current delivery mode after Gate A Pass approval and execution-ready transition |

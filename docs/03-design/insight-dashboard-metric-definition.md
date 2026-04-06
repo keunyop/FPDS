@@ -26,7 +26,7 @@ Goals:
 - align aggregate snapshot, API contract, and public UI vocabulary before implementation
 
 This is a design baseline, not an implementation start signal.  
-Implementation still waits for `Gate A blocker closed + Product Owner explicit approval`.
+Implementation still waits for `Gate A = Pass + Product Owner explicit approval`.
 
 ---
 
@@ -59,7 +59,7 @@ This document does not decide:
 - localization ownership workflow and glossary governance
 
 Product-type-specific dashboard visual emphasis is closed by `docs/03-design/product-type-visualization-principles.md`.  
-The remaining follow-on work is `5.10`, `5.11`, `1.7.5`, and `1.7.6`.
+The remaining follow-on work is `5.10`, `5.11`, and localization implementation against `docs/03-design/localization-governance-and-fallback-policy.md`.
 
 ---
 

@@ -15,13 +15,13 @@ Source Documents:
 
 ## 0. Current Progress Snapshot
 
-As of 2026-04-05, WBS 기준 현재 진행 상태는 아래와 같습니다.
+As of 2026-04-06, WBS 기준 현재 진행 상태는 아래와 같습니다.
 
 | Metric | Value | Basis |
 |---|---|---|
-| Overall WBS Progress | 38.6% complete | 114개 WBS task 중 44개 `Completed` |
-| Current Stage Progress | 81.5% complete | Stage 0 범위인 `0.x + 1.x` 54개 task 중 44개 `Completed` |
-| Estimated Remaining Duration | about 126 working days | Stage 0 잔여분 약 2일 + Stage 1~8 기본 일정 124일 |
+| Overall WBS Progress | 47.4% complete | 114개 WBS task 중 54개 `Completed` |
+| Current Stage Progress | 100.0% complete | Stage 0 범위인 `0.x + 1.x` 54개 task 중 54개 `Completed` |
+| Estimated Remaining Duration | about 124 working days | Stage 0 planning package completed, Stage 1~8 기본 일정 124일 |
 
 계산 메모:
 - 전체 진행률은 `Completed task count / 전체 WBS task count` 기준이다.
@@ -39,3 +39,14 @@ As of 2026-04-05, WBS 기준 현재 진행 상태는 아래와 같습니다.
 - 2026-04-05 기준 WBS `1.7.1`이 `docs/03-design/product-grid-information-architecture.md` 생성과 함께 완료 처리되었다.
 - 2026-04-05 기준 WBS `1.7.2`가 `docs/03-design/insight-dashboard-metric-definition.md` 생성과 함께 완료 처리되었다.
 - 2026-04-05 기준 WBS `1.7.3`이 `docs/03-design/product-type-visualization-principles.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.7.4`가 `docs/03-design/admin-information-architecture.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.7.5`~`1.7.7`이 `docs/03-design/localization-governance-and-fallback-policy.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.1`이 `docs/01-planning/td-savings-source-inventory.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.2`가 `docs/01-planning/prototype-backlog.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.3`이 `docs/01-planning/prototype-acceptance-checklist.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.4`가 `docs/01-planning/prototype-spike-scope.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.5`가 `docs/01-planning/sprint-0-board.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 WBS `1.8.6`이 `docs/00-governance/gate-a-build-start-review-note.md` 생성과 함께 완료 처리되었다.
+- 2026-04-06 기준 Gate A review는 최종 교차 검토 후 `Pass`로 승인되었다.
+- 2026-04-06 기준 Stage 0는 문서 기준으로 마감되었고, Foundation/Prototype build는 `Next` 상태로 전환되었다.
+- 2026-04-06 기준 Gate A `Pass`와 실제 구현 시작 승인은 분리되어 있으며, 구현은 별도 시작 지시 전까지 보류 상태다.

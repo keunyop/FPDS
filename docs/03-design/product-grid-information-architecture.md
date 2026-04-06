@@ -170,7 +170,7 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 | Dashboard Metrics | `docs/03-design/insight-dashboard-metric-definition.md` |
 | Visualization Rules | `docs/03-design/product-type-visualization-principles.md` |
 | Cross-Filter Choreography | `5.11` |
-| Localization Ops | `1.7.5`, `1.7.6` |
+| Localization Ops | `docs/03-design/localization-governance-and-fallback-policy.md` |
 
 ---
 

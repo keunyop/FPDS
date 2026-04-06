@@ -25,7 +25,7 @@ Source Documents:
 - Gate A 이전에 닫아야 하는 security/access open item을 문서 기준으로 종료한다.
 
 이 문서는 구현 지시서가 아니라 설계 baseline이다.  
-구현은 `Gate A blocker closed + Product Owner explicit approval` 이후에만 시작한다.
+구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
 
 ---
 

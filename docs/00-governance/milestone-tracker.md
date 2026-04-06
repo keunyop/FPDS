@@ -42,7 +42,7 @@ Source Documents:
 
 - `Target Week`는 공식 프로젝트 시계 기준 상대 주차다.
 - `Week 0`은 Product Owner가 승인한 공식 실행 시작 주다.
-- 현재는 설계 마감 단계이므로 Stage 0의 남은 일정을 기준으로 마일스톤을 추적한다.
+- Gate A `Pass` 이후에도 공식 build start date는 아직 절대 날짜로 고정하지 않았으므로 상대 주차 기준을 유지한다.
 - 절대 날짜 칼럼은 비워두거나 `TBD`로 두고, 공식 시작일 확정 후 채운다.
 
 ---
@@ -51,7 +51,7 @@ Source Documents:
 
 | Milestone | Stage | Status | Owner | Target Week | Calendar Due | Gate | Key Exit Criteria | Evidence Required |
 |---|---|---|---|---|---|---|---|---|
-| M0 | Detailed Design Closure | In Progress | Product Owner, Tech Lead | Week 3 | TBD | Gate A | open gate blockers closed, core design package ready | gate review note, updated WBS, updated roadmap |
+| M0 | Detailed Design Closure | Done | Product Owner, Tech Lead | Week 3 | TBD | Gate A | open gate blockers closed, core design package ready | gate review note, updated WBS, updated roadmap |
 | M1 | Foundation Setup Complete | Not Started | Tech Lead | Week 5 | TBD | - | repo/app/db/auth/i18n/ops baseline ready | foundation checklist, environment notes |
 | M2 | Prototype Acceptance | Not Started | Tech Lead, QA | Week 8 | TBD | Gate B | TD Savings end-to-end feasibility proven | prototype demo, findings memo, evidence pack |
 | M3 | Admin/Ops Core Complete | Not Started | Product Owner, Tech Lead | Week 11 | TBD | Gate C | internal review/trace/run/usage workflows operational | admin demo, QA summary |
@@ -134,3 +134,4 @@ Escalation Needed:
 | Date | Change |
 |---|---|
 | 2026-03-29 | Initial milestone tracker created |
+| 2026-04-06 | Updated M0 to Done after Gate A Pass approval |

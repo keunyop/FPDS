@@ -187,57 +187,57 @@ Based on:
 | 1.7.1 | Completed | Product Grid 정보 구조 설계 | `docs/03-design/product-grid-information-architecture.md` Sections 2-13 | Frontend, Product Owner | 1.5.1 |
 | 1.7.2 | Completed | Insight Dashboard metric 정의 | `docs/03-design/insight-dashboard-metric-definition.md` Sections 2-10 | Product Owner, Frontend, Backend | 1.4.5 |
 | 1.7.3 | Completed | product-type별 시각화 원칙 확정 | `docs/03-design/product-type-visualization-principles.md` Sections 2-10 | Product Owner, Frontend | 1.7.2 |
-| 1.7.4 | Now | admin 정보 구조 설계 | review queue, trace viewer, run detail, usage dashboard 레이아웃 | Frontend | 1.5.2 |
-| 1.7.5 | Now | i18n resource ownership 정의 | EN/KO/JA 번역 주체와 리뷰 방식 | Product Owner, Frontend | 1.7.1 |
-| 1.7.6 | Now | locale fallback 정책 정의 | label fallback, source-derived text 처리 원칙 | Frontend, Product Owner | 1.7.5 |
-| 1.7.7 | Later | Japanese glossary 정책 정의 | 용어집 owner 및 유지 규칙 | Product Owner | 1.7.6 |
+| 1.7.4 | Completed | admin 정보 구조 설계 | `docs/03-design/admin-information-architecture.md` Sections 2-11 | Frontend | 1.5.2 |
+| 1.7.5 | Completed | i18n resource ownership 정의 | `docs/03-design/localization-governance-and-fallback-policy.md` Sections 2, 4, 5, 8 | Product Owner, Frontend | 1.7.1 |
+| 1.7.6 | Completed | locale fallback 정책 정의 | `docs/03-design/localization-governance-and-fallback-policy.md` Sections 2, 6, 7, 8 | Frontend, Product Owner | 1.7.5 |
+| 1.7.7 | Completed | Japanese glossary 정책 정의 | `docs/03-design/localization-governance-and-fallback-policy.md` Sections 2, 9 | Product Owner | 1.7.6 |
 
 ### 1.8 Prototype Planning Package
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.8.1 | Now | TD Savings source inventory 작성 | 대상 URL/PDF 목록, 예상 필드, 위험도 | AI/Data | 1.1.1 |
-| 1.8.2 | Now | prototype backlog 분해 | user story/task list, 우선순위 | Tech Lead, Backend, AI/Data | 1.3.1 |
-| 1.8.3 | Now | prototype acceptance checklist 고정 | 성공 기준, 데모 기준, 실패 시 보완 판단 기준 | Product Owner, QA | 1.8.2 |
-| 1.8.4 | Now | Spike 범위 정의 | parser/snapshot 실험 범위와 종료 조건 | Tech Lead, AI/Data | 1.8.1 |
-| 1.8.5 | Now | Sprint 0 작업판 확정 | 설계 마감용 태스크 보드 | Delivery Lead | 1.8.2 |
-| 1.8.6 | Now | Build Start Gate 검토 | 개발 시작 승인 전 점검표 | Product Owner, Tech Lead | 1.8.3 |
+| 1.8.1 | Completed | TD Savings source inventory 작성 | `docs/01-planning/td-savings-source-inventory.md` Sections 2-7 | AI/Data | 1.1.1 |
+| 1.8.2 | Completed | prototype backlog 분해 | `docs/01-planning/prototype-backlog.md` Sections 2-10 | Tech Lead, Backend, AI/Data | 1.3.1 |
+| 1.8.3 | Completed | prototype acceptance checklist 고정 | `docs/01-planning/prototype-acceptance-checklist.md` Sections 2-9 | Product Owner, QA | 1.8.2 |
+| 1.8.4 | Completed | Spike 범위 정의 | `docs/01-planning/prototype-spike-scope.md` Sections 2-10 | Tech Lead, AI/Data | 1.8.1 |
+| 1.8.5 | Completed | Sprint 0 작업판 확정 | `docs/01-planning/sprint-0-board.md` Sections 2-8 | Delivery Lead | 1.8.2 |
+| 1.8.6 | Completed | Build Start Gate 검토 | `docs/00-governance/gate-a-build-start-review-note.md` Sections 1-9 | Product Owner, Tech Lead | 1.8.3 |
 
 ## WBS 2. Foundation Setup
 
-> 상태: `Blocked`  
-> 조건: Gate A 통과 후, Product Owner의 명시적 개발 시작 승인 필요
+> 상태: `Next`  
+> 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수 가능
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 2.1 | Blocked | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A |
-| 2.2 | Blocked | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 |
-| 2.3 | Blocked | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 |
-| 2.4 | Blocked | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 |
-| 2.5 | Blocked | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 |
-| 2.6 | Blocked | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 |
-| 2.7 | Blocked | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 |
-| 2.8 | Blocked | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 |
-| 2.9 | Blocked | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 |
-| 2.10 | Blocked | CI/CD 기본 파이프라인 준비 | lint/typecheck/build/test baseline | DevOps | 2.1 |
+| 2.1 | Next | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A |
+| 2.2 | Next | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 |
+| 2.3 | Next | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 |
+| 2.4 | Next | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 |
+| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 |
+| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 |
+| 2.7 | Next | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 |
+| 2.8 | Next | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 |
+| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 |
+| 2.10 | Next | CI/CD 기본 파이프라인 준비 | lint/typecheck/build/test baseline | DevOps | 2.1 |
 
 ## WBS 3. Prototype Build - TD Savings
 
-> 상태: `Blocked`  
-> 조건: Gate A 통과 후 착수
+> 상태: `Next`  
+> 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 3.1 | Blocked | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 |
-| 3.2 | Blocked | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 |
-| 3.3 | Blocked | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 |
-| 3.4 | Blocked | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 |
-| 3.5 | Blocked | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 |
-| 3.6 | Blocked | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 |
-| 3.7 | Blocked | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 |
-| 3.8 | Blocked | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 |
-| 3.9 | Blocked | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 |
-| 3.10 | Blocked | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 |
+| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 |
+| 3.2 | Next | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 |
+| 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 |
+| 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 |
+| 3.5 | Next | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 |
+| 3.6 | Next | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 |
+| 3.7 | Next | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 |
+| 3.8 | Next | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 |
+| 3.9 | Next | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 |
+| 3.10 | Next | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 |
 
 ## WBS 4. Admin and Ops Core
 

@@ -35,6 +35,8 @@ Source Documents:
 4. High priority open issue가 gate 목적을 직접 막으면 통과할 수 없다.
 5. gate 결과는 `Pass`, `Fail`, `Deferred` 중 하나로 남긴다.
 6. gate 통과 후 WBS와 roadmap 상태를 즉시 업데이트한다.
+7. `Gate A Pass`는 설계/준비 상태의 통과를 의미하며, 구현 시작 자체를 자동 승인하지 않는다.
+8. 실제 개발 시작은 `docs/02-requirements/scope-baseline.md`의 explicit approval rule을 별도로 따른다.
 
 ---
 
@@ -66,17 +68,21 @@ Source Documents:
 - Sprint 0 backlog와 Build Start Gate 점검 항목이 정리되어 있다.
 - WBS `0.x`, `1.x`의 gate 차단 항목이 닫혀 있다.
 - `Build Start Sign-off Package`가 준비되어 있다.
-- Product Owner가 개발 시작을 별도로 승인했다.
 
 통과 산출물:
 - Gate A review note
 - updated WBS status
 - updated roadmap status
+- if development is still on hold, the hold state is recorded separately
 
 Fail examples:
 - open decision이 여전히 핵심 설계를 막는 경우
 - auth/RBAC/security 방향이 미정인 경우
 - Prototype acceptance가 합의되지 않은 경우
+
+주의:
+- Gate A는 `build readiness gate`다.
+- Gate A를 `Pass`로 닫은 뒤에도 Product Owner의 별도 개발 시작 승인 전까지 구현은 시작하지 않는다.
 
 ---
 
@@ -192,3 +198,4 @@ Approved By:
 |---|---|
 | 2026-03-29 | Initial stage gate checklist created |
 | 2026-03-30 | Added scope baseline source and Build Start Sign-off Package check to Gate A |
+| 2026-04-06 | Clarified that Gate A Pass confirms readiness, while actual implementation start still requires separate Product Owner approval |
