@@ -1,15 +1,15 @@
-# FPDS Scope Change Control
+﻿# FPDS Scope Change Control
 
 Version: 1.0  
 Date: 2026-03-29  
 Status: Active  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
-- `docs/working-agreement.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
+- `docs/00-governance/working-agreement.md`
 
 ---
 
@@ -127,11 +127,11 @@ Source Documents:
 
 변경이 승인되면 아래 문서를 함께 갱신한다.
 
-- `docs/WBS.md`
-- `docs/roadmap.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
-- 필요 시 `docs/working-agreement.md`
+- `docs/01-planning/WBS.md`
+- `docs/00-governance/roadmap.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
+- 필요 시 `docs/00-governance/working-agreement.md`
 - 필요 시 세부 설계 문서
 
 최소 반영 규칙:

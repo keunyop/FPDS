@@ -1,16 +1,16 @@
-# FPDS Aggregate and Cache Refresh Strategy
+﻿# FPDS Aggregate and Cache Refresh Strategy
 
 Version: 1.0  
 Date: 2026-04-01  
 Status: Approved Baseline for WBS 1.4.5  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/erd-draft.md`
-- `docs/workflow-state-ingestion-design.md`
-- `docs/system-context-diagram.md`
-- `docs/decision-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/erd-draft.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/03-design/system-context-diagram.md`
+- `docs/00-governance/decision-log.md`
 
 ---
 
@@ -24,7 +24,7 @@ Source Documents:
 - TTL과 freshness 노출 규칙을 정의한다.
 
 이 문서는 refresh mechanics를 정의한다.  
-exact KPI formula, ranking metric semantics, scatter axis meaning은 `1.7.2`, `1.7.3`에서 별도로 닫는다.
+exact KPI formula, ranking metric semantics, scatter preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`에서 닫고, product-type별 default visualization emphasis는 `docs/03-design/product-type-visualization-principles.md`에서 닫는다.
 
 ---
 
@@ -139,12 +139,9 @@ admin metric health는 최소 아래를 보여줄 수 있어야 한다.
 
 아래 항목은 이번 문서 범위 밖이다.
 
-- KPI formula exact definition
-- ranking metric tie-break rule
-- scatter axis final meaning by product type
 - chart color/UX semantics
 
-이 항목은 `1.7.2`, `1.7.3` 및 public/admin UX 설계에서 닫는다.
+이 항목은 public/admin UX 설계에서 닫는다.
 
 ---
 

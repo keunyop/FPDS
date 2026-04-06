@@ -1,15 +1,15 @@
-# FPDS Domain Model and Canonical Schema v1
+﻿# FPDS Domain Model and Canonical Schema v1
 
 Version: 1.0  
 Date: 2026-03-30  
 Status: Approved Baseline for WBS 1.2.1 - 1.2.7  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/scope-baseline.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/02-requirements/scope-baseline.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
 
 ---
 

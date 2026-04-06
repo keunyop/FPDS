@@ -1,10 +1,10 @@
-# FPDS Detailed WBS
+﻿# FPDS Detailed WBS
 
 Version: 1.0  
 Date: 2026-03-29  
 Based on:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
 
 ---
 
@@ -107,11 +107,11 @@ Based on:
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
 | 0.1 | Completed | 프로젝트 운영 방식 확정 | working agreement, sync cadence, 보고 방식 | Product Owner, Tech Lead | 없음 |
-| 0.2 | Completed | Decision Log 생성 | `docs/decision-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
-| 0.3 | Completed | RAID Log 생성 | `docs/raid-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
-| 0.4 | Completed | Scope change control 규칙 확정 | `docs/scope-change-control.md` | Product Owner | 0.1 |
-| 0.5 | Completed | Stage gate 운영 기준 확정 | `docs/stage-gate-checklist.md` | Product Owner, QA | 0.4 |
-| 0.6 | Completed | milestone tracking 체계 확정 | `docs/milestone-tracker.md` | Delivery Lead | 0.5 |
+| 0.2 | Completed | Decision Log 생성 | `docs/00-governance/decision-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
+| 0.3 | Completed | RAID Log 생성 | `docs/00-governance/raid-log.md` 초안 | Product Owner, Tech Lead | 0.1 |
+| 0.4 | Completed | Scope change control 규칙 확정 | `docs/00-governance/scope-change-control.md` | Product Owner | 0.1 |
+| 0.5 | Completed | Stage gate 운영 기준 확정 | `docs/00-governance/stage-gate-checklist.md` | Product Owner, QA | 0.4 |
+| 0.6 | Completed | milestone tracking 체계 확정 | `docs/00-governance/milestone-tracker.md` | Delivery Lead | 0.5 |
 
 ## WBS 1. Detailed Design Closure
 
@@ -119,74 +119,74 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.1.1 | Completed | Prototype 범위 고정 | `docs/scope-baseline.md` Section 3 | Product Owner, Tech Lead | 0.2 |
-| 1.1.2 | Completed | Phase 1 v1 범위 고정 | `docs/scope-baseline.md` Section 4 | Product Owner | 1.1.1 |
-| 1.1.3 | Completed | 비범위 항목 재확인 | `docs/scope-baseline.md` Section 5 | Product Owner | 1.1.2 |
-| 1.1.4 | Completed | release cutline 정의 | `docs/scope-baseline.md` Section 6 | Product Owner, Tech Lead | 1.1.3 |
-| 1.1.5 | Completed | 승인 방식 정의 | `docs/scope-baseline.md` Section 7 | Product Owner | 1.1.4 |
+| 1.1.1 | Completed | Prototype 범위 고정 | `docs/02-requirements/scope-baseline.md` Section 3 | Product Owner, Tech Lead | 0.2 |
+| 1.1.2 | Completed | Phase 1 v1 범위 고정 | `docs/02-requirements/scope-baseline.md` Section 4 | Product Owner | 1.1.1 |
+| 1.1.3 | Completed | 비범위 항목 재확인 | `docs/02-requirements/scope-baseline.md` Section 5 | Product Owner | 1.1.2 |
+| 1.1.4 | Completed | release cutline 정의 | `docs/02-requirements/scope-baseline.md` Section 6 | Product Owner, Tech Lead | 1.1.3 |
+| 1.1.5 | Completed | 승인 방식 정의 | `docs/02-requirements/scope-baseline.md` Section 7 | Product Owner | 1.1.4 |
 
 ### 1.2 Domain Model and Canonical Schema
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.2.1 | Completed | Canada deposit taxonomy 확정 | `docs/domain-model-canonical-schema.md` Section 3 | Domain Reviewer, Tech Lead | 1.1.2 |
-| 1.2.2 | Completed | canonical product schema v1 설계 | `docs/domain-model-canonical-schema.md` Section 4 | Tech Lead, Backend | 1.2.1 |
-| 1.2.3 | Completed | source-derived 필드 정책 정의 | `docs/domain-model-canonical-schema.md` Section 4.7 | Tech Lead | 1.2.2 |
-| 1.2.4 | Completed | field-level validation rules 정의 | `docs/domain-model-canonical-schema.md` Section 5 | Backend, Domain Reviewer | 1.2.2 |
-| 1.2.5 | Completed | confidence scoring/routing 기준 정의 | `docs/domain-model-canonical-schema.md` Section 6 | AI/Data, Tech Lead | 1.2.4 |
-| 1.2.6 | Completed | change event model 정의 | `docs/domain-model-canonical-schema.md` Section 7 | Backend | 1.2.2 |
-| 1.2.7 | Completed | Japan 확장 대비 schema 확인 | `docs/domain-model-canonical-schema.md` Section 8 | Tech Lead | 1.2.2 |
+| 1.2.1 | Completed | Canada deposit taxonomy 확정 | `docs/03-design/domain-model-canonical-schema.md` Section 3 | Domain Reviewer, Tech Lead | 1.1.2 |
+| 1.2.2 | Completed | canonical product schema v1 설계 | `docs/03-design/domain-model-canonical-schema.md` Section 4 | Tech Lead, Backend | 1.2.1 |
+| 1.2.3 | Completed | source-derived 필드 정책 정의 | `docs/03-design/domain-model-canonical-schema.md` Section 4.7 | Tech Lead | 1.2.2 |
+| 1.2.4 | Completed | field-level validation rules 정의 | `docs/03-design/domain-model-canonical-schema.md` Section 5 | Backend, Domain Reviewer | 1.2.2 |
+| 1.2.5 | Completed | confidence scoring/routing 기준 정의 | `docs/03-design/domain-model-canonical-schema.md` Section 6 | AI/Data, Tech Lead | 1.2.4 |
+| 1.2.6 | Completed | change event model 정의 | `docs/03-design/domain-model-canonical-schema.md` Section 7 | Backend | 1.2.2 |
+| 1.2.7 | Completed | Japan 확장 대비 schema 확인 | `docs/03-design/domain-model-canonical-schema.md` Section 8 | Tech Lead | 1.2.2 |
 
 ### 1.3 Workflow and State Design
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.3.1 | Completed | end-to-end ingestion flow 상세화 | `docs/workflow-state-ingestion-design.md` Sections 2-9 | Tech Lead, AI/Data | 1.2.2 |
-| 1.3.2 | Completed | review state machine 정의 | `docs/review-run-publish-audit-state-design.md` Section 3 | Backend | 1.3.1 |
-| 1.3.3 | Completed | run lifecycle 정의 | `docs/review-run-publish-audit-state-design.md` Section 4 | Backend | 1.3.1 |
-| 1.3.4 | Completed | publish lifecycle 정의 | `docs/review-run-publish-audit-state-design.md` Section 5 | Backend | 1.3.1 |
-| 1.3.5 | Completed | audit trail scope 정의 | `docs/review-run-publish-audit-state-design.md` Section 6 | Backend, Security | 1.3.2 |
+| 1.3.1 | Completed | end-to-end ingestion flow 상세화 | `docs/03-design/workflow-state-ingestion-design.md` Sections 2-9 | Tech Lead, AI/Data | 1.2.2 |
+| 1.3.2 | Completed | review state machine 정의 | `docs/03-design/review-run-publish-audit-state-design.md` Section 3 | Backend | 1.3.1 |
+| 1.3.3 | Completed | run lifecycle 정의 | `docs/03-design/review-run-publish-audit-state-design.md` Section 4 | Backend | 1.3.1 |
+| 1.3.4 | Completed | publish lifecycle 정의 | `docs/03-design/review-run-publish-audit-state-design.md` Section 5 | Backend | 1.3.1 |
+| 1.3.5 | Completed | audit trail scope 정의 | `docs/03-design/review-run-publish-audit-state-design.md` Section 6 | Backend, Security | 1.3.2 |
 
 ### 1.4 Architecture and Data Storage Design
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.4.1 | Completed | 시스템 컨텍스트 다이어그램 작성 | `docs/system-context-diagram.md` Sections 2-7 | Tech Lead | 1.3.1 |
-| 1.4.2 | Completed | ERD 초안 작성 | `docs/erd-draft.md` Sections 2-8 | Backend | 1.2.2 |
-| 1.4.3 | Completed | source snapshot/evidence 저장 전략 확정 | `docs/source-snapshot-evidence-storage-strategy.md` Sections 2-10 | AI/Data, Backend | 1.4.2 |
-| 1.4.4 | Completed | retrieval/vector 시작점 결정 | `docs/retrieval-vector-starting-point.md` Sections 2-9 | Tech Lead, AI/Data | 1.4.3 |
-| 1.4.5 | Completed | aggregate/cache refresh 전략 정의 | `docs/aggregate-cache-refresh-strategy.md` Sections 2-9 | Backend | 1.4.2 |
-| 1.4.6 | Completed | 환경 분리 전략 정리 | `docs/environment-separation-strategy.md` Sections 2-9 | DevOps | 1.4.1 |
+| 1.4.1 | Completed | 시스템 컨텍스트 다이어그램 작성 | `docs/03-design/system-context-diagram.md` Sections 2-7 | Tech Lead | 1.3.1 |
+| 1.4.2 | Completed | ERD 초안 작성 | `docs/03-design/erd-draft.md` Sections 2-8 | Backend | 1.2.2 |
+| 1.4.3 | Completed | source snapshot/evidence 저장 전략 확정 | `docs/03-design/source-snapshot-evidence-storage-strategy.md` Sections 2-10 | AI/Data, Backend | 1.4.2 |
+| 1.4.4 | Completed | retrieval/vector 시작점 결정 | `docs/03-design/retrieval-vector-starting-point.md` Sections 2-9 | Tech Lead, AI/Data | 1.4.3 |
+| 1.4.5 | Completed | aggregate/cache refresh 전략 정의 | `docs/03-design/aggregate-cache-refresh-strategy.md` Sections 2-9 | Backend | 1.4.2 |
+| 1.4.6 | Completed | 환경 분리 전략 정리 | `docs/03-design/environment-separation-strategy.md` Sections 2-9 | DevOps | 1.4.1 |
 
 ### 1.5 API and Interface Contracts
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.5.1 | Completed | public API contract 정의 | `docs/api-interface-contracts.md` Section 4 | Backend, Frontend | 1.2.2 |
-| 1.5.2 | Completed | admin API contract 정의 | `docs/api-interface-contracts.md` Section 5 | Backend, Frontend | 1.3.2 |
-| 1.5.3 | Completed | internal orchestration interface 정의 | `docs/api-interface-contracts.md` Section 6 | Tech Lead | 1.3.1 |
-| 1.5.4 | Completed | BX-PF write contract 초안 작성 | `docs/api-interface-contracts.md` Section 7 | Backend, Tech Lead | 1.2.2 |
-| 1.5.5 | Completed | external SaaS/Open API 초안 작성 | `docs/api-interface-contracts.md` Section 8 | Backend | 1.5.1 |
+| 1.5.1 | Completed | public API contract 정의 | `docs/03-design/api-interface-contracts.md` Section 4 | Backend, Frontend | 1.2.2 |
+| 1.5.2 | Completed | admin API contract 정의 | `docs/03-design/api-interface-contracts.md` Section 5 | Backend, Frontend | 1.3.2 |
+| 1.5.3 | Completed | internal orchestration interface 정의 | `docs/03-design/api-interface-contracts.md` Section 6 | Tech Lead | 1.3.1 |
+| 1.5.4 | Completed | BX-PF write contract 초안 작성 | `docs/03-design/api-interface-contracts.md` Section 7 | Backend, Tech Lead | 1.2.2 |
+| 1.5.5 | Completed | external SaaS/Open API 초안 작성 | `docs/03-design/api-interface-contracts.md` Section 8 | Backend | 1.5.1 |
 
 ### 1.6 Security and Access Control Design
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.6.1 | Now | admin auth 방식 결정 | session cookie vs token 결정 | Product Owner, Tech Lead, Security | 1.5.2 |
-| 1.6.2 | Now | RBAC 설계 | admin/operator/reviewer 권한 매트릭스 | Security, Tech Lead | 1.6.1 |
-| 1.6.3 | Now | external API auth 방향 정의 | key/token/tenant scope 초안 | Security, Backend | 1.5.5 |
-| 1.6.4 | Now | CORS/origin 정책 정의 | public/admin/api 환경별 allowlist 정책 | Security | 1.4.6 |
-| 1.6.5 | Now | crawler safe fetch / SSRF 정책 정의 | egress allowlist, URL validation, private IP 차단 원칙 | Security, AI/Data | 1.4.1 |
-| 1.6.6 | Now | session/CSRF/security headers 정책 정의 | CSP, HSTS, SameSite, HttpOnly, Secure 정책 | Security | 1.6.1 |
-| 1.6.7 | Next | secret rotation and audit scope 정의 | secret owner, rotation cycle, access audit | DevOps, Security | 1.6.6 |
+| 1.6.1 | Completed | admin auth 방식 결정 | `docs/03-design/security-access-control-design.md` Section 3 | Product Owner, Tech Lead, Security | 1.5.2 |
+| 1.6.2 | Completed | RBAC 설계 | `docs/03-design/security-access-control-design.md` Section 4 | Security, Tech Lead | 1.6.1 |
+| 1.6.3 | Completed | external API auth 방향 정의 | `docs/03-design/security-access-control-design.md` Section 5 | Security, Backend | 1.5.5 |
+| 1.6.4 | Completed | CORS/origin 정책 정의 | `docs/03-design/security-access-control-design.md` Section 6 | Security | 1.4.6 |
+| 1.6.5 | Completed | crawler safe fetch / SSRF 정책 정의 | `docs/03-design/security-access-control-design.md` Section 7 | Security, AI/Data | 1.4.1 |
+| 1.6.6 | Completed | session/CSRF/security headers 정책 정의 | `docs/03-design/security-access-control-design.md` Section 8 | Security | 1.6.1 |
+| 1.6.7 | Completed | secret rotation and audit scope 정의 | `docs/03-design/security-access-control-design.md` Section 9 | DevOps, Security | 1.6.6 |
 
 ### 1.7 Public/Admin UX and Localization Design
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.7.1 | Now | Product Grid 정보 구조 설계 | card 필드, filter bar, sort, empty/loading state | Frontend, Product Owner | 1.5.1 |
-| 1.7.2 | Now | Insight Dashboard metric 정의 | KPI, ranking widget, scatter 데이터 정의 | Product Owner, Frontend, Backend | 1.4.5 |
-| 1.7.3 | Now | product-type별 시각화 원칙 확정 | chequing/savings/GIC별 축/비교 기준 | Product Owner, Frontend | 1.7.2 |
+| 1.7.1 | Completed | Product Grid 정보 구조 설계 | `docs/03-design/product-grid-information-architecture.md` Sections 2-13 | Frontend, Product Owner | 1.5.1 |
+| 1.7.2 | Completed | Insight Dashboard metric 정의 | `docs/03-design/insight-dashboard-metric-definition.md` Sections 2-10 | Product Owner, Frontend, Backend | 1.4.5 |
+| 1.7.3 | Completed | product-type별 시각화 원칙 확정 | `docs/03-design/product-type-visualization-principles.md` Sections 2-10 | Product Owner, Frontend | 1.7.2 |
 | 1.7.4 | Now | admin 정보 구조 설계 | review queue, trace viewer, run detail, usage dashboard 레이아웃 | Frontend | 1.5.2 |
 | 1.7.5 | Now | i18n resource ownership 정의 | EN/KO/JA 번역 주체와 리뷰 방식 | Product Owner, Frontend | 1.7.1 |
 | 1.7.6 | Now | locale fallback 정책 정의 | label fallback, source-derived text 처리 원칙 | Frontend, Product Owner | 1.7.5 |

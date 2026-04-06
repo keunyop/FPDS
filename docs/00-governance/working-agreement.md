@@ -1,15 +1,15 @@
-# FPDS Working Agreement
+﻿# FPDS Working Agreement
 
 Version: 1.0  
 Date: 2026-03-29  
 Status: Active  
 Based on:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/scope-baseline.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/02-requirements/scope-baseline.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
 
 ---
 
@@ -43,11 +43,11 @@ Based on:
 문서 우선순위는 아래 순서를 따른다.
 
 1. 최신 Product Owner 명시 지시
-2. `docs/FPDS_Requirements_Definition_v1_5.md`
-3. `docs/plan.md`
-4. `docs/WBS.md`
-5. `docs/decision-log.md`
-6. `docs/raid-log.md`
+2. `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+3. `docs/01-planning/plan.md`
+4. `docs/01-planning/WBS.md`
+5. `docs/00-governance/decision-log.md`
+6. `docs/00-governance/raid-log.md`
 7. 세부 설계 문서
 
 해석 원칙:
@@ -147,7 +147,7 @@ Based on:
 
 ### 8.1 Decision Rules
 
-- 주요 결정은 `docs/decision-log.md`에 기록한다.
+- 주요 결정은 `docs/00-governance/decision-log.md`에 기록한다.
 - 아직 닫히지 않은 항목은 `Open`으로 유지한다.
 - 구두 합의처럼 남기지 않고 문서로 고정한다.
 

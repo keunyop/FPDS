@@ -1,16 +1,16 @@
-# FPDS Workflow and State Design - End-to-End Ingestion Flow
+﻿# FPDS Workflow and State Design - End-to-End Ingestion Flow
 
 Version: 1.0  
 Date: 2026-03-31  
 Status: Approved Baseline for WBS 1.3.1  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/domain-model-canonical-schema.md`
-- `docs/decision-log.md`
-- `docs/scope-baseline.md`
-- `docs/stage-gate-checklist.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/domain-model-canonical-schema.md`
+- `docs/00-governance/decision-log.md`
+- `docs/02-requirements/scope-baseline.md`
+- `docs/00-governance/stage-gate-checklist.md`
 
 ---
 
@@ -37,7 +37,7 @@ Source Documents:
 2. retry 기본 모델은 `source/stage 단위 재시도 + run partial completion 허용 + publish 별도 retry/reconciliation`이다.
 3. source identity는 `bank_code + normalized_source_url + source_type`를 기본 키로 보고, `checksum/fingerprint`는 change detection과 idempotency 판단에 사용한다.
 4. retrieval은 `retrieval-ready evidence 저장`까지를 이 문서에서 고정하고, vector index 구현 상세는 `WBS 1.4.4`에서 닫는다.
-5. BX-PF publish는 `interface-first + publish state 중심`으로 정의하고, exact write contract와 field mapping은 `docs/api-interface-contracts.md` Section 7에서 닫는다.
+5. BX-PF publish는 `interface-first + publish state 중심`으로 정의하고, exact write contract와 field mapping은 `docs/03-design/api-interface-contracts.md` Section 7에서 닫는다.
 
 ---
 
@@ -270,7 +270,7 @@ Source Documents:
   - pending reason
 - 규칙:
   - 이 단계는 interface-first 수준으로만 고정한다.
-  - exact BX-PF adapter-facing write contract와 field mapping은 `docs/api-interface-contracts.md` Section 7에서 정의한다.
+  - exact BX-PF adapter-facing write contract와 field mapping은 `docs/03-design/api-interface-contracts.md` Section 7에서 정의한다.
 
 ### 5.12 Stage 11. Publish / Queue
 
@@ -371,9 +371,9 @@ Source Documents:
 
 아래 항목은 이 문서에서 일부러 열어 둔다.
 
-- review/run/publish/audit state detail은 `docs/review-run-publish-audit-state-design.md`에서 종료 (`1.3.2` ~ `1.3.5`)
+- review/run/publish/audit state detail은 `docs/03-design/review-run-publish-audit-state-design.md`에서 종료 (`1.3.2` ~ `1.3.5`)
 - vector index 구현 여부와 pgvector 도입 범위 (`1.4.4`)
-- BX-PF exact payload, required fields, response contract (`docs/api-interface-contracts.md` Section 7)
+- BX-PF exact payload, required fields, response contract (`docs/03-design/api-interface-contracts.md` Section 7)
 
 ---
 
@@ -390,4 +390,4 @@ Source Documents:
 | Date | Change |
 |---|---|
 | 2026-03-31 | Initial end-to-end ingestion flow baseline created for WBS 1.3.1 |
-| 2026-04-01 | Closed 1.3.2 - 1.3.5 follow-up items by linking `docs/review-run-publish-audit-state-design.md` |
+| 2026-04-01 | Closed 1.3.2 - 1.3.5 follow-up items by linking `docs/03-design/review-run-publish-audit-state-design.md` |

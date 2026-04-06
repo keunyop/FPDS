@@ -1,17 +1,17 @@
-# FPDS Stage Gate Checklist
+﻿# FPDS Stage Gate Checklist
 
 Version: 1.0  
 Date: 2026-03-29  
 Status: Active  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/roadmap.md`
-- `docs/scope-baseline.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
-- `docs/working-agreement.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/00-governance/roadmap.md`
+- `docs/02-requirements/scope-baseline.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
+- `docs/00-governance/working-agreement.md`
 
 ---
 

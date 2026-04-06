@@ -1,17 +1,17 @@
-# FPDS Environment Separation Strategy
+﻿# FPDS Environment Separation Strategy
 
 Version: 1.1
 Date: 2026-04-01
 Status: Approved Baseline for WBS 1.4.6
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/system-context-diagram.md`
-- `docs/source-snapshot-evidence-storage-strategy.md`
-- `docs/retrieval-vector-starting-point.md`
-- `docs/aggregate-cache-refresh-strategy.md`
-- `docs/decision-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/system-context-diagram.md`
+- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
+- `docs/03-design/retrieval-vector-starting-point.md`
+- `docs/03-design/aggregate-cache-refresh-strategy.md`
+- `docs/00-governance/decision-log.md`
 
 ---
 

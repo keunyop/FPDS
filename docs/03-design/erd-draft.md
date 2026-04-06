@@ -1,17 +1,17 @@
-# FPDS ERD Draft
+﻿# FPDS ERD Draft
 
 Version: 1.0  
 Date: 2026-04-01  
 Status: Approved Baseline for WBS 1.4.2  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/domain-model-canonical-schema.md`
-- `docs/workflow-state-ingestion-design.md`
-- `docs/review-run-publish-audit-state-design.md`
-- `docs/system-context-diagram.md`
-- `docs/decision-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/domain-model-canonical-schema.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/03-design/review-run-publish-audit-state-design.md`
+- `docs/03-design/system-context-diagram.md`
+- `docs/00-governance/decision-log.md`
 
 ---
 
@@ -446,7 +446,7 @@ erDiagram
 | `user_account` | reviewer/operator actor reference용 | auth provider 종속 세부 schema는 `1.6.x`에서 닫기 |
 
 이 중 `translation_resource`, `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`는 PRD에 직접 명시된 저장 단위다.  
-scatter/grid cache 분리는 KPI/axis/refresh 전략이 닫히는 `1.4.5`, `1.7.2`, `1.7.3`에서 구체화한다.
+scatter/grid cache 분리는 `docs/03-design/aggregate-cache-refresh-strategy.md`, `docs/03-design/insight-dashboard-metric-definition.md`, `docs/03-design/product-type-visualization-principles.md`에서 구체화한다.
 
 ---
 
@@ -456,12 +456,12 @@ scatter/grid cache 분리는 KPI/axis/refresh 전략이 닫히는 `1.4.5`, `1.7.
 
 | Area | Open Item | Follow-Up WBS | Why It Does Not Block 1.4.2 |
 |---|---|---|---|
-| Evidence Storage | object key naming, raw/parsed retention, metadata normalization | `docs/source-snapshot-evidence-storage-strategy.md` | ERD 이후 storage artifact와 metadata 경계를 상세화한 문서다. |
-| Retrieval | vector index scope, pgvector starting point, fallback rule | `docs/retrieval-vector-starting-point.md` | evidence chunk retrieval starting point를 상세화한 문서다. |
-| Aggregate Cache | product grid projection, snapshot domains, refresh/TTL | `docs/aggregate-cache-refresh-strategy.md` | aggregate refresh mechanics를 상세화한 문서다. |
-| BX-PF | exact write payload, field mapping, response schema | `docs/api-interface-contracts.md` Section 7 | publish adapter contract를 상세화한 문서다. |
+| Evidence Storage | object key naming, raw/parsed retention, metadata normalization | `docs/03-design/source-snapshot-evidence-storage-strategy.md` | ERD 이후 storage artifact와 metadata 경계를 상세화한 문서다. |
+| Retrieval | vector index scope, pgvector starting point, fallback rule | `docs/03-design/retrieval-vector-starting-point.md` | evidence chunk retrieval starting point를 상세화한 문서다. |
+| Aggregate Cache | product grid projection, snapshot domains, refresh/TTL | `docs/03-design/aggregate-cache-refresh-strategy.md` | aggregate refresh mechanics를 상세화한 문서다. |
+| BX-PF | exact write payload, field mapping, response schema | `docs/03-design/api-interface-contracts.md` Section 7 | publish adapter contract를 상세화한 문서다. |
 | Auth/RBAC | session/token schema, role matrix, auth session tables | `1.6.1`, `1.6.2` | actor reference만 유지하면 core operational ERD는 성립한다. |
-| Environment Separation | env topology, private worker boundary, data plane isolation | `docs/environment-separation-strategy.md` | environment/trust boundary를 상세화한 문서다. |
+| Environment Separation | env topology, private worker boundary, data plane isolation | `docs/03-design/environment-separation-strategy.md` | environment/trust boundary를 상세화한 문서다. |
 | Security | audit retention duration, secret/credential detail, SSRF allowlist tables | `1.6.5` ~ `1.6.7` | security metadata exact schema는 후속 정책화가 가능하다. |
 
 ---

@@ -1,21 +1,22 @@
-# FPDS API and Interface Contracts
+﻿# FPDS API and Interface Contracts
 
 Version: 1.0
 Date: 2026-04-01
 Status: Approved Baseline for WBS 1.5.1-1.5.5
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/WBS.md`
-- `docs/system-context-diagram.md`
-- `docs/domain-model-canonical-schema.md`
-- `docs/workflow-state-ingestion-design.md`
-- `docs/review-run-publish-audit-state-design.md`
-- `docs/erd-draft.md`
-- `docs/source-snapshot-evidence-storage-strategy.md`
-- `docs/retrieval-vector-starting-point.md`
-- `docs/aggregate-cache-refresh-strategy.md`
-- `docs/environment-separation-strategy.md`
-- `docs/decision-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/system-context-diagram.md`
+- `docs/03-design/domain-model-canonical-schema.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/03-design/review-run-publish-audit-state-design.md`
+- `docs/03-design/erd-draft.md`
+- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
+- `docs/03-design/retrieval-vector-starting-point.md`
+- `docs/03-design/aggregate-cache-refresh-strategy.md`
+- `docs/03-design/environment-separation-strategy.md`
+- `docs/03-design/insight-dashboard-metric-definition.md`
+- `docs/00-governance/decision-log.md`
 
 ---
 
@@ -243,35 +244,46 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 목적:
 - KPI cards와 freshness note를 제공한다.
 - backing dataset은 `dashboard_metric_snapshot`이다.
+- exact metric semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.metrics[]` baseline:
 
 | Field | Description |
 |---|---|
-| `metric_key` | `total_active_products`, `highest_display_rate`, `recently_changed_products`, etc. |
+| `metric_key` | `total_active_products`, `banks_in_scope`, `highest_display_rate`, `recently_changed_products_30d` |
 | `label` | localized metric label |
 | `value` | numeric or stringified scalar |
 | `unit` | `count`, `percent`, `currency`, `days`, etc. |
 | `scope_note` | optional localized note |
+
+응답 `data.breakdowns` baseline:
+
+| Field | Description |
+|---|---|
+| `products_by_bank[]` | `{ bank_code, bank_name, count, share_percent }` |
+| `products_by_product_type[]` | `{ product_type, product_type_label, count, share_percent }` |
 
 ### 4.6 `GET /api/public/dashboard-rankings`
 
 목적:
 - ranking widget dataset을 제공한다.
 - backing dataset은 `dashboard_ranking_snapshot`이다.
+- exact ranking semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.widgets[]` baseline:
 
 | Field | Description |
 |---|---|
-| `ranking_key` | `highest_rate`, `lowest_monthly_fee`, `lowest_minimum_deposit`, `recently_updated`, etc. |
+| `ranking_key` | `highest_display_rate`, `lowest_monthly_fee`, `lowest_minimum_deposit`, `recently_changed_30d` |
 | `title` | localized widget title |
 | `metric_label` | localized metric label |
 | `items[]` | ranked product summary rows |
+| `window_days` | optional, currently used by `recently_changed_30d` |
 
 ranked row baseline:
 - `rank`
 - `product_id`
+- `bank_code`
 - `bank_name`
 - `product_name`
 - `product_type`
@@ -284,12 +296,13 @@ ranked row baseline:
 목적:
 - comparative scatter plot dataset을 제공한다.
 - backing dataset은 `dashboard_scatter_snapshot`이다.
+- exact preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 추가 query:
 
 | Query | Type | Notes |
 |---|---|---|
-| `axis_preset` | string | product-type-aware preset |
+| `axis_preset` | string | `chequing_fee_vs_minimum_balance`, `savings_rate_vs_minimum_balance`, `gic_rate_vs_minimum_deposit`, `gic_term_vs_rate` |
 
 응답 `data` baseline:
 

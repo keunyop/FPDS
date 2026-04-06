@@ -1,4 +1,4 @@
-# FPDS Requirements Definition (PRD / Requirements Spec)
+﻿# FPDS Requirements Definition (PRD / Requirements Spec)
 Version: 1.5  
 Date: 2026-03-28  
 Language: Korean-centered with English technical terms + English/Korean/Japanese UI support  

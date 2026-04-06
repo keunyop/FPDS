@@ -1,17 +1,17 @@
-# FPDS Review, Run, Publish, and Audit State Design
+﻿# FPDS Review, Run, Publish, and Audit State Design
 
 Version: 1.0  
 Date: 2026-04-01  
 Status: Approved Baseline for WBS 1.3.2 - 1.3.5  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/domain-model-canonical-schema.md`
-- `docs/workflow-state-ingestion-design.md`
-- `docs/decision-log.md`
-- `docs/scope-baseline.md`
-- `docs/stage-gate-checklist.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/domain-model-canonical-schema.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/00-governance/decision-log.md`
+- `docs/02-requirements/scope-baseline.md`
+- `docs/00-governance/stage-gate-checklist.md`
 
 ---
 
@@ -40,7 +40,7 @@ This document applies the already-approved baseline decisions below.
 4. Run retry is `source/stage scoped`, not always full-run restart.
 5. Run partial completion is allowed.
 6. Publish retry and reconciliation are tracked separately from ingestion run retry.
-7. BX-PF publish remains `interface-first`; exact adapter-facing write contract and field mapping stay in `docs/api-interface-contracts.md` Section 7.
+7. BX-PF publish remains `interface-first`; exact adapter-facing write contract and field mapping stay in `docs/03-design/api-interface-contracts.md` Section 7.
 8. FPDS owns operational truth for run, review, audit, publish, and reconciliation metadata.
 
 ---
@@ -412,7 +412,7 @@ This document provides baseline input for:
 - `WBS 4.2`, `4.5`, `4.7`, `6.2`, `6.3` implementation design later
 
 This document does not close:
-- exact BX-PF remote payload/response transport contract (`docs/api-interface-contracts.md` Section 7 closes the adapter-facing baseline)
+- exact BX-PF remote payload/response transport contract (`docs/03-design/api-interface-contracts.md` Section 7 closes the adapter-facing baseline)
 - vector index implementation detail (`WBS 1.4.4`)
 - exact audit retention duration policy
 

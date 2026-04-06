@@ -1,14 +1,14 @@
-# FPDS Milestone Tracker
+﻿# FPDS Milestone Tracker
 
 Version: 1.0  
 Date: 2026-03-29  
 Status: Active  
 Source Documents:
-- `docs/WBS.md`
-- `docs/roadmap.md`
-- `docs/stage-gate-checklist.md`
-- `docs/working-agreement.md`
-- `docs/decision-log.md`
+- `docs/01-planning/WBS.md`
+- `docs/00-governance/roadmap.md`
+- `docs/00-governance/stage-gate-checklist.md`
+- `docs/00-governance/working-agreement.md`
+- `docs/00-governance/decision-log.md`
 
 ---
 
@@ -26,7 +26,7 @@ Source Documents:
 
 ## 2. Tracking Rules
 
-1. milestone 기준 문서는 `docs/roadmap.md`와 `docs/WBS.md`다.
+1. milestone 기준 문서는 `docs/00-governance/roadmap.md`와 `docs/01-planning/WBS.md`다.
 2. 현재는 공식 build start date가 확정되지 않았으므로 due date는 `relative week` 기준으로 관리한다.
 3. 절대 날짜는 Gate A 직전 또는 Product Owner가 개발 시작일을 확정하는 시점에 추가한다.
 4. milestone 상태는 `Not Started`, `In Progress`, `At Risk`, `Done`으로 관리한다.

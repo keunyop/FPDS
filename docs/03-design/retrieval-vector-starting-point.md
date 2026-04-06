@@ -1,18 +1,18 @@
-# FPDS Retrieval and Vector Starting Point
+﻿# FPDS Retrieval and Vector Starting Point
 
 Version: 1.0  
 Date: 2026-04-01  
 Status: Approved Baseline for WBS 1.4.4  
 Source Documents:
-- `docs/FPDS_Requirements_Definition_v1_5.md`
-- `docs/plan.md`
-- `docs/WBS.md`
-- `docs/source-snapshot-evidence-storage-strategy.md`
-- `docs/system-context-diagram.md`
-- `docs/erd-draft.md`
-- `docs/workflow-state-ingestion-design.md`
-- `docs/decision-log.md`
-- `docs/raid-log.md`
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/01-planning/plan.md`
+- `docs/01-planning/WBS.md`
+- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
+- `docs/03-design/system-context-diagram.md`
+- `docs/03-design/erd-draft.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/00-governance/decision-log.md`
+- `docs/00-governance/raid-log.md`
 
 ---
 
@@ -146,7 +146,7 @@ FPDS의 Phase 1 retrieval/vector starting point는 아래로 결정한다.
 |---|---|---|---|
 | Embedding Model | exact model id and dimension | implementation/config | backend starting point와 separate concern이다. |
 | Re-ranking | lexical blend, reranker, threshold tuning | later tuning | initial hybrid baseline만 있으면 된다. |
-| Infra | exact Postgres extension provisioning by env | `docs/environment-separation-strategy.md` and infra setup | logical choice는 먼저 고정 가능하다. |
+| Infra | exact Postgres extension provisioning by env | `docs/03-design/environment-separation-strategy.md` and infra setup | logical choice는 먼저 고정 가능하다. |
 | Cost Guardrail | embedding refresh policy and budget cap | later ops policy | architecture starting point를 막지 않는다. |
 
 ---
