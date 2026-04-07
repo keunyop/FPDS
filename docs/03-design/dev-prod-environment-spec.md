@@ -92,12 +92,18 @@ Rules:
 | `FPDS_OBJECT_STORAGE_REGION` | object storage region or logical location |
 | `FPDS_OBJECT_STORAGE_BUCKET` | private bucket or container name |
 | `FPDS_OBJECT_STORAGE_PREFIX` | top-level environment prefix |
+| `FPDS_OBJECT_STORAGE_ACCESS_MODE` | storage access mode, currently `private` |
+| `FPDS_OBJECT_STORAGE_SIGNED_URL_MODE` | object access mode for internal retrieval |
+| `FPDS_SNAPSHOT_OBJECT_PREFIX` | snapshot object subtree name |
+| `FPDS_PARSED_OBJECT_PREFIX` | parsed object subtree name |
+| `FPDS_PARSER_INTERMEDIATE_PREFIX` | parser intermediate subtree name |
 | `FPDS_EVIDENCE_PREFIX_ROOT` | evidence namespace root |
 | `FPDS_EVIDENCE_RETENTION_CLASS` | retention hook for later archival or purge work |
 
 Rules:
 - `dev` and `prod` must never share DB credentials, storage buckets, or vector namespaces
 - object storage layout must preserve the `{env}/...` separation model
+- object storage access stays `private` and signed access stays internal-only by default
 - exact lifecycle rules, encryption settings, and retention days stay out of this baseline
 
 ### 4.4 Auth and Secret Inputs

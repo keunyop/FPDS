@@ -223,8 +223,8 @@ Based on:
 |---|---|---|---|---|---|---|
 | 2.1 | Completed | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A | 2026-04-07 |
 | 2.2 | Completed | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 | 2026-04-09 |
-| 2.3 | Next | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 | 2026-04-10 |
-| 2.4 | Next | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 | 2026-04-10 |
+| 2.3 | Completed | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 | 2026-04-10 |
+| 2.4 | Completed | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 | 2026-04-10 |
 | 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-15 |
 | 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-17 |
 | 2.7 | Next | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 | 2026-04-13 |

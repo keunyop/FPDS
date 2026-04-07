@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "environment_model": ["dev", "prod"],
+  "bucket_strategy": {
+    "recommended_mode": "separate_private_bucket_per_env",
+    "fallback_mode": "single_private_bucket_with_env_prefix",
+    "bucket_names": {
+      "dev": "fpds-dev-private",
+      "prod": "fpds-prod-private"
+    }
+  },
+  "object_storage_defaults": {
+    "driver": "s3-compatible",
+    "access_mode": "private",
+    "signed_url_mode": "internal-only",
+    "retention_class_default": "hot"
+  },
+  "key_layout": {
+    "raw_snapshot": "{env}/snapshots/{country_code}/{bank_code}/{source_document_id}/{snapshot_id}/raw",
+    "parsed_text": "{env}/parsed/{country_code}/{bank_code}/{source_document_id}/{parsed_document_id}/parsed.txt",
+    "parsed_metadata": "{env}/parsed/{country_code}/{bank_code}/{source_document_id}/{parsed_document_id}/metadata.json",
+    "parser_intermediate": "{env}/parsed/{country_code}/{bank_code}/{source_document_id}/{parsed_document_id}/intermediate/{artifact_name}"
+  },
+  "access_rules": {
+    "public_browser_direct_access": false,
+    "admin_browser_direct_object_path_exposure": false,
+    "allowed_runtime_access": ["worker", "internal_api"],
+    "public_api_may_return_raw_object_keys": false
+  },
+  "retention_classes": ["hot", "archive", "legal_hold"],
+  "placeholder_policy": {
+    "lifecycle_rule_days": "replace-me",
+    "encryption_mode": "replace-me",
+    "kms_key_reference": "replace-me"
+  }
+}

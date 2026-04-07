@@ -54,6 +54,26 @@ Rules:
 - `dev` is the only local development environment shape for now.
 - Real BX-PF credentials and write-back are `prod` only.
 
+## Database Baseline
+
+- DB source of truth: [docs/03-design/db-migration-baseline.md](docs/03-design/db-migration-baseline.md)
+- Migration entrypoint: [db/README.md](db/README.md)
+
+Rules:
+- Postgres is the baseline database.
+- Migrations stay SQL-first until we intentionally choose a framework or ORM.
+- Early schema keeps flexible payloads in `jsonb` and defers `pgvector` to later work.
+
+## Object Storage Baseline
+
+- Storage source of truth: [docs/03-design/object-storage-evidence-bucket-baseline.md](docs/03-design/object-storage-evidence-bucket-baseline.md)
+- Storage entrypoint: [storage/README.md](storage/README.md)
+
+Rules:
+- Object storage is private by default.
+- Browser surfaces must not receive raw object paths or direct bucket access.
+- `dev` and `prod` storage boundaries stay separated by bucket or top-level prefix.
+
 ## What The Harness Does
 
 - `pre-commit` only inspects staged files.
@@ -68,6 +88,8 @@ Rules:
 
 - `app/` browser-facing surfaces for public, admin, and prototype viewer
 - `api/` public, admin, and internal API boundaries
+- `db/` SQL-first migration baseline and database notes
+- `storage/` object storage and evidence bucket baseline
 - `worker/` private discovery, pipeline, publish, and runtime workers
 - `shared/` cross-surface contracts, domain, config, i18n, observability, and security modules
 - `docs/` project requirements, governance, planning, and design

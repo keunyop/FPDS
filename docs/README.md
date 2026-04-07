@@ -82,6 +82,8 @@ Status: Active Navigation Index
 - `aggregate-cache-refresh-strategy.md`
 - `environment-separation-strategy.md`
 - `dev-prod-environment-spec.md`
+- `db-migration-baseline.md`
+- `object-storage-evidence-bucket-baseline.md`
 - `api-interface-contracts.md`
 - `security-access-control-design.md`
 - `product-grid-information-architecture.md`

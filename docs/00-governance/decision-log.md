@@ -145,6 +145,9 @@ Status meaning:
 
 ---
 
+| D-076 | 2026-04-07 | Decided | SQL-First DB Migration Baseline | WBS `2.3` uses a Postgres-first, SQL-first migration baseline in-repo. The first migration creates the core ingestion, evidence, candidate, review, canonical, publish, usage, audit, taxonomy, and processing-policy tables, while keeping ids as application-generated `text` and deferring `pgvector`, auth-vendor tables, and dashboard tables to later work. | the ERD and workflow baselines were already closed, but implementation needed a concrete initial schema that could move forward without prematurely locking the project to one ORM or framework. | database baseline, migrations, prototype readiness, WBS 2.3, future scaffolds | `docs/03-design/db-migration-baseline.md`, `db/migrations/0001_initial_baseline.sql`, `db/README.md` |
+| D-077 | 2026-04-07 | Decided | Private Object Storage Baseline | WBS `2.4` uses a private, S3-compatible object storage baseline with separate `dev` and `prod` buckets as the preferred shape, `{env}/...` key separation as the fallback minimum, and browser-facing surfaces blocked from direct raw object access. The tracked baseline adds storage layout examples, env keys for object subtree names and private-access mode, and a repo-level storage contract for snapshots and parsed artifacts. | the storage strategy was already approved at the design level, but prototype ingestion work needed a concrete bucket and object-key baseline before snapshot capture and parsing could be implemented without path drift or accidental public exposure. | object storage, evidence lineage, private access, env contract, WBS 2.4, prototype readiness | `docs/03-design/object-storage-evidence-bucket-baseline.md`, `storage/object-layout.example.json`, `storage/README.md`, `.env.dev.example`, `.env.prod.example` |
+
 ## 5. Change History
 
 | Date | Change |
@@ -176,3 +179,5 @@ Status meaning:
 | 2026-04-07 | Added implementation memory decision and development journal baseline for resume-friendly handoff |
 | 2026-04-07 | Added absolute calendar schedule baseline for WBS and milestone due date tracking |
 | 2026-04-07 | Added dev and prod env template baseline decision for WBS 2.2 |
+| 2026-04-07 | Added SQL-first DB migration baseline decision for WBS 2.3 |
+| 2026-04-07 | Added private object storage baseline decision for WBS 2.4 |
