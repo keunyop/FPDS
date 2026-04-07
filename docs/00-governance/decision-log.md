@@ -1,8 +1,8 @@
-﻿# FPDS Decision Log
+# FPDS Decision Log
 
-Version: 1.0  
-Date: 2026-03-29  
-Status: Active  
+Version: 1.0
+Date: 2026-03-29
+Status: Active
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -138,6 +138,8 @@ Status meaning:
 | D-069 | 2026-04-06 | Decided | Sprint 0 Ready Board | Sprint 0는 active execution report가 아니라 `Gate A Pass` 이후 즉시 참조할 ready board로 관리하고, foundation minimum과 source ingestion core를 우선순위화한다. | 조기 구현 리스크를 막으면서도 Gate A 통과 직후 실행 순서를 명확히 해 single-developer 흐름을 부드럽게 유지하기 위해 | build-start governance, sprint planning, foundation sequencing, prototype execution order | `docs/01-planning/sprint-0-board.md` |
 | D-070 | 2026-04-06 | Superseded | Gate A Review Outcome | `2026-04-06` initial Gate A review 결과는 `Deferred`로 기록되었다. 설계 패키지와 Build Start Sign-off Package는 준비되었지만, 당시에는 `Product Owner explicit approval`이 아직 기록되지 않았다. | first review 시점의 상태를 보존하고, 후속 승인 결정과 구분하기 위해 | gate governance, build-start approval, roadmap, WBS stage transition | `docs/00-governance/gate-a-build-start-review-note.md` |
 | D-071 | 2026-04-06 | Decided | Gate A Approval | final cross-document consistency review에서 Gate A blocker가 없음을 재확인했고, Product Owner approval을 반영해 Gate A를 `Pass`로 승인한다. Foundation과 Prototype build stage는 `Next` 상태로 전환하지만, 실제 구현 시작은 별도 실행 시작 지시 전까지 보류한다. | deferred review 결과와 최종 승인 결정을 분리해 기록하고, 문서 패키지 완결성과 stage transition 상태를 현재 기준으로 고정하기 위해 | gate governance, milestone tracking, roadmap, WBS stage transition | `docs/00-governance/gate-a-build-start-review-note.md`, `docs/00-governance/milestone-tracker.md`, `docs/01-planning/WBS.md` |
+| D-072 | 2026-04-07 | Decided | Harness Engineering | repository harness baseline은 `AGENTS.md`, staged-only pre-commit, report-only cleanup audit, and repository-wide CI checks로 시작한다. product implementation은 이 harness work로 자동 시작되지 않는다. | WBS 2와 WBS 3 착수 전에 workflow guardrail, 문서 정합성 점검, 조용한 성공/실패 시 알림 규칙을 먼저 고정하기 위해 | engineering workflow, hooks, CI, documentation, build-start discipline | `docs/00-governance/harness-engineering-baseline.md` |
+| D-073 | 2026-04-07 | Decided | Implementation Memory | 의미 있는 구현 slice가 끝날 때마다 다음 Codex 세션이 코드 전체를 다시 읽지 않고 이어갈 수 있도록 development journal entry를 남긴다. entry는 goal, outcome, key files, decisions, verification, next step을 포함한다. | chat history 의존도를 줄이고 repo 문서만으로 재진입과 handoff가 가능하게 만들기 위해 | engineering workflow, documentation, handoff, resume efficiency | `docs/00-governance/development-journal.md`, `docs/00-governance/harness-engineering-baseline.md` |
 
 ---
 
@@ -168,3 +170,5 @@ Status meaning:
 | 2026-04-06 | Added prototype acceptance, spike scope, and Sprint 0 ready board baselines and closed WBS 1.8.3~1.8.5 |
 | 2026-04-06 | Added Gate A build-start review outcome and closed WBS 1.8.6 review task |
 | 2026-04-06 | Superseded the initial Deferred Gate A result and recorded final Gate A Pass approval |
+| 2026-04-07 | Added harness engineering baseline decision for staged-only pre-commit, report-only cleanup audit, and CI checks |
+| 2026-04-07 | Added implementation memory decision and development journal baseline for resume-friendly handoff |

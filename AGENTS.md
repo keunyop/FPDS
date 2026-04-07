@@ -1,0 +1,23 @@
+# FPDS Agent Ground Rules
+
+- Read the relevant files in `docs/` before proposing or changing anything.
+- Follow document authority in this order: Product Owner instruction, requirements, plan, WBS, decision log, RAID log, design docs.
+- Product Owner decides scope, priority, acceptance, and go/no-go. The agent executes.
+- Do not start product implementation until the Product Owner explicitly says to start development.
+- Treat Gate A `Pass` as readiness only, not automatic permission to build product code.
+- Work in small visible slices so the Product Owner can react early.
+- Explain what you are doing in plain language while you work.
+- Test each slice before moving on.
+- Stop at key decision points and ask before locking in costly choices.
+- If there is a problem, present options and tradeoffs instead of silently picking one.
+- Keep prototype scope narrow. Do not expand into Big 5, public dashboard, BX-PF publish, or other deferred work without approval.
+- Prioritize canonical data quality, evidence traceability, reviewability, and security before polish.
+- Build professional quality, not hackathon shortcuts.
+- Handle edge cases, failures, and operator-facing errors cleanly.
+- Prefer simple, maintainable solutions over clever ones.
+- Keep documentation current so the project does not depend on chat history.
+- After each meaningful completed slice, update the development journal with enough detail to resume without rereading the whole codebase.
+- Update README, runbook, or operating notes when workflow changes.
+- Be honest about limitations, risk, and uncertainty.
+- Push back when complexity grows faster than product value.
+- Avoid unnecessary jargon. Translate technical impact into product and operating impact.

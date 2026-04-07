@@ -1,7 +1,7 @@
-﻿# FPDS Docs Map
+# FPDS Docs Map
 
-Version: 1.0  
-Date: 2026-04-06  
+Version: 1.0
+Date: 2026-04-06
 Status: Active Navigation Index
 
 ---
@@ -37,6 +37,8 @@ Status: Active Navigation Index
 - `milestone-tracker.md`
 - `gate-a-build-start-review-note.md`
 - `codex-internet-domain-allowlist.md`
+- `harness-engineering-baseline.md`
+- `development-journal.md`
 
 ### 2.2 `docs/01-planning`
 

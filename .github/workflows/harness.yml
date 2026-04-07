@@ -1,0 +1,33 @@
+name: Harness Checks
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Repo Doctor
+        shell: pwsh
+        run: ./scripts/harness/repo-doctor.ps1
+
+      - name: Project Checks
+        shell: pwsh
+        run: ./scripts/harness/invoke-project-checks.ps1
+
+      - name: Cleanup Audit
+        if: always()
+        shell: pwsh
+        run: ./scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md
+
+      - name: Upload Cleanup Audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-cleanup-audit
+          path: harness-cleanup-audit.md
