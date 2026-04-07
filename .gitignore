@@ -1,1 +1,5 @@
 harness-cleanup-audit.md
+.env
+.env.*
+!.env.example
+!.env.*.example

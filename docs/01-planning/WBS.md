@@ -1,7 +1,7 @@
-﻿# FPDS Detailed WBS
+# FPDS Detailed WBS
 
-Version: 1.0  
-Date: 2026-03-29  
+Version: 1.0
+Date: 2026-03-29
 Based on:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -64,6 +64,17 @@ Based on:
 | DevOps / Security | 환경, secret, 배포, 모니터링, 보안 baseline |
 | QA / Reviewer | acceptance, regression, 운영 시나리오 검증 |
 | Domain Reviewer | 금융상품 taxonomy, field 해석, 품질 검증 |
+
+### 3.3 Due Date Rules
+
+- WBS task due date는 공식 실행 시작일 `2026-04-07` 기준 절대 날짜로 관리한다.
+- `0.x`, `1.x`는 이미 완료된 문서 단계이므로 status와 산출물 기준을 유지하고, 절대 due date는 향후 구현 task인 `2.x`~`7.x`에 우선 적용한다.
+- `2026-05-04` 이전 due date는 Phase 1 개발성 작업 완료를 목표로 둔다.
+- `2026-05-05` 이후 due date는 QA, hardening, release evidence처럼 테스트/검증 성격이 포함된 작업에 우선 배치한다.
+- `7.x`는 `2026-07-31` Phase 2 종료 목표를 기준으로 역산한다.
+- task due date는 가능한 한 working day 기준으로 잡고, weekend due date는 피한다.
+- 현실적 일정안은 late-stage 과밀을 줄이기 위해 dependency가 허용하는 독립 작업을 앞당겨 병렬 배치한다.
+- 이 due date는 focused execution과 selective Codex parallelization을 전제로 하며, scope change가 발생하면 함께 재산정한다.
 
 ---
 
@@ -205,116 +216,116 @@ Based on:
 
 ## WBS 2. Foundation Setup
 
-> 상태: `Next`  
+> 상태: `Next`
 > 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수 가능
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 2.1 | Next | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A |
-| 2.2 | Next | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 |
-| 2.3 | Next | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 |
-| 2.4 | Next | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 |
-| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 |
-| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 |
-| 2.7 | Next | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 |
-| 2.8 | Next | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 |
-| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 |
-| 2.10 | Next | CI/CD 기본 파이프라인 준비 | lint/typecheck/build/test baseline | DevOps | 2.1 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 2.1 | Completed | repo 구조 생성 | app/api/worker/shared/docs 구조 | Tech Lead | Gate A | 2026-04-07 |
+| 2.2 | Completed | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 | 2026-04-09 |
+| 2.3 | Next | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 | 2026-04-10 |
+| 2.4 | Next | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 | 2026-04-10 |
+| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-15 |
+| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-17 |
+| 2.7 | Next | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 | 2026-04-13 |
+| 2.8 | Next | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 | 2026-04-14 |
+| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 | 2026-04-16 |
+| 2.10 | Next | CI/CD 기본 파이프라인 준비 | lint/typecheck/build/test baseline | DevOps | 2.1 | 2026-04-13 |
 
 ## WBS 3. Prototype Build - TD Savings
 
-> 상태: `Next`  
+> 상태: `Next`
 > 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 |
-| 3.2 | Next | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 |
-| 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 |
-| 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 |
-| 3.5 | Next | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 |
-| 3.6 | Next | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 |
-| 3.7 | Next | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 |
-| 3.8 | Next | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 |
-| 3.9 | Next | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 |
-| 3.10 | Next | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-14 |
+| 3.2 | Next | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 | 2026-04-16 |
+| 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 | 2026-04-20 |
+| 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 | 2026-04-21 |
+| 3.5 | Next | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 | 2026-04-22 |
+| 3.6 | Next | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 | 2026-04-23 |
+| 3.7 | Next | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 | 2026-04-24 |
+| 3.8 | Next | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 | 2026-04-27 |
+| 3.9 | Next | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 | 2026-04-28 |
+| 3.10 | Next | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 | 2026-04-29 |
 
 ## WBS 4. Admin and Ops Core
 
-> 상태: `Blocked`  
+> 상태: `Blocked`
 > 조건: Prototype 성공 후 착수
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 4.1 | Blocked | admin login 구현 | 보호된 admin 진입 | Backend, Frontend | 2.5 |
-| 4.2 | Blocked | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 |
-| 4.3 | Blocked | review decision flow 구현 | approve/reject/edit approve | Backend | 4.2 |
-| 4.4 | Blocked | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 |
-| 4.5 | Blocked | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 |
-| 4.6 | Blocked | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 |
-| 4.7 | Blocked | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 |
-| 4.8 | Blocked | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 |
-| 4.9 | Blocked | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 |
-| 4.10 | Blocked | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 4.1 | Blocked | admin login 구현 | 보호된 admin 진입 | Backend, Frontend | 2.5 | 2026-04-21 |
+| 4.2 | Blocked | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 | 2026-04-24 |
+| 4.3 | Blocked | review decision flow 구현 | approve/reject/edit approve | Backend | 4.2 | 2026-04-27 |
+| 4.4 | Blocked | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 | 2026-04-28 |
+| 4.5 | Blocked | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |
+| 4.6 | Blocked | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 | 2026-04-29 |
+| 4.7 | Blocked | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 | 2026-04-29 |
+| 4.8 | Blocked | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
+| 4.9 | Blocked | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
+| 4.10 | Blocked | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5 | 2026-05-06 |
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 
-> 상태: `Blocked`  
+> 상태: `Blocked`
 > 조건: Prototype 성공 + Admin/Ops Core 안정화 후 착수
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 5.1 | Blocked | Big 5 source registry 완성 | RBC/TD/BMO/Scotiabank/CIBC source 목록 | AI/Data | 1.1.2 |
-| 5.2 | Blocked | Chequing parser 확장 | product type coverage | AI/Data | 5.1 |
-| 5.3 | Blocked | Savings parser 확장 | product type coverage | AI/Data | 5.1 |
-| 5.4 | Blocked | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 |
-| 5.5 | Blocked | per-bank normalization rule 보강 | bank별 예외 처리 | Backend, AI/Data | 5.2, 5.3, 5.4 |
-| 5.6 | Blocked | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 |
-| 5.7 | Blocked | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 |
-| 5.8 | Blocked | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 |
-| 5.9 | Blocked | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 |
-| 5.10 | Blocked | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 |
-| 5.11 | Blocked | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 |
-| 5.12 | Blocked | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 |
-| 5.13 | Blocked | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 |
-| 5.14 | Blocked | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 5.1 | Blocked | Big 5 source registry 완성 | RBC/TD/BMO/Scotiabank/CIBC source 목록 | AI/Data | 1.1.2 | 2026-04-17 |
+| 5.2 | Blocked | Chequing parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
+| 5.3 | Blocked | Savings parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
+| 5.4 | Blocked | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-27 |
+| 5.5 | Blocked | per-bank normalization rule 보강 | bank별 예외 처리 | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-04-30 |
+| 5.6 | Blocked | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 | 2026-04-22 |
+| 5.7 | Blocked | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
+| 5.8 | Blocked | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
+| 5.9 | Blocked | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
+| 5.10 | Blocked | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
+| 5.11 | Blocked | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 | 2026-05-04 |
+| 5.12 | Blocked | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |
+| 5.13 | Blocked | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |
+| 5.14 | Blocked | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 | 2026-05-07 |
 
 ## WBS 6. BX-PF Publish Readiness and Release Hardening
 
-> 상태: `Blocked`  
+> 상태: `Blocked`
 > 조건: Phase 1 핵심 기능 안정화 후 착수
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 6.1 | Blocked | BX-PF connector 구현 | interface-first connector | Backend | 1.5.4 |
-| 6.2 | Blocked | approved product publish flow 구현 | approve 후 publish queue 연결 | Backend | 6.1, 4.3 |
-| 6.3 | Blocked | pending/retry/reconciliation 구현 | 실패 복구 및 상태 추적 | Backend | 6.2 |
-| 6.4 | Blocked | publish monitor UI 구현 | admin publish status 화면 | Frontend | 6.3 |
-| 6.5 | Blocked | 보안 하드닝 검증 | authz, CORS, CSRF, SSRF, headers 점검 | Security, QA | 5.14 |
-| 6.6 | Blocked | 운영 runbook 작성 | 장애 대응/재처리/권한 운영 문서 | Tech Lead, DevOps | 6.3 |
-| 6.7 | Blocked | release checklist 작성 | Phase 1 release checklist | QA, Product Owner | 6.5, 6.6 |
-| 6.8 | Blocked | acceptance evidence pack 준비 | 데모 자료, 테스트 결과, 운영 체크 | QA | 6.7 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 6.1 | Blocked | BX-PF connector 구현 | interface-first connector | Backend | 1.5.4 | 2026-04-23 |
+| 6.2 | Blocked | approved product publish flow 구현 | approve 후 publish queue 연결 | Backend | 6.1, 4.3 | 2026-05-04 |
+| 6.3 | Blocked | pending/retry/reconciliation 구현 | 실패 복구 및 상태 추적 | Backend | 6.2 | 2026-05-04 |
+| 6.4 | Blocked | publish monitor UI 구현 | admin publish status 화면 | Frontend | 6.3 | 2026-05-04 |
+| 6.5 | Blocked | 보안 하드닝 검증 | authz, CORS, CSRF, SSRF, headers 점검 | Security, QA | 5.14 | 2026-05-08 |
+| 6.6 | Blocked | 운영 runbook 작성 | 장애 대응/재처리/권한 운영 문서 | Tech Lead, DevOps | 6.3 | 2026-05-08 |
+| 6.7 | Blocked | release checklist 작성 | Phase 1 release checklist | QA, Product Owner | 6.5, 6.6 | 2026-05-11 |
+| 6.8 | Blocked | acceptance evidence pack 준비 | 데모 자료, 테스트 결과, 운영 체크 | QA | 6.7 | 2026-05-12 |
 
 ## WBS 7. Phase 2 Japan Expansion and External API
 
 > 상태: `Later`
 
-| WBS ID | Status | Task | Key Output | Owner | Dependency |
-|---|---|---|---|---|---|
-| 7.1 | Later | Japan Big 5 최종 대상 확정 | 기관 목록과 source inventory | Product Owner, Domain Reviewer | 1.2.7 |
-| 7.2 | Later | Japanese source parsing 설계/구현 | locale-aware parser | AI/Data | 7.1 |
-| 7.3 | Later | 일본 taxonomy 매핑 | locale subtype mapping | Domain Reviewer, Backend | 7.2 |
-| 7.4 | Later | external API auth 구현 | tenant/client auth | Backend, Security | 1.6.3 |
-| 7.5 | Later | external search/detail/change API 구현 | `/api/v1/products`, `/changes` 등 | Backend | 1.5.5 |
-| 7.6 | Later | API rate limit/SLA 운영체계 구현 | usage policy enforcement | Backend, DevOps | 7.4 |
-| 7.7 | Later | API docs 작성 | EN/JA 우선 문서 | Backend, Product Owner | 7.5 |
-| 7.8 | Later | API monitoring/audit separation 구현 | tenant별 usage/error 추적 | DevOps, Backend | 7.5 |
+| WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
+|---|---|---|---|---|---|---|
+| 7.1 | Later | Japan Big 5 최종 대상 확정 | 기관 목록과 source inventory | Product Owner, Domain Reviewer | 1.2.7 | 2026-05-15 |
+| 7.2 | Later | Japanese source parsing 설계/구현 | locale-aware parser | AI/Data | 7.1 | 2026-06-05 |
+| 7.3 | Later | 일본 taxonomy 매핑 | locale subtype mapping | Domain Reviewer, Backend | 7.2 | 2026-06-12 |
+| 7.4 | Later | external API auth 구현 | tenant/client auth | Backend, Security | 1.6.3 | 2026-06-19 |
+| 7.5 | Later | external search/detail/change API 구현 | `/api/v1/products`, `/changes` 등 | Backend | 1.5.5 | 2026-07-03 |
+| 7.6 | Later | API rate limit/SLA 운영체계 구현 | usage policy enforcement | Backend, DevOps | 7.4 | 2026-07-10 |
+| 7.7 | Later | API docs 작성 | EN/JA 우선 문서 | Backend, Product Owner | 7.5 | 2026-07-17 |
+| 7.8 | Later | API monitoring/audit separation 구현 | tenant별 usage/error 추적 | DevOps, Backend | 7.5 | 2026-07-24 |
 
 ---
 
 ## 6. Immediate Action Backlog
 
-아래 항목은 **지금 바로 진행 가능한 실제 업무 목록**입니다.  
+아래 항목은 **지금 바로 진행 가능한 실제 업무 목록**입니다.
 단, 이 단계는 설계/계획 작업이며 구현 작업이 아닙니다.
 
 | Priority | Task | Expected Result |

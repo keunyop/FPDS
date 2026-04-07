@@ -6,6 +6,7 @@ Current status:
 - Gate A is `Pass`.
 - Product implementation is still on hold until the Product Owner explicitly starts development.
 - Harness engineering is installed so we can begin WBS 2 and WBS 3 on cleaner rails when you say go.
+- WBS `2.2` env templates are now tracked as placeholder-only docs and example files.
 
 ## Start Here
 
@@ -41,6 +42,18 @@ Optional future project-wide checks:
 powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-project-checks.ps1
 ```
 
+## Environment Templates
+
+- Environment source of truth: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
+- Example files: `.env.dev.example`, `.env.prod.example`
+- Shared config landing zone: [shared/config/README.md](shared/config/README.md)
+
+Rules:
+- Only placeholder values are committed.
+- Real secrets and exact production origins stay out of git.
+- `dev` is the only local development environment shape for now.
+- Real BX-PF credentials and write-back are `prod` only.
+
 ## What The Harness Does
 
 - `pre-commit` only inspects staged files.
@@ -53,6 +66,10 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invo
 
 ## Current Top-Level Layout
 
+- `app/` browser-facing surfaces for public, admin, and prototype viewer
+- `api/` public, admin, and internal API boundaries
+- `worker/` private discovery, pipeline, publish, and runtime workers
+- `shared/` cross-surface contracts, domain, config, i18n, observability, and security modules
 - `docs/` project requirements, governance, planning, and design
 - `scripts/harness/` hook, audit, and verification scripts
 - `.githooks/` Git hook entrypoints

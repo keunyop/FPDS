@@ -1,8 +1,8 @@
-﻿# FPDS Milestone Tracker
+# FPDS Milestone Tracker
 
-Version: 1.0  
-Date: 2026-03-29  
-Status: Active  
+Version: 1.0
+Date: 2026-03-29
+Status: Active
 Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/00-governance/roadmap.md`
@@ -18,7 +18,7 @@ Source Documents:
 
 목적:
 - WBS와 roadmap의 주요 마일스톤을 한 장에서 추적한다.
-- 현재 단계에서 절대 날짜가 아니라 상대 주차 기준으로도 일정 통제가 가능하게 한다.
+- 공식 실행 캘린더 기준으로 절대 due date를 관리한다.
 - 각 milestone마다 owner, exit criteria, evidence, next review를 명확히 둔다.
 - gate review와 milestone review가 같은 기준을 사용하게 한다.
 
@@ -27,12 +27,14 @@ Source Documents:
 ## 2. Tracking Rules
 
 1. milestone 기준 문서는 `docs/00-governance/roadmap.md`와 `docs/01-planning/WBS.md`다.
-2. 현재는 공식 build start date가 확정되지 않았으므로 due date는 `relative week` 기준으로 관리한다.
-3. 절대 날짜는 Gate A 직전 또는 Product Owner가 개발 시작일을 확정하는 시점에 추가한다.
-4. milestone 상태는 `Not Started`, `In Progress`, `At Risk`, `Done`으로 관리한다.
-5. milestone이 `At Risk`가 되면 RAID log와 함께 본다.
-6. gate가 필요한 milestone은 gate note가 evidence에 포함되어야 한다.
-7. 매 milestone 갱신 시 roadmap 진행률과 WBS 상태를 함께 점검한다.
+2. 공식 실행 시작일은 `2026-04-07`로 둔다.
+3. Phase 1 development complete target은 `2026-05-04`다.
+4. Phase 1 testing window는 `2026-05-05`부터 시작한다.
+5. Phase 2의 모든 개발 및 테스트 종료 목표는 `2026-07-31`이다.
+6. milestone 상태는 `Not Started`, `In Progress`, `At Risk`, `Done`으로 관리한다.
+7. milestone이 `At Risk`가 되면 RAID log와 함께 본다.
+8. gate가 필요한 milestone은 gate note가 evidence에 포함되어야 한다.
+9. 매 milestone 갱신 시 roadmap 진행률과 WBS 상태를 함께 점검한다.
 
 ---
 
@@ -40,10 +42,13 @@ Source Documents:
 
 현재 문서 단계의 due date 해석:
 
-- `Target Week`는 공식 프로젝트 시계 기준 상대 주차다.
-- `Week 0`은 Product Owner가 승인한 공식 실행 시작 주다.
-- Gate A `Pass` 이후에도 공식 build start date는 아직 절대 날짜로 고정하지 않았으므로 상대 주차 기준을 유지한다.
-- 절대 날짜 칼럼은 비워두거나 `TBD`로 두고, 공식 시작일 확정 후 채운다.
+- 기준 실행 시작일은 `2026-04-07`이다.
+- due date는 기본적으로 `calendar due`를 사용한다.
+- `Target Week`는 실행 시작일 기준 상대 주차를 참고용으로 함께 유지한다.
+- Phase 1 개발성 작업은 가능한 한 `2026-05-04` 이전에 끝나도록 배치한다.
+- 테스트, QA, hardening, acceptance evidence 성격의 작업은 `2026-05-05` 이후 일정으로 둔다.
+- Phase 2는 `2026-07-31` 최종 acceptance를 목표로 역산한다.
+- milestone due date도 가능한 한 working day 기준으로 둔다.
 
 ---
 
@@ -51,15 +56,15 @@ Source Documents:
 
 | Milestone | Stage | Status | Owner | Target Week | Calendar Due | Gate | Key Exit Criteria | Evidence Required |
 |---|---|---|---|---|---|---|---|---|
-| M0 | Detailed Design Closure | Done | Product Owner, Tech Lead | Week 3 | TBD | Gate A | open gate blockers closed, core design package ready | gate review note, updated WBS, updated roadmap |
-| M1 | Foundation Setup Complete | Not Started | Tech Lead | Week 5 | TBD | - | repo/app/db/auth/i18n/ops baseline ready | foundation checklist, environment notes |
-| M2 | Prototype Acceptance | Not Started | Tech Lead, QA | Week 8 | TBD | Gate B | TD Savings end-to-end feasibility proven | prototype demo, findings memo, evidence pack |
-| M3 | Admin/Ops Core Complete | Not Started | Product Owner, Tech Lead | Week 11 | TBD | Gate C | internal review/trace/run/usage workflows operational | admin demo, QA summary |
-| M4 | Canada Public Experience Complete | Not Started | Product Owner, Frontend, Backend | Week 15 | TBD | - | Big 5 public catalog and dashboard usable | public demo, metric validation note |
-| M5 | Phase 1 Release Readiness | Not Started | Product Owner | Week 18 | TBD | Gate D | publish, security, runbook, release evidence ready | release checklist, acceptance pack |
-| M6 | Japan Expansion Setup Complete | Not Started | Product Owner, Tech Lead | Week 22 | TBD | - | Japan source/taxonomy/parsing base ready | Japan scope memo, schema/taxonomy note |
-| M7 | External API Delivery Complete | Not Started | Product Owner, Backend | Week 26 | TBD | - | external API v1 usable with auth/docs/monitoring | API docs, monitoring note, demo |
-| M8 | Phase 2 Acceptance | Not Started | Product Owner | Week 28 | TBD | - | Japan + API scope accepted | acceptance evidence pack |
+| M0 | Detailed Design Closure | Done | Product Owner, Tech Lead | Week 0 | 2026-04-06 | Gate A | open gate blockers closed, core design package ready | gate review note, updated WBS, updated roadmap |
+| M1 | Foundation Setup Complete | In Progress | Tech Lead | Week 2 | 2026-04-17 | - | repo/app/db/auth/i18n/ops baseline ready | foundation checklist, environment notes |
+| M2 | Prototype Acceptance | Not Started | Tech Lead, QA | Week 4 | 2026-04-29 | Gate B | TD Savings end-to-end feasibility proven | prototype demo, findings memo, evidence pack |
+| M3 | Admin/Ops Core Complete | Not Started | Product Owner, Tech Lead | Week 4 | 2026-05-04 | Gate C | internal review/trace/run/usage workflows operational | admin demo, QA summary |
+| M4 | Canada Public Experience Complete | Not Started | Product Owner, Frontend, Backend | Week 4 | 2026-05-04 | - | Big 5 public catalog and dashboard usable | public demo, metric validation note |
+| M5 | Phase 1 Release Readiness | Not Started | Product Owner | Week 6 | 2026-05-12 | Gate D | publish, security, runbook, release evidence ready | release checklist, acceptance pack |
+| M6 | Japan Expansion Setup Complete | Not Started | Product Owner, Tech Lead | Week 9 | 2026-06-12 | - | Japan source/taxonomy/parsing base ready | Japan scope memo, schema/taxonomy note |
+| M7 | External API Delivery Complete | Not Started | Product Owner, Backend | Week 15 | 2026-07-24 | - | external API v1 usable with auth/docs/monitoring | API docs, monitoring note, demo |
+| M8 | Phase 2 Acceptance | Not Started | Product Owner | Week 16 | 2026-07-31 | - | Japan + API scope accepted | acceptance evidence pack |
 
 ---
 
@@ -135,3 +140,4 @@ Escalation Needed:
 |---|---|
 | 2026-03-29 | Initial milestone tracker created |
 | 2026-04-06 | Updated M0 to Done after Gate A Pass approval |
+| 2026-04-07 | Switched from relative-only planning to absolute calendar due dates anchored to the approved execution start date |

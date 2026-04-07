@@ -81,6 +81,7 @@ Status: Active Navigation Index
 - `retrieval-vector-starting-point.md`
 - `aggregate-cache-refresh-strategy.md`
 - `environment-separation-strategy.md`
+- `dev-prod-environment-spec.md`
 - `api-interface-contracts.md`
 - `security-access-control-design.md`
 - `product-grid-information-architecture.md`

@@ -7,7 +7,6 @@ Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
 - `docs/01-planning/WBS.md`
-
 ---
 
 ## 1. Purpose
@@ -140,6 +139,9 @@ Status meaning:
 | D-071 | 2026-04-06 | Decided | Gate A Approval | final cross-document consistency review에서 Gate A blocker가 없음을 재확인했고, Product Owner approval을 반영해 Gate A를 `Pass`로 승인한다. Foundation과 Prototype build stage는 `Next` 상태로 전환하지만, 실제 구현 시작은 별도 실행 시작 지시 전까지 보류한다. | deferred review 결과와 최종 승인 결정을 분리해 기록하고, 문서 패키지 완결성과 stage transition 상태를 현재 기준으로 고정하기 위해 | gate governance, milestone tracking, roadmap, WBS stage transition | `docs/00-governance/gate-a-build-start-review-note.md`, `docs/00-governance/milestone-tracker.md`, `docs/01-planning/WBS.md` |
 | D-072 | 2026-04-07 | Decided | Harness Engineering | repository harness baseline은 `AGENTS.md`, staged-only pre-commit, report-only cleanup audit, and repository-wide CI checks로 시작한다. product implementation은 이 harness work로 자동 시작되지 않는다. | WBS 2와 WBS 3 착수 전에 workflow guardrail, 문서 정합성 점검, 조용한 성공/실패 시 알림 규칙을 먼저 고정하기 위해 | engineering workflow, hooks, CI, documentation, build-start discipline | `docs/00-governance/harness-engineering-baseline.md` |
 | D-073 | 2026-04-07 | Decided | Implementation Memory | 의미 있는 구현 slice가 끝날 때마다 다음 Codex 세션이 코드 전체를 다시 읽지 않고 이어갈 수 있도록 development journal entry를 남긴다. entry는 goal, outcome, key files, decisions, verification, next step을 포함한다. | chat history 의존도를 줄이고 repo 문서만으로 재진입과 handoff가 가능하게 만들기 위해 | engineering workflow, documentation, handoff, resume efficiency | `docs/00-governance/development-journal.md`, `docs/00-governance/harness-engineering-baseline.md` |
+| D-074 | 2026-04-07 | Decided | Calendar Schedule Baseline | 공식 실행 캘린더는 `2026-04-07`을 시작점으로 두고, `Phase 1 development complete = 2026-05-04`, `Phase 1 testing start = 2026-05-05`, `Phase 2 all development and testing complete = 2026-07-31`로 고정한다. WBS task due date와 milestone calendar due는 이 기준으로 갱신한다. | relative week 기반 계획을 실제 실행 달력으로 전환하고, 향후 task due date와 milestone due date를 같은 절대 일정 기준으로 관리하기 위해 | WBS scheduling, milestone tracking, roadmap, delivery governance | `docs/01-planning/WBS.md`, `docs/00-governance/milestone-tracker.md`, `docs/00-governance/roadmap.md` |
+
+| D-075 | 2026-04-07 | Decided | Dev and Prod Env Template Baseline | WBS `2.2` baseline uses tracked placeholder-only example files `.env.dev.example` and `.env.prod.example` plus a repo-level env spec. `dev` remains the only local development environment shape, and real BX-PF credentials and write-back are `prod` only. | environment separation was already approved at the design level, but follow-on foundation work needs a concrete minimum config contract for DB, storage, origins, session security, crawler policy, monitoring, LLM, and BX-PF without committing secrets or locking the runtime to one framework too early. | env config, secret handling, local bootstrap, WBS 2.2, future scaffolds | `docs/03-design/dev-prod-environment-spec.md`, `.env.dev.example`, `.env.prod.example`, `shared/config/README.md` |
 
 ---
 
@@ -172,3 +174,5 @@ Status meaning:
 | 2026-04-06 | Superseded the initial Deferred Gate A result and recorded final Gate A Pass approval |
 | 2026-04-07 | Added harness engineering baseline decision for staged-only pre-commit, report-only cleanup audit, and CI checks |
 | 2026-04-07 | Added implementation memory decision and development journal baseline for resume-friendly handoff |
+| 2026-04-07 | Added absolute calendar schedule baseline for WBS and milestone due date tracking |
+| 2026-04-07 | Added dev and prod env template baseline decision for WBS 2.2 |
