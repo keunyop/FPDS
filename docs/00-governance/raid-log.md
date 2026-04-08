@@ -1,8 +1,8 @@
-﻿# FPDS RAID Log
+# FPDS RAID Log
 
-Version: 1.0  
-Date: 2026-03-29  
-Status: Active  
+Version: 1.0
+Date: 2026-03-29
+Status: Active
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -64,7 +64,7 @@ Source Documents:
 |---|---|---|---|---|---|---|
 | A-001 | High | Monitoring | TD Savings는 Prototype용 source로 충분한 구조와 증빙을 제공한다. | `docs/01-planning/td-savings-source-inventory.md`에서 public HTML/PDF source set은 확인되었고, parser feasibility는 spike로 계속 검증한다. | AI/Data | PRD 4.1, 18.1 / Plan 8, 14 / `docs/01-planning/td-savings-source-inventory.md` |
 | A-002 | High | Open | Canada Big 5 deposit products는 현재 범위에서 현실적인 Phase 1 커버리지다. | source availability와 parsing 난이도 확인 | Product Owner, AI/Data | PRD 4.1, 18.2 |
-| A-003 | Medium | Open | Next.js + Postgres + Supabase Auth + S3 계열 구성이 Phase 1 속도와 운영성에 적합하다. | architecture workshop에서 재확인 | Tech Lead | PRD 15.2 |
+| A-003 | Medium | Closed | Runtime baseline is now fixed as `Next.js App Router + FastAPI + separate Python worker + server-side session auth + Postgres + S3-compatible storage`, with `pnpm` for frontend and `uv` for Python runtime management. | Closed by Product Owner runtime-stack decision and `D-085`. Remaining work is setup and verification, not architecture selection. | Product Owner, Tech Lead | `docs/00-governance/decision-log.md`, `docs/00-governance/pre-development-owner-preparation-guide.md` |
 | A-004 | Medium | Closed | pgvector를 초기 retrieval starting point로 써도 Phase 1 요구 수준에는 충분하다. | `docs/03-design/retrieval-vector-starting-point.md`에서 Phase 1 baseline으로 확정되었다. | Tech Lead, AI/Data | PRD 15.2, 22 / `docs/03-design/retrieval-vector-starting-point.md` |
 | A-005 | High | Open | BX-PF는 approved normalized product master의 target store 역할을 계속 유지한다. | BX-PF 계약/환경 확인 | Product Owner, Tech Lead | PRD 6, 16.1 |
 | A-006 | Medium | Monitoring | Public/Admin UI의 EN/KO/JA 3개 언어 운영이 현재 팀 체계로 감당 가능하다. | localization ownership은 확정되었지만 실제 구현/운영 부하는 아직 검증 전이다. | Product Owner | PRD 1, 6, 14.6 / `docs/03-design/localization-governance-and-fallback-policy.md` |

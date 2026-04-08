@@ -198,6 +198,60 @@ Each entry should include:
 - Known issues: the route shells are documentation-first placeholders, so a future framework choice still needs to map these manifests into actual files and handlers
 - Next step: start `WBS 3.1` source discovery or `4.1` admin login implementation on top of the new auth and route scaffold
 
+## 2026-04-07 - WBS 2 Readiness Review and Owner Prep Guide
+
+- WBS: `2.x` review support
+- Status: `done`
+- Goal: review whether WBS `2` is practically ready for WBS `3`, and capture the remaining Product Owner or infrastructure preparation tasks in-repo before coding starts
+- Why now: the Product Owner asked for a full readiness review before WBS `3`, and the repo needed a single document that explains what still must be prepared outside git
+- Outcome: reviewed the foundation artifacts, identified the remaining readiness gaps around runtime choice, real dev infra, real secrets, and unexecuted DB migration, and added `docs/00-governance/pre-development-owner-preparation-guide.md` with a step-by-step owner checklist
+- Not done: no product runtime code, DB migration apply, storage provisioning, or framework selection was performed
+- Key files: `docs/00-governance/pre-development-owner-preparation-guide.md`, `docs/00-governance/development-journal.md`, `docs/README.md`
+- Decisions: did not lock a runtime stack on the Product Owner's behalf. The guide explicitly leaves framework, router, worker model, and auth strategy as owner decisions before coding starts. The preparation path is now written against hosted dev DB and hosted dev object storage instead of a local-only infra baseline
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md`
+  - passed with no findings
+- Known issues: WBS `2` contracts are largely complete, but practical start readiness still depends on user-owned infrastructure and runtime choices
+- Next step: have the Product Owner fill the preparation guide, then confirm the chosen runtime stack before any WBS `3` implementation work
+
+## 2026-04-07 - Product Code Language Baseline
+
+- WBS: `2.x` readiness support
+- Status: `done`
+- Goal: record the Product Owner's product-code language decision before runtime stack selection continues
+- Why now: the Product Owner explicitly decided the language direction and the repo needed one documented baseline before framework and runtime choices are closed
+- Outcome: fixed the product-code language baseline as `Python primary + TypeScript frontend`, updated the owner preparation guide to treat language as decided and runtime shape as still open, and recorded the decision in the decision log
+- Not done: package manager, browser framework, API runtime, worker model, and auth implementation are still undecided
+- Key files: `docs/00-governance/decision-log.md`, `docs/00-governance/pre-development-owner-preparation-guide.md`, `docs/00-governance/development-journal.md`
+- Decisions: Python is the default language for pipeline and backend-heavy product code. TypeScript remains the default language for browser-facing public and admin frontend code. This is a language baseline only, not a full runtime-stack choice
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md`
+  - passed with no findings
+- Known issues: runtime and framework choices still need to be made before implementation begins
+- Next step: choose package manager, frontend runtime, API runtime, worker model, and auth approach on top of the new language baseline
+
+## 2026-04-07 - Runtime Stack Baseline and Prep Guide Update
+
+- WBS: `2.x` readiness support
+- Status: `done`
+- Goal: lock the minimum runtime stack for WBS `3` readiness and update the owner-preparation guide so it reflects concrete setup steps instead of open architecture choices
+- Why now: the Product Owner approved the recommended runtime stack and asked for a more complete pre-development guide based on those fixed choices
+- Outcome: fixed the runtime baseline as `Next.js App Router + pnpm` for frontend, `FastAPI` as a separate API service, a separate Python worker process, `uv` for Python package/runtime management, Python API managed server-side session auth, and `dev monitoring = disabled`. Rewrote the owner-preparation guide so it now explains the full hosted-dev setup path from local tool installation through hosted Postgres, hosted S3-compatible storage, secret creation, OpenAI access, and readiness handoff
+- Not done: no runtime packages were installed by Codex, no hosted infrastructure was provisioned, and no product code was written
+- Key files: `docs/00-governance/pre-development-owner-preparation-guide.md`, `docs/00-governance/decision-log.md`, `docs/00-governance/raid-log.md`, `docs/00-governance/development-journal.md`
+- Decisions: runtime shape is no longer open for WBS `3` readiness. What remains is setup and verification only
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md`
+  - passed with no findings
+- Known issues: actual hosted dev infra, local toolchain installation, and real secrets are still user-owned preparation work
+- Next step: have the Product Owner complete the hosted-dev setup checklist and report readiness back before any WBS `3` implementation starts
+
 ---
 
 ## 7. Change History
@@ -206,7 +260,11 @@ Each entry should include:
 |---|---|
 | 2026-04-07 | Initial development journal created |
 | 2026-04-07 | Rewrote the journal in clean UTF-8 text and added the WBS 2.2 entry |
+| 2026-04-07 | Added the runtime-stack baseline entry and updated its verification results after rerunning foundation checks |
 | 2026-04-07 | Added the WBS 2.3 DB and migration baseline entry |
 | 2026-04-07 | Added the WBS 2.4 object storage and evidence bucket baseline entry |
 | 2026-04-07 | Added the combined WBS 2.7 and 2.10 monitoring and foundation CI baseline entry |
 | 2026-04-07 | Added the combined WBS 2.5, 2.6, 2.8, and 2.9 foundation scaffold entry |
+| 2026-04-07 | Added the WBS 2 readiness review and owner preparation guide entry |
+| 2026-04-07 | Added the product code language baseline entry: Python primary plus TypeScript frontend |
+| 2026-04-07 | Added the runtime stack baseline and detailed hosted-dev preparation update |

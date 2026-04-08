@@ -39,6 +39,8 @@ Status: Active Navigation Index
 - `codex-internet-domain-allowlist.md`
 - `harness-engineering-baseline.md`
 - `development-journal.md`
+- `pre-development-owner-preparation-guide.md`
+- `pre-development-owner-preparation-guide.md`
 
 ### 2.2 `docs/01-planning`
 
