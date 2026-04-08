@@ -22,6 +22,17 @@ Current status:
 - Harness baseline: [docs/00-governance/harness-engineering-baseline.md](docs/00-governance/harness-engineering-baseline.md)
 - Development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
 
+## Local Toolchain
+
+- `uv` is the Python package and runtime manager baseline.
+- `pnpm` is the frontend package manager baseline.
+- `psql` is required for Postgres migration and DB verification work.
+- `aws` CLI is available for future S3-compatible and AWS-side operator workflows.
+
+Notes:
+- On this workspace machine, `psql` was installed as PostgreSQL command-line tools only. No local Postgres server setup was intentionally locked in.
+- If a terminal does not see a newly installed tool yet, restart the terminal session so it reloads `PATH`.
+
 ## Harness Commands
 
 Install Git hooks:

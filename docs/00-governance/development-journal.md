@@ -252,6 +252,28 @@ Each entry should include:
 - Known issues: actual hosted dev infra, local toolchain installation, and real secrets are still user-owned preparation work
 - Next step: have the Product Owner complete the hosted-dev setup checklist and report readiness back before any WBS `3` implementation starts
 
+## 2026-04-08 - Local Toolchain Install Baseline
+
+- WBS: `2.x` readiness support
+- Status: `done`
+- Goal: install the approved local toolchain needed for the chosen runtime baseline so follow-on setup and verification work can run on this machine
+- Why now: the Product Owner explicitly asked for local installation of `uv`, `pnpm`, `psql`, and `aws` CLI, and `psql` had already been called out as missing in the DB baseline entry
+- Outcome: installed `uv`, `pnpm`, and `aws` CLI with `winget`. Installed PostgreSQL command-line tools so `psql` is available without intentionally locking in a local Postgres server configuration. Updated `README.md` with a short local-toolchain note
+- Not done: no hosted dev infrastructure, no local database initialization, no AWS authentication, and no project package/bootstrap commands were run
+- Key files: `README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the `psql` installation narrow by using PostgreSQL CLI tools only instead of treating a local database server as part of the repo baseline. Left real AWS credentials and DB connection setup out of scope
+- Verification:
+  - `uv --version`
+  - passed with `0.11.3`
+  - `pnpm --version`
+  - passed with `10.33.0`
+  - `aws --version`
+  - passed with `aws-cli/2.34.26`
+  - `psql --version`
+  - passed with `PostgreSQL 18.3`
+- Known issues: existing terminal sessions may need a restart before the updated `PATH` is visible without manual refresh
+- Next step: connect the new local toolchain to the hosted dev setup checklist when the Product Owner is ready
+
 ---
 
 ## 7. Change History
@@ -268,3 +290,4 @@ Each entry should include:
 | 2026-04-07 | Added the WBS 2 readiness review and owner preparation guide entry |
 | 2026-04-07 | Added the product code language baseline entry: Python primary plus TypeScript frontend |
 | 2026-04-07 | Added the runtime stack baseline and detailed hosted-dev preparation update |
+| 2026-04-08 | Added the local toolchain installation baseline entry and README note |
