@@ -1,24 +1,21 @@
-name: Harness Checks
+name: Foundation Checks
 
 on:
   pull_request:
   push:
+  workflow_dispatch:
 
 jobs:
-  harness:
+  foundation:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Repo Doctor
+      - name: Foundation Checks
         shell: pwsh
-        run: ./scripts/harness/repo-doctor.ps1
-
-      - name: Project Checks
-        shell: pwsh
-        run: ./scripts/harness/invoke-project-checks.ps1
+        run: ./scripts/harness/invoke-foundation-checks.ps1
 
       - name: Cleanup Audit
         if: always()

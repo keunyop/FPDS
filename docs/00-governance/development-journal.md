@@ -162,6 +162,24 @@ Each entry should include:
 - Known issues: actual storage provisioning and provider-side access policy work are still external tasks, and object uploads have not been validated against a live bucket
 - Next step: complete `WBS 2.7` monitoring and error tracking baseline or `WBS 3.1` source discovery depending on foundation sequencing priority
 
+## 2026-04-07 - WBS 2.7 and 2.10 Monitoring and Foundation CI Baseline
+
+- WBS: `2.7`, `2.10`
+- Status: `done`
+- Goal: add a minimum observability contract and make CI validate the foundation baseline that future runtime code will depend on
+- Why now: Sprint 0 marked monitoring and CI as P0 foundation work because prototype failures need to be diagnosable before source discovery and snapshot work start in earnest
+- Outcome: added a monitoring/error tracking baseline document, shared observability example artifacts for safe external errors and structured internal events, a foundation validation script, a single local-and-CI entrypoint, JSON syntax checks in the harness, broader package-script auto-discovery, and a documented CI baseline that keeps deployment automation deferred for now
+- Not done: no runtime SDK integration, no alert routing, no production DSN provisioning, and no deployment automation were added
+- Key files: `docs/03-design/monitoring-error-tracking-baseline.md`, `docs/00-governance/foundation-ci-cd-baseline.md`, `shared/observability/README.md`, `shared/observability/error-envelope.example.json`, `shared/observability/structured-log-event.example.json`, `scripts/harness/validate-foundation-baseline.ps1`, `scripts/harness/invoke-foundation-checks.ps1`, `.github/workflows/harness.yml`, `docs/01-planning/WBS.md`
+- Decisions: kept the observability contract provider-neutral while aligning `prod` to the existing `sentry` label. Treated `request_id`, `correlation_id`, and `run_id` as separate fields. Reused PowerShell scripts inside GitHub Actions instead of duplicating logic in YAML. Left deployment steps out of scope until real infrastructure and secrets are approved
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md`
+  - passed with no findings
+- Known issues: the repo still has no runtime package or deployment target, so conditional package checks currently skip and CI remains validation-only
+- Next step: complete `WBS 2.8` security baseline or start `WBS 3.1` source discovery using the new observability contract
+
 ---
 
 ## 7. Change History
@@ -172,3 +190,4 @@ Each entry should include:
 | 2026-04-07 | Rewrote the journal in clean UTF-8 text and added the WBS 2.2 entry |
 | 2026-04-07 | Added the WBS 2.3 DB and migration baseline entry |
 | 2026-04-07 | Added the WBS 2.4 object storage and evidence bucket baseline entry |
+| 2026-04-07 | Added the combined WBS 2.7 and 2.10 monitoring and foundation CI baseline entry |

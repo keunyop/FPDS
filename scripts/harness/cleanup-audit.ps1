@@ -18,6 +18,9 @@ foreach ($finding in Get-HarnessMissingFileFindings) {
 foreach ($finding in Get-MarkdownReferenceFindings -RelativePaths $markdownFiles) {
     $findings.Add($finding)
 }
+foreach ($finding in Get-JsonSyntaxFindings -RelativePaths (Get-JsonFilesUnderRepo)) {
+    $findings.Add($finding)
+}
 foreach ($finding in Get-TrailingWhitespaceFindings -RelativePaths $allTextFiles) {
     $findings.Add($finding)
 }

@@ -352,19 +352,61 @@ function Get-PowerShellFilesUnderRepo {
     return @($files | ForEach-Object { Get-RepoRelativePath -AbsolutePath $_.FullName })
 }
 
+function Get-JsonFilesUnderRepo {
+    $root = Get-RepoRoot
+    $files = Get-ChildItem -Path $root -Recurse -Filter *.json -File | Where-Object {
+        $_.FullName -notmatch "\\\.git\\"
+    }
+
+    return @($files | ForEach-Object { Get-RepoRelativePath -AbsolutePath $_.FullName })
+}
+
+function Get-JsonSyntaxFindings {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$RelativePaths
+    )
+
+    $findings = [System.Collections.Generic.List[object]]::new()
+
+    foreach ($relativePath in $RelativePaths) {
+        $absolutePath = Get-AbsolutePath -RelativePath $relativePath
+        if (-not (Test-Path -LiteralPath $absolutePath)) {
+            continue
+        }
+
+        try {
+            $content = [System.IO.File]::ReadAllText($absolutePath)
+            $null = $content | ConvertFrom-Json
+        }
+        catch {
+            $findings.Add((New-Finding -Severity "error" -File $relativePath -Message "Invalid JSON syntax: $($_.Exception.Message)"))
+        }
+    }
+
+    return $findings.ToArray()
+}
+
 function Get-RequiredHarnessPaths {
     return @(
         "AGENTS.md",
         "README.md",
         "docs/README.md",
         "docs/00-governance/harness-engineering-baseline.md",
+        "docs/00-governance/foundation-ci-cd-baseline.md",
+        "docs/03-design/monitoring-error-tracking-baseline.md",
         ".githooks/pre-commit",
         "scripts/harness/install-hooks.ps1",
         "scripts/harness/pre-commit.ps1",
         "scripts/harness/repo-doctor.ps1",
         "scripts/harness/cleanup-audit.ps1",
+        "scripts/harness/validate-foundation-baseline.ps1",
+        "scripts/harness/invoke-foundation-checks.ps1",
         "scripts/harness/invoke-project-checks.ps1",
-        ".github/workflows/harness.yml"
+        ".github/workflows/harness.yml",
+        "shared/observability/README.md",
+        "shared/observability/error-envelope.example.json",
+        "shared/observability/structured-log-event.example.json"
     )
 }
 

@@ -22,6 +22,11 @@ foreach ($finding in Get-PowerShellSyntaxFindings -RelativePaths $powerShellFile
     $findings.Add($finding)
 }
 
+$jsonFiles = Get-JsonFilesUnderRepo
+foreach ($finding in Get-JsonSyntaxFindings -RelativePaths $jsonFiles) {
+    $findings.Add($finding)
+}
+
 if ($findings.Count -gt 0) {
     Write-Findings -Findings $findings.ToArray()
     exit 1

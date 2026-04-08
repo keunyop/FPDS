@@ -225,12 +225,12 @@ Based on:
 | 2.2 | Completed | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 | 2026-04-09 |
 | 2.3 | Completed | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 | 2026-04-10 |
 | 2.4 | Completed | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 | 2026-04-10 |
-| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-15 |
-| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-17 |
-| 2.7 | Next | monitoring/error tracking baseline 구성 | Sentry or equivalent | DevOps | 2.1 | 2026-04-13 |
+| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-14 |
+| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-15 |
+| 2.7 | Completed | monitoring/error tracking baseline 구성 | observability contract, safe error envelope, structured log example | DevOps | 2.1 | 2026-04-13 |
 | 2.8 | Next | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 | 2026-04-14 |
-| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 | 2026-04-16 |
-| 2.10 | Next | CI/CD 기본 파이프라인 준비 | lint/typecheck/build/test baseline | DevOps | 2.1 | 2026-04-13 |
+| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 | 2026-04-15 |
+| 2.10 | Completed | CI/CD 기본 파이프라인 준비 | foundation checks workflow and future package-script baseline | DevOps | 2.1 | 2026-04-13 |
 
 ## WBS 3. Prototype Build - TD Savings
 
@@ -239,7 +239,7 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
 |---|---|---|---|---|---|---|
-| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-14 |
+| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-16 |
 | 3.2 | Next | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 | 2026-04-16 |
 | 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 | 2026-04-20 |
 | 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 | 2026-04-21 |

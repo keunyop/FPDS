@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-04-07T12:00:00Z",
+  "level": "error",
+  "environment": "dev",
+  "runtime_label": "local-dev",
+  "surface": "worker",
+  "component": "snapshot-capture",
+  "event_type": "stage_failure",
+  "request_id": "req_20260407_0001",
+  "correlation_id": "corr_20260407_0001",
+  "run_id": "run_20260407_0001",
+  "error_code": "snapshot_fetch_failed",
+  "message": "Snapshot fetch failed after the allowed retries.",
+  "safe_context": {
+    "bank_code": "TD",
+    "source_id": "TD-SAV-007",
+    "source_type": "pdf",
+    "retry_count": 2,
+    "http_status": 504
+  },
+  "monitoring": {
+    "provider": "disabled",
+    "capture": false
+  }
+}

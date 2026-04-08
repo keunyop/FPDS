@@ -7,6 +7,8 @@ Current status:
 - Product implementation is still on hold until the Product Owner explicitly starts development.
 - Harness engineering is installed so we can begin WBS 2 and WBS 3 on cleaner rails when you say go.
 - WBS `2.2` env templates are now tracked as placeholder-only docs and example files.
+- WBS `2.7` observability baseline is documented with safe error and structured event examples.
+- WBS `2.10` foundation CI now reuses the same local PowerShell checks in GitHub Actions.
 
 ## Start Here
 
@@ -28,6 +30,12 @@ Run repository health checks:
 
 ```powershell
 powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1
+```
+
+Run the full foundation baseline checks:
+
+```powershell
+powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1
 ```
 
 Run the report-only cleanup audit:
@@ -79,10 +87,18 @@ Rules:
 - `pre-commit` only inspects staged files.
 - The hook auto-fixes low-risk text hygiene issues such as trailing spaces and missing final newline.
 - The hook validates staged Markdown references and staged PowerShell syntax.
+- Foundation checks validate env examples, observability artifacts, JSON syntax, and future package scripts.
 - Success stays quiet. Failures stop the commit with a clear message.
 - Cleanup audit is `report-only` by design.
 - CI runs repository-wide checks without starting product implementation.
 - Completed implementation slices should be summarized in the development journal for future resume.
+
+## Observability Baseline
+
+- Monitoring baseline: [docs/03-design/monitoring-error-tracking-baseline.md](docs/03-design/monitoring-error-tracking-baseline.md)
+- Shared observability landing zone: [shared/observability/README.md](shared/observability/README.md)
+- `dev` keeps monitoring disabled by default.
+- `prod` is aligned to a `sentry` provider label, but the real DSN stays out of git.
 
 ## Current Top-Level Layout
 

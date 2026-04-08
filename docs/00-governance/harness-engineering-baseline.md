@@ -36,6 +36,7 @@ Source Documents:
 4. cleanup audit는 `report-only`로 시작하며 자동 삭제/자동 리팩터링을 수행하지 않는다.
 5. repository-wide 검증은 CI에서 수행한다.
 6. harness는 product code implementation을 시작하지 않는다.
+7. foundation baseline 검증은 env/observability contract와 future package-script checks를 같은 local/CI entrypoint로 묶는다.
 
 ---
 
@@ -81,6 +82,8 @@ CI는 repository-wide로 아래를 수행한다.
 - required harness file 존재 여부 확인
 - Markdown reference 검증
 - PowerShell syntax 검증
+- JSON syntax 검증
+- foundation env/observability baseline 검증
 - future package script 감지 시 `lint`, `typecheck`, `test`, `build` 실행
 - cleanup audit report 생성
 
@@ -143,15 +146,18 @@ cleanup audit는 report-only다.
 | `scripts/harness/install-hooks.ps1` | local hook install |
 | `scripts/harness/pre-commit.ps1` | staged-only hook logic |
 | `scripts/harness/repo-doctor.ps1` | repository health gate |
+| `scripts/harness/validate-foundation-baseline.ps1` | env and observability baseline validation |
+| `scripts/harness/invoke-foundation-checks.ps1` | local and CI foundation entrypoint |
 | `scripts/harness/cleanup-audit.ps1` | report-only cleanup audit |
 | `scripts/harness/invoke-project-checks.ps1` | future package-script checks |
-| `.github/workflows/harness.yml` | CI baseline |
+| `.github/workflows/harness.yml` | foundation CI baseline |
 
 ---
 
 ## 8. Operating Notes
 
 - local 시작 시 `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/install-hooks.ps1`로 hooks를 연결한다.
+- local에서 CI와 같은 수준의 baseline 검증은 `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`로 실행한다.
 - docs map은 `docs/README.md`를 기준으로 유지한다.
 - WBS 2 foundation가 시작되면 package manager와 framework가 정해지는 시점에 project checks를 강화한다.
 - cleanup audit가 실제 수정까지 하려면 Product Owner 승인을 다시 받는다.
