@@ -1,0 +1,49 @@
+{
+  "locale": "en",
+  "resource_status": "approved",
+  "domains": {
+    "public_navigation": {
+      "home": "Home",
+      "products": "Products",
+      "dashboard": "Insight Dashboard"
+    },
+    "public_filters": {
+      "bank": "Bank",
+      "product_type": "Product Type",
+      "target_customer_tag": "Target Customer",
+      "clear_filters": "Clear Filters"
+    },
+    "public_metrics": {
+      "freshness": "Freshness",
+      "recent_changes": "Recent Changes",
+      "methodology": "Methodology"
+    },
+    "admin_operations": {
+      "login": "Admin Login",
+      "overview": "Overview",
+      "reviews": "Review Queue",
+      "review_detail": "Review Detail",
+      "runs": "Runs",
+      "run_detail": "Run Detail",
+      "changes": "Change History",
+      "publish": "Publish Monitor",
+      "usage": "LLM Usage",
+      "health_dashboard": "Dashboard Health",
+      "product_record": "Product Record"
+    },
+    "shared_taxonomy": {
+      "product_type.chequing": "Chequing",
+      "product_type.savings": "Savings",
+      "product_type.gic": "GIC",
+      "review_state.queued": "Queued",
+      "review_state.approved": "Approved",
+      "review_state.rejected": "Rejected",
+      "review_state.edited": "Edited",
+      "review_state.deferred": "Deferred"
+    },
+    "system_messages": {
+      "fallback_to_en": "English fallback applied.",
+      "translation_pending": "Translation pending review."
+    }
+  }
+}

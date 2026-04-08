@@ -9,4 +9,7 @@ Planned scope:
 - dashboard rankings
 - dashboard scatter
 
-No endpoint implementation is added in WBS `2.1`.
+Current scaffold:
+- `route-manifest.json` lists the reserved anonymous read-only public routes.
+
+No endpoint implementation is added yet.

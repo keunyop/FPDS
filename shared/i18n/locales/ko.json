@@ -1,0 +1,49 @@
+{
+  "locale": "ko",
+  "resource_status": "draft",
+  "domains": {
+    "public_navigation": {
+      "home": "홈",
+      "products": "상품",
+      "dashboard": "인사이트 대시보드"
+    },
+    "public_filters": {
+      "bank": "은행",
+      "product_type": "상품 유형",
+      "target_customer_tag": "대상 고객",
+      "clear_filters": "필터 초기화"
+    },
+    "public_metrics": {
+      "freshness": "최신성",
+      "recent_changes": "최근 변경",
+      "methodology": "산출 기준"
+    },
+    "admin_operations": {
+      "login": "관리자 로그인",
+      "overview": "개요",
+      "reviews": "검토 대기열",
+      "review_detail": "검토 상세",
+      "runs": "실행 이력",
+      "run_detail": "실행 상세",
+      "changes": "변경 이력",
+      "publish": "배포 모니터",
+      "usage": "LLM 사용량",
+      "health_dashboard": "대시보드 상태",
+      "product_record": "상품 레코드"
+    },
+    "shared_taxonomy": {
+      "product_type.chequing": "당좌예금",
+      "product_type.savings": "저축예금",
+      "product_type.gic": "정기예금",
+      "review_state.queued": "대기",
+      "review_state.approved": "승인",
+      "review_state.rejected": "반려",
+      "review_state.edited": "수정 승인",
+      "review_state.deferred": "보류"
+    },
+    "system_messages": {
+      "fallback_to_en": "영문 기본값이 적용되었습니다.",
+      "translation_pending": "번역 검토가 아직 완료되지 않았습니다."
+    }
+  }
+}

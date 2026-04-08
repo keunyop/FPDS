@@ -1,0 +1,19 @@
+{
+  "policy_version": "2026-04-07",
+  "mode_env_key": "FPDS_SOURCE_FETCH_MODE",
+  "allowlist_env_key": "FPDS_SOURCE_FETCH_ALLOWLIST",
+  "block_private_networks_env_key": "FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS",
+  "rules": {
+    "allowlist_only": true,
+    "block_private_networks": true,
+    "block_loopback": true,
+    "block_link_local": true,
+    "block_metadata_endpoints": true,
+    "follow_redirects_within_allowlist_only": true,
+    "allow_arbitrary_user_supplied_urls": false
+  },
+  "seed_domains": [
+    "td.com",
+    "tdcanadatrust.com"
+  ]
+}

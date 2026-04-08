@@ -1,0 +1,60 @@
+{
+  "contract_version": "2026-04-07",
+  "auth_mode": "server-session",
+  "provider_lock_in": "none",
+  "session_cookie": {
+    "name": "fpds_admin_session",
+    "http_only": true,
+    "same_site": "Lax",
+    "secure_envs": [
+      "prod"
+    ],
+    "path": "/",
+    "domain_scope": "admin-origin-only",
+    "idle_timeout_minutes": 60,
+    "absolute_timeout_hours": 12
+  },
+  "login_surface": {
+    "route": "/admin/login",
+    "interactive_human_only": true,
+    "success_redirect": "/admin",
+    "failure_redirect": "/admin/login"
+  },
+  "csrf": {
+    "enabled": true,
+    "token_transport": "double-submit-or-equivalent",
+    "protected_methods": [
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE"
+    ],
+    "exclude_routes": [
+      "/api/admin/auth/login",
+      "/api/admin/auth/logout"
+    ]
+  },
+  "session_actor_shape": {
+    "required_fields": [
+      "user_id",
+      "email",
+      "role",
+      "display_name",
+      "issued_at",
+      "expires_at"
+    ],
+    "allowed_roles": [
+      "admin",
+      "reviewer",
+      "read_only"
+    ]
+  },
+  "environment_contract": {
+    "auth_mode_env_key": "FPDS_ADMIN_AUTH_MODE",
+    "session_secret_env_key": "FPDS_ADMIN_SESSION_SECRET",
+    "csrf_secret_env_key": "FPDS_ADMIN_CSRF_SECRET",
+    "cookie_secure_env_key": "FPDS_COOKIE_SECURE",
+    "cookie_same_site_env_key": "FPDS_COOKIE_SAMESITE",
+    "csrf_enabled_env_key": "FPDS_CSRF_PROTECTION_ENABLED"
+  }
+}

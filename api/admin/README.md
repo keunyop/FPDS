@@ -9,5 +9,10 @@ Planned scope:
 - publish
 - usage
 - dashboard health
+- auth session routes and session introspection
 
-No endpoint implementation is added in WBS `2.1`.
+Current scaffold:
+- `route-manifest.json` lists the reserved admin routes and their auth or CSRF expectations.
+- `auth/README.md` captures the login, logout, and session route baseline without locking an auth provider.
+
+No endpoint implementation is added yet.

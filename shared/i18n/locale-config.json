@@ -1,0 +1,44 @@
+{
+  "config_version": "2026-04-07",
+  "default_locale": "en",
+  "supported_locales": [
+    "en",
+    "ko",
+    "ja"
+  ],
+  "fallback_chains": {
+    "en": [
+      "en"
+    ],
+    "ko": [
+      "ko",
+      "en"
+    ],
+    "ja": [
+      "ja",
+      "en"
+    ]
+  },
+  "resource_domains": [
+    "public_navigation",
+    "public_filters",
+    "public_metrics",
+    "admin_operations",
+    "shared_taxonomy",
+    "system_messages"
+  ],
+  "non_localized_fields": [
+    "product_name",
+    "description_short",
+    "eligibility_text",
+    "fee_waiver_condition",
+    "notes",
+    "source_subtype_label",
+    "evidence_excerpt"
+  ],
+  "format_fallback_chain": [
+    "selected-locale",
+    "en-CA",
+    "machine-readable-value"
+  ]
+}

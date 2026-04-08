@@ -1,0 +1,147 @@
+{
+  "surface": "admin_api",
+  "auth_mode": "server-session",
+  "base_path": "/api/admin",
+  "routes": [
+    {
+      "route": "/api/admin/auth/login",
+      "methods": [
+        "POST"
+      ],
+      "access": "anonymous-human-login",
+      "csrf_required": false,
+      "notes": "Create an admin session."
+    },
+    {
+      "route": "/api/admin/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "csrf_required": false,
+      "notes": "Destroy the current admin session."
+    },
+    {
+      "route": "/api/admin/auth/session",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated",
+      "csrf_required": false,
+      "notes": "Return the current actor session snapshot."
+    },
+    {
+      "route": "/api/admin/review-tasks",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated",
+      "csrf_required": false
+    },
+    {
+      "route": "/api/admin/review-tasks/:reviewTaskId",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated",
+      "csrf_required": false
+    },
+    {
+      "route": "/api/admin/review-tasks/:reviewTaskId/approve",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin",
+        "reviewer"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/review-tasks/:reviewTaskId/reject",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin",
+        "reviewer"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/review-tasks/:reviewTaskId/edit-approve",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin",
+        "reviewer"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/review-tasks/:reviewTaskId/defer",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin",
+        "reviewer"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/runs",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/runs/:runId",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/change-history",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/products/:productId",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/bxpf-publish",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/llm-usage",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
+      "route": "/api/admin/dashboard-health",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    }
+  ]
+}

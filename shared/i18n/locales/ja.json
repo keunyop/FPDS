@@ -1,0 +1,49 @@
+{
+  "locale": "ja",
+  "resource_status": "draft",
+  "domains": {
+    "public_navigation": {
+      "home": "ホーム",
+      "products": "商品",
+      "dashboard": "インサイトダッシュボード"
+    },
+    "public_filters": {
+      "bank": "銀行",
+      "product_type": "商品タイプ",
+      "target_customer_tag": "対象顧客",
+      "clear_filters": "フィルター解除"
+    },
+    "public_metrics": {
+      "freshness": "鮮度",
+      "recent_changes": "最近の変更",
+      "methodology": "算出基準"
+    },
+    "admin_operations": {
+      "login": "管理者ログイン",
+      "overview": "概要",
+      "reviews": "レビューキュー",
+      "review_detail": "レビュー詳細",
+      "runs": "実行履歴",
+      "run_detail": "実行詳細",
+      "changes": "変更履歴",
+      "publish": "公開モニター",
+      "usage": "LLM利用量",
+      "health_dashboard": "ダッシュボード健全性",
+      "product_record": "商品レコード"
+    },
+    "shared_taxonomy": {
+      "product_type.chequing": "当座預金",
+      "product_type.savings": "普通預金",
+      "product_type.gic": "定期預金",
+      "review_state.queued": "待機",
+      "review_state.approved": "承認",
+      "review_state.rejected": "却下",
+      "review_state.edited": "修正承認",
+      "review_state.deferred": "保留"
+    },
+    "system_messages": {
+      "fallback_to_en": "英語のフォールバックが適用されました。",
+      "translation_pending": "翻訳レビューがまだ完了していません。"
+    }
+  }
+}

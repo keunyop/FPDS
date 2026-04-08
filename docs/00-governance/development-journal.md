@@ -180,6 +180,24 @@ Each entry should include:
 - Known issues: the repo still has no runtime package or deployment target, so conditional package checks currently skip and CI remains validation-only
 - Next step: complete `WBS 2.8` security baseline or start `WBS 3.1` source discovery using the new observability contract
 
+## 2026-04-07 - WBS 2.5, 2.6, 2.8, and 2.9 Foundation Scaffolds
+
+- WBS: `2.5`, `2.6`, `2.8`, `2.9`
+- Status: `done`
+- Goal: add the remaining auth, i18n, security, and public or admin route scaffolds without forcing a runtime framework choice too early
+- Why now: WBS `2` was blocked on these shared foundation contracts, and follow-on work like admin login, public UI, and source-driven prototype work needs a stable boundary before runtime code starts
+- Outcome: added a vendor-neutral admin auth session contract, RBAC matrix, browser security policy scaffold, safe-fetch and secret inventory manifests, EN/KO/JA locale config and starter resource files, glossary seed data, admin and public API route manifests, and app-side public or admin route manifests with per-route shell placeholders
+- Not done: no framework router, auth vendor, runtime session storage, UI components, or API handlers were implemented
+- Key files: `shared/security/auth-session.contract.json`, `shared/security/browser-security-policy.json`, `shared/security/rbac-role-matrix.json`, `shared/security/safe-fetch-policy.example.json`, `shared/security/secret-inventory.example.json`, `shared/i18n/locale-config.json`, `shared/i18n/locales/en.json`, `shared/i18n/locales/ko.json`, `shared/i18n/locales/ja.json`, `shared/i18n/glossary.seed.json`, `api/admin/route-manifest.json`, `api/public/route-manifest.json`, `app/admin/routes.manifest.json`, `app/public/routes.manifest.json`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: kept the scaffold vendor-neutral so the repo still does not lock `Next.js`, `Express`, `Supabase Auth`, or another runtime choice prematurely. Treated `en` as the approved fallback root and left `ko` and `ja` resources in draft status. Reserved admin login as `/admin/login` and kept admin APIs cookie-session based with CSRF required for authenticated writes
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/cleanup-audit.ps1 -ReportPath harness-cleanup-audit.md`
+  - passed with no findings
+- Known issues: the route shells are documentation-first placeholders, so a future framework choice still needs to map these manifests into actual files and handlers
+- Next step: start `WBS 3.1` source discovery or `4.1` admin login implementation on top of the new auth and route scaffold
+
 ---
 
 ## 7. Change History
@@ -191,3 +209,4 @@ Each entry should include:
 | 2026-04-07 | Added the WBS 2.3 DB and migration baseline entry |
 | 2026-04-07 | Added the WBS 2.4 object storage and evidence bucket baseline entry |
 | 2026-04-07 | Added the combined WBS 2.7 and 2.10 monitoring and foundation CI baseline entry |
+| 2026-04-07 | Added the combined WBS 2.5, 2.6, 2.8, and 2.9 foundation scaffold entry |

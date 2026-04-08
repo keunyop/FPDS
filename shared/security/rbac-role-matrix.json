@@ -1,0 +1,121 @@
+{
+  "matrix_version": "2026-04-07",
+  "roles": [
+    "admin",
+    "reviewer",
+    "read_only"
+  ],
+  "permissions": [
+    {
+      "resource": "admin.overview",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "admin.review_queue",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ],
+        "approve": [
+          "admin",
+          "reviewer"
+        ],
+        "reject": [
+          "admin",
+          "reviewer"
+        ],
+        "edit_approve": [
+          "admin",
+          "reviewer"
+        ],
+        "defer": [
+          "admin",
+          "reviewer"
+        ]
+      }
+    },
+    {
+      "resource": "admin.runs",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "admin.change_history",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "admin.publish_monitor",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "admin.usage",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "admin.dashboard_health",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
+      "resource": "security.config",
+      "actions": {
+        "read": [
+          "admin"
+        ],
+        "write": [
+          "admin"
+        ]
+      }
+    },
+    {
+      "resource": "security.credentials",
+      "actions": {
+        "issue": [
+          "admin"
+        ],
+        "rotate": [
+          "admin"
+        ],
+        "revoke": [
+          "admin"
+        ]
+      }
+    }
+  ]
+}

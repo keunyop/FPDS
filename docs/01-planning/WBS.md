@@ -214,7 +214,7 @@ Based on:
 | 1.8.5 | Completed | Sprint 0 작업판 확정 | `docs/01-planning/sprint-0-board.md` Sections 2-8 | Delivery Lead | 1.8.2 |
 | 1.8.6 | Completed | Build Start Gate 검토 | `docs/00-governance/gate-a-build-start-review-note.md` Sections 1-9 | Product Owner, Tech Lead | 1.8.3 |
 
-## WBS 2. Foundation Setup
+## WBS 2. Foundation Setup (Completed)
 
 > 상태: `Next`
 > 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수 가능
@@ -225,11 +225,11 @@ Based on:
 | 2.2 | Completed | 환경 분리 및 env 템플릿 구성 | dev/prod env spec | DevOps | 2.1 | 2026-04-09 |
 | 2.3 | Completed | DB 및 migration baseline 준비 | 초기 schema migration | Backend | 1.4.2 | 2026-04-10 |
 | 2.4 | Completed | object storage/evidence bucket 준비 | snapshot/chunk 저장소 | DevOps | 1.4.3 | 2026-04-10 |
-| 2.5 | Next | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-14 |
-| 2.6 | Next | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-15 |
+| 2.5 | Completed | auth scaffold 구성 | admin auth 기본 구조 | Backend | 1.6.1 | 2026-04-14 |
+| 2.6 | Completed | i18n scaffold 구성 | EN/KO/JA locale skeleton | Frontend | 1.7.5 | 2026-04-15 |
 | 2.7 | Completed | monitoring/error tracking baseline 구성 | observability contract, safe error envelope, structured log example | DevOps | 2.1 | 2026-04-13 |
-| 2.8 | Next | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 | 2026-04-14 |
-| 2.9 | Next | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 | 2026-04-15 |
+| 2.8 | Completed | security baseline 적용 | headers, secret handling, access boundary | Security, DevOps | 1.6.6 | 2026-04-14 |
+| 2.9 | Completed | public/admin route skeleton 준비 | empty shell routes | Frontend | 2.1 | 2026-04-15 |
 | 2.10 | Completed | CI/CD 기본 파이프라인 준비 | foundation checks workflow and future package-script baseline | DevOps | 2.1 | 2026-04-13 |
 
 ## WBS 3. Prototype Build - TD Savings

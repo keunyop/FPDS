@@ -1,0 +1,76 @@
+{
+  "policy_version": "2026-04-07",
+  "environment_keys": {
+    "public_origins": "FPDS_ALLOWED_PUBLIC_ORIGINS",
+    "admin_origins": "FPDS_ALLOWED_ADMIN_ORIGINS",
+    "headers_enabled": "FPDS_SECURITY_HEADERS_ENABLED",
+    "cookie_secure": "FPDS_COOKIE_SECURE",
+    "cookie_same_site": "FPDS_COOKIE_SAMESITE",
+    "csrf_enabled": "FPDS_CSRF_PROTECTION_ENABLED"
+  },
+  "browser_surfaces": {
+    "public": {
+      "anonymous_read_only": true,
+      "allow_credentials": false
+    },
+    "admin": {
+      "session_backed": true,
+      "allow_credentials": true,
+      "exact_origin_allowlist_only": true
+    }
+  },
+  "headers": {
+    "content_security_policy": {
+      "enabled": true,
+      "directives": {
+        "default-src": [
+          "'self'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "script-src": [
+          "'self'"
+        ],
+        "connect-src": [
+          "'self'"
+        ]
+      }
+    },
+    "strict_transport_security": {
+      "prod_only": true,
+      "max_age_seconds": 31536000,
+      "include_subdomains": true
+    },
+    "x_content_type_options": "nosniff",
+    "referrer_policy": "strict-origin-when-cross-origin"
+  },
+  "cookie_policy": {
+    "http_only": true,
+    "same_site": "Lax",
+    "prod_secure_required": true
+  },
+  "csrf_policy": {
+    "apply_to_cookie_authenticated_writes": true,
+    "protected_methods": [
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE"
+    ]
+  }
+}

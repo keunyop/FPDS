@@ -8,4 +8,8 @@ Planned scope:
 - public dashboard
 - locale-aware public rendering
 
-No route implementation is added in WBS `2.1`.
+Current scaffold:
+- `routes.manifest.json` lists the reserved public routes.
+- `route-shells/` holds route-by-route placeholders without locking a framework router.
+
+No runtime page implementation is added yet.

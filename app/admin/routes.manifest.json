@@ -1,0 +1,84 @@
+{
+  "surface": "admin_app",
+  "auth_mode": "server-session",
+  "default_locale": "en",
+  "routes": [
+    {
+      "route": "/admin/login",
+      "route_id": "admin.login",
+      "shell_dir": "route-shells/login",
+      "resource_key": "admin_operations.login",
+      "access": "anonymous"
+    },
+    {
+      "route": "/admin",
+      "route_id": "admin.overview",
+      "shell_dir": "route-shells/overview",
+      "resource_key": "admin_operations.overview",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/reviews",
+      "route_id": "admin.reviews",
+      "shell_dir": "route-shells/reviews",
+      "resource_key": "admin_operations.reviews",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/reviews/:reviewTaskId",
+      "route_id": "admin.review_detail",
+      "shell_dir": "route-shells/review-detail",
+      "resource_key": "admin_operations.review_detail",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/runs",
+      "route_id": "admin.runs",
+      "shell_dir": "route-shells/runs",
+      "resource_key": "admin_operations.runs",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/runs/:runId",
+      "route_id": "admin.run_detail",
+      "shell_dir": "route-shells/run-detail",
+      "resource_key": "admin_operations.run_detail",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/changes",
+      "route_id": "admin.changes",
+      "shell_dir": "route-shells/changes",
+      "resource_key": "admin_operations.changes",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/publish",
+      "route_id": "admin.publish",
+      "shell_dir": "route-shells/publish",
+      "resource_key": "admin_operations.publish",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/usage",
+      "route_id": "admin.usage",
+      "shell_dir": "route-shells/usage",
+      "resource_key": "admin_operations.usage",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/health/dashboard",
+      "route_id": "admin.health_dashboard",
+      "shell_dir": "route-shells/health-dashboard",
+      "resource_key": "admin_operations.health_dashboard",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/products/:productId",
+      "route_id": "admin.product_record",
+      "shell_dir": "route-shells/product-record",
+      "resource_key": "admin_operations.product_record",
+      "access": "authenticated"
+    }
+  ]
+}

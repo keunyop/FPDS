@@ -10,4 +10,8 @@ Planned scope:
 - publish monitor
 - usage and health surfaces
 
-No auth or route implementation is added in WBS `2.1`.
+Current scaffold:
+- `routes.manifest.json` lists the reserved admin routes and visibility expectations.
+- `route-shells/` holds route-by-route placeholders without locking a framework router.
+
+No runtime auth or page implementation is added yet.

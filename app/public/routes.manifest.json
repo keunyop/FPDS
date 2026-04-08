@@ -1,0 +1,25 @@
+{
+  "surface": "public_app",
+  "access": "anonymous",
+  "default_locale": "en",
+  "routes": [
+    {
+      "route": "/",
+      "route_id": "public.home",
+      "shell_dir": "route-shells/home",
+      "resource_key": "public_navigation.home"
+    },
+    {
+      "route": "/products",
+      "route_id": "public.products",
+      "shell_dir": "route-shells/products",
+      "resource_key": "public_navigation.products"
+    },
+    {
+      "route": "/dashboard",
+      "route_id": "public.dashboard",
+      "shell_dir": "route-shells/dashboard",
+      "resource_key": "public_navigation.dashboard"
+    }
+  ]
+}

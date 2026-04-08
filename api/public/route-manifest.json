@@ -1,0 +1,42 @@
+{
+  "surface": "public_api",
+  "access": "anonymous-read-only",
+  "base_path": "/api/public",
+  "routes": [
+    {
+      "route": "/api/public/products",
+      "methods": [
+        "GET"
+      ],
+      "notes": "Public product grid list."
+    },
+    {
+      "route": "/api/public/filters",
+      "methods": [
+        "GET"
+      ],
+      "notes": "Shared grid and dashboard filters."
+    },
+    {
+      "route": "/api/public/dashboard-summary",
+      "methods": [
+        "GET"
+      ],
+      "notes": "Headline KPI and composition breakdowns."
+    },
+    {
+      "route": "/api/public/dashboard-rankings",
+      "methods": [
+        "GET"
+      ],
+      "notes": "Ranking widgets."
+    },
+    {
+      "route": "/api/public/dashboard-scatter",
+      "methods": [
+        "GET"
+      ],
+      "notes": "Scatter preset data."
+    }
+  ]
+}

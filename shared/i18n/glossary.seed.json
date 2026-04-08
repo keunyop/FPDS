@@ -1,0 +1,60 @@
+{
+  "glossary_version": "2026-04-07",
+  "entries": [
+    {
+      "term_key": "product_type.chequing",
+      "domain": "shared_taxonomy",
+      "source_term_en": "Chequing",
+      "term_ko": "당좌예금",
+      "term_ja": "当座預金",
+      "term_status": "draft",
+      "do_not_translate_flag": false,
+      "usage_note": "Use for deposit product type labels only.",
+      "last_reviewed_at": null
+    },
+    {
+      "term_key": "product_type.savings",
+      "domain": "shared_taxonomy",
+      "source_term_en": "Savings",
+      "term_ko": "저축예금",
+      "term_ja": "普通預金",
+      "term_status": "draft",
+      "do_not_translate_flag": false,
+      "usage_note": "Use for deposit product type labels only.",
+      "last_reviewed_at": null
+    },
+    {
+      "term_key": "product_type.gic",
+      "domain": "shared_taxonomy",
+      "source_term_en": "GIC",
+      "term_ko": "정기예금",
+      "term_ja": "定期預金",
+      "term_status": "draft",
+      "do_not_translate_flag": false,
+      "usage_note": "Use for Canada GIC or term-deposit type labels.",
+      "last_reviewed_at": null
+    },
+    {
+      "term_key": "review_state.queued",
+      "domain": "admin_operations",
+      "source_term_en": "Queued",
+      "term_ko": "대기",
+      "term_ja": "待機",
+      "term_status": "draft",
+      "do_not_translate_flag": false,
+      "usage_note": "Review task state label.",
+      "last_reviewed_at": null
+    },
+    {
+      "term_key": "review_state.deferred",
+      "domain": "admin_operations",
+      "source_term_en": "Deferred",
+      "term_ko": "보류",
+      "term_ja": "保留",
+      "term_status": "draft",
+      "do_not_translate_flag": false,
+      "usage_note": "Review task state label.",
+      "last_reviewed_at": null
+    }
+  ]
+}

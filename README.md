@@ -4,10 +4,14 @@ This repository is currently a docs-first FPDS workspace. The main project map l
 
 Current status:
 - Gate A is `Pass`.
-- Product implementation is still on hold until the Product Owner explicitly starts development.
-- Harness engineering is installed so we can begin WBS 2 and WBS 3 on cleaner rails when you say go.
+- Product Owner-directed implementation is active for Foundation work in WBS `2`.
+- Harness engineering is installed and foundation scaffolds are now active for WBS `2` and upcoming WBS `3`.
 - WBS `2.2` env templates are now tracked as placeholder-only docs and example files.
+- WBS `2.5` auth scaffold is now tracked as a vendor-neutral session and RBAC baseline.
+- WBS `2.6` i18n scaffold now includes EN/KO/JA resource files, locale config, and glossary seed data.
 - WBS `2.7` observability baseline is documented with safe error and structured event examples.
+- WBS `2.8` security baseline now includes browser-policy, safe-fetch, and secret-inventory scaffold files.
+- WBS `2.9` public and admin route skeletons now exist as route manifests plus shell placeholders.
 - WBS `2.10` foundation CI now reuses the same local PowerShell checks in GitHub Actions.
 
 ## Start Here
@@ -81,6 +85,30 @@ Rules:
 - Object storage is private by default.
 - Browser surfaces must not receive raw object paths or direct bucket access.
 - `dev` and `prod` storage boundaries stay separated by bucket or top-level prefix.
+
+## Auth and Security Scaffold
+
+- Security entrypoint: [shared/security/README.md](shared/security/README.md)
+- Auth session contract: [shared/security/auth-session.contract.json](shared/security/auth-session.contract.json)
+- Browser security policy scaffold: [shared/security/browser-security-policy.json](shared/security/browser-security-policy.json)
+- Admin API auth routes: [api/admin/auth/README.md](api/admin/auth/README.md)
+
+Rules:
+- Admin auth stays `server-session` based.
+- No auth vendor is locked in yet.
+- CSRF, cookie, CORS, and safe-fetch rules are scaffolded now so later runtime code does not invent its own policy.
+
+## I18n and Route Scaffold
+
+- I18n entrypoint: [shared/i18n/README.md](shared/i18n/README.md)
+- Locale config: [shared/i18n/locale-config.json](shared/i18n/locale-config.json)
+- Public routes: [app/public/routes.manifest.json](app/public/routes.manifest.json)
+- Admin routes: [app/admin/routes.manifest.json](app/admin/routes.manifest.json)
+
+Rules:
+- `en` is the default locale and fallback root.
+- `ko` and `ja` starter resources are scaffolded but remain draft until reviewed.
+- Route shells reserve the public and admin structure without forcing a framework router yet.
 
 ## What The Harness Does
 
