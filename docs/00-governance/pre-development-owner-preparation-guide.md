@@ -457,21 +457,21 @@ Mark each row `yes` or `no`.
 
 | Check | Yes or No |
 |---|---|
-| Python 3.12 installed locally |  |
-| `uv` installed locally |  |
-| Node.js LTS installed locally |  |
-| `pnpm` installed locally |  |
-| `psql` installed locally |  |
-| hosted dev Postgres provisioned |  |
-| hosted dev Postgres reachable from local machine |  |
-| hosted dev object storage provisioned |  |
-| hosted dev object storage is private |  |
-| hosted dev object storage reachable from local machine |  |
-| real dev secrets stored outside git |  |
-| OpenAI dev API key ready |  |
-| untracked local dev env source prepared |  |
-| `dev monitoring = disabled` confirmed |  |
-| Codex may later create or use untracked local env files during development |  |
+| Python 3.12 installed locally | yes (Python 3.14.3 is installed) |
+| `uv` installed locally | yes (uv 0.11.3)|
+| Node.js LTS installed locally | yes (v24.13.0) |
+| `pnpm` installed locally | yes (10.33.0) |
+| `psql` installed locally | yes (18.3) |
+| hosted dev Postgres provisioned | yes (supabase) |
+| hosted dev Postgres reachable from local machine | yes |
+| hosted dev object storage provisioned | yes (aws s3) |
+| hosted dev object storage is private | yes |
+| hosted dev object storage reachable from local machine | yes |
+| real dev secrets stored outside git | yes |
+| OpenAI dev API key ready | yes |
+| untracked local dev env source prepared | yes |
+| `dev monitoring = disabled` confirmed | yes |
+| Codex may later create or use untracked local env files during development | yes |
 
 You are practically ready for WBS `3` only when the critical rows above are `yes`.
 
@@ -520,3 +520,4 @@ Before WBS `3` begins, remember:
 | 2026-04-07 | Initial pre-development owner preparation guide created after WBS 2 review |
 | 2026-04-07 | Rewritten as a clean hosted-dev preparation guide with step-by-step owner actions |
 | 2026-04-07 | Rewritten again after the runtime stack was fixed to Next.js App Router, FastAPI, separate Python worker, pnpm, uv, server-side session auth, and disabled dev monitoring |
+| 2026-04-09 | Recorded the completed owner readiness checklist response and corrected the checklist typo |
