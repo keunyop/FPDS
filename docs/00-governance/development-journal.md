@@ -290,6 +290,38 @@ Each entry should include:
 - Known issues: Python `3.14.3` is newer than the declared `3.12` baseline, so package compatibility should be watched during bootstrap and may justify a `3.12` runtime env if dependency support lags
 - Next step: wait for explicit Product Owner instruction to start development, then create or use untracked local env files and begin the first approved WBS `3` slice
 
+## 2026-04-09 - Root README Status Refresh
+
+- WBS: `2.x` documentation support
+- Status: `done`
+- Goal: align the root README with the authoritative docs so it shows current readiness clearly without implying that WBS `3` implementation has already begun
+- Why now: the previous README mixed Gate A readiness, completed foundation scaffolds, and implementation-sounding wording in a way that could be misread after the latest readiness updates
+- Outcome: rewrote the root `README.md` to present the repo as `execution-ready` rather than `implementation-in-progress`, added the explicit hold rule for Product Owner start approval, reflected the approved runtime baseline, linked the key governance and readiness docs, and kept the harness and local toolchain guidance easy to find
+- Not done: no product code, package bootstrap, DB migration apply, or runtime start commands were added
+- Key files: `README.md`, `docs/00-governance/development-journal.md`
+- Decisions: the root README should describe what is already approved and prepared, but it must not read as a signal that actual development has started. Runtime decisions are documented as approved baselines only, not as bootstrapped repo state
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: no content validation issues were reported by the harness after the README refresh
+- Next step: wait for the next Product Owner documentation or development-start instruction
+
+## 2026-04-09 - Harness Startup Read Order Update
+
+- WBS: `2.x` documentation support
+- Status: `done`
+- Goal: make the harness startup reading order explicitly include `development-journal.md` alongside `AGENTS.md` and root `README.md`
+- Why now: the Product Owner wanted the resume-memory document to be part of the required pre-work reading flow, not only a post-slice handoff artifact
+- Outcome: updated `AGENTS.md` to tell the agent to read the root `README.md` and `docs/00-governance/development-journal.md` before starting work, added the development journal to the harness required-file list in `scripts/harness/shared.ps1`, and rewrote the harness baseline doc in clean ASCII with the new startup read order called out directly
+- Not done: no product code, runtime bootstrap, or workflow automation beyond the documentation and harness file-list update was added
+- Key files: `AGENTS.md`, `scripts/harness/shared.ps1`, `docs/00-governance/harness-engineering-baseline.md`, `docs/00-governance/development-journal.md`
+- Decisions: the development journal is now part of the startup context set because it carries the latest resume-safe implementation memory that may not be visible from README or AGENTS alone
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: no harness validation issues were reported after the startup read-order update
+- Next step: use the new startup read order in the next session that begins substantive work
+
 ---
 
 ## 7. Change History
@@ -308,3 +340,5 @@ Each entry should include:
 | 2026-04-07 | Added the runtime stack baseline and detailed hosted-dev preparation update |
 | 2026-04-08 | Added the local toolchain installation baseline entry and README note |
 | 2026-04-09 | Added the owner readiness checklist return entry and recorded the completed setup status |
+| 2026-04-09 | Added the root README status refresh entry |
+| 2026-04-09 | Added the harness startup read order update entry |

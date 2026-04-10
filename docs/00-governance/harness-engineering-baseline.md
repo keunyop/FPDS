@@ -1,7 +1,7 @@
 # FPDS Harness Engineering Baseline
 
-Version: 1.0
-Date: 2026-04-07
+Version: 1.1
+Date: 2026-04-09
 Status: Active
 Source Documents:
 - `docs/00-governance/working-agreement.md`
@@ -16,47 +16,48 @@ Source Documents:
 
 ## 1. Purpose
 
-이 문서는 WBS 2와 WBS 3 착수 전에 먼저 깔아 두는 repository harness 기준을 고정한다.
+This document fixes the repository harness baseline that should exist before WBS `2` and WBS `3` work moves forward.
 
-목적:
-- 구현 시작 전에도 작업 방식, 자동 검증, 문서 정합성 점검 기준을 갖춘다.
-- Product Owner가 흐름을 따라가기 쉬운 작은 slice 방식과 자동 점검 기준을 연결한다.
-- product implementation과 harness work를 구분해 build hold rule을 깨지 않도록 한다.
+Goals:
+- lock the basic workflow guardrails before product implementation starts
+- keep Product Owner visibility high with small, reviewable slices
+- separate harness work from product implementation so the build hold rule stays intact
 
-이 문서는 제품 기능 구현 승인 문서가 아니다.
-현재 범위는 repository harness와 workflow guardrail에 한정한다.
+This is not a product feature approval document.
+Its scope is the repository harness and workflow guardrails only.
 
 ---
 
 ## 2. Baseline Decisions
 
-1. `AGENTS.md`는 60줄 이하의 항상 적용되는 규칙만 둔다.
-2. pre-commit hook은 `staged files only`를 기준으로 동작한다.
-3. pre-commit hook은 low-risk text hygiene만 자동 수정하고, 성공 시 조용히 끝난다.
-4. cleanup audit는 `report-only`로 시작하며 자동 삭제/자동 리팩터링을 수행하지 않는다.
-5. repository-wide 검증은 CI에서 수행한다.
-6. harness는 product code implementation을 시작하지 않는다.
-7. foundation baseline 검증은 env/observability contract와 future package-script checks를 같은 local/CI entrypoint로 묶는다.
+1. `AGENTS.md` keeps only short, always-on operating rules.
+2. Before substantive work starts, the agent reads `AGENTS.md`, root `README.md`, and `docs/00-governance/development-journal.md`.
+3. The pre-commit hook runs on `staged files only`.
+4. The pre-commit hook auto-fixes only low-risk text hygiene issues and stays quiet on success.
+5. Cleanup audit starts as `report-only` and does not auto-delete or auto-refactor files.
+6. Repository-wide validation runs in CI.
+7. The harness does not start product code implementation by itself.
+8. Foundation baseline checks use one shared local and CI entrypoint for env or observability contracts and future package-script checks.
 
 ---
 
 ## 3. Harness Scope
 
-포함:
+Included:
 - `AGENTS.md`
 - root `README.md`
-- development journal
-- Git hook entrypoint와 install script
+- `docs/00-governance/development-journal.md`
+- Git hook entrypoint and install script
 - staged-only pre-commit checks
 - repo doctor
 - report-only cleanup audit
 - CI workflow for harness checks
 
-비포함:
-- app/api/worker 기능 구현
-- parser, DB, API, UI, BX-PF connector 구현
+Excluded:
+- app, api, or worker feature implementation
+- parser, DB, API, UI, or BX-PF connector implementation
 - cleanup auto-delete
-- agent-driven autonomous refactor loop
+- autonomous refactor loops
 
 ---
 
@@ -64,74 +65,71 @@ Source Documents:
 
 ### 4.1 Pre-Commit
 
-현재 pre-commit은 아래만 수행한다.
+Current pre-commit scope:
+- staged text file trailing whitespace and final newline fixes
+- staged Markdown local reference validation
+- staged PowerShell syntax validation
 
-- staged text file trailing whitespace / final newline 자동 보정
-- staged Markdown local reference 검증
-- staged PowerShell syntax 검증
-
-원칙:
-- 성공은 조용히 끝난다.
-- 실패 시에만 commit을 막고 메시지를 보여준다.
-- staged 범위를 넘어 repository 전체를 검사하지 않는다.
+Behavior:
+- success stays quiet
+- failures stop the commit and show a clear message
+- the hook does not expand staged checks to a full-repo scan
 
 ### 4.2 CI
 
-CI는 repository-wide로 아래를 수행한다.
-
-- required harness file 존재 여부 확인
-- Markdown reference 검증
-- PowerShell syntax 검증
-- JSON syntax 검증
-- foundation env/observability baseline 검증
-- future package script 감지 시 `lint`, `typecheck`, `test`, `build` 실행
-- cleanup audit report 생성
+CI runs repository-wide validation for:
+- required harness file presence
+- Markdown reference validation
+- PowerShell syntax validation
+- JSON syntax validation
+- foundation env and observability baseline validation
+- future package-script checks such as `lint`, `typecheck`, `test`, and `build`
+- cleanup audit report generation
 
 ---
 
 ## 5. Cleanup Audit Model
 
-cleanup audit는 report-only다.
+Cleanup audit is `report-only`.
 
-점검 항목:
+Current findings scope:
 - broken local doc references
 - trailing whitespace
-- required harness file 누락
-- TODO/FIXME/HACK marker
+- missing required harness files
+- `TODO`, `FIXME`, and `HACK` markers
 
-후속 확장 가능 항목:
-- unused code/import/export
-- unused env key
-- dependency vulnerability report
-- docs-vs-code drift checks
+Possible future scope:
+- unused code, import, or export checks
+- unused env key checks
+- dependency vulnerability reporting
+- docs-versus-code drift checks
 
-위 항목은 product code가 생긴 뒤에 단계적으로 추가한다.
+These should be added only after product code exists and the Product Owner agrees with the extra enforcement cost.
 
 ---
 
 ## 6. Development Journal Model
 
-부분 완료가 생길 때마다 `development-journal.md`에 slice summary를 남긴다.
+When a meaningful slice is completed, add a slice summary to `docs/00-governance/development-journal.md`.
 
-기록 목적:
-- 다음 Codex 세션이 코드 전체를 다시 읽지 않고도 최근 구현 의도와 상태를 빠르게 파악한다.
-- Product Owner가 각 slice의 결과, 검증, 남은 리스크를 문서로 추적한다.
-- handoff가 chat history가 아니라 repo 문서 기준으로 이어지게 만든다.
+Purpose:
+- let the next Codex session resume without rereading the whole codebase
+- give the Product Owner a compact record of outcome, verification, and known gaps
+- keep handoff inside the repository instead of depending on chat history
 
-각 entry에는 최소 아래를 남긴다.
-
+Each entry should record at least:
 - slice name and date
-- 목표와 왜 이 작업을 먼저 했는지
-- 실제로 바뀐 사용자/운영 동작
-- 변경한 주요 파일 또는 모듈
-- 핵심 설계 판단 또는 새 제약
-- 실행/검증한 명령
-- 아직 남아 있는 known issue, follow-up, next natural step
+- goal and why the slice was done now
+- actual repo or product impact
+- key files
+- decisions or constraints
+- commands that were run for verification
+- known issues and the next natural step
 
-제외 원칙:
-- 장황한 코드 설명
-- commit diff 전체 복붙
-- chat transcript 의존 설명
+Do not turn the journal into:
+- a full code walkthrough
+- a pasted commit diff
+- a chat transcript
 
 ---
 
@@ -156,12 +154,13 @@ cleanup audit는 report-only다.
 
 ## 8. Operating Notes
 
-- local 시작 시 `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/install-hooks.ps1`로 hooks를 연결한다.
-- local에서 CI와 같은 수준의 baseline 검증은 `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`로 실행한다.
-- docs map은 `docs/README.md`를 기준으로 유지한다.
-- WBS 2 foundation가 시작되면 package manager와 framework가 정해지는 시점에 project checks를 강화한다.
-- cleanup audit가 실제 수정까지 하려면 Product Owner 승인을 다시 받는다.
-- 의미 있는 구현 slice가 끝나면 `development-journal.md`를 같은 turn 안에서 함께 갱신한다.
+- Install hooks locally with `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/install-hooks.ps1`.
+- Run the same foundation baseline used by CI with `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`.
+- Before substantive work starts, read `AGENTS.md`, root `README.md`, and `docs/00-governance/development-journal.md`.
+- Keep `docs/README.md` as the docs map entrypoint.
+- Strengthen project checks only after package management and runtime bootstrap are real, not hypothetical.
+- If cleanup audit ever moves beyond report-only, get Product Owner approval first.
+- When a meaningful implementation slice ends, update `docs/00-governance/development-journal.md` in the same turn.
 
 ---
 
@@ -171,3 +170,4 @@ cleanup audit는 report-only다.
 |---|---|
 | 2026-04-07 | Initial harness engineering baseline created |
 | 2026-04-07 | Added development journal rule for resume-friendly slice summaries |
+| 2026-04-09 | Rewrote the document in ASCII-first format and added startup read order to include the development journal alongside `AGENTS.md` and root `README.md` |

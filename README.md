@@ -1,37 +1,122 @@
 # FPDS Workspace
 
-This repository is currently a docs-first FPDS workspace. The main project map lives in [docs/README.md](docs/README.md).
+This repository is the docs-first workspace for `FPDS` (Finance Product Data Service), the evidence-grounded financial product data platform that will later support MyBank-facing experiences.
 
-Current status:
-- Gate A is `Pass`.
-- Product Owner-directed implementation is active for Foundation work in WBS `2`.
-- Harness engineering is installed and foundation scaffolds are now active for WBS `2` and upcoming WBS `3`.
-- WBS `2.2` env templates are now tracked as placeholder-only docs and example files.
-- WBS `2.5` auth scaffold is now tracked as a vendor-neutral session and RBAC baseline.
-- WBS `2.6` i18n scaffold now includes EN/KO/JA resource files, locale config, and glossary seed data.
-- WBS `2.7` observability baseline is documented with safe error and structured event examples.
-- WBS `2.8` security baseline now includes browser-policy, safe-fetch, and secret-inventory scaffold files.
-- WBS `2.9` public and admin route skeletons now exist as route manifests plus shell placeholders.
-- WBS `2.10` foundation CI now reuses the same local PowerShell checks in GitHub Actions.
+The repository is currently `execution-ready`, not `product-implementation-in-progress`.
+
+As of `2026-04-09`:
+- `Gate A` passed on `2026-04-06`
+- `WBS 2` foundation scaffolds and baseline artifacts are recorded as complete
+- local toolchain and hosted dev readiness were recorded on `2026-04-09`
+- actual `WBS 3` product implementation has not started and remains on hold until the Product Owner gives an explicit start instruction
+
+## What This Repo Contains Today
+
+- requirements, scope, planning, governance, and design documents
+- foundation baselines for env, DB, storage, auth, i18n, security, observability, and route manifests
+- repository harness scripts, git hooks, and CI validation
+- top-level boundaries for future `app`, `api`, `worker`, `shared`, `db`, and `storage` work
+
+This is intentionally not a running FPDS product yet.
 
 ## Start Here
 
-- Project docs map: [docs/README.md](docs/README.md)
-- Working agreement: [docs/00-governance/working-agreement.md](docs/00-governance/working-agreement.md)
+- docs map: [docs/README.md](docs/README.md)
+- requirements baseline: [docs/02-requirements/FPDS_Requirements_Definition_v1_5.md](docs/02-requirements/FPDS_Requirements_Definition_v1_5.md)
+- execution plan: [docs/01-planning/plan.md](docs/01-planning/plan.md)
 - WBS: [docs/01-planning/WBS.md](docs/01-planning/WBS.md)
-- Harness baseline: [docs/00-governance/harness-engineering-baseline.md](docs/00-governance/harness-engineering-baseline.md)
-- Development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
+- working agreement: [docs/00-governance/working-agreement.md](docs/00-governance/working-agreement.md)
+- Gate A review note: [docs/00-governance/gate-a-build-start-review-note.md](docs/00-governance/gate-a-build-start-review-note.md)
+- decision log: [docs/00-governance/decision-log.md](docs/00-governance/decision-log.md)
+- development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
+- owner readiness guide: [docs/00-governance/pre-development-owner-preparation-guide.md](docs/00-governance/pre-development-owner-preparation-guide.md)
+
+## Delivery Boundary
+
+- `Prototype`: `TD Bank` plus `Savings Accounts` end-to-end feasibility validation
+- `Phase 1`: Canada Big 5 deposit-product data platform plus public product grid, insight dashboard, admin console, BX-PF connector readiness, and EN/KO/JA UI
+- `Phase 2`: Japan Big 5 expansion plus external SaaS or Open API
+
+Out of scope for the current FPDS build:
+- personalized recommendation
+- consumer banking features
+- public evidence trace exposure
+- billing or subscription
+- broad expansion beyond the approved country and product cutline
+
+## Current Status Snapshot
+
+### Ready
+
+- Gate A document package is closed
+- `WBS 2.1` to `2.10` foundation work is tracked as complete
+- approved runtime and toolchain baselines are documented
+- local tools are available: `uv`, `pnpm`, `psql`, `aws`
+- hosted dev readiness and real dev secret preparation are recorded
+
+### Not Started
+
+- `WBS 3` prototype runtime work
+- runtime package bootstrap
+- DB migration apply on the real dev database
+- snapshot capture, parsing, chunking, extraction, normalization, review flow, public UI, admin UI, and BX-PF runtime integration code
+
+### Hold Rule
+
+`Gate A Pass` means readiness only.
+It does not mean development has already started.
+
+Implementation still waits for:
+- explicit Product Owner start instruction
+
+## Approved Technical Baseline
+
+- primary product language: `Python`
+- browser-facing frontend language: `TypeScript`
+- frontend runtime baseline: `Next.js App Router`
+- API runtime baseline: `FastAPI` as a separate service
+- worker baseline: separate `Python worker process`
+- frontend package manager: `pnpm`
+- Python package and runtime manager: `uv`
+- admin auth approach: server-side session auth managed by the Python API
+- dev monitoring baseline: `disabled` for the first implementation pass
+
+These are approved baselines for future implementation.
+They should not be read as evidence that the runtime has already been bootstrapped in this repo.
+
+## Foundation Baselines In Repo
+
+- env contract: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
+- env examples: `.env.dev.example`, `.env.prod.example`
+- config landing zone: [shared/config/README.md](shared/config/README.md)
+- DB baseline: [docs/03-design/db-migration-baseline.md](docs/03-design/db-migration-baseline.md)
+- DB entrypoint: [db/README.md](db/README.md)
+- storage baseline: [docs/03-design/object-storage-evidence-bucket-baseline.md](docs/03-design/object-storage-evidence-bucket-baseline.md)
+- storage entrypoint: [storage/README.md](storage/README.md)
+- auth and security baseline: [shared/security/README.md](shared/security/README.md)
+- i18n baseline: [shared/i18n/README.md](shared/i18n/README.md)
+- observability baseline: [shared/observability/README.md](shared/observability/README.md)
+- public route manifest: [app/public/routes.manifest.json](app/public/routes.manifest.json)
+- admin route manifest: [app/admin/routes.manifest.json](app/admin/routes.manifest.json)
+
+Rules:
+- only placeholder values are committed
+- real secrets stay out of git
+- `dev` is the current local development shape
+- `BX-PF` remains `mock` in `dev` and real write-back is `prod` only
+- browser-facing surfaces must not receive direct private object access
 
 ## Local Toolchain
 
-- `uv` is the Python package and runtime manager baseline.
-- `pnpm` is the frontend package manager baseline.
-- `psql` is required for Postgres migration and DB verification work.
-- `aws` CLI is available for future S3-compatible and AWS-side operator workflows.
+Expected local tools:
+- `uv`
+- `pnpm`
+- `psql`
+- `aws`
 
 Notes:
-- On this workspace machine, `psql` was installed as PostgreSQL command-line tools only. No local Postgres server setup was intentionally locked in.
-- If a terminal does not see a newly installed tool yet, restart the terminal session so it reloads `PATH`.
+- `psql` is installed as PostgreSQL command-line tools only. A local Postgres server is not part of the repo baseline.
+- if a new tool is not visible in the current shell, restart the terminal so `PATH` reloads cleanly
 
 ## Harness Commands
 
@@ -65,89 +150,24 @@ Optional future project-wide checks:
 powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-project-checks.ps1
 ```
 
-## Environment Templates
-
-- Environment source of truth: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
-- Example files: `.env.dev.example`, `.env.prod.example`
-- Shared config landing zone: [shared/config/README.md](shared/config/README.md)
-
-Rules:
-- Only placeholder values are committed.
-- Real secrets and exact production origins stay out of git.
-- `dev` is the only local development environment shape for now.
-- Real BX-PF credentials and write-back are `prod` only.
-
-## Database Baseline
-
-- DB source of truth: [docs/03-design/db-migration-baseline.md](docs/03-design/db-migration-baseline.md)
-- Migration entrypoint: [db/README.md](db/README.md)
-
-Rules:
-- Postgres is the baseline database.
-- Migrations stay SQL-first until we intentionally choose a framework or ORM.
-- Early schema keeps flexible payloads in `jsonb` and defers `pgvector` to later work.
-
-## Object Storage Baseline
-
-- Storage source of truth: [docs/03-design/object-storage-evidence-bucket-baseline.md](docs/03-design/object-storage-evidence-bucket-baseline.md)
-- Storage entrypoint: [storage/README.md](storage/README.md)
-
-Rules:
-- Object storage is private by default.
-- Browser surfaces must not receive raw object paths or direct bucket access.
-- `dev` and `prod` storage boundaries stay separated by bucket or top-level prefix.
-
-## Auth and Security Scaffold
-
-- Security entrypoint: [shared/security/README.md](shared/security/README.md)
-- Auth session contract: [shared/security/auth-session.contract.json](shared/security/auth-session.contract.json)
-- Browser security policy scaffold: [shared/security/browser-security-policy.json](shared/security/browser-security-policy.json)
-- Admin API auth routes: [api/admin/auth/README.md](api/admin/auth/README.md)
-
-Rules:
-- Admin auth stays `server-session` based.
-- No auth vendor is locked in yet.
-- CSRF, cookie, CORS, and safe-fetch rules are scaffolded now so later runtime code does not invent its own policy.
-
-## I18n and Route Scaffold
-
-- I18n entrypoint: [shared/i18n/README.md](shared/i18n/README.md)
-- Locale config: [shared/i18n/locale-config.json](shared/i18n/locale-config.json)
-- Public routes: [app/public/routes.manifest.json](app/public/routes.manifest.json)
-- Admin routes: [app/admin/routes.manifest.json](app/admin/routes.manifest.json)
-
-Rules:
-- `en` is the default locale and fallback root.
-- `ko` and `ja` starter resources are scaffolded but remain draft until reviewed.
-- Route shells reserve the public and admin structure without forcing a framework router yet.
-
 ## What The Harness Does
 
-- `pre-commit` only inspects staged files.
-- The hook auto-fixes low-risk text hygiene issues such as trailing spaces and missing final newline.
-- The hook validates staged Markdown references and staged PowerShell syntax.
-- Foundation checks validate env examples, observability artifacts, JSON syntax, and future package scripts.
-- Success stays quiet. Failures stop the commit with a clear message.
-- Cleanup audit is `report-only` by design.
-- CI runs repository-wide checks without starting product implementation.
-- Completed implementation slices should be summarized in the development journal for future resume.
-
-## Observability Baseline
-
-- Monitoring baseline: [docs/03-design/monitoring-error-tracking-baseline.md](docs/03-design/monitoring-error-tracking-baseline.md)
-- Shared observability landing zone: [shared/observability/README.md](shared/observability/README.md)
-- `dev` keeps monitoring disabled by default.
-- `prod` is aligned to a `sentry` provider label, but the real DSN stays out of git.
+- `pre-commit` only inspects staged files
+- the hook can auto-fix low-risk text hygiene issues
+- staged Markdown references and staged PowerShell syntax are validated
+- foundation checks validate env examples, JSON artifacts, observability artifacts, and future package-script baselines
+- CI remains validation-only and does not imply product implementation has started
+- cleanup audit is intentionally `report-only`
 
 ## Current Top-Level Layout
 
-- `app/` browser-facing surfaces for public, admin, and prototype viewer
+- `app/` browser-facing public, admin, and prototype viewer boundaries
 - `api/` public, admin, and internal API boundaries
-- `db/` SQL-first migration baseline and database notes
+- `db/` SQL-first migration baseline and DB notes
 - `storage/` object storage and evidence bucket baseline
-- `worker/` private discovery, pipeline, publish, and runtime workers
-- `shared/` cross-surface contracts, domain, config, i18n, observability, and security modules
-- `docs/` project requirements, governance, planning, and design
-- `scripts/harness/` hook, audit, and verification scripts
-- `.githooks/` Git hook entrypoints
-- `.github/workflows/` CI for the harness
+- `worker/` discovery, pipeline, publish, and runtime worker boundaries
+- `shared/` contracts, config, domain, i18n, observability, and security modules
+- `docs/` requirements, governance, planning, and design
+- `scripts/harness/` repository checks, audits, and helper scripts
+- `.githooks/` git hook entrypoints
+- `.github/workflows/` CI validation workflows

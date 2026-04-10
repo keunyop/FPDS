@@ -1,6 +1,7 @@
 # FPDS Agent Ground Rules
 
 - Read the relevant files in `docs/` before proposing or changing anything.
+- Before starting work, read the root `README.md` and `docs/00-governance/development-journal.md` for current repo status and resume context.
 - Follow document authority in this order: Product Owner instruction, requirements, plan, WBS, decision log, RAID log, design docs.
 - Product Owner decides scope, priority, acceptance, and go/no-go. The agent executes.
 - Do not start product implementation until the Product Owner explicitly says to start development.

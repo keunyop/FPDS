@@ -392,6 +392,7 @@ function Get-RequiredHarnessPaths {
         "AGENTS.md",
         "README.md",
         "docs/README.md",
+        "docs/00-governance/development-journal.md",
         "docs/00-governance/harness-engineering-baseline.md",
         "docs/00-governance/foundation-ci-cd-baseline.md",
         "docs/03-design/monitoring-error-tracking-baseline.md",
