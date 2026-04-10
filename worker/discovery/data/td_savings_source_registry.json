@@ -1,0 +1,191 @@
+{
+  "registry_version": "2026-04-06",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "TD-SAV-001",
+  "sources": [
+    {
+      "source_id": "TD-SAV-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "prototype target products seed and product discovery",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Every Day Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/every-day-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD ePremium Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "transaction_fee",
+        "free_online_transfers"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Growth Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "transaction_fee",
+        "boosted_rate_eligibility"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "current interest rate truth and tier values",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates",
+      "expected_fields": [
+        "public_display_rate",
+        "standard_rate",
+        "boosted_rate",
+        "rate_tiers"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "cross-product fee comparison and normalization",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings",
+      "expected_fields": [
+        "monthly_transaction_limit",
+        "transaction_fee",
+        "bill_payment_fee",
+        "atm_fees"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account and service fee governing document",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf",
+      "expected_fields": [
+        "effective_date",
+        "account_lineup",
+        "detailed_account_fees",
+        "transaction_definitions"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "interest calculation and tier rule governing document",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513782-en.pdf",
+      "expected_fields": [
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "tier_definition_text"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-009",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account-level general legal terms",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/tdct-accounts-fst-en.pdf",
+      "expected_fields": [
+        "record_availability",
+        "account_change_rules",
+        "interest_applicability_references"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-010",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account opening and basic banking access evidence",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/522050-en.pdf",
+      "expected_fields": [
+        "account_opening_requirements",
+        "refusal_grounds",
+        "compliance_notes"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-011",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "access card and credentials service terms",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/aa-eng.pdf",
+      "expected_fields": [
+        "service_access_terms",
+        "credential_usage",
+        "card_service_constraints"
+      ]
+    },
+    {
+      "source_id": "TD-SAV-012",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "general service fee supplement evidence",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/802234-en.pdf",
+      "expected_fields": [
+        "ancillary_service_fees",
+        "service_definitions",
+        "non_core_fees"
+      ]
+    }
+  ]
+}

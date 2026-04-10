@@ -239,8 +239,8 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
 |---|---|---|---|---|---|---|
-| 3.1 | Next | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-16 |
-| 3.2 | Next | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 | 2026-04-16 |
+| 3.1 | Completed | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-16 |
+| 3.2 | Completed | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 | 2026-04-16 |
 | 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 | 2026-04-20 |
 | 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 | 2026-04-21 |
 | 3.5 | Next | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 | 2026-04-22 |

@@ -322,6 +322,86 @@ Each entry should include:
 - Known issues: no harness validation issues were reported after the startup read-order update
 - Next step: use the new startup read order in the next session that begins substantive work
 
+## 2026-04-09 - WBS 3.1 Source Discovery Core
+
+- WBS: `3.1`
+- Status: `partial`
+- Goal: start the TD savings source discovery implementation with a reproducible registry seed, deterministic source identity, and warning-aware discovery flow
+- Why now: the Product Owner explicitly started WBS `3.1`, and snapshot or parsing work would be unstable without first fixing the approved TD source set in runnable code
+- Outcome: added a Python discovery package under `worker/discovery/fpds_discovery`, seeded the approved 12-source TD savings registry in `worker/discovery/data/td_savings_source_registry.json`, implemented normalized URL dedupe and deterministic `source_document_id` generation, added entry-page detail discovery plus linked-PDF discovery, enforced controlled fetch rules for HTTPS and allowlisted domains, and added offline fixtures plus unit tests that cover registry output, warnings, and contract-shaped discovery payloads
+- Not done: no DB persistence to `source_document` or `run_source_item` was added yet, no live snapshot capture was performed, and one current TD live PDF URL drift remains unresolved against the approved inventory baseline
+- Key files: `worker/discovery/data/td_savings_source_registry.json`, `worker/discovery/fpds_discovery/discovery.py`, `worker/discovery/fpds_discovery/registry.py`, `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/fpds_discovery/url_utils.py`, `worker/discovery/tests/test_discovery.py`, `worker/discovery/README.md`
+- Decisions: kept the approved source inventory as the source of truth and treated out-of-registry or excluded links as warnings instead of auto-expanding scope. Stored human registry ids like `TD-SAV-001` in `source_metadata` while generating separate deterministic `source_document_id` values from `bank_code + normalized_source_url + source_type`. Included `run_id`, `correlation_id`, `discovery_mode`, `discovery_status`, and `discovery_notes` in the output payload so the worker stays aligned with the discovery interface baseline
+- Verification:
+  - `python -m unittest discover -s worker/discovery/tests -t .`
+  - passed
+  - `python -m worker.discovery.fpds_discovery --entry-html-path worker/discovery/tests/fixtures/td_savings_entry.html --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/every-day-savings-account=worker/discovery/tests/fixtures/td_every_day_detail.html" --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account=worker/discovery/tests/fixtures/td_epremium_detail.html" --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account=worker/discovery/tests/fixtures/td_growth_detail.html" --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates=worker/discovery/tests/fixtures/td_account_rates.html" --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings=worker/discovery/tests/fixtures/td_fee_summary.html" --run-id run_20260409_0001 --correlation-id corr_20260409_0001`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: on `2026-04-09`, the live TD page appears to expose `513796-en.pdf` where the approved inventory still lists `513796-20171030.pdf`, so live discovery against the current site will surface that as a warning until the Product Owner decides whether to keep the strict baseline or update the inventory
+- Next step: decide how to handle the live `TD-SAV-007` PDF drift, then either connect discovery output to DB persistence or move directly into `3.2` snapshot capture using the new registry and source identity helpers
+
+## 2026-04-09 - WBS 3.1 TD-SAV-007 Live URL Alignment
+
+- WBS: `3.1`
+- Status: `done`
+- Goal: align the approved TD savings inventory and discovery registry with the current live `TD-SAV-007` URL selected by the Product Owner
+- Why now: the Product Owner decided to update the baseline instead of keeping the previous `TD-SAV-007` PDF path as a warning-only drift
+- Outcome: updated the inventory document and the discovery seed registry so `TD-SAV-007` now points to `https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf`, refreshed fixture HTML to match the new canonical seed, and documented that the fee summary page still exposes a second live download path outside the current 12-source baseline
+- Not done: no alias handling was added for the alternate fee-summary PDF path, and no live network discovery test was added in-repo
+- Key files: `docs/01-planning/td-savings-source-inventory.md`, `worker/discovery/data/td_savings_source_registry.json`, `worker/discovery/tests/fixtures/td_every_day_detail.html`, `worker/discovery/tests/fixtures/td_fee_summary.html`, `docs/00-governance/development-journal.md`
+- Decisions: treated the detail-page URL as the canonical `TD-SAV-007` baseline. Kept the alternate fee-summary path documented as live context instead of widening the prototype source registry or changing source identity rules mid-slice
+- Verification:
+  - verified live detail-page PDF link resolves to `https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf`
+  - verified the fee summary page still exposes `https://www.td.com/content/dam/tdct/document/pdf/econsent/accounts/513796.pdf` as a separate live download path
+- Known issues: if live discovery later starts from the fee summary page and follows the alternate `513796.pdf` link directly, it will still be classified outside the current 12-source registry until alias support is intentionally added
+- Next step: connect discovery output to DB persistence or begin `3.2` snapshot capture using the updated canonical `TD-SAV-007` seed
+
+## 2026-04-09 - WBS 3.2 Snapshot Capture Core
+
+- WBS: `3.2`
+- Status: `partial`
+- Goal: start the snapshot capture implementation so approved discovery sources can be fetched, stored to the approved raw object key layout, and described with DB-shaped fetch metadata
+- Why now: `3.2` is the next dependency after source discovery, and parsing or chunking would be premature without a stable snapshot boundary for raw HTML or PDF preservation, retry, and reuse
+- Outcome: added `worker/discovery/fpds_snapshot` with a snapshot capture service, source adapter, object key builder, filesystem or AWS CLI storage adapters, and a CLI entrypoint. Extended the shared fetch helper so snapshot capture can reuse the same allowlist-driven live fetch policy as discovery while recording final URL, content type, status, redirect count, and fetch timestamp. The snapshot result now returns DB-shaped `source_snapshot` payloads for newly stored artifacts plus per-source `run_source_item` payloads that carry `completed` or `failed` stage status and finer-grained snapshot action in `stage_metadata`. Added tests for HTML/PDF snapshot storage, source-level retry failure, and identical-fingerprint reuse
+- Not done: no live object storage upload was verified against the dev bucket, no DB persistence was wired to the real dev Postgres yet, and no formal snapshot interface document was added under `shared/contracts` or `api-interface-contracts`
+- Key files: `worker/discovery/fpds_snapshot/capture.py`, `worker/discovery/fpds_snapshot/storage.py`, `worker/discovery/fpds_snapshot/__main__.py`, `worker/discovery/fpds_snapshot/__init__.py`, `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/tests/test_snapshot_capture.py`, `worker/discovery/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept `fetch_status` narrow at `fetched` or `reused` for snapshot rows and kept `run_source_item.stage_status` conservative at `completed` or `failed`, with exact snapshot action left in `stage_metadata.snapshot_action`. Chose SHA-256 over raw body bytes for `checksum` and SHA-256 over `content_type + body` for `fingerprint` so raw integrity and idempotency keys stay deterministic without waiting for a fuller checksum policy document. Kept failed fetch attempts out of `source_snapshot` rows because the current schema requires `object_storage_key`, `checksum`, and `fingerprint`, and instead routed failures into `run_source_item.error_summary` and `stage_metadata`
+- Verification:
+  - `python -m unittest discover -s worker/discovery/tests -t .`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - blocked by an inaccessible temporary debug folder `tmp58jc15b1` created during local debugging
+  - manual harness-equivalent markdown, PowerShell, and JSON validation excluding the inaccessible debug folder
+  - passed
+- Known issues: the inaccessible `tmp58jc15b1` debug folder still remains in the workspace and prevents the standard repo doctor full-repo scan from completing cleanly. Live snapshot execution also still depends on user-owned dev bucket access, valid AWS CLI auth, and DB migration application if persistence is added next
+- Next step: connect snapshot results to real `source_document` or `source_snapshot` persistence and run a first live capture against the priority prototype sources `TD-SAV-002`, `TD-SAV-004`, `TD-SAV-007`, and `TD-SAV-008`
+
+## 2026-04-09 - WBS 3.2 Snapshot Capture Persistence and Live Verification
+
+- WBS: `3.2`
+- Status: `done`
+- Goal: finish snapshot capture by wiring live env loading, Postgres persistence, and a real dev verification run
+- Why now: the Product Owner confirmed that dev bucket access and the baseline migration were ready, so `3.2` could move from capture-only code to an end-to-end runnable slice
+- Outcome: added env-file loading for the snapshot CLI, with explicit env files overriding ambient process env. Added a `psql`-backed persistence layer that starts or finalizes `ingestion_run`, upserts `source_document`, inserts new `source_snapshot`, and upserts `run_source_item`. Added schema resolution so the worker prefers `FPDS_DATABASE_SCHEMA` when the required tables exist there, but falls back to `public` when the configured schema is empty and `public` contains the snapshot tables. Live snapshot capture was then verified against the dev bucket and dev Postgres for `TD-SAV-002`, `TD-SAV-004`, `TD-SAV-007`, and `TD-SAV-008`
+- Not done: no parsed-document or chunk-stage persistence was added yet, and no harness fix was made for the unrelated ACL-blocked `tmp58jc15b1` folder
+- Key files: `worker/discovery/env.py`, `worker/discovery/fpds_snapshot/persistence.py`, `worker/discovery/fpds_snapshot/__main__.py`, `worker/discovery/fpds_snapshot/capture.py`, `worker/discovery/fpds_snapshot/storage.py`, `worker/discovery/tests/test_snapshot_persistence.py`, `worker/discovery/README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept DB access dependency-free by using baseline `psql` instead of adding a Python DB driver. Treated an explicit `--env-file` as the source of truth and allowed a safe `public` schema fallback only when the configured schema does not contain the required snapshot tables. Left `run_state` as `completed` for partial-success capture runs and reserved `failed` for all-source failure
+- Verification:
+  - `python -m unittest discover -s worker/discovery/tests -t .`
+  - passed with `15` tests
+  - `python -m worker.discovery.fpds_snapshot --env-file .env.dev --persist-db --run-id run_20260409_3203 --correlation-id corr_20260409_3203 --request-id req_20260409_3203 --source-id TD-SAV-002 --source-id TD-SAV-004 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `stored_count=4`, `database_schema=public`
+  - `psql ... select count(*) from public.ingestion_run where run_id = 'run_20260409_3203'; select count(*) from public.run_source_item where run_id = 'run_20260409_3203'; select count(*) from public.source_snapshot where snapshot_id in (...);`
+  - returned `1`, `4`, `4`
+  - `python -m worker.discovery.fpds_snapshot --env-file .env.dev --persist-db --run-id run_20260409_3204 --correlation-id corr_20260409_3204 --request-id req_20260409_3204 --source-id TD-SAV-002 --source-id TD-SAV-004 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `reused_count=4`, confirming DB-backed snapshot reuse
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - still blocked by `tmp58jc15b1` access denied outside this slice
+- Known issues: the current dev env declares `FPDS_DATABASE_SCHEMA=fpds`, but the migrated snapshot tables actually live in `public`, so runtime schema fallback is currently masking that local setup drift. The inaccessible `tmp58jc15b1` folder still prevents a clean full-repo harness scan
+- Next step: start `3.3` parsing and chunking using the now-persisted `source_snapshot` rows and verified raw object keys
+
 ---
 
 ## 7. Change History
@@ -342,3 +422,7 @@ Each entry should include:
 | 2026-04-09 | Added the owner readiness checklist return entry and recorded the completed setup status |
 | 2026-04-09 | Added the root README status refresh entry |
 | 2026-04-09 | Added the harness startup read order update entry |
+| 2026-04-09 | Added the WBS 3.1 source discovery core entry |
+| 2026-04-09 | Added the WBS 3.1 TD-SAV-007 live URL alignment entry |
+| 2026-04-09 | Added the WBS 3.2 snapshot capture core entry |
+| 2026-04-09 | Added the WBS 3.2 snapshot capture persistence and live verification entry |

@@ -1,8 +1,8 @@
-﻿# TD Savings Source Inventory
+# TD Savings Source Inventory
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Approved Baseline for WBS 1.8.1  
+Version: 1.0
+Date: 2026-04-06
+Status: Approved Baseline for WBS 1.8.1
 Source Documents:
 - `docs/02-requirements/scope-baseline.md`
 - `docs/01-planning/plan.md`
@@ -114,7 +114,7 @@ Source Documents:
 | TD-SAV-004 | P0 | HTML detail | `TD Growth Savings` primary detail source | `https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account` | product_name, description_short, monthly_fee, transaction_fee, boosted_rate_eligibility, qualifying transaction rules, tier summary | High: boosted-rate 조건이 길고 cross-product dependency를 포함 |
 | TD-SAV-005 | P0 | HTML rates | current interest rate truth and tier values | `https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates` | public_display_rate, standard_rate, boosted_rate, rate tiers, rate-as-of marker | High: dynamic current values라 change frequency 높음 |
 | TD-SAV-006 | P0 | HTML fee summary | cross-product fee 비교와 fee normalization | `https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings` | monthly transaction limit, transaction fee, bill payment fee, atm fees, transfer exceptions | Medium: summary page라 일부 상세 조건이 생략될 수 있음 |
-| TD-SAV-007 | P0 | PDF terms/fees | account/service fee의 canonical governing document | `https://www.td.com/content/dam/tdct/document/pdf/econsent/accounts/513796-20171030.pdf` | effective_date, account lineup, detailed account fees, service fees, paper statement fee, transaction definitions, fee applicability | Medium: PDF table parsing complexity, but legal baseline로 중요 |
+| TD-SAV-007 | P0 | PDF terms/fees | account/service fee의 canonical governing document | `https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf` | effective_date, account lineup, detailed account fees, service fees, paper statement fee, transaction definitions, fee applicability | Medium: PDF table parsing complexity, but legal baseline로 중요 |
 | TD-SAV-008 | P0 | PDF interest | interest calculation and tier rule의 canonical governing document | `https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513782-en.pdf` | interest_calculation_method, interest_payment_frequency, tier_definition_text, account-specific rate table logic | Medium: PDF row grouping과 tier parsing 난이도 존재 |
 
 ### 4.2 P1 Supporting Evidence Sources
@@ -154,6 +154,11 @@ Prototype의 초기 source registry에는 Section 4의 12개 source만 수동 �
 3. detail/fee page에서 노출되는 linked PDF는 Section 4 등록 목록과 일치할 때만 source로 채택한다.
 4. query string, tracking parameter, trailing slash 차이는 normalized URL 기준으로 dedupe한다.
 5. promotion page, compare tool, authenticated flow, cross-domain link는 warning만 남기고 registry에 자동 추가하지 않는다.
+
+Note:
+- as of `2026-04-09`, TD live pages expose `TD-SAV-007` with the detail-page URL `https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf`
+- the fee summary page also exposes a second live download path `https://www.td.com/content/dam/tdct/document/pdf/econsent/accounts/513796.pdf`
+- the prototype registry now treats the detail-page URL as the canonical `TD-SAV-007` seed, and the alternate fee-summary path stays outside the 12-source baseline unless alias handling is explicitly added later
 
 ---
 
