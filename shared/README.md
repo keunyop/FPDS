@@ -5,6 +5,7 @@ This directory holds cross-surface modules reused by app, API, and workers.
 Current boundary:
 - `config/` shared config shape and environment readers
 - `contracts/` shared request, response, and orchestration contracts
+- `design/` shared design tokens, CSS variables, and UI vocabulary
 - `domain/` canonical schema, validation, and business vocabulary
 - `i18n/` localization resources and helpers
 - `observability/` logging, error, and usage helpers

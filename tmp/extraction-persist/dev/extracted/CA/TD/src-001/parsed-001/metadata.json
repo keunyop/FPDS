@@ -1,0 +1,12 @@
+{
+  "source_id": "TD-SAV-002",
+  "source_document_id": "src-001",
+  "snapshot_id": "snap-001",
+  "parsed_document_id": "parsed-001",
+  "model_execution_id": "modelexec-4b034e76c39c9326",
+  "extracted_storage_key": "dev/extracted/CA/TD/src-001/parsed-001/extracted.json",
+  "metadata_storage_key": "dev/extracted/CA/TD/src-001/parsed-001/metadata.json",
+  "extracted_field_count": 19,
+  "evidence_link_count": 11,
+  "runtime_notes": []
+}

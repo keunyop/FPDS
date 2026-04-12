@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FPDS Prototype Result Viewer</title>
+    <link rel="stylesheet" href="../../shared/design/fpds-theme.css" />
+    <link rel="stylesheet" href="./viewer.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="shell__nav">
+        <div class="brand-lockup">
+          <div class="brand-lockup__eyebrow">FPDS Prototype</div>
+          <div class="brand-lockup__title">Internal Result Viewer</div>
+          <p class="brand-lockup__copy">
+            Read-only reviewability surface for TD Savings prototype runs before full admin queue and trace tooling.
+          </p>
+        </div>
+        <nav class="nav-sections" aria-label="Viewer sections">
+          <a href="#overview">Run Overview</a>
+          <a href="#candidates">Candidate Rail</a>
+          <a href="#detail">Candidate Detail</a>
+          <a href="#evidence">Evidence Links</a>
+        </nav>
+        <div class="nav-card">
+          <div class="nav-card__label">Prototype boundary</div>
+          <ul class="nav-card__list">
+            <li>Read-only result inspection</li>
+            <li>Evidence-linked field review</li>
+            <li>No admin login required</li>
+            <li>No decision or trace write flows</li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="shell__main">
+        <header class="hero" id="overview">
+          <div>
+            <div class="hero__eyebrow">Stripe-benchmarked FPDS shell</div>
+            <h1 class="hero__title">Prototype run diagnostics with evidence-first detail</h1>
+            <p class="hero__copy">
+              This viewer is intentionally narrow: operators can inspect run outcome, candidate fields, validation issues,
+              and evidence excerpts without stepping into the deferred admin review workflow.
+            </p>
+          </div>
+          <div class="hero__meta" id="run-meta"></div>
+        </header>
+
+        <section class="metric-strip" id="metrics"></section>
+
+        <section class="workspace">
+          <div class="workspace__rail" id="candidates">
+            <div class="panel panel--rail">
+              <div class="panel__header">
+                <div>
+                  <div class="panel__eyebrow">Candidate Rail</div>
+                  <h2 class="panel__title">Reviewable outputs</h2>
+                </div>
+                <div class="panel__count" id="candidate-count"></div>
+              </div>
+              <div class="candidate-list" id="candidate-list"></div>
+            </div>
+          </div>
+
+          <div class="workspace__detail" id="detail">
+            <div class="panel">
+              <div class="panel__header">
+                <div>
+                  <div class="panel__eyebrow">Candidate Detail</div>
+                  <h2 class="panel__title" id="detail-title">Select a candidate</h2>
+                </div>
+                <div class="panel__status" id="detail-status"></div>
+              </div>
+              <div id="detail-summary" class="summary-grid"></div>
+              <div class="detail-columns">
+                <section class="detail-card">
+                  <h3>Highlighted Fields</h3>
+                  <div id="field-chips" class="field-chip-grid"></div>
+                </section>
+                <section class="detail-card">
+                  <h3>Validation Issues</h3>
+                  <div id="issue-list" class="issue-list"></div>
+                </section>
+              </div>
+              <section class="detail-card detail-card--table">
+                <h3>Canonical Payload</h3>
+                <div id="payload-table" class="payload-table"></div>
+              </section>
+            </div>
+
+            <div class="panel" id="evidence">
+              <div class="panel__header">
+                <div>
+                  <div class="panel__eyebrow">Evidence Links</div>
+                  <h2 class="panel__title">Source excerpts and anchors</h2>
+                </div>
+              </div>
+              <div id="evidence-list" class="evidence-list"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./viewer-payload.js"></script>
+    <script src="./viewer.js"></script>
+  </body>
+</html>

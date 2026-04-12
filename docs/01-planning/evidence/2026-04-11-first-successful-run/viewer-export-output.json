@@ -1,0 +1,14 @@
+{
+  "run_id": "run_20260411_3901_validate",
+  "candidate_count": 3,
+  "review_task_count": 3,
+  "evidence_link_count": 43,
+  "output_json": "app\\prototype\\viewer-payload.json",
+  "output_js": "app\\prototype\\viewer-payload.js",
+  "runtime": {
+    "env_file": ".env.dev",
+    "loaded_env_key_count": 49,
+    "database_schema": "public",
+    "generated_at": "2026-04-11T07:51:34.629299+00:00"
+  }
+}

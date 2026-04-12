@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from worker.discovery.fpds_discovery.drift import DriftIssue, PreflightDriftResult, SourcePreflightCheck
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, FetchedResponse
 from worker.discovery.fpds_discovery.registry import DEFAULT_REGISTRY_PATH, load_registry
 from worker.discovery.fpds_snapshot.capture import (
@@ -49,11 +50,61 @@ class SnapshotCaptureTests(unittest.TestCase):
             object_store=object_store,
             fetcher=lambda url, policy: responses[url],
         )
+        preflight_result = PreflightDriftResult(
+            run_id="run_20260409_0100",
+            correlation_id="corr_20260409_0100",
+            request_id=None,
+            checks=[
+                SourcePreflightCheck(
+                    source_id=html_source.source_id,
+                    source_document_id=html_source.source_document_id,
+                    expected_url=html_source.normalized_source_url,
+                    expected_source_type=html_source.source_type,
+                    status="warning",
+                    fetched_at="2026-04-09T00:00:00+00:00",
+                    final_url=html_source.resolved_url,
+                    normalized_final_url=html_source.normalized_source_url,
+                    status_code=200,
+                    content_type="text/html",
+                    redirect_count=0,
+                    error_summary=None,
+                    issues=[
+                        DriftIssue(
+                            source_id=html_source.source_id,
+                            source_document_id=html_source.source_document_id,
+                            issue_code="content_type_changed",
+                            severity="warning",
+                            expected_url=html_source.normalized_source_url,
+                            detected_url=html_source.normalized_source_url,
+                            expected_source_type=html_source.source_type,
+                            detected_content_type="text/html",
+                            message="simulated warning",
+                        )
+                    ],
+                ),
+                SourcePreflightCheck(
+                    source_id=pdf_source.source_id,
+                    source_document_id=pdf_source.source_document_id,
+                    expected_url=pdf_source.normalized_source_url,
+                    expected_source_type=pdf_source.source_type,
+                    status="ok",
+                    fetched_at="2026-04-09T00:00:00+00:00",
+                    final_url=pdf_source.resolved_url,
+                    normalized_final_url=pdf_source.normalized_source_url,
+                    status_code=200,
+                    content_type="application/pdf",
+                    redirect_count=0,
+                    error_summary=None,
+                    issues=[],
+                ),
+            ],
+        )
 
         result = service.capture_sources(
             run_id="run_20260409_0100",
             correlation_id="corr_20260409_0100",
             sources=[html_source, pdf_source],
+            preflight_result=preflight_result,
         )
 
         self.assertFalse(result.partial_completion_flag)
@@ -67,6 +118,7 @@ class SnapshotCaptureTests(unittest.TestCase):
             self.assertEqual(item.run_source_item_record["stage_status"], "completed")
             self.assertTrue(str(item.run_source_item_record["run_source_item_id"]).startswith("rsi-"))
             self.assertTrue(str(item.object_storage_key).startswith("dev/snapshots/CA/TD/"))
+        self.assertEqual(stored_results[0].run_source_item_record["warning_count"], 1)
 
     def test_capture_reuses_existing_snapshot_when_fingerprint_matches(self) -> None:
         source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-007"))

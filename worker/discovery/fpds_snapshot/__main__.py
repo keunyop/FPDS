@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from worker.discovery.env import load_env_file, resolve_default_env_file
+from worker.discovery.fpds_discovery.drift import RegistryPreflightDriftService
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy
 from worker.discovery.fpds_discovery.registry import load_registry
 
@@ -52,6 +53,11 @@ def main() -> int:
         default=None,
         help="Optional JSON file with previously stored snapshot records for reuse decisions.",
     )
+    parser.add_argument(
+        "--skip-preflight-drift-check",
+        action="store_true",
+        help="Disable lightweight source drift checks before snapshot capture.",
+    )
     args = parser.parse_args()
 
     env_file = args.env_file
@@ -91,8 +97,18 @@ def main() -> int:
         )
 
     storage_config = SnapshotStorageConfig.from_env()
+    fetch_policy = DiscoveryFetchPolicy.from_env()
+    preflight_result = None
+    if not args.skip_preflight_drift_check:
+        preflight_service = RegistryPreflightDriftService(fetch_policy=fetch_policy)
+        preflight_result = preflight_service.check_sources(
+            run_id=args.run_id,
+            correlation_id=args.correlation_id,
+            request_id=args.request_id,
+            sources=sources,
+        )
     service = SnapshotCaptureService(
-        fetch_policy=DiscoveryFetchPolicy.from_env(),
+        fetch_policy=fetch_policy,
         storage_config=storage_config,
         object_store=build_object_store(storage_config),
     )
@@ -102,6 +118,7 @@ def main() -> int:
         request_id=args.request_id,
         sources=sources,
         existing_snapshots=existing_snapshots,
+        preflight_result=preflight_result,
     )
     output = result.to_dict()
     output["runtime"] = {
@@ -112,6 +129,7 @@ def main() -> int:
         "triggered_by": args.triggered_by,
         "database_schema": repository.active_schema if repository is not None else None,
         "storage_driver": storage_config.driver,
+        "preflight_drift_check_enabled": not args.skip_preflight_drift_check,
     }
     if repository is not None:
         persistence_result = repository.persist_capture_result(

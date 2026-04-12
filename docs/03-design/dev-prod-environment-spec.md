@@ -96,6 +96,9 @@ Rules:
 | `FPDS_OBJECT_STORAGE_SIGNED_URL_MODE` | object access mode for internal retrieval |
 | `FPDS_SNAPSHOT_OBJECT_PREFIX` | snapshot object subtree name |
 | `FPDS_PARSED_OBJECT_PREFIX` | parsed object subtree name |
+| `FPDS_EXTRACTION_OBJECT_PREFIX` | extraction artifact subtree name |
+| `FPDS_NORMALIZED_OBJECT_PREFIX` | normalization artifact subtree name |
+| `FPDS_VALIDATION_OBJECT_PREFIX` | validation or routing artifact subtree name |
 | `FPDS_PARSER_INTERMEDIATE_PREFIX` | parser intermediate subtree name |
 | `FPDS_EVIDENCE_PREFIX_ROOT` | evidence namespace root |
 | `FPDS_EVIDENCE_RETENTION_CLASS` | retention hook for later archival or purge work |

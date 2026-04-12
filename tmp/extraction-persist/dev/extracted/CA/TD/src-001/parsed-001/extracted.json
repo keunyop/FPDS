@@ -1,0 +1,1011 @@
+{
+  "run_id": "run-001",
+  "correlation_id": null,
+  "request_id": null,
+  "source_id": "TD-SAV-002",
+  "source_document_id": "src-001",
+  "snapshot_id": "snap-001",
+  "parsed_document_id": "parsed-001",
+  "model_execution_id": "modelexec-4b034e76c39c9326",
+  "agent_name": "fpds-heuristic-extractor",
+  "model_id": "heuristic-extractor-v1",
+  "started_at": "2026-04-12T04:54:41.203029+00:00",
+  "schema_context": {
+    "product_family": "deposit",
+    "product_type": "savings",
+    "source_language": "en",
+    "expected_fields": []
+  },
+  "requested_fields": [
+    "product_name",
+    "description_short",
+    "monthly_fee",
+    "public_display_fee",
+    "fee_waiver_condition",
+    "minimum_balance",
+    "minimum_deposit",
+    "standard_rate",
+    "public_display_rate",
+    "promotional_rate",
+    "promotional_period_text",
+    "introductory_rate_flag",
+    "eligibility_text",
+    "interest_calculation_method",
+    "interest_payment_frequency",
+    "tiered_rate_flag",
+    "tier_definition_text",
+    "withdrawal_limit_text",
+    "registered_flag",
+    "notes"
+  ],
+  "retrieval_result": {
+    "correlation_id": null,
+    "run_id": "run-001",
+    "parsed_document_id": "parsed-001",
+    "requested_retrieval_mode": "metadata-only",
+    "applied_retrieval_mode": "metadata-only",
+    "runtime_notes": [],
+    "matches": [
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "product_name",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "description_short",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "monthly_fee",
+        "score": 0.17,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "monthly"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "public_display_fee",
+        "score": 0.17,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "monthly"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "fee_waiver_condition",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "minimum_balance",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "minimum_deposit",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "standard_rate",
+        "score": 0.59,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "interest",
+            "interest rate",
+            "rate"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "public_display_rate",
+        "score": 0.59,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "interest",
+            "interest rate",
+            "rate"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "promotional_rate",
+        "score": 0.35,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "rate"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "promotional_period_text",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "introductory_rate_flag",
+        "score": 0.35,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "rate"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "eligibility_text",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "interest_calculation_method",
+        "score": 0.29,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "interest",
+            "is"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "interest_payment_frequency",
+        "score": 0.9,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "interest",
+            "interest is paid",
+            "is",
+            "monthly",
+            "paid",
+            "paid monthly"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "tiered_rate_flag",
+        "score": 0.47,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "interest",
+            "rate"
+          ],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "tier_definition_text",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "withdrawal_limit_text",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "registered_flag",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "notes",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      }
+    ]
+  },
+  "extracted_fields": [
+    {
+      "field_name": "product_family",
+      "candidate_value": "deposit",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "product_type",
+      "candidate_value": "savings",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "bank_code",
+      "candidate_value": "TD",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "country_code",
+      "candidate_value": "CA",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "source_language",
+      "candidate_value": "en",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "currency",
+      "candidate_value": "CAD",
+      "value_type": "string",
+      "confidence": 0.99,
+      "extraction_method": "derived_context",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "product_name",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.88,
+      "extraction_method": "derived_title",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "description_short",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.7,
+      "extraction_method": "derived_description",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": null,
+      "evidence_text_excerpt": null,
+      "anchor_type": null,
+      "anchor_value": null,
+      "page_no": null,
+      "chunk_index": null,
+      "field_metadata": {
+        "derived_field": true
+      }
+    },
+    {
+      "field_name": "fee_waiver_condition",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    },
+    {
+      "field_name": "standard_rate",
+      "candidate_value": "1.10",
+      "value_type": "decimal",
+      "confidence": 0.59,
+      "extraction_method": "heuristic_percent",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": [
+          "interest",
+          "interest rate",
+          "rate"
+        ]
+      }
+    },
+    {
+      "field_name": "public_display_rate",
+      "candidate_value": "1.10",
+      "value_type": "decimal",
+      "confidence": 0.59,
+      "extraction_method": "heuristic_percent",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": [
+          "interest",
+          "interest rate",
+          "rate"
+        ]
+      }
+    },
+    {
+      "field_name": "promotional_rate",
+      "candidate_value": "1.10",
+      "value_type": "decimal",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_percent",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": [
+          "rate"
+        ]
+      }
+    },
+    {
+      "field_name": "promotional_period_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    },
+    {
+      "field_name": "eligibility_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    },
+    {
+      "field_name": "interest_calculation_method",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_sentence",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": [
+          "interest",
+          "is"
+        ]
+      }
+    },
+    {
+      "field_name": "interest_payment_frequency",
+      "candidate_value": "monthly",
+      "value_type": "string",
+      "confidence": 0.9,
+      "extraction_method": "heuristic_frequency",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": [
+          "interest",
+          "interest is paid",
+          "is",
+          "monthly",
+          "paid",
+          "paid monthly"
+        ]
+      }
+    },
+    {
+      "field_name": "tier_definition_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    },
+    {
+      "field_name": "withdrawal_limit_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    },
+    {
+      "field_name": "notes",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "value_type": "string",
+      "confidence": 0.55,
+      "extraction_method": "heuristic_text",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0,
+      "field_metadata": {
+        "retrieval_mode": "metadata-only",
+        "matched_keywords": []
+      }
+    }
+  ],
+  "evidence_links": [
+    {
+      "field_name": "fee_waiver_condition",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "standard_rate",
+      "candidate_value": "1.10",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.59,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "public_display_rate",
+      "candidate_value": "1.10",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.59,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "promotional_rate",
+      "candidate_value": "1.10",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "promotional_period_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "eligibility_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "interest_calculation_method",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "interest_payment_frequency",
+      "candidate_value": "monthly",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.9,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "tier_definition_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "withdrawal_limit_text",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    },
+    {
+      "field_name": "notes",
+      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
+      "evidence_chunk_id": "chunk-001",
+      "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+      "source_document_id": "src-001",
+      "source_snapshot_id": "snap-001",
+      "citation_confidence": 0.55,
+      "model_execution_id": "modelexec-4b034e76c39c9326",
+      "anchor_type": "section",
+      "anchor_value": "rates",
+      "page_no": null,
+      "chunk_index": 0
+    }
+  ]
+}

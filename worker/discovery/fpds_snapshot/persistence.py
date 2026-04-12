@@ -229,6 +229,8 @@ FROM (
             "snapshot_stats": capture_result.to_dict()["stats"],
             "source_ids": [source.source_id for source in sources],
         }
+        if capture_result.preflight_result is not None:
+            final_run_metadata["preflight_drift"] = capture_result.preflight_result.to_dict()["stats"]
         sql = f"""
 BEGIN;
 SET LOCAL search_path TO {schema};
@@ -456,7 +458,7 @@ SELECT COALESCE((
     @staticmethod
     def _run_psql(command: Sequence[str], sql: str) -> str:
         completed = subprocess.run(
-            [*command, "-X", "-q", "-A", "-t"],
+            [*command, "-v", "ON_ERROR_STOP=1", "-X", "-q", "-A", "-t"],
             input=sql,
             text=True,
             capture_output=True,

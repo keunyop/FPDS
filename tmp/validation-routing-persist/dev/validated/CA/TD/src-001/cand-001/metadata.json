@@ -1,0 +1,21 @@
+{
+  "candidate_id": "cand-001",
+  "source_document_id": "src-001",
+  "snapshot_id": "snap-001",
+  "parsed_document_id": "parsed-001",
+  "validation_model_execution_id": "modelexec-3172f4c93249d4af",
+  "validation_storage_key": "dev/validated/CA/TD/src-001/cand-001/validation-routing.json",
+  "metadata_storage_key": "dev/validated/CA/TD/src-001/cand-001/metadata.json",
+  "validation_status": "pass",
+  "validation_issue_codes": [],
+  "source_confidence": 0.8258,
+  "candidate_state": "in_review",
+  "review_reason_code": "manual_sampling_review",
+  "queue_reason_codes": [
+    "manual_sampling_review"
+  ],
+  "review_task_id": "review-134d5e08a0809aa0",
+  "runtime_notes": [
+    "Candidate routed to review in `prototype` mode with primary reason `manual_sampling_review`."
+  ]
+}

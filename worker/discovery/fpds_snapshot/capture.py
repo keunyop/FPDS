@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 from typing import Callable
 
+from worker.discovery.fpds_discovery.drift import PreflightDriftResult
 from worker.discovery.fpds_discovery.fetch import (
     DiscoveryFetchPolicy,
     FetchedResponse,
@@ -118,12 +119,13 @@ class SnapshotCaptureResult:
     request_id: str | None
     source_results: list[SnapshotSourceResult]
     partial_completion_flag: bool
+    preflight_result: PreflightDriftResult | None = None
 
     def to_dict(self) -> dict[str, object]:
         stored_count = sum(1 for item in self.source_results if item.snapshot_action == "stored")
         reused_count = sum(1 for item in self.source_results if item.snapshot_action == "reused")
         failed_count = sum(1 for item in self.source_results if item.snapshot_action == "failed")
-        return {
+        payload = {
             "run_id": self.run_id,
             "correlation_id": self.correlation_id,
             "request_id": self.request_id,
@@ -136,6 +138,9 @@ class SnapshotCaptureResult:
             },
             "source_results": [item.__dict__ for item in self.source_results],
         }
+        if self.preflight_result is not None:
+            payload["preflight"] = self.preflight_result.to_dict()
+        return payload
 
 
 class SnapshotCaptureService:
@@ -162,6 +167,7 @@ class SnapshotCaptureService:
         correlation_id: str | None = None,
         request_id: str | None = None,
         existing_snapshots: list[ExistingSnapshotRecord] | None = None,
+        preflight_result: PreflightDriftResult | None = None,
     ) -> SnapshotCaptureResult:
         known_snapshots = {
             record.dedupe_key: record for record in (existing_snapshots or [])
@@ -176,6 +182,7 @@ class SnapshotCaptureService:
                 correlation_id=correlation_id,
                 request_id=request_id,
                 known_snapshots=known_snapshots,
+                preflight_result=preflight_result,
             )
             source_results.append(result)
             if result.snapshot_action == "stored" and result.source_snapshot_record is not None:
@@ -190,6 +197,7 @@ class SnapshotCaptureService:
             request_id=request_id,
             source_results=source_results,
             partial_completion_flag=partial_completion_flag,
+            preflight_result=preflight_result,
         )
 
     def _capture_single_source(
@@ -200,9 +208,13 @@ class SnapshotCaptureService:
         correlation_id: str | None,
         request_id: str | None,
         known_snapshots: dict[tuple[str, str], ExistingSnapshotRecord],
+        preflight_result: PreflightDriftResult | None,
     ) -> SnapshotSourceResult:
         attempt_count = 0
         last_error: str | None = None
+        preflight_issues = preflight_result.issues_for_source_document(source.source_document_id) if preflight_result is not None else []
+        preflight_status = preflight_result.status_for_source_document(source.source_document_id) if preflight_result is not None else None
+        preflight_issue_codes = [issue.issue_code for issue in preflight_issues]
 
         while attempt_count < self.max_attempts:
             attempt_count += 1
@@ -220,6 +232,9 @@ class SnapshotCaptureService:
                         request_id=request_id,
                         fetched=fetched,
                         known=known,
+                        preflight_warning_count=len(preflight_issues),
+                        preflight_status=preflight_status,
+                        preflight_issue_codes=preflight_issue_codes,
                     )
 
                 snapshot_id = _build_snapshot_id(source.source_document_id, fingerprint)
@@ -270,7 +285,7 @@ class SnapshotCaptureService:
                         source=source,
                         snapshot_id=snapshot_id,
                         stage_status="completed",
-                        warning_count=0,
+                        warning_count=len(preflight_issues),
                         error_count=0,
                         error_summary=None,
                         stage_metadata={
@@ -282,6 +297,8 @@ class SnapshotCaptureService:
                             "object_storage_key": object_key,
                             "correlation_id": correlation_id,
                             "attempt_count": attempt_count,
+                            "preflight_status": preflight_status,
+                            "preflight_issue_codes": preflight_issue_codes,
                         },
                     ),
                 )
@@ -307,7 +324,7 @@ class SnapshotCaptureService:
                 source=source,
                 snapshot_id=None,
                 stage_status="failed",
-                warning_count=0,
+                warning_count=len(preflight_issues),
                 error_count=attempt_count,
                 error_summary=last_error,
                 stage_metadata={
@@ -316,6 +333,8 @@ class SnapshotCaptureService:
                     "attempt_count": attempt_count,
                     "correlation_id": correlation_id,
                     "requested_url": source.resolved_url,
+                    "preflight_status": preflight_status,
+                    "preflight_issue_codes": preflight_issue_codes,
                 },
             ),
         )
@@ -330,6 +349,9 @@ class SnapshotCaptureService:
         request_id: str | None,
         fetched: FetchedResponse,
         known: ExistingSnapshotRecord,
+        preflight_warning_count: int = 0,
+        preflight_status: str | None = None,
+        preflight_issue_codes: list[str] | None = None,
     ) -> SnapshotSourceResult:
         return SnapshotSourceResult(
             source_id=source.source_id,
@@ -350,7 +372,7 @@ class SnapshotCaptureService:
                 source=source,
                 snapshot_id=known.snapshot_id,
                 stage_status="completed",
-                warning_count=0,
+                warning_count=preflight_warning_count,
                 error_count=0,
                 error_summary=None,
                 stage_metadata={
@@ -360,6 +382,8 @@ class SnapshotCaptureService:
                     "attempt_count": attempt_count,
                     "existing_snapshot_id": known.snapshot_id,
                     "existing_fetched_at": known.fetched_at,
+                    "preflight_status": preflight_status,
+                    "preflight_issue_codes": preflight_issue_codes or [],
                     "current_response_metadata": _build_response_metadata(
                         source=source,
                         fetched=fetched,

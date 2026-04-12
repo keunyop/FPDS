@@ -3,3 +3,6 @@ harness-cleanup-audit.md
 .env.*
 !.env.example
 !.env.*.example
+.venv/
+__pycache__/
+*.pyc

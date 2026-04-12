@@ -1,0 +1,239 @@
+{
+  "run_id": "run_20260411_3901_validate",
+  "correlation_id": "corr_20260411_3901",
+  "request_id": null,
+  "routing_mode": "prototype",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 3,
+    "queued_count": 3,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 3
+  },
+  "source_results": [
+    {
+      "source_id": "TD-SAV-002",
+      "source_document_id": "src-td-html-7922da6819d41139",
+      "snapshot_id": "snap-5cb335a1f79c7572",
+      "parsed_document_id": "parsed-279eed7a9e8087fa",
+      "candidate_id": "cand-49a521ade25ad544",
+      "candidate_run_id": "run_20260411_3901_normalize",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-7e227310d10483f8",
+      "validation_storage_key": "dev/validated/CA/TD/src-td-html-7922da6819d41139/cand-49a521ade25ad544/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/TD/src-td-html-7922da6819d41139/cand-49a521ade25ad544/metadata.json",
+      "review_task_id": "review-ee7d9aded05be1e2",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6692,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "manual_sampling_review"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e1db881129baedcd",
+        "run_id": "run_20260411_3901_validate",
+        "source_document_id": "src-td-html-7922da6819d41139",
+        "selected_snapshot_id": "snap-5cb335a1f79c7572",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-49a521ade25ad544",
+          "candidate_run_id": "run_20260411_3901_normalize",
+          "validation_model_execution_id": "modelexec-7e227310d10483f8",
+          "normalization_model_execution_id": "modelexec-ada2c8caf1919683",
+          "validation_storage_key": "dev/validated/CA/TD/src-td-html-7922da6819d41139/cand-49a521ade25ad544/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/TD/src-td-html-7922da6819d41139/cand-49a521ade25ad544/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6692,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "manual_sampling_review"
+          ],
+          "review_task_id": "review-ee7d9aded05be1e2",
+          "runtime_notes": [
+            "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    },
+    {
+      "source_id": "TD-SAV-003",
+      "source_document_id": "src-td-html-ea1ab93268f19492",
+      "snapshot_id": "snap-e6b73a16fb92200a",
+      "parsed_document_id": "parsed-5d032ecec3f01711",
+      "candidate_id": "cand-6b5c6ae1c07f2afa",
+      "candidate_run_id": "run_20260411_3901_normalize",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-edb356fe566eb5b8",
+      "validation_storage_key": "dev/validated/CA/TD/src-td-html-ea1ab93268f19492/cand-6b5c6ae1c07f2afa/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/TD/src-td-html-ea1ab93268f19492/cand-6b5c6ae1c07f2afa/metadata.json",
+      "review_task_id": "review-055dad56cf0d43cc",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6738,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "manual_sampling_review"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-91377278744a07ce",
+        "run_id": "run_20260411_3901_validate",
+        "source_document_id": "src-td-html-ea1ab93268f19492",
+        "selected_snapshot_id": "snap-e6b73a16fb92200a",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-6b5c6ae1c07f2afa",
+          "candidate_run_id": "run_20260411_3901_normalize",
+          "validation_model_execution_id": "modelexec-edb356fe566eb5b8",
+          "normalization_model_execution_id": "modelexec-3b721883a9d5e90f",
+          "validation_storage_key": "dev/validated/CA/TD/src-td-html-ea1ab93268f19492/cand-6b5c6ae1c07f2afa/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/TD/src-td-html-ea1ab93268f19492/cand-6b5c6ae1c07f2afa/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6738,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "manual_sampling_review"
+          ],
+          "review_task_id": "review-055dad56cf0d43cc",
+          "runtime_notes": [
+            "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    },
+    {
+      "source_id": "TD-SAV-004",
+      "source_document_id": "src-td-html-ccce6ce37887f36e",
+      "snapshot_id": "snap-2a38b480916a6d67",
+      "parsed_document_id": "parsed-9f012538945d6293",
+      "candidate_id": "cand-cf186b9aee48b51c",
+      "candidate_run_id": "run_20260411_3901_normalize",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-7e00fbad4760287c",
+      "validation_storage_key": "dev/validated/CA/TD/src-td-html-ccce6ce37887f36e/cand-cf186b9aee48b51c/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/TD/src-td-html-ccce6ce37887f36e/cand-cf186b9aee48b51c/metadata.json",
+      "review_task_id": "review-c451a2ba4c341cd6",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.673,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "manual_sampling_review"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8c4d1d51b93eb516",
+        "run_id": "run_20260411_3901_validate",
+        "source_document_id": "src-td-html-ccce6ce37887f36e",
+        "selected_snapshot_id": "snap-2a38b480916a6d67",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-cf186b9aee48b51c",
+          "candidate_run_id": "run_20260411_3901_normalize",
+          "validation_model_execution_id": "modelexec-7e00fbad4760287c",
+          "normalization_model_execution_id": "modelexec-ff97ddb50b53a2a7",
+          "validation_storage_key": "dev/validated/CA/TD/src-td-html-ccce6ce37887f36e/cand-cf186b9aee48b51c/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/TD/src-td-html-ccce6ce37887f36e/cand-cf186b9aee48b51c/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.673,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "manual_sampling_review"
+          ],
+          "review_task_id": "review-c451a2ba4c341cd6",
+          "runtime_notes": [
+            "Candidate routed to review in `prototype` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": ".env.dev",
+    "loaded_env_key_count": 49,
+    "persist_db": true,
+    "trigger_type": "manual",
+    "triggered_by": "codex",
+    "routing_mode": "prototype",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260411_3901_validate",
+    "run_state": "completed",
+    "candidate_count": 3,
+    "review_task_count": 3,
+    "review_queued_count": 3,
+    "auto_validated_count": 0,
+    "model_execution_count": 3,
+    "usage_record_count": 3,
+    "run_source_item_count": 3,
+    "source_success_count": 3,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-11T07:50:48.504723+00:00"
+  }
+}

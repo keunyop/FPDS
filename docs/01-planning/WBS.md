@@ -233,6 +233,8 @@ Based on:
 | 2.10 | Completed | CI/CD 기본 파이프라인 준비 | foundation checks workflow and future package-script baseline | DevOps | 2.1 | 2026-04-13 |
 
 ## WBS 3. Prototype Build - TD Savings
+> Approved Update 2026-04-11: `Completed`
+> Gate B `Pass` 승인 완료
 
 > 상태: `Next`
 > 조건: Gate A `Pass` 승인 완료 후, Product Owner의 실행 시작 지시 시 execution order 기준으로 착수
@@ -241,16 +243,18 @@ Based on:
 |---|---|---|---|---|---|---|
 | 3.1 | Completed | source discovery 구현 | TD Savings source capture | AI/Data | 1.8.1, 2.4 | 2026-04-16 |
 | 3.2 | Completed | snapshot 수집 구현 | HTML/PDF snapshot 저장 | AI/Data | 3.1 | 2026-04-16 |
-| 3.3 | Next | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 | 2026-04-20 |
-| 3.4 | Next | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 | 2026-04-21 |
-| 3.5 | Next | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 | 2026-04-22 |
-| 3.6 | Next | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 | 2026-04-23 |
-| 3.7 | Next | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 | 2026-04-24 |
-| 3.8 | Next | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 | 2026-04-27 |
-| 3.9 | Next | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 | 2026-04-28 |
-| 3.10 | Next | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 | 2026-04-29 |
+| 3.3 | Completed | parsing/chunking 구현 | parsed text + chunk metadata | AI/Data | 3.2 | 2026-04-20 |
+| 3.4 | Completed | evidence retrieval 구조 구현 | field-to-evidence 연결 구조 | AI/Data, Backend | 3.3 | 2026-04-21 |
+| 3.5 | Completed | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 | 2026-04-22 |
+| 3.6 | Completed | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 | 2026-04-23 |
+| 3.7 | Completed | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 | 2026-04-24 |
+| 3.8 | Completed | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 | 2026-04-27 |
+| 3.9 | Completed | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 | 2026-04-28 |
+| 3.10 | Completed | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 | 2026-04-29 |
 
 ## WBS 4. Admin and Ops Core
+> Approved Update 2026-04-11: `Next`
+> Gate B `Pass` 승인 완료, 단 별도 시작 지시 전까지는 착수하지 않음
 
 > 상태: `Blocked`
 > 조건: Prototype 성공 후 착수

@@ -1,0 +1,2135 @@
+{
+  "run_id": "run_20260411_3901_extract",
+  "correlation_id": "corr_20260411_3901",
+  "request_id": null,
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 3,
+    "stored_count": 3,
+    "failed_count": 0,
+    "extracted_field_count": 67,
+    "evidence_link_count": 43
+  },
+  "source_results": [
+    {
+      "source_id": "TD-SAV-002",
+      "source_document_id": "src-td-html-7922da6819d41139",
+      "snapshot_id": "snap-5cb335a1f79c7572",
+      "parsed_document_id": "parsed-279eed7a9e8087fa",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+      "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-7922da6819d41139/parsed-279eed7a9e8087fa/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-7922da6819d41139/parsed-279eed7a9e8087fa/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "TD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "TD Every Day Savings Account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Earns interest on Every dollar",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions included per month 2 1 Additional Transactions 2 $3.00 each Free Transfers to your other TD accounts 1 Unlimited Non-TD ATM Fee (in Canada) 3 $2.00 each Foreign ATM Fee (in U.S., Mexico) 3 $3.00 each Foreign ATM Fees (in any other foreign ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "deposit"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Earn interest and save Whether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-ea6c74fd2633e58c",
+          "evidence_text_excerpt": "Earn interest and save\nWhether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "anchor_type": "section",
+          "anchor_value": "earn-interest-and-save",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Bank accounts and fees at a glance This is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at an",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-5393de3342731163",
+          "evidence_text_excerpt": "Bank accounts and fees at a glance\nThis is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at any branch.\nView fees",
+          "anchor_type": "section",
+          "anchor_value": "bank-accounts-and-fees-at-a-glance",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply",
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Banking Services (PDF) Financial Services Terms Access Agreement (PDF) General List of Services",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-740cd35312da32d8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "calculated",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "TD Every Day Savings Account Earns interest on Every dollar Free transfers to your other TD Canada Trust deposit accounts 1 Unlimited Monthly Fee $0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD Every Day Savings Account Earns interest on Every dollar Free transfers to your other TD Canada Trust deposit accounts 1 Unlimited Monthly Fee $0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-740cd35312da32d8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "additional",
+              "information"
+            ]
+          }
+        },
+        {
+          "field_name": "included_transactions",
+          "candidate_value": "Plan Highlights Included transactions 1 transaction 2 per month Free transfers to your other TD accounts Enjoy unlimited free transfers to your other TD deposit accounts 1 Daily interest Interest calculated on every dollar Automated Savings You can make savings part of your every",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-7ea50b3f9827439e",
+          "evidence_text_excerpt": "Plan Highlights\nIncluded transactions 1 transaction 2 per month\nFree transfers to your other TD accounts Enjoy unlimited free transfers to your other TD deposit accounts 1\nDaily interest Interest calculated on every dollar\nAutomated Savings You can make savings part of your everyday life with our Automated Savings service\nAdditional account benefits Free paperless record keeping or online statements",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "included",
+              "included transactions",
+              "transactions"
+            ]
+          }
+        },
+        {
+          "field_name": "additional_transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions included per month 2 1 Additional Transactions 2 $3.00 each Free Transfers to your other TD accounts 1 Unlimited Non-TD ATM Fee (in Canada) 3 $2.00 each Foreign ATM Fee (in U.S., Mexico) 3 $3.00 each Foreign ATM Fees (in any other foreign ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "additional",
+              "fee"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions included per month 2 1 Additional Transactions 2 $3.00 each Free Transfers to your other TD accounts 1 Unlimited Non-TD ATM Fee (in Canada) 3 $2.00 each Foreign ATM Fee (in U.S., Mexico) 3 $3.00 each Foreign ATM Fees (in any other foreign ",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Earn interest and save Whether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "evidence_chunk_id": "chunk-ea6c74fd2633e58c",
+          "evidence_text_excerpt": "Earn interest and save\nWhether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "earn-interest-and-save",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Bank accounts and fees at a glance This is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at an",
+          "evidence_chunk_id": "chunk-5393de3342731163",
+          "evidence_text_excerpt": "Bank accounts and fees at a glance\nThis is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at any branch.\nView fees",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "bank-accounts-and-fees-at-a-glance",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Banking Services (PDF) Financial Services Terms Access Agreement (PDF) General List of Services",
+          "evidence_chunk_id": "chunk-740cd35312da32d8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "TD Every Day Savings Account Earns interest on Every dollar Free transfers to your other TD Canada Trust deposit accounts 1 Unlimited Monthly Fee $0",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD Every Day Savings Account Earns interest on Every dollar Free transfers to your other TD Canada Trust deposit accounts 1 Unlimited Monthly Fee $0",
+          "evidence_chunk_id": "chunk-6e67c66ca2ce575a",
+          "evidence_text_excerpt": "TD Every Day\u00a0Savings Account\nEarns interest on Every dollar\nFree transfers to your other TD Canada Trust deposit accounts 1 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "td-every-day-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "evidence_chunk_id": "chunk-740cd35312da32d8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "included_transactions",
+          "candidate_value": "Plan Highlights Included transactions 1 transaction 2 per month Free transfers to your other TD accounts Enjoy unlimited free transfers to your other TD deposit accounts 1 Daily interest Interest calculated on every dollar Automated Savings You can make savings part of your every",
+          "evidence_chunk_id": "chunk-7ea50b3f9827439e",
+          "evidence_text_excerpt": "Plan Highlights\nIncluded transactions 1 transaction 2 per month\nFree transfers to your other TD accounts Enjoy unlimited free transfers to your other TD deposit accounts 1\nDaily interest Interest calculated on every dollar\nAutomated Savings You can make savings part of your everyday life with our Automated Savings service\nAdditional account benefits Free paperless record keeping or online statements",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "additional_transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions included per month 2 1 Additional Transactions 2 $3.00 each Free Transfers to your other TD accounts 1 Unlimited Non-TD ATM Fee (in Canada) 3 $2.00 each Foreign ATM Fee (in U.S., Mexico) 3 $3.00 each Foreign ATM Fees (in any other foreign ",
+          "evidence_chunk_id": "chunk-d853d95a7c12ec77",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions included per month 2\n1\nAdditional Transactions 2\n$3.00 each\nFree Transfers to your other TD accounts 1\nUnlimited\nNon-TD ATM Fee (in Canada) 3\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 3\n$3.00 each\nForeign ATM Fees (in any other foreign country) 3\n$5.00 each\nPaper Statement Fee\n$2.00 per month",
+          "source_document_id": "src-td-html-7922da6819d41139",
+          "source_snapshot_id": "snap-5cb335a1f79c7572",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f8468e9ee42bf487",
+        "run_id": "run_20260411_3901_extract",
+        "source_document_id": "src-td-html-7922da6819d41139",
+        "selected_snapshot_id": "snap-5cb335a1f79c7572",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-279eed7a9e8087fa",
+          "model_execution_id": "modelexec-25ae0d16cb0a6ee3",
+          "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-7922da6819d41139/parsed-279eed7a9e8087fa/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-7922da6819d41139/parsed-279eed7a9e8087fa/metadata.json",
+          "extracted_field_count": 22,
+          "evidence_link_count": 14,
+          "runtime_notes": [],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    },
+    {
+      "source_id": "TD-SAV-003",
+      "source_document_id": "src-td-html-ea1ab93268f19492",
+      "snapshot_id": "snap-e6b73a16fb92200a",
+      "parsed_document_id": "parsed-5d032ecec3f01711",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-52315b4b891c8446",
+      "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-ea1ab93268f19492/parsed-5d032ecec3f01711/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-ea1ab93268f19492/parsed-5d032ecec3f01711/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "TD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "TD ePremium Savings Account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "On balances of $10,000 or more High interest rate",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transaction Fee 3 $5.00 each Free Online Transfers 2 Unlimited Non-TD ATM Fee (in Canada) 4 $2.00 each Foreign ATM Fee (in U.S., Mexico) 4 $3.00 each Foreign ATM Fees (in any other foreign country) 4 $5.00 each",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "10000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "daily"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "10000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "deposit"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Earn interest and save Whether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-e649bb3c0ab8589d",
+          "evidence_text_excerpt": "Earn interest and save\nWhether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "anchor_type": "section",
+          "anchor_value": "earn-interest-and-save",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Bank accounts and fees at a glance This is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at an",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-74bf1dc130b89ed5",
+          "evidence_text_excerpt": "Bank accounts and fees at a glance\nThis is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at any branch.\nView fees",
+          "anchor_type": "section",
+          "anchor_value": "bank-accounts-and-fees-at-a-glance",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply",
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Plan Highlights High interest rate Earn interest calculated daily, when your account balance is $10,000 or more.",
+          "value_type": "string",
+          "confidence": 0.85,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "daily",
+              "interest",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "Free online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2 Automated Savings You can make savings part of your everyday life with our Automated Savings services Additional account benefits Free paperless record keeping or online statements",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD ePremium Savings Account On balances of $10,000 or more High interest rate Free online transfers to your other TD Canada Trust deposit accounts 2 Unlimited Monthly Fee $0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-7194c51a70da86f8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "additional",
+              "information"
+            ]
+          }
+        },
+        {
+          "field_name": "transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transaction Fee 3 $5.00 each Free Online Transfers 2 Unlimited Non-TD ATM Fee (in Canada) 4 $2.00 each Foreign ATM Fee (in U.S., Mexico) 4 $3.00 each Foreign ATM Fees (in any other foreign country) 4 $5.00 each",
+          "value_type": "string",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "transaction",
+              "transaction fee"
+            ]
+          }
+        },
+        {
+          "field_name": "free_online_transfers",
+          "candidate_value": "TD ePremium Savings Account On balances of $10,000 or more High interest rate Free online transfers to your other TD Canada Trust deposit accounts 2 Unlimited Monthly Fee $0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "free",
+              "free online transfers",
+              "online",
+              "transfers"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transaction Fee 3 $5.00 each Free Online Transfers 2 Unlimited Non-TD ATM Fee (in Canada) 4 $2.00 each Foreign ATM Fee (in U.S., Mexico) 4 $3.00 each Foreign ATM Fees (in any other foreign country) 4 $5.00 each",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "10000.00",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "10000.00",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Earn interest and save Whether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "evidence_chunk_id": "chunk-e649bb3c0ab8589d",
+          "evidence_text_excerpt": "Earn interest and save\nWhether you're saving for the future or for a large purchase, we can help you achieve your goals with a savings account that fits your needs.",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "earn-interest-and-save",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Bank accounts and fees at a glance This is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at an",
+          "evidence_chunk_id": "chunk-74bf1dc130b89ed5",
+          "evidence_text_excerpt": "Bank accounts and fees at a glance\nThis is a simple overview of our most common fees. For a complete list of all banking fees that might apply to your account, please check our helpful About Our Accounts and Related Services document, which you can download here, or ask for at any branch.\nView fees",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "bank-accounts-and-fees-at-a-glance",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Plan Highlights High interest rate Earn interest calculated daily, when your account balance is $10,000 or more.",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.85,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "Free online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2 Automated Savings You can make savings part of your everyday life with our Automated Savings services Additional account benefits Free paperless record keeping or online statements",
+          "evidence_chunk_id": "chunk-3124258c76c37de7",
+          "evidence_text_excerpt": "Plan Highlights\nHigh interest rate Earn interest calculated daily, when your account balance is $10,000 or more.\nFree online transfers Enjoy unlimited free online transfers to your other TD deposit accounts 2\nAutomated Savings You can make savings part of your everyday life with our Automated Savings services\nAdditional account benefits Free paperless record keeping or online statements",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD ePremium Savings Account On balances of $10,000 or more High interest rate Free online transfers to your other TD Canada Trust deposit accounts 2 Unlimited Monthly Fee $0",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "evidence_chunk_id": "chunk-7194c51a70da86f8",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transaction Fee 3 $5.00 each Free Online Transfers 2 Unlimited Non-TD ATM Fee (in Canada) 4 $2.00 each Foreign ATM Fee (in U.S., Mexico) 4 $3.00 each Foreign ATM Fees (in any other foreign country) 4 $5.00 each",
+          "evidence_chunk_id": "chunk-0b7119ff34364921",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransaction Fee 3\n$5.00 each\nFree Online Transfers 2\nUnlimited\nNon-TD ATM Fee (in Canada) 4\n$2.00 each\nForeign ATM Fee (in U.S., Mexico) 4\n$3.00 each\nForeign ATM Fees (in any other foreign country) 4\n$5.00 each",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "free_online_transfers",
+          "candidate_value": "TD ePremium Savings Account On balances of $10,000 or more High interest rate Free online transfers to your other TD Canada Trust deposit accounts 2 Unlimited Monthly Fee $0",
+          "evidence_chunk_id": "chunk-a7049fc3d80e0546",
+          "evidence_text_excerpt": "TD ePremium Savings Account\nOn balances of $10,000 or more High interest rate\nFree online transfers to your other TD Canada Trust deposit accounts 2 Unlimited\nMonthly Fee $0",
+          "source_document_id": "src-td-html-ea1ab93268f19492",
+          "source_snapshot_id": "snap-e6b73a16fb92200a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "anchor_type": "section",
+          "anchor_value": "td-epremium-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-3efc3e1a1c793dfa",
+        "run_id": "run_20260411_3901_extract",
+        "source_document_id": "src-td-html-ea1ab93268f19492",
+        "selected_snapshot_id": "snap-e6b73a16fb92200a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-5d032ecec3f01711",
+          "model_execution_id": "modelexec-52315b4b891c8446",
+          "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-ea1ab93268f19492/parsed-5d032ecec3f01711/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-ea1ab93268f19492/parsed-5d032ecec3f01711/metadata.json",
+          "extracted_field_count": 22,
+          "evidence_link_count": 14,
+          "runtime_notes": [],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    },
+    {
+      "source_id": "TD-SAV-004",
+      "source_document_id": "src-td-html-ccce6ce37887f36e",
+      "snapshot_id": "snap-2a38b480916a6d67",
+      "parsed_document_id": "parsed-9f012538945d6293",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-76074f62b375b946",
+      "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-ccce6ce37887f36e/parsed-9f012538945d6293/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-ccce6ce37887f36e/parsed-9f012538945d6293/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "TD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "TD Growth\u2122 Savings Account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Earns interest on Balances over $5000 with the Boosted rate 1",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions fee $5.00 each 3 Free transfers to your other TD accounts Unlimited 4 Non-TD ATM Fee (in Canada) $2.00 each 5 Foreign ATM Fee (in U.S., Mexico) $3.00 each 5 Foreign ATM Fees (in any other foreign country) $5.00 each 5",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "5000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "5000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "deposit"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealt",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealt",
+          "value_type": "string",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligibility",
+              "eligible",
+              "qualify"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Banking Services (PDF) Financial Services Terms Access Agreement (PDF) General List of Services",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-82d26dab37575013",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 15,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "calculated",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-c8956e47b18ae2e9",
+          "evidence_text_excerpt": "Plan Highlights\n$0 Monthly Fee Enjoy your savings account without the burden of monthly fees.\n$0 Monthly Fee\nEnjoy your savings account without the burden of monthly fees.\nEarn the Boosted Rate 1 Customers with an eligible TD Chequing 1 Account can earn\u202fhigher returns on balances of $5,000 or more with the Boosted Rate\u00a0instead of the Standard Posted Rate.\nEarn the Boosted Rate 1\nCustomers with an eligible TD Chequing 1 Account can earn\u202fhigher returns on balances of $5,000 or more with the Boosted Rate\u00a0instead of the Standard Posted Rate.\nTiered Interest Rates The more you save, the higher your interest rate \u2013 helping you earn more as you save.\nTiered Interest Rates\nThe more you save, the higher your interest rate \u2013 helping you earn more as you save.\nFree Transfers Enjoy unlimited, free transfers to all of your TD deposit accounts. 4\nFree Transfers\nEnjoy unlimited, free transfers to all",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate",
+              "tiered"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "TD Growth\u2122 Savings Account Earns interest on Balances over $5000 with the Boosted rate 1 Free transfers to your other TD deposit accounts Unlimited 4 Monthly Fee $ 0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD Growth\u2122 Savings Account Earns interest on Balances over $5000 with the Boosted rate 1 Free transfers to your other TD deposit accounts Unlimited 4 Monthly Fee $ 0",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-82d26dab37575013",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 15,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "additional",
+              "information"
+            ]
+          }
+        },
+        {
+          "field_name": "transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions fee $5.00 each 3 Free transfers to your other TD accounts Unlimited 4 Non-TD ATM Fee (in Canada) $2.00 each 5 Foreign ATM Fee (in U.S., Mexico) $3.00 each 5 Foreign ATM Fees (in any other foreign country) $5.00 each 5",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee"
+            ]
+          }
+        },
+        {
+          "field_name": "boosted_rate_eligibility",
+          "candidate_value": "Boosted Rate Eligibility Earn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD C",
+          "value_type": "string",
+          "confidence": 0.76,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "boosted",
+              "boosted rate eligibility",
+              "eligibility",
+              "rate"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions fee $5.00 each 3 Free transfers to your other TD accounts Unlimited 4 Non-TD ATM Fee (in Canada) $2.00 each 5 Foreign ATM Fee (in U.S., Mexico) $3.00 each 5 Foreign ATM Fees (in any other foreign country) $5.00 each 5",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "5000.00",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "5000.00",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealt",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealt",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Banking Services (PDF) Financial Services Terms Access Agreement (PDF) General List of Services",
+          "evidence_chunk_id": "chunk-82d26dab37575013",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 15
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-c8956e47b18ae2e9",
+          "evidence_text_excerpt": "Plan Highlights\n$0 Monthly Fee Enjoy your savings account without the burden of monthly fees.\n$0 Monthly Fee\nEnjoy your savings account without the burden of monthly fees.\nEarn the Boosted Rate 1 Customers with an eligible TD Chequing 1 Account can earn\u202fhigher returns on balances of $5,000 or more with the Boosted Rate\u00a0instead of the Standard Posted Rate.\nEarn the Boosted Rate 1\nCustomers with an eligible TD Chequing 1 Account can earn\u202fhigher returns on balances of $5,000 or more with the Boosted Rate\u00a0instead of the Standard Posted Rate.\nTiered Interest Rates The more you save, the higher your interest rate \u2013 helping you earn more as you save.\nTiered Interest Rates\nThe more you save, the higher your interest rate \u2013 helping you earn more as you save.\nFree Transfers Enjoy unlimited, free transfers to all of your TD deposit accounts. 4\nFree Transfers\nEnjoy unlimited, free transfers to all",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "plan-highlights",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "TD Growth\u2122 Savings Account Earns interest on Balances over $5000 with the Boosted rate 1 Free transfers to your other TD deposit accounts Unlimited 4 Monthly Fee $ 0",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "TD Growth\u2122 Savings Account Earns interest on Balances over $5000 with the Boosted rate 1 Free transfers to your other TD deposit accounts Unlimited 4 Monthly Fee $ 0",
+          "evidence_chunk_id": "chunk-7cfce3637154be8b",
+          "evidence_text_excerpt": "TD Growth\u2122 Savings Account\nEarns interest on Balances over $5000 with the Boosted rate 1\nFree transfers to your other TD deposit accounts Unlimited 4\nMonthly Fee $ 0",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "td-growth-savings-account",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Additional Account Details & Terms Information Find out more about opening a TD account with helpful resources and information. Account Interest Rates How Our Interest is Calculated (PDF) Account and Other Related Service Fees (PDF) Everyday Finances Made Easy Access to Basic Ban",
+          "evidence_chunk_id": "chunk-82d26dab37575013",
+          "evidence_text_excerpt": "Additional Account Details & Terms Information\nFind out more about opening a TD account with helpful resources and information.\nAccount Interest\u00a0Rates\nHow Our Interest is Calculated\u00a0(PDF)\nAccount and Other Related Service Fees\u00a0(PDF)\nEveryday Finances Made\u00a0Easy\nAccess to Basic Banking Services\u00a0(PDF)\nFinancial Services\u00a0Terms\nAccess Agreement (PDF)\nGeneral List of\u00a0Services",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "additional-account-details-terms-information",
+          "page_no": null,
+          "chunk_index": 15
+        },
+        {
+          "field_name": "transaction_fee",
+          "candidate_value": "Account Fees Monthly Fee $0 Transactions fee $5.00 each 3 Free transfers to your other TD accounts Unlimited 4 Non-TD ATM Fee (in Canada) $2.00 each 5 Foreign ATM Fee (in U.S., Mexico) $3.00 each 5 Foreign ATM Fees (in any other foreign country) $5.00 each 5",
+          "evidence_chunk_id": "chunk-c05da8277120890e",
+          "evidence_text_excerpt": "Account Fees\nMonthly Fee\n$0\nTransactions fee\n$5.00 each 3\nFree transfers to your other TD accounts\nUnlimited 4\nNon-TD ATM Fee (in Canada)\n$2.00 each 5\nForeign ATM Fee (in U.S., Mexico)\n$3.00 each 5\nForeign ATM Fees (in any other foreign country)\n$5.00 each 5",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "account-fees",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "boosted_rate_eligibility",
+          "candidate_value": "Boosted Rate Eligibility Earn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify: 1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account Maintain an eligible TD C",
+          "evidence_chunk_id": "chunk-9f644fbb1a515d2a",
+          "evidence_text_excerpt": "Boosted Rate Eligibility\nEarn the Boosted rate 1 on your savings for the next month! Here\u2019s how to qualify:\n1 Maintain an eligible TD Chequing Account: TD Unlimited Chequing Account TD All-Inclusive Banking Plan TD Wealth Private Banking Chequing Account\nMaintain an eligible TD Chequing Account:\nTD Unlimited Chequing Account\nTD All-Inclusive Banking Plan\nTD Wealth Private Banking Chequing Account\n2 Complete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month: Direct Deposit Pre-Authorized Debit Online Bill Payment\nComplete at least 2 out of the 3 Qualifying Monthly Transactions 1 on your eligible TD Chequing Account each month:\nDirect Deposit\nPre-Authorized Debit\nOnline Bill Payment",
+          "source_document_id": "src-td-html-ccce6ce37887f36e",
+          "source_snapshot_id": "snap-2a38b480916a6d67",
+          "citation_confidence": 0.76,
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "anchor_type": "section",
+          "anchor_value": "boosted-rate-eligibility",
+          "page_no": null,
+          "chunk_index": 3
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-33a51f80d8c12acd",
+        "run_id": "run_20260411_3901_extract",
+        "source_document_id": "src-td-html-ccce6ce37887f36e",
+        "selected_snapshot_id": "snap-2a38b480916a6d67",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-9f012538945d6293",
+          "model_execution_id": "modelexec-76074f62b375b946",
+          "extracted_storage_key": "dev/extracted/CA/TD/src-td-html-ccce6ce37887f36e/parsed-9f012538945d6293/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/TD/src-td-html-ccce6ce37887f36e/parsed-9f012538945d6293/metadata.json",
+          "extracted_field_count": 23,
+          "evidence_link_count": 15,
+          "runtime_notes": [],
+          "correlation_id": "corr_20260411_3901",
+          "request_id": null
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": ".env.dev",
+    "loaded_env_key_count": 49,
+    "persist_db": true,
+    "trigger_type": "manual",
+    "triggered_by": "codex",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260411_3901_extract",
+    "run_state": "completed",
+    "model_execution_count": 3,
+    "usage_record_count": 3,
+    "run_source_item_count": 3,
+    "extracted_draft_count": 3,
+    "source_success_count": 3,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-11T07:43:08.421018+00:00"
+  }
+}

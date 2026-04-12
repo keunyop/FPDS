@@ -2,22 +2,46 @@
 
 This repository is the docs-first workspace for `FPDS` (Finance Product Data Service), the evidence-grounded financial product data platform that will later support MyBank-facing experiences.
 
-The repository is currently `execution-ready`, not `product-implementation-in-progress`.
+The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-09`:
+As of `2026-04-11`:
 - `Gate A` passed on `2026-04-06`
-- `WBS 2` foundation scaffolds and baseline artifacts are recorded as complete
-- local toolchain and hosted dev readiness were recorded on `2026-04-09`
-- actual `WBS 3` product implementation has not started and remains on hold until the Product Owner gives an explicit start instruction
+- `Gate B` passed on `2026-04-11`
+- `WBS 2` foundation scaffolds and baseline artifacts are complete
+- `WBS 3.1` source discovery is complete
+- `WBS 3.2` snapshot capture and persistence are complete
+- `WBS 3.3` parsing/chunking is complete with live dev verification and parsed-document reuse verification
+- `WBS 3.4` evidence retrieval is complete with metadata-only live verification and vector-assisted fallback behavior verification
+- `WBS 3.5` extraction flow is complete with extracted-draft artifacts, `model_execution` and zero-token heuristic usage persistence, and unit verification
+- `WBS 3.6` normalization mapping is complete with `normalized_candidate`, `field_evidence_link`, and live dev verification
+- `WBS 3.7` validation/confidence routing is complete with candidate revalidation, `review_task` creation, and live dev verification
+- `WBS 3.8` internal result viewer is complete as a static prototype viewer plus live-exportable viewer payload
+- `WBS 3.9` first end-to-end run is complete with a committed evidence pack and live viewer export for the three TD savings target products
+- `WBS 3.10` prototype findings memo is complete, and its original Gate B `Deferred` recommendation has now been overtaken by three post-memo hardening slices plus an approved Gate B review note
+- a first post-`3.10` hardening slice is complete: normalization now supplements missing TD savings rate fields from the `TD-SAV-005` current-rates source, and a live hardening run moved all three target candidates from `validation_error` to `validation_status=pass`
+- a second post-`3.10` hardening slice is complete: normalization now selectively reuses `TD-SAV-008` governing-PDF interest rules, has an opportunistic `TD-SAV-007` fee-waiver merge hook, splits `TD Growth` boosted-rate qualification into cleaner canonical fields, and suppresses several noisy long-text fields before candidate persistence
+- a third post-`3.10` hardening slice is complete: `TD-SAV-007` fee-governing evidence is now used in a live target-safe way to suppress noisy `fee_waiver_condition` fields for zero-monthly-fee TD savings products instead of persisting misleading waiver text
 
 ## What This Repo Contains Today
 
 - requirements, scope, planning, governance, and design documents
 - foundation baselines for env, DB, storage, auth, i18n, security, observability, and route manifests
+- shared design-system baseline artifacts for future public and admin UI implementation
+- a minimal Python worker project baseline in `pyproject.toml`
+- working prototype ingestion code for discovery, preflight drift checks, scheduled registry refresh artifacts, snapshot capture, parse/chunk, and evidence retrieval stages
+- working prototype extraction code that turns retrieval matches into sparse extracted drafts with evidence-link drafts
+- working prototype normalization code that maps extracted drafts into canonical candidate rows and candidate-level evidence links
+- working prototype validation/routing code that recomputes candidate validation, updates candidate state, and creates prototype review tasks
+- working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
+- a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
+- a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
+- a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
+- a second hardening baseline that selectively merges governing-PDF interest rules, cleans noisy text, and separates `TD Growth` qualification logic in normalization
+- a third hardening baseline that uses `TD-SAV-007` to keep zero-fee savings candidates from carrying misleading fee-waiver text
 - repository harness scripts, git hooks, and CI validation
 - top-level boundaries for future `app`, `api`, `worker`, `shared`, `db`, and `storage` work
 
-This is intentionally not a running FPDS product yet.
+This is still not a full FPDS product yet, but the ingestion core is now actively being implemented.
 
 ## Start Here
 
@@ -53,21 +77,36 @@ Out of scope for the current FPDS build:
 - approved runtime and toolchain baselines are documented
 - local tools are available: `uv`, `pnpm`, `psql`, `aws`
 - hosted dev readiness and real dev secret preparation are recorded
+- `WBS 3.1` to `3.4` have runnable code and verification records in-repo
+- `WBS 3.5` extraction now has runnable code and unit verification records in-repo
+- `WBS 3.6` normalization now has runnable code and live dev verification records in-repo
+- `WBS 3.7` validation and routing now has runnable code and live dev verification records in-repo
+- `WBS 3.8` prototype viewer now has runnable export code and a browser-viewable static shell in-repo
+- `WBS 3.9` now has a live first end-to-end evidence pack in-repo for the three prototype target products
+- `WBS 3.10` now has a written findings memo, and three follow-up hardening slices have already cleared the original `required_field_missing` validation gap, added selective `TD-SAV-008` PDF merge, improved `TD Growth` qualification cleanup, and removed misleading zero-fee `fee_waiver_condition` fields using `TD-SAV-007` evidence in live reruns
+- Gate B is now closed as `Pass`
+- `WBS 4. Admin and Ops Core` is the next approved stage, but implementation has not started because no separate start instruction has been given for that stage
+- discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
+- the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
+
+### In Progress
+
+- prototype worker runtime implementation
 
 ### Not Started
 
-- `WBS 3` prototype runtime work
-- runtime package bootstrap
-- DB migration apply on the real dev database
-- snapshot capture, parsing, chunking, extraction, normalization, review flow, public UI, admin UI, and BX-PF runtime integration code
+- full public UI, full admin UI, and review decision runtime code
+- BX-PF runtime integration code
+- frontend and API package bootstrap
 
 ### Hold Rule
 
-`Gate A Pass` means readiness only.
-It does not mean development has already started.
+The Product Owner has explicitly started WBS `3` product implementation.
 
-Implementation still waits for:
-- explicit Product Owner start instruction
+Scope still remains constrained to the approved prototype boundary:
+- `TD Bank`
+- `Savings Accounts`
+- ingestion and reviewability-first slices before broader public or admin build-out
 
 ## Approved Technical Baseline
 
@@ -81,14 +120,16 @@ Implementation still waits for:
 - admin auth approach: server-side session auth managed by the Python API
 - dev monitoring baseline: `disabled` for the first implementation pass
 
-These are approved baselines for future implementation.
-They should not be read as evidence that the runtime has already been bootstrapped in this repo.
+These remain the approved baselines for the broader runtime.
+Current implementation evidence in this repo is still concentrated in the Python worker path.
 
 ## Foundation Baselines In Repo
 
 - env contract: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
+- design-system baseline: [docs/03-design/fpds-design-system.md](docs/03-design/fpds-design-system.md)
 - env examples: `.env.dev.example`, `.env.prod.example`
 - config landing zone: [shared/config/README.md](shared/config/README.md)
+- design landing zone: [shared/design/README.md](shared/design/README.md)
 - DB baseline: [docs/03-design/db-migration-baseline.md](docs/03-design/db-migration-baseline.md)
 - DB entrypoint: [db/README.md](db/README.md)
 - storage baseline: [docs/03-design/object-storage-evidence-bucket-baseline.md](docs/03-design/object-storage-evidence-bucket-baseline.md)
@@ -166,7 +207,7 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invo
 - `db/` SQL-first migration baseline and DB notes
 - `storage/` object storage and evidence bucket baseline
 - `worker/` discovery, pipeline, publish, and runtime worker boundaries
-- `shared/` contracts, config, domain, i18n, observability, and security modules
+- `shared/` contracts, config, design, domain, i18n, observability, and security modules
 - `docs/` requirements, governance, planning, and design
 - `scripts/harness/` repository checks, audits, and helper scripts
 - `.githooks/` git hook entrypoints

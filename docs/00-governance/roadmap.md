@@ -13,6 +13,14 @@ Source Documents:
 - `docs/00-governance/raid-log.md`
 - `docs/00-governance/working-agreement.md`
 
+## Gate Update
+
+As of `2026-04-11`:
+- `Gate B` is approved as `Pass`
+- `WBS 3. Prototype Build` is complete for the approved `TD Savings` prototype scope
+- `WBS 4. Admin and Ops Core` is the next approved stage
+- no `WBS 4` implementation has started yet, because Product Owner requested document updates only and did not issue a separate start instruction for that stage
+
 ## 0. Current Progress Snapshot
 
 As of 2026-04-07, WBS 기준 현재 진행 상태는 아래와 같습니다.

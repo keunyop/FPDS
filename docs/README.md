@@ -36,6 +36,7 @@ Status: Active Navigation Index
 - `roadmap.md`
 - `milestone-tracker.md`
 - `gate-a-build-start-review-note.md`
+- `gate-b-prototype-review-note.md`
 - `codex-internet-domain-allowlist.md`
 - `harness-engineering-baseline.md`
 - `development-journal.md`
@@ -55,8 +56,10 @@ Status: Active Navigation Index
 - `td-savings-source-inventory.md`
 - `prototype-backlog.md`
 - `prototype-acceptance-checklist.md`
+- `prototype-findings-memo.md`
 - `prototype-spike-scope.md`
 - `sprint-0-board.md`
+- `evidence/2026-04-11-first-successful-run/evidence-pack.md`
 
 ### 2.3 `docs/02-requirements`
 
@@ -80,6 +83,7 @@ Status: Active Navigation Index
 - `system-context-diagram.md`
 - `erd-draft.md`
 - `source-snapshot-evidence-storage-strategy.md`
+- `source-registry-refresh-and-approval-policy.md`
 - `retrieval-vector-starting-point.md`
 - `aggregate-cache-refresh-strategy.md`
 - `environment-separation-strategy.md`
@@ -88,6 +92,7 @@ Status: Active Navigation Index
 - `object-storage-evidence-bucket-baseline.md`
 - `api-interface-contracts.md`
 - `security-access-control-design.md`
+- `fpds-design-system.md`
 - `product-grid-information-architecture.md`
 - `insight-dashboard-metric-definition.md`
 - `product-type-visualization-principles.md`

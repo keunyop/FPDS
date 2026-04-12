@@ -402,6 +402,349 @@ Each entry should include:
 - Known issues: the current dev env declares `FPDS_DATABASE_SCHEMA=fpds`, but the migrated snapshot tables actually live in `public`, so runtime schema fallback is currently masking that local setup drift. The inaccessible `tmp58jc15b1` folder still prevents a clean full-repo harness scan
 - Next step: start `3.3` parsing and chunking using the now-persisted `source_snapshot` rows and verified raw object keys
 
+## 2026-04-10 - WBS 3.3 Parse and Chunk Pipeline
+
+- WBS: `3.3`
+- Status: `done`
+- Goal: turn persisted raw snapshots into parsed text and evidence-ready chunks that downstream retrieval and extraction can consume
+- Why now: `3.4` evidence retrieval and every later ingestion stage depend on stable `parsed_document` and `evidence_chunk` records, so snapshot persistence alone was not enough to move the prototype forward
+- Outcome: added a minimal Python worker project baseline in `pyproject.toml`, introduced `worker/pipeline/fpds_parse_chunk` with HTML parsing via `beautifulsoup4`, PDF parsing via `pypdf`, overlap-aware chunk generation, parsed artifact object storage writes, `psql`-backed persistence for `parsed_document` and `evidence_chunk`, and a CLI that can load stored snapshots from DB or a JSON snapshot manifest. Verified the stage live against dev storage and dev Postgres for `TD-SAV-002`, `TD-SAV-004`, `TD-SAV-007`, and `TD-SAV-008`, then reran the same sources to confirm parsed-document reuse on identical snapshots
+- Not done: no retrieval ranking or field-to-evidence matching logic yet, no extraction prompt flow yet, and no admin trace viewer consumption code yet
+- Key files: `pyproject.toml`, `worker/env.py`, `worker/pipeline/fpds_parse_chunk/parser.py`, `worker/pipeline/fpds_parse_chunk/service.py`, `worker/pipeline/fpds_parse_chunk/storage.py`, `worker/pipeline/fpds_parse_chunk/persistence.py`, `worker/pipeline/fpds_parse_chunk/__main__.py`, `worker/pipeline/tests/test_parse_chunk.py`, `worker/pipeline/README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept `parsed text full body -> object storage` and `chunk excerpt + metadata -> DB` aligned to the approved storage strategy. Used `section` anchors for HTML and `page` anchors for PDF. Reused existing parsed artifacts by `snapshot_id` to preserve immutable lineage and avoid duplicate chunk rows. Moved env loading to `worker/env.py` so discovery and pipeline CLIs can share the same local env behavior. Reworked parse persistence to inline large JSON payloads in SQL so Windows command-length limits do not break `psql` on chunk-heavy sources
+- Verification:
+  - `python -m unittest discover -s worker -t .`
+  - passed with `20` tests
+  - `python -m worker.pipeline.fpds_parse_chunk --env-file .env.dev --persist-db --run-id run_20260410_3301 --correlation-id corr_20260410_3301 --request-id req_20260410_3301 --source-id TD-SAV-002 --source-id TD-SAV-004 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `stored_count=4`, `parsed_document_count=4`, `evidence_chunk_count=118`, `database_schema=public`
+  - `python -m worker.pipeline.fpds_parse_chunk --env-file .env.dev --persist-db --run-id run_20260410_3302 --correlation-id corr_20260410_3302 --request-id req_20260410_3302 --source-id TD-SAV-002 --source-id TD-SAV-004 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `reused_count=4`, confirming parsed-document reuse for the same snapshots
+- Known issues: the dev database schema setting still resolves to `public` at runtime instead of the configured `fpds` schema. The current PDF path extracts page text successfully for the verified TD sources, but table-heavy PDFs will still need retrieval and extraction quality review in `3.4` and `3.5`
+- Next step: start `3.4` evidence retrieval on top of the new `parsed_document_id`, `evidence_chunk_id`, page or section anchor, and excerpt metadata baseline
+
+## 2026-04-10 - WBS 3.4 Evidence Retrieval Baseline
+
+- WBS: `3.4`
+- Status: `done`
+- Goal: add a retrieval-ready internal interface that can return candidate evidence chunks per canonical field before extraction starts
+- Why now: `3.5` extraction depends on a stable way to look up chunk candidates by `parsed_document_id`, field name, and metadata scope, and the approved architecture explicitly allows metadata-only retrieval fallback before `pgvector` is ready in early dev
+- Outcome: added `worker/pipeline/fpds_evidence_retrieval` with request and response models aligned to the internal evidence retrieval contract, a `psql`-backed repository that resolves the active schema and reads joined `evidence_chunk -> parsed_document -> source_snapshot -> source_document` metadata, a metadata-only retrieval service with field-aware lexical scoring, CLI support for `parsed_document_id` or registry-backed `source_id` lookup, and unit tests for ranking, metadata filtering, vector-assisted fallback behavior, and DB payload loading. Live verification was run against dev Postgres for `TD-SAV-007` and `TD-SAV-008`
+- Not done: no `pgvector` similarity search yet, no embedding storage yet, and no `field_evidence_link` persistence yet because that table requires `candidate_id` or `product_version_id`, which are introduced in later stages
+- Key files: `worker/pipeline/fpds_evidence_retrieval/models.py`, `worker/pipeline/fpds_evidence_retrieval/service.py`, `worker/pipeline/fpds_evidence_retrieval/persistence.py`, `worker/pipeline/fpds_evidence_retrieval/__main__.py`, `worker/pipeline/tests/test_evidence_retrieval.py`, `worker/pipeline/README.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: treated `metadata-only` as the approved Prototype or early-dev fallback and kept `vector-assisted` as a forward-compatible request mode that currently degrades cleanly with an explicit runtime note. Did not write `field_evidence_link` rows in `3.4` because the existing DB constraint requires a downstream `candidate_id` or `product_version_id`, so this stage returns candidate chunk sets and leaves finalized linkage to extraction or canonicalization stages. Added UTF-8 `psql` decoding for retrieval because live chunk excerpts can include characters that break the default Windows code page
+- Verification:
+  - `python -m unittest discover -s worker -t .`
+  - passed with `25` tests
+  - `python -m worker.pipeline.fpds_evidence_retrieval --env-file .env.dev --run-id run_20260410_3401 --correlation-id corr_20260410_3401 --source-id TD-SAV-007 --field-name monthly_fee --field-name fee_waiver_condition --field-name eligibility_text`
+  - passed with `requested_retrieval_mode=metadata-only`, `applied_retrieval_mode=metadata-only`, and chunk-level matches that included `evidence_chunk_id`, page anchor, excerpt, and score
+  - `python -m worker.pipeline.fpds_evidence_retrieval --env-file .env.dev --run-id run_20260410_3402 --correlation-id corr_20260410_3402 --source-id TD-SAV-008 --retrieval-mode vector-assisted --field-name interest_payment_frequency --field-name tier_definition_text`
+  - passed with `requested_retrieval_mode=vector-assisted`, `applied_retrieval_mode=metadata-only`, and an explicit fallback runtime note
+- Known issues: the current retrieval scoring is heuristic and metadata-only, so quality is good enough for early extraction scaffolding but not yet the final Phase 1 hybrid target. The dev database schema still resolves to `public` instead of the configured `fpds` schema. `field_evidence_link` persistence remains blocked on later-stage candidate creation
+- Next step: start `3.5` extraction using the new retrieval request shape and candidate chunk output as the evidence input boundary
+
+## 2026-04-10 - Source Registry Refresh and Approval Policy
+
+- WBS: `3.1` operating follow-up
+- Status: `done`
+- Goal: document how the TD savings source registry should stay current when bank sites change URLs, retire products, or publish new sources
+- Why now: the Product Owner asked for an explicit operating strategy before moving deeper into extraction, and the current repo had the approved active registry seed but not a written refresh and approval policy
+- Outcome: added `docs/03-design/source-registry-refresh-and-approval-policy.md` to define the recommended hybrid model: stable approved active registry for ingestion, drift detection during ingestion preflight, scheduled refresh runs that generate candidate diffs, and explicit human approval before promotion into the active registry. Updated the docs map and discovery README so the operating policy is discoverable from the repo entrypoints
+- Not done: no scheduled refresh job, candidate diff persistence layer, admin approval UI, or registry promotion audit implementation was added yet
+- Key files: `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/README.md`, `worker/discovery/README.md`
+- Decisions: rejected both extremes of `auto-update registry on every ingestion run` and `manual-only registry maintenance`. Chose an approval-first hybrid model so ingestion replay remains reproducible while source drift can still be detected quickly
+- Verification:
+  - reviewed `worker/discovery/fpds_discovery/registry.py` and `worker/discovery/README.md` against the new policy to confirm the current implementation already matches the `approved active registry only` baseline
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - not run for this docs-only slice
+- Known issues: the policy defines target operations beyond the current implementation. Candidate registry storage, scheduled refresh execution, and approval tooling remain future work
+- Next step: decide whether the next slice should add `ingestion preflight drift check` first or `scheduled refresh artifact generation` first
+
+## 2026-04-10 - Discovery Preflight Drift Check and Refresh Artifact Generation
+
+- WBS: `3.1` operating follow-up
+- Status: `done`
+- Goal: implement the first runnable operating slices behind the new registry policy: preflight drift checks before ingestion and a scheduled refresh artifact that produces candidate diffs without mutating the active registry
+- Why now: the Product Owner chose the execution order explicitly, and the repo needed operator-visible signals for URL drift or source changes before moving deeper into extraction
+- Outcome: added `worker/discovery/fpds_discovery/drift.py` with a lightweight source-by-source preflight checker that detects fetch failures, final URL changes, and content-type changes. Wired the snapshot capture CLI to run preflight by default and carry warning counts plus preflight summary into run output and snapshot persistence metadata. Added `worker/discovery/fpds_registry_refresh` with a refresh CLI that combines scheduled discovery output and preflight findings into a JSON artifact containing candidate diffs such as `new_source_candidate`, `redirect_detected`, and `source_missing_from_discovery`
+- Not done: no scheduler integration, no candidate diff DB persistence, no active registry promotion workflow, and no admin review UI were added
+- Key files: `worker/discovery/fpds_discovery/drift.py`, `worker/discovery/fpds_snapshot/__main__.py`, `worker/discovery/fpds_snapshot/capture.py`, `worker/discovery/fpds_snapshot/persistence.py`, `worker/discovery/fpds_registry_refresh/service.py`, `worker/discovery/fpds_registry_refresh/__main__.py`, `worker/discovery/tests/test_drift_preflight.py`, `worker/discovery/tests/test_registry_refresh.py`, `worker/discovery/README.md`
+- Decisions: kept preflight warning-only so ingestion reproducibility stays anchored to the approved active registry. Chose JSON artifact generation for scheduled refresh instead of introducing a new DB table or approval UI in the same slice. Kept `--skip-preflight-drift-check` as an escape hatch, but enabled preflight by default for snapshot capture
+- Verification:
+  - `python -m unittest discover -s worker/discovery/tests -t .`
+  - passed with `19` tests
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: scheduled refresh currently generates a local artifact only and does not persist candidate diffs. The preflight check is deliberately lightweight and does not yet compare entry-page listing drift inside the snapshot CLI path
+- Next step: decide whether the next follow-up slice should persist refresh artifacts for review history or start `3.5` extraction as the mainline path
+
+## 2026-04-10 - WBS 3.5 Extraction Flow Baseline
+
+- WBS: `3.5`
+- Status: `done`
+- Goal: convert retrieval-ready evidence chunks into source-level sparse extracted drafts and persist the execution trace needed for later normalization and reviewability
+- Why now: `3.6` normalization needs a stable upstream extraction boundary, and the workflow design explicitly separates `extracted draft` from downstream `normalized_candidate`
+- Outcome: added `worker/pipeline/fpds_extraction` with a CLI, service, storage config, and `psql` repository. The new stage resolves the latest `parsed_document` for registry-backed `source_id` or direct `parsed_document_id`, runs metadata-only evidence retrieval across an extraction field set, derives sparse field candidates, writes extracted draft plus metadata JSON artifacts, persists one `model_execution` row per source attempt, persists a zero-token `llm_usage_record` with `heuristic-no-llm-call` metadata, and updates `run_source_item.stage_metadata` with extraction status and artifact linkage
+- Not done: no external LLM call yet, no `normalized_candidate` write yet, and no `field_evidence_link` persistence yet because candidate ids are still introduced in `3.6`
+- Key files: `worker/pipeline/fpds_extraction/__main__.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_extraction/persistence.py`, `worker/pipeline/fpds_extraction/storage.py`, `worker/pipeline/fpds_extraction/models.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/README.md`, `worker/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: treated `3.5` as `source-level sparse draft extraction` instead of canonicalization. Chose object-storage JSON artifacts as the extraction result persistence shape because the current schema has `model_execution` and `llm_usage_record` but no dedicated extraction table. Kept usage accounting honest by writing `0` tokens with explicit `heuristic-no-llm-call` metadata rather than pretending an external LLM was invoked
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction`
+  - passed with `3` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `32` tests
+  - `python -m worker.pipeline.fpds_extraction --help`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: live dev DB verification did not complete in this session because `psql` could not resolve the configured Supabase host name from the current environment. Extraction heuristics are intentionally lightweight and metadata-only, so quality is sufficient for baseline wiring but not yet final production behavior. The current stage emits evidence-link drafts inside the extracted artifact, but DB-backed `field_evidence_link` rows remain deferred until candidate creation exists
+- Next step: start `3.6` normalization so extracted drafts can be merged into `normalized_candidate`
+
+## 2026-04-10 - WBS 3.6 Normalization Mapping Baseline
+
+- WBS: `3.6`
+- Status: `done`
+- Goal: map extracted draft artifacts into `normalized_candidate` rows and persist candidate-level `field_evidence_link` trace so later validation and review routing can operate on stable candidate ids
+- Why now: `3.7` validation and review routing depend on `candidate_id`, canonical core fields, and persisted field-level evidence links, which only exist after normalization
+- Outcome: added `worker/pipeline/fpds_normalization` with a CLI, service, storage config, and `psql` repository. The stage now resolves the latest completed extraction artifact per registry-backed `source_id`, loads extracted draft JSON from object storage, applies heuristic canonical mapping for core fields and subtype inference, computes provisional `validation_status`, `validation_issue_codes`, and `source_confidence`, writes normalized artifact JSON plus metadata JSON, persists `normalized_candidate`, persists candidate-scoped `field_evidence_link`, records one normalization `model_execution` row per source, records a zero-token `llm_usage_record`, and updates `run_source_item.stage_metadata` with candidate ids and normalization results
+- Not done: no full validation engine yet, no review queue creation yet, and normalization is still source-by-source rather than multi-source product merge
+- Key files: `worker/pipeline/fpds_normalization/__main__.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_normalization/persistence.py`, `worker/pipeline/fpds_normalization/storage.py`, `worker/pipeline/fpds_normalization/models.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `worker/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: set `candidate_state = draft` and left review lifecycle to later stages. Used heuristic subtype mapping against the approved Phase 1 taxonomy values and preserved the `other` fallback path. Chose to persist candidate-level `field_evidence_link` in `3.6` because `candidate_id` now exists. Also tightened all current worker `psql` runners with `ON_ERROR_STOP=1` after normalization exposed a false-positive success path when SQL errors did not stop the command
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization`
+  - passed with `4` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `36` tests
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+  - `python -m worker.pipeline.fpds_normalization --env-file .env.dev --persist-db --run-id run_20260410_3603 --source-id TD-SAV-002 --source-id TD-SAV-007`
+  - passed with `candidate_count=2`, `field_evidence_link_count=32`, `database_schema=public`
+  - `psql ... SELECT counts for ingestion_run, normalized_candidate, field_evidence_link, model_execution, llm_usage_record, run_source_item where run_id = 'run_20260410_3603'`
+  - returned `1`, `2`, `32`, `2`, `2`, `2`
+- Known issues: normalization is intentionally heuristic and can still over-map noisy extracted fields. In the live run, `TD-SAV-002` normalized to `validation_status=error` with `required_field_missing`, which is acceptable for this stage because `3.7` will formalize validation and routing rather than forcing all candidates to look clean at normalization time
+- Next step: start `3.7` validation and confidence routing on top of the new `normalized_candidate` and `field_evidence_link` baseline
+
+## 2026-04-10 - WBS 3.7 Validation and Confidence Routing Baseline
+
+- WBS: `3.7`
+- Status: `done`
+- Goal: formalize candidate validation and prototype review routing on top of `normalized_candidate` so the pipeline produces queued review work instead of stopping at provisional normalization output
+- Why now: `3.8` internal result viewing and later review decision work both need stable `review_task` rows, updated candidate states, and a dedicated validation/routing execution trace
+- Outcome: added `worker/pipeline/fpds_validation_routing` with a CLI, service, storage config, and `psql` repository. The stage now resolves the latest completed normalization artifact per registry-backed `source_id`, reloads candidate payload plus candidate-scoped evidence links, reloads active taxonomy and routing policy config from Postgres, recomputes validation issue codes and confidence, updates `normalized_candidate` state and review reason, writes validation/routing artifact JSON plus metadata JSON, persists `review_task` rows in `queued` state for Prototype routing, records one validation/routing `model_execution` row per source, records a zero-token `llm_usage_record`, and updates `run_source_item.stage_metadata` with review queue linkage
+- Not done: no review decision flow yet, no canonical upsert or change assessment yet, no audit-event emission yet, and no Phase 1 auto-approve live path was exercised because the current product boundary still uses Prototype review-all routing
+- Key files: `worker/pipeline/fpds_validation_routing/__main__.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `worker/pipeline/fpds_validation_routing/storage.py`, `worker/pipeline/fpds_validation_routing/models.py`, `worker/pipeline/tests/test_validation_routing.py`, `worker/pipeline/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept `routing_mode = prototype` as the CLI default because the current repo scope is still Prototype-first. Loaded active taxonomy and routing policy values from `taxonomy_registry` and `processing_policy_config` instead of hard-coding new thresholds inside the service. Used the candidate-producing normalization run id as the persisted `review_task.run_id` so each queued task remains attached to the candidate’s originating run even when validation/routing is executed as a later standalone slice
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_validation_routing`
+  - passed with `3` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `39` tests
+  - `python -m worker.pipeline.fpds_validation_routing --help`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+  - `python -m worker.pipeline.fpds_validation_routing --env-file .env.dev --persist-db --run-id run_20260410_3701 --source-id TD-SAV-002 --source-id TD-SAV-007`
+  - passed with `queued_count=2`, `review_task_count=2`, `database_schema=public`
+- Known issues: Prototype routing intentionally sends even clean candidates like `TD-SAV-007` to review, so `manual_sampling_review` remains the primary reason for pass-level items. A follow-up read-only `psql` verification command timed out in the current shell, so live persistence confirmation relies on the successful stage output and persisted-count summary from the validation CLI itself rather than an extra direct DB query transcript
+- Next step: start `3.8` internal result viewer on top of the new candidate validation state, review task id, and validation artifact links
+
+## 2026-04-10 - FPDS Design System Baseline
+
+- WBS: `design support for 1.7, 3.8, 4.x, 5.x`
+- Status: `done`
+- Goal: define a reusable FPDS design-system baseline, benchmarked against Stripe Dashboard and Stripe Apps design guidance, before app and admin UI implementation starts in earnest
+- Why now: the Product Owner asked for a design system before public/admin UI implementation, and upcoming slices such as `3.8` internal result viewer and later admin/public surfaces need shared tokens and shell rules instead of per-screen styling drift
+- Outcome: added `docs/03-design/fpds-design-system.md` to define visual principles, shell structure, status semantics, typography, color direction, component families, and admin/public surface rules. Added `shared/design/` with implementation-ready token artifacts in `fpds-design-tokens.json` and `fpds-theme.css`, plus a shared-module README so future frontend work can consume one source of truth for tokens and CSS variables
+- Not done: no React component library, no Tailwind or CSS-in-JS integration, no Figma file, and no actual route implementation yet
+- Key files: `docs/03-design/fpds-design-system.md`, `shared/design/README.md`, `shared/design/fpds-design-tokens.json`, `shared/design/fpds-theme.css`, `shared/README.md`, `docs/README.md`, `README.md`
+- Decisions: used Stripe as a benchmark for system consistency, constrained customization, token-driven styling, and pattern-first state handling rather than attempting a visual clone. Chose a FPDS-specific palette of navy, cobalt, teal, amber, and brick red instead of Stripe-purple mimicry. Kept one shared system for public and admin surfaces, with density and layout differences handled by usage rather than separate token sets
+- Verification:
+  - reviewed `https://docs.stripe.com/stripe-apps/design`
+  - reviewed `https://docs.stripe.com/stripe-apps/style`
+  - reviewed `https://docs.stripe.com/stripe-apps/patterns`
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: this is a baseline document and token set, not a live component library. The exact frontend consumption pattern still needs to be chosen when app/admin runtime implementation begins
+- Next step: use the new design-system baseline as the visual contract for `WBS 3.8` internal result viewer and later admin/public UI scaffolds
+
+## 2026-04-10 - WBS 3.8 Internal Result Viewer Baseline
+
+- WBS: `3.8`
+- Status: `done`
+- Goal: implement the prototype read-only internal result viewer using the new FPDS design-system baseline without prematurely committing to the full admin runtime stack
+- Why now: Prototype acceptance requires operator-facing reviewability, and `3.7` now leaves the repo with stable `review_task`, `normalized_candidate`, and `field_evidence_link` rows that can be surfaced without waiting for `4.x` admin workflow work
+- Outcome: added `worker/pipeline/fpds_result_viewer` as a DB-backed payload exporter that reads one persisted run, joins candidate, review, source, snapshot, and evidence metadata, maps source-document ids back to registry `source_id`, and writes both `viewer-payload.json` and browser-consumable `viewer-payload.js` into `app/prototype/`. Added a static `app/prototype/index.html` viewer shell plus CSS and JS that consume the payload and render run summary, candidate rail, highlighted fields, validation issues, canonical payload rows, and evidence excerpts in a Stripe-benchmarked FPDS layout
+- Not done: no framework runtime, no admin auth, no review decision actions, no queue list operations, and no full `4.4` evidence trace viewer drilldown yet
+- Key files: `worker/pipeline/fpds_result_viewer/__main__.py`, `worker/pipeline/fpds_result_viewer/persistence.py`, `worker/pipeline/fpds_result_viewer/service.py`, `worker/pipeline/tests/test_result_viewer.py`, `app/prototype/index.html`, `app/prototype/viewer.css`, `app/prototype/viewer.js`, `app/prototype/viewer-payload.js`, `app/prototype/README.md`, `worker/pipeline/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept the viewer as a static prototype surface under `app/prototype/` instead of starting the full admin shell early. Exported DB-only payload data rather than depending on object-storage fetch at page load so the viewer can stay read-only and resilient. Scoped the UI to run summary plus evidence-linked candidate detail, explicitly leaving deep trace and mutation paths to later admin work
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_result_viewer`
+  - passed with `3` tests
+  - `python -m worker.pipeline.fpds_result_viewer --help`
+  - passed
+  - `python -m worker.pipeline.fpds_result_viewer --env-file .env.dev --run-id run_20260410_3701`
+  - passed with `candidate_count=2`, `review_task_count=2`, `evidence_link_count=32`, `database_schema=public`
+- Known issues: browser rendering is static and intentionally local-file friendly, so there is no route framework, SSR, or API fetch contract yet. The exported payload files are meant to be regenerated per run and are not a substitute for the later admin API contract
+- Next step: run a live export from a persisted validation/routing run, then use the resulting viewer output as part of `3.9` first end-to-end evidence-pack verification
+
+## 2026-04-11 - WBS 3.9 First End-to-End Run Evidence Pack
+
+- WBS: `3.9`
+- Status: `done`
+- Goal: execute the first live end-to-end TD Savings prototype chain and commit enough raw outputs plus summary evidence to support prototype acceptance review
+- Why now: `3.8` already gave the repo a read-only viewer, so the next required prototype artifact was a real run that covered the three target products and demonstrated evidence-linked reviewability
+- Outcome: executed live discovery, snapshot, parse, extraction, normalization, validation/routing, and viewer export for the prototype source set. Committed raw stage outputs under `docs/01-planning/evidence/2026-04-11-first-successful-run/` and added a summary evidence pack document that maps the run back to acceptance criteria. The live viewer payload in `app/prototype/` now reflects the `2026-04-11` validation run covering `TD Every Day`, `TD ePremium`, and `TD Growth`
+- Not done: no rerun hardening pass yet, no formal findings memo yet, and no attempt was made to convert the current `validation_error` candidates into clean pass-state output inside this slice
+- Key files: `docs/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`, `docs/01-planning/evidence/2026-04-11-first-successful-run/discovery-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/snapshot-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/parse-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/extraction-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/normalization-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`, `docs/01-planning/evidence/2026-04-11-first-successful-run/viewer-export-output.json`, `app/prototype/viewer-payload.json`, `app/prototype/viewer-payload.js`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: used the three product detail pages as the candidate-producing scope and added `TD-SAV-005`, `TD-SAV-007`, and `TD-SAV-008` only to the snapshot/parse coverage set so the evidence pack proves `HTML detail + current values + governing PDF` coverage without pretending the current pipeline already merges multi-source product truth. Treated the resulting pack as a `Conditional Pass` input because all three target candidates remain reviewable but still have `required_field_missing` validation errors
+- Verification:
+  - `python -m worker.discovery.fpds_discovery --run-id run_20260411_3901_discovery --correlation-id corr_20260411_3901 --discovery-mode manual`
+  - passed and written to the committed discovery artifact
+  - `python -m worker.discovery.fpds_snapshot --env-file .env.dev --persist-db --run-id run_20260411_3901_snapshot --correlation-id corr_20260411_3901 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004 --source-id TD-SAV-005 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `stored_count=2`, `reused_count=4`, `failed_count=0`
+  - `python -m worker.pipeline.fpds_parse_chunk --env-file .env.dev --persist-db --run-id run_20260411_3901_parse --correlation-id corr_20260411_3901 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004 --source-id TD-SAV-005 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with parse coverage across all 6 scoped sources
+  - `python -m worker.pipeline.fpds_extraction --env-file .env.dev --persist-db --run-id run_20260411_3901_extract --correlation-id corr_20260411_3901 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `extracted_field_count=67`, `evidence_link_count=43`
+  - `python -m worker.pipeline.fpds_normalization --env-file .env.dev --persist-db --run-id run_20260411_3901_normalize --correlation-id corr_20260411_3901 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `candidate_count=3`, `field_evidence_link_count=43`
+  - `python -m worker.pipeline.fpds_validation_routing --env-file .env.dev --persist-db --run-id run_20260411_3901_validate --correlation-id corr_20260411_3901 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `queued_count=3`, `review_task_count=3`
+  - `python -m worker.pipeline.fpds_result_viewer --env-file .env.dev --run-id run_20260411_3901_validate`
+  - passed with `candidate_count=3`, `review_task_count=3`, `evidence_link_count=43`, `database_schema=public`
+- Known issues: all three target product candidates still land in `validation_error` with `required_field_missing`, so the current prototype can prove reviewability and evidence lineage but not yet high-confidence canonical completeness. The discovery output still contains many expected warning-only external or out-of-registry links, which is acceptable under the registry policy but noisy for reviewers. Rerun reproducibility was not exercised in this slice
+- Next step: write the `3.10` findings memo using this evidence pack as the factual baseline, with explicit recommendations for Growth eligibility handling, supporting-source merge strategy, and rerun hardening
+
+## 2026-04-11 - WBS 3.10 Prototype Findings Memo
+
+- WBS: `3.10`
+- Status: `done`
+- Goal: turn the first successful run evidence pack into a decision-quality memo that explains what the prototype has proven, what is still weak, and whether Gate B should pass now
+- Why now: `3.9` produced the required live evidence artifacts, but prototype acceptance still needed an explicit interpretation of quality gaps, special-case risk, and expansion readiness before the Product Owner can make a Gate B decision
+- Outcome: added `docs/01-planning/prototype-findings-memo.md` as the formal findings memo for the TD Savings prototype. The memo records that the prototype has proven end-to-end feasibility, evidence-grounded reviewability, and live viewer inspection across the three target products, while also documenting the main remaining gap: all three target candidates still failed validation with `required_field_missing`. The memo recommends treating Gate B as `Deferred` rather than `Pass` until required-field completeness improves or the Product Owner explicitly accepts the remaining prototype gaps
+- Not done: no new pipeline code or live rerun was added in this slice, no Gate B decision note was written yet, and no remediation work was started for the required-field gap or supporting-source merge logic
+- Key files: `docs/01-planning/prototype-findings-memo.md`, `docs/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`, `docs/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`, `app/prototype/viewer-payload.json`, `docs/README.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: interpreted the current prototype outcome as `feasibility proven` but not a clean gate pass, because `docs/00-governance/stage-gate-checklist.md` says `Conditional Pass` is not the default operating mode. Framed the memo around three pre-expansion priorities: close required canonical field gaps, improve supporting-source merge, and harden Growth-style special-case normalization before Big 5 work begins
+- Verification:
+  - reviewed `docs/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
+  - reviewed `docs/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`
+  - reviewed `app/prototype/viewer-payload.json`
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: the repo now has a findings memo, but the memo is intentionally not a Gate B decision note. The actual gate result still belongs to the Product Owner. The underlying quality issue also remains open: the prototype still needs canonical completeness improvement before it should be treated as expansion-ready
+- Next step: decide whether to run a targeted hardening slice for required-field closure and supporting-source merge before the Product Owner reviews Gate B
+
+## 2026-04-11 - Post-3.10 Hardening Slice 1: TD Savings Current-Rate Merge
+
+- WBS: `3.10` follow-up hardening
+- Status: `done`
+- Goal: reduce the prototype `required_field_missing` gap without relaxing validation rules by supplementing missing savings rate fields from an evidence-backed supporting source
+- Why now: the findings memo showed that the three target products were reviewable but still failed validation mainly because the target detail pages did not contribute rate fields directly, while the current-rates supporting source already contained product-specific rate tables
+- Outcome: added a narrow supporting-source merge baseline to normalization. When a target TD Savings detail source is normalized and a fresh extraction artifact exists for `TD-SAV-005`, normalization now inspects the supporting artifact's retrieval matches, picks the chunk whose anchor or excerpt matches the target product, parses rate-table values, and appends `standard_rate` and `public_display_rate` for `TD Every Day` and `TD ePremium`, plus `standard_rate`, `public_display_rate`, and `promotional_rate` for `TD Growth`. The merge is evidence-linked and leaves a runtime note so the viewer and review flow can see that the candidate was supplemented from current-rate evidence rather than silently overwritten
+- Not done: this is still not a general multi-source merge engine. It does not yet merge `TD-SAV-007` or `TD-SAV-008`, it does not resolve every noisy long-text field, and it is deliberately prototype-specific rather than a reusable Big 5 merge framework
+- Key files: `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/fpds_normalization/__main__.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `README.md`
+- Decisions: kept the first hardening slice inside normalization orchestration instead of changing validation rules or introducing a brand-new merge stage. Used `TD-SAV-005` only for this slice because it directly addressed the missing-rate blocker with the smallest safe change. Chose product-matched retrieval-result reuse from the stored extraction artifact instead of treating the supporting source as its own candidate-producing record
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization`
+  - passed with `7` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `45` tests
+  - `python -m worker.pipeline.fpds_extraction --env-file .env.dev --persist-db --run-id run_20260411_3511_extract_harden --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004 --source-id TD-SAV-005`
+  - passed with `stored_count=4`, `failed_count=0`
+  - `python -m worker.pipeline.fpds_normalization --env-file .env.dev --persist-db --run-id run_20260411_3512_normalize_harden --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `candidate_count=3`, all `validation_status=pass`
+  - `python -m worker.pipeline.fpds_validation_routing --env-file .env.dev --persist-db --run-id run_20260411_3513_validate_harden --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `review_task_count=3`, all `validation_status=pass`, all `review_reason_code=manual_sampling_review`
+- Known issues: `TD-SAV-005` extraction is still broad and can extract unrelated products if used on its own, so the new merge helper must stay product-matched. The hardening slice fixes the original validation blocker, but it does not yet prove the full generality needed for Big 5 expansion. `TD-SAV-007` and `TD-SAV-008` supporting merge remains future work
+- Next step: decide whether the next hardening slice should target governing-PDF merge for `interest_calculation_method` and `fee_waiver_condition`, or whether the Product Owner wants to write the Gate B decision note first now that the three prototype targets can reach pass-state validation
+
+## 2026-04-11 - Post-3.10 Hardening Slice 2: Governing-PDF Merge and Growth Cleanup
+
+- WBS: `3.10` follow-up hardening
+- Status: `done`
+- Goal: extend the first hardening pass so the prototype uses governing-PDF evidence more intentionally, separates `TD Growth` qualification logic more cleanly, and suppresses the noisiest long-text fields before canonical persistence
+- Why now: after Slice 1, the three target candidates could already pass validation, but the Product Owner explicitly called out three remaining quality gaps before `WBS 4`: `TD-SAV-007/008` PDF merge, boosted-rate qualification separation for `TD Growth`, and noisy long-text cleanup
+- Outcome: expanded `worker/pipeline/fpds_normalization/supporting_merge.py` so `TD-SAV-002`, `TD-SAV-003`, and `TD-SAV-004` now treat `TD-SAV-005`, `TD-SAV-007`, and `TD-SAV-008` as prototype supporting sources. Current-rate supplementation remains product-matched. A new selective `TD-SAV-008` merge path replaces noisy detail-page `interest_calculation_method` values with governing-PDF wording when the detail page only surfaced link text, and it can also fill `interest_payment_frequency` and `TD Growth` tier wording when stronger PDF evidence exists. An opportunistic `TD-SAV-007` hook was added for `fee_waiver_condition`, but it only applies when a specific refund-the-fee clause is present and the target field is missing or clearly noisy. The same module now performs a narrow text-cleanup pass before normalization, suppressing generic notes, fee-at-a-glance noise, and marketing-style promo text. For `TD Growth`, boosted-rate qualification is now split into cleaner `eligibility_text`, `boosted_rate_eligibility`, and `promotional_period_text` values instead of reusing one long chunk in multiple ambiguous fields
+- Not done: this is still not a full general multi-source merge engine, `TD-SAV-007` merge is intentionally opportunistic rather than comprehensive, and `TD-SAV-008` interest-table extraction on its own remains broad if used outside the target-aware normalization path
+- Key files: `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `README.md`, `docs/01-planning/prototype-findings-memo.md`
+- Decisions: kept the second hardening slice inside normalization prep instead of broadening extraction or adding a separate merge stage. Used governing-PDF evidence only for targeted field replacement when the existing detail-page text was obviously non-canonical. Chose to suppress noisy long-text fields rather than preserve them in canonical payloads simply because extraction found nearby text
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization`
+  - passed with `9` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `47` tests
+  - `python -m worker.pipeline.fpds_extraction --env-file .env.dev --persist-db --run-id run_20260411_3523_extract_harden2 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004 --source-id TD-SAV-005 --source-id TD-SAV-007 --source-id TD-SAV-008`
+  - passed with `stored_count=6`, `failed_count=0`
+  - `python -m worker.pipeline.fpds_normalization --env-file .env.dev --persist-db --run-id run_20260411_3524_normalize_harden2 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `candidate_count=3`, all `validation_status=pass`, and runtime notes showing `TD-SAV-008` replacement plus noise suppression
+  - `python -m worker.pipeline.fpds_validation_routing --env-file .env.dev --persist-db --run-id run_20260411_3525_validate_harden2 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `review_task_count=3`, all `validation_status=pass`, all `review_reason_code=manual_sampling_review`
+  - `python -m worker.pipeline.fpds_result_viewer --env-file .env.dev --run-id run_20260411_3525_validate_harden2`
+  - passed with `candidate_count=3`, `review_task_count=3`, `evidence_link_count=43`
+- Known issues: `TD-SAV-003` did not need `TD-SAV-008` replacement in the live rerun because its detail-page interest text was already specific enough, so the second slice does not yet prove that every target will always consume every supporting source. `TD-SAV-007` fee-governing merge is present in code but did not surface as a runtime note in this rerun, which means the current prototype source set still does not have a strong live `fee_waiver_condition` use case for the three savings targets
+- Next step: decide whether to write the Gate B decision note now that required-field completeness and the highest-risk text-quality gaps are materially better, or run one more focused rerun-hardening slice before the Product Owner closes the gate
+
+## 2026-04-11 - Post-3.10 Hardening Slice 3: TD-SAV-007 Fee-Governing Cleanup
+
+- WBS: `3.10` follow-up hardening
+- Status: `done`
+- Goal: turn the `TD-SAV-007` fee-governing hook into a real live target improvement instead of leaving it as a dormant merge path
+- Why now: after Slice 2, `TD-SAV-007` logic existed in code but had not changed any live prototype candidate. The Product Owner asked specifically to push one more level deeper until the fee-governing PDF affected a real target case
+- Outcome: probed live `TD-SAV-007` retrieval and confirmed that the strongest fee-waiver evidence in the governing PDF is still general monthly-fee guidance rather than a product-specific savings waiver rule. Based on that, the normalization merge logic now uses `TD-SAV-007` to review zero-monthly-fee TD savings candidates and suppress noisy `fee_waiver_condition` values instead of preserving raw detail-page fee-table text. This now affects all three prototype targets in live reruns: `TD-SAV-002`, `TD-SAV-003`, and `TD-SAV-004` no longer carry misleading `fee_waiver_condition` values in the exported viewer payload
+- Not done: `TD-SAV-007` still does not provide a positive product-specific fee-waiver fill for the prototype savings targets, because the governing PDF language is broader and more chequing-oriented than the target detail pages. This slice therefore improves correctness by suppression, not by new canonical-field population
+- Key files: `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `README.md`, `app/prototype/viewer-payload.json`
+- Decisions: treated `TD-SAV-007` as governing evidence that some monthly-fee waiver language exists in the broader fee document, but not as proof that the three zero-fee savings targets should persist a `fee_waiver_condition`. Preferred removing misleading fee-waiver text over forcing a weak merge simply to show a populated field
+- Verification:
+  - `python -m worker.pipeline.fpds_evidence_retrieval --env-file .env.dev --run-id run_20260411_3526_td007_probe --source-id TD-SAV-007 --field-name fee_waiver_condition --field-name monthly_fee --field-name public_display_fee`
+  - passed and showed the strongest `fee_waiver_condition` chunk on `page-2` as generic monthly-fee guidance rather than a target-specific savings rule
+  - `python -m unittest worker.pipeline.tests.test_normalization`
+  - passed with `10` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `48` tests
+  - `python -m worker.pipeline.fpds_normalization --env-file .env.dev --persist-db --run-id run_20260411_3527_normalize_harden3 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `candidate_count=3`, all `validation_status=pass`, and runtime notes confirming `TD-SAV-007` review plus `fee_waiver_condition` suppression
+  - `python -m worker.pipeline.fpds_validation_routing --env-file .env.dev --persist-db --run-id run_20260411_3528_validate_harden3 --source-id TD-SAV-002 --source-id TD-SAV-003 --source-id TD-SAV-004`
+  - passed with `review_task_count=3`, all `validation_status=pass`, all `review_reason_code=manual_sampling_review`
+  - `python -m worker.pipeline.fpds_result_viewer --env-file .env.dev --run-id run_20260411_3528_validate_harden3`
+  - passed with `candidate_count=3`, `review_task_count=3`, `evidence_link_count=40`
+- Known issues: the fee-governing PDF still does not give the prototype a richer positive merge for savings fee-waiver rules, so this slice should be read as a precision improvement rather than a coverage expansion. A future chequing-focused slice may be a better place to reuse the positive balance-waiver language in `TD-SAV-007`
+- Next step: decide whether the current prototype quality is now sufficient for a Gate B decision note, or whether one more rerun-hardening pass should focus on repeatability and operator-facing warning summarization
+
+## 2026-04-11 - Gate B Review Note and WBS 3 Completion Assessment
+
+- WBS: `3.10` gate closure follow-up
+- Status: `done`
+- Goal: convert the prototype evidence, findings memo, and post-memo hardening results into a decision-quality Gate B review note that answers whether `WBS 3` is now complete enough to move into `WBS 4`
+- Why now: the prototype had already shipped all `WBS 3.1` to `3.10` slices and three focused hardening passes, but the repo still lacked the formal Gate B note that the governance checklist requires before the Product Owner can close the prototype gate with confidence
+- Outcome: added `docs/00-governance/gate-b-prototype-review-note.md` as the Gate B review note. The note records that the first successful run evidence pack originally justified only a conditional prototype read because all three targets still failed validation, but that the later hardening slices closed the main blocker. The current recommendation is now Gate B `Pass`: the three TD savings target products are present, source-type coverage includes detail HTML plus current-values HTML plus governing PDF, the viewer can show evidence-linked fields, and the latest live rerun `run_20260411_3528_validate_harden3` shows all three candidates at `validation_status=pass` with `manual_sampling_review` as the only routing reason. Also updated the root `README.md`, the docs map, and the milestone tracker so the repo reflects that the gate review is now active and the old `Deferred` reading from the findings memo is no longer the latest interpretation
+- Not done: did not change `docs/01-planning/WBS.md` or `docs/00-governance/roadmap.md` to mark `WBS 4` as active, because the governance model still makes Product Owner sign-off the formal stage-transition event even though the review note now recommends `Pass`
+- Key files: `docs/00-governance/gate-b-prototype-review-note.md`, `README.md`, `docs/README.md`, `docs/00-governance/milestone-tracker.md`
+- Decisions: treated the Gate B review note as a decision-quality recommendation rather than pretending the Product Owner approval record already exists. Marked milestone `M2` as `In Progress` to reflect active gate review instead of prematurely calling it `Done`
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization`
+  - passed with `10` tests
+  - `python -m unittest discover -s worker -t .`
+  - passed with `48` tests
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: the roadmap document still contains older progress wording and some pre-existing encoding noise, so it was left untouched in this slice pending explicit Product Owner sign-off of Gate B. The Gate B note itself is enough to support the decision, but the final status flip for `WBS 4` should happen together with approval
+- Next step: Product Owner reviews the Gate B note and either approves the recommended `Pass` so `WBS 4` can move forward, or requests one more narrow hardening pass before the stage transition is recorded
+
+## 2026-04-11 - Gate B Approval Recorded
+
+- WBS: gate closure follow-up
+- Status: `done`
+- Goal: record the Product Owner approval of Gate B and update the status documents that must move with an approved stage transition
+- Why now: the Gate B review note had already been prepared and the Product Owner explicitly approved it, so the repo needed the formal approval record and status propagation required by the stage-gate checklist
+- Outcome: updated `docs/00-governance/gate-b-prototype-review-note.md` from draft recommendation to approved `Pass`, recorded the approval in `docs/00-governance/decision-log.md`, moved milestone `M2` to `Done`, updated `docs/01-planning/WBS.md` so `WBS 3` is marked `Completed` and `WBS 4` is marked `Next`, and refreshed the root `README.md`. The document set now consistently says: Gate B passed, the prototype stage is complete, `WBS 4` is the next approved stage, and no `WBS 4` development has started because the Product Owner requested documentation updates only
+- Not done: no implementation work was started for `WBS 4`, and the `4.x` task rows themselves were intentionally left untouched because the stage is approved but not yet in active execution
+- Key files: `docs/00-governance/gate-b-prototype-review-note.md`, `docs/00-governance/decision-log.md`, `docs/00-governance/milestone-tracker.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: treated Gate B approval as a stage-transition readiness update, not as an implicit start command for the next build stage
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: `docs/00-governance/roadmap.md` still contains older pre-existing encoding noise in historical sections, but the current Gate B state is now added in a clean-text `Gate Update` section near the top
+- Next step: wait for explicit Product Owner instruction before starting any `WBS 4` implementation work
+
 ---
 
 ## 7. Change History
@@ -426,3 +769,8 @@ Each entry should include:
 | 2026-04-09 | Added the WBS 3.1 TD-SAV-007 live URL alignment entry |
 | 2026-04-09 | Added the WBS 3.2 snapshot capture core entry |
 | 2026-04-09 | Added the WBS 3.2 snapshot capture persistence and live verification entry |
+| 2026-04-10 | Added the WBS 3.4 evidence retrieval, source-registry policy, drift-check follow-up, WBS 3.5 extraction, and WBS 3.6 normalization entries |
+| 2026-04-10 | Added the WBS 3.7 validation/routing, FPDS design-system, and WBS 3.8 internal result viewer entries |
+| 2026-04-11 | Added the WBS 3.9 first successful run evidence-pack entry |
+| 2026-04-11 | Added the WBS 3.10 prototype findings memo entry |
+| 2026-04-11 | Added the post-3.10 hardening slice 1 entry for TD Savings current-rate merge |
