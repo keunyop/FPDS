@@ -32,6 +32,11 @@ const timelineItems = [
     title: "Audit log route is now live",
     copy: "Protected `/admin/audit` now keeps review, auth, and trace-access audit history queryable as an append-only operations surface.",
     meta: "Completed in WBS 4.7"
+  },
+  {
+    title: "Usage route is now live",
+    copy: "Protected `/admin/usage` now surfaces totals, by-model, by-agent, by-run, trend, and anomaly drilldowns for LLM cost review.",
+    meta: "Completed in WBS 4.8"
   }
 ] as const;
 
@@ -97,14 +102,14 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Live admin surfaces",
-      value: "7",
-      note: "Login, overview, review queue, review detail, runs, changes, and audit are now live inside the protected shell.",
+      value: "8",
+      note: "Login, overview, review queue, review detail, runs, changes, audit, and usage are now live inside the protected shell.",
       tone: "info" as const
     },
     {
       label: "Newest route",
-      value: "/admin/audit",
-      note: "Append-only audit chronology now complements change history without replacing it.",
+      value: "/admin/usage",
+      note: "LLM usage now sits beside audit and run diagnosis as its own observability surface.",
       tone: "warning" as const
     },
     {

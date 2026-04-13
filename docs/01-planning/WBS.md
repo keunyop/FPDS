@@ -268,9 +268,9 @@ Based on:
 | 4.5 | Completed | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |
 | 4.6 | Completed | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 | 2026-04-29 |
 | 4.7 | Completed | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 | 2026-04-29 |
-| 4.8 | Blocked | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
-| 4.9 | Blocked | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
-| 4.10 | Blocked | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5, 4.6 | 2026-05-06 |
+| 4.8 | Completed | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
+| 4.9 | Completed | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
+| 4.10 | Completed | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5, 4.6 | 2026-05-06 |
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 

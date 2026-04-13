@@ -132,7 +132,8 @@ const navGroups: NavGroup[] = [
       {
         label: "Usage",
         description: "LLM usage and cost visibility",
-        status: "Planned",
+        href: "/admin/usage",
+        status: "Live",
         icon: Sparkles
       },
       {

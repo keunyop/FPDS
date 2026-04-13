@@ -6,5 +6,6 @@ Purpose:
 - inspect model, agent, and run-level token and cost usage
 
 Current scaffold:
-- route reserved only
-- usage dashboard deferred to `4.9`
+- live protected usage route
+- dashboard-v1 scope filters for time range, run, agent, model, provider, stage, and search
+- compact totals, coverage summaries, by-model, by-agent, by-run, trend, and anomaly sections

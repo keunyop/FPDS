@@ -532,7 +532,7 @@ Each entry should include:
 - Outcome: added `worker/pipeline/fpds_validation_routing` with a CLI, service, storage config, and `psql` repository. The stage now resolves the latest completed normalization artifact per registry-backed `source_id`, reloads candidate payload plus candidate-scoped evidence links, reloads active taxonomy and routing policy config from Postgres, recomputes validation issue codes and confidence, updates `normalized_candidate` state and review reason, writes validation/routing artifact JSON plus metadata JSON, persists `review_task` rows in `queued` state for Prototype routing, records one validation/routing `model_execution` row per source, records a zero-token `llm_usage_record`, and updates `run_source_item.stage_metadata` with review queue linkage
 - Not done: no review decision flow yet, no canonical upsert or change assessment yet, no audit-event emission yet, and no Phase 1 auto-approve live path was exercised because the current product boundary still uses Prototype review-all routing
 - Key files: `worker/pipeline/fpds_validation_routing/__main__.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `worker/pipeline/fpds_validation_routing/storage.py`, `worker/pipeline/fpds_validation_routing/models.py`, `worker/pipeline/tests/test_validation_routing.py`, `worker/pipeline/README.md`, `README.md`, `docs/01-planning/WBS.md`
-- Decisions: kept `routing_mode = prototype` as the CLI default because the current repo scope is still Prototype-first. Loaded active taxonomy and routing policy values from `taxonomy_registry` and `processing_policy_config` instead of hard-coding new thresholds inside the service. Used the candidate-producing normalization run id as the persisted `review_task.run_id` so each queued task remains attached to the candidate’s originating run even when validation/routing is executed as a later standalone slice
+- Decisions: kept `routing_mode = prototype` as the CLI default because the current repo scope is still Prototype-first. Loaded active taxonomy and routing policy values from `taxonomy_registry` and `processing_policy_config` instead of hard-coding new thresholds inside the service. Used the candidate-producing normalization run id as the persisted `review_task.run_id` so each queued task remains attached to the candidate?셲 originating run even when validation/routing is executed as a later standalone slice
 - Verification:
   - `python -m unittest worker.pipeline.tests.test_validation_routing`
   - passed with `3` tests
@@ -1036,6 +1036,71 @@ Each entry should include:
 - Known issues: the audit route currently exposes the categories already emitted by live code, so publish/config/usage coverage remains sparse until those writer paths land. `evidence_trace_viewed` emits on each protected detail read, which is acceptable for append-only chronology but may warrant future aggregation or sampling if operator traffic grows significantly
 - Next step: implement `WBS 4.8` LLM usage tracking so operators can move from append-only audit chronology into model-cost and anomaly diagnosis on a dedicated usage surface
 
+## 2026-04-13 - WBS 4.8 LLM Usage Tracking
+
+- WBS: `4.8`
+- Status: `done`
+- Goal: deliver the first protected LLM usage tracking slice so operators can inspect model-cost and token usage by run, agent, model, provider, and time range inside the admin runtime
+- Why now: the audit trail slice was already live, and the next operator need was a dedicated surface for usage and anomaly diagnosis using the `llm_usage_record` rows already persisted by worker stages
+- Outcome: added `GET /api/admin/llm-usage` to the FastAPI admin service and a protected `/admin/usage` page to the Next.js admin app. The new backend endpoint accepts time-range and scope filters for `from`, `to`, `run_id`, `agent_name`, `model_name`, `provider_name`, `stage`, and search, joins usage rows to `model_execution`, `ingestion_run`, `normalized_candidate`, and `review_task`, and returns dashboard-shaped totals plus per-model, per-agent, per-run, daily trend, and anomaly drilldown aggregates. The new admin route renders those aggregates in a compact read-only triage surface and promotes `Usage` to a live observability route in the shared shell
+- Not done: no new usage writer path, billing action, quota enforcement, alerting workflow, or audit-event emission change was added in this slice. The page stays observability-only and does not introduce cost controls or policy mutation
+- Key files: `api/service/api_service/main.py`, `api/service/api_service/llm_usage.py`, `api/service/tests/test_llm_usage.py`, `app/admin/src/app/admin/usage/page.tsx`, `app/admin/src/components/fpds/admin/llm-usage-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/route-shells/usage/README.md`, `api/service/README.md`, `app/admin/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept the response dashboard-shaped instead of paginated because the contract calls for aggregate views and anomaly candidates. Kept the frontend route read-only and aligned it to the existing triage-first admin surfaces instead of introducing a second dashboard style. Used in-memory anomaly scoring over the persisted rows because the current schema already carries the needed context but does not yet have a dedicated summary table
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_llm_usage`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `python -m py_compile api/service/api_service/main.py api/service/api_service/llm_usage.py api/service/tests/test_llm_usage.py`
+  - passed
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+- Known issues: current pipeline usage rows still skew heavily toward zero-token `heuristic-no-llm-call` records, so real provider traffic is still needed before anomaly ranking and cost interpretation can be judged beyond the prototype baseline
+- Next step: implement `WBS 4.9` usage dashboard v1 refinements or move on to the next approved admin or ops slice once live operator feedback arrives
+## 2026-04-13 - WBS 4.9 Usage Dashboard v1
+
+- WBS: `4.9`
+- Status: `done`
+- Goal: turn the live `/admin/usage` baseline into a clearer dashboard-v1 surface so operators can scope, interpret, and drill into token and cost drift without leaving the admin shell
+- Why now: `WBS 4.8` already exposed the protected usage route and aggregation API, but the route still felt closer to a baseline observability slice than a completed admin dashboard because provider or stage scoping, scope coverage signals, and richer anomaly context were still thin
+- Outcome: expanded the protected usage page so it now supports free-text search plus provider and stage filters in addition to the existing date, run, agent, and model controls. The page now surfaces scope coverage and density signals, model/agent/run concentration hotspots, richer totals, trend deltas, and denser anomaly drilldown context. The usage aggregation backend now also returns share percentages, average cost or token density, and day-over-day trend state or summary fields so the dashboard can explain movement instead of only listing raw totals
+- Not done: this slice does not add quota enforcement, alert routing, budget caps, or billing workflow. It remains a read-only observability surface and still depends on the persisted `llm_usage_record` rows already emitted by the pipeline
+- Key files: `app/admin/src/app/admin/usage/page.tsx`, `app/admin/src/components/fpds/admin/llm-usage-surface.tsx`, `api/service/api_service/llm_usage.py`, `app/admin/README.md`, `api/service/README.md`, `app/admin/route-shells/usage/README.md`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept the route inside the existing Shadcnblocks-based admin shell and improved density through composition instead of adding a second dashboard style. Reused the existing `/api/admin/llm-usage` contract shape and extended it with share or trend interpretation fields rather than introducing a separate usage-summary endpoint. Kept provider and stage as optional scope filters because the backend already had the needed metadata and operator diagnosis benefits from exposing it directly
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_llm_usage`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+- Known issues: usage quality is still only as representative as the current prototype traffic, and the anomaly heuristics still operate on the persisted row set rather than a dedicated historical summary store. Locale resources for this route also remain follow-on work under the broader admin i18n slice
+- Next step: move to the next approved admin or ops surface, or revisit usage once live provider traffic justifies alerting, quota, or budget-governance follow-up
+## 2026-04-13 - WBS 4.10 Operational Scenario QA
+
+- WBS: `4.10`
+- Status: `done`
+- Goal: close the final `WBS 4` task by producing explicit Gate C QA evidence for the operator path from review decision into history, audit, and run drilldown
+- Why now: `WBS 4.1` through `4.9` already gave the admin runtime all required protected surfaces, but the last row in the WBS still needed a scenario-style verification slice proving that those surfaces stay linked together in operator terms instead of only existing as isolated feature slices
+- Outcome: added `api/service/tests/test_ops_scenario_qa.py` as a dedicated scenario test that exercises `edit_approve`, canonical change-event side effects, manual-override audit emission, change-history linkage, audit-log linkage, and run-detail continuity together. Updated `app/admin/tsconfig.json` so the standalone TypeScript check resolves the current Next-generated `.next/types` validator imports cleanly during QA. Created `docs/00-governance/wbs-4-ops-scenario-qa-summary.md` and `docs/00-governance/gate-c-admin-ops-review-note.md`, updated the milestone tracker and WBS row, refreshed the root README plus package READMEs, and corrected the roadmap gate update so the repo now records `4.10` as complete and carries a documented Gate C `Pass` recommendation
+- Not done: did not mark `WBS 5` active, did not add a recorded browser demo artifact, and did not add a Gate C approval entry to the decision log because the governance model still makes Product Owner sign-off the formal stage-transition event
+- Key files: `api/service/tests/test_ops_scenario_qa.py`, `app/admin/tsconfig.json`, `docs/00-governance/wbs-4-ops-scenario-qa-summary.md`, `docs/00-governance/gate-c-admin-ops-review-note.md`, `docs/00-governance/milestone-tracker.md`, `docs/01-planning/WBS.md`, `README.md`, `api/service/README.md`, `app/admin/README.md`, `docs/00-governance/roadmap.md`
+- Decisions: treated this slice as gate-evidence closeout rather than new surface work, and kept the stage-transition boundary explicit so engineering can recommend `Pass` without silently consuming the Product Owner's approval role
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+- Known issues: the remaining open item is governance, not implementation. Product Owner approval is still needed on the new Gate C note before `WBS 5` can become the formally active stage
+- Next step: Product Owner reviews the QA summary and Gate C note, then records `Pass` or `Deferred` and decides whether to unlock `WBS 5`
 ---
 
 ## 7. Change History
@@ -1072,3 +1137,6 @@ Each entry should include:
 | 2026-04-13 | Added the WBS 4.5 run status implementation entry |
 | 2026-04-13 | Added the WBS 4.6 change history implementation entry |
 | 2026-04-13 | Added the WBS 4.7 audit log baseline implementation entry |
+| 2026-04-13 | Added the WBS 4.8 LLM usage tracking implementation entry |
+| 2026-04-13 | Added the WBS 4.9 usage dashboard v1 implementation entry |
+| 2026-04-13 | Added the WBS 4.10 operational scenario QA entry plus Gate C recommendation artifacts |

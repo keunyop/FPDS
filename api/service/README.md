@@ -1,6 +1,6 @@
 # FPDS Admin API Service
 
-This package is the first live admin runtime package for `WBS 4.1`, `4.2`, `4.3`, `4.4`, `4.5`, `4.6`, and `4.7`.
+This package is the first live admin runtime package for `WBS 4.1`, `4.2`, `4.3`, `4.4`, `4.5`, `4.6`, `4.7`, `4.8`, `4.9`, and the `WBS 4.10` operational scenario QA slice.
 
 Current scope:
 - DB-backed admin user accounts
@@ -12,6 +12,7 @@ Current scope:
 - run detail read route with source processing summary, error summary, related review tasks, and usage summary
 - change-history list route backed by `change_event` with protected canonical chronology and manual-override audit context
 - audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
+- usage dashboard route backed by `llm_usage_record` with protected totals, richer scope metadata, per-model, per-agent, per-run, trend, and anomaly drilldown aggregations
 - approve, reject, defer, and edit-approve review mutations
 - canonical product/version creation or update side effects for approved decisions
 - review and manual-override audit events plus change-event emission
@@ -28,6 +29,7 @@ Current routes:
 - `GET /api/admin/runs/:runId`
 - `GET /api/admin/change-history`
 - `GET /api/admin/audit-log`
+- `GET /api/admin/llm-usage`
 - `POST /api/admin/review-tasks/:reviewTaskId/approve`
 - `POST /api/admin/review-tasks/:reviewTaskId/reject`
 - `POST /api/admin/review-tasks/:reviewTaskId/edit-approve`
@@ -68,8 +70,10 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
 - Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
 - Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
+- LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
 - Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.
 - Later admin write routes can keep reusing the same session and CSRF token model.
 - The settings loader now resolves a relative `FPDS_ENV_FILE` from either the current working directory or the repo root, so `.env.dev` works both from the workspace root and from inside `api/service`.
+- `api/service/tests/test_ops_scenario_qa.py` now gives the service layer a Gate C-focused operator scenario test that verifies review decision side effects, change history linkage, audit continuity, and run-detail drilldown context together.

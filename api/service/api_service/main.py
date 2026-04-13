@@ -16,6 +16,7 @@ from api_service.audit_log import load_audit_log_list, normalize_audit_log_filte
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
 from api_service.db import open_connection
+from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
 from api_service.models import LoginRequest
 from api_service.models import ReviewDecisionRequest
 from api_service.review_detail import (
@@ -424,6 +425,35 @@ async def audit_log_list(
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         payload = load_audit_log_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/llm-usage")
+async def llm_usage_dashboard(
+    request: Request,
+    from_: Annotated[datetime | None, Query(alias="from")] = None,
+    to: Annotated[datetime | None, Query(alias="to")] = None,
+    run_id: str | None = None,
+    agent_name: str | None = None,
+    model_name: str | None = None,
+    provider_name: str | None = None,
+    stage: str | None = None,
+    q: str | None = None,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_llm_usage_filters(
+        recorded_from=from_,
+        recorded_to=to,
+        run_id=run_id,
+        agent_name=agent_name,
+        model_name=model_name,
+        provider_name=provider_name,
+        stage=stage,
+        search=q,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_llm_usage_dashboard(connection, filters=filters)
     return _success(payload, request)
 
 

@@ -28,7 +28,10 @@ As of `2026-04-13`:
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns
-- the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, and append-only audit history
+- `WBS 4.8` LLM usage tracking is now complete with a session-protected usage dashboard API, time-range and scope filters, totals, per-model, per-agent, per-run, and trend aggregations, and anomaly drilldown candidates
+- `WBS 4.9` usage dashboard v1 is now complete with provider/stage/search filters, richer scope coverage signals, concentration shares, trend deltas, and denser anomaly drilldown context on `/admin/usage`
+- `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
+- the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
 
@@ -47,7 +50,9 @@ As of `2026-04-13`:
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
 - a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface
-- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish, usage, and health surfaces route-oriented
+- a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
+- a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
+- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish and health surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
@@ -107,6 +112,9 @@ Out of scope for the current FPDS build:
 - `WBS 4.5` run status is now implemented and gives operators a live `/admin/runs` list plus `/admin/runs/:runId` diagnostic detail route
 - `WBS 4.6` change history is now implemented and gives operators a live `/admin/changes` chronology route with review/run context and manual-override audit context
 - `WBS 4.7` audit log baseline is now implemented and gives operators a live `/admin/audit` chronology route with actor, target, request, and review/run context
+- `WBS 4.8` LLM usage tracking is now implemented and gives operators a live `/admin/usage` dashboard API plus protected usage analysis route
+- `WBS 4.9` usage dashboard v1 is now implemented and adds richer provider or stage scoping, concentration summaries, and anomaly drilldowns on `/admin/usage`
+- `WBS 4.10` operational scenario QA is now implemented and gives the repo a concrete Gate C QA artifact for the review-to-history operator path
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
@@ -115,11 +123,12 @@ Out of scope for the current FPDS build:
 ### In Progress
 
 - prototype worker runtime implementation
-- `WBS 4` admin and ops runtime bootstrap beyond audit log
+- Gate C Product Owner review and final stage-transition approval
 
 ### Not Started
 
-- full public UI and the remaining admin or ops surfaces after run status
+- `WBS 5` public experience work and Big 5 expansion slices
+- later admin follow-on surfaces such as publish monitor and health
 - BX-PF runtime integration code
 - public frontend package bootstrap
 

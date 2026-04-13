@@ -368,6 +368,17 @@ export type AuditLogListResponse = {
   has_next_page: boolean;
 };
 
+export type LlmUsageDashboardResponse = {
+  totals: Record<string, unknown>;
+  by_model: Record<string, unknown>[];
+  by_agent: Record<string, unknown>[];
+  by_run: Record<string, unknown>[];
+  trend?: Record<string, unknown>[];
+  usage_trend?: Record<string, unknown>[];
+  anomaly_candidates: Record<string, unknown>[];
+  applied_filters?: Record<string, unknown>;
+};
+
 export type ReviewEvidenceLink = {
   field_name: string;
   label: string;
@@ -602,4 +613,8 @@ export async function fetchChangeHistoryList(searchParams: URLSearchParams): Pro
 
 export async function fetchAuditLogList(searchParams: URLSearchParams): Promise<AuditLogListResponse | null> {
   return fetchAdminData<AuditLogListResponse>("/api/admin/audit-log", searchParams);
+}
+
+export async function fetchLlmUsage(searchParams: URLSearchParams): Promise<LlmUsageDashboardResponse | null> {
+  return fetchAdminData<LlmUsageDashboardResponse>("/api/admin/llm-usage", searchParams);
 }

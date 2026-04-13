@@ -15,11 +15,11 @@ Source Documents:
 
 ## Gate Update
 
-As of `2026-04-11`:
+As of `2026-04-13`:
 - `Gate B` is approved as `Pass`
 - `WBS 3. Prototype Build` is complete for the approved `TD Savings` prototype scope
-- `WBS 4. Admin and Ops Core` is the next approved stage
-- no `WBS 4` implementation has started yet, because Product Owner requested document updates only and did not issue a separate start instruction for that stage
+- `WBS 4. Admin and Ops Core` implementation is complete through `4.10`, including operational scenario QA evidence
+- `Gate C` now has a documented `Pass` recommendation, but `WBS 5` remains formally blocked until Product Owner approval is recorded
 
 ## 0. Current Progress Snapshot
 
