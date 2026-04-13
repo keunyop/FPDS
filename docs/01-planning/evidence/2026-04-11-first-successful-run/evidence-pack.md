@@ -156,21 +156,21 @@ Sample C. `TD ePremium Savings Account` interest calculation:
 ## 8. Viewer Equivalent
 
 Live viewer export artifacts:
-- [viewer-payload.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/app/prototype/viewer-payload.json)
-- [viewer-payload.js](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/app/prototype/viewer-payload.js)
-- [index.html](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/app/prototype/index.html)
+- [viewer-payload.json](../../../../app/prototype/viewer-payload.json)
+- [viewer-payload.js](../../../../app/prototype/viewer-payload.js)
+- [index.html](../../../../app/prototype/index.html)
 
 For prototype acceptance, the static viewer with live payload is used as the `viewer screenshot or equivalent` artifact.
 
 ## 9. Raw Run Artifacts
 
-- [discovery-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/discovery-output.json)
-- [snapshot-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/snapshot-output.json)
-- [parse-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/parse-output.json)
-- [extraction-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/extraction-output.json)
-- [normalization-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/normalization-output.json)
-- [validation-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json)
-- [viewer-export-output.json](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/docs/01-planning/evidence/2026-04-11-first-successful-run/viewer-export-output.json)
+- [discovery-output.json](./discovery-output.json)
+- [snapshot-output.json](./snapshot-output.json)
+- [parse-output.json](./parse-output.json)
+- [extraction-output.json](./extraction-output.json)
+- [normalization-output.json](./normalization-output.json)
+- [validation-output.json](./validation-output.json)
+- [viewer-export-output.json](./viewer-export-output.json)
 
 ## 10. Next Step
 

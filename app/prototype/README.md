@@ -21,7 +21,7 @@ python -m worker.pipeline.fpds_result_viewer `
 ```
 
 Open the prototype viewer:
-- open [index.html](/d:/10%20Development/10%20개인프로젝트/70.%20Mybank/workspace/app/prototype/index.html) in a browser
+- open [index.html](index.html) in a browser
 - or serve `app/prototype/` from a lightweight static server if you prefer an `http://` URL
 
 Current boundary:

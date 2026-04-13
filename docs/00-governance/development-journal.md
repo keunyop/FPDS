@@ -839,6 +839,22 @@ Each entry should include:
 - Known issues: the imported Shadcnblocks blocks depend on the `radix-ui` package and on Tailwind 4 CSS import semantics, so future block adoption should expect app-level dependency or CSS adjustments rather than assuming the registry output is immediately production-ready. Several vendor-derived files now carry FPDS-specific edits, so upgrade work should consult the new override register before replacing them wholesale
 - Next step: build `WBS 4.2 review queue` on top of the new Shadcnblocks shell and prefer wrapper components for future vendor-derived page sections where possible
 
+## 2026-04-13 - CI Markdown Link Portability Fix
+
+- WBS: harness follow-up
+- Status: `done`
+- Goal: fix GitHub Actions failures caused by local Windows absolute-path Markdown links that cannot resolve in Linux CI
+- Why now: the foundation checks started failing in GitHub Actions because the cleanup audit treats broken local Markdown references as errors, and the first-successful-run evidence pack plus the prototype README still used `/d:/...` links copied from a local workspace
+- Outcome: replaced the broken absolute workspace links in the first successful run evidence pack and in `app/prototype/README.md` with repository-relative links that resolve both locally and in CI
+- Not done: did not rewrite older historical journal text that still references the removed `app/admin/src/app/theme.css`; this slice only fixed the actively failing Markdown references
+- Key files: `docs/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`, `app/prototype/README.md`
+- Decisions: prefer repo-relative Markdown links in committed docs and evidence packs, even when local clickable absolute links are convenient inside chat or editor output
+- Verification:
+  - `git diff --check`
+  - pending rerun after this slice
+- Known issues: `tmpnf6kizz_/` still reports a permission-denied warning during broad repository scans in this environment, but it is unrelated to the Markdown link failure
+- Next step: rerun the foundation checks or the cleanup audit so CI can confirm the broken-link set is cleared
+
 ---
 
 ## 7. Change History
