@@ -256,13 +256,13 @@ Based on:
 > Approved Update 2026-04-11: `Next`
 > Gate B `Pass` 승인 완료, 단 별도 시작 지시 전까지는 착수하지 않음
 
-> 상태: `Blocked`
+> 상태: `Now`
 > 조건: Prototype 성공 후 착수
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
 |---|---|---|---|---|---|---|
-| 4.1 | Blocked | admin login 구현 | 보호된 admin 진입 | Backend, Frontend | 2.5 | 2026-04-21 |
-| 4.2 | Blocked | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 | 2026-04-24 |
+| 4.1 | Completed | admin login 구현 | 보호된 admin 진입 | Backend, Frontend | 2.5 | 2026-04-21 |
+| 4.2 | Next | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 | 2026-04-24 |
 | 4.3 | Blocked | review decision flow 구현 | approve/reject/edit approve | Backend | 4.2 | 2026-04-27 |
 | 4.4 | Blocked | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 | 2026-04-28 |
 | 4.5 | Blocked | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |

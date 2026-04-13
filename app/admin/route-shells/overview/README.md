@@ -7,5 +7,5 @@ Purpose:
 - links into review, run, publish, usage, and health surfaces
 
 Current scaffold:
-- route reserved only
-- reads from admin APIs later
+- route reserved at the design layer
+- first live overview shell now exists in `app/admin/src/app/admin/`

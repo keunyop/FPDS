@@ -30,7 +30,8 @@ Goals:
 2. CI should call repository scripts instead of reimplementing validation logic directly in YAML.
 3. The baseline must work even when product runtime packages do not exist yet.
 4. `lint`, `typecheck`, `test`, and `build` checks remain conditional and are auto-detected from any tracked `package.json`.
-5. Deployment automation is not enabled in this baseline because real hosts, secrets, and promotion rules are still external prerequisites.
+5. JavaScript package-script checks are `pnpm-first` to match the approved runtime baseline, with fallback only when a package explicitly signals `npm`.
+6. Deployment automation is not enabled in this baseline because real hosts, secrets, and promotion rules are still external prerequisites.
 
 ---
 
@@ -44,7 +45,7 @@ It runs these stages:
 |---|---|---|
 | repo and docs validation | `scripts/harness/repo-doctor.ps1` | required files, Markdown links, PowerShell syntax, JSON syntax |
 | foundation contract validation | `scripts/harness/validate-foundation-baseline.ps1` | env examples, observability artifacts, provider rules |
-| project checks | `scripts/harness/invoke-project-checks.ps1` | auto-discovered package scripts in `lint`, `typecheck`, `test`, `build` order |
+| project checks | `scripts/harness/invoke-project-checks.ps1` | auto-discovered package scripts in `lint`, `typecheck`, `test`, `build` order with pnpm-first package-manager detection |
 | cleanup audit | `scripts/harness/cleanup-audit.ps1` | report-only hygiene and drift summary artifact |
 
 ---
@@ -112,3 +113,4 @@ This baseline supports:
 | Date | Change |
 |---|---|
 | 2026-04-07 | Initial foundation CI/CD baseline created for WBS 2.10 |
+| 2026-04-11 | Clarified that future JavaScript project checks are pnpm-first so WBS 4 package bootstrap aligns with the approved runtime baseline |

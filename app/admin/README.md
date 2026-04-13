@@ -12,6 +12,10 @@ Planned scope:
 
 Current scaffold:
 - `routes.manifest.json` lists the reserved admin routes and visibility expectations.
-- `route-shells/` holds route-by-route placeholders without locking a framework router.
+- `route-shells/` keeps the original route-by-route design placeholders.
+- the live Next.js admin package for `WBS 4.1` now lives alongside this scaffold under `src/`.
 
-No runtime auth or page implementation is added yet.
+Current runtime:
+- `/admin/login` login screen
+- protected `/admin` overview entry
+- middleware-based route gate backed by the shared session cookie contract

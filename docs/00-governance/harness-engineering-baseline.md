@@ -38,6 +38,7 @@ Its scope is the repository harness and workflow guardrails only.
 6. Repository-wide validation runs in CI.
 7. The harness does not start product code implementation by itself.
 8. Foundation baseline checks use one shared local and CI entrypoint for env or observability contracts and future package-script checks.
+9. Future package-script checks should follow the approved runtime baseline, so JavaScript package checks are `pnpm-first` with fallback only when a package explicitly declares `npm`.
 
 ---
 
@@ -159,6 +160,7 @@ Do not turn the journal into:
 - Before substantive work starts, read `AGENTS.md`, root `README.md`, and `docs/00-governance/development-journal.md`.
 - Keep `docs/README.md` as the docs map entrypoint.
 - Strengthen project checks only after package management and runtime bootstrap are real, not hypothetical.
+- When JavaScript package checks become real, prefer `pnpm` and allow `npm` only when the package explicitly signals it through `packageManager` or lockfile shape.
 - If cleanup audit ever moves beyond report-only, get Product Owner approval first.
 - When a meaningful implementation slice ends, update `docs/00-governance/development-journal.md` in the same turn.
 
@@ -171,3 +173,4 @@ Do not turn the journal into:
 | 2026-04-07 | Initial harness engineering baseline created |
 | 2026-04-07 | Added development journal rule for resume-friendly slice summaries |
 | 2026-04-09 | Rewrote the document in ASCII-first format and added startup read order to include the development journal alongside `AGENTS.md` and root `README.md` |
+| 2026-04-11 | Updated project-check guidance so future JavaScript runtime checks are pnpm-first in line with the approved runtime baseline |

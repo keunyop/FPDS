@@ -745,6 +745,48 @@ Each entry should include:
 - Known issues: `docs/00-governance/roadmap.md` still contains older pre-existing encoding noise in historical sections, but the current Gate B state is now added in a clean-text `Gate Update` section near the top
 - Next step: wait for explicit Product Owner instruction before starting any `WBS 4` implementation work
 
+## 2026-04-11 - Pre-WBS 4 Harness Readiness Tuning
+
+- WBS: pre-`4.x` readiness
+- Status: `done`
+- Goal: close the most obvious harness mismatch before `WBS 4` starts, so future admin/frontend package bootstrap does not immediately fight the approved runtime baseline
+- Why now: `WBS 4` is the next approved stage and the current harness still ran JavaScript package checks through `npm` only, while the approved baseline already fixed `pnpm` as the frontend package manager
+- Outcome: updated `scripts/harness/invoke-project-checks.ps1` so auto-discovered package checks are now `pnpm-first`. The script now reads `packageManager` when present, respects `pnpm-lock.yaml` and npm lockfile signals, uses `pnpm` directly when available, and falls back to `corepack pnpm` before failing. `npm` remains supported only when the package explicitly prefers it. Updated the harness and CI baseline docs plus the root README so the package-check behavior now matches the approved runtime direction before any `WBS 4` package files are added
+- Not done: no `package.json` or `pnpm-lock.yaml` exists in the repo yet, so this is a readiness fix rather than a live package-bootstrap verification. CI workflow provisioning for Node remains unchanged for now because the repo still has no tracked JavaScript package to execute
+- Key files: `scripts/harness/invoke-project-checks.ps1`, `docs/00-governance/harness-engineering-baseline.md`, `docs/00-governance/foundation-ci-cd-baseline.md`, `README.md`
+- Decisions: kept the harness change small and aligned it with the already approved runtime baseline instead of adding broader Node or package bootstrap automation ahead of actual `WBS 4` code
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: the current repo still has no JavaScript package, so the new pnpm-first path is structurally correct but not yet exercised against a real `app/admin` workspace. Once `WBS 4` package bootstrap begins, a follow-up slice may still choose to add explicit Node setup in CI if the repository moves from passive package discovery to active package execution
+- Next step: if `WBS 4` starts later, keep the first package bootstrap aligned with `pnpm` by adding `packageManager` to the tracked `package.json` and committing a matching `pnpm-lock.yaml`
+
+## 2026-04-12 - WBS 4.1 Admin Login
+
+- WBS: `4.1`
+- Status: `done`
+- Goal: implement the first real admin entry slice with DB-backed operator accounts, DB-backed sessions, and a protected admin shell
+- Why now: the Product Owner explicitly started `WBS 4` and chose to begin with the durable Postgres-backed account model rather than an env-only bootstrap credential
+- Outcome: added `db/migrations/0002_admin_auth.sql` with `user_account`, `admin_auth_session`, and `auth_login_attempt` tables. Added a new FastAPI service package under `api/service/` with login, logout, session introspection, request-id and security-header middleware, Postgres-backed login-attempt throttling, and auth audit-event persistence. Added a bootstrap CLI for the first operator account using scrypt password hashing. Bootstrapped the first live Next.js admin package under `app/admin/` with `/admin/login`, protected `/admin`, middleware-based route gating, and a session-aware overview shell. Updated the relevant README, DB, decision, and WBS documents so the repo now records `4.1` as complete and `4.2` as next
+- Not done: review queue, review decision actions, trace viewer, run status pages, and role-specific admin mutations remain follow-on slices. The current admin UI is intentionally just the login flow plus a protected overview shell
+- Key files: `db/migrations/0002_admin_auth.sql`, `api/service/api_service/main.py`, `api/service/api_service/auth.py`, `api/service/api_service/bootstrap_admin_user.py`, `app/admin/package.json`, `app/admin/src/app/admin/login/page.tsx`, `app/admin/src/app/admin/page.tsx`, `docs/01-planning/WBS.md`
+- Decisions: used DB-backed operator accounts from the start, with `scrypt` password hashing and server-side opaque session cookies. Kept the shared auth contract cookie name `fpds_admin_session`. Added DB-backed login-attempt tracking and temporary lockout so the first login slice already satisfies the baseline retry-threshold expectation instead of leaving brute-force handling entirely for later. Kept the UI scope narrow so `4.1` stays focused on authenticated entry rather than blending into review-queue work
+- Verification:
+  - `python -m unittest discover -s api/service/tests -t api/service`
+  - passed with `3` tests
+  - `python -m compileall api/service/api_service`
+  - passed
+  - `api/service/.venv/Scripts/python -c "import api_service.main; print('api-import-ok')"`
+  - passed
+  - `node node_modules/typescript/bin/tsc --noEmit`
+  - passed
+  - `node node_modules/next/dist/bin/next build`
+  - passed
+- Known issues: `corepack pnpm install` fetched packages and produced `pnpm-lock.yaml`, but it did not finish cleanly in this environment's link step, so local UI verification used `cmd /c npm install --no-package-lock` as a fallback without changing the tracked `packageManager` or adding `package-lock.json`. Also, a stray permission-locked temp folder left by an earlier test attempt is still blocking `repo-doctor`, so the repository health script was not rerun successfully in this slice
+- Next step: build `WBS 4.2 review queue` on top of the new authenticated admin shell and session actor model
+- Follow-up: hardened the admin service env-file loader after live verification exposed that `uv run --directory api/service ...` resolves relative `FPDS_ENV_FILE` from the service working directory. The loader now also checks the repo root so the documented `.env.dev` startup path works from the workspace root.
+- Follow-up: fixed the Next.js 16 login page runtime contract after live dev-server verification showed that `searchParams` is now promise-based in the app router. The admin login route now awaits `searchParams` before reading `next`, so `/admin/login` renders correctly under `next dev`.
+
 ---
 
 ## 7. Change History
@@ -774,3 +816,4 @@ Each entry should include:
 | 2026-04-11 | Added the WBS 3.9 first successful run evidence-pack entry |
 | 2026-04-11 | Added the WBS 3.10 prototype findings memo entry |
 | 2026-04-11 | Added the post-3.10 hardening slice 1 entry for TD Savings current-rate merge |
+| 2026-04-12 | Added the WBS 4.1 DB-backed admin login implementation entry |

@@ -7,5 +7,5 @@ Purpose:
 - successful auth redirects to `/admin`
 
 Current scaffold:
-- route reserved only
-- no auth provider or form implementation yet
+- route reserved only at the design layer
+- live implementation now exists in `app/admin/src/app/admin/login/`

@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-11`:
+As of `2026-04-12`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `WBS 2` foundation scaffolds and baseline artifacts are complete
@@ -21,6 +21,7 @@ As of `2026-04-11`:
 - a first post-`3.10` hardening slice is complete: normalization now supplements missing TD savings rate fields from the `TD-SAV-005` current-rates source, and a live hardening run moved all three target candidates from `validation_error` to `validation_status=pass`
 - a second post-`3.10` hardening slice is complete: normalization now selectively reuses `TD-SAV-008` governing-PDF interest rules, has an opportunistic `TD-SAV-007` fee-waiver merge hook, splits `TD Growth` boosted-rate qualification into cleaner canonical fields, and suppresses several noisy long-text fields before candidate persistence
 - a third post-`3.10` hardening slice is complete: `TD-SAV-007` fee-governing evidence is now used in a live target-safe way to suppress noisy `fee_waiver_condition` fields for zero-monthly-fee TD savings products instead of persisting misleading waiver text
+- `WBS 4.1` admin login is now complete with a DB-backed operator account table, DB-backed session table, FastAPI auth routes, a bootstrap-admin CLI, and a protected Next.js admin entry shell
 
 ## What This Repo Contains Today
 
@@ -33,6 +34,8 @@ As of `2026-04-11`:
 - working prototype normalization code that maps extracted drafts into canonical candidate rows and candidate-level evidence links
 - working prototype validation/routing code that recomputes candidate validation, updates candidate state, and creates prototype review tasks
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
+- a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
+- a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
@@ -85,19 +88,22 @@ Out of scope for the current FPDS build:
 - `WBS 3.9` now has a live first end-to-end evidence pack in-repo for the three prototype target products
 - `WBS 3.10` now has a written findings memo, and three follow-up hardening slices have already cleared the original `required_field_missing` validation gap, added selective `TD-SAV-008` PDF merge, improved `TD Growth` qualification cleanup, and removed misleading zero-fee `fee_waiver_condition` fields using `TD-SAV-007` evidence in live reruns
 - Gate B is now closed as `Pass`
-- `WBS 4. Admin and Ops Core` is the next approved stage, but implementation has not started because no separate start instruction has been given for that stage
+- `WBS 4.1` admin login is now implemented and gives the admin surface its first real runtime bootstrap
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
+- the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
+- the first Next.js admin package baseline is now tracked in `app/admin/package.json`
 
 ### In Progress
 
 - prototype worker runtime implementation
+- `WBS 4` admin and ops runtime bootstrap beyond login
 
 ### Not Started
 
-- full public UI, full admin UI, and review decision runtime code
+- full public UI, the remaining admin surfaces after login, and review decision runtime code
 - BX-PF runtime integration code
-- frontend and API package bootstrap
+- public frontend package bootstrap
 
 ### Hold Rule
 
@@ -121,7 +127,7 @@ Scope still remains constrained to the approved prototype boundary:
 - dev monitoring baseline: `disabled` for the first implementation pass
 
 These remain the approved baselines for the broader runtime.
-Current implementation evidence in this repo is still concentrated in the Python worker path.
+Current implementation evidence is still heaviest in the Python worker path, but the first live admin frontend and API packages now exist as well.
 
 ## Foundation Baselines In Repo
 
@@ -197,6 +203,7 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invo
 - the hook can auto-fix low-risk text hygiene issues
 - staged Markdown references and staged PowerShell syntax are validated
 - foundation checks validate env examples, JSON artifacts, observability artifacts, and future package-script baselines
+- future JavaScript package checks are `pnpm-first` so upcoming `WBS 4` frontend bootstrap aligns with the approved runtime baseline
 - CI remains validation-only and does not imply product implementation has started
 - cleanup audit is intentionally `report-only`
 

@@ -6,3 +6,6 @@ harness-cleanup-audit.md
 .venv/
 __pycache__/
 *.pyc
+node_modules/
+.next/
+*.tsbuildinfo

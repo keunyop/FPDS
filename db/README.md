@@ -11,15 +11,17 @@ Current decisions:
 
 Files:
 - `migrations/0001_initial_baseline.sql`: core schema and seed data
+- `migrations/0002_admin_auth.sql`: DB-backed admin user, session, and login-attempt tables for `WBS 4.1`
 
 How to apply when a database is available:
 
 ```powershell
 psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
 ```
 
 Notes:
-- The current workspace does not have `psql` installed, so this migration was not executed locally.
+- `psql` is available in the prepared local toolchain, but the migrations still need a reachable Postgres target.
 - Use the connection target from `.env.dev.example` or `.env.prod.example`.
 - Keep future migrations additive and append-only where possible.
 - Put extension-specific or vendor-specific migrations in later numbered files.
