@@ -262,15 +262,15 @@ Based on:
 | WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
 |---|---|---|---|---|---|---|
 | 4.1 | Completed | admin login 구현 | 보호된 admin 진입 | Backend, Frontend | 2.5 | 2026-04-21 |
-| 4.2 | Next | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 | 2026-04-24 |
-| 4.3 | Blocked | review decision flow 구현 | approve/reject/edit approve | Backend | 4.2 | 2026-04-27 |
-| 4.4 | Blocked | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 | 2026-04-28 |
-| 4.5 | Blocked | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |
-| 4.6 | Blocked | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 | 2026-04-29 |
-| 4.7 | Blocked | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 | 2026-04-29 |
+| 4.2 | Completed | review queue 구현 | 목록/상태/검색/정렬 | Backend, Frontend | 1.3.2 | 2026-04-24 |
+| 4.3 | Completed | review decision flow 구현 | approve/reject/edit approve | Backend, Frontend | 4.2 | 2026-04-27 |
+| 4.4 | Completed | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 | 2026-04-28 |
+| 4.5 | Completed | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |
+| 4.6 | Completed | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 | 2026-04-29 |
+| 4.7 | Completed | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 | 2026-04-29 |
 | 4.8 | Blocked | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
 | 4.9 | Blocked | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
-| 4.10 | Blocked | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5 | 2026-05-06 |
+| 4.10 | Blocked | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5, 4.6 | 2026-05-06 |
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 

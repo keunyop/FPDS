@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-12`:
+As of `2026-04-13`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `WBS 2` foundation scaffolds and baseline artifacts are complete
@@ -22,7 +22,13 @@ As of `2026-04-12`:
 - a second post-`3.10` hardening slice is complete: normalization now selectively reuses `TD-SAV-008` governing-PDF interest rules, has an opportunistic `TD-SAV-007` fee-waiver merge hook, splits `TD Growth` boosted-rate qualification into cleaner canonical fields, and suppresses several noisy long-text fields before candidate persistence
 - a third post-`3.10` hardening slice is complete: `TD-SAV-007` fee-governing evidence is now used in a live target-safe way to suppress noisy `fee_waiver_condition` fields for zero-monthly-fee TD savings products instead of persisting misleading waiver text
 - `WBS 4.1` admin login is now complete with a DB-backed operator account table, DB-backed session table, FastAPI auth routes, a bootstrap-admin CLI, and a protected Next.js admin entry shell
-- the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, and redesigned protected overview
+- `WBS 4.2` review queue is now complete with a session-protected review-task list API, a protected `/admin/reviews` queue route, active-state defaults, search, filters, sorting, and stable drill-in links
+- `WBS 4.3` review decision flow is now complete with review-task detail read APIs, approve/reject/defer/edit-approve mutations, canonical product/version side effects, review/change audit emission, and a live `/admin/reviews/:reviewTaskId` decision surface with override diff preview
+- `WBS 4.4` evidence trace viewer is now complete with field-selectable trace drilldown, enriched evidence metadata, parsed mapping context, and model-run references on the live `/admin/reviews/:reviewTaskId` route
+- `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
+- `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
+- `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns
+- the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, and append-only audit history
 
 ## What This Repo Contains Today
 
@@ -37,7 +43,11 @@ As of `2026-04-12`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
-- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future review, run, publish, usage, and health surfaces route-oriented
+- a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
+- a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
+- a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
+- a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface
+- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish, usage, and health surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
@@ -91,6 +101,12 @@ Out of scope for the current FPDS build:
 - `WBS 3.10` now has a written findings memo, and three follow-up hardening slices have already cleared the original `required_field_missing` validation gap, added selective `TD-SAV-008` PDF merge, improved `TD Growth` qualification cleanup, and removed misleading zero-fee `fee_waiver_condition` fields using `TD-SAV-007` evidence in live reruns
 - Gate B is now closed as `Pass`
 - `WBS 4.1` admin login is now implemented and gives the admin surface its first real runtime bootstrap
+- `WBS 4.2` review queue is now implemented and gives the admin surface its first live reviewer intake route
+- `WBS 4.3` review decision flow is now implemented and lets operators complete approve/reject/defer/edit-approve actions against persisted review tasks
+- `WBS 4.4` evidence trace viewer is now implemented and lets operators focus a field, inspect linked evidence, and review model-stage context on the same detail route
+- `WBS 4.5` run status is now implemented and gives operators a live `/admin/runs` list plus `/admin/runs/:runId` diagnostic detail route
+- `WBS 4.6` change history is now implemented and gives operators a live `/admin/changes` chronology route with review/run context and manual-override audit context
+- `WBS 4.7` audit log baseline is now implemented and gives operators a live `/admin/audit` chronology route with actor, target, request, and review/run context
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
@@ -99,11 +115,11 @@ Out of scope for the current FPDS build:
 ### In Progress
 
 - prototype worker runtime implementation
-- `WBS 4` admin and ops runtime bootstrap beyond login
+- `WBS 4` admin and ops runtime bootstrap beyond audit log
 
 ### Not Started
 
-- full public UI, the remaining admin surfaces after login, and review decision runtime code
+- full public UI and the remaining admin or ops surfaces after run status
 - BX-PF runtime integration code
 - public frontend package bootstrap
 

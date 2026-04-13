@@ -53,6 +53,13 @@
       "access": "authenticated"
     },
     {
+      "route": "/admin/audit",
+      "route_id": "admin.audit",
+      "shell_dir": "route-shells/audit",
+      "resource_key": "admin_operations.audit",
+      "access": "authenticated"
+    },
+    {
       "route": "/admin/publish",
       "route_id": "admin.publish",
       "shell_dir": "route-shells/publish",

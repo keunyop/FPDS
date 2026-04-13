@@ -10,6 +10,7 @@ import {
   Gauge,
   LayoutDashboard,
   Search,
+  ScrollText,
   ShieldCheck,
   Sparkles,
   UploadCloud
@@ -81,7 +82,8 @@ const navGroups: NavGroup[] = [
       {
         label: "Review Queue",
         description: "Queue, validation, and decision intake",
-        status: "Next",
+        href: "/admin/reviews",
+        status: "Live",
         icon: FileClock
       },
       {
@@ -98,8 +100,23 @@ const navGroups: NavGroup[] = [
       {
         label: "Runs",
         description: "Execution diagnostics and failure context",
-        status: "Planned",
+        href: "/admin/runs",
+        status: "Live",
         icon: Activity
+      },
+      {
+        label: "Changes",
+        description: "Canonical chronology and override context",
+        href: "/admin/changes",
+        status: "Live",
+        icon: ArrowUpRight
+      },
+      {
+        label: "Audit Log",
+        description: "Append-only workflow and auth trail",
+        href: "/admin/audit",
+        status: "Live",
+        icon: ScrollText
       },
       {
         label: "Publish",
@@ -133,7 +150,17 @@ function findMatchingGroupIndex(pathname: string | null) {
     return 0;
   }
 
-  const matchingIndex = navGroups.findIndex((group) => group.items.some((item) => item.href === pathname));
+  const matchingIndex = navGroups.findIndex((group) =>
+    group.items.some((item) => {
+      if (!item.href) {
+        return false;
+      }
+      if (item.href === "/admin") {
+        return pathname === item.href;
+      }
+      return pathname === item.href || pathname.startsWith(`${item.href}/`);
+    })
+  );
   return matchingIndex >= 0 ? matchingIndex : 0;
 }
 

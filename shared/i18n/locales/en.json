@@ -26,6 +26,7 @@
       "runs": "Runs",
       "run_detail": "Run Detail",
       "changes": "Change History",
+      "audit": "Audit Log",
       "publish": "Publish Monitor",
       "usage": "LLM Usage",
       "health_dashboard": "Dashboard Health",

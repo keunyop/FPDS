@@ -1,11 +1,20 @@
 # FPDS Admin API Service
 
-This package is the first live runtime slice for `WBS 4.1 admin login`.
+This package is the first live admin runtime package for `WBS 4.1`, `4.2`, `4.3`, `4.4`, `4.5`, `4.6`, and `4.7`.
 
 Current scope:
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - login, logout, and session introspection routes
+- review queue list route backed by `review_task` and `normalized_candidate`
+- review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
+- run list route backed by `ingestion_run` with protected run-state diagnostics
+- run detail read route with source processing summary, error summary, related review tasks, and usage summary
+- change-history list route backed by `change_event` with protected canonical chronology and manual-override audit context
+- audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
+- approve, reject, defer, and edit-approve review mutations
+- canonical product/version creation or update side effects for approved decisions
+- review and manual-override audit events plus change-event emission
 - login failure tracking and auth audit events
 - bootstrap CLI for the first operator account
 
@@ -13,6 +22,16 @@ Current routes:
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/logout`
 - `GET /api/admin/auth/session`
+- `GET /api/admin/review-tasks`
+- `GET /api/admin/review-tasks/:reviewTaskId`
+- `GET /api/admin/runs`
+- `GET /api/admin/runs/:runId`
+- `GET /api/admin/change-history`
+- `GET /api/admin/audit-log`
+- `POST /api/admin/review-tasks/:reviewTaskId/approve`
+- `POST /api/admin/review-tasks/:reviewTaskId/reject`
+- `POST /api/admin/review-tasks/:reviewTaskId/edit-approve`
+- `POST /api/admin/review-tasks/:reviewTaskId/defer`
 - `GET /healthz`
 
 ## Local Run
@@ -44,5 +63,13 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Passwords are hashed with Python's built-in `scrypt`.
 - The session cookie is still `fpds_admin_session` per the shared auth contract.
 - Login throttling is DB-backed with per-account lockout and recent-attempt checks.
-- Later admin write routes can reuse the stored session and CSRF token model.
+- The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
+- Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
+- Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
+- Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
+- Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
+- Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
+- Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
+- Review write routes now require the stored session plus matching `X-CSRF-Token` header.
+- Later admin write routes can keep reusing the same session and CSRF token model.
 - The settings loader now resolves a relative `FPDS_ENV_FILE` from either the current working directory or the repo root, so `.env.dev` works both from the workspace root and from inside `api/service`.

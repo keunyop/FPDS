@@ -1,18 +1,32 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Annotated
 from typing import Any
+from typing import Literal
 from uuid import uuid4
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from api_service.auth import LoginError, authenticate_user, get_session_by_token, revoke_session
+from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
+from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.models import LoginRequest
+from api_service.models import ReviewDecisionRequest
+from api_service.review_detail import (
+    ReviewRequestContext,
+    ReviewTaskError,
+    apply_review_decision,
+    load_review_task_detail,
+    record_evidence_trace_viewed,
+)
+from api_service.review_queue import load_review_queue, normalize_review_queue_filters
+from api_service.run_status import load_run_status_detail, load_run_status_list, normalize_run_status_filters
 
 
 def _request_ip(request: Request) -> str | None:
@@ -101,6 +115,11 @@ async def login_error_handler(request: Request, exc: LoginError):
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
 
 
+@app.exception_handler(ReviewTaskError)
+async def review_task_error_handler(request: Request, exc: ReviewTaskError):
+    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError):
     return _error(status_code=422, code="validation_error", message="Invalid request payload.", request=request)
@@ -131,6 +150,17 @@ def _resolve_session(request: Request) -> tuple[dict[str, Any], dict[str, Any]]:
         if not resolved:
             raise LoginError(status_code=401, code="authentication_required", message="Admin session is required.")
     return resolved
+
+
+def _require_csrf(request: Request, *, session_info: dict[str, Any]) -> None:
+    settings: Settings = request.app.state.settings
+    if not settings.csrf_enabled:
+        return
+
+    expected = session_info.get("csrf_token")
+    provided = request.headers.get("x-csrf-token")
+    if not expected or provided != expected:
+        raise ReviewTaskError(status_code=403, code="invalid_csrf_token", message="A valid CSRF token is required.")
 
 
 @app.get("/healthz")
@@ -209,3 +239,244 @@ async def session(request: Request) -> JSONResponse:
         },
         request,
     )
+
+
+@app.get("/api/admin/review-tasks")
+async def review_tasks(
+    request: Request,
+    state: Annotated[list[Literal["queued", "approved", "rejected", "edited", "deferred"]] | None, Query()] = None,
+    bank_code: str | None = None,
+    product_type: str | None = None,
+    validation_status: Literal["pass", "warning", "error"] | None = None,
+    created_from: datetime | None = None,
+    created_to: datetime | None = None,
+    q: str | None = None,
+    sort_by: Literal["priority", "created_at", "updated_at", "source_confidence", "product_name"] = "priority",
+    sort_order: Literal["asc", "desc"] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_review_queue_filters(
+        states=state,
+        bank_code=bank_code,
+        product_type=product_type,
+        validation_status=validation_status,
+        created_from=created_from,
+        created_to=created_to,
+        search=q,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_review_queue(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/review-tasks/{review_task_id}")
+async def review_task_detail(request: Request, review_task_id: str) -> JSONResponse:
+    actor, _session_info = _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
+        if payload:
+            record_evidence_trace_viewed(
+                connection,
+                actor=actor,
+                review_task_id=review_task_id,
+                run_id=payload["review_task"]["run_id"],
+                candidate_id=payload["review_task"]["candidate_id"],
+                product_id=payload["review_task"]["product_id"],
+                request_id=request.state.request_id,
+                ip_address=_request_ip(request),
+                user_agent=request.headers.get("user-agent"),
+                field_count=int(payload["evidence_summary"]["field_count"]),
+                evidence_item_count=int(payload["evidence_summary"]["item_count"]),
+            )
+    if not payload:
+        return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/runs")
+async def run_status_list(
+    request: Request,
+    state: Annotated[list[Literal["started", "completed", "failed", "retried"]] | None, Query()] = None,
+    run_type: str | None = None,
+    partial_only: bool = False,
+    started_from: datetime | None = None,
+    started_to: datetime | None = None,
+    q: str | None = None,
+    sort_by: Literal["started_at", "completed_at", "candidate_count", "review_queued_count", "run_type"] = "started_at",
+    sort_order: Literal["asc", "desc"] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_run_status_filters(
+        states=state,
+        run_type=run_type,
+        partial_only=partial_only,
+        started_from=started_from,
+        started_to=started_to,
+        search=q,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_run_status_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/runs/{run_id}")
+async def run_status_detail(request: Request, run_id: str) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_run_status_detail(connection, run_id=run_id)
+    if not payload:
+        return _error(status_code=404, code="run_not_found", message="Run was not found.", request=request)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/change-history")
+async def change_history_list(
+    request: Request,
+    product_id: str | None = None,
+    bank_code: str | None = None,
+    product_type: str | None = None,
+    change_type: Literal["New", "Updated", "Discontinued", "Reclassified", "ManualOverride"] | None = None,
+    changed_from: datetime | None = None,
+    changed_to: datetime | None = None,
+    q: str | None = None,
+    sort_by: Literal["detected_at", "change_type", "product_name", "bank_code"] = "detected_at",
+    sort_order: Literal["asc", "desc"] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_change_history_filters(
+        product_id=product_id,
+        bank_code=bank_code,
+        product_type=product_type,
+        change_type=change_type,
+        changed_from=changed_from,
+        changed_to=changed_to,
+        search=q,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_change_history_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.get("/api/admin/audit-log")
+async def audit_log_list(
+    request: Request,
+    event_category: Literal["review", "run", "publish", "auth", "config", "usage"] | None = None,
+    event_type: str | None = None,
+    actor_type: Literal["system", "user", "service", "scheduler"] | None = None,
+    target_type: str | None = None,
+    actor_id: str | None = None,
+    target_id: str | None = None,
+    run_id: str | None = None,
+    review_task_id: str | None = None,
+    product_id: str | None = None,
+    publish_item_id: str | None = None,
+    occurred_from: datetime | None = None,
+    occurred_to: datetime | None = None,
+    q: str | None = None,
+    sort_by: Literal["occurred_at", "event_category", "event_type", "target_type"] = "occurred_at",
+    sort_order: Literal["asc", "desc"] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_audit_log_filters(
+        event_category=event_category,
+        event_type=event_type,
+        actor_type=actor_type,
+        target_type=target_type,
+        actor_id=actor_id,
+        target_id=target_id,
+        run_id=run_id,
+        review_task_id=review_task_id,
+        product_id=product_id,
+        publish_item_id=publish_item_id,
+        occurred_from=occurred_from,
+        occurred_to=occurred_to,
+        search=q,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_audit_log_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+async def _handle_review_decision(
+    request: Request,
+    *,
+    review_task_id: str,
+    action_type: Literal["approve", "reject", "edit_approve", "defer"],
+    payload: ReviewDecisionRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        result = apply_review_decision(
+            connection,
+            review_task_id=review_task_id,
+            action_type=action_type,
+            actor=actor,
+            reason_code=payload.reason_code,
+            reason_text=payload.reason_text,
+            override_payload=payload.override_payload,
+            context=ReviewRequestContext(
+                request_id=request.state.request_id,
+                ip_address=_request_ip(request),
+                user_agent=request.headers.get("user-agent"),
+            ),
+        )
+        detail = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
+    return _success(
+        {
+            "result": result,
+            "review_task": detail,
+        },
+        request,
+    )
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/approve")
+async def approve_review_task(request: Request, review_task_id: str, payload: ReviewDecisionRequest) -> JSONResponse:
+    return await _handle_review_decision(request, review_task_id=review_task_id, action_type="approve", payload=payload)
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/reject")
+async def reject_review_task(request: Request, review_task_id: str, payload: ReviewDecisionRequest) -> JSONResponse:
+    return await _handle_review_decision(request, review_task_id=review_task_id, action_type="reject", payload=payload)
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/edit-approve")
+async def edit_approve_review_task(request: Request, review_task_id: str, payload: ReviewDecisionRequest) -> JSONResponse:
+    return await _handle_review_decision(request, review_task_id=review_task_id, action_type="edit_approve", payload=payload)
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/defer")
+async def defer_review_task(request: Request, review_task_id: str, payload: ReviewDecisionRequest) -> JSONResponse:
+    return await _handle_review_decision(request, review_task_id=review_task_id, action_type="defer", payload=payload)

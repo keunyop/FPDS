@@ -14,25 +14,31 @@ const timelineItems = [
     meta: "Completed in WBS 4.1"
   },
   {
-    title: "Shadcnblocks UI foundation applied",
-    copy: "The admin runtime now uses a vendor-first shell, login block, and shared shadcn primitives.",
-    meta: "Completed in this slice"
+    title: "Review queue route is now live",
+    copy: "Protected `/admin/reviews` now lists real review tasks with active-state defaults, search, filters, and sorting.",
+    meta: "Completed in WBS 4.2"
   },
   {
-    title: "Review queue is the next natural surface",
-    copy: "The overview keeps the next work pointed at queue-first triage rather than overloading the current page.",
-    meta: "Next planned slice"
+    title: "Run diagnostics route is now live",
+    copy: "Protected `/admin/runs` and `/admin/runs/:runId` now explain run outcome, source impact, related review tasks, and usage summary.",
+    meta: "Completed in WBS 4.5"
+  },
+  {
+    title: "Change history route is now live",
+    copy: "Protected `/admin/changes` now shows canonical event chronology with changed fields, review context, run context, and manual-override audit context.",
+    meta: "Completed in WBS 4.6"
+  },
+  {
+    title: "Audit log route is now live",
+    copy: "Protected `/admin/audit` now keeps review, auth, and trace-access audit history queryable as an append-only operations surface.",
+    meta: "Completed in WBS 4.7"
   }
 ] as const;
 
 const emptySurfaces = [
   {
-    title: "Queued reviews",
-    copy: "This panel becomes the high-signal review intake surface once queue APIs are available."
-  },
-  {
     title: "Recent failures",
-    copy: "Run failures will surface here without replacing the dedicated runs diagnostic screen."
+    copy: "Overview can summarize failures later, but detailed diagnosis now belongs to the live runs route."
   },
   {
     title: "Usage anomalies",
@@ -91,14 +97,14 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Live admin surfaces",
-      value: "2",
-      note: "Login and protected overview now sit on Shadcnblocks-based shell primitives.",
+      value: "7",
+      note: "Login, overview, review queue, review detail, runs, changes, and audit are now live inside the protected shell.",
       tone: "info" as const
     },
     {
-      label: "Next route",
-      value: "/admin/reviews",
-      note: "Queue-first triage remains the highest-signal follow-on surface.",
+      label: "Newest route",
+      value: "/admin/audit",
+      note: "Append-only audit chronology now complements change history without replacing it.",
       tone: "warning" as const
     },
     {
@@ -125,7 +131,7 @@ export default async function AdminOverviewPage() {
             <div className="max-w-3xl">
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Protected overview</p>
               <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-                Admin triage now lives inside the Shadcnblocks-based FPDS operations shell.
+                Admin triage now spans overview, review, runs, and canonical change chronology inside the FPDS operations shell.
               </h1>
               <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
                 The live overview keeps admin compact, route-oriented, and evidence aware. It is the stable entrypoint
@@ -142,7 +148,7 @@ export default async function AdminOverviewPage() {
           <div className="mt-6">
             <Banner1
               defaultVisible={true}
-              description="This slice refreshes the live admin shell and overview first. Queue, trace, runs, publish, usage, and health remain separate surfaces and will be wired in follow-on WBS slices."
+              description="Review queue, review detail, trace, runs, change history, and audit log are now live, while publish, usage, and health remain separate surfaces and continue to land in follow-on WBS slices."
               dismissible={false}
               title="Current slice boundary"
               tone="warning"
@@ -182,7 +188,7 @@ export default async function AdminOverviewPage() {
                   dashboard.
                 </p>
               </div>
-              <span className="rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">Next slices ready</span>
+              <span className="rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">Route set expanding</span>
             </div>
 
             <div className="mt-6 grid gap-4">

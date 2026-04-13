@@ -63,6 +63,16 @@
       }
     },
     {
+      "resource": "admin.audit_log",
+      "actions": {
+        "read": [
+          "admin",
+          "reviewer",
+          "read_only"
+        ]
+      }
+    },
+    {
       "resource": "admin.publish_monitor",
       "actions": {
         "read": [

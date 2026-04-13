@@ -1,0 +1,147 @@
+import { redirect } from "next/navigation";
+
+import { ApplicationShell5 } from "@/components/application-shell5";
+import { ReviewQueueSurface, type ReviewQueuePageFilters } from "@/components/fpds/admin/review-queue-surface";
+import { fetchAdminSession, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
+
+import { LogoutButton } from "../LogoutButton";
+
+type ReviewQueuePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const DEFAULT_STATES = ["queued", "deferred"];
+
+export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const filters = parsePageFilters(resolvedSearchParams);
+  const apiSearchParams = buildApiSearchParams(filters);
+
+  let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
+  let queue: Awaited<ReturnType<typeof fetchReviewQueue>> = null;
+  let apiUnavailable = false;
+
+  try {
+    session = await fetchAdminSession();
+    if (session) {
+      queue = await fetchReviewQueue(apiSearchParams);
+    }
+  } catch {
+    apiUnavailable = true;
+  }
+
+  if (!session && !apiUnavailable) {
+    redirect("/admin/login?next=/admin/reviews");
+  }
+
+  if (session && !queue && !apiUnavailable) {
+    redirect("/admin/login?next=/admin/reviews");
+  }
+
+  if (!session || !queue || apiUnavailable) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-4 py-8 md:px-6">
+        <section className="w-full rounded-[1.75rem] border border-destructive/20 bg-card/95 p-6 shadow-sm md:p-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-destructive">Admin API unavailable</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
+              Review queue could not load because the admin API is not reachable.
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              Start the FastAPI service and refresh this page. The queue route needs the protected session contract and
+              the new `/api/admin/review-tasks` list endpoint before it can render real review work.
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
+  return (
+    <ApplicationShell5
+      environmentLabel={envLabel}
+      headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
+      user={{
+        name: session.user.display_name,
+        email: session.user.email,
+        role: session.user.role,
+      }}
+    >
+      <ReviewQueueSurface filters={filters} queue={queue} />
+    </ApplicationShell5>
+  );
+}
+
+function parsePageFilters(searchParams: Record<string, string | string[] | undefined>): ReviewQueuePageFilters {
+  return {
+    q: firstValue(searchParams.q),
+    states: multiValue(searchParams.state, DEFAULT_STATES),
+    bankCode: firstValue(searchParams.bank_code).toUpperCase(),
+    productType: firstValue(searchParams.product_type).toLowerCase(),
+    validationStatus: firstValue(searchParams.validation_status).toLowerCase(),
+    createdFrom: firstValue(searchParams.created_from),
+    createdTo: firstValue(searchParams.created_to),
+    sortBy: firstValue(searchParams.sort_by) || "priority",
+    sortOrder: firstValue(searchParams.sort_order) === "asc" ? "asc" : "desc",
+    page: positiveInteger(firstValue(searchParams.page)) ?? 1,
+  };
+}
+
+function buildApiSearchParams(filters: ReviewQueuePageFilters) {
+  const params = new URLSearchParams();
+  for (const state of filters.states) {
+    params.append("state", state);
+  }
+  if (filters.q) {
+    params.set("q", filters.q);
+  }
+  if (filters.bankCode) {
+    params.set("bank_code", filters.bankCode);
+  }
+  if (filters.productType) {
+    params.set("product_type", filters.productType);
+  }
+  if (filters.validationStatus) {
+    params.set("validation_status", filters.validationStatus);
+  }
+  if (filters.createdFrom) {
+    params.set("created_from", `${filters.createdFrom}T00:00:00Z`);
+  }
+  if (filters.createdTo) {
+    params.set("created_to", `${filters.createdTo}T23:59:59.999Z`);
+  }
+  params.set("sort_by", filters.sortBy);
+  params.set("sort_order", filters.sortOrder);
+  params.set("page", String(filters.page));
+  return params;
+}
+
+function firstValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value[0]?.trim() ?? "";
+  }
+  return value?.trim() ?? "";
+}
+
+function multiValue(value: string | string[] | undefined, fallback: string[]) {
+  if (Array.isArray(value)) {
+    const normalized = value.map((item) => item.trim().toLowerCase()).filter(Boolean);
+    return normalized.length ? normalized : fallback;
+  }
+  if (typeof value === "string" && value.trim()) {
+    return [value.trim().toLowerCase()];
+  }
+  return fallback;
+}
+
+function positiveInteger(value: string) {
+  if (!value) {
+    return null;
+  }
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return null;
+  }
+  return parsed;
+}

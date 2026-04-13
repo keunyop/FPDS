@@ -890,6 +890,152 @@ Each entry should include:
 - Known issues: the original CI blocker from missing frontend dependencies is addressed, but this local Windows environment still has a separate `next build` `spawn EPERM` problem that should be treated independently from the GitHub Actions fix
 - Next step: rerun `scripts/harness/invoke-foundation-checks.ps1` and then recheck the GitHub Actions workflow result with the new Node plus Corepack bootstrap in place
 
+## 2026-04-13 - Customer Progress Report Draft Prepared
+
+- WBS: delivery reporting support
+- Status: `done`
+- Goal: prepare a customer-facing first progress report covering project start through `2026-04-12` using a conservative status line that stays aligned to the published schedule
+- Why now: the Product Owner needed a shareable written progress update for the first customer reporting cycle and explicitly wanted the external message to remain on-schedule rather than exposing the full internal lead
+- Outcome: added `docs/customer-reports/customer-progress-report-2026-04-12.md` as the first customer-facing progress report draft and introduced `docs/customer-reports/` as the dedicated location for customer-shareable reporting documents. The report is written in English, summarizes the period as `On schedule`, records detailed design and Foundation Setup as complete, reports the Prototype core pipeline plus first internal end-to-end verification as complete, and keeps `Admin/Ops Core` framed as the next stage rather than over-reporting the internal lead
+- Not done: did not convert this draft into a branded client template, slide deck, or bilingual version. Also did not disclose the fuller internal status line of `Gate B Pass` plus `WBS 4.1` completion because this slice intentionally preserved customer-facing buffer
+- Key files: `docs/customer-reports/README.md`, `docs/customer-reports/customer-progress-report-2026-04-12.md`, `docs/00-governance/development-journal.md`
+- Decisions: used a conservative external reporting line that remains factually correct while avoiding premature customer expectations about later-phase completion. Framed progress around completed foundations, prototype core implementation, and internal verification rather than around internal WBS lead indicators
+- Verification:
+  - `git diff --check`
+  - pending
+- Known issues: the report is currently a repository markdown draft only, so any final customer branding or formatting adaptation still remains a follow-on packaging task
+- Next step: reuse this report draft as the base text for the customer submission and adjust wording only if the Product Owner wants a more formal or more executive-style tone
+
+## 2026-04-13 - WBS 4.2 Review Queue
+
+- WBS: `4.2`
+- Status: `done`
+- Goal: deliver the first real reviewer intake surface on top of persisted prototype `review_task` data
+- Why now: `WBS 4.1` already gave the admin runtime a protected shell and DB-backed session model, while `WBS 3.7` had already persisted queueable review tasks. That made the review queue the smallest live admin slice that could add real operational value without jumping ahead to review decisions or evidence trace
+- Outcome: added `GET /api/admin/review-tasks` to the FastAPI admin service with active-state defaults, search, filters, pagination, and sorting against `review_task` plus `normalized_candidate`. Added protected `/admin/reviews` and reserved `/admin/reviews/:reviewTaskId` routes in the Next.js admin app. The new queue route now shows filtered review-task counts, a table-first reviewer intake surface, queue-specific badges, pagination, and stable drill-in links while keeping decision and trace work explicitly out of this slice. The admin shell and overview were also updated so Review Queue is now a live route instead of a planned placeholder
+- Not done: no review decision mutations, no trace/evidence pane, no assignment or lock metadata, no bulk actions, and no locale-resource wiring were added. The review-detail route is intentionally just a placeholder until `4.3` and `4.4`
+- Key files: `api/service/api_service/main.py`, `api/service/api_service/review_queue.py`, `api/service/tests/test_review_queue.py`, `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/app/admin/reviews/[reviewTaskId]/page.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/app/admin/page.tsx`, `docs/01-planning/WBS.md`
+- Decisions: defaulted the live queue to `queued` plus `deferred` so the first view stays triage-first. Added a `priority` sort that orders open states ahead of terminal ones, then error/warning validation ahead of pass, then lower confidence ahead of higher confidence. Kept the frontend bank and product-type filter options static for now instead of inventing a new facets API in the same slice. Added a placeholder detail route now so queue drill-in links stay stable without pretending that the trace viewer is already implemented
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: the queue UI currently uses static bank and product-type option lists rather than backend-provided dynamic facets. `/admin/reviews/:reviewTaskId` is only a stable placeholder route today, so review decisions still cannot be completed end-to-end from the admin UI
+- Next step: implement the real review-detail data contract and decision actions on `/admin/reviews/:reviewTaskId` so the queue can hand work off to an actual operator decision surface
+
+## 2026-04-13 - WBS 4.3 Review Decision Flow
+
+- WBS: `4.3`
+- Status: `done`
+- Goal: turn the reserved review-detail route into a real operator decision surface that can complete approve, reject, defer, and edit-and-approve flows against persisted prototype `review_task` data
+- Why now: `WBS 4.2` already delivered protected reviewer intake and stable drill-in links, but the queue still dead-ended at a placeholder route. The next smallest meaningful slice was to connect real detail reads, decision mutations, and the first canonical side effects so review work could complete end-to-end inside the admin runtime
+- Outcome: added `GET /api/admin/review-tasks/:reviewTaskId` plus `POST /approve`, `/reject`, `/edit-approve`, and `/defer` routes to the FastAPI admin service. The new decision flow loads candidate summary, normalized fields, source context, evidence snapshot, current canonical continuity match, and append-only decision history. Mutations now update `review_task` and `normalized_candidate`, append `review_decision`, emit review audit events, and on approve or edit-approve perform the first runtime canonical upsert path by creating or updating `canonical_product`, `product_version`, product-version-scoped evidence links, and `change_event` rows. The Next.js admin route `/admin/reviews/:reviewTaskId` is now a live decision surface with approve, reject, defer, and edit-and-approve controls plus JSON override diff preview and a same-origin proxy route for submissions
+- Not done: this slice does not implement the full `4.4` trace viewer, assignment or lock metadata, bulk actions, or a fully specified long-term continuity algorithm. The current canonical continuity match is intentionally conservative for the prototype scope and uses exact country, bank, family, type, subtype, and product-name matching
+- Key files: `api/service/api_service/main.py`, `api/service/api_service/models.py`, `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `app/admin/src/app/admin/reviews/[reviewTaskId]/page.tsx`, `app/admin/src/app/admin/reviews/[reviewTaskId]/decision/route.ts`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept the prototype review detail trace lightweight in this slice by exposing evidence summary and excerpts rather than claiming the full trace viewer was already finished. Used a conservative exact-match continuity baseline because the workflow design explicitly leaves the detailed continuity algorithm as follow-on work. Excluded reviewer-overridden fields from product-version evidence-link cloning so manual overrides do not appear evidence-backed when they were operator-supplied
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+- Known issues: edit-and-approve currently uses a JSON object editor instead of a per-field structured form, which is practical for this prototype slice but not yet ideal for less technical operators. The current continuity match is intentionally exact and may need a richer identity strategy before broader bank or product-type expansion
+- Next step: implement the full `4.4` trace viewer so field selection, evidence drilldown, and model-run context can support higher-confidence operator review on the same detail route
+
+## 2026-04-13 - WBS 4.4 Evidence Trace Viewer
+
+- WBS: `4.4`
+- Status: `done`
+- Goal: turn the live review-detail route into the first real evidence trace viewer so operators can inspect field-level evidence, parsed mapping context, and model-stage references before deciding
+- Why now: `WBS 4.3` already landed the protected detail route and decision actions, but reviewers still had to work from a lightweight evidence snapshot instead of the trace-pane behavior required by the admin IA and API contract
+- Outcome: expanded `GET /api/admin/review-tasks/:reviewTaskId` so it now returns field-trace groups, enriched evidence metadata, validation issue detail, and relevant extraction/normalization/validation model execution references. Reworked `/admin/reviews/:reviewTaskId` into a split-pane detail surface where selecting a normalized field focuses the trace pane on that field's evidence links, parsed mapping metadata, and model-run context while keeping the decision form and override preview on the same page
+- Not done: this slice does not add raw parsed-artifact downloads, object-storage direct access, assignment or locking, run history pages, or a structured form-based edit-and-approve editor. It stays inside the approved review-detail route and still avoids exposing private object keys
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `README.md`, `api/service/README.md`, `app/admin/README.md`, `app/admin/route-shells/review-detail/README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept the trace viewer on the existing review-detail route instead of creating a second trace-only route so the operator can diagnose and decide without context switching. Reused persisted DB metadata only and did not introduce object fetches or raw artifact links, which keeps the trace pane aligned to the private-storage boundary from the design docs. Used stage-level model execution references for extraction, normalization, and validation rather than inventing a new per-evidence execution linkage table in this slice
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: the trace pane still depends on metadata already persisted in `field_evidence_link`, `field_mapping_metadata`, and `model_execution`, so deeper provenance such as raw parsed-body inspection or per-evidence execution lineage remains follow-on work. The edit-and-approve path still uses JSON overrides rather than a field-structured editor
+- Next step: build `WBS 4.5` run status so operators can pivot from a review task into full run-level diagnosis when the trace pane suggests broader execution problems
+
+## 2026-04-13 - WBS 4.5 Run Status
+
+- WBS: `4.5`
+- Status: `done`
+- Goal: deliver the first live run diagnostics surface so operators can move from review detail into run-level execution diagnosis without leaving the protected admin runtime
+- Why now: `WBS 4.4` gave reviewers field-level trace and model context, but there was still no dedicated place to explain broader run failures, partial completion, per-source processing impact, or run-linked usage after the trace suggested execution-wide issues
+- Outcome: added `GET /api/admin/runs` and `GET /api/admin/runs/:runId` to the FastAPI admin service with protected run list/detail reads, run-type aliasing from persisted metadata, search, filters, pagination, derived stage summaries, source processing summaries, error-event summaries, usage aggregation, and related review-task links. Added protected `/admin/runs` and `/admin/runs/:runId` routes to the Next.js admin app with a table-first run list, partial-completion triage, run detail diagnostics, review drilldowns, and shell navigation updates so operators can move directly from review context into producing-run diagnosis
+- Not done: this slice does not add retry actions, audit-history browsing, publish drilldown, correlation-grouped cross-stage rollups, or a separate run-history analytics layer. Current run detail reflects the persisted stage-scoped run records that already exist in the prototype rather than introducing a new correlation-level aggregation model in the same slice
+- Key files: `api/service/api_service/run_status.py`, `api/service/api_service/main.py`, `api/service/tests/test_run_status.py`, `app/admin/src/app/admin/runs/page.tsx`, `app/admin/src/app/admin/runs/[runId]/page.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/components/fpds/admin/run-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/application-shell5.tsx`, `docs/01-planning/WBS.md`
+- Decisions: mapped contract-level `run_type` from persisted `run_metadata.pipeline_stage` with fallback to `trigger_type` so the live API can meet the admin contract without a schema migration. Kept run detail metadata browser-safe by exposing only curated per-source metadata keys and by excluding private storage paths or raw object keys from the frontend payload. Used stage-specific persisted run records as the live diagnostic unit because that is the current runtime truth in the database, while keeping correlation id visible for future grouped views
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `cmd /c npm run typecheck`
+  - first run failed on stale `.next/types` route validator before the new routes were reflected
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin` after the successful build refreshed the generated route types
+- Known issues: current run detail derives stage summary and error events from existing `model_execution`, `run_source_item`, and `llm_usage_record` rows because there is still no dedicated persisted stage-summary or run-error-event table. Run history also remains stage-scoped rather than correlation-grouped, so a future grouped run-history view may still be useful if operator usage shows that cross-stage diagnosis needs a higher-level aggregation surface
+- Next step: implement `WBS 4.6` change history so operators can move from run diagnosis into canonical change chronology without leaving the admin shell
+
+## 2026-04-13 - WBS 4.6 Change History
+
+- WBS: `4.6`
+- Status: `done`
+- Goal: deliver the first live canonical change chronology surface so operators can inspect persisted `change_event` history without leaving the protected admin runtime
+- Why now: `WBS 4.5` already gave operators run-level diagnosis, but there was still no dedicated place to explain what canonical product changes were approved over time, which fields changed, or when a manual override also emitted audit context
+- Outcome: added `GET /api/admin/change-history` to the FastAPI admin service with search, bank/product-type/change-type/date filters, sorting, pagination, changed-field summaries, linked review/run context, and manual-override audit context when present. Added protected `/admin/changes` to the Next.js admin app with a table-first chronology surface, filter controls, review/run drilldowns, and admin-shell navigation updates so canonical change history is now a live operations route instead of a reserved placeholder
+- Not done: this slice does not implement `/admin/products/:productId`, a separate audit-log surface, product-record drilldown, or grouped change analytics. Current change chronology stays list-first and relies on the change events already emitted during review approval and edit-approve flows
+- Key files: `api/service/api_service/change_history.py`, `api/service/api_service/main.py`, `api/service/tests/test_change_history.py`, `app/admin/src/app/admin/changes/page.tsx`, `app/admin/src/components/fpds/admin/change-history-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/application-shell5.tsx`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept `change history` distinct from `product record` per the admin IA instead of folding current canonical truth into the same route. Exposed review and run drilldowns now because those routes are already live, but kept product-record drilldown deferred until its own surface exists. Used the existing `audit_event` table only to enrich `ManualOverride` rows rather than pulling the whole audit-log slice forward
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `cmd /c npm run typecheck`
+  - first parallel run failed before the new Next.js route types were generated for `/admin/changes`
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin` after the successful build refreshed the generated route types
+- Known issues: `Product Record` drilldown is still reserved, so change history currently links only to the already-live review and run routes. `Discontinued` events are supported by the list contract but still depend on a future writer path that emits that event type
+- Next step: implement `WBS 4.7` audit log baseline so operators can move from manual-override context into a broader append-only audit trail when needed
+
+## 2026-04-13 - WBS 4.7 Audit Log Baseline
+
+- WBS: `4.7`
+- Status: `done`
+- Goal: deliver the first protected append-only audit trail surface so operators can inspect review, auth, and trace-access history without leaving the admin runtime
+- Why now: `WBS 4.6` already exposed manual-override audit context inside change history, but there was still no dedicated surface for broader audit chronology, actor/request metadata, or trace-access history
+- Outcome: added `GET /api/admin/audit-log` to the FastAPI admin service with search, category, event type, actor type, target type, linked entity, date filters, sorting, pagination, actor snapshot enrichment, and review/run drilldowns. Added protected `/admin/audit` to the Next.js admin app with a table-first audit surface, filter controls, shell navigation updates, and route-manifest wiring. Review detail reads now also emit `evidence_trace_viewed` audit events so trace access becomes queryable alongside review decisions and auth history
+- Not done: this slice does not implement privilege-change UI, config-change mutation routes, publish action writers, or the later usage-dashboard analytics surface. Publish and usage categories can be queried now but still depend on future writer paths for wider real data coverage
+- Key files: `api/service/api_service/audit_log.py`, `api/service/api_service/main.py`, `api/service/api_service/review_detail.py`, `api/service/tests/test_audit_log.py`, `api/service/tests/test_review_detail.py`, `app/admin/src/app/admin/audit/page.tsx`, `app/admin/src/components/fpds/admin/audit-log-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/lib/admin-api.ts`, `README.md`, `docs/01-planning/WBS.md`
+- Decisions: kept audit log distinct from canonical change history so actor/request chronology does not blur into product-change chronology. Placed audit log under `Operations` in the admin shell because it is primarily an operator diagnosis surface rather than a cost or aggregate-health surface. Added trace-access audit capture at review-detail read time instead of inventing a separate trace-only route because the live detail page already owns sensitive evidence inspection
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `cmd /c npm run build`
+  - first run failed on a JSX text token in the new audit surface, then passed after replacing the inline state-transition arrow with a JSX-safe text expression
+  - `cmd /c npm run typecheck`
+  - first parallel run failed before `.next/types` finished generating, then passed when rerun after the successful build
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: the audit route currently exposes the categories already emitted by live code, so publish/config/usage coverage remains sparse until those writer paths land. `evidence_trace_viewed` emits on each protected detail read, which is acceptable for append-only chronology but may warrant future aggregation or sampling if operator traffic grows significantly
+- Next step: implement `WBS 4.8` LLM usage tracking so operators can move from append-only audit chronology into model-cost and anomaly diagnosis on a dedicated usage surface
+
 ---
 
 ## 7. Change History
@@ -920,3 +1066,9 @@ Each entry should include:
 | 2026-04-11 | Added the WBS 3.10 prototype findings memo entry |
 | 2026-04-11 | Added the post-3.10 hardening slice 1 entry for TD Savings current-rate merge |
 | 2026-04-12 | Added the WBS 4.1 DB-backed admin login implementation entry |
+| 2026-04-13 | Added the WBS 4.2 review queue implementation entry |
+| 2026-04-13 | Added the WBS 4.3 review decision flow implementation entry |
+| 2026-04-13 | Added the WBS 4.4 evidence trace viewer implementation entry |
+| 2026-04-13 | Added the WBS 4.5 run status implementation entry |
+| 2026-04-13 | Added the WBS 4.6 change history implementation entry |
+| 2026-04-13 | Added the WBS 4.7 audit log baseline implementation entry |

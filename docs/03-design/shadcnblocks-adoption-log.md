@@ -69,6 +69,34 @@ Do not add an entry for:
   - `pnpm run build`
 - Notes: `radix-nova` is now active through `components.json` and app-level shadcn semantic variables. The older `src/app/theme.css` mirror was removed because the admin app now styles directly from `globals.css`
 
+## 2026-04-13 - Admin Review Queue Runtime
+
+- Surface or Area: `app/admin` protected `/admin/reviews` route plus reserved `/admin/reviews/:reviewTaskId`
+- Vendor Asset: existing `@shadcnblocks/application-shell5`, `@shadcnblocks/stats5`, `@shadcnblocks/banner1`, generated shadcn UI primitives
+- Source: previously installed authenticated `@shadcnblocks` registry assets reused inside the admin runtime
+- Install Method: no new vendor install; composed from the existing admin shell foundation
+- Files Added or Changed: `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/app/admin/reviews/[reviewTaskId]/page.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/page.tsx`
+- FPDS Wrappers or Overrides: added a repo-owned review queue surface under `components/fpds/admin` so the queue table, filter form, pagination, and queue-specific badge semantics stay in the FPDS domain layer
+- Direct Vendor Edits: yes; `application-shell5` was edited again so the Review navigation item is now live and review-detail paths stay inside the correct shell group
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+- Notes: no new vendor block was imported for `4.2`; the queue route deliberately reuses the existing shell and support blocks instead of widening the vendor footprint before `4.3` and `4.4`
+
+## 2026-04-13 - Admin Run Diagnostics Runtime
+
+- Surface or Area: `app/admin` protected `/admin/runs` and `/admin/runs/:runId`
+- Vendor Asset: existing `@shadcnblocks/application-shell5`, `@shadcnblocks/stats5`, `@shadcnblocks/banner1`, generated shadcn UI primitives
+- Source: previously installed authenticated `@shadcnblocks` registry assets reused inside the admin runtime
+- Install Method: no new vendor install; composed from the existing admin shell foundation
+- Files Added or Changed: `app/admin/src/app/admin/runs/page.tsx`, `app/admin/src/app/admin/runs/[runId]/page.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/components/fpds/admin/run-detail-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/page.tsx`
+- FPDS Wrappers or Overrides: added repo-owned run list and run detail surfaces under `components/fpds/admin` so run lifecycle semantics, degraded-status cues, source-processing summary, and review-task drilldowns stay in the FPDS domain layer
+- Direct Vendor Edits: yes; `application-shell5` was edited again so the Runs navigation item is now live and the overview copy stays aligned to the current runtime state
+- Verification:
+  - `cmd /c npm run build`
+  - `cmd /c npm run typecheck`
+- Notes: no new vendor block was imported for `4.5`; the run surfaces deliberately reuse the existing shell and support blocks rather than widening the vendor footprint before publish, usage, and health routes land
+
 ---
 
 ## 5. Change History

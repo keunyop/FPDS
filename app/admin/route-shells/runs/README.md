@@ -6,6 +6,6 @@ Purpose:
 - list ingestion and processing runs
 - triage failures and partial completion
 
-Current scaffold:
-- route reserved only
-- run list UI deferred to `4.5`
+Current runtime:
+- protected run list is live
+- session-backed filters, sort, and pagination are implemented in `src/app/admin/runs`

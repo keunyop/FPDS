@@ -7,5 +7,5 @@ Purpose:
 - drill into product continuity and review context
 
 Current scaffold:
-- route reserved only
-- list and filters deferred to `4.6`
+- protected route is live in `src/app/admin/changes/page.tsx`
+- table-first chronology, filters, review/run drilldowns, and manual-override audit context landed in `4.6`

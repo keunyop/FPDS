@@ -1,4 +1,4 @@
-﻿# FPDS Admin Information Architecture
+# FPDS Admin Information Architecture
 
 Version: 1.0
 Date: 2026-04-06
@@ -26,7 +26,7 @@ Source Documents:
 - review, trace, run, change, publish, usage, dashboard health가 서로 다른 운영 목적을 가진 surface라는 점을 UI 구조에 반영한다.
 - admin API contract, RBAC/security baseline, workflow/state model, aggregate health 기준이 같은 admin UX vocabulary를 참조하도록 만든다.
 
-이 문서는 구현 시작 신호가 아니다.  
+이 문서는 구현 시작 신호가 아니다.
 구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
 
 ---
@@ -116,6 +116,7 @@ Source Documents:
 | Review | Review Queue | `/admin/reviews` | reviewer work intake와 queue 처리 |
 | Operations | Runs | `/admin/runs` | ingestion/run 상태 진단 |
 | Operations | Change History | `/admin/changes` | canonical 변화 추적 |
+| Operations | Audit Log | `/admin/audit` | append-only review/auth/run/publish audit trail 확인 |
 | Operations | Publish Monitor | `/admin/publish` | BX-PF pending/retry/reconciliation 확인 |
 | Observability | LLM Usage | `/admin/usage` | token/cost 모니터링 |
 | Observability | Dashboard Health | `/admin/health/dashboard` | public aggregate freshness/health 확인 |
@@ -130,7 +131,7 @@ Source Documents:
 | Run Detail | `/admin/runs/:runId` | runs list, review detail, usage drilldown, search |
 | Product Record | `/admin/products/:productId` | change history, publish monitor, search, review result context |
 
-`/admin/products` list route는 구현 시 둘 수 있지만, 본 IA baseline에서는 primary navigation 필수 항목으로 두지 않는다.  
+`/admin/products` list route는 구현 시 둘 수 있지만, 본 IA baseline에서는 primary navigation 필수 항목으로 두지 않는다.
 canonical product는 triage-first surface가 아니라 contextual diagnostic surface로 본다.
 
 ### 5.4 Reserved Follow-On Navigation
@@ -176,6 +177,7 @@ global search는 최소 아래 query를 지원해야 한다.
 | Run Detail | Related Review Tasks | run에서 나온 review workload 확인 |
 | Run Detail | LLM Usage | same run cost drilldown |
 | Change History | Product Record | 현재 버전과 변경 문맥 확인 |
+| Change History | Audit Log | manual override context에서 broader append-only trail로 이동 |
 | Publish Monitor | Product Record | publish 대상 상품 문맥 확인 |
 | Dashboard Health | Public aggregate domain reference | stale/failure 원인 추적 |
 
@@ -342,7 +344,20 @@ Product Record는 continuity-centric contextual surface다.
 - change history는 event chronology를 보여주고, product record는 current canonical truth를 보여준다.
 - `ManualOverride`는 change history와 audit 문맥을 동시에 드러내야 한다.
 
-### 7.6 Publish Monitor
+### 7.6 Audit Log
+
+Audit Log는 append-only audit trail의 primary home이다.
+
+`/admin/audit` baseline:
+- filter by category, event type, actor type, target type, linked run/review/product context, date range
+- list row는 `event category`, `event type`, `occurred at`, `actor`, `target`, `state transition`, `reason`, `request context`, `review/run drilldown`을 포함한다.
+
+규칙:
+- change history와 audit log는 분리한다. change history는 canonical product event를 설명하고, audit log는 actor와 request context를 설명한다.
+- trace viewer 접근과 auth event는 audit log에서 조회 가능해야 한다.
+- product, run, review처럼 이미 owning surface가 있는 엔터티는 audit log에서 drilldown entry만 제공하고, primary diagnosis는 각 owning surface에서 계속 수행한다.
+
+### 7.7 Publish Monitor
 
 Publish Monitor는 BX-PF publish tracker의 primary home이다.
 
@@ -374,7 +389,7 @@ Publish Monitor는 BX-PF publish tracker의 primary home이다.
 - publish monitor는 review queue 안에 종속시키지 않고 별도 surface로 둔다.
 - exact retry execution control은 후속 구현 WBS에서 상세화하되, 상태 조회와 원인 확인 구조는 지금 고정한다.
 
-### 7.7 LLM Usage Dashboard
+### 7.8 LLM Usage Dashboard
 
 LLM Usage는 cost/usage observability surface다.
 
@@ -398,7 +413,7 @@ LLM Usage는 cost/usage observability surface다.
 - public business dashboard metric과 혼동되지 않도록 별도 navigation group에 둔다.
 - anomaly row는 가능한 경우 run detail 또는 review/product context로 drilldown을 제공한다.
 
-### 7.8 Dashboard Health
+### 7.9 Dashboard Health
 
 Dashboard Health는 public aggregate freshness와 quality health를 운영자 시점에서 보는 surface다.
 
@@ -438,7 +453,7 @@ exact permission enforcement detail은 `1.6.2 RBAC` 구현에서 확정하지만
 | Usage dashboard read | O | O | O | cost visibility |
 | Dashboard health read | O | O | O | aggregate health visibility |
 
-현재 범위에는 privilege/config/credential management screen을 포함하지 않는다.  
+현재 범위에는 privilege/config/credential management screen을 포함하지 않는다.
 그런 admin-only governance screen이 후속 추가되더라도, 본 문서의 core admin operations IA는 그대로 유지한다.
 
 ---
@@ -471,6 +486,7 @@ exact permission enforcement detail은 `1.6.2 RBAC` 구현에서 확정하지만
 | Trace viewer implementation | `4.4` |
 | Run status screen | `4.5` |
 | Change history screen | `4.6` |
+| Audit log implementation | `4.7` |
 | Usage dashboard implementation | `4.8`, `4.9` |
 | Publish monitor implementation | `6.4` |
 
@@ -483,6 +499,7 @@ exact permission enforcement detail은 `1.6.2 RBAC` 구현에서 확정하지만
 - `4.4`: evidence trace viewer 구현
 - `4.5`: run status 화면 구현
 - `4.6`: change history 화면 구현
+- `4.7`: audit log 화면 구현
 - `4.9`: usage dashboard v1 구현
 - `5.12`: EN/KO/JA admin locale 적용
 - `6.4`: publish monitor UI 구현
@@ -502,3 +519,4 @@ exact permission enforcement detail은 `1.6.2 RBAC` 구현에서 확정하지만
 | Date | Change |
 |---|---|
 | 2026-04-06 | Initial admin information architecture baseline created for WBS 1.7.4 |
+| 2026-04-13 | Added Audit Log as an operations surface with drilldown rules distinct from canonical change history |

@@ -7,18 +7,25 @@ Planned scope:
 - review detail and trace
 - runs
 - change history
+- audit log
 - publish monitor
 - usage and health surfaces
 
 Current scaffold:
 - `routes.manifest.json` lists the reserved admin routes and visibility expectations.
 - `route-shells/` keeps the original route-by-route design placeholders.
-- the live Next.js admin package for `WBS 4.1` now lives alongside this scaffold under `src/`.
+- the live Next.js admin package for `WBS 4.1` to `4.7` now lives alongside this scaffold under `src/`.
 - future admin surfaces should follow the template-first baseline from `docs/03-design/fpds-design-system.md` and `docs/03-design/fpds_design_system_stripe_benchmark.md`.
 
 Current runtime:
 - `/admin/login` login screen
 - protected `/admin` overview entry
+- protected `/admin/reviews` review queue with active-state defaults, search, filters, sort, and pagination
+- protected `/admin/reviews/:reviewTaskId` review detail route with field-selectable evidence trace, model-run context, action history, and approve/reject/defer/edit-approve controls
+- protected `/admin/runs` run list with status filters, partial-completion triage, and stable drill-in links
+- protected `/admin/runs/:runId` run detail route with stage summary, source processing summary, related review-task links, and usage summary
+- protected `/admin/changes` change history route with canonical chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
+- protected `/admin/audit` audit log route with append-only chronology, actor and target context, request metadata, and review/run drilldowns
 - middleware-based route gate backed by the shared session cookie contract
 - Shadcnblocks-based admin login and shell built on `components.json`, `radix-nova`, and app-local shadcn semantic variables
 - vendor-installed shadcn UI primitives under `src/components/ui/` plus edited Shadcnblocks-derived blocks under `src/components/`

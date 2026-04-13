@@ -7,5 +7,7 @@ Purpose:
 - list active `queued` and `deferred` review tasks
 
 Current scaffold:
-- route reserved only
-- filter and list UI deferred to `4.2`
+- live route now exists under `app/admin/src/app/admin/reviews/page.tsx`
+- current runtime includes active-state defaults, search, filters, sort, pagination, and a table-first reviewer intake surface
+- review decisions now land on the live `/admin/reviews/:reviewTaskId` detail route
+- full trace drilldown remains deferred to `4.4`

@@ -116,6 +116,13 @@
       "access": "authenticated"
     },
     {
+      "route": "/api/admin/audit-log",
+      "methods": [
+        "GET"
+      ],
+      "access": "authenticated"
+    },
+    {
       "route": "/api/admin/products/:productId",
       "methods": [
         "GET"
