@@ -93,11 +93,15 @@ Status: Active Navigation Index
 - `api-interface-contracts.md`
 - `security-access-control-design.md`
 - `fpds-design-system.md`
+- `fpds_design_system_stripe_benchmark.md`
 - `product-grid-information-architecture.md`
 - `insight-dashboard-metric-definition.md`
 - `product-type-visualization-principles.md`
 - `admin-information-architecture.md`
 - `localization-governance-and-fallback-policy.md`
+- `shadcnblocks-adoption-log.md`
+- `shadcnblocks-block-inventory.md`
+- `ui-override-register.md`
 
 ---
 

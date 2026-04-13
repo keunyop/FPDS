@@ -805,6 +805,40 @@ Each entry should include:
 - Known issues: the Next.js admin package cannot import workspace-level global CSS directly during production build, so `app/admin/src/app/theme.css` currently mirrors the shared design-theme export for runtime use. The shared token source of truth still remains under `shared/design/`, but future repo tooling may need a more formal frontend token-sync step once multiple apps consume the same theme
 - Next step: build `WBS 4.2 review queue` inside the new shell so the first queue surface inherits the refreshed navigation, compact table density, banner vocabulary, and empty-state rules without another visual reset
 
+## 2026-04-13 - Design Baseline Docs Realigned to Template-First Direction
+
+- WBS: design-governance follow-up
+- Status: `done`
+- Goal: propagate the Product Owner's updated design-system baseline into the surrounding repo documentation so the docs set no longer describes FPDS as primarily a bespoke token-and-primitive system
+- Why now: `docs/03-design/fpds-design-system.md` and `docs/03-design/fpds_design_system_stripe_benchmark.md` were updated to shift FPDS toward a `Stripe benchmark + Shadcnblocks template-first` frontend direction. Several surrounding docs still described `shared/design/` as the singular token source of truth or described future frontend work as framework-agnostic, which would make the repo hard to resume from safely
+- Outcome: updated the root README, docs map, shared module summary, shared design README, and app-surface README files so they now describe the new authority split: Stripe for structural benchmark, Shadcnblocks for template/block implementation base, and FPDS for domain-specific UI behavior. Added three supporting design-governance docs: `shadcnblocks-adoption-log.md`, `shadcnblocks-block-inventory.md`, and `ui-override-register.md`, so future template/block adoption and override decisions have explicit homes in-repo
+- Not done: no runtime code, `components.json`, Shadcnblocks CLI setup, premium-registry auth, or actual vendor block adoption was introduced in this slice. The new tracking docs are intentionally empty scaffolds until frontend implementation starts using them for real
+- Key files: `README.md`, `docs/README.md`, `shared/README.md`, `shared/design/README.md`, `app/admin/README.md`, `app/public/README.md`, `docs/03-design/shadcnblocks-adoption-log.md`, `docs/03-design/shadcnblocks-block-inventory.md`, `docs/03-design/ui-override-register.md`
+- Decisions: treated the newly edited design-system documents as the active authority and updated adjacent docs to match them rather than preserving older wording about bespoke primitives or shared token artifacts as the sole source of truth. Kept `shared/design/` documented as a bridge layer because the current repo still contains token exports there, even though the new design baseline expects future frontend source of truth to move toward `components.json` plus app-level shadcn semantic variables
+- Verification:
+  - `git diff --check`
+  - passed
+- Known issues: `docs/README.md` still contains older non-ASCII or encoding-noisy historical text outside the lines touched in this slice, so this update kept changes minimal and targeted. The new Shadcnblocks tracking docs exist, but they will not become useful until future frontend implementation records real vendor template and block adoption events
+- Next step: if frontend implementation starts consuming Shadcnblocks assets, record the first adoption slice in `docs/03-design/shadcnblocks-adoption-log.md` and keep the block inventory and override register updated in the same turn
+
+## 2026-04-13 - Admin UI Migrated to Shadcnblocks Foundation
+
+- WBS: `4.1` UI hardening follow-up
+- Status: `done`
+- Goal: replace the bespoke admin login and overview UI with a real Shadcnblocks-based frontend foundation while preserving the existing FPDS admin auth and route-gating behavior
+- Why now: the Product Owner updated the design baseline to make Shadcnblocks the implementation authority, provided a working `SHADCNBLOCKS_API_KEY`, and asked for the live admin runtime to move from docs-only alignment to actual vendor-first UI adoption
+- Outcome: added `app/admin/components.json`, Tailwind 4 or PostCSS setup, shadcn utility wiring, and the first installed Shadcnblocks assets under `app/admin/src/components/`. Reworked the imported `login2`, `application-shell5`, `stats5`, and `banner1` blocks into FPDS-ready variants for the real operator login and protected `/admin` overview. The old `src/app/theme.css` mirror was removed and the admin app now styles directly from app-local shadcn semantic variables in `src/app/globals.css`
+- Not done: no new live admin routes beyond `/admin/login` and `/admin` were added, review queue data is still not wired, and vendor-derived blocks remain directly edited rather than wrapped behind a separate FPDS component layer
+- Key files: `app/admin/components.json`, `app/admin/postcss.config.mjs`, `app/admin/src/app/globals.css`, `app/admin/src/components/login2.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/stats5.tsx`, `app/admin/src/components/banner1.tsx`, `app/admin/src/app/admin/login/page.tsx`, `app/admin/src/app/admin/page.tsx`, `docs/03-design/shadcnblocks-adoption-log.md`
+- Decisions: used `radix-nova` in `components.json` as the active admin style baseline. Installed Shadcnblocks blocks through the authenticated registry and accepted direct edits to those vendor-derived files for this first runtime slice because the stock demo content did not match FPDS operator auth or admin information architecture. Kept FPDS auth flow server-side and did not add social auth, remember-me, or preview-only dummy routes
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: the imported Shadcnblocks blocks depend on the `radix-ui` package and on Tailwind 4 CSS import semantics, so future block adoption should expect app-level dependency or CSS adjustments rather than assuming the registry output is immediately production-ready. Several vendor-derived files now carry FPDS-specific edits, so upgrade work should consult the new override register before replacing them wholesale
+- Next step: build `WBS 4.2 review queue` on top of the new Shadcnblocks shell and prefer wrapper components for future vendor-derived page sections where possible
+
 ---
 
 ## 7. Change History

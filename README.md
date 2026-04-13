@@ -22,13 +22,13 @@ As of `2026-04-12`:
 - a second post-`3.10` hardening slice is complete: normalization now selectively reuses `TD-SAV-008` governing-PDF interest rules, has an opportunistic `TD-SAV-007` fee-waiver merge hook, splits `TD Growth` boosted-rate qualification into cleaner canonical fields, and suppresses several noisy long-text fields before candidate persistence
 - a third post-`3.10` hardening slice is complete: `TD-SAV-007` fee-governing evidence is now used in a live target-safe way to suppress noisy `fee_waiver_condition` fields for zero-monthly-fee TD savings products instead of persisting misleading waiver text
 - `WBS 4.1` admin login is now complete with a DB-backed operator account table, DB-backed session table, FastAPI auth routes, a bootstrap-admin CLI, and a protected Next.js admin entry shell
-- the live admin runtime now uses the refreshed benchmark-aligned FPDS design system with a compact shell, refreshed login, and redesigned protected overview
+- the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, and redesigned protected overview
 
 ## What This Repo Contains Today
 
 - requirements, scope, planning, governance, and design documents
 - foundation baselines for env, DB, storage, auth, i18n, security, observability, and route manifests
-- shared design-system baseline artifacts for future public and admin UI implementation
+- shared design-system baseline artifacts and template-adoption guidance for future public and admin UI implementation
 - a minimal Python worker project baseline in `pyproject.toml`
 - working prototype ingestion code for discovery, preflight drift checks, scheduled registry refresh artifacts, snapshot capture, parse/chunk, and evidence retrieval stages
 - working prototype extraction code that turns retrieval matches into sparse extracted drafts with evidence-link drafts
@@ -37,7 +37,7 @@ As of `2026-04-12`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
-- a refreshed admin design-system implementation that aligns the live shell to the new FPDS benchmark while keeping future review, run, publish, usage, and health surfaces route-oriented
+- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future review, run, publish, usage, and health surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
@@ -135,6 +135,7 @@ Current implementation evidence is still heaviest in the Python worker path, but
 
 - env contract: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
 - design-system baseline: [docs/03-design/fpds-design-system.md](docs/03-design/fpds-design-system.md)
+- Stripe benchmark + template-first baseline: [docs/03-design/fpds_design_system_stripe_benchmark.md](docs/03-design/fpds_design_system_stripe_benchmark.md)
 - env examples: `.env.dev.example`, `.env.prod.example`
 - config landing zone: [shared/config/README.md](shared/config/README.md)
 - design landing zone: [shared/design/README.md](shared/design/README.md)

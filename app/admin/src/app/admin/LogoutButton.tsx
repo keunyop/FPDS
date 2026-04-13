@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 type LogoutButtonProps = {
   apiOrigin: string;
 };
@@ -26,13 +28,8 @@ export function LogoutButton({ apiOrigin }: LogoutButtonProps) {
   }
 
   return (
-    <button
-      className="fpds-button fpds-button-secondary"
-      disabled={pending}
-      onClick={handleLogout}
-      type="button"
-    >
+    <Button disabled={pending} onClick={handleLogout} type="button" variant="outline">
       {pending ? "Signing out..." : "Sign out"}
-    </button>
+    </Button>
   );
 }

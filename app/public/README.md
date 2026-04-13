@@ -10,6 +10,7 @@ Planned scope:
 
 Current scaffold:
 - `routes.manifest.json` lists the reserved public routes.
-- `route-shells/` holds route-by-route placeholders without locking a framework router.
+- `route-shells/` holds route-by-route placeholders for the future public runtime.
+- the future public runtime should follow the Next.js + Shadcnblocks template-first baseline from `docs/03-design/fpds-design-system.md` and `docs/03-design/fpds_design_system_stripe_benchmark.md`.
 
 No runtime page implementation is added yet.

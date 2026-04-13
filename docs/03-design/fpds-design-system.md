@@ -1,464 +1,494 @@
 # FPDS Design System Baseline
 
-Version: 1.1
-Date: 2026-04-12
-Status: Approved Working Baseline with benchmark-aligned refresh
+Version: 2.0
+Date: 2026-04-13
+Status: Approved Working Baseline after Shadcnblocks Template-First Overhaul
+
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/admin-information-architecture.md`
+- `docs/03-design/insight-dashboard-metric-definition.md`
 - `docs/03-design/product-type-visualization-principles.md`
-- `docs/03-design/localization-governance-and-fallback-policy.md`
 - `docs/03-design/fpds_design_system_stripe_benchmark.md`
 - `https://docs.stripe.com/stripe-apps/design`
 - `https://docs.stripe.com/stripe-apps/style`
 - `https://docs.stripe.com/stripe-apps/patterns`
+- `https://www.shadcnblocks.com/docs`
+- `https://www.shadcnblocks.com/docs/blocks/getting-started`
+- `https://www.shadcnblocks.com/docs/shadcn-cli/overview`
+- `https://www.shadcnblocks.com/docs/blocks/styles`
+- `https://www.shadcnblocks.com/docs/templates/getting-started`
+- `https://www.shadcnblocks.com/docs/templates/project-structure`
+- `https://www.shadcnblocks.com/docs/templates/adding-blocks`
+- `https://www.shadcnblocks.com/admin-dashboard`
 
 ---
 
 ## 1. Purpose
 
-This document defines the FPDS design-system baseline for public and admin surfaces.
+This document defines the FPDS design-system baseline after the project-level decision to move away from a bespoke component-system approach and adopt **Shadcnblocks as the official template and block foundation** for frontend implementation.
 
 Goals:
-- translate the approved FPDS IA into a reusable visual and interaction system
-- benchmark Stripe Dashboard and Stripe Apps guidance without copying it literally
-- keep future public, admin, and docs surfaces visually aligned through shared tokens and component rules
-- provide implementation-ready guidance before WBS `3.8`, `4.x`, and `5.x` UI work begins
+- keep Stripe as the benchmark for structure, restraint, and state communication
+- use Shadcnblocks as the implementation base for shells, pages, sections, and generic UI primitives
+- preserve FPDS-owned domain behavior for product comparison, evidence workflows, operational status, and localization
+- provide implementation-ready direction for upcoming public and admin UI work without re-opening core design decisions
 
-This is a design-system baseline, not a route implementation or component-library implementation by itself.
-
-As of `2026-04-12`, the benchmark-aligned refresh in `docs/03-design/fpds_design_system_stripe_benchmark.md` is the more specific authority for:
-- light-only theme direction
-- `public = balanced` and `admin = compact` density
-- restrained hero-lite usage
-- route-oriented admin shell behavior
-- page-template-level guidance for login, overview, queue, trace, runs, publish, usage, and health surfaces
-
-When this document and the benchmark doc differ, follow the benchmark doc and the shared token artifacts under `shared/design/`.
+This is a design-system and template-adoption baseline. It is not a backend architecture spec and it is not a route-by-route implementation diff.
 
 ---
 
-## 2. Benchmark Interpretation
+## 2. Decision Shift
 
-FPDS uses Stripe as a benchmark in three ways.
+The previous baseline treated FPDS as a mostly bespoke UI system built with custom tokens and custom page scaffolds inspired by Stripe.
 
-1. Official guidance says app design should stay consistent, clear, and scalable, and should rely on recommended patterns rather than one-off custom UI.
-2. Official guidance says custom styling should stay limited and token-driven so accessibility and platform consistency remain strong.
-3. Stripe Apps guidance emphasizes patterns for state, empty/loading, actions, lists, and context views instead of decorative novelty.
+The new baseline is different:
+- **Stripe remains the benchmark** for product experience principles.
+- **Shadcnblocks becomes the implementation base** for templates, blocks, and generic interface patterns.
+- **FPDS owns only the domain layer**: product-type-aware comparison rules, evidence-aware admin workflows, public methodology/freshness communication, domain status semantics, and trilingual behavior.
 
-FPDS keeps those principles, but applies them to a different product domain:
-- financial-product review and evidence trace
-- public comparison grids and dashboard views
-- admin triage, diagnosis, and decision surfaces
-
-Inference:
-- Stripe does not publish a full "clone the dashboard" recipe.
-- The FPDS shell, paneling, and data-density choices below are an inference from Stripe's documented design philosophy and common Dashboard conventions.
+In practical terms, FPDS no longer starts by inventing new generic cards, tables, badges, dialogs, or shell layouts. It starts from vendor template assets and only customizes what is product-specific.
 
 ---
 
-## 3. Core Principles
+## 3. Authority Hierarchy
 
-### 3.1 System Before Decoration
+### 3.1 Benchmark Authority
 
-- Tokens, spacing, density, and state language are more important than ornamental branding.
-- Custom color use should stay restrained.
-- Brand expression belongs in accent moments, not in every component.
+Stripe remains the authority for:
+- restrained, high-density product UI
+- contextual navigation and focus escalation
+- token-driven styling discipline
+- clear loading, empty, state, and action patterns
 
-### 3.2 Triage First
+### 3.2 Implementation Authority
 
-- The admin surface should feel like an operational cockpit.
-- Queue state, risk, confidence, freshness, and failure should be readable within a few seconds.
-- High-signal surfaces use panel rhythm, status color, and hierarchy before charts or flair.
+Shadcnblocks is now the authority for:
+- template structure
+- page and section starting points
+- generic admin shell patterns
+- block installation workflow
+- shadcn/ui style selection
+- project structure conventions for the frontend layer
 
-### 3.3 Context-Preserving Navigation
+### 3.3 FPDS Domain Authority
 
-- Like Stripe Dashboard patterns, FPDS should keep users inside a stable shell while detail views deepen context.
-- Primary navigation, scoped filters, detail panes, and back context should feel continuous rather than page-jumpy.
+FPDS remains the authority for:
+- Public Product Grid meaning
+- Insight Dashboard metrics and visualization rules
+- review, trace, run, publish, usage, and health workflows
+- public evidence non-exposure
+- locale rules and source-language handling
+- domain status vocabulary
 
-### 3.4 Evidence Is a First-Class UI Object
+### 3.4 Conflict Rule
 
-- Evidence excerpts, field provenance, and validation issues are not secondary metadata.
-- The system should visually support comparison between candidate value, issue state, and evidence source.
+When Stripe benchmark ideas and Shadcnblocks implementation defaults differ, FPDS should:
+1. keep the Stripe principle,
+2. use the closest Shadcnblocks pattern available,
+3. add the smallest possible FPDS wrapper or override,
+4. avoid creating a second bespoke primitive system.
 
-### 3.5 Data-Dense, Not Visually Heavy
-
-- Use compact spacing, subtle borders, and strong typography hierarchy.
-- Prefer panel stacks, tables, and metric strips over oversized cards.
-- Avoid flat single-color surfaces and avoid noisy gradients in work areas.
-
-### 3.6 State Must Be Unambiguous
-
-- `queued`, `warning`, `error`, `retry`, `published`, `fresh`, and `stale` each need stable color and badge behavior.
-- State color is supportive, not the only signal; icon, label, and placement should reinforce it.
-
-### 3.7 Public and Admin Should Feel Related, Not Identical
-
-- Admin should be denser, more operational, and more muted.
-- Public should be lighter, more comparative, and more editorial.
-- Both should still share the same tokens, spacing scale, motion language, and status semantics.
+When this document and the benchmark doc differ, follow `docs/03-design/fpds_design_system_stripe_benchmark.md`.
 
 ---
 
-## 4. Visual Direction
+## 4. Template Baseline Decisions
 
-### 4.1 Overall Character
+## 4.1 Frontend Template Direction
 
+FPDS standardizes on the **Shadcnblocks Next.js template direction** for frontend implementation.
+
+This means the frontend layer assumes:
+- Next.js 15 App Router conventions
+- React 19
+- Tailwind 4
+- shadcn/ui primitives
+- section-based composition
+
+This does not override broader FPDS platform decisions outside the UI layer.
+
+## 4.2 Primitive Library Baseline
+
+FPDS uses **Radix UI** as the baseline primitive library.
+
+Reason:
+- Shadcnblocks explicitly presents Radix as the preferred and more battle-tested default.
+- FPDS admin workflows prioritize operational stability over experimentation.
+
+## 4.3 Global Style Baseline
+
+FPDS uses **`radix-nova`** as the global shadcn style baseline.
+
+Reason:
+- Nova is documented as tighter and better suited to data-heavy dashboards.
+- FPDS admin surfaces are compact by design.
+- Public surfaces can be relaxed through section spacing and card padding without fragmenting the component style system.
+
+### Result
+- **Admin** uses Nova density almost directly.
+- **Public** uses the same style family with relaxed spacing wrappers.
+- FPDS does **not** mix Vega, Nova, Maia, Lyra, or Mira on a route-by-route basis.
+
+## 4.4 Installation Baseline
+
+FPDS adopts a **CLI-first** installation policy for Shadcnblocks.
+
+Default rules:
+- use the official `shadcn` CLI for adding blocks and components
+- configure private registry authentication for premium/pro assets
+- use copy/paste only as an exception
+- keep `components.json` aligned with the selected style and aliases
+
+## 4.5 Registry and Auth Baseline
+
+FPDS assumes private-registry authentication for premium blocks and templates.
+
+Required baseline inputs:
+- `SHADCNBLOCKS_API_KEY`
+- authenticated `@shadcnblocks` registry configuration in `components.json`
+
+## 4.6 Project Structure Baseline
+
+FPDS aligns its frontend structure with the Shadcnblocks template conventions and extends them with a domain layer.
+
+Recommended structure:
+
+```text
+src/
+  app/
+    (public)/
+    (admin)/
+    globals.css
+    layout.tsx
+  components/
+    ui/
+    layout/
+    sections/
+    fpds/
+      public/
+      admin/
+      shared/
+  lib/
+```
+
+Interpretation:
+- `components/ui` is vendor-installed primitive territory.
+- `components/layout` and `components/sections` are template-derived building blocks.
+- `components/fpds` is where FPDS-specific business UI lives.
+
+---
+
+## 5. System Architecture for the UI Layer
+
+### 5.1 Vendor Layer
+
+Contains:
+- Shadcnblocks templates
+- Shadcn Admin Kit
+- installed shadcn/ui primitives
+- imported template sections and layout blocks
+
+Rule:
+- keep this layer as close to vendor defaults as practical.
+
+### 5.2 Theme Layer
+
+Contains:
+- `components.json`
+- shadcn semantic CSS variables in `globals.css`
+- FPDS color, chart, and status semantic overrides
+- spacing and density rules
+
+Rule:
+- do not preserve a separate parallel token tree when shadcn semantic variables can express the same intent.
+
+### 5.3 Domain Layer
+
+Contains FPDS-owned business UI, such as:
+- `ProductCard`
+- `FreshnessIndicator`
+- `MethodologyNote`
+- `DashboardRankingList`
+- `EvidenceTracePane`
+- `ReviewActionBar`
+- `RunStageStrip`
+- `PublishStateCard`
+- `DashboardHealthDomainList`
+
+Rule:
+- domain components should carry business meaning, not generic UI responsibility.
+
+### 5.4 Route Composition Layer
+
+This is where FPDS composes pages from:
+- template shells
+- template sections
+- vendor primitives
+- FPDS domain sections
+
+Rule:
+- stable shells, replaceable sections.
+
+---
+
+## 6. Theme and Token Direction
+
+## 6.1 Source of Truth
+
+The source of truth for product UI theming is now:
+1. `components.json` style selection
+2. `globals.css` shadcn semantic variables
+3. supplemental status and chart tokens
+4. route-level spacing and density rules
+
+## 6.2 Semantic Token Model
+
+FPDS should express its visual system through shadcn semantic roles such as:
+- `background`
+- `foreground`
+- `card`
+- `popover`
+- `primary`
+- `secondary`
+- `muted`
+- `accent`
+- `destructive`
+- `border`
+- `input`
+- `ring`
+- sidebar-specific semantic tokens
+
+Supplemental FPDS-specific tokens may exist for:
+- chart categories
+- success, warning, info semantics
+- evidence or freshness states when needed
+
+## 6.3 Visual Direction
+
+The visual direction stays close to the previous benchmark intent:
 - crisp
-- confident
-- financial but not old-fashioned
-- structured and calm under high information density
+- calm
+- analytical
+- financial without looking old-fashioned
+- restrained rather than decorative
 
-### 4.2 Color Direction
+Color direction:
+- light neutral canvas
+- indigo as primary action and active state
+- cool neutral borders and surfaces
+- teal/green for success
+- amber for warning
+- red for destructive
 
-FPDS should avoid Stripe-purple imitation and instead use:
-- deep navy for shell and emphasis
-- cobalt blue for primary action and active state
-- teal for success and verified states
-- amber for warnings and pending states
-- brick red for critical and rejection states
-- cool neutral grays for structure
-
-### 4.3 Typography Direction
-
-Recommended type roles:
-- UI sans: `Instrument Sans`
-- data mono: `IBM Plex Mono`
-- editorial or long-form docs accent: `Newsreader`
-
-Rules:
-- admin and product UI rely mostly on UI sans + mono
-- editorial serif is optional and should not appear in dense operational tables
-- avoid generic default stacks as the primary design voice
-
-### 4.4 Shape Direction
-
-- small radii by default
-- medium radii for cards or drawers
-- rounded pills only for badges/chips
-- minimal shadow; rely more on surface steps and borders than floating-card aesthetics
+Typography direction:
+- keep the product UI simple and implementation-friendly
+- avoid introducing a more ornamental editorial font as a core product dependency
+- use a clear UI sans and a readable mono for IDs, runs, and diagnostic values
 
 ---
 
-## 5. Design Tokens
+## 7. Surface Mapping
 
-The shared token baseline lives in:
-- `shared/design/fpds-design-tokens.json`
-- `shared/design/fpds-theme.css`
+## 7.1 Public Surfaces
 
-### 5.1 Color Roles
-
-Foundations:
-- canvas
-- surface
-- surface-raised
-- surface-inset
-- border-subtle
-- border-strong
-
-Text:
-- text-primary
-- text-secondary
-- text-muted
-- text-on-accent
-
-Interactive:
-- accent-primary
-- accent-primary-hover
-- accent-secondary
-- focus-ring
-
-Status:
-- info
-- success
-- warning
-- critical
-- queued
-- published
-- stale
-
-### 5.2 Spacing Scale
-
-Use an `8px` base rhythm:
-- `2`
-- `4`
-- `8`
-- `12`
-- `16`
-- `24`
-- `32`
-- `40`
-- `48`
-- `64`
-
-Rules:
-- admin tables and filter bars usually use `8`, `12`, `16`
-- page sections use `24`, `32`
-- hero or high-emphasis public layouts can use `40`, `48`, `64`
-
-### 5.3 Radius
-
-- `sm = 8px`
-- `md = 12px`
-- `lg = 18px`
-- `pill = 999px`
-
-### 5.4 Shadow
-
-- `shadow-0`: none
-- `shadow-1`: subtle edge lift
-- `shadow-2`: hover/focus lift
-
-Shadows should stay soft and sparse.
-
-### 5.5 Motion
-
-Use short, purposeful transitions:
-- `fast = 120ms`
-- `base = 180ms`
-- `slow = 260ms`
-
-Motion should prioritize:
-- drawer or detail-pane entry
-- table/filter state transitions
-- staggered dashboard reveal
-
-Avoid playful or bouncy motion in admin operations surfaces.
-
----
-
-## 6. Layout System
-
-### 6.1 Admin Shell
-
-Recommended structure:
-- left navigation rail
-- top utility bar
-- page header band
-- content canvas
-- optional right-side detail or trace pane
-
-Desktop baseline:
-- left rail: `248px`
-- content max width: fluid
-- detail split panes are preferred for review and trace workflows
-
-Tablet baseline:
-- nav rail may collapse
-- secondary pane may convert to tabbed sections
-
-Mobile baseline:
-- navigation collapses to drawer
-- dense tables convert to stacked list cards
-- state badge, confidence, and action affordances must remain visible
-
-### 6.2 Public Shell
-
-Recommended structure:
-- compact top nav
-- wide content container
-- strong page header
-- sticky filter row where appropriate
-- alternating comparison sections and list/grid sections
-
-Public width guidance:
-- reading sections: `720-840px`
-- grid/dashboard sections: `1200-1440px`
-
-### 6.3 Panel Rhythm
-
-Panels are the main work unit.
-
-Panel rules:
-- subtle background step or border
-- clear internal header
-- action row aligned to panel purpose
-- no decorative gradients inside dense work panels
-
----
-
-## 7. Component Baseline
-
-### 7.1 Shell Components
-
-- AppShell
-- SideNav
-- TopBar
-- PageHeader
-- Breadcrumb or BackContext
-- SectionHeader
-
-### 7.2 Filter and Search Components
-
-- FilterBar
-- FilterChip
-- SearchInput
-- ScopeSummary
-- SortToolbar
-
-### 7.3 Data Display Components
-
-- MetricStrip
-- DataTable
-- ComparisonCard
-- DetailPanel
-- FieldRow
-- EvidenceSnippet
-- KeyValueGrid
-
-### 7.4 State Components
-
-- StatusBadge
-- SeverityBadge
-- InlineNotice
-- EmptyState
-- LoadingState
-- ErrorState
-
-### 7.5 Workflow Components
-
-- ReviewActionBar
-- ValidationIssueList
-- TracePane
-- RunStageStrip
-- PublishStateCard
-- UsageTrendPanel
-
-### 7.6 Public-Specific Components
-
-- ProductCard
-- DashboardRankingList
-- ScatterPlotPanel
-- MethodologyNote
-- FreshnessIndicator
-
----
-
-## 8. Component Behavior Rules
-
-### 8.1 Badges
-
-- Use soft background plus strong text, not neon fills.
-- Use one stable semantic per badge family.
-- Never invent one-off badge colors per page.
-
-### 8.2 Tables
-
-- Admin tables are compact and should support sticky headers where useful.
-- Numeric columns align right.
-- IDs and timestamps may use mono text.
-- Row actions should not crowd the default list surface.
-
-### 8.3 Panels and Drawers
-
-- Review detail and trace should prefer side-by-side inspection on desktop.
-- Side drawer or split pane is preferred over full hard navigation for secondary context.
-- Long diagnostic surfaces should chunk into titled sections, not one long blob.
-
-### 8.4 Empty and Loading States
-
-Follow the Stripe-inspired pattern approach:
-- tell the user what is happening
-- explain why the surface is empty when possible
-- provide the next useful action
-
-### 8.5 Forms and Decisions
-
-- Primary action is singular and visually clear.
-- Destructive actions must read as deliberate, not equal-weight neighbors.
-- Edit-and-approve flows should show diff or changed-field context before commit.
-
----
-
-## 9. Status Semantics
-
-| State | Token Direction | UI Treatment |
+| Surface | Vendor Starting Point | FPDS-Owned Layer |
 |---|---|---|
-| `pass` / verified | success | subtle green badge, low visual noise |
-| `warning` / pending | warning | amber badge, visible but not alarming |
-| `error` / rejected | critical | red badge, strongest emphasis |
-| `queued` | queued | blue-gray badge, operational attention |
-| `published` | success | success badge with calm treatment |
-| `retry` / `reconciliation` | warning or critical based on severity | always visible in list rows |
-| `stale` | warning | freshness-specific emphasis |
+| `/dashboard` | Shadcnblocks public template header and section rhythm | market snapshot framing, methodology/freshness messaging, filter context |
+| `/dashboard/products` | card/grid, toolbar, filter, and pagination patterns | product-type-aware `ProductCard`, shared scope summary, product-specific metrics |
+| `/dashboard/insights` | stats cards, chart cards, ranking/list sections | ranking semantics, scatter preset logic, insufficiency handling |
+| `/methodology` | docs/article/content sections | FPDS metric definitions, freshness policy, evidence boundary |
+
+## 7.2 Admin Surfaces
+
+| Surface | Vendor Starting Point | FPDS-Owned Layer |
+|---|---|---|
+| `/admin` | Admin Kit shell and dashboard widgets | urgent-attention ordering, dashboard health and retry semantics |
+| `/admin/reviews` | Admin Kit table, filters, badges, pagination | review-state, confidence, validation, issue summary semantics |
+| `/admin/reviews/:id` | Admin Kit page shell, cards, forms, sheets | evidence trace, diff preview, review action logic |
+| `/admin/runs` | Admin Kit table and metric panels | run lifecycle semantics and stage vocabulary |
+| `/admin/changes` | Admin Kit list/table patterns | change-event taxonomy and chronology |
+| `/admin/publish` | Admin Kit tables and alert cards | retry/reconciliation behavior and publish risk messaging |
+| `/admin/usage` | Admin Kit metric and chart panels | run/agent/model cost interpretation |
+| `/admin/health/dashboard` | Admin Kit status cards and tables | aggregate freshness, completeness, and cache semantics |
 
 ---
 
-## 10. Surface-Specific Guidance
+## 8. Component Ownership Rules
 
-### 10.1 Admin Overview
+## 8.1 Vendor-Managed by Default
 
-- prioritize queue count, failures, retries, stale aggregates, and recent changes
-- use dense metrics and short labels
-- keep charts secondary to triage signals
+FPDS should use vendor-installed primitives for generic UI such as:
+- buttons
+- cards
+- badges
+- dialogs
+- sheets
+- tables
+- form controls
+- tabs
+- dropdowns
+- tooltips
+- skeletons
+- alerts
 
-### 10.2 Review Queue
+## 8.2 FPDS-Managed by Design
 
-- table-first
-- sortable and filter-heavy
-- issue summary, confidence, and validation status must scan quickly
+FPDS should own business-specific components such as:
+- product comparison cards
+- ranking widgets with metric semantics
+- freshness and methodology modules
+- evidence trace panels
+- validation issue lists
+- review action bars
+- diff previews
+- publish risk and reconciliation panels
+- usage anomaly drilldowns
+- dashboard health domain summaries
 
-### 10.3 Review Detail / Trace Viewer
+## 8.3 Customization Boundary
 
-- two-pane or three-zone structure on desktop
-- candidate fields on the left, evidence/trace on the right
-- action area anchored and always discoverable
+Allowed:
+- theme overrides
+- spacing and density wrappers
+- route-specific composition
+- domain-specific cells, notes, and panels
 
-### 10.4 Runs
+Disallowed as the default path:
+- rewriting vendor primitives into a second in-house primitive set
+- changing style families per route
+- forking template pages for trivial copy changes
+- scattering hard-coded colors outside the theme layer
 
-- timeline/state strip first
-- stage summaries second
-- per-source failures below
+## 8.4 Edit Order Rule
 
-### 10.5 Public Product Grid
-
-- product cards should stay comparison-oriented
-- do not over-style cards with hero marketing visuals
-- emphasize rates, fees, minimums, freshness, and badges
-
-### 10.6 Public Dashboard
-
-- use strong headline metrics with disciplined supporting charts
-- mixed-type views should feel like market overview
-- single-type views can become more comparative and analytical
+When changing UI:
+1. try configuration and theming first,
+2. then composition and wrappers,
+3. then domain-specific custom sections,
+4. only edit vendor code last.
 
 ---
 
-## 11. Accessibility and Restraint Rules
+## 9. Public and Admin Experience Rules
 
-- color is never the only state signal
-- all interactive states must have visible focus treatment
-- body copy and secondary text must keep strong enough contrast on all surface levels
-- avoid low-contrast pastel-on-white patterns
-- avoid decorative color bars that carry meaning without text support
-- animation should respect reduced-motion preferences
+### 9.1 Public
+
+Public remains dashboard-first.
+
+Key rules:
+- no marketing-led homepage narrative
+- Product Grid and Insights remain sibling surfaces
+- methodology and freshness must remain reachable
+- evidence is never exposed publicly
+
+### 9.2 Admin
+
+Admin remains triage-first and diagnosis-oriented.
+
+Key rules:
+- overview is not a giant everything-dashboard
+- review queue is table-first
+- review detail is a domain page, not a generic template demo
+- publish, usage, and health remain separate operational surfaces
+
+### 9.3 Shared Rules
+
+- public and admin share the same style family and theme system
+- public is balanced; admin is compact
+- source-derived product text remains in the source language
+- translated UI labels follow locale-resource governance
+
+---
+
+## 10. Status, Localization, and Accessibility
+
+## 10.1 Status
+
+Vendor badge components should be reused, but FPDS owns the semantic mapping.
+
+Minimum baseline:
+- queued / pending / in review → info
+- approved / published / healthy → success
+- deferred / reconciliation / stale soon → warning
+- rejected / failed / critical → destructive
+
+State must never rely on color alone.
+
+## 10.2 Localization
+
+Translate:
+- navigation
+- page titles
+- widget labels
+- filter labels
+- chart titles
+- methodology notes
+- helper text
+- status labels
+
+Do not translate:
+- source-derived product names
+- source-derived descriptions or conditions
+- evidence excerpts
+
+## 10.3 Accessibility
+
+Maintain:
+- visible focus treatment
+- strong text contrast on light surfaces
+- non-color state cues
+- sufficiently large hit areas for chips, tabs, and locale controls
+- reduced-motion respect
+
+---
+
+## 11. Upgrade and Maintenance Boundary
+
+Shadcnblocks is a commercial template and block source, so upgrade discipline is part of the design-system baseline.
+
+Required maintenance principles:
+- isolate FPDS custom logic from vendor primitives
+- record imported templates and blocks
+- document any direct edits to vendor-derived code
+- re-test public/admin shells after vendor updates
+- keep locale, status, and evidence behaviors under regression coverage
+
+Recommended supporting artifacts:
+- Shadcnblocks adoption log
+- block inventory
+- override register
 
 ---
 
 ## 12. Implementation Boundary
 
-This baseline does not yet implement:
-- React components
-- Tailwind config
-- Next.js layout code
-- Figma files
+This baseline does not by itself implement:
+- React page files
+- Tailwind config files
+- vendor acquisition or licensing
+- API integration
+- chart library selection details
 
 It does provide the approved starting point for:
-- `WBS 3.8` internal result viewer
-- `WBS 4.x` admin surfaces
-- `WBS 5.x` public grid and dashboard
+- public dashboard surfaces
+- public product grid
+- methodology surface
+- admin shell and operations pages
+- FPDS domain wrappers on top of Shadcnblocks
 
 ---
 
 ## 13. Follow-On Artifacts
 
 The next natural implementation artifacts are:
-- component primitive inventory in code
-- token export for frontend build tooling
-- admin layout scaffold
-- public layout scaffold
-- localized label mappings for badge/state names
+- a Shadcnblocks adoption log
+- a frontend block inventory
+- a theme variable file aligned to `radix-nova`
+- public and admin layout scaffolds
+- domain component inventory under `components/fpds`
+- locale label mapping for badge, status, and helper text
 
 ---
 
@@ -467,4 +497,7 @@ The next natural implementation artifacts are:
 | Date | Change |
 |---|---|
 | 2026-04-10 | Initial FPDS design-system baseline created using Stripe design guidance as a benchmark |
-| 2026-04-12 | Added benchmark-refresh authority note so implementation follows the newer Stripe-benchmarked FPDS design document and shared token artifacts |
+| 2026-04-12 | Added benchmark-refresh authority note |
+| 2026-04-13 | Reworked the baseline to adopt Shadcnblocks as the official template-first implementation layer |
+| 2026-04-13 | Standardized on `Radix UI + radix-nova` and added vendor/theme/domain ownership rules |
+| 2026-04-13 | Reframed public/admin surface guidance around template composition rather than bespoke primitives |
