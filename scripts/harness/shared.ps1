@@ -320,8 +320,8 @@ function Get-TrailingWhitespaceFindings {
 
 function Get-TextFilesUnderRepo {
     $root = Get-RepoRoot
-    $files = Get-ChildItem -Path $root -Recurse -File | Where-Object {
-        $_.FullName -notmatch "\\\.git\\"
+    $files = Get-ChildItem -Path $root -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
     }
 
     $relativePaths = foreach ($file in $files) {
@@ -336,8 +336,8 @@ function Get-TextFilesUnderRepo {
 
 function Get-MarkdownFilesUnderRepo {
     $root = Get-RepoRoot
-    $files = Get-ChildItem -Path $root -Recurse -Filter *.md -File | Where-Object {
-        $_.FullName -notmatch "\\\.git\\"
+    $files = Get-ChildItem -Path $root -Recurse -Filter *.md -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
     }
 
     return @($files | ForEach-Object { Get-RepoRelativePath -AbsolutePath $_.FullName })
@@ -345,8 +345,8 @@ function Get-MarkdownFilesUnderRepo {
 
 function Get-PowerShellFilesUnderRepo {
     $root = Get-RepoRoot
-    $files = Get-ChildItem -Path $root -Recurse -Filter *.ps1 -File | Where-Object {
-        $_.FullName -notmatch "\\\.git\\"
+    $files = Get-ChildItem -Path $root -Recurse -Filter *.ps1 -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
     }
 
     return @($files | ForEach-Object { Get-RepoRelativePath -AbsolutePath $_.FullName })
@@ -354,8 +354,8 @@ function Get-PowerShellFilesUnderRepo {
 
 function Get-JsonFilesUnderRepo {
     $root = Get-RepoRoot
-    $files = Get-ChildItem -Path $root -Recurse -Filter *.json -File | Where-Object {
-        $_.FullName -notmatch "\\\.git\\"
+    $files = Get-ChildItem -Path $root -Recurse -Filter *.json -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
     }
 
     return @($files | ForEach-Object { Get-RepoRelativePath -AbsolutePath $_.FullName })

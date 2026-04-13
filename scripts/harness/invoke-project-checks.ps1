@@ -54,17 +54,17 @@ function Get-RunCommandParts {
 
     switch ($PackageManager) {
         "pnpm" {
-            if (Get-Command pnpm -ErrorAction SilentlyContinue) {
-                return @{
-                    Command = "pnpm"
-                    Prefix  = @("run")
-                }
-            }
-
             if (Get-Command corepack -ErrorAction SilentlyContinue) {
                 return @{
                     Command = "corepack"
                     Prefix  = @("pnpm", "run")
+                }
+            }
+
+            if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+                return @{
+                    Command = "pnpm"
+                    Prefix  = @("run")
                 }
             }
 
@@ -86,9 +86,92 @@ function Get-RunCommandParts {
     }
 }
 
+function Get-InstallCommandParts {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PackageManager,
+        [Parameter(Mandatory = $true)]
+        [string]$PackageDirectory
+    )
+
+    switch ($PackageManager) {
+        "pnpm" {
+            $arguments = @("install")
+            if (Test-Path -LiteralPath (Join-Path $PackageDirectory "pnpm-lock.yaml")) {
+                $arguments += "--frozen-lockfile"
+            }
+
+            if (Get-Command corepack -ErrorAction SilentlyContinue) {
+                return @{
+                    Command = "corepack"
+                    Prefix  = @("pnpm") + $arguments
+                }
+            }
+
+            if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+                return @{
+                    Command = "pnpm"
+                    Prefix  = $arguments
+                }
+            }
+
+            throw "Package install needs pnpm, but neither 'pnpm' nor 'corepack' is available."
+        }
+        "npm" {
+            if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+                throw "Package install needs npm, but 'npm' is not available."
+            }
+
+            $arguments = @("install")
+            $npmLockCandidates = @(
+                (Join-Path $PackageDirectory "package-lock.json"),
+                (Join-Path $PackageDirectory "npm-shrinkwrap.json")
+            )
+
+            foreach ($candidate in $npmLockCandidates) {
+                if (Test-Path -LiteralPath $candidate) {
+                    $arguments = @("ci")
+                    break
+                }
+            }
+
+            return @{
+                Command = "npm"
+                Prefix  = $arguments
+            }
+        }
+        default {
+            throw "Unsupported package manager preference '$PackageManager'."
+        }
+    }
+}
+
+function Install-PackageDependenciesIfNeeded {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$PackageDirectory,
+        [Parameter(Mandatory = $true)]
+        [string]$RelativePackagePath,
+        [Parameter(Mandatory = $true)]
+        [string]$PackageManager
+    )
+
+    $nodeModulesPath = Join-Path $PackageDirectory "node_modules"
+    if (Test-Path -LiteralPath $nodeModulesPath) {
+        return
+    }
+
+    $installCommandParts = Get-InstallCommandParts -PackageManager $PackageManager -PackageDirectory $PackageDirectory
+    Write-Host "Installing dependencies for ${relativePackagePath} using ${PackageManager}"
+    & $installCommandParts.Command @($installCommandParts.Prefix)
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
 $repoRoot = Get-RepoRoot
-$packageJsonFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter package.json -File | Where-Object {
-    $_.FullName -notmatch "\\\.git\\" -and $_.FullName -notmatch "\\node_modules\\"
+$packageJsonFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter package.json -File -ErrorAction SilentlyContinue | Where-Object {
+    $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
 }
 
 if (-not $packageJsonFiles) {
@@ -117,6 +200,8 @@ foreach ($packageJsonFile in ($packageJsonFiles | Sort-Object FullName)) {
     $runCommandParts = Get-RunCommandParts -PackageManager $packageManagerPreference
     Push-Location $packageDirectory
     try {
+        Install-PackageDependenciesIfNeeded -PackageDirectory $packageDirectory -RelativePackagePath $relativePackagePath -PackageManager $packageManagerPreference
+
         foreach ($scriptName in $scriptOrder) {
             if ($availableScripts -contains $scriptName) {
                 Write-Host "Running ${packageManagerPreference} script in ${relativePackagePath}: $scriptName"

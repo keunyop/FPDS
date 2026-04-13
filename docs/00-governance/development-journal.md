@@ -855,6 +855,41 @@ Each entry should include:
 - Known issues: `tmpnf6kizz_/` still reports a permission-denied warning during broad repository scans in this environment, but it is unrelated to the Markdown link failure
 - Next step: rerun the foundation checks or the cleanup audit so CI can confirm the broken-link set is cleared
 
+## 2026-04-13 - Harness Scan Hardened Against Inaccessible Temp Directories
+
+- WBS: harness follow-up
+- Status: `done`
+- Goal: stop repository-wide harness scans from failing when a stray inaccessible temp directory exists inside the workspace
+- Why now: after the broken Markdown links were fixed, local foundation checks were still being interrupted by the unreadable `tmpnf6kizz_/` directory left in the repo root from an earlier failed process
+- Outcome: updated the shared harness file-discovery helpers and project package discovery so recursive scans now skip unreadable paths instead of failing the whole run. The scan filters also now ignore generated or vendor directories such as `node_modules`, `.next`, and `.venv`, which keeps Markdown and JSON validation focused on repo-owned files
+- Not done: the broken temp directory itself could not be deleted in this session because ACL repair and low-level removal both returned access denied
+- Key files: `scripts/harness/shared.ps1`, `scripts/harness/invoke-project-checks.ps1`
+- Decisions: prefer making the harness resilient to unreadable generated folders instead of assuming the workspace is always perfectly clean. Keep generated dependency or build directories out of broad repo validation by default
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - repo doctor and foundation baseline passed; the run then continued past the temp-folder failure point and stopped later on a separate local `pnpm.exe` access-denied issue
+- Known issues: the inaccessible `tmpnf6kizz_/` directory still exists on disk and `git status` continues to warn about it. The remaining local harness failure is now a separate `pnpm.exe` execution-permission issue rather than a recursive-scan permission error
+- Next step: if local full-harness execution is still needed in this environment, investigate the Windows `pnpm.exe` access-denied behavior separately from the temp directory
+
+## 2026-04-13 - Foundation CI Dependency Bootstrap Fix
+
+- WBS: harness follow-up
+- Status: `done`
+- Goal: stop GitHub Actions foundation checks from failing when `app/admin` package scripts run before frontend dependencies are installed
+- Why now: the shared foundation entrypoint reached the live `app/admin` `typecheck` script in CI, but the Ubuntu runner had no `node_modules`, so TypeScript reported broad `next`, `react`, and package-resolution failures that were not real code regressions
+- Outcome: updated `scripts/harness/invoke-project-checks.ps1` so the shared package-check entrypoint installs missing dependencies before running package scripts and prefers `corepack pnpm` for the approved frontend baseline. Updated `.github/workflows/harness.yml` so the foundation workflow now pins Node `24`, enables Corepack, and reuses the same repository entrypoint instead of reimplementing package logic in YAML. Refreshed the harness and CI baseline docs plus the root README so the new behavior is recorded in-repo
+- Outcome: updated `scripts/harness/invoke-project-checks.ps1` so the shared package-check entrypoint installs missing dependencies before running package scripts and prefers `corepack pnpm` for the approved frontend baseline. Updated `.github/workflows/harness.yml` so the foundation workflow now pins Node `24`, adds pnpm lockfile caching, and reuses the same repository entrypoint instead of reimplementing package logic in YAML. Refreshed the harness and CI baseline docs plus the root README so the new behavior is recorded in-repo
+- Not done: did not add a second package workspace or change the actual `app/admin` package contents. This slice was only about making the existing shared checks runnable in CI
+- Key files: `scripts/harness/invoke-project-checks.ps1`, `.github/workflows/harness.yml`, `docs/00-governance/harness-engineering-baseline.md`, `docs/00-governance/foundation-ci-cd-baseline.md`, `README.md`
+- Decisions: keep dependency install orchestration inside the shared PowerShell entrypoint so local and CI behavior stay aligned. Use `actions/setup-node` only for runtime provisioning and cache setup, not for duplicating per-package install logic in workflow YAML
+- Verification:
+  - `git diff --check`
+  - passed with line-ending warnings only
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - repo doctor passed, foundation baseline passed, `app/admin` `typecheck` passed, and the run then stopped on a separate Windows-local `next build` `spawn EPERM` failure
+- Known issues: the original CI blocker from missing frontend dependencies is addressed, but this local Windows environment still has a separate `next build` `spawn EPERM` problem that should be treated independently from the GitHub Actions fix
+- Next step: rerun `scripts/harness/invoke-foundation-checks.ps1` and then recheck the GitHub Actions workflow result with the new Node plus Corepack bootstrap in place
+
 ---
 
 ## 7. Change History

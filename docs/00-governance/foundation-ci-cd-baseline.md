@@ -31,6 +31,7 @@ Goals:
 3. The baseline must work even when product runtime packages do not exist yet.
 4. `lint`, `typecheck`, `test`, and `build` checks remain conditional and are auto-detected from any tracked `package.json`.
 5. JavaScript package-script checks are `pnpm-first` to match the approved runtime baseline, with fallback only when a package explicitly signals `npm`.
+6. When a tracked JavaScript package exists, CI should provide Node and allow the shared package-check entrypoint to install dependencies if `node_modules` is missing.
 6. Deployment automation is not enabled in this baseline because real hosts, secrets, and promotion rules are still external prerequisites.
 
 ---
@@ -45,7 +46,7 @@ It runs these stages:
 |---|---|---|
 | repo and docs validation | `scripts/harness/repo-doctor.ps1` | required files, Markdown links, PowerShell syntax, JSON syntax |
 | foundation contract validation | `scripts/harness/validate-foundation-baseline.ps1` | env examples, observability artifacts, provider rules |
-| project checks | `scripts/harness/invoke-project-checks.ps1` | auto-discovered package scripts in `lint`, `typecheck`, `test`, `build` order with pnpm-first package-manager detection |
+| project checks | `scripts/harness/invoke-project-checks.ps1` | auto-discovered package scripts in `lint`, `typecheck`, `test`, `build` order with pnpm-first package-manager detection and dependency install when needed |
 | cleanup audit | `scripts/harness/cleanup-audit.ps1` | report-only hygiene and drift summary artifact |
 
 ---
@@ -60,6 +61,7 @@ CI entrypoint:
 
 Rule:
 - if a check matters in CI, it should be runnable locally through repository scripts
+- CI should prepare the minimum tool runtime, such as Node plus Corepack for tracked frontend packages, but keep package-script orchestration inside the shared repository entrypoint
 
 ---
 
@@ -114,3 +116,4 @@ This baseline supports:
 |---|---|
 | 2026-04-07 | Initial foundation CI/CD baseline created for WBS 2.10 |
 | 2026-04-11 | Clarified that future JavaScript project checks are pnpm-first so WBS 4 package bootstrap aligns with the approved runtime baseline |
+| 2026-04-13 | Clarified that CI should prepare Node plus Corepack and allow the shared project-check entrypoint to install missing frontend dependencies |

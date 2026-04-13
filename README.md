@@ -206,7 +206,7 @@ powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invo
 - the hook can auto-fix low-risk text hygiene issues
 - staged Markdown references and staged PowerShell syntax are validated
 - foundation checks validate env examples, JSON artifacts, observability artifacts, and future package-script baselines
-- future JavaScript package checks are `pnpm-first` so upcoming `WBS 4` frontend bootstrap aligns with the approved runtime baseline
+- JavaScript package checks are `pnpm-first`, and the shared project-check entrypoint installs missing dependencies when a tracked package has no local `node_modules`
 - CI remains validation-only and does not imply product implementation has started
 - cleanup audit is intentionally `report-only`
 
