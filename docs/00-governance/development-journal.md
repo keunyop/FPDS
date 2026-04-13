@@ -787,6 +787,24 @@ Each entry should include:
 - Follow-up: hardened the admin service env-file loader after live verification exposed that `uv run --directory api/service ...` resolves relative `FPDS_ENV_FILE` from the service working directory. The loader now also checks the repo root so the documented `.env.dev` startup path works from the workspace root.
 - Follow-up: fixed the Next.js 16 login page runtime contract after live dev-server verification showed that `searchParams` is now promise-based in the app router. The admin login route now awaits `searchParams` before reading `next`, so `/admin/login` renders correctly under `next dev`.
 
+## 2026-04-12 - Admin Design-System Refresh
+
+- WBS: `4.1` follow-up UI hardening
+- Status: `done`
+- Goal: replace the first-pass admin visuals with the new benchmark-aligned FPDS design system while staying inside the current live admin scope
+- Why now: the Product Owner asked for a full FPDS design-system refresh based on the Stripe benchmark document, but the only live runtime UI today is the admin login and protected overview. Refreshing those surfaces now keeps the current implementation aligned with the new design authority before `4.2+` surfaces expand
+- Outcome: updated the shared FPDS design-token artifacts to the new light-only benchmark values, refreshed the admin runtime theme, replaced the old green glass-like login and overview visuals with a compact shell built around left-rail navigation, top utility, route-oriented triage panels, restrained badges, and explicit empty-state placeholders for future review/run/publish/usage/health surfaces. The login page now presents a neutral elevated operator card, and the protected overview now reads like an actual operations entry shell instead of a one-off feature announcement page
+- Not done: no new admin data APIs, review queue routes, run detail routes, publish workflows, locale resources, or public `/dashboard` runtime pages were added in this slice. To avoid running ahead of current scope, future admin surfaces still remain planned placeholders rather than live pages
+- Key files: `shared/design/fpds-design-tokens.json`, `shared/design/fpds-theme.css`, `app/admin/src/app/theme.css`, `app/admin/src/app/globals.css`, `app/admin/src/app/admin/login/page.tsx`, `app/admin/src/app/admin/login/LoginForm.tsx`, `app/admin/src/app/admin/page.tsx`, `docs/03-design/fpds-design-system.md`, `README.md`
+- Decisions: treated `docs/03-design/fpds_design_system_stripe_benchmark.md` as the more specific authority over the older design-system baseline where the two differed. Kept the admin redesign compact, light-only, and route-oriented. Chose not to add `remember me` or SSO controls because the benchmark mentions them only as optional UI patterns and the current auth implementation does not support them yet. Also kept future admin surfaces visible as planned navigation states instead of wiring broken links or prematurely implementing `4.2+` pages
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+- Known issues: the Next.js admin package cannot import workspace-level global CSS directly during production build, so `app/admin/src/app/theme.css` currently mirrors the shared design-theme export for runtime use. The shared token source of truth still remains under `shared/design/`, but future repo tooling may need a more formal frontend token-sync step once multiple apps consume the same theme
+- Next step: build `WBS 4.2 review queue` inside the new shell so the first queue surface inherits the refreshed navigation, compact table density, banner vocabulary, and empty-state rules without another visual reset
+
 ---
 
 ## 7. Change History

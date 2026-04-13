@@ -26,7 +26,12 @@ export function LogoutButton({ apiOrigin }: LogoutButtonProps) {
   }
 
   return (
-    <button className="secondary-button" disabled={pending} onClick={handleLogout} type="button">
+    <button
+      className="fpds-button fpds-button-secondary"
+      disabled={pending}
+      onClick={handleLogout}
+      type="button"
+    >
       {pending ? "Signing out..." : "Sign out"}
     </button>
   );

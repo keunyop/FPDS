@@ -19,3 +19,5 @@ Current runtime:
 - `/admin/login` login screen
 - protected `/admin` overview entry
 - middleware-based route gate backed by the shared session cookie contract
+- shared-design-token-driven admin shell aligned to the refreshed FPDS benchmark
+- local `src/app/theme.css` mirrors the shared token export because the Next.js app cannot import workspace-level global CSS directly during production build

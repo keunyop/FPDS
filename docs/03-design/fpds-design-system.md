@@ -1,14 +1,15 @@
 # FPDS Design System Baseline
 
-Version: 1.0
-Date: 2026-04-10
-Status: Approved Working Baseline for FPDS UI Implementation
+Version: 1.1
+Date: 2026-04-12
+Status: Approved Working Baseline with benchmark-aligned refresh
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/admin-information-architecture.md`
 - `docs/03-design/product-type-visualization-principles.md`
 - `docs/03-design/localization-governance-and-fallback-policy.md`
+- `docs/03-design/fpds_design_system_stripe_benchmark.md`
 - `https://docs.stripe.com/stripe-apps/design`
 - `https://docs.stripe.com/stripe-apps/style`
 - `https://docs.stripe.com/stripe-apps/patterns`
@@ -26,6 +27,15 @@ Goals:
 - provide implementation-ready guidance before WBS `3.8`, `4.x`, and `5.x` UI work begins
 
 This is a design-system baseline, not a route implementation or component-library implementation by itself.
+
+As of `2026-04-12`, the benchmark-aligned refresh in `docs/03-design/fpds_design_system_stripe_benchmark.md` is the more specific authority for:
+- light-only theme direction
+- `public = balanced` and `admin = compact` density
+- restrained hero-lite usage
+- route-oriented admin shell behavior
+- page-template-level guidance for login, overview, queue, trace, runs, publish, usage, and health surfaces
+
+When this document and the benchmark doc differ, follow the benchmark doc and the shared token artifacts under `shared/design/`.
 
 ---
 
@@ -457,3 +467,4 @@ The next natural implementation artifacts are:
 | Date | Change |
 |---|---|
 | 2026-04-10 | Initial FPDS design-system baseline created using Stripe design guidance as a benchmark |
+| 2026-04-12 | Added benchmark-refresh authority note so implementation follows the newer Stripe-benchmarked FPDS design document and shared token artifacts |

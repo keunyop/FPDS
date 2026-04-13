@@ -53,11 +53,12 @@ export function LoginForm({ apiOrigin, nextPath }: LoginFormProps) {
   }
 
   return (
-    <form className="form-grid" onSubmit={handleSubmit}>
-      <label className="field-label">
-        Work email
+    <form className="fpds-form-grid" onSubmit={handleSubmit}>
+      <label className="fpds-field">
+        <span className="fpds-field-label">Work email</span>
         <input
           autoComplete="email"
+          className="fpds-field-input"
           name="email"
           onChange={(event) => setEmail(event.target.value)}
           placeholder="admin@example.com"
@@ -66,23 +67,40 @@ export function LoginForm({ apiOrigin, nextPath }: LoginFormProps) {
           value={email}
         />
       </label>
-      <label className="field-label">
-        Password
+      <label className="fpds-field">
+        <span className="fpds-field-label">Password</span>
         <input
           autoComplete="current-password"
+          className="fpds-field-input"
           name="password"
           onChange={(event) => setPassword(event.target.value)}
+          placeholder="Enter your password"
           required
           type="password"
           value={password}
         />
       </label>
-      <button className="primary-button" disabled={pending} type="submit">
+      <div className="fpds-inline-row">
+        <p className="fpds-form-note">Server-side session sign-in with DB-backed operator accounts.</p>
+        <span className="fpds-status-badge" data-tone="info">
+          Secure session
+        </span>
+      </div>
+      <button className="fpds-button fpds-button-primary" disabled={pending} type="submit">
         {pending ? "Signing in..." : "Sign in to FPDS Admin"}
       </button>
-      {error ? <div className="error-banner">{error}</div> : null}
-      <div className="hint-banner">
-        Use an operator account created through the bootstrap CLI after the admin auth migration is applied.
+      {error ? (
+        <div className="fpds-feedback" data-tone="danger">
+          <strong>Sign-in failed</strong>
+          <span>{error}</span>
+        </div>
+      ) : null}
+      <div className="fpds-feedback" data-tone="info">
+        <strong>Operator-only access</strong>
+        <span>
+          Use an operator account created through the bootstrap CLI after the admin auth migration is
+          applied.
+        </span>
       </div>
     </form>
   );
