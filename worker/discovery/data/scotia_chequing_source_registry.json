@@ -1,0 +1,102 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "scotiabank.com"
+  ],
+  "entry_source_id": "SCOTIA-CHQ-001",
+  "sources": [
+    {
+      "source_id": "SCOTIA-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Scotiabank personal chequing lineup entry and product discovery",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "summary_benefits",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Ultimate Package detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Preferred Package detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "savings_rate_boost"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Basic Plus Bank Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_etransfer_support"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Basic Bank Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "eligibility_fee_waivers"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank chequing comparison page",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+      "expected_fields": [
+        "account_comparison_rows",
+        "monthly_fee",
+        "included_transactions"
+      ]
+    }
+  ]
+}

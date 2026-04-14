@@ -7,6 +7,7 @@ The repository is currently `product-implementation-in-progress`.
 As of `2026-04-13`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
+- `Gate C` passed on `2026-04-13`
 - `WBS 2` foundation scaffolds and baseline artifacts are complete
 - `WBS 3.1` source discovery is complete
 - `WBS 3.2` snapshot capture and persistence are complete
@@ -31,6 +32,11 @@ As of `2026-04-13`:
 - `WBS 4.8` LLM usage tracking is now complete with a session-protected usage dashboard API, time-range and scope filters, totals, per-model, per-agent, per-run, and trend aggregations, and anomaly drilldown candidates
 - `WBS 4.9` usage dashboard v1 is now complete with provider/stage/search filters, richer scope coverage signals, concentration shares, trend deltas, and denser anomaly drilldown context on `/admin/usage`
 - `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
+- `WBS 5.1` Big 5 source registry is now complete with a committed Canada Big 5 registry catalog and per-bank `chequing`, `savings`, and `gic` source baselines
+- `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
+- `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification
+- `WBS 5.4` GIC or term parser expansion is now complete with GIC-specific extraction fields, normalization-time term and cross-field validation alignment, and unit verification
+- `WBS 5.6` aggregate dataset generation is now complete with persisted aggregate refresh snapshots plus projection, metric, ranking, and scatter source datasets for the approved public vocabulary
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -58,6 +64,8 @@ As of `2026-04-13`:
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
 - a second hardening baseline that selectively merges governing-PDF interest rules, cleans noisy text, and separates `TD Growth` qualification logic in normalization
 - a third hardening baseline that uses `TD-SAV-007` to keep zero-fee savings candidates from carrying misleading fee-waiver text
+- deposit parser baselines for `chequing`, `savings`, and `gic` that now extract product-type-specific fields such as transaction bundles, savings tiering or withdrawal rules, and GIC term or redeemability signals while normalizing subtype behavior to the approved canonical taxonomy
+- an aggregate refresh worker slice that builds `public_product_projection` plus dashboard metric, ranking, and scatter source datasets from the canonical product baseline
 - repository harness scripts, git hooks, and CI validation
 - top-level boundaries for future `app`, `api`, `worker`, `shared`, `db`, and `storage` work
 
@@ -69,6 +77,7 @@ This is still not a full FPDS product yet, but the ingestion core is now activel
 - requirements baseline: [docs/02-requirements/FPDS_Requirements_Definition_v1_5.md](docs/02-requirements/FPDS_Requirements_Definition_v1_5.md)
 - execution plan: [docs/01-planning/plan.md](docs/01-planning/plan.md)
 - WBS: [docs/01-planning/WBS.md](docs/01-planning/WBS.md)
+- Canada Big 5 source registry baseline: [docs/01-planning/canada-big5-source-registry.md](docs/01-planning/canada-big5-source-registry.md)
 - working agreement: [docs/00-governance/working-agreement.md](docs/00-governance/working-agreement.md)
 - Gate A review note: [docs/00-governance/gate-a-build-start-review-note.md](docs/00-governance/gate-a-build-start-review-note.md)
 - decision log: [docs/00-governance/decision-log.md](docs/00-governance/decision-log.md)
@@ -123,23 +132,24 @@ Out of scope for the current FPDS build:
 ### In Progress
 
 - prototype worker runtime implementation
-- Gate C Product Owner review and final stage-transition approval
+- `WBS 5` public experience work and Big 5 expansion slices
+- public frontend package bootstrap
 
 ### Not Started
 
-- `WBS 5` public experience work and Big 5 expansion slices
 - later admin follow-on surfaces such as publish monitor and health
 - BX-PF runtime integration code
-- public frontend package bootstrap
 
 ### Hold Rule
 
-The Product Owner has explicitly started WBS `3` product implementation.
+The Product Owner has explicitly started WBS `5` product implementation.
 
-Scope still remains constrained to the approved prototype boundary:
-- `TD Bank`
-- `Savings Accounts`
-- ingestion and reviewability-first slices before broader public or admin build-out
+Scope now includes the approved post-prototype path through `WBS 5.4`:
+- Canada Big 5 source-registry baseline
+- continued evidence-first expansion for `chequing`, `savings`, and `gic`
+- completed parser baselines for `chequing`, `savings`, and `gic` across the worker stages using the approved registry catalog
+- completed aggregate source dataset generation for the public grid and dashboard backing stores
+- public-experience follow-on slices only within the approved Phase 1 cutline
 
 ## Approved Technical Baseline
 

@@ -5,7 +5,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from worker.discovery.fpds_discovery.registry import load_registry
+from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
 
 from .models import (
@@ -58,8 +58,8 @@ def main() -> int:
         loaded_env_keys = sorted(load_env_file(env_file, override=True).keys())
 
     repository = PsqlNormalizationRepository(NormalizationDatabaseConfig.from_env())
-    registry = load_registry(args.registry_path)
-    target_source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in args.source_id]
+    selected_sources_by_id = resolve_sources_by_id(args.source_id, registry_path=args.registry_path)
+    target_source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
     supporting_source_ids = sorted(
         {
             support_source_id
@@ -67,7 +67,8 @@ def main() -> int:
             for support_source_id in supporting_source_ids_for_target(source_id)
         }
     )
-    supporting_source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in supporting_source_ids]
+    supporting_sources_by_id = resolve_sources_by_id(supporting_source_ids, registry_path=args.registry_path) if supporting_source_ids else {}
+    supporting_source_document_ids = [supporting_sources_by_id[source_id].source_document_id for source_id in supporting_source_ids]
     lookup_source_document_ids = [*target_source_document_ids, *supporting_source_document_ids]
     repository.ensure_ingestion_run(
         run_id=args.run_id,
@@ -85,7 +86,7 @@ def main() -> int:
     missing_source_ids = [
         source_id
         for source_id in args.source_id
-        if registry.by_source_id(source_id).source_document_id not in lookup_by_source_document_id
+        if selected_sources_by_id[source_id].source_document_id not in lookup_by_source_document_id
     ]
     if missing_source_ids:
         raise ValueError(
@@ -98,7 +99,7 @@ def main() -> int:
     object_store = build_object_store(storage_config)
     supporting_artifacts_by_source_id: dict[str, dict[str, object]] = {}
     for support_source_id in supporting_source_ids:
-        source_document_id = registry.by_source_id(support_source_id).source_document_id
+        source_document_id = supporting_sources_by_id[support_source_id].source_document_id
         lookup = lookup_by_source_document_id.get(source_document_id)
         if lookup is None:
             continue
@@ -107,7 +108,7 @@ def main() -> int:
         )
     inputs: list[NormalizationInput] = []
     for source_id in args.source_id:
-        source_document_id = registry.by_source_id(source_id).source_document_id
+        source_document_id = selected_sources_by_id[source_id].source_document_id
         lookup = lookup_by_source_document_id[source_document_id]
         artifact = json.loads(object_store.get_object_bytes(object_key=lookup.extracted_storage_key).decode("utf-8"))
         target_supporting_source_ids = supporting_source_ids_for_target(source_id)

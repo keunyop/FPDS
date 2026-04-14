@@ -9,11 +9,14 @@ Current scope:
 - `fpds_normalization/` implements `WBS 3.6` canonical candidate mapping, `normalized_candidate` persistence, `field_evidence_link` persistence, and normalized artifact storage
 - `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
 - `fpds_result_viewer/` implements `WBS 3.8` read-only prototype viewer payload export from persisted run, candidate, and evidence rows
+- `fpds_aggregate_refresh/` implements `WBS 5.6` aggregate source dataset generation for `public_product_projection`, `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`, and `dashboard_scatter_snapshot`
 
 Planned follow-on scope:
 - canonical upsert and change assessment
 - publish preparation
-- aggregate refresh
+
+Big 5 source-id note:
+- when `--registry-path` is omitted, worker CLI stages that resolve `--source-id` now use the committed registry catalog, so `TD-*`, `RBC-*`, `BMO-*`, `SCOTIA-*`, and `CIBC-*` `chequing`, `savings`, and `gic` source ids can run without switching the default TD savings registry file by hand
 
 Run parse/chunk against stored snapshots in dev:
 
@@ -80,6 +83,16 @@ python -m worker.pipeline.fpds_result_viewer `
   --run-id run_20260410_3701
 ```
 
+Run aggregate refresh against the current canonical dataset in dev:
+
+```powershell
+python -m worker.pipeline.fpds_aggregate_refresh `
+  --env-file .env.dev `
+  --persist-db `
+  --snapshot-id agg_20260413_5601 `
+  --country-code CA
+```
+
 What `WBS 3.5` stores today:
 - extracted draft JSON artifact per parsed document in object storage
 - metadata JSON artifact with counts and storage references
@@ -90,6 +103,7 @@ What `WBS 3.5` stores today:
 Current boundary:
 - this stage produces source-level sparse drafts, not `normalized_candidate`
 - `field_evidence_link` rows are still deferred because they require `candidate_id` or `product_version_id`
+- the extraction baseline now includes product-type-specific canonical fields for `chequing`, `savings`, and `gic`, including transaction bundle signals, savings tiering or withdrawal text, and GIC term, redeemability, compounding, payout, and registered-plan support fields
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -103,6 +117,8 @@ What `WBS 3.6` stores today:
 - for the TD Savings prototype, `TD-SAV-007` fee-governing evidence can now suppress misleading `fee_waiver_condition` values for zero-monthly-fee savings products instead of persisting raw fee-table text
 - `TD Growth` qualification text is now split more deliberately into `eligibility_text`, `boosted_rate_eligibility`, and `promotional_period_text`
 - clearly noisy long-text fields such as generic notes, marketing promo copy, and fee-at-a-glance snippets can now be suppressed before canonical candidate persistence
+- chequing subtype inference now aligns to the approved taxonomy: `standard`, `package`, `interest_bearing`, `premium`, `other`
+- normalization and validation now also align GIC term and redeemability rules at candidate creation time so missing deposit or term values, invalid term lengths, and conflicting redeemability flags are surfaced before review routing
 
 Current boundary:
 - normalization now persists `normalized_candidate` and candidate-level evidence links
@@ -129,6 +145,17 @@ What `WBS 3.8` exports today:
 Current boundary:
 - this is a read-only prototype viewer export, not the full admin review queue or trace viewer
 - write actions, queue mutation, and deep trace drilldown remain deferred to later admin slices
+
+What `WBS 5.6` stores today:
+- one `aggregate_refresh_run` row per attempted snapshot
+- flattened `public_product_projection` rows with the shared filter vocabulary and approved bucket codes
+- `dashboard_metric_snapshot` rows for the current aggregate scope baseline
+- `dashboard_ranking_snapshot` rows for the approved ranking widget catalog
+- `dashboard_scatter_snapshot` rows for the approved scatter preset catalog
+
+Current boundary:
+- this slice builds aggregate source datasets only; it does not implement the public products API, dashboard APIs, or public UI
+- later public API work can now read from persisted aggregate rows instead of joining live canonical tables directly
 
 Reliability note:
 - DB-backed worker stages now run `psql` with `ON_ERROR_STOP=1` so SQL errors abort the stage instead of being reported as false-positive success

@@ -5,6 +5,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
 from worker.discovery.fpds_discovery.registry import load_registry
 
@@ -65,6 +66,11 @@ def main() -> int:
     repository = None
     registry = load_registry(args.registry_path)
     selected_source_ids = args.source_id or [source.source_id for source in registry.sources]
+    selected_sources_by_id = (
+        resolve_sources_by_id(selected_source_ids, registry_path=args.registry_path)
+        if args.source_id
+        else {source.source_id: source for source in registry.sources}
+    )
     if args.snapshot_records_path is not None:
         payload = json.loads(args.snapshot_records_path.read_text(encoding="utf-8"))
         snapshots = [ParseSourceSnapshot(**item) for item in payload]
@@ -72,7 +78,7 @@ def main() -> int:
         if not args.persist_db:
             raise ValueError("Either --persist-db or --snapshot-records-path is required for parse/chunk input.")
         repository = PsqlParseChunkRepository(ParseChunkDatabaseConfig.from_env())
-        source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in selected_source_ids]
+        source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in selected_source_ids]
         repository.ensure_ingestion_run(
             run_id=args.run_id,
             trigger_type=args.trigger_type,
@@ -88,7 +94,7 @@ def main() -> int:
         missing_source_ids = [
             source_id
             for source_id in selected_source_ids
-            if registry.by_source_id(source_id).source_document_id not in snapshot_map
+            if selected_sources_by_id[source_id].source_document_id not in snapshot_map
         ]
         if missing_source_ids:
             raise ValueError(
@@ -98,8 +104,8 @@ def main() -> int:
             )
         snapshots = [
             ParseSourceSnapshot(
-                **{
-                    **snapshot_map[registry.by_source_id(source_id).source_document_id].__dict__,
+                    **{
+                    **snapshot_map[selected_sources_by_id[source_id].source_document_id].__dict__,
                     "source_id": source_id,
                 }
             )

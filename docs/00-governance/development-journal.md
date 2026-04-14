@@ -1101,6 +1101,108 @@ Each entry should include:
   - passed in `app/admin`
 - Known issues: the remaining open item is governance, not implementation. Product Owner approval is still needed on the new Gate C note before `WBS 5` can become the formally active stage
 - Next step: Product Owner reviews the QA summary and Gate C note, then records `Pass` or `Deferred` and decides whether to unlock `WBS 5`
+
+## 2026-04-13 - WBS 5.1 Big 5 Source Registry
+
+- WBS: `5.1`
+- Status: `done`
+- Goal: close the Canada Big 5 source-registry baseline so `5.2`, `5.3`, and `5.4` can start from committed source files instead of prototype-only TD scope
+- Why now: the Product Owner explicitly approved `WBS 5` start, and parser expansion would stay blocked without an approved active registry beyond the existing TD savings prototype seed
+- Outcome: added a committed registry catalog plus `15` per-bank or product-type registry files covering `RBC`, `TD`, `BMO`, `SCOTIA`, and `CIBC` across `chequing`, `savings`, and `gic`. Added a catalog loader and tests that verify the `5 x 3` matrix and loadability of every registry file. Added a planning baseline document that fixes the `5.1` completeness cutline as `approved active baseline for parser expansion`, updated the worker README to explain the new catalog boundary, generalized a few TD-specific discovery messages, and refreshed governance or status documents to reflect Gate C approval, WBS 5 start, and `5.1` completion
+- Not done: did not implement new bank-specific discovery fixtures, live crawling automation, parser logic for non-TD banks, or public UI runtime code. Some future supporting PDFs and low-confidence edge pages remain intentionally deferred to later approved registry refresh or parser slices
+- Key files: `worker/discovery/data/source_registry_catalog.json`, `worker/discovery/data/*.json`, `worker/discovery/fpds_discovery/catalog.py`, `worker/discovery/tests/test_registry_catalog.py`, `docs/01-planning/canada-big5-source-registry.md`, `docs/01-planning/WBS.md`, `docs/00-governance/decision-log.md`, `docs/00-governance/milestone-tracker.md`, `docs/00-governance/roadmap.md`, `README.md`
+- Decisions: kept the existing TD savings registry unchanged as the prototype truth source. Treated `5.1 complete` as an approved active baseline for all Big 5 banks and all in-scope product types, while leaving future source enrichment to the registry refresh approval flow. Allowed clearly standalone USD savings variants only as `P1`
+- Verification:
+  - `python -m unittest discover -s worker/discovery/tests -t .`
+  - passed
+- Known issues: current runnable offline discovery fixtures still target TD savings, so future bank-specific discovery rule differences will need coverage as `5.2` to `5.4` progress. A few bank source URLs were chosen from currently published official consumer pages and may still need later promotion or deprecation if the banks change their public lineup
+- Next step: implement `WBS 5.2` chequing parser expansion against the new registry catalog and add the first non-TD discovery or parser fixtures
+
+## 2026-04-13 - WBS 5.2 Chequing Parser Expansion
+
+- WBS: `5.2`
+- Status: `done`
+- Goal: make `chequing` a first-class runnable parser path instead of a registry-only placeholder
+- Why now: `5.1` closed the Canada Big 5 source-registry baseline, and the next blocker was getting chequing-specific fields and taxonomy behavior through the worker stages with real test coverage
+- Outcome: expanded evidence-retrieval hints and extraction heuristics for chequing-only fields such as `included_transactions`, `unlimited_transactions_flag`, `interac_e_transfer_included`, `overdraft_available`, `cheque_book_info`, `student_plan_flag`, and `newcomer_plan_flag`. Updated normalization so chequing requiredness is validated at normalization time, integer field values are preserved, student/newcomer stay orthogonal flags or tags, and chequing subtype inference now aligns with the approved schema (`standard`, `package`, `interest_bearing`, `premium`, `other`). Also updated worker CLI source-id resolution so parse, retrieval, extraction, normalization, validation, and viewer export can resolve catalog-managed Big 5 source ids without manually swapping the default TD savings registry file
+- Not done: this slice did not add bank-specific chequing supporting-merge logic, live chequing evidence packs, public UI work, or the later `5.3` savings and `5.4` GIC parser expansion
+- Key files: `worker/discovery/fpds_discovery/catalog.py`, `worker/pipeline/fpds_evidence_retrieval/service.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_parse_chunk/__main__.py`, `worker/pipeline/fpds_extraction/__main__.py`, `worker/pipeline/fpds_normalization/__main__.py`, `worker/pipeline/fpds_validation_routing/__main__.py`, `worker/pipeline/fpds_result_viewer/__main__.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`
+- Decisions: kept TD savings supporting-merge logic intentionally narrow instead of forcing a premature cross-bank merge layer into `5.2`. Matched chequing subtype behavior to the canonical schema and kept `student` or `newcomer` as flags or tags rather than subtype values
+- Verification:
+  - `python -m unittest worker.discovery.tests.test_registry_catalog worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - passed
+  - `python -m py_compile worker/discovery/fpds_discovery/catalog.py worker/pipeline/fpds_parse_chunk/__main__.py worker/pipeline/fpds_evidence_retrieval/__main__.py worker/pipeline/fpds_evidence_retrieval/service.py worker/pipeline/fpds_extraction/__main__.py worker/pipeline/fpds_extraction/service.py worker/pipeline/fpds_normalization/__main__.py worker/pipeline/fpds_normalization/service.py worker/pipeline/fpds_validation_routing/__main__.py worker/pipeline/fpds_result_viewer/__main__.py`
+  - passed
+  - `python -m unittest discover -s worker -t .`
+  - passed
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: chequing parser coverage is now wired through the worker stages, but the supporting-source merge layer still remains TD savings-specific and later bank-level exceptions still belong in `5.5`
+- Next step: implement `WBS 5.3` savings parser expansion against the same catalog-backed runner path
+
+## 2026-04-13 - WBS 5.3 and 5.4 Savings and GIC Parser Expansion
+
+- WBS: `5.3`, `5.4`
+- Status: `done`
+- Goal: extend the catalog-backed parser path so `savings` and `gic` become first-class product types across extraction, normalization, and validation instead of relying on prototype-era partial behavior
+- Why now: `5.2` closed the chequing slice and left the remaining approved product-type coverage work concentrated in savings detail-field coverage and GIC term or redeemability handling
+- Outcome: expanded evidence-retrieval hints and extraction heuristics so savings runs now pull tiering, withdrawal-limit, and registered signals more deliberately, while GIC runs can extract `term_length_text`, `term_length_days`, `redeemable_flag`, `non_redeemable_flag`, `compounding_frequency`, `payout_option`, and `registered_plan_supported`. Updated normalization so GIC candidates now enforce term-value validity, required minimum deposit or term presence, and redeemability cross-field consistency at normalization time, with non-redeemable subtype inference checked before the broader redeemable match. Added focused unit coverage for savings-specific extraction and normalization fields plus GIC extraction, normalization, and validation-routing cross-field behavior, and refreshed repo status docs plus the worker README to reflect completed `5.3` and `5.4`
+- Not done: this slice did not add bank-specific supporting-source merge rules beyond the existing TD savings prototype path, did not create live Big 5 savings or GIC evidence packs, and did not start `5.5` per-bank normalization exceptions
+- Key files: `worker/pipeline/fpds_evidence_retrieval/service.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_validation_routing.py`, `worker/pipeline/README.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: kept the current savings supporting-merge layer TD-specific instead of widening scope into `5.5`. Treated GIC term normalization as heuristic coverage for clear single-term phrases while still allowing `term_length_text` to satisfy requiredness when only human-readable term text is available
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction`
+  - passed
+  - `python -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - passed
+  - `python -m py_compile worker/pipeline/fpds_extraction/service.py worker/pipeline/fpds_evidence_retrieval/service.py worker/pipeline/fpds_normalization/service.py worker/pipeline/tests/test_extraction.py worker/pipeline/tests/test_normalization.py worker/pipeline/tests/test_validation_routing.py`
+  - passed
+  - `python -m unittest discover -s worker -t .`
+  - passed
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: broader Big 5 savings and GIC quality still depends on future per-bank exception handling and live source verification. The current GIC term-to-days heuristic intentionally handles clear single-term phrases and leaves multi-term ranges primarily in `term_length_text`
+- Next step: implement `WBS 5.5` per-bank normalization rule hardening for Big 5 savings and GIC edge cases
+
+## 2026-04-13 - WBS 5.5 Normalization Hardening Baseline
+
+- WBS: `5.5`
+- Status: `done`
+- Goal: turn `WBS 5.5` from a placeholder row into a concrete hardening slice with explicit scope, boundaries, and completion signals before implementation starts
+- Why now: `5.2` to `5.4` closed parser coverage, but the remaining row for `5.5` still only said `bank별 예외 처리`, which was too vague to protect the next slice from hidden scope growth or from bleeding into public API/UI work
+- Outcome: strengthened the `WBS 5.5` row and added a scope baseline that fixes the slice around bank-matched supporting-source merge, savings and GIC edge-case normalization, targeted chequing follow-up only when needed for schema alignment, regression coverage, and explicit manual-review deferrals. Also made the boundary against registry expansion and public API/UI work explicit so `5.6` and later slices stay separated
+- Not done: no worker code, test fixture, registry, or public-surface changes were made in this slice
+- Key files: `docs/01-planning/WBS.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept `5.5` focused on normalization hardening rather than discovery expansion or a generic merge-engine redesign. Framed the exit signal around evidence-grounded, reviewable per-bank rules so the public aggregate slice does not absorb unresolved bank-specific ambiguity by accident
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+  - `git diff --check -- docs/01-planning/WBS.md docs/00-governance/development-journal.md`
+  - passed
+- Known issues: the concrete per-bank rule inventory still belongs to the future implementation slice, so this entry clarifies the cutline but does not yet name every bank/product exception that will be encoded
+- Next step: implement `WBS 5.5` using the new scope baseline to drive the first bank-rule inventory, representative fixtures, and regression-backed normalization changes
+
+## 2026-04-13 - WBS 5.6 Aggregate Dataset Generation
+
+- WBS: `5.6`
+- Status: `done`
+- Goal: generate the aggregate source datasets that the later public products and dashboard APIs can read from instead of joining live canonical tables directly
+- Why now: after the `5.5` scope baseline was clarified, the Product Owner explicitly deferred `5.5` implementation and approved moving directly to `5.6` so the public aggregate backing store could be built without waiting for the later bank-specific hardening pass
+- Outcome: added a new aggregate refresh migration and worker slice that reads the current canonical deposit dataset, flattens it into `public_product_projection`, and generates persisted `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`, and `dashboard_scatter_snapshot` rows. The new worker also records `aggregate_refresh_run` attempts, marks failed refreshes, and applies the approved public bucket vocabulary for fee, minimum balance, minimum deposit, and term ranges. Added focused tests for bucket assignment, KPI totals, ranking order, scatter coverage, and psql-backed persistence wiring. Updated WBS and status docs so `5.5` is explicitly deferred and `5.6` is explicitly complete
+- Not done: this slice did not implement `GET /api/public/products`, dashboard APIs, filter counts, public UI routes, or the deferred per-bank normalization hardening from `5.5`
+- Key files: `db/migrations/0003_aggregate_refresh.sql`, `worker/pipeline/fpds_aggregate_refresh/__main__.py`, `worker/pipeline/fpds_aggregate_refresh/models.py`, `worker/pipeline/fpds_aggregate_refresh/service.py`, `worker/pipeline/fpds_aggregate_refresh/persistence.py`, `worker/pipeline/tests/test_aggregate_refresh.py`, `docs/01-planning/WBS.md`, `docs/03-design/product-grid-information-architecture.md`, `worker/pipeline/README.md`, `README.md`
+- Decisions: kept the slice DB-backed and aggregate-row-oriented instead of introducing object-storage artifacts for this stage. Stored the approved bucket boundaries in the product-grid IA doc so later APIs and UI work share the same filter vocabulary. Treated the current metric snapshot as the persisted aggregate baseline for the active public scope while leaving richer filtered API behavior to the later public API slices
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_aggregate_refresh`
+  - passed
+  - `python -m py_compile worker/pipeline/fpds_aggregate_refresh/__main__.py worker/pipeline/fpds_aggregate_refresh/models.py worker/pipeline/fpds_aggregate_refresh/service.py worker/pipeline/fpds_aggregate_refresh/persistence.py worker/pipeline/tests/test_aggregate_refresh.py`
+  - passed
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+  - `git diff --check -- db/migrations/0003_aggregate_refresh.sql worker/pipeline/fpds_aggregate_refresh worker/pipeline/tests/test_aggregate_refresh.py docs/01-planning/WBS.md docs/03-design/product-grid-information-architecture.md worker/pipeline/README.md README.md docs/00-governance/decision-log.md docs/00-governance/development-journal.md`
+  - passed with line-ending warnings only
+- Known issues: `5.5` bank-specific normalization hardening is still deferred, so the aggregate rows now reflect the current canonical quality baseline rather than a future bank-exception-complete state
+- Next step: implement `WBS 5.7` public products API on top of `public_product_projection`
 ---
 
 ## 7. Change History
@@ -1140,3 +1242,8 @@ Each entry should include:
 | 2026-04-13 | Added the WBS 4.8 LLM usage tracking implementation entry |
 | 2026-04-13 | Added the WBS 4.9 usage dashboard v1 implementation entry |
 | 2026-04-13 | Added the WBS 4.10 operational scenario QA entry plus Gate C recommendation artifacts |
+| 2026-04-13 | Added the WBS 5.1 Big 5 source registry baseline entry and recorded WBS 5 start context |
+| 2026-04-13 | Added the WBS 5.2 chequing parser expansion entry and verification results |
+| 2026-04-13 | Added the combined WBS 5.3 and 5.4 savings and GIC parser expansion entry and verification results |
+| 2026-04-13 | Added the WBS 5.5 normalization hardening baseline entry and clarified its scope boundary in the WBS |
+| 2026-04-13 | Added the WBS 5.6 aggregate dataset generation entry, approved bucket baseline, and WBS 5.5 defer context |

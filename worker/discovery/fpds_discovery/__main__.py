@@ -11,7 +11,7 @@ from .url_utils import normalize_source_url
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="FPDS TD savings source discovery")
+    parser = argparse.ArgumentParser(description="FPDS source discovery runner")
     parser.add_argument("--registry-path", type=Path, default=None, help="Optional custom registry JSON path.")
     parser.add_argument("--entry-html-path", type=Path, default=None, help="Offline entry page HTML fixture path.")
     parser.add_argument(

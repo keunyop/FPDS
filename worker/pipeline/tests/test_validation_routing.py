@@ -114,6 +114,41 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_gic_cross_field_issue_stays_error_and_queues_reason(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-gic-error")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+
+            result = service.validate_and_route_inputs(
+                run_id="run-gic-001",
+                inputs=[input_item],
+                taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="prototype",
+                    auto_approve_min_confidence=1.0,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence", "inconsistent_cross_field_logic"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("inconsistent_cross_field_logic", source_result.validation_issue_codes)
+            self.assertIn("validation_error", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
 
 class ValidationRoutingPersistenceTests(unittest.TestCase):
     def test_load_policies_and_persist_queue(self) -> None:
@@ -249,6 +284,66 @@ def _build_input() -> ValidationInput:
             _evidence("monthly_fee", "0.0", "chunk-fee"),
             _evidence("standard_rate", "1.25", "chunk-rate"),
             _evidence("interest_payment_frequency", "monthly", "chunk-frequency"),
+        ],
+        runtime_notes=[],
+    )
+
+
+def _build_gic_input() -> ValidationInput:
+    candidate_record = {
+        "candidate_id": "cand-gic-001",
+        "run_id": "run-gic-3603",
+        "source_document_id": "src-gic-001",
+        "model_execution_id": "modelexec-normalize-gic-001",
+        "candidate_state": "draft",
+        "validation_status": "pass",
+        "source_confidence": 0.86,
+        "review_reason_code": None,
+        "country_code": "CA",
+        "bank_code": "RBC",
+        "product_family": "deposit",
+        "product_type": "gic",
+        "subtype_code": "non_redeemable",
+        "product_name": "RBC 1 Year Non-Redeemable GIC",
+        "source_language": "en",
+        "currency": "CAD",
+        "validation_issue_codes": [],
+        "candidate_payload": {
+            "status": "active",
+            "last_verified_at": "2026-04-10T12:00:00+00:00",
+            "bank_name": "RBC",
+            "product_name": "RBC 1 Year Non-Redeemable GIC",
+            "standard_rate": 3.8,
+            "minimum_deposit": 500.0,
+            "term_length_text": "1 year",
+            "term_length_days": 365,
+            "redeemable_flag": True,
+            "non_redeemable_flag": True,
+        },
+        "field_mapping_metadata": {},
+    }
+    return ValidationInput(
+        source_id="RBC-GIC-002",
+        source_document_id="src-gic-001",
+        snapshot_id="snap-gic-001",
+        parsed_document_id="parsed-gic-001",
+        candidate_id="cand-gic-001",
+        candidate_run_id="run-gic-3603",
+        normalization_model_execution_id="modelexec-normalize-gic-001",
+        normalized_storage_key="dev/normalized/CA/RBC/src-gic-001/cand-gic-001/normalized.json",
+        metadata_storage_key="dev/normalized/CA/RBC/src-gic-001/cand-gic-001/metadata.json",
+        bank_code="RBC",
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": "gic"},
+        normalized_candidate_record=candidate_record,
+        field_evidence_links=[
+            _evidence("standard_rate", "3.8", "chunk-gic-rate"),
+            _evidence("minimum_deposit", "500.0", "chunk-gic-rate"),
+            _evidence("term_length_days", "365", "chunk-gic-rate"),
+            _evidence("redeemable_flag", "true", "chunk-gic-flags"),
+            _evidence("non_redeemable_flag", "true", "chunk-gic-flags"),
         ],
         runtime_notes=[],
     )

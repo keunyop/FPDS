@@ -70,6 +70,116 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_normalizes_chequing_candidate_with_package_subtype_and_flags(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-chequing-service")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            result = service.normalize_inputs(
+                run_id="run-chq-001",
+                inputs=[_build_chequing_input()],
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.normalization_action, "stored")
+            self.assertEqual(source_result.validation_status, "pass")
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertEqual(candidate["product_type"], "chequing")
+            self.assertEqual(candidate["subtype_code"], "package")
+            self.assertEqual(candidate["candidate_payload"]["monthly_fee"], 0.0)
+            self.assertEqual(candidate["candidate_payload"]["included_transactions"], 25)
+            self.assertTrue(candidate["candidate_payload"]["interac_e_transfer_included"])
+            self.assertTrue(candidate["candidate_payload"]["student_plan_flag"])
+            self.assertTrue(candidate["candidate_payload"]["newcomer_plan_flag"])
+            self.assertIn("student", candidate["candidate_payload"]["target_customer_tags"])
+            self.assertIn("newcomer", candidate["candidate_payload"]["target_customer_tags"])
+            self.assertGreater(source_result.source_confidence or 0, 0.7)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_normalizes_savings_specific_fields(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-savings-detail")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            result = service.normalize_inputs(
+                run_id="run-sav-001",
+                inputs=[_build_savings_detail_input()],
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "pass")
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            payload = candidate["candidate_payload"]
+            self.assertEqual(candidate["subtype_code"], "high_interest")
+            self.assertTrue(payload["tiered_rate_flag"])
+            self.assertEqual(payload["interest_payment_frequency"], "monthly")
+            self.assertIn("daily closing balance", payload["interest_calculation_method"].lower())
+            self.assertIn("$5,000", payload["tier_definition_text"])
+            self.assertIn("withdrawal", payload["withdrawal_limit_text"].lower())
+            self.assertTrue(payload["registered_flag"])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_normalizes_gic_candidate_with_non_redeemable_subtype(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-service")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            result = service.normalize_inputs(
+                run_id="run-gic-001",
+                inputs=[_build_gic_input()],
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.normalization_action, "stored")
+            self.assertEqual(source_result.validation_status, "pass")
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertEqual(candidate["product_type"], "gic")
+            self.assertEqual(candidate["subtype_code"], "non_redeemable")
+            payload = candidate["candidate_payload"]
+            self.assertEqual(payload["term_length_text"], "1 year")
+            self.assertEqual(payload["term_length_days"], 365)
+            self.assertEqual(payload["minimum_deposit"], 500.0)
+            self.assertEqual(payload["standard_rate"], 3.8)
+            self.assertFalse(payload["redeemable_flag"])
+            self.assertTrue(payload["non_redeemable_flag"])
+            self.assertEqual(payload["compounding_frequency"], "annually")
+            self.assertEqual(payload["payout_option"], "at_maturity")
+            self.assertTrue(payload["registered_plan_supported"])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_missing_rate_sets_error_status(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-error")
         try:
@@ -94,6 +204,37 @@ class NormalizationServiceTests(unittest.TestCase):
             )
 
             result = service.normalize_inputs(run_id="run-002", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_gic_missing_minimum_deposit_sets_error_status(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-error")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "extracted_fields": [field for field in input_item.extracted_fields if field.field_name != "minimum_deposit"],
+                    "evidence_links": [link for link in input_item.evidence_links if link.field_name != "minimum_deposit"],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-gic-002", inputs=[input_item])
 
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
@@ -491,6 +632,159 @@ def _build_input() -> NormalizationInput:
             _evidence("monthly_fee", "0.00", "chunk-fee"),
             _evidence("standard_rate", "1.25", "chunk-rate"),
             _evidence("interest_payment_frequency", "monthly", "chunk-frequency"),
+        ],
+        runtime_notes=[],
+    )
+
+
+def _build_chequing_input() -> NormalizationInput:
+    return NormalizationInput(
+        source_id="TD-CHQ-002",
+        source_document_id="src-chq-001",
+        snapshot_id="snap-chq-001",
+        parsed_document_id="parsed-chq-001",
+        extraction_model_execution_id="modelexec-extract-chq-001",
+        extracted_storage_key="dev/extracted/CA/TD/src-chq-001/parsed-chq-001/extracted.json",
+        metadata_storage_key="dev/extracted/CA/TD/src-chq-001/parsed-chq-001/metadata.json",
+        bank_code="TD",
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": "chequing"},
+        schema_context={"product_family": "deposit", "product_type": "chequing"},
+        extracted_fields=[
+            _field("product_family", "deposit", "string", 0.99),
+            _field("product_type", "chequing", "string", 0.99),
+            _field("country_code", "CA", "string", 0.99),
+            _field("bank_code", "TD", "string", 0.99),
+            _field("source_language", "en", "string", 0.99),
+            _field("currency", "CAD", "string", 0.99),
+            _field("product_name", "TD Student Banking Package", "string", 0.88),
+            _field("description_short", "Chequing account for students and newcomers to Canada.", "string", 0.74),
+            _field("monthly_fee", "0.00", "decimal", 0.86, evidence_chunk_id="chunk-chq-fee"),
+            _field("included_transactions", 25, "integer", 0.82, evidence_chunk_id="chunk-chq-fee"),
+            _field("interac_e_transfer_included", True, "boolean", 0.81, evidence_chunk_id="chunk-chq-benefits"),
+            _field("overdraft_available", True, "boolean", 0.78, evidence_chunk_id="chunk-chq-benefits"),
+            _field("cheque_book_info", "One free cheque book when you open the account.", "string", 0.77, evidence_chunk_id="chunk-chq-benefits"),
+            _field("student_plan_flag", True, "boolean", 0.8, evidence_chunk_id="chunk-chq-title"),
+            _field("newcomer_plan_flag", True, "boolean", 0.8, evidence_chunk_id="chunk-chq-title"),
+        ],
+        evidence_links=[
+            _evidence("monthly_fee", "0.00", "chunk-chq-fee"),
+            _evidence("included_transactions", "25", "chunk-chq-fee"),
+            _evidence("interac_e_transfer_included", "true", "chunk-chq-benefits"),
+            _evidence("student_plan_flag", "true", "chunk-chq-title"),
+            _evidence("newcomer_plan_flag", "true", "chunk-chq-title"),
+        ],
+        runtime_notes=[],
+    )
+
+
+def _build_savings_detail_input() -> NormalizationInput:
+    return NormalizationInput(
+        source_id="RBC-SAV-004",
+        source_document_id="src-sav-001",
+        snapshot_id="snap-sav-001",
+        parsed_document_id="parsed-sav-001",
+        extraction_model_execution_id="modelexec-extract-sav-001",
+        extracted_storage_key="dev/extracted/CA/RBC/src-sav-001/parsed-sav-001/extracted.json",
+        metadata_storage_key="dev/extracted/CA/RBC/src-sav-001/parsed-sav-001/metadata.json",
+        bank_code="RBC",
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": "savings"},
+        schema_context={"product_family": "deposit", "product_type": "savings"},
+        extracted_fields=[
+            _field("product_family", "deposit", "string", 0.99),
+            _field("product_type", "savings", "string", 0.99),
+            _field("country_code", "CA", "string", 0.99),
+            _field("bank_code", "RBC", "string", 0.99),
+            _field("source_language", "en", "string", 0.99),
+            _field("currency", "CAD", "string", 0.99),
+            _field("product_name", "RBC High Interest eSavings", "string", 0.88),
+            _field("standard_rate", "1.60", "decimal", 0.85, evidence_chunk_id="chunk-sav-rate"),
+            _field(
+                "interest_calculation_method",
+                "Interest is calculated on the daily closing balance and paid monthly.",
+                "string",
+                0.79,
+                evidence_chunk_id="chunk-sav-rate",
+            ),
+            _field("interest_payment_frequency", "monthly", "string", 0.8, evidence_chunk_id="chunk-sav-rate"),
+            _field("tiered_rate_flag", True, "boolean", 0.82, evidence_chunk_id="chunk-sav-rate"),
+            _field(
+                "tier_definition_text",
+                "Balances of $0 to $4,999.99 earn 1.60%; $5,000 and over earn 1.80%.",
+                "string",
+                0.77,
+                evidence_chunk_id="chunk-sav-rate",
+            ),
+            _field(
+                "withdrawal_limit_text",
+                "One debit transaction per month is included. Additional withdrawals cost $5 each.",
+                "string",
+                0.75,
+                evidence_chunk_id="chunk-sav-withdrawal",
+            ),
+            _field("registered_flag", True, "boolean", 0.76, evidence_chunk_id="chunk-sav-registered"),
+        ],
+        evidence_links=[
+            _evidence("standard_rate", "1.60", "chunk-sav-rate"),
+            _evidence("interest_calculation_method", "Interest is calculated on the daily closing balance and paid monthly.", "chunk-sav-rate"),
+            _evidence("interest_payment_frequency", "monthly", "chunk-sav-rate"),
+            _evidence("tiered_rate_flag", "true", "chunk-sav-rate"),
+            _evidence("tier_definition_text", "Balances of $0 to $4,999.99 earn 1.60%; $5,000 and over earn 1.80%.", "chunk-sav-rate"),
+            _evidence("withdrawal_limit_text", "One debit transaction per month is included. Additional withdrawals cost $5 each.", "chunk-sav-withdrawal"),
+            _evidence("registered_flag", "true", "chunk-sav-registered"),
+        ],
+        runtime_notes=[],
+    )
+
+
+def _build_gic_input() -> NormalizationInput:
+    return NormalizationInput(
+        source_id="RBC-GIC-002",
+        source_document_id="src-gic-001",
+        snapshot_id="snap-gic-001",
+        parsed_document_id="parsed-gic-001",
+        extraction_model_execution_id="modelexec-extract-gic-001",
+        extracted_storage_key="dev/extracted/CA/RBC/src-gic-001/parsed-gic-001/extracted.json",
+        metadata_storage_key="dev/extracted/CA/RBC/src-gic-001/parsed-gic-001/metadata.json",
+        bank_code="RBC",
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": "gic"},
+        schema_context={"product_family": "deposit", "product_type": "gic"},
+        extracted_fields=[
+            _field("product_family", "deposit", "string", 0.99),
+            _field("product_type", "gic", "string", 0.99),
+            _field("country_code", "CA", "string", 0.99),
+            _field("bank_code", "RBC", "string", 0.99),
+            _field("source_language", "en", "string", 0.99),
+            _field("currency", "CAD", "string", 0.99),
+            _field("product_name", "RBC 1 Year Non-Redeemable GIC", "string", 0.9),
+            _field("standard_rate", "3.80", "decimal", 0.84, evidence_chunk_id="chunk-gic-rate"),
+            _field("minimum_deposit", "500.00", "decimal", 0.82, evidence_chunk_id="chunk-gic-rate"),
+            _field("term_length_text", "1 year", "string", 0.83, evidence_chunk_id="chunk-gic-rate"),
+            _field("term_length_days", 365, "integer", 0.83, evidence_chunk_id="chunk-gic-rate"),
+            _field("redeemable_flag", False, "boolean", 0.8, evidence_chunk_id="chunk-gic-title"),
+            _field("non_redeemable_flag", True, "boolean", 0.86, evidence_chunk_id="chunk-gic-title"),
+            _field("compounding_frequency", "annually", "string", 0.77, evidence_chunk_id="chunk-gic-interest"),
+            _field("payout_option", "at_maturity", "string", 0.78, evidence_chunk_id="chunk-gic-interest"),
+            _field("registered_plan_supported", True, "boolean", 0.79, evidence_chunk_id="chunk-gic-registered"),
+        ],
+        evidence_links=[
+            _evidence("standard_rate", "3.80", "chunk-gic-rate"),
+            _evidence("minimum_deposit", "500.00", "chunk-gic-rate"),
+            _evidence("term_length_text", "1 year", "chunk-gic-rate"),
+            _evidence("term_length_days", "365", "chunk-gic-rate"),
+            _evidence("redeemable_flag", "false", "chunk-gic-title"),
+            _evidence("non_redeemable_flag", "true", "chunk-gic-title"),
+            _evidence("compounding_frequency", "annually", "chunk-gic-interest"),
+            _evidence("payout_option", "at_maturity", "chunk-gic-interest"),
+            _evidence("registered_plan_supported", "true", "chunk-gic-registered"),
         ],
         runtime_notes=[],
     )

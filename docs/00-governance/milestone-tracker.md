@@ -57,10 +57,10 @@ Source Documents:
 | Milestone | Stage | Status | Owner | Target Week | Calendar Due | Gate | Key Exit Criteria | Evidence Required |
 |---|---|---|---|---|---|---|---|---|
 | M0 | Detailed Design Closure | Done | Product Owner, Tech Lead | Week 0 | 2026-04-06 | Gate A | open gate blockers closed, core design package ready | gate review note, updated WBS, updated roadmap |
-| M1 | Foundation Setup Complete | In Progress | Tech Lead | Week 2 | 2026-04-17 | - | repo/app/db/auth/i18n/ops baseline ready | foundation checklist, environment notes |
+| M1 | Foundation Setup Complete | Done | Tech Lead | Week 2 | 2026-04-17 | - | repo/app/db/auth/i18n/ops baseline ready | foundation checklist, environment notes |
 | M2 | Prototype Acceptance | Done | Tech Lead, QA | Week 4 | 2026-04-29 | Gate B | TD Savings end-to-end feasibility proven | prototype demo, findings memo, evidence pack, gate review note |
-| M3 | Admin/Ops Core Complete | In Progress | Product Owner, Tech Lead | Week 4 | 2026-05-04 | Gate C | internal review/trace/run/usage workflows operational | admin demo, QA summary, gate review note |
-| M4 | Canada Public Experience Complete | Not Started | Product Owner, Frontend, Backend | Week 4 | 2026-05-04 | - | Big 5 public catalog and dashboard usable | public demo, metric validation note |
+| M3 | Admin/Ops Core Complete | Done | Product Owner, Tech Lead | Week 4 | 2026-05-04 | Gate C | internal review/trace/run/usage workflows operational | admin demo, QA summary, gate review note |
+| M4 | Canada Public Experience Complete | In Progress | Product Owner, Frontend, Backend | Week 4 | 2026-05-04 | - | Big 5 public catalog and dashboard usable | public demo, metric validation note |
 | M5 | Phase 1 Release Readiness | Not Started | Product Owner | Week 6 | 2026-05-12 | Gate D | publish, security, runbook, release evidence ready | release checklist, acceptance pack |
 | M6 | Japan Expansion Setup Complete | Not Started | Product Owner, Tech Lead | Week 9 | 2026-06-12 | - | Japan source/taxonomy/parsing base ready | Japan scope memo, schema/taxonomy note |
 | M7 | External API Delivery Complete | Not Started | Product Owner, Backend | Week 15 | 2026-07-24 | - | external API v1 usable with auth/docs/monitoring | API docs, monitoring note, demo |
@@ -144,3 +144,4 @@ Escalation Needed:
 | 2026-04-11 | Updated M2 to In Progress after the Gate B review note and post-prototype hardening evidence were prepared |
 | 2026-04-11 | Updated M2 to Done after Product Owner approved Gate B Pass |
 | 2026-04-13 | Updated M3 to In Progress after WBS 4 implementation and the Gate C QA plus review-note evidence landed |
+| 2026-04-13 | Updated M1 to Done, M3 to Done, and M4 to In Progress after Product Owner approved WBS 5 start and WBS 5.1 landed |

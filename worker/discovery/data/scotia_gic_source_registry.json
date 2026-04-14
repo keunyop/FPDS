@@ -1,0 +1,72 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "scotiabank.com"
+  ],
+  "entry_source_id": "SCOTIA-GIC-001",
+  "sources": [
+    {
+      "source_id": "SCOTIA-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Scotiabank GIC overview and product family discovery",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates.html",
+      "expected_fields": [
+        "gic_types",
+        "special_rate_summary",
+        "detail_links",
+        "market_linked_summary"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank GIC rates reference page",
+      "url": "https://www.scotiabank.com/ca/en/personal/rates-prices/gic-rates.html",
+      "expected_fields": [
+        "redeemable_gic_rates",
+        "non_redeemable_gic_rates",
+        "market_linked_gic_rates"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank non-redeemable GIC detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/non-redeemable-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "cashability",
+        "interest_payment_options"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-GIC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank market linked GIC detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/market-linked-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ]
+    }
+  ]
+}

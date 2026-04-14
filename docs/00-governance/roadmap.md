@@ -19,7 +19,9 @@ As of `2026-04-13`:
 - `Gate B` is approved as `Pass`
 - `WBS 3. Prototype Build` is complete for the approved `TD Savings` prototype scope
 - `WBS 4. Admin and Ops Core` implementation is complete through `4.10`, including operational scenario QA evidence
-- `Gate C` now has a documented `Pass` recommendation, but `WBS 5` remains formally blocked until Product Owner approval is recorded
+- `Gate C` is approved as `Pass`
+- `WBS 5` is now the active stage
+- `WBS 5.1 Big 5 source registry` is complete with a committed Canada Big 5 registry catalog and per-bank baseline source files
 
 ## 0. Current Progress Snapshot
 

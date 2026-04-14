@@ -5,8 +5,8 @@ import json
 import os
 from pathlib import Path
 
+from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
-from worker.discovery.fpds_discovery.registry import load_registry
 
 from .models import EvidenceRetrievalRequest, MetadataFilters
 from .persistence import PsqlEvidenceRetrievalRepository, RetrievalDatabaseConfig
@@ -67,14 +67,14 @@ def main() -> int:
             raise ValueError("Either --parsed-document-id or at least one --source-id is required.")
         if len(args.source_id) != 1:
             raise ValueError("When --parsed-document-id is omitted, pass exactly one --source-id.")
-        registry = load_registry(args.registry_path)
-        source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in args.source_id]
+        selected_sources_by_id = resolve_sources_by_id(args.source_id, registry_path=args.registry_path)
+        source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
         parsed_documents = repository.load_latest_parsed_documents(source_document_ids=source_document_ids)
         parsed_by_source_document_id = {item.source_document_id: item for item in parsed_documents}
         missing_source_ids = [
             source_id
             for source_id in args.source_id
-            if registry.by_source_id(source_id).source_document_id not in parsed_by_source_document_id
+            if selected_sources_by_id[source_id].source_document_id not in parsed_by_source_document_id
         ]
         if missing_source_ids:
             raise ValueError(
@@ -82,7 +82,7 @@ def main() -> int:
                 + ", ".join(missing_source_ids)
                 + ". Run WBS 3.3 parse/chunk first."
             )
-        first_source_document_id = registry.by_source_id(args.source_id[0]).source_document_id
+        first_source_document_id = selected_sources_by_id[args.source_id[0]].source_document_id
         parsed_document_id = parsed_by_source_document_id[first_source_document_id].parsed_document_id
 
     filters = MetadataFilters(

@@ -27,6 +27,22 @@ _FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "interest_payment_frequency": ("paid monthly", "monthly", "interest is paid", "payment frequency"),
     "tiered_rate_flag": ("tiered", "tiers", "interest rate tiers"),
     "tier_definition_text": ("tier", "tiers", "balance range"),
+    "withdrawal_limit_text": ("withdrawal", "withdrawals", "debit transaction", "transaction limit"),
+    "registered_flag": ("tfsa", "rrsp", "registered"),
+    "term_length_text": ("term", "term length", "year term", "month term", "days"),
+    "term_length_days": ("term", "year", "month", "days"),
+    "redeemable_flag": ("redeemable", "cashable", "early redemption"),
+    "non_redeemable_flag": ("non-redeemable", "non redeemable", "non-cashable", "non cashable"),
+    "compounding_frequency": ("compounded", "compounding", "compound interest"),
+    "payout_option": ("paid monthly", "paid annually", "at maturity", "interest paid"),
+    "registered_plan_supported": ("tfsa", "rrsp", "rrif", "registered plan", "registered account"),
+    "included_transactions": ("transactions included", "debits included", "transactions per month", "free transactions"),
+    "unlimited_transactions_flag": ("unlimited transactions", "unlimited debits", "unlimited banking"),
+    "interac_e_transfer_included": ("interac e-transfer", "e-transfer included", "free e-transfer"),
+    "overdraft_available": ("overdraft", "overdraft protection"),
+    "cheque_book_info": ("cheque book", "cheques", "checks"),
+    "student_plan_flag": ("student", "student banking", "youth"),
+    "newcomer_plan_flag": ("newcomer", "new to canada"),
     "description_short": ("account", "savings", "earn", "designed for"),
     "notes": ("note", "additional information", "important", "conditions apply"),
 }
@@ -167,6 +183,28 @@ def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
     if "payment_frequency" in field_name and "monthly" in excerpt_text:
         return 0.18
     if "calculation_method" in field_name and "calculated" in excerpt_text:
+        return 0.18
+    if "term_length" in field_name and any(token in excerpt_text for token in ("term", "year", "month", "day")):
+        return 0.18
+    if "redeemable" in field_name and any(token in excerpt_text for token in ("redeemable", "cashable")):
+        return 0.18
+    if "compounding" in field_name and any(token in excerpt_text for token in ("compounded", "compound interest")):
+        return 0.18
+    if "payout_option" in field_name and any(token in excerpt_text for token in ("paid", "maturity", "interest paid")):
+        return 0.18
+    if "registered" in field_name and any(token in excerpt_text for token in ("tfsa", "rrsp", "rrif", "registered")):
+        return 0.18
+    if "transactions" in field_name and any(token in excerpt_text for token in ("transaction", "debit", "unlimited")):
+        return 0.18
+    if "transfer" in field_name and any(token in excerpt_text for token in ("e-transfer", "interac")):
+        return 0.18
+    if "overdraft" in field_name and "overdraft" in excerpt_text:
+        return 0.18
+    if "cheque" in field_name and any(token in excerpt_text for token in ("cheque", "check")):
+        return 0.18
+    if "student_plan_flag" in field_name and any(token in excerpt_text for token in ("student", "youth")):
+        return 0.18
+    if "newcomer_plan_flag" in field_name and any(token in excerpt_text for token in ("newcomer", "new to canada")):
         return 0.18
     return 0.05
 

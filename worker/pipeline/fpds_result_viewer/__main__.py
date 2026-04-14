@@ -5,6 +5,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from worker.discovery.fpds_discovery.catalog import load_all_registries
 from worker.discovery.fpds_discovery.registry import load_registry
 from worker.env import load_env_file, resolve_default_env_file
 
@@ -44,8 +45,12 @@ def main() -> int:
         loaded_env_keys = sorted(load_env_file(env_file, override=True).keys())
 
     repository = PsqlResultViewerRepository(ResultViewerDatabaseConfig.from_env())
-    registry = load_registry(args.registry_path)
-    source_id_by_document_id = {source.source_document_id: source.source_id for source in registry.sources}
+    registries = (load_registry(args.registry_path),) if args.registry_path is not None else load_all_registries()
+    source_id_by_document_id = {
+        source.source_document_id: source.source_id
+        for registry in registries
+        for source in registry.sources
+    }
     run_overview = repository.load_run_overview(run_id=args.run_id)
     candidate_rows = repository.load_candidate_rows(run_id=args.run_id)
     service = ResultViewerPayloadService()

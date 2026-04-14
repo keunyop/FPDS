@@ -1,0 +1,81 @@
+{
+  "catalog_version": "2026-04-13",
+  "country_code": "CA",
+  "registries": [
+    {
+      "bank_code": "RBC",
+      "product_type": "chequing",
+      "registry_path": "rbc_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "RBC",
+      "product_type": "savings",
+      "registry_path": "rbc_savings_source_registry.json"
+    },
+    {
+      "bank_code": "RBC",
+      "product_type": "gic",
+      "registry_path": "rbc_gic_source_registry.json"
+    },
+    {
+      "bank_code": "TD",
+      "product_type": "chequing",
+      "registry_path": "td_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "TD",
+      "product_type": "savings",
+      "registry_path": "td_savings_source_registry.json"
+    },
+    {
+      "bank_code": "TD",
+      "product_type": "gic",
+      "registry_path": "td_gic_source_registry.json"
+    },
+    {
+      "bank_code": "BMO",
+      "product_type": "chequing",
+      "registry_path": "bmo_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "BMO",
+      "product_type": "savings",
+      "registry_path": "bmo_savings_source_registry.json"
+    },
+    {
+      "bank_code": "BMO",
+      "product_type": "gic",
+      "registry_path": "bmo_gic_source_registry.json"
+    },
+    {
+      "bank_code": "SCOTIA",
+      "product_type": "chequing",
+      "registry_path": "scotia_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "SCOTIA",
+      "product_type": "savings",
+      "registry_path": "scotia_savings_source_registry.json"
+    },
+    {
+      "bank_code": "SCOTIA",
+      "product_type": "gic",
+      "registry_path": "scotia_gic_source_registry.json"
+    },
+    {
+      "bank_code": "CIBC",
+      "product_type": "chequing",
+      "registry_path": "cibc_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "CIBC",
+      "product_type": "savings",
+      "registry_path": "cibc_savings_source_registry.json"
+    },
+    {
+      "bank_code": "CIBC",
+      "product_type": "gic",
+      "registry_path": "cibc_gic_source_registry.json"
+    }
+  ]
+}

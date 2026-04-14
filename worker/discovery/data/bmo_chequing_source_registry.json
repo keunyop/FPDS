@@ -1,0 +1,116 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "bmo.com"
+  ],
+  "entry_source_id": "BMO-CHQ-001",
+  "sources": [
+    {
+      "source_id": "BMO-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "BMO personal chequing lineup entry and product discovery",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "summary_benefits",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Practical Chequing detail source",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "transaction_fee"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Plus Chequing detail source",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_savings_benefits"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Performance Chequing detail source",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Premium Chequing detail source",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "family_bundle_benefits"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO chequing and savings interest rates page",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+      "expected_fields": [
+        "account_interest_rates",
+        "chequing_account_list",
+        "savings_account_list"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO bank account terms and conditions",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+      "expected_fields": [
+        "terms_version",
+        "service_fee_terms",
+        "account_rules"
+      ]
+    }
+  ]
+}

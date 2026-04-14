@@ -69,8 +69,14 @@ class SourceRegistry:
         by_identity: dict[str, RegistrySource] = {}
         by_source_id: dict[str, RegistrySource] = {}
         for source in self.sources:
+            if source.identity in by_identity:
+                raise ValueError(f"Duplicate registry source identity: {source.identity}")
+            if source.source_id in by_source_id:
+                raise ValueError(f"Duplicate registry source id: {source.source_id}")
             by_identity[source.identity] = source
             by_source_id[source.source_id] = source
+        if self.entry_source_id not in by_source_id:
+            raise ValueError(f"Entry source id not found in registry: {self.entry_source_id}")
         object.__setattr__(self, "_by_identity", by_identity)
         object.__setattr__(self, "_by_source_id", by_source_id)
 

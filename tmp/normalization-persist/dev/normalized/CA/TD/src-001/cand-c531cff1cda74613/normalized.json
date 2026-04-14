@@ -9,7 +9,7 @@
   "parsed_document_id": "parsed-001",
   "extraction_model_execution_id": "modelexec-extract-001",
   "normalization_model_execution_id": "modelexec-87d2d4739eb6fabf",
-  "started_at": "2026-04-12T04:54:41.244614+00:00",
+  "started_at": "2026-04-14T04:22:27.841129+00:00",
   "normalized_candidate": {
     "candidate_id": "cand-c531cff1cda74613",
     "run_id": "run-001",
@@ -30,14 +30,14 @@
     "validation_issue_codes": [],
     "candidate_payload": {
       "status": "active",
-      "source_subtype_label": null,
-      "last_verified_at": "2026-04-12T04:54:41.244708+00:00",
+      "last_verified_at": "2026-04-14T04:22:27.841211+00:00",
       "bank_name": "TD Bank",
       "product_name": "TD ePremium Savings Account",
       "description_short": "High-interest savings account.",
       "monthly_fee": 0.0,
       "standard_rate": 1.25,
       "interest_payment_frequency": "monthly",
+      "source_subtype_label": null,
       "subtype_code": "high_interest",
       "target_customer_tags": [],
       "effective_date": null

@@ -95,15 +95,15 @@ Engineering conclusion:
 - The original `4.10` blocker was evidence quality, not missing product code.
 - The repo now has a concrete QA artifact for the Gate C requirement that operational scenario QA be performed.
 
-Remaining non-code step:
-- Product Owner still needs to review the Gate C note, confirm the admin or ops walkthrough is sufficient for acceptance, and record the formal go/no-go decision for starting `WBS 5`.
+Follow-on note:
+- Product Owner has approved Gate C and authorized `WBS 5` start. This QA artifact remains the supporting engineering evidence for that decision.
 
 ---
 
 ## 6. Recommendation
 
 - engineering readiness for `WBS 5`: `Ready`
-- formal stage transition to `WBS 5`: `Pending Product Owner Gate C approval`
+- formal stage transition to `WBS 5`: `Approved`
 
 ---
 
@@ -112,3 +112,4 @@ Remaining non-code step:
 | Date | Change |
 |---|---|
 | 2026-04-13 | Created the WBS 4 operational scenario QA summary and recorded the automated review-to-history verification slice |
+| 2026-04-13 | Updated the summary after Product Owner approved Gate C and WBS 5 start |

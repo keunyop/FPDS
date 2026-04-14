@@ -1,0 +1,86 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "cibc.com"
+  ],
+  "entry_source_id": "CIBC-SAV-001",
+  "sources": [
+    {
+      "source_id": "CIBC-SAV-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "CIBC personal savings lineup entry and product discovery",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "CIBC-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC eAdvantage Savings detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "regular_interest_rate",
+        "smart_interest_rate",
+        "transaction_fee"
+      ]
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC US Personal Account detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "regular_interest_rate",
+        "transaction_fee"
+      ]
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC personal bank account rates page",
+      "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "personal_account_rate_tables"
+      ]
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC eAdvantage interest rate terms page",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+      "expected_fields": [
+        "special_rate_rules",
+        "regular_interest_rules",
+        "bonus_interest_rules"
+      ]
+    }
+  ]
+}

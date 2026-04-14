@@ -1,0 +1,58 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "cibc.com"
+  ],
+  "entry_source_id": "CIBC-GIC-001",
+  "sources": [
+    {
+      "source_id": "CIBC-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "CIBC GIC overview and product family discovery",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics.html",
+      "expected_fields": [
+        "gic_types",
+        "special_rate_summary",
+        "detail_links",
+        "product_highlights"
+      ]
+    },
+    {
+      "source_id": "CIBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Flexible GIC detail source",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "interest_payment_rules"
+      ]
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Bonus Rate GIC detail source",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "rate_structure"
+      ]
+    }
+  ]
+}

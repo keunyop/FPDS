@@ -18,7 +18,7 @@ from .storage import NormalizationStorageConfig
 
 _ACTIVE_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 _SUBTYPE_REGISTRY = {
-    "chequing": {"standard", "student", "newcomer", "premium", "other"},
+    "chequing": {"standard", "package", "interest_bearing", "premium", "other"},
     "savings": {"standard", "high_interest", "youth", "foreign_currency", "other"},
     "gic": {"redeemable", "non_redeemable", "market_linked", "other"},
 }
@@ -316,19 +316,8 @@ def _normalize_candidate(
     product_name = _coalesce_string(_field_value(extracted_by_field, "product_name"))
     source_language = _coalesce_string(_field_value(extracted_by_field, "source_language"), item.source_language, "und")
     currency = _coalesce_string(_field_value(extracted_by_field, "currency"), "CAD")
-    subtype_code, source_subtype_label = _infer_subtype_code(
-        product_type=product_type,
-        currency=currency,
-        product_name=product_name,
-        description_short=_coalesce_string(_field_value(extracted_by_field, "description_short")),
-        notes=_coalesce_string(_field_value(extracted_by_field, "notes")),
-    )
-    if source_subtype_label is not None:
-        runtime_notes.append("Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.")
-
     candidate_payload: dict[str, object] = {
         "status": "active",
-        "source_subtype_label": source_subtype_label,
         "last_verified_at": _utc_now_iso(),
         "bank_name": _bank_name_for_code(bank_code),
         "product_name": product_name,
@@ -352,6 +341,14 @@ def _normalize_candidate(
             continue
         candidate_payload[field_name] = normalized_value
 
+    subtype_code, source_subtype_label = _infer_subtype_code(
+        product_type=product_type,
+        currency=currency,
+        candidate_payload=candidate_payload,
+    )
+    if source_subtype_label is not None:
+        runtime_notes.append("Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.")
+    candidate_payload["source_subtype_label"] = source_subtype_label
     candidate_payload["subtype_code"] = subtype_code
     field_mapping_metadata["subtype_code"] = {
         "normalized_value": subtype_code,
@@ -360,6 +357,10 @@ def _normalize_candidate(
         "source_subtype_label": source_subtype_label,
     }
     candidate_payload["target_customer_tags"] = _infer_target_customer_tags(candidate_payload)
+    if _truthy(candidate_payload.get("student_plan_flag")) or "student" in candidate_payload["target_customer_tags"]:
+        candidate_payload["student_plan_flag"] = True
+    if _truthy(candidate_payload.get("newcomer_plan_flag")) or "newcomer" in candidate_payload["target_customer_tags"]:
+        candidate_payload["newcomer_plan_flag"] = True
     candidate_payload["effective_date"] = _normalize_effective_date(candidate_payload.get("effective_date"), candidate_payload.get("notes"))
 
     validation_issue_codes = _compute_validation_issue_codes(
@@ -459,9 +460,29 @@ def _compute_validation_issue_codes(
         if field_name not in _RATE_FIELDS and decimal_value < 0:
             issues.append("invalid_numeric_range")
 
+    term_length_days = candidate_payload.get("term_length_days")
+    if term_length_days not in {None, ""}:
+        integer_value = _as_int(term_length_days)
+        if integer_value is None or integer_value < 1:
+            issues.append("invalid_term_value")
+
+    if product_type == "chequing":
+        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
+            issues.append("required_field_missing")
     if product_type == "savings":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
+    if product_type == "gic":
+        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+            issues.append("required_field_missing")
+        if candidate_payload.get("minimum_deposit") in {None, ""}:
+            issues.append("required_field_missing")
+        if candidate_payload.get("term_length_days") in {None, ""} and candidate_payload.get("term_length_text") in {None, ""}:
+            issues.append("required_field_missing")
+        if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
+            issues.append("inconsistent_cross_field_logic")
+        if candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
+            issues.append("inconsistent_cross_field_logic")
 
     conflicting_fields = defaultdict(set)
     for link in evidence_links:
@@ -472,7 +493,13 @@ def _compute_validation_issue_codes(
 
 
 def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
-    error_issue_codes = {"required_field_missing", "invalid_taxonomy_code", "invalid_numeric_range"}
+    error_issue_codes = {
+        "required_field_missing",
+        "invalid_taxonomy_code",
+        "invalid_numeric_range",
+        "invalid_term_value",
+        "inconsistent_cross_field_logic",
+    }
     if any(item in error_issue_codes for item in validation_issue_codes):
         return "error"
     if validation_issue_codes:
@@ -492,7 +519,16 @@ def _compute_source_confidence(
 ) -> float:
     required_values = [product_type, product_name, currency, candidate_payload.get("status"), candidate_payload.get("last_verified_at")]
     completeness = sum(1 for item in required_values if item not in {None, ""}) / len(required_values)
+    if product_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
+        completeness = min(1.0, completeness + 0.15)
     if product_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+        completeness = min(1.0, completeness + 0.15)
+    if (
+        product_type == "gic"
+        and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS)
+        and candidate_payload.get("minimum_deposit") not in {None, ""}
+        and any(candidate_payload.get(field_name) not in {None, ""} for field_name in ("term_length_days", "term_length_text"))
+    ):
         completeness = min(1.0, completeness + 0.15)
     evidence_average = sum(item.citation_confidence for item in evidence_links) / len(evidence_links) if evidence_links else 0.45
     evidence_coverage = min(1.0, len(evidence_links) / 8)
@@ -537,13 +573,15 @@ def _infer_subtype_code(
     *,
     product_type: str | None,
     currency: str | None,
-    product_name: str | None,
-    description_short: str | None,
-    notes: str | None,
+    candidate_payload: dict[str, object],
 ) -> tuple[str | None, str | None]:
     if product_type is None:
         return None, None
-    text = " ".join(item for item in [product_name, description_short, notes] if item).lower()
+    text = " ".join(
+        str(candidate_payload.get(field_name, ""))
+        for field_name in ("product_name", "description_short", "notes", "eligibility_text", "cheque_book_info")
+    ).lower()
+    product_name = _coalesce_string(candidate_payload.get("product_name"))
     if product_type == "savings":
         if currency and currency != "CAD":
             return "foreign_currency", None
@@ -553,20 +591,26 @@ def _infer_subtype_code(
             return "youth", None
         return "standard", None
     if product_type == "chequing":
-        if "student" in text:
-            return "student", None
-        if "newcomer" in text:
-            return "newcomer", None
-        if "premium" in text or "all-inclusive" in text:
+        if _has_positive_rate(candidate_payload):
+            return "interest_bearing", None
+        if any(token in text for token in ("premium", "vip", "ultimate", "signature", "all-inclusive", "all inclusive")):
             return "premium", None
+        included_transactions = _as_int(candidate_payload.get("included_transactions"))
+        if (
+            any(token in text for token in ("package", "bundle", "bundled"))
+            or _truthy(candidate_payload.get("unlimited_transactions_flag"))
+            or _truthy(candidate_payload.get("interac_e_transfer_included"))
+            or (included_transactions is not None and included_transactions >= 25)
+        ):
+            return "package", None
         return "standard", None
     if product_type == "gic":
         if "market linked" in text or "index linked" in text:
             return "market_linked", None
+        if "non-redeemable" in text or "non redeemable" in text or "non-cashable" in text or "non cashable" in text:
+            return "non_redeemable", None
         if "redeemable" in text:
             return "redeemable", None
-        if "non-redeemable" in text:
-            return "non_redeemable", None
         return "other", product_name
     return "other", product_name
 
@@ -574,9 +618,9 @@ def _infer_subtype_code(
 def _infer_target_customer_tags(candidate_payload: dict[str, object]) -> list[str]:
     tags: list[str] = []
     merged_text = " ".join(str(candidate_payload.get(field_name, "")) for field_name in ("product_name", "description_short", "notes", "eligibility_text")).lower()
-    if "student" in merged_text or "youth" in merged_text:
+    if "student" in merged_text or "youth" in merged_text or _truthy(candidate_payload.get("student_plan_flag")):
         tags.append("student")
-    if "newcomer" in merged_text:
+    if "newcomer" in merged_text or _truthy(candidate_payload.get("newcomer_plan_flag")):
         tags.append("newcomer")
     if "senior" in merged_text:
         tags.append("senior")
@@ -608,6 +652,9 @@ def _normalize_field_value(*, field_name: str, value: object, value_type: str) -
         if isinstance(value, bool):
             return value
         return str(value).strip().lower() == "true"
+    if value_type == "integer":
+        integer_value = _as_int(value)
+        return integer_value if integer_value is not None else None
     if value_type == "decimal":
         decimal_value = _as_decimal(value)
         return float(decimal_value) if decimal_value is not None else None
@@ -628,6 +675,13 @@ def _as_decimal(value: object) -> Decimal | None:
         return None
 
 
+def _as_int(value: object) -> int | None:
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
 def _coalesce_string(*values: object) -> str | None:
     for value in values:
         if value is None:
@@ -641,6 +695,22 @@ def _coalesce_string(*values: object) -> str | None:
 def _looks_like_language_code(value: str) -> bool:
     normalized = value.strip()
     return bool(re.fullmatch(r"[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?", normalized))
+
+
+def _truthy(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value in {None, ""}:
+        return False
+    return str(value).strip().lower() == "true"
+
+
+def _has_positive_rate(candidate_payload: dict[str, object]) -> bool:
+    for field_name in _RATE_FIELDS:
+        decimal_value = _as_decimal(candidate_payload.get(field_name))
+        if decimal_value is not None and decimal_value > 0:
+            return True
+    return False
 
 
 def _bank_name_for_code(bank_code: str | None) -> str | None:

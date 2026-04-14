@@ -5,7 +5,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from worker.discovery.fpds_discovery.registry import load_registry
+from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
 
 from .models import ValidationEvidenceLink, ValidationInput
@@ -58,8 +58,8 @@ def main() -> int:
         loaded_env_keys = sorted(load_env_file(env_file, override=True).keys())
 
     repository = PsqlValidationRoutingRepository(ValidationRoutingDatabaseConfig.from_env())
-    registry = load_registry(args.registry_path)
-    source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in args.source_id]
+    selected_sources_by_id = resolve_sources_by_id(args.source_id, registry_path=args.registry_path)
+    source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
     repository.ensure_ingestion_run(
         run_id=args.run_id,
         trigger_type=args.trigger_type,
@@ -76,7 +76,7 @@ def main() -> int:
     missing_source_ids = [
         source_id
         for source_id in args.source_id
-        if registry.by_source_id(source_id).source_document_id not in lookup_by_source_document_id
+        if selected_sources_by_id[source_id].source_document_id not in lookup_by_source_document_id
     ]
     if missing_source_ids:
         raise ValueError(
@@ -92,7 +92,7 @@ def main() -> int:
 
     inputs: list[ValidationInput] = []
     for source_id in args.source_id:
-        source_document_id = registry.by_source_id(source_id).source_document_id
+        source_document_id = selected_sources_by_id[source_id].source_document_id
         lookup = lookup_by_source_document_id[source_document_id]
         artifact = json.loads(object_store.get_object_bytes(object_key=lookup.normalized_storage_key).decode("utf-8"))
         inputs.append(

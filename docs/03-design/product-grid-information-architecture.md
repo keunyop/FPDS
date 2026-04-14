@@ -83,7 +83,7 @@ result summary row는 아래 정보를 포함한다.
 - clear filters action
 - dashboard sibling entry
 
-이 row는 dashboard KPI card를 대체하지 않는다.  
+이 row는 dashboard KPI card를 대체하지 않는다.
 grid summary는 탐색 상태 요약, dashboard metric은 시장 비교 요약으로 역할을 분리한다.
 
 ---
@@ -162,6 +162,17 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - exact click/state choreography는 `5.11`에서 결정한다.
 
 ---
+
+## 10.5 Aggregate Bucket Baseline
+
+The shared public aggregate vocabulary uses the following approved bucket boundaries:
+
+- `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`
+- `minimum_balance_bucket`: `none` for `<= 0 CAD`, `under_1000` for `< 1000 CAD`, `from_1000_to_4999` for `1000-4999.99 CAD`, `5000_plus` for `>= 5000 CAD`
+- `minimum_deposit_bucket`: `none` for `<= 0 CAD`, `under_500` for `< 500 CAD`, `from_500_to_4999` for `500-4999.99 CAD`, `5000_plus` for `>= 5000 CAD`
+- `term_bucket`: `under_1y` for `< 365 days`, `from_1y_to_3y` for `365-1095 days`, `over_3y` for `> 1095 days`
+
+These boundaries are the baseline for `5.6` aggregate projection generation and the shared filter vocabulary used by the later grid and dashboard APIs.
 
 ## 11. Follow-On Items
 

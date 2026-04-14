@@ -7,10 +7,14 @@ Prototype-first target:
 
 Current implementation slice:
 - `data/td_savings_source_registry.json` stores the approved 12-source TD savings registry seed.
+- `data/source_registry_catalog.json` now catalogs the approved Canada Big 5 source-registry baseline across `chequing`, `savings`, and `gic`.
 - `fpds_discovery/` contains URL normalization, deterministic source identity, controlled fetch validation, and discovery rules for entry-page detail discovery plus linked PDF discovery.
 - `fpds_snapshot/` contains snapshot capture, preflight drift checks, object key generation, storage adapters, checksum or fingerprint calculation, retry handling, and snapshot reuse logic.
 - `fpds_registry_refresh/` contains scheduled refresh artifact generation for candidate diffs and source drift review.
 - `tests/` contains offline fixtures and unit tests so discovery can be verified without live network access.
+
+Important boundary:
+- Big 5 registry coverage is now committed as a data baseline, but runnable offline discovery fixtures and the most mature discovery rules still live on the TD savings prototype slice.
 
 Operating policy:
 - `docs/03-design/source-registry-refresh-and-approval-policy.md` defines the registry operating baseline: keep an approved active registry, detect drift during preflight or scheduled refresh, and promote changes only after explicit approval.
@@ -25,6 +29,13 @@ python -m worker.discovery.fpds_discovery `
   --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account=worker/discovery/tests/fixtures/td_growth_detail.html" `
   --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates=worker/discovery/tests/fixtures/td_account_rates.html" `
   --page-html "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings=worker/discovery/tests/fixtures/td_fee_summary.html"
+```
+
+Run discovery against a different committed registry:
+
+```powershell
+python -m worker.discovery.fpds_discovery `
+  --registry-path worker/discovery/data/rbc_chequing_source_registry.json
 ```
 
 Run unit tests:
@@ -59,6 +70,7 @@ python -m worker.discovery.fpds_registry_refresh `
 
 Notes:
 - Discovery keeps the approved registry as the source of truth and treats out-of-registry or excluded flows as warnings instead of auto-expanding scope.
+- The registry catalog is the planning baseline for Canada Big 5 expansion. Bank-specific parser or discovery behavior can still be enriched in later slices without rewriting the `5.1` cutline.
 - Registry refresh strategy is approval-first: ingestion uses the active registry, while future refresh automation should produce candidate diffs instead of rewriting the active registry in place.
 - Snapshot capture now performs lightweight preflight drift checks by default before fetching and storing raw artifacts. Use `--skip-preflight-drift-check` only when intentionally bypassing that operator signal.
 - Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST` and `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS` env settings from the shared baseline.

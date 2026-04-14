@@ -1,0 +1,101 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-SAV-001",
+  "sources": [
+    {
+      "source_id": "RBC-SAV-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "RBC personal savings lineup entry and product discovery",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC High Interest Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_fee"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Day to Day Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/day-to-day-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_limit"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Enhanced Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/enhanced-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "tiered_interest_rules",
+        "transaction_limit"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC personal account rates and interest support page",
+      "url": "https://www.rbcroyalbank.com/rates/persacct.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "savings_rate_table"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC savings fees and options page",
+      "url": "https://www.rbcroyalbank.com/onlinebanking/servicech/disclosures/part2K.html",
+      "expected_fields": [
+        "transaction_fee",
+        "atm_fee_summary",
+        "statement_fee"
+      ]
+    }
+  ]
+}

@@ -44,10 +44,29 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "tier_definition_text",
     "withdrawal_limit_text",
     "registered_flag",
+    "term_length_text",
+    "term_length_days",
+    "redeemable_flag",
+    "non_redeemable_flag",
+    "compounding_frequency",
+    "payout_option",
+    "registered_plan_supported",
+    "included_transactions",
+    "unlimited_transactions_flag",
+    "interac_e_transfer_included",
+    "overdraft_available",
+    "cheque_book_info",
+    "student_plan_flag",
+    "newcomer_plan_flag",
     "notes",
 )
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _MONEY_RE = re.compile(r"\$\s?([0-9][0-9,]*(?:\.\d{1,2})?)")
+_TERM_RE = re.compile(
+    r"(?<!\d)(\d{1,3})\s*(?:-|\s)?\s*(day|days|month|months|year|years)\b"
+    r"(?:\s*(?:to|-)\s*(\d{1,3})\s*(?:-|\s)?\s*(day|days|month|months|year|years)\b)?",
+    re.IGNORECASE,
+)
 _WHITESPACE_RE = re.compile(r"\s+")
 
 
@@ -486,14 +505,41 @@ def _extract_candidate_value(
         percent = _extract_percent_value(text)
         return percent, "decimal", "heuristic_percent", {}
 
-    if field_name == "interest_payment_frequency":
+    if field_name == "included_transactions":
+        return _extract_included_transactions(text), "integer", "heuristic_transaction_count", {}
+
+    if field_name in {"interest_payment_frequency", "compounding_frequency"}:
         return _detect_frequency(lowered), "string", "heuristic_frequency", {}
 
     if field_name == "interest_calculation_method":
         return _find_sentence(text, ("calculated", "daily closing balance", "calculation")), "string", "heuristic_sentence", {}
 
-    if field_name in {"introductory_rate_flag", "tiered_rate_flag", "registered_flag"}:
+    if field_name == "term_length_text":
+        return _extract_term_length_text(text), "string", "heuristic_term_text", {}
+
+    if field_name == "term_length_days":
+        return _extract_term_length_days(text), "integer", "heuristic_term_days", {}
+
+    if field_name == "payout_option":
+        return _extract_payout_option(lowered), "string", "heuristic_payout_option", {}
+
+    if field_name in {
+        "introductory_rate_flag",
+        "tiered_rate_flag",
+        "registered_flag",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "registered_plan_supported",
+        "unlimited_transactions_flag",
+        "interac_e_transfer_included",
+        "overdraft_available",
+        "student_plan_flag",
+        "newcomer_plan_flag",
+    }:
         return _extract_boolean_flag(field_name=field_name, lowered=lowered, anchor_value=anchor_value), "boolean", "heuristic_flag", {}
+
+    if field_name == "cheque_book_info":
+        return _normalize_text(_find_sentence(text, ("cheque", "check", "cheque book")) or text)[:280], "string", "heuristic_text", {}
 
     if field_name in {
         "fee_waiver_condition",
@@ -599,6 +645,46 @@ def _extract_boolean_flag(*, field_name: str, lowered: str, anchor_value: str | 
         if any(token in lowered for token in ("tfsa", "rrsp", "registered")):
             return True
         return None
+    if field_name == "redeemable_flag":
+        if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
+            return False
+        if any(token in lowered for token in ("redeemable", "cashable", "early redemption")):
+            return True
+        return None
+    if field_name == "non_redeemable_flag":
+        if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
+            return True
+        if "redeemable" in lowered or "cashable" in lowered:
+            return False
+        return None
+    if field_name == "registered_plan_supported":
+        if any(token in lowered for token in ("tfsa", "rrsp", "rrif", "resp", "registered plan", "registered account")):
+            return True
+        return None
+    if field_name == "unlimited_transactions_flag":
+        if "unlimited" in lowered and any(token in lowered for token in ("transaction", "debit", "banking")):
+            return True
+        return None
+    if field_name == "interac_e_transfer_included":
+        if any(token in lowered for token in ("interac e-transfer", "interac e transfer", "e-transfer", "etransfer")) and any(
+            token in lowered for token in ("included", "free", "unlimited", "no fee", "waived")
+        ):
+            return True
+        return None
+    if field_name == "overdraft_available":
+        if "overdraft" in lowered or "overdraft" in anchor:
+            return True
+        return None
+    if field_name == "student_plan_flag":
+        if any(token in lowered for token in ("student", "youth")) or any(token in anchor for token in ("student", "youth")):
+            return True
+        return None
+    if field_name == "newcomer_plan_flag":
+        if any(token in lowered for token in ("newcomer", "new to canada")) or any(
+            token in anchor for token in ("newcomer", "new-to-canada")
+        ):
+            return True
+        return None
     return None
 
 
@@ -618,6 +704,41 @@ def _detect_frequency(lowered: str) -> str | None:
     return None
 
 
+def _extract_term_length_text(text: str) -> str | None:
+    match = _TERM_RE.search(text)
+    if match is None:
+        return None
+    start_value, start_unit, end_value, end_unit = match.groups()
+    normalized_start = f"{start_value} {_normalize_term_unit(start_unit)}"
+    if end_value and end_unit:
+        return f"{normalized_start} to {end_value} {_normalize_term_unit(end_unit)}"
+    return normalized_start
+
+
+def _extract_term_length_days(text: str) -> int | None:
+    match = _TERM_RE.search(text)
+    if match is None:
+        return None
+    start_value, start_unit, end_value, end_unit = match.groups()
+    if end_value or end_unit:
+        return None
+    return _convert_term_to_days(start_value, start_unit)
+
+
+def _extract_payout_option(lowered: str) -> str | None:
+    if "at maturity" in lowered:
+        return "at_maturity"
+    if "paid monthly" in lowered or "monthly interest" in lowered:
+        return "monthly"
+    if "paid quarterly" in lowered or "quarterly interest" in lowered:
+        return "quarterly"
+    if "semi-annually" in lowered or "paid semi-annually" in lowered:
+        return "semi-annually"
+    if "paid annually" in lowered or "annual interest" in lowered or "interest paid annually" in lowered:
+        return "annually"
+    return None
+
+
 def _find_sentence(text: str, keywords: tuple[str, ...]) -> str | None:
     normalized = _normalize_text(text)
     for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
@@ -625,6 +746,52 @@ def _find_sentence(text: str, keywords: tuple[str, ...]) -> str | None:
         if any(keyword in lowered for keyword in keywords):
             return raw_sentence
     return normalized if normalized else None
+
+
+def _extract_included_transactions(text: str) -> int | None:
+    lowered = text.lower()
+    if "unlimited" in lowered and any(token in lowered for token in ("transaction", "debit", "banking")):
+        return None
+    patterns = (
+        r"(?:includes?|included)\s+(\d{1,3})\s+(?:free\s+)?(?:transactions?|debits?|withdrawals?)",
+        r"(\d{1,3})\s+(?:free\s+)?(?:transactions?|debits?|withdrawals?)\s+(?:included|per month|a month)",
+        r"(\d{1,3})\s+(?:transactions?|debits?)\s+included",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, lowered)
+        if match is None:
+            continue
+        try:
+            return int(match.group(1))
+        except ValueError:
+            return None
+    return None
+
+
+def _normalize_term_unit(unit: str) -> str:
+    normalized = unit.lower()
+    if normalized.startswith("day"):
+        return "day" if normalized == "day" else "days"
+    if normalized.startswith("month"):
+        return "month" if normalized == "month" else "months"
+    if normalized.startswith("year"):
+        return "year" if normalized == "year" else "years"
+    return normalized
+
+
+def _convert_term_to_days(value: str, unit: str) -> int | None:
+    try:
+        integer_value = int(value)
+    except ValueError:
+        return None
+    normalized = unit.lower()
+    if normalized.startswith("day"):
+        return integer_value
+    if normalized.startswith("month"):
+        return integer_value * 30
+    if normalized.startswith("year"):
+        return integer_value * 365
+    return None
 
 
 def _normalize_text(value: str) -> str:

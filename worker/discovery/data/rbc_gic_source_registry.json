@@ -1,0 +1,57 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-GIC-001",
+  "sources": [
+    {
+      "source_id": "RBC-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "RBC GIC overview and family discovery",
+      "url": "https://www.rbcroyalbank.com/investments/gics.html",
+      "expected_fields": [
+        "product_family",
+        "gic_types",
+        "special_rate_summary",
+        "detail_links"
+      ]
+    },
+    {
+      "source_id": "RBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC GIC rates reference page",
+      "url": "https://www.rbcroyalbank.com/investments/gic-rates.html",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_redeemable_gic_rates",
+        "redeemable_gic_rates"
+      ]
+    },
+    {
+      "source_id": "RBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC guaranteed-return GIC family detail",
+      "url": "https://www.rbcroyalbank.com/investments/guaranteed-return-gics.html",
+      "expected_fields": [
+        "gic_categories",
+        "minimum_investment",
+        "term_options",
+        "cashability"
+      ]
+    }
+  ]
+}

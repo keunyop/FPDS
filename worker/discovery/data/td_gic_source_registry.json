@@ -1,0 +1,101 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "td.com"
+  ],
+  "entry_source_id": "TD-GIC-001",
+  "sources": [
+    {
+      "source_id": "TD-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "TD GIC overview and product family discovery",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic",
+      "expected_fields": [
+        "gic_types",
+        "special_rate_summary",
+        "term_summary",
+        "detail_links"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD GIC rates reference page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/gic-rates-canada",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_cashable_gic_rates",
+        "market_growth_gic_rates"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Special Offer GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/special-offer",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "rate_structure",
+        "cashability"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Non-Cashable GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/non-cashable-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "interest_payment_options",
+        "cashability"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Market Growth GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD Market Growth GIC rates page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic-rates",
+      "expected_fields": [
+        "product_variants",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ]
+    }
+  ]
+}

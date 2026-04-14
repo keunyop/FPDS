@@ -5,7 +5,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from worker.discovery.fpds_discovery.registry import load_registry
+from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 
@@ -112,8 +112,8 @@ def _load_contexts(
     args,
 ) -> list[ExtractionDocumentContext]:
     if args.source_id:
-        registry = load_registry(args.registry_path)
-        source_document_ids = [registry.by_source_id(source_id).source_document_id for source_id in args.source_id]
+        selected_sources_by_id = resolve_sources_by_id(args.source_id, registry_path=args.registry_path)
+        source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
         repository.ensure_ingestion_run(
             run_id=args.run_id,
             trigger_type=args.trigger_type,
@@ -129,7 +129,7 @@ def _load_contexts(
         missing_source_ids = [
             source_id
             for source_id in args.source_id
-            if registry.by_source_id(source_id).source_document_id not in context_by_source_document_id
+            if selected_sources_by_id[source_id].source_document_id not in context_by_source_document_id
         ]
         if missing_source_ids:
             raise ValueError(
@@ -140,7 +140,7 @@ def _load_contexts(
 
         contexts: list[ExtractionDocumentContext] = []
         for source_id in args.source_id:
-            source_document_id = registry.by_source_id(source_id).source_document_id
+            source_document_id = selected_sources_by_id[source_id].source_document_id
             context = context_by_source_document_id[source_document_id]
             contexts.append(
                 ExtractionDocumentContext(

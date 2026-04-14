@@ -1,0 +1,57 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "bmo.com"
+  ],
+  "entry_source_id": "BMO-GIC-001",
+  "sources": [
+    {
+      "source_id": "BMO-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "BMO GIC overview and product family discovery",
+      "url": "https://www.bmo.com/en-ca/main/personal/investments/gic/",
+      "expected_fields": [
+        "gic_types",
+        "special_rate_summary",
+        "fund_linked_gic_summary",
+        "detail_links"
+      ]
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO GIC rates reference page",
+      "url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+      "expected_fields": [
+        "gic_rate_table",
+        "term_options",
+        "rate_effective_date"
+      ]
+    },
+    {
+      "source_id": "BMO-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Progressive GIC detail source",
+      "url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+      "expected_fields": [
+        "product_name",
+        "return_structure",
+        "term_options",
+        "principal_protection"
+      ]
+    }
+  ]
+}

@@ -152,7 +152,7 @@ class SourceDiscoveryService:
             entry_source,
             selection_mode="entry_seed",
             discovery_status="selected",
-            discovery_notes=["Entry seed source for TD savings discovery."],
+            discovery_notes=[f"Entry seed source for {self.registry.bank_code} {self.registry.product_type} discovery."],
         )
 
         self._scan_entry_links(
@@ -252,7 +252,7 @@ class SourceDiscoveryService:
                     target_url=link.resolved_url,
                     normalized_target_url=link.normalized_url,
                     source_type=link.source_type,
-                    message="Entry page exposed a TD source that is not in the approved registry.",
+                    message="Entry page exposed a source that is not in the approved registry.",
                 )
                 warnings[warning.dedupe_key()] = warning
                 continue
@@ -296,7 +296,7 @@ class SourceDiscoveryService:
                     target_url=link.resolved_url,
                     normalized_target_url=link.normalized_url,
                     source_type=link.source_type,
-                    message="Linked PDF was not present in the approved TD savings registry.",
+                    message="Linked PDF was not present in the approved registry.",
                 )
                 warnings[warning.dedupe_key()] = warning
                 continue
@@ -381,7 +381,7 @@ class SourceDiscoveryService:
                 target_url=link.resolved_url,
                 normalized_target_url=link.normalized_url,
                 source_type=link.source_type,
-                message="Link resolved outside the approved TD public domain boundary.",
+                message="Link resolved outside the approved public domain boundary.",
             )
         return None
 

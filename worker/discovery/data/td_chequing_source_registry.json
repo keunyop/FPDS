@@ -1,0 +1,102 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "td.com"
+  ],
+  "entry_source_id": "TD-CHQ-001",
+  "sources": [
+    {
+      "source_id": "TD-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "TD personal chequing lineup entry and product discovery",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "summary_benefits",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "TD-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD All-Inclusive Banking Plan detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/all-inclusive-banking-plan",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ]
+    },
+    {
+      "source_id": "TD-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Unlimited Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/unlimited-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "atm_fee_summary"
+      ]
+    },
+    {
+      "source_id": "TD-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Every Day Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/every-day-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ]
+    },
+    {
+      "source_id": "TD-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Minimum Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/minimum-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ]
+    },
+    {
+      "source_id": "TD-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD bank account fee summary page",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges",
+      "expected_fields": [
+        "monthly_fee",
+        "atm_fee_summary",
+        "chequing_fee_table"
+      ]
+    }
+  ]
+}

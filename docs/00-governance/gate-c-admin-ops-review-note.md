@@ -2,7 +2,7 @@
 
 Version: 1.0
 Date: 2026-04-13
-Status: Pass Recommendation
+Status: Pass Approved
 Source Documents:
 - `docs/00-governance/stage-gate-checklist.md`
 - `docs/01-planning/WBS.md`
@@ -19,19 +19,19 @@ Source Documents:
 
 Gate: `Gate C`
 Review Date: `2026-04-13`
-Result: `Recommended Pass`
+Result: `Pass`
 Decision Owner: `Product Owner`
 
 Summary:
 - `WBS 4.1` through `4.9` already delivered the protected admin and ops runtime surfaces for login, review, trace, runs, change history, audit, and usage.
 - `WBS 4.10` is now closed by a dedicated operational scenario QA slice that verifies the main reviewer workflow across decision, history, audit, and run drilldowns.
 - The core Gate C implementation requirement is now satisfied in code and regression evidence: operators can authenticate, review a task, inspect evidence trace, apply a decision, and follow that decision into change history, audit chronology, run detail, and usage context.
-- The remaining gap is governance, not engineering: Product Owner still needs to record the final Gate C approval and confirm the acceptance walkthrough or demo is sufficient.
+- The Product Owner has now approved the stage transition and `WBS 5` start.
 
 Conclusion:
 - `WBS 4. Admin and Ops Core` is complete from an engineering delivery standpoint.
-- The recommended Gate C outcome is `Pass`.
-- `WBS 5` should remain formally blocked until Product Owner approval is recorded on this note.
+- The final Gate C outcome is `Pass`.
+- `WBS 5` is now the active stage.
 
 ---
 
@@ -67,13 +67,7 @@ Evidence:
 
 ## 4. Blocking Items
 
-There are no remaining engineering blockers that should keep Gate C open.
-
-Open governance item:
-
-| Item | Why It Still Matters |
-|---|---|
-| Product Owner approval and acceptance walkthrough | Gate C is a formal stage transition, so implementation completion alone should not automatically unlock `WBS 5` without recorded owner approval |
+There are no remaining engineering or governance blockers that keep Gate C open.
 
 ---
 
@@ -81,17 +75,16 @@ Open governance item:
 
 | Risk | Why It Is Acceptable for Gate C | Follow-Up Home |
 |---|---|---|
-| Acceptance evidence is stronger in automated QA than in a recorded live walkthrough | The protected admin shell, API routes, and regression evidence now cover the required operator path; a manual walkthrough remains an approval artifact rather than a product-code blocker | Product Owner Gate C sign-off |
+| Acceptance evidence is stronger in automated QA than in a recorded live walkthrough | The protected admin shell, API routes, and regression evidence now cover the required operator path; future walkthrough quality can improve without reopening Gate C | later operator demo or release readiness slices |
 | Admin and ops ergonomics can still improve after first internal usage | Gate C requires operational readiness, not final polish; the current shell already separates review, runs, changes, audit, and usage into stable protected routes | `WBS 5` and later operator feedback slices |
 
 ---
 
 ## 6. Follow-Up Actions
 
-1. Product Owner reviews this note and the QA summary.
-2. Product Owner records the final Gate C decision as `Pass` or `Deferred`.
-3. If approved, update milestone and stage-tracking documents to show `WBS 5` as the next active stage.
-4. If approval is deferred, keep `WBS 5` blocked and record the specific remaining acceptance concern.
+1. Start `WBS 5.2` chequing parser expansion against the committed Big 5 source-registry baseline.
+2. Add non-TD discovery or parser fixtures where bank-specific page structure differs from the TD prototype path.
+3. Keep source additions or removals inside the registry refresh approval flow instead of mutating the active baseline ad hoc.
 
 ---
 
@@ -104,19 +97,20 @@ As of `2026-04-13`, the Gate C review outcome is:
 - run, change, and audit drilldowns: `Ready`
 - usage observability: `Ready`
 - operational scenario QA: `Ready`
-- transition recommendation for `WBS 5`: `Ready after Product Owner approval`
-- final gate result: `Recommended Pass`
+- transition recommendation for `WBS 5`: `Approved`
+- final gate result: `Pass`
 
 ---
 
 ## 8. Approval Record
 
-Approved By: `Pending Product Owner`
+Approved By: `Product Owner`
+
+Approval Date: `2026-04-13`
 
 Note:
-- This document is a gate review note and recommendation, not yet the final approval record.
-- Engineering assessment recommends Gate C `Pass`.
-- Formal stage transition to `WBS 5` should happen only after Product Owner sign-off is recorded here and the milestone or roadmap status is updated accordingly.
+- Gate C is approved as `Pass`.
+- Formal stage transition to `WBS 5` is now recorded in the milestone, roadmap, WBS, and decision-log documents.
 
 ---
 
@@ -125,3 +119,4 @@ Note:
 | Date | Change |
 |---|---|
 | 2026-04-13 | Created the initial Gate C review note with a Pass recommendation based on completed WBS 4 implementation plus the operational scenario QA slice |
+| 2026-04-13 | Recorded Product Owner Gate C Pass approval and activated WBS 5 |

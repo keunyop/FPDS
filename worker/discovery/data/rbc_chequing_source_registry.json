@@ -1,0 +1,102 @@
+{
+  "registry_version": "2026-04-13",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-CHQ-001",
+  "sources": [
+    {
+      "source_id": "RBC-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "RBC personal chequing lineup entry and product discovery",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "summary_benefits",
+        "product_detail_links"
+      ]
+    },
+    {
+      "source_id": "RBC-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Day to Day Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/day-to-day-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_etransfer_support"
+      ]
+    },
+    {
+      "source_id": "RBC-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Advantage Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/advantage-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "atm_fee_summary"
+      ]
+    },
+    {
+      "source_id": "RBC-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Signature No Limit Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/signature-no-limit-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ]
+    },
+    {
+      "source_id": "RBC-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC VIP Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/vip-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_account_benefits"
+      ]
+    },
+    {
+      "source_id": "RBC-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC personal account rates and interest support page",
+      "url": "https://www.rbcroyalbank.com/rates/persacct.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "no_interest_accounts",
+        "rate_effective_date"
+      ]
+    }
+  ]
+}

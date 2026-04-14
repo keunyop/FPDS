@@ -274,25 +274,59 @@ Based on:
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 
-> 상태: `Blocked`
+> Approved Update 2026-04-13: `Now`
+> Product Owner approved WBS `5` start and WBS `5.1` is complete
+>
+> 상태: `Now`
 > 조건: Prototype 성공 + Admin/Ops Core 안정화 후 착수
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency | Due Date |
 |---|---|---|---|---|---|---|
-| 5.1 | Blocked | Big 5 source registry 완성 | RBC/TD/BMO/Scotiabank/CIBC source 목록 | AI/Data | 1.1.2 | 2026-04-17 |
-| 5.2 | Blocked | Chequing parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
-| 5.3 | Blocked | Savings parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
-| 5.4 | Blocked | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-27 |
-| 5.5 | Blocked | per-bank normalization rule 보강 | bank별 예외 처리 | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-04-30 |
-| 5.6 | Blocked | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 | 2026-04-22 |
-| 5.7 | Blocked | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
-| 5.8 | Blocked | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
-| 5.9 | Blocked | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
-| 5.10 | Blocked | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
-| 5.11 | Blocked | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 | 2026-05-04 |
-| 5.12 | Blocked | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |
-| 5.13 | Blocked | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |
-| 5.14 | Blocked | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 | 2026-05-07 |
+| 5.1 | Completed | Big 5 source registry 완성 | RBC/TD/BMO/Scotiabank/CIBC source 목록 | AI/Data | 1.1.2 | 2026-04-17 |
+| 5.2 | Completed | Chequing parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
+| 5.3 | Completed | Savings parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
+| 5.4 | Completed | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-27 |
+| 5.5 | Later | per-bank normalization rule 보강 | bank별 merge 규칙, edge-case 정리, 회귀 검증 | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-04-30 |
+| 5.6 | Completed | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 | 2026-04-22 |
+| 5.7 | Next | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
+| 5.8 | Next | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
+| 5.9 | Next | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
+| 5.10 | Next | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
+| 5.11 | Next | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 | 2026-05-04 |
+| 5.12 | Next | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |
+| 5.13 | Next | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |
+| 5.14 | Next | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 | 2026-05-07 |
+
+### 5.5 Scope Baseline
+
+`WBS 5.5`는 현재 Big 5 parser coverage를 실제 bank variation에 견디는 normalization 품질로 끌어올리는 hardening slice다.
+이 단계의 목적은 public API/UI 작업을 시작하기 전에, 은행별로 흩어진 공식 truth source와 wording 차이 때문에 생기는 canonical ambiguity를 reviewable한 규칙으로 줄이는 것이다.
+
+In scope:
+- bank/product matched supporting-source merge rules when official product truth is split across detail pages, rates pages, fee summaries, and governing PDFs
+- savings hardening for boosted or promotional qualification, zero-fee waiver suppression, tiering or withdrawal wording cleanup, and registered or eligibility field cleanup where evidence supports explicit canonical mapping
+- GIC hardening for term text interpretation, redeemable or non-redeemable conflict cleanup, payout or compounding normalization, and minimum-deposit interpretation where banks publish the same fact in different wording
+- targeted chequing follow-up only when a bank-specific normalization exception is required to keep the already-approved `5.2` behavior schema-aligned
+- targeted bank fixtures, normalization tests, and rerunnable representative samples for each newly added rule family
+- explicit deferral notes for cases that remain manual-review-only after the hardening pass
+
+Out of scope:
+- new source discovery expansion outside the approved registry refresh flow
+- public products API, dashboard API, Product Grid, Insight Dashboard, locale rollout, or responsive QA work from `5.6` to `5.14`
+- a broad generic multi-bank merge engine if explicit per-bank rules cover the approved Phase 1 edge cases more simply
+
+Verification baseline:
+- normalization and validation regression tests pass after each rule slice
+- representative bank fixtures or rerun samples show evidence-linked merged output instead of unexplained long-text carryover
+- remaining bank-specific gaps are written down as manual-review or later-slice follow-up items instead of being left implicit
+
+Done signal:
+- known Big 5 bank edge cases across the approved product types no longer rely only on TD prototype-specific merge behavior
+- the active per-bank exception set is small, explicit, evidence-grounded, and reviewer-readable
+- `5.6` public aggregate work can start without carrying unresolved normalization ambiguity as hidden scope
+
+Approved follow-up note:
+- on `2026-04-13`, the Product Owner explicitly deferred implementation of `5.5` so `5.6` aggregate dataset generation could proceed first
 
 ## WBS 6. BX-PF Publish Readiness and Release Hardening
 

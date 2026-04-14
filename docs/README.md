@@ -53,6 +53,7 @@ Status: Active Navigation Index
 주요 문서:
 - `plan.md`
 - `WBS.md`
+- `canada-big5-source-registry.md`
 - `td-savings-source-inventory.md`
 - `prototype-backlog.md`
 - `prototype-acceptance-checklist.md`
@@ -131,3 +132,4 @@ Status: Active Navigation Index
 | Date | Change |
 |---|---|
 | 2026-04-06 | Added root-level docs map and confirmed current folder classification is valid without file moves |
+| 2026-04-13 | Added the Canada Big 5 source registry baseline document to the planning index |
