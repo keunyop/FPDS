@@ -39,7 +39,8 @@ As of `2026-04-14`:
 - `WBS 5.6` aggregate dataset generation is now complete with persisted aggregate refresh snapshots plus projection, metric, ranking, and scatter source datasets for the approved public vocabulary
 - `WBS 5.7` public products API is now complete with anonymous `/api/public/products` and `/api/public/filters` routes backed by the latest successful aggregate projection snapshot, shared filter vocabulary, sort options, pagination, localized labels, and freshness metadata
 - `WBS 5.8` dashboard APIs are now complete with anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` routes that reuse the latest successful aggregate projection snapshot for request-time filtered summary, ranking, and scatter responses plus methodology and freshness context
-- `WBS 5.9` Product Grid UI is now complete with a live Next.js public package, a `/products` catalog route, sticky public filters, result-summary chips, product-type-aware cards, pagination, and a placeholder `/dashboard` sibling entry for the next slice
+- `WBS 5.9` Product Grid UI is now complete with a live Next.js public package, a `/products` catalog route, sticky public filters, result-summary chips, product-type-aware cards, and pagination
+- `WBS 5.10` Insight Dashboard UI is now complete with a live `/dashboard` route, KPI cards, ranking widgets, a comparative scatter view, and query-preserved sibling navigation back to `/products`
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -55,7 +56,7 @@ As of `2026-04-14`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
-- a first live `Next.js` public package under `app/public/` with `/products` as the new public Product Grid route plus a lightweight `/dashboard` placeholder route
+- a first live `Next.js` public package under `app/public/` with `/products` for the public Product Grid and `/dashboard` for the public Insight Dashboard
 - a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
@@ -131,7 +132,8 @@ Out of scope for the current FPDS build:
 - `WBS 4.10` operational scenario QA is now implemented and gives the repo a concrete Gate C QA artifact for the review-to-history operator path
 - `WBS 5.7` public products API is now implemented and gives the repo live anonymous `/api/public/products` and `/api/public/filters` endpoints with shared public filter vocabulary, pagination, sort support, localized labels, and snapshot freshness metadata
 - `WBS 5.8` dashboard APIs are now implemented and give the repo live anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` endpoints with request-time filtered summary, ranking, and scatter responses derived from the latest successful public aggregate snapshot
-- `WBS 5.9` Product Grid UI is now implemented and gives the repo a live `app/public` Next.js package with `/products`, shared public filters, type-aware product cards, pagination, and a placeholder `/dashboard` sibling route
+- `WBS 5.9` Product Grid UI is now implemented and gives the repo a live `app/public` Next.js package with `/products`, shared public filters, type-aware product cards, and pagination
+- `WBS 5.10` Insight Dashboard UI is now implemented and gives the repo a live `/dashboard` route with KPI cards, ranking widgets, a product-type-aware comparative chart, methodology/freshness notes, and sibling navigation that preserves public query scope
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
@@ -142,7 +144,7 @@ Out of scope for the current FPDS build:
 
 - prototype worker runtime implementation
 - `WBS 5` public experience work and Big 5 expansion slices
-- public dashboard, locale rollout, and responsive QA follow-on slices
+- locale rollout and responsive QA follow-on slices
 
 ### Not Started
 

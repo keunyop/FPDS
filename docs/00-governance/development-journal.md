@@ -1263,6 +1263,24 @@ Each entry should include:
   - passed in `app/public`
 - Known issues: the WinGet-installed `pnpm.exe` remains unusable in this environment and `corepack pnpm` still depends on blocked network access, so this fix restores a valid local package layout but does not resolve the host-level package-manager restriction itself. The placeholder `/dashboard` route still remains intentionally lightweight until `5.10`
 - Next step: implement `WBS 5.10` Insight Dashboard UI on top of the verified public package shell
+
+## 2026-04-14 - WBS 5.10 Insight Dashboard UI
+
+- WBS: `5.10`
+- Status: `done`
+- Goal: implement the public Insight Dashboard UI on top of the aggregate-backed dashboard APIs from `5.8`
+- Why now: `5.9` had already established the live public package, shared public filter vocabulary, and sibling route structure, so the next smallest meaningful slice was to turn `/dashboard` from a placeholder into a real market-insight surface
+- Outcome: replaced the placeholder `/dashboard` route with a live server-rendered dashboard page that reads the current public scope from the query string, fetches summary, ranking, scatter, and filter metadata in parallel, and renders KPI cards, bank/product-type breakdowns, ranking widgets, a comparative scatter view, and methodology/freshness notes. Added shared public-query parsing and href builders so `/products` and `/dashboard` preserve the same scope vocabulary and added active-state top navigation for the public app shell
+- Not done: this slice did not add the `5.11` cross-filter choreography beyond preserving and removing query-string scope, did not start the `5.12` locale rollout, and did not complete the `5.14` responsive QA sweep
+- Key files: `app/public/src/app/dashboard/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/lib/public-query.ts`, `app/public/src/lib/public-api.ts`, `app/public/src/app/products/page.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `README.md`, `app/public/README.md`, `docs/01-planning/WBS.md`
+- Decisions: reused the existing Product Grid query vocabulary instead of inventing dashboard-only filter keys. Kept scope adjustment on the Product Grid sibling route so `5.10` closes the dashboard surface without silently pulling `5.11` cross-filter choreography into the same slice. Left the `/` redirect unchanged so landing-route scope stays stable while public follow-on work is still in progress
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+- Known issues: the shell-level top navigation still switches between `/products` and `/dashboard` without preserving the current query string; the in-page sibling links do preserve scope. Locale-specific copy and full responsive QA remain follow-on work
+- Next step: implement `WBS 5.11` grid/dashboard cross-filter choreography so the public app can move between both surfaces without losing active scope
 ---
 
 ## 7. Change History
@@ -1309,3 +1327,4 @@ Each entry should include:
 | 2026-04-13 | Added the WBS 5.6 aggregate dataset generation entry, approved bucket baseline, and WBS 5.5 defer context |
 | 2026-04-14 | Added the combined WBS 5.7 and 5.8 public aggregate API implementation entry and verification results |
 | 2026-04-14 | Added the WBS 5.9 Product Grid UI implementation entry and verification results |
+| 2026-04-14 | Added the WBS 5.10 Insight Dashboard UI implementation entry and verification results |

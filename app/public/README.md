@@ -17,5 +17,5 @@ Current runtime:
 - a live Next.js public package now lives under `src/`
 - `/` redirects to `/products`
 - `/products` renders the `WBS 5.9` Product Grid UI against `GET /api/public/products` and `GET /api/public/filters`
-- `/dashboard` remains a lightweight placeholder until `WBS 5.10` implements the real dashboard UI
+- `/dashboard` now renders the `WBS 5.10` Insight Dashboard UI against `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, `GET /api/public/dashboard-scatter`, and `GET /api/public/filters`
 - the public app uses the same `radix-nova` style family as the admin app, but with a more relaxed public layout rhythm

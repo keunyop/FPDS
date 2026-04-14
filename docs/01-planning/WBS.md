@@ -291,7 +291,7 @@ Based on:
 | 5.7 | Completed | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
 | 5.8 | Completed | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
 | 5.9 | Completed | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
-| 5.10 | Next | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
+| 5.10 | Completed | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
 | 5.11 | Next | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 | 2026-05-04 |
 | 5.12 | Next | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |
 | 5.13 | Next | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |

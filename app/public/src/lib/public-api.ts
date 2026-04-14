@@ -70,6 +70,97 @@ export type PublicFiltersResponse = {
   freshness: PublicFreshness;
 };
 
+export type PublicDashboardMetric = {
+  metric_key: string;
+  label: string;
+  value: number | null;
+  unit: string;
+  scope_note: string | null;
+};
+
+export type PublicDashboardBreakdownItem = {
+  count: number;
+  share_percent: number;
+};
+
+export type PublicDashboardSummaryResponse = {
+  metrics: PublicDashboardMetric[];
+  breakdowns: {
+    products_by_bank: Array<
+      PublicDashboardBreakdownItem & {
+        bank_code: string;
+        bank_name: string;
+      }
+    >;
+    products_by_product_type: Array<
+      PublicDashboardBreakdownItem & {
+        product_type: string;
+        product_type_label: string;
+      }
+    >;
+  };
+  applied_filters: Record<string, unknown>;
+  freshness: PublicFreshness;
+};
+
+export type PublicDashboardRankingRow = {
+  rank: number;
+  product_id: string;
+  bank_code: string;
+  bank_name: string;
+  product_name: string;
+  product_type: string;
+  metric_value: number | null;
+  metric_unit: string;
+  last_changed_at: string | null;
+};
+
+export type PublicDashboardRankingWidget = {
+  ranking_key: string;
+  title: string;
+  metric_label: string;
+  items: PublicDashboardRankingRow[];
+  window_days?: number;
+};
+
+export type PublicDashboardRankingsResponse = {
+  widgets: PublicDashboardRankingWidget[];
+  availability_status: string;
+  insufficiency_note: string | null;
+  applied_filters: Record<string, unknown>;
+  freshness: PublicFreshness;
+};
+
+export type PublicDashboardScatterAxis = {
+  key: string;
+  label: string;
+  unit: string;
+};
+
+export type PublicDashboardScatterPoint = {
+  product_id: string;
+  bank_code: string;
+  bank_name: string;
+  product_name: string;
+  product_type: string;
+  x_value: number;
+  y_value: number;
+  highlight_badge_code: string | null;
+};
+
+export type PublicDashboardScatterResponse = {
+  chart_key: string | null;
+  title: string | null;
+  x_axis: PublicDashboardScatterAxis | null;
+  y_axis: PublicDashboardScatterAxis | null;
+  points: PublicDashboardScatterPoint[];
+  availability_status: string;
+  insufficiency_note: string | null;
+  methodology_note: string | null;
+  applied_filters: Record<string, unknown>;
+  freshness: PublicFreshness;
+};
+
 type PublicApiEnvelope<T> = {
   data: T;
 };
@@ -108,6 +199,18 @@ export async function fetchPublicFilters(searchParams: URLSearchParams): Promise
     applied_filters: payload.applied_filters,
     freshness: payload.freshness
   };
+}
+
+export async function fetchPublicDashboardSummary(searchParams: URLSearchParams): Promise<PublicDashboardSummaryResponse> {
+  return fetchPublicData<PublicDashboardSummaryResponse>("/api/public/dashboard-summary", searchParams);
+}
+
+export async function fetchPublicDashboardRankings(searchParams: URLSearchParams): Promise<PublicDashboardRankingsResponse> {
+  return fetchPublicData<PublicDashboardRankingsResponse>("/api/public/dashboard-rankings", searchParams);
+}
+
+export async function fetchPublicDashboardScatter(searchParams: URLSearchParams): Promise<PublicDashboardScatterResponse> {
+  return fetchPublicData<PublicDashboardScatterResponse>("/api/public/dashboard-scatter", searchParams);
 }
 
 async function fetchPublicData<T>(path: string, searchParams?: URLSearchParams): Promise<T> {

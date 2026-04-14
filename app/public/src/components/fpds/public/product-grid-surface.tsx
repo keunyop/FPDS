@@ -3,21 +3,8 @@ import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProduct, type PublicProductsResponse } from "@/lib/public-api";
+import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
-
-export type ProductGridPageFilters = {
-  locale: string;
-  bankCodes: string[];
-  productTypes: string[];
-  targetCustomerTags: string[];
-  feeBucket: string;
-  minimumBalanceBucket: string;
-  minimumDepositBucket: string;
-  termBucket: string;
-  sortBy: string;
-  sortOrder: "asc" | "desc";
-  page: number;
-};
 
 type ProductGridSurfaceProps = {
   apiUnavailable: boolean;
@@ -55,7 +42,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
               <Link href="/products">Retry Product Grid</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/dashboard">Open dashboard placeholder</Link>
+              <Link href="/dashboard">Open insight dashboard</Link>
             </Button>
           </div>
         </section>
@@ -69,7 +56,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   const showMinimumBalance = !gicOnly;
   const showMinimumDeposit = selectedProductTypes.size === 0 || selectedProductTypes.has("gic");
   const showTermBucket = gicOnly;
-  const dashboardHref = buildProductsHref(filters, { page: 1 }).replace("/products", "/dashboard");
+  const dashboardHref = buildPublicHref("/dashboard", filters);
   const pagination = buildPagination(products, filters);
   const scopeBankCount = filters.bankCodes.length || filterOptions.banks.length;
 
@@ -202,7 +189,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild variant="outline">
-                  <Link href={dashboardHref}>Open dashboard sibling</Link>
+                  <Link href={dashboardHref}>Open insight dashboard</Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link href="/products">Clear all filters</Link>
@@ -222,7 +209,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">No result</p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">No products matched the current filter scope.</h2>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                Clear the active chips or move to the dashboard sibling surface if you want a higher-level market view for
+                Clear the active chips or move to the insight dashboard if you want a higher-level market view for
                 this slice.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -230,7 +217,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
                   <Link href="/products">Clear filters</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href={dashboardHref}>Go to dashboard placeholder</Link>
+                  <Link href={dashboardHref}>Go to insight dashboard</Link>
                 </Button>
               </div>
             </section>
@@ -523,45 +510,7 @@ function buildPagination(products: PublicProductsResponse, filters: ProductGridP
 }
 
 function buildProductsHref(filters: ProductGridPageFilters, overrides: Partial<ProductGridPageFilters>) {
-  const next = { ...filters, ...overrides };
-  const params = new URLSearchParams();
-
-  if (next.locale !== "en") {
-    params.set("locale", next.locale);
-  }
-  for (const bankCode of next.bankCodes) {
-    params.append("bank_code", bankCode);
-  }
-  for (const productType of next.productTypes) {
-    params.append("product_type", productType);
-  }
-  for (const tag of next.targetCustomerTags) {
-    params.append("target_customer_tag", tag);
-  }
-  if (next.feeBucket) {
-    params.set("fee_bucket", next.feeBucket);
-  }
-  if (next.minimumBalanceBucket) {
-    params.set("minimum_balance_bucket", next.minimumBalanceBucket);
-  }
-  if (next.minimumDepositBucket) {
-    params.set("minimum_deposit_bucket", next.minimumDepositBucket);
-  }
-  if (next.termBucket) {
-    params.set("term_bucket", next.termBucket);
-  }
-  if (next.sortBy !== "default") {
-    params.set("sort_by", next.sortBy);
-  }
-  if (next.sortOrder !== "desc") {
-    params.set("sort_order", next.sortOrder);
-  }
-  if (next.page > 1) {
-    params.set("page", String(next.page));
-  }
-
-  const query = params.toString();
-  return query ? `/products?${query}` : "/products";
+  return buildPublicHref("/products", { ...filters, ...overrides });
 }
 
 function formatFreshnessLine(freshness: PublicProductsResponse["freshness"], locale: string) {
