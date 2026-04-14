@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-13`:
+As of `2026-04-14`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -37,6 +37,9 @@ As of `2026-04-13`:
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification
 - `WBS 5.4` GIC or term parser expansion is now complete with GIC-specific extraction fields, normalization-time term and cross-field validation alignment, and unit verification
 - `WBS 5.6` aggregate dataset generation is now complete with persisted aggregate refresh snapshots plus projection, metric, ranking, and scatter source datasets for the approved public vocabulary
+- `WBS 5.7` public products API is now complete with anonymous `/api/public/products` and `/api/public/filters` routes backed by the latest successful aggregate projection snapshot, shared filter vocabulary, sort options, pagination, localized labels, and freshness metadata
+- `WBS 5.8` dashboard APIs are now complete with anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` routes that reuse the latest successful aggregate projection snapshot for request-time filtered summary, ranking, and scatter responses plus methodology and freshness context
+- `WBS 5.9` Product Grid UI is now complete with a live Next.js public package, a `/products` catalog route, sticky public filters, result-summary chips, product-type-aware cards, pagination, and a placeholder `/dashboard` sibling entry for the next slice
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -52,11 +55,13 @@ As of `2026-04-13`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
+- a first live `Next.js` public package under `app/public/` with `/products` as the new public Product Grid route plus a lightweight `/dashboard` placeholder route
 - a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
 - a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface
 - a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
+- a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
 - a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish and health surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
@@ -124,16 +129,20 @@ Out of scope for the current FPDS build:
 - `WBS 4.8` LLM usage tracking is now implemented and gives operators a live `/admin/usage` dashboard API plus protected usage analysis route
 - `WBS 4.9` usage dashboard v1 is now implemented and adds richer provider or stage scoping, concentration summaries, and anomaly drilldowns on `/admin/usage`
 - `WBS 4.10` operational scenario QA is now implemented and gives the repo a concrete Gate C QA artifact for the review-to-history operator path
+- `WBS 5.7` public products API is now implemented and gives the repo live anonymous `/api/public/products` and `/api/public/filters` endpoints with shared public filter vocabulary, pagination, sort support, localized labels, and snapshot freshness metadata
+- `WBS 5.8` dashboard APIs are now implemented and give the repo live anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` endpoints with request-time filtered summary, ranking, and scatter responses derived from the latest successful public aggregate snapshot
+- `WBS 5.9` Product Grid UI is now implemented and gives the repo a live `app/public` Next.js package with `/products`, shared public filters, type-aware product cards, pagination, and a placeholder `/dashboard` sibling route
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
 - the first Next.js admin package baseline is now tracked in `app/admin/package.json`
+- the first Next.js public package baseline is now tracked in `app/public/package.json`
 
 ### In Progress
 
 - prototype worker runtime implementation
 - `WBS 5` public experience work and Big 5 expansion slices
-- public frontend package bootstrap
+- public dashboard, locale rollout, and responsive QA follow-on slices
 
 ### Not Started
 

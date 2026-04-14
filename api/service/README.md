@@ -1,8 +1,9 @@
-# FPDS Admin API Service
+# FPDS API Service
 
-This package is the first live admin runtime package for `WBS 4.1`, `4.2`, `4.3`, `4.4`, `4.5`, `4.6`, `4.7`, `4.8`, `4.9`, and the `WBS 4.10` operational scenario QA slice.
+This package is the live FastAPI runtime package for the completed admin slices through `WBS 4.10` plus the first public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
 
 Current scope:
+- anonymous public aggregate-backed product and dashboard read APIs
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - login, logout, and session introspection routes
@@ -20,6 +21,11 @@ Current scope:
 - bootstrap CLI for the first operator account
 
 Current routes:
+- `GET /api/public/products`
+- `GET /api/public/filters`
+- `GET /api/public/dashboard-summary`
+- `GET /api/public/dashboard-rankings`
+- `GET /api/public/dashboard-scatter`
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/logout`
 - `GET /api/admin/auth/session`
@@ -43,6 +49,7 @@ Apply the DB baseline in order:
 ```powershell
 psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
 ```
 
 Create the first operator account:
@@ -62,6 +69,9 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 
 ## Notes
 
+- Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.
+- The settings loader now reads both `FPDS_ALLOWED_PUBLIC_ORIGINS` and `FPDS_ALLOWED_ADMIN_ORIGINS`, and the live CORS middleware allows the combined origin set because the same FastAPI service now fronts both public and admin browser surfaces.
 - Passwords are hashed with Python's built-in `scrypt`.
 - The session cookie is still `fpds_admin_session` per the shared auth contract.
 - Login throttling is DB-backed with per-account lockout and recent-attempt checks.

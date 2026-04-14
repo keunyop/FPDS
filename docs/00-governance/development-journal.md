@@ -1203,6 +1203,66 @@ Each entry should include:
   - passed with line-ending warnings only
 - Known issues: `5.5` bank-specific normalization hardening is still deferred, so the aggregate rows now reflect the current canonical quality baseline rather than a future bank-exception-complete state
 - Next step: implement `WBS 5.7` public products API on top of `public_product_projection`
+
+## 2026-04-14 - WBS 5.7 and 5.8 Public Aggregate APIs
+
+- WBS: `5.7`, `5.8`
+- Status: `done`
+- Goal: expose the approved public product-grid and dashboard read APIs on top of the aggregate snapshot baseline from `5.6`
+- Why now: `5.6` had already created the public aggregate backing store, and the next approved slice was to make that data reachable through anonymous read-only APIs before public UI work starts
+- Outcome: added live `GET /api/public/products`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` routes to the FastAPI service. Added public query normalization, shared localized label helpers, latest-successful-snapshot freshness resolution, projection-backed filtering, public sort and pagination behavior, dashboard summary breakdowns, ranking priority rules, and product-type-aware scatter defaults plus empty-state notes. Also expanded the service config to load public CORS origins and added focused unit coverage for public products, filters, dashboard summary, rankings, scatter, and config parsing
+- Not done: this slice did not build the public Next.js UI routes, did not add per-scope precomputed dashboard snapshots beyond the existing `all_active_products` aggregate rows, and did not implement the deferred `5.5` bank-specific normalization hardening
+- Key files: `api/service/api_service/main.py`, `api/service/api_service/config.py`, `api/service/api_service/public_common.py`, `api/service/api_service/public_products.py`, `api/service/api_service/public_dashboard.py`, `api/service/tests/test_public_products.py`, `api/service/tests/test_public_dashboard.py`, `api/service/tests/test_config.py`, `api/public/README.md`, `api/service/README.md`, `docs/03-design/api-interface-contracts.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: implemented the Product Owner-approved `option 1` approach for `5.8`: dashboard APIs now derive request-time filtered results from the latest successful `public_product_projection` snapshot instead of waiting for precomputed dashboard rows for every possible filter scope. Kept the dashboard metric, ranking, and scatter vocabulary aligned to the approved docs while documenting this narrower implementation detail in the contract docs
+- Verification:
+  - `python -m py_compile api/service/api_service/public_common.py api/service/api_service/public_products.py api/service/api_service/public_dashboard.py api/service/api_service/main.py api/service/api_service/config.py api/service/tests/test_public_products.py api/service/tests/test_public_dashboard.py api/service/tests/test_config.py`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_public_products api.service.tests.test_public_dashboard api.service.tests.test_config`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_run_status api.service.tests.test_llm_usage`
+  - passed
+  - `$env:PYTHONPATH='api/service'; python -m unittest discover -s api/service/tests`
+  - passed
+  - `git diff --check`
+  - passed with line-ending warnings only
+- Known issues: because the current FastAPI app shares one global CORS middleware for both public and admin surfaces, the service currently allows the combined public/admin origin set with credentials enabled at the app level even though public routes remain anonymous and read-only. Also, dashboard responses are filtered at request time from `public_product_projection`, not from per-filter persisted dashboard scope rows
+- Next step: implement `WBS 5.9` Product Grid UI against the new public products and filters routes
+
+## 2026-04-14 - WBS 5.9 Product Grid UI
+
+- WBS: `5.9`
+- Status: `done`
+- Goal: turn the new public products and filters APIs into the first live public browsing surface
+- Why now: `5.7` and `5.8` had already closed the aggregate-backed public read APIs, so the next approved slice was to stand up the public Next.js package and render the Product Grid against those endpoints
+- Outcome: added a live `app/public` Next.js package with the approved `radix-nova` public theme layer, a `/products` route that parses shared public filters from the query string, server-fetches anonymous product and filter data, renders the approved heading/filter-summary/card-grid/pagination anatomy, and links to a lightweight `/dashboard` placeholder so the sibling navigation is not broken before `5.10`. The Product Grid now surfaces sticky filter controls, active-filter chips, product-type-aware metric emphasis, freshness messaging, empty-state handling, and paginated product cards for the current public aggregate scope
+- Not done: this slice did not implement the actual dashboard UI from `5.10`, did not add the `5.11` cross-filter choreography beyond preserving query-string scope, and did not start the `5.12` locale rollout or `5.14` responsive QA follow-on work
+- Key files: `app/public/package.json`, `app/public/src/app/layout.tsx`, `app/public/src/app/products/page.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/lib/public-api.ts`, `app/public/README.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: kept the public app as its own Next.js package under `app/public/` instead of mixing public routes into the admin package. Fetched global filter vocabulary separately from filtered product results so users can still expand multi-select scope instead of having the option list collapse to only the already-selected bank or product type. Left `/dashboard` intentionally lightweight so `5.9` closes the Product Grid without pretending that `5.10` dashboard behavior is already implemented
+- Verification:
+  - `corepack pnpm install`
+  - partially succeeded for `app/public` package contents but the local `pnpm` link step did not finish cleanly in this environment
+  - `node node_modules\\typescript\\bin\\tsc --noEmit`
+  - passed
+  - `node node_modules\\next\\dist\\bin\\next build`
+  - blocked because the local `pnpm` install did not finish creating the `next` binary link in `app/public/node_modules`
+- Known issues: the new public package typechecks, but a full Next.js production build could not be completed in this environment because repeated `pnpm install` attempts left `next` in a partial link state under `app/public/node_modules`. The placeholder `/dashboard` route exists only to keep sibling navigation working until `5.10`
+- Next step: implement `WBS 5.10` Insight Dashboard UI on top of the existing public dashboard APIs and the new public package shell
+
+## 2026-04-14 - WBS 5.9 build verification follow-up
+
+- WBS: `5.9`
+- Status: `done`
+- Goal: finish the blocked production-build verification for the new public package without changing approved Product Grid scope
+- Outcome: repaired `app/public` so it now uses a fully local pnpm-style `node_modules` layout rooted inside `app/public/node_modules` instead of the earlier broken partial install or cross-package junction workaround. Also tightened `app/public/tsconfig.json` to exclude backup `node_modules.*` folders from typecheck scope
+- Key files: `app/public/tsconfig.json`, `docs/00-governance/development-journal.md`
+- Decisions: kept the product code unchanged and treated this as an environment recovery slice. Because the local `pnpm.exe` shim returned access-denied and `corepack pnpm` could not reach the npm registry in this restricted environment, rebuilt the public package's pnpm junction structure from the already-working `app/admin/node_modules` layout so every junction target resolves inside `app/public/node_modules`
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+- Known issues: the WinGet-installed `pnpm.exe` remains unusable in this environment and `corepack pnpm` still depends on blocked network access, so this fix restores a valid local package layout but does not resolve the host-level package-manager restriction itself. The placeholder `/dashboard` route still remains intentionally lightweight until `5.10`
+- Next step: implement `WBS 5.10` Insight Dashboard UI on top of the verified public package shell
 ---
 
 ## 7. Change History
@@ -1247,3 +1307,5 @@ Each entry should include:
 | 2026-04-13 | Added the combined WBS 5.3 and 5.4 savings and GIC parser expansion entry and verification results |
 | 2026-04-13 | Added the WBS 5.5 normalization hardening baseline entry and clarified its scope boundary in the WBS |
 | 2026-04-13 | Added the WBS 5.6 aggregate dataset generation entry, approved bucket baseline, and WBS 5.5 defer context |
+| 2026-04-14 | Added the combined WBS 5.7 and 5.8 public aggregate API implementation entry and verification results |
+| 2026-04-14 | Added the WBS 5.9 Product Grid UI implementation entry and verification results |

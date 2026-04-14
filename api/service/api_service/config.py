@@ -63,8 +63,11 @@ def _read_required(key: str) -> str:
 class Settings:
     env: str
     database_url: str
+    public_web_origin: str
     admin_web_origin: str
+    public_api_origin: str
     admin_api_origin: str
+    allowed_public_origins: tuple[str, ...]
     allowed_admin_origins: tuple[str, ...]
     request_id_header: str
     session_cookie_name: str
@@ -95,6 +98,13 @@ class Settings:
             for origin in os.getenv("FPDS_ALLOWED_ADMIN_ORIGINS", "").split(",")
             if origin.strip()
         )
+        allowed_public_origins = tuple(
+            origin.strip()
+            for origin in os.getenv("FPDS_ALLOWED_PUBLIC_ORIGINS", "").split(",")
+            if origin.strip()
+        )
+        if not allowed_public_origins:
+            allowed_public_origins = (_read_required("FPDS_PUBLIC_WEB_ORIGIN"),)
         if not allowed_admin_origins:
             allowed_admin_origins = (_read_required("FPDS_ADMIN_WEB_ORIGIN"),)
 
@@ -105,8 +115,11 @@ class Settings:
         return cls(
             env=os.getenv("FPDS_ENV", "dev"),
             database_url=_read_required("FPDS_DATABASE_URL"),
+            public_web_origin=_read_required("FPDS_PUBLIC_WEB_ORIGIN"),
             admin_web_origin=_read_required("FPDS_ADMIN_WEB_ORIGIN"),
+            public_api_origin=_read_required("FPDS_PUBLIC_API_ORIGIN"),
             admin_api_origin=_read_required("FPDS_ADMIN_API_ORIGIN"),
+            allowed_public_origins=allowed_public_origins,
             allowed_admin_origins=allowed_admin_origins,
             request_id_header=os.getenv("FPDS_REQUEST_ID_HEADER", "x-request-id"),
             session_cookie_name=SESSION_COOKIE_NAME,

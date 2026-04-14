@@ -288,9 +288,9 @@ Based on:
 | 5.4 | Completed | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-27 |
 | 5.5 | Later | per-bank normalization rule 보강 | bank별 merge 규칙, edge-case 정리, 회귀 검증 | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-04-30 |
 | 5.6 | Completed | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 | 2026-04-22 |
-| 5.7 | Next | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
-| 5.8 | Next | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
-| 5.9 | Next | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
+| 5.7 | Completed | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
+| 5.8 | Completed | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
+| 5.9 | Completed | Product Grid UI 구현 | public catalog 화면 | Frontend | 1.7.1, 5.7 | 2026-04-30 |
 | 5.10 | Next | Insight Dashboard UI 구현 | KPI, ranking, scatter 화면 | Frontend | 1.7.2, 5.8 | 2026-05-01 |
 | 5.11 | Next | grid/dashboard cross-filter 적용 | 필터 상태 공유 | Frontend | 5.9, 5.10 | 2026-05-04 |
 | 5.12 | Next | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |

@@ -15,8 +15,11 @@ class SettingsTests(unittest.TestCase):
             "\n".join(
                 [
                     "FPDS_DATABASE_URL=postgres://user:pass@localhost:5432/fpds",
+                    "FPDS_PUBLIC_WEB_ORIGIN=http://localhost:3000",
                     "FPDS_ADMIN_WEB_ORIGIN=http://localhost:3001",
+                    "FPDS_PUBLIC_API_ORIGIN=http://localhost:4000",
                     "FPDS_ADMIN_API_ORIGIN=http://localhost:4000",
+                    "FPDS_ALLOWED_PUBLIC_ORIGINS=http://localhost:3000,http://127.0.0.1:3000",
                     "FPDS_ALLOWED_ADMIN_ORIGINS=http://localhost:3001,http://127.0.0.1:3001",
                     "FPDS_ADMIN_SESSION_SECRET=dev-secret",
                     "FPDS_ADMIN_CSRF_SECRET=csrf-secret",
@@ -36,7 +39,10 @@ class SettingsTests(unittest.TestCase):
             os.environ.clear()
             os.environ.update(previous)
 
+        self.assertEqual(settings.public_web_origin, "http://localhost:3000")
         self.assertEqual(settings.admin_web_origin, "http://localhost:3001")
+        self.assertEqual(settings.public_api_origin, "http://localhost:4000")
+        self.assertEqual(settings.allowed_public_origins, ("http://localhost:3000", "http://127.0.0.1:3000"))
         self.assertEqual(settings.allowed_admin_origins, ("http://localhost:3001", "http://127.0.0.1:3001"))
         self.assertFalse(settings.cookie_secure)
         self.assertEqual(settings.cookie_same_site, "lax")
@@ -53,5 +59,7 @@ class SettingsTests(unittest.TestCase):
             os.environ.clear()
             os.environ.update(previous)
 
+        self.assertEqual(settings.public_web_origin, "http://localhost:3000")
         self.assertEqual(settings.admin_web_origin, "http://localhost:3001")
+        self.assertEqual(settings.public_api_origin, "http://localhost:4000")
         self.assertEqual(settings.admin_api_origin, "http://localhost:4000")

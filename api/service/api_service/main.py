@@ -19,6 +19,19 @@ from api_service.db import open_connection
 from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
 from api_service.models import LoginRequest
 from api_service.models import ReviewDecisionRequest
+from api_service.public_dashboard import (
+    SUPPORTED_AXIS_PRESETS,
+    load_public_dashboard_rankings,
+    load_public_dashboard_scatter,
+    load_public_dashboard_summary,
+    normalize_public_dashboard_query,
+)
+from api_service.public_products import (
+    PRODUCT_SORT_OPTIONS,
+    load_public_filters,
+    load_public_products,
+    normalize_public_products_query,
+)
 from api_service.review_detail import (
     ReviewRequestContext,
     ReviewTaskError,
@@ -39,15 +52,24 @@ def _request_ip(request: Request) -> str | None:
     return None
 
 
-def _meta(request: Request) -> dict[str, Any]:
-    return {
+def _meta(request: Request, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = {
         "request_id": request.state.request_id,
         "generated_at": request.state.generated_at,
     }
+    if extra:
+        payload.update(extra)
+    return payload
 
 
-def _success(data: dict[str, Any], request: Request, status_code: int = 200) -> JSONResponse:
-    return JSONResponse(status_code=status_code, content={"data": data, "meta": _meta(request)})
+def _success(
+    data: dict[str, Any],
+    request: Request,
+    status_code: int = 200,
+    *,
+    meta_extra: dict[str, Any] | None = None,
+) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"data": data, "meta": _meta(request, extra=meta_extra)})
 
 
 def _error(*, status_code: int, code: str, message: str, request: Request) -> JSONResponse:
@@ -133,7 +155,7 @@ async def unhandled_error_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(settings.allowed_admin_origins),
+    allow_origins=sorted({*settings.allowed_public_origins, *settings.allowed_admin_origins}),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
@@ -240,6 +262,191 @@ async def session(request: Request) -> JSONResponse:
         },
         request,
     )
+
+
+@app.get("/api/public/products")
+async def public_products(
+    request: Request,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+    bank_code: Annotated[list[str] | None, Query()] = None,
+    product_type: Annotated[list[str] | None, Query()] = None,
+    subtype_code: Annotated[list[str] | None, Query()] = None,
+    target_customer_tag: Annotated[list[str] | None, Query()] = None,
+    fee_bucket: str | None = None,
+    minimum_balance_bucket: str | None = None,
+    minimum_deposit_bucket: str | None = None,
+    term_bucket: str | None = None,
+    sort_by: str = "default",
+    sort_order: Literal["asc", "desc"] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> JSONResponse:
+    query = normalize_public_products_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=bank_code,
+        product_types=product_type,
+        subtype_codes=subtype_code,
+        target_customer_tags=target_customer_tag,
+        fee_bucket=fee_bucket,
+        minimum_balance_bucket=minimum_balance_bucket,
+        minimum_deposit_bucket=minimum_deposit_bucket,
+        term_bucket=term_bucket,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_products(connection, query=query)
+    return _success(
+        payload,
+        request,
+        meta_extra={
+            "locale": query.filters.locale,
+            "page": payload["page"],
+            "page_size": payload["page_size"],
+            "total_items": payload["total_items"],
+        },
+    )
+
+
+@app.get("/api/public/filters")
+async def public_filters(
+    request: Request,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+    bank_code: Annotated[list[str] | None, Query()] = None,
+    product_type: Annotated[list[str] | None, Query()] = None,
+    subtype_code: Annotated[list[str] | None, Query()] = None,
+    target_customer_tag: Annotated[list[str] | None, Query()] = None,
+    fee_bucket: str | None = None,
+    minimum_balance_bucket: str | None = None,
+    minimum_deposit_bucket: str | None = None,
+    term_bucket: str | None = None,
+) -> JSONResponse:
+    filters = normalize_public_products_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=bank_code,
+        product_types=product_type,
+        subtype_codes=subtype_code,
+        target_customer_tags=target_customer_tag,
+        fee_bucket=fee_bucket,
+        minimum_balance_bucket=minimum_balance_bucket,
+        minimum_deposit_bucket=minimum_deposit_bucket,
+        term_bucket=term_bucket,
+        sort_by="default",
+        sort_order="desc",
+        page=1,
+        page_size=20,
+    ).filters
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_filters(connection, filters=filters)
+    return _success(payload, request, meta_extra={"locale": filters.locale})
+
+
+@app.get("/api/public/dashboard-summary")
+async def public_dashboard_summary(
+    request: Request,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+    bank_code: Annotated[list[str] | None, Query()] = None,
+    product_type: Annotated[list[str] | None, Query()] = None,
+    subtype_code: Annotated[list[str] | None, Query()] = None,
+    target_customer_tag: Annotated[list[str] | None, Query()] = None,
+    fee_bucket: str | None = None,
+    minimum_balance_bucket: str | None = None,
+    minimum_deposit_bucket: str | None = None,
+    term_bucket: str | None = None,
+) -> JSONResponse:
+    query = normalize_public_dashboard_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=bank_code,
+        product_types=product_type,
+        subtype_codes=subtype_code,
+        target_customer_tags=target_customer_tag,
+        fee_bucket=fee_bucket,
+        minimum_balance_bucket=minimum_balance_bucket,
+        minimum_deposit_bucket=minimum_deposit_bucket,
+        term_bucket=term_bucket,
+        axis_preset=None,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_dashboard_summary(connection, query=query)
+    return _success(payload, request, meta_extra={"locale": query.filters.locale})
+
+
+@app.get("/api/public/dashboard-rankings")
+async def public_dashboard_rankings(
+    request: Request,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+    bank_code: Annotated[list[str] | None, Query()] = None,
+    product_type: Annotated[list[str] | None, Query()] = None,
+    subtype_code: Annotated[list[str] | None, Query()] = None,
+    target_customer_tag: Annotated[list[str] | None, Query()] = None,
+    fee_bucket: str | None = None,
+    minimum_balance_bucket: str | None = None,
+    minimum_deposit_bucket: str | None = None,
+    term_bucket: str | None = None,
+) -> JSONResponse:
+    query = normalize_public_dashboard_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=bank_code,
+        product_types=product_type,
+        subtype_codes=subtype_code,
+        target_customer_tags=target_customer_tag,
+        fee_bucket=fee_bucket,
+        minimum_balance_bucket=minimum_balance_bucket,
+        minimum_deposit_bucket=minimum_deposit_bucket,
+        term_bucket=term_bucket,
+        axis_preset=None,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_dashboard_rankings(connection, query=query)
+    return _success(payload, request, meta_extra={"locale": query.filters.locale})
+
+
+@app.get("/api/public/dashboard-scatter")
+async def public_dashboard_scatter(
+    request: Request,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+    bank_code: Annotated[list[str] | None, Query()] = None,
+    product_type: Annotated[list[str] | None, Query()] = None,
+    subtype_code: Annotated[list[str] | None, Query()] = None,
+    target_customer_tag: Annotated[list[str] | None, Query()] = None,
+    fee_bucket: str | None = None,
+    minimum_balance_bucket: str | None = None,
+    minimum_deposit_bucket: str | None = None,
+    term_bucket: str | None = None,
+    axis_preset: str | None = None,
+) -> JSONResponse:
+    query = normalize_public_dashboard_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=bank_code,
+        product_types=product_type,
+        subtype_codes=subtype_code,
+        target_customer_tags=target_customer_tag,
+        fee_bucket=fee_bucket,
+        minimum_balance_bucket=minimum_balance_bucket,
+        minimum_deposit_bucket=minimum_deposit_bucket,
+        term_bucket=term_bucket,
+        axis_preset=axis_preset,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_dashboard_scatter(connection, query=query)
+    return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 
 @app.get("/api/admin/review-tasks")

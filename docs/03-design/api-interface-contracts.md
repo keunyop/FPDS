@@ -243,7 +243,8 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 
 목적:
 - KPI cards와 freshness note를 제공한다.
-- backing dataset은 `dashboard_metric_snapshot`이다.
+- serving baseline은 latest successful public aggregate snapshot이다.
+- 구현은 persisted `dashboard_metric_snapshot` freshness vocabulary를 유지하되, request scope가 precomputed dashboard scope보다 더 좁을 때는 latest successful `public_product_projection`에서 filtered summary를 재계산할 수 있다.
 - exact metric semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.metrics[]` baseline:
@@ -267,7 +268,8 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 
 목적:
 - ranking widget dataset을 제공한다.
-- backing dataset은 `dashboard_ranking_snapshot`이다.
+- serving baseline은 latest successful public aggregate snapshot이다.
+- 구현은 persisted `dashboard_ranking_snapshot` catalog vocabulary를 유지하되, shared filter vocabulary를 반영하기 위해 latest successful `public_product_projection`에서 filtered ranking을 재계산할 수 있다.
 - exact ranking semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.widgets[]` baseline:
@@ -295,7 +297,8 @@ ranked row baseline:
 
 목적:
 - comparative scatter plot dataset을 제공한다.
-- backing dataset은 `dashboard_scatter_snapshot`이다.
+- serving baseline은 latest successful public aggregate snapshot이다.
+- 구현은 persisted `dashboard_scatter_snapshot` preset vocabulary를 유지하되, shared filter vocabulary를 반영하기 위해 latest successful `public_product_projection`에서 filtered scatter points를 재계산할 수 있다.
 - exact preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 추가 query:
