@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { RunStatusSurface, type RunStatusPageFilters } from "@/components/fpds/admin/run-status-surface";
 import { fetchAdminSession, fetchRunStatusList, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
 
@@ -14,6 +15,7 @@ const DEFAULT_STATES = ["started", "completed", "failed"];
 
 export default async function RunStatusPage({ searchParams }: RunStatusPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
 
@@ -31,11 +33,11 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
   }
 
   if (!session && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/runs");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/runs", new URLSearchParams(), locale))}`);
   }
 
   if (session && !runs && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/runs");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/runs", new URLSearchParams(), locale))}`);
   }
 
   if (!session || !runs || apiUnavailable) {
@@ -61,6 +63,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,
@@ -68,7 +71,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
         role: session.user.role,
       }}
     >
-      <RunStatusSurface filters={filters} runs={runs} />
+      <RunStatusSurface filters={filters} locale={locale} runs={runs} />
     </ApplicationShell5>
   );
 }

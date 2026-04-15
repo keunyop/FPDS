@@ -6,6 +6,7 @@ import { Banner1 } from "@/components/banner1";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
+import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 const RUN_STATES = ["started", "completed", "failed", "retried"] as const;
@@ -26,9 +27,10 @@ export type RunStatusPageFilters = {
 type RunStatusSurfaceProps = {
   filters: RunStatusPageFilters;
   runs: RunStatusListResponse;
+  locale: AdminLocale;
 };
 
-export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
+export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProps) {
   const stateCounts = runs.summary.state_counts;
   const runTypeOptions = Array.from(new Set([...COMMON_RUN_TYPES, ...Object.keys(runs.summary.run_type_counts)])).sort();
   const statItems = [
@@ -110,15 +112,15 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild size="sm" variant="outline">
-              <Link href="/admin/runs">Default runs</Link>
+              <Link href={buildAdminHref("/admin/runs", new URLSearchParams(), locale)}>Default runs</Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={buildRunHref(filters, { states: [...RUN_STATES], page: 1 })}>All states</Link>
+              <Link href={buildRunHref(filters, { states: [...RUN_STATES], page: 1 }, locale)}>All states</Link>
             </Button>
           </div>
         </div>
 
-        <form action="/admin/runs" className="mt-6 grid gap-5">
+        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
           <div className="grid gap-4 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">Search</span>
@@ -234,7 +236,7 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
             <div className="flex items-end gap-2">
               <Button type="submit">Apply filters</Button>
               <Button asChild variant="outline">
-                <Link href="/admin/runs">Reset</Link>
+                <Link href={buildAdminHref("/admin/runs", new URLSearchParams(), locale)}>Reset</Link>
               </Button>
             </div>
           </div>
@@ -309,7 +311,7 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
                     <tr className="align-top" key={item.run_id}>
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-1">
-                          <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={`/admin/runs/${item.run_id}`}>
+                          <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
                             {item.run_id}
                           </Link>
                           <span className="text-xs text-muted-foreground">Trigger {toTitleCase(item.trigger_type)}</span>
@@ -368,8 +370,8 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/admin/runs/${item.run_id}`}>Open detail</Link>
+                          <Button asChild size="sm" variant="outline">
+                            <Link href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>Open detail</Link>
                         </Button>
                       </td>
                     </tr>
@@ -385,7 +387,7 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
               <div className="flex items-center gap-2">
                 {runs.page > 1 ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link href={buildRunHref(filters, { page: Math.max(1, runs.page - 1) })}>Previous</Link>
+                    <Link href={buildRunHref(filters, { page: Math.max(1, runs.page - 1) }, locale)}>Previous</Link>
                   </Button>
                 ) : (
                   <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
@@ -394,7 +396,7 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
                 )}
                 {runs.has_next_page ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link href={buildRunHref(filters, { page: runs.page + 1 })}>Next</Link>
+                    <Link href={buildRunHref(filters, { page: runs.page + 1 }, locale)}>Next</Link>
                   </Button>
                 ) : (
                   <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
@@ -410,7 +412,7 @@ export function RunStatusSurface({ filters, runs }: RunStatusSurfaceProps) {
   );
 }
 
-function buildRunHref(filters: RunStatusPageFilters, overrides: Partial<RunStatusPageFilters>) {
+function buildRunHref(filters: RunStatusPageFilters, overrides: Partial<RunStatusPageFilters>, locale: AdminLocale) {
   const next = {
     ...filters,
     ...overrides,
@@ -444,8 +446,7 @@ function buildRunHref(filters: RunStatusPageFilters, overrides: Partial<RunStatu
     params.set("page", String(next.page));
   }
 
-  const query = params.toString();
-  return query ? `/admin/runs?${query}` : "/admin/runs";
+  return buildAdminHref("/admin/runs", params, locale);
 }
 
 function formatTimestamp(value: string | null) {

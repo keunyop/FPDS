@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { ReviewQueueSurface, type ReviewQueuePageFilters } from "@/components/fpds/admin/review-queue-surface";
 import { fetchAdminSession, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
 
@@ -14,6 +15,7 @@ const DEFAULT_STATES = ["queued", "deferred"];
 
 export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
 
@@ -31,11 +33,11 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   }
 
   if (!session && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/reviews");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/reviews", new URLSearchParams(), locale))}`);
   }
 
   if (session && !queue && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/reviews");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/reviews", new URLSearchParams(), locale))}`);
   }
 
   if (!session || !queue || apiUnavailable) {
@@ -61,6 +63,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,
@@ -68,7 +71,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
         role: session.user.role,
       }}
     >
-      <ReviewQueueSurface filters={filters} queue={queue} />
+      <ReviewQueueSurface filters={filters} locale={locale} queue={queue} />
     </ApplicationShell5>
   );
 }

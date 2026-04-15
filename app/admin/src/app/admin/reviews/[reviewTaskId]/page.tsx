@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { ReviewDetailSurface } from "@/components/fpds/admin/review-detail-surface";
 import { fetchAdminSession, fetchReviewTaskDetail, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../../LogoutButton";
 
@@ -10,10 +11,13 @@ type ReviewDetailPageProps = {
   params: Promise<{
     reviewTaskId: string;
   }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function ReviewDetailPage({ params }: ReviewDetailPageProps) {
+export default async function ReviewDetailPage({ params, searchParams }: ReviewDetailPageProps) {
   const { reviewTaskId } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let detail: Awaited<ReturnType<typeof fetchReviewTaskDetail>> = null;
@@ -29,7 +33,7 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
   }
 
   if (!session && !apiUnavailable) {
-    redirect(`/admin/login?next=/admin/reviews/${reviewTaskId}`);
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref(`/admin/reviews/${reviewTaskId}`, new URLSearchParams(), locale))}`);
   }
 
   if (!session || apiUnavailable) {
@@ -57,6 +61,7 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,

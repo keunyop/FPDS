@@ -292,7 +292,7 @@ def load_public_dashboard_scatter(connection, *, query: PublicDashboardQuery) ->
             "points": [],
             "availability_status": "scope_selection_required",
             "insufficiency_note": labels["mixed_scope_note"],
-            "methodology_note": labels["methodology"],
+            "methodology_note": build_dashboard_methodology_note(locale),
             "applied_filters": applied_filters_payload(query.filters),
             "freshness": freshness,
         }
@@ -308,7 +308,7 @@ def load_public_dashboard_scatter(connection, *, query: PublicDashboardQuery) ->
             "points": [],
             "availability_status": "insufficient_data",
             "insufficiency_note": labels["insufficient"],
-            "methodology_note": labels["methodology"],
+            "methodology_note": build_dashboard_methodology_note(locale),
             "applied_filters": applied_filters_payload(query.filters),
             "freshness": freshness,
         }
@@ -317,7 +317,7 @@ def load_public_dashboard_scatter(connection, *, query: PublicDashboardQuery) ->
         **chart,
         "availability_status": "ready",
         "insufficiency_note": None,
-        "methodology_note": labels["methodology"],
+        "methodology_note": build_dashboard_methodology_note(locale),
         "applied_filters": applied_filters_payload(query.filters),
         "freshness": freshness,
     }
@@ -342,6 +342,32 @@ def _resolve_scope_key(rows: list[dict[str, Any]], *, filters: PublicQueryFilter
     if len(distinct_product_types) == 1:
         return next(iter(distinct_product_types))
     return "mixed"
+
+
+def build_dashboard_methodology_note(locale: str) -> str:
+    if locale == "ko":
+        return (
+            "지표와 ranking은 현재 공개 범위의 최신 성공 aggregate snapshot을 기준으로 계산됩니다. "
+            "금리 비교는 public_display_rate를 사용하고, 수수료 비교는 public_display_fee가 있으면 우선 사용하며 없으면 monthly_fee로 대체합니다. "
+            "최근 변경 상품은 snapshot refresh 시각 기준 최근 30일 창으로 계산됩니다. "
+            "해당 비교에 필요한 숫자 필드가 없는 상품은 ranking과 comparative chart에서 제외됩니다. "
+            "이 공개 dashboard는 시장 요약 전용이며 evidence trace나 source excerpt는 노출하지 않습니다."
+        )
+    if locale == "ja":
+        return (
+            "指標と ranking は、現在の公開スコープに対する最新の成功 aggregate snapshot を基準に計算されます。"
+            "金利比較には public_display_rate を使い、手数料比較には public_display_fee があれば優先し、なければ monthly_fee にフォールバックします。"
+            "最近変更された商品は、snapshot refresh 時刻を基準にした直近 30 日ウィンドウで計算されます。"
+            "その比較に必要な数値フィールドがない商品は、ranking と comparative chart から除外されます。"
+            "この公開 dashboard は市場要約専用であり、evidence trace や source excerpt は公開しません。"
+        )
+    return (
+        "Metrics and rankings are computed from the latest successful aggregate snapshot for the current public scope. "
+        "Rate comparisons use public_display_rate, while fee comparisons prefer public_display_fee and fall back to monthly_fee when needed. "
+        "Recently changed products are measured over the trailing 30 days from the snapshot refresh time. "
+        "Products missing the numeric fields required for a comparison are excluded from the affected ranking and comparative chart. "
+        "This public dashboard is a market summary surface and does not expose evidence trace or source excerpts."
+    )
 
 
 def _build_ranking_widget(

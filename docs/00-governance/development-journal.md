@@ -1281,6 +1281,66 @@ Each entry should include:
   - passed in `app/public`
 - Known issues: the shell-level top navigation still switches between `/products` and `/dashboard` without preserving the current query string; the in-page sibling links do preserve scope. Locale-specific copy and full responsive QA remain follow-on work
 - Next step: implement `WBS 5.11` grid/dashboard cross-filter choreography so the public app can move between both surfaces without losing active scope
+
+## 2026-04-14 - WBS 5.11 Grid and Dashboard Cross-Filter
+
+- WBS: `5.11`
+- Status: `done`
+- Goal: close the shared public cross-filter slice so `/products` and `/dashboard` keep the same scope and the dashboard can drill back into the Product Grid without losing context
+- Why now: `5.9` and `5.10` had already established both public sibling surfaces on the same query vocabulary, but the top shell still dropped scope and the dashboard still lacked exact drill-in choreography
+- Outcome: added a shared-scope URL helper for the public app, made the public sibling nav preserve the active public scope across `/products` and `/dashboard`, and added dashboard-to-grid drill-in links from bank/product-type breakdowns, ranking rows, and scatter points. Ranking drill-ins now carry an aligned Product Grid sort, and single-type drill-ins prune hidden bucket filters before opening the grid so cross-filter state stays meaningful
+- Not done: this slice did not add a duplicate full filter form to `/dashboard`, did not implement locale rollout from `5.12`, and did not close the broader responsive QA sweep from `5.14`
+- Key files: `app/public/src/lib/public-query.ts`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/app/layout.tsx`, `docs/03-design/product-grid-information-architecture.md`, `docs/01-planning/WBS.md`, `app/public/README.md`, `README.md`
+- Decisions: kept shared state URL-based and limited cross-surface carryover to the shared public scope vocabulary rather than carrying Product Grid-only paging/sort state or Dashboard-only axis-preset state through sibling navigation. Kept the Product Grid as the owner of the full filter form and treated the dashboard as a scope-aware summary surface with drill-back actions instead of duplicating filter controls
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+- Known issues: the public header brand link and the `/` redirect still intentionally land on the default Product Grid route instead of preserving current scope. Locale-specific copy and the broader responsive QA sweep remain follow-on work
+- Next step: implement `WBS 5.12` locale rollout for the public and admin UI on top of the now-stable public cross-filter behavior
+
+## 2026-04-14 - WBS 5.12 EN/KO/JA Locale Rollout
+
+- WBS: `5.12`
+- Status: `done`
+- Goal: apply the approved EN/KO/JA locale baseline to the live public and admin UI without violating the source-language preservation rules from the localization governance docs
+- Why now: `5.9` to `5.11` had already stabilized the live public surfaces and `4.1` to `4.10` had already stabilized the protected admin shell, so the next approved slice was to wire locale selection, fallback-safe UI copy, and locale-preserving navigation across both packages
+- Outcome: added locale-aware runtime helpers for the public and admin packages, introduced visible EN/KO/JA switch controls in the public header and admin shell or login surface, preserved `locale` through sibling nav, redirects, pagination, and protected route transitions, and localized UI-owned labels, shell copy, metadata, and formatting on the live public `/products` and `/dashboard` routes plus the admin login, overview, review queue, and run-status surfaces
+- Not done: this slice did not add machine translation for source-derived product, evidence, or condition text; did not change the approved `selected locale -> en -> safe fallback` policy; and did not close the broader responsive QA sweep from `5.14`
+- Key files: `app/public/src/lib/public-locale.ts`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/app/layout.tsx`, `app/public/src/app/page.tsx`, `app/public/src/app/products/page.tsx`, `app/public/src/app/dashboard/page.tsx`, `app/admin/src/lib/admin-i18n.ts`, `app/admin/src/components/admin-locale-switcher.tsx`, `app/admin/src/components/admin-locale-document-sync.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/login2.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/app/layout.tsx`, `app/admin/src/app/admin/login/page.tsx`, `app/admin/src/app/admin/page.tsx`, `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/app/admin/runs/page.tsx`, `app/public/README.md`, `app/admin/README.md`, `shared/i18n/README.md`, `docs/01-planning/WBS.md`, `README.md`
+- Decisions: kept locale state URL-based so the public sibling routes and protected admin routes remain resumable and reviewable without introducing a separate client-only locale store. Kept source-derived product names, descriptions, evidence excerpts, and conditions in their original source language instead of translating or duplicating persisted content. Localized only UI-owned labels, helper text, and formatting so the runtime still matches the approved localization governance boundary
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+- Known issues: the locale rollout currently lives in app-local helper modules rather than a shared runtime package, and the broader screenshot or responsive regression sweep still belongs to `5.14`
+- Next step: execute `WBS 5.13` freshness and metric note wording plus `WBS 5.14` responsive QA on top of the now-locale-aware public and admin shells
+
+## 2026-04-15 - WBS 5.13 Freshness and Metric Notes
+
+- WBS: `5.13`
+- Status: `done`
+- Goal: make the public Product Grid and Insight Dashboard explain freshness, metric meaning, exclusion rules, and public evidence boundaries in locale-aware wording
+- Why now: `5.12` had already stabilized EN/KO/JA locale handling across the live public surfaces, so the next approved slice was to close the remaining note wording gap called out in the WBS and design docs
+- Outcome: added note-card treatment to the public Product Grid so `/products` now explains how card metrics are prioritized by product type and how public freshness behaves for the current scope. Refined the public dashboard note wording so `/dashboard` now carries richer methodology copy aligned to the aggregate rules, plus more consistent localized chart/ranking/fallback/freshness messaging around the existing public note surfaces
+- Not done: this slice did not add a separate `/methodology` route, did not widen the public API contract beyond the existing dashboard note field, and did not start the broader responsive QA sweep from `5.14`
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `api/service/api_service/public_dashboard.py`, `docs/01-planning/WBS.md`, `README.md`, `app/public/README.md`
+- Decisions: treated `5.13` as a public note-presentation slice rather than a larger contract redesign. Kept note ownership mostly UI-side for Product Grid presentation while making the dashboard methodology note API-backed so the existing dashboard note slot could stay intact and locale-aware without adding a new response shape
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_public_dashboard`
+  - passed
+- Known issues: some public locale copy still remains app-local instead of coming from one shared runtime package, and `5.14` responsive QA is still the next separate slice
+- Next step: execute `WBS 5.14` responsive QA across the locale-aware public Product Grid and Insight Dashboard
 ---
 
 ## 7. Change History
@@ -1328,3 +1388,5 @@ Each entry should include:
 | 2026-04-14 | Added the combined WBS 5.7 and 5.8 public aggregate API implementation entry and verification results |
 | 2026-04-14 | Added the WBS 5.9 Product Grid UI implementation entry and verification results |
 | 2026-04-14 | Added the WBS 5.10 Insight Dashboard UI implementation entry and verification results |
+| 2026-04-14 | Added the WBS 5.11 grid/dashboard cross-filter implementation entry and verification results |
+| 2026-04-15 | Added the WBS 5.13 freshness and metric note wording entry and verification results |

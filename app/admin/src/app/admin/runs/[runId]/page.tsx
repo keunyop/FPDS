@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { RunDetailSurface } from "@/components/fpds/admin/run-detail-surface";
 import { fetchAdminSession, fetchRunStatusDetail, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../../LogoutButton";
 
@@ -10,10 +11,13 @@ type RunDetailPageProps = {
   params: Promise<{
     runId: string;
   }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function RunDetailPage({ params }: RunDetailPageProps) {
+export default async function RunDetailPage({ params, searchParams }: RunDetailPageProps) {
   const { runId } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let detail: Awaited<ReturnType<typeof fetchRunStatusDetail>> = null;
@@ -29,7 +33,7 @@ export default async function RunDetailPage({ params }: RunDetailPageProps) {
   }
 
   if (!session && !apiUnavailable) {
-    redirect(`/admin/login?next=/admin/runs/${runId}`);
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref(`/admin/runs/${runId}`, new URLSearchParams(), locale))}`);
   }
 
   if (!session || apiUnavailable) {
@@ -57,6 +61,7 @@ export default async function RunDetailPage({ params }: RunDetailPageProps) {
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,

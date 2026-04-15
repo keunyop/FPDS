@@ -4,6 +4,7 @@ import { Banner1 } from "@/components/banner1";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { ReviewQueueResponse } from "@/lib/admin-api";
+import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 const REVIEW_STATES = ["queued", "deferred", "approved", "edited", "rejected"] as const;
@@ -27,9 +28,10 @@ export type ReviewQueuePageFilters = {
 type ReviewQueueSurfaceProps = {
   queue: ReviewQueueResponse;
   filters: ReviewQueuePageFilters;
+  locale: AdminLocale;
 };
 
-export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) {
+export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfaceProps) {
   const stateCounts = queue.summary.state_counts;
   const validationCounts = queue.summary.validation_counts;
   const statItems = [
@@ -111,15 +113,15 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
 
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild size="sm" variant="outline">
-              <Link href="/admin/reviews">Active queue</Link>
+              <Link href={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)}>Active queue</Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={buildQueueHref(filters, { states: [...REVIEW_STATES], page: 1 })}>All states</Link>
+              <Link href={buildQueueHref(filters, { states: [...REVIEW_STATES], page: 1 }, locale)}>All states</Link>
             </Button>
           </div>
         </div>
 
-        <form action="/admin/reviews" className="mt-6 grid gap-5">
+        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
           <div className="grid gap-4 xl:grid-cols-[1.5fr_repeat(5,minmax(0,1fr))]">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">Search</span>
@@ -253,7 +255,7 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
             <div className="flex items-end gap-2">
               <Button type="submit">Apply filters</Button>
               <Button asChild variant="outline">
-                <Link href="/admin/reviews">Reset</Link>
+                <Link href={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)}>Reset</Link>
               </Button>
             </div>
           </div>
@@ -338,12 +340,12 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
                         <div className="grid gap-1">
                           <Link
                             className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
-                            href={`/admin/reviews/${item.review_task_id}`}
+                            href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}
                           >
                             {item.review_task_id}
                           </Link>
                           <span className="text-xs text-muted-foreground">Candidate {item.candidate_id}</span>
-                          <Link className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline" href={`/admin/runs/${item.run_id}`}>
+                          <Link className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
                             Run {item.run_id}
                           </Link>
                         </div>
@@ -406,7 +408,7 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2">
                           <Button asChild size="sm" variant="outline">
-                            <Link href={`/admin/reviews/${item.review_task_id}`}>Open detail</Link>
+                            <Link href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}>Open detail</Link>
                           </Button>
                           <span className="text-xs leading-5 text-muted-foreground">
                             Decision controls land in `4.3` after detail and trace context are in place.
@@ -427,7 +429,7 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
               <div className="flex items-center gap-2">
                 {queue.page > 1 ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link href={buildQueueHref(filters, { page: Math.max(1, queue.page - 1) })}>Previous</Link>
+                    <Link href={buildQueueHref(filters, { page: Math.max(1, queue.page - 1) }, locale)}>Previous</Link>
                   </Button>
                 ) : (
                   <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
@@ -436,7 +438,7 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
                 )}
                 {queue.has_next_page ? (
                   <Button asChild size="sm" variant="outline">
-                    <Link href={buildQueueHref(filters, { page: queue.page + 1 })}>Next</Link>
+                    <Link href={buildQueueHref(filters, { page: queue.page + 1 }, locale)}>Next</Link>
                   </Button>
                 ) : (
                   <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
@@ -455,6 +457,7 @@ export function ReviewQueueSurface({ queue, filters }: ReviewQueueSurfaceProps) 
 function buildQueueHref(
   filters: ReviewQueuePageFilters,
   overrides: Partial<ReviewQueuePageFilters>,
+  locale: AdminLocale,
 ) {
   const next = {
     ...filters,
@@ -492,8 +495,7 @@ function buildQueueHref(
     params.set("page", String(next.page));
   }
 
-  const query = params.toString();
-  return query ? `/admin/reviews?${query}` : "/admin/reviews";
+  return buildAdminHref("/admin/reviews", params, locale);
 }
 
 function formatTimestamp(value: string) {

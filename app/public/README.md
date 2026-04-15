@@ -18,4 +18,7 @@ Current runtime:
 - `/` redirects to `/products`
 - `/products` renders the `WBS 5.9` Product Grid UI against `GET /api/public/products` and `GET /api/public/filters`
 - `/dashboard` now renders the `WBS 5.10` Insight Dashboard UI against `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, `GET /api/public/dashboard-scatter`, and `GET /api/public/filters`
+- `WBS 5.11` is now implemented with URL-based shared scope preservation across sibling navigation plus dashboard-to-grid drill-in links from breakdowns, ranking rows, and scatter points
+- `WBS 5.12` is now implemented with EN/KO/JA locale switching, locale-preserving sibling navigation, locale-aware page metadata, and locale-aware labels or freshness copy while keeping source-derived product content in its original language
+- `WBS 5.13` is now implemented with locale-aware methodology/freshness note cards on `/products`, richer public methodology note wording on `/dashboard`, and refreshed public note copy that explains snapshot timing, metric semantics, exclusion rules, and public evidence boundaries
 - the public app uses the same `radix-nova` style family as the admin app, but with a more relaxed public layout rhythm

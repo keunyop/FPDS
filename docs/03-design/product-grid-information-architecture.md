@@ -165,6 +165,13 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 
 ## 10.5 Aggregate Bucket Baseline
 
+### 10.6 Implemented Cross-Filter Baseline
+
+- shared grid/dashboard state is carried in the URL query string using the approved shared public filter vocabulary
+- sibling top navigation preserves shared scope, but does not carry Product Grid-only paging/sort state or Dashboard-only axis-preset state
+- dashboard breakdown rows, ranking rows, and scatter points may drill back into the Product Grid with a narrower bank/product-type scope
+- when drill-in selects exactly one product type, bucket filters hidden for that type should be pruned before opening the Product Grid
+
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 
 - `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`

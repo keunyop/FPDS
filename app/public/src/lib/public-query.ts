@@ -19,6 +19,8 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
+export type PublicRoutePath = "/products" | "/dashboard";
+
 const SORT_OPTIONS = new Set([
   "default",
   "bank_name",
@@ -39,6 +41,10 @@ const SUPPORTED_AXIS_PRESETS = new Set([
 ]);
 
 type PageSearchParams = Record<string, string | string[] | undefined>;
+type SearchParamsReader = {
+  get(name: string): string | null;
+  getAll(name: string): string[];
+};
 
 type PublicHrefState = PublicScopeFilters &
   Partial<{
@@ -125,7 +131,7 @@ export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
   return params;
 }
 
-export function buildPublicHref(path: "/products" | "/dashboard", state: PublicHrefState) {
+export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
   const params = new URLSearchParams();
 
   if (state.locale !== "en") {
@@ -173,19 +179,46 @@ export function buildPublicHref(path: "/products" | "/dashboard", state: PublicH
   return query ? `${path}?${query}` : path;
 }
 
-function parsePublicScopeFilters(searchParams: PageSearchParams): PublicScopeFilters {
-  const locale = firstValue(searchParams.locale).toLowerCase();
+export function buildScopedPublicHrefFromSearchParams(path: PublicRoutePath, searchParams: SearchParamsReader) {
+  return buildPublicHref(path, {
+    locale: normalizeLocaleValue(searchParams.get("locale") ?? ""),
+    bankCodes: normalizeMultiValues(searchParams.getAll("bank_code"), true),
+    productTypes: normalizeMultiValues(searchParams.getAll("product_type")),
+    targetCustomerTags: normalizeMultiValues(searchParams.getAll("target_customer_tag")),
+    feeBucket: normalizeScalarValue(searchParams.get("fee_bucket") ?? ""),
+    minimumBalanceBucket: normalizeScalarValue(searchParams.get("minimum_balance_bucket") ?? ""),
+    minimumDepositBucket: normalizeScalarValue(searchParams.get("minimum_deposit_bucket") ?? ""),
+    termBucket: normalizeScalarValue(searchParams.get("term_bucket") ?? "")
+  });
+}
 
+function parsePublicScopeFilters(searchParams: PageSearchParams): PublicScopeFilters {
   return {
-    locale: SUPPORTED_LOCALES.has(locale) ? locale : "en",
-    bankCodes: multiValue(searchParams.bank_code).map((value) => value.toUpperCase()),
-    productTypes: multiValue(searchParams.product_type),
-    targetCustomerTags: multiValue(searchParams.target_customer_tag),
-    feeBucket: firstValue(searchParams.fee_bucket).toLowerCase(),
-    minimumBalanceBucket: firstValue(searchParams.minimum_balance_bucket).toLowerCase(),
-    minimumDepositBucket: firstValue(searchParams.minimum_deposit_bucket).toLowerCase(),
-    termBucket: firstValue(searchParams.term_bucket).toLowerCase()
+    locale: normalizeLocaleValue(firstValue(searchParams.locale)),
+    bankCodes: normalizeMultiValues(multiValue(searchParams.bank_code), true),
+    productTypes: normalizeMultiValues(multiValue(searchParams.product_type)),
+    targetCustomerTags: normalizeMultiValues(multiValue(searchParams.target_customer_tag)),
+    feeBucket: normalizeScalarValue(firstValue(searchParams.fee_bucket)),
+    minimumBalanceBucket: normalizeScalarValue(firstValue(searchParams.minimum_balance_bucket)),
+    minimumDepositBucket: normalizeScalarValue(firstValue(searchParams.minimum_deposit_bucket)),
+    termBucket: normalizeScalarValue(firstValue(searchParams.term_bucket))
   };
+}
+
+function normalizeLocaleValue(value: string) {
+  const locale = value.toLowerCase();
+  return SUPPORTED_LOCALES.has(locale) ? locale : "en";
+}
+
+function normalizeScalarValue(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function normalizeMultiValues(values: string[], uppercase = false) {
+  return values
+    .map((value) => normalizeScalarValue(value))
+    .filter(Boolean)
+    .map((value) => (uppercase ? value.toUpperCase() : value));
 }
 
 function firstValue(value: string | string[] | undefined) {

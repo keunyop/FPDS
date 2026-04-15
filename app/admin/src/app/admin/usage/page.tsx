@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { LlmUsageSurface, type LlmUsagePageFilters } from "@/components/fpds/admin/llm-usage-surface";
 import { fetchAdminSession, fetchLlmUsage, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
 
@@ -12,6 +13,7 @@ type LlmUsagePageProps = {
 
 export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
 
@@ -29,11 +31,11 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   }
 
   if (!session && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/usage");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/usage", new URLSearchParams(), locale))}`);
   }
 
   if (session && !usage && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/usage");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/usage", new URLSearchParams(), locale))}`);
   }
 
   if (!session || !usage || apiUnavailable) {
@@ -60,6 +62,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,

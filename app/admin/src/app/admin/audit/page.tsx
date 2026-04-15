@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { AuditLogSurface, type AuditLogPageFilters } from "@/components/fpds/admin/audit-log-surface";
 import { fetchAdminSession, fetchAuditLogList, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
 
@@ -12,6 +13,7 @@ type AuditLogPageProps = {
 
 export default async function AuditLogPage({ searchParams }: AuditLogPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
 
@@ -29,11 +31,11 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
   }
 
   if (!session && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/audit");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/audit", new URLSearchParams(), locale))}`);
   }
 
   if (session && !auditLog && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/audit");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/audit", new URLSearchParams(), locale))}`);
   }
 
   if (!session || !auditLog || apiUnavailable) {
@@ -59,6 +61,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,

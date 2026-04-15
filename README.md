@@ -41,6 +41,9 @@ As of `2026-04-14`:
 - `WBS 5.8` dashboard APIs are now complete with anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` routes that reuse the latest successful aggregate projection snapshot for request-time filtered summary, ranking, and scatter responses plus methodology and freshness context
 - `WBS 5.9` Product Grid UI is now complete with a live Next.js public package, a `/products` catalog route, sticky public filters, result-summary chips, product-type-aware cards, and pagination
 - `WBS 5.10` Insight Dashboard UI is now complete with a live `/dashboard` route, KPI cards, ranking widgets, a comparative scatter view, and query-preserved sibling navigation back to `/products`
+- `WBS 5.11` grid/dashboard cross-filter is now complete with URL-based shared-scope sibling navigation plus dashboard drill-in links back into the Product Grid from breakdowns, rankings, and scatter points
+- `WBS 5.12` locale rollout is now complete with EN/KO/JA query-param locale support across the public Product Grid and Insight Dashboard plus the protected admin shell and login surfaces
+- `WBS 5.13` freshness/metric note wording is now complete with locale-aware public methodology/freshness note cards on `/products`, richer dashboard methodology wording on `/dashboard`, and clarified snapshot/metric/exclusion messaging for the public surface
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -134,6 +137,9 @@ Out of scope for the current FPDS build:
 - `WBS 5.8` dashboard APIs are now implemented and give the repo live anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` endpoints with request-time filtered summary, ranking, and scatter responses derived from the latest successful public aggregate snapshot
 - `WBS 5.9` Product Grid UI is now implemented and gives the repo a live `app/public` Next.js package with `/products`, shared public filters, type-aware product cards, and pagination
 - `WBS 5.10` Insight Dashboard UI is now implemented and gives the repo a live `/dashboard` route with KPI cards, ranking widgets, a product-type-aware comparative chart, methodology/freshness notes, and sibling navigation that preserves public query scope
+- `WBS 5.11` grid/dashboard cross-filter is now implemented and gives the repo scope-preserving public sibling nav plus dashboard-to-grid drill-in links for breakdown, ranking, and scatter views
+- `WBS 5.12` locale rollout is now implemented and gives the repo EN/KO/JA locale-aware public and admin shells with query-preserved locale switching, locale-aware labels, and locale-aware date or number formatting for UI-owned copy
+- `WBS 5.13` freshness/metric note wording is now implemented and gives the repo locale-aware public methodology/freshness note cards plus clearer dashboard note wording for snapshot timing, metric semantics, exclusion rules, and public evidence non-exposure
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`
@@ -144,7 +150,7 @@ Out of scope for the current FPDS build:
 
 - prototype worker runtime implementation
 - `WBS 5` public experience work and Big 5 expansion slices
-- locale rollout and responsive QA follow-on slices
+- responsive QA follow-on slices
 
 ### Not Started
 

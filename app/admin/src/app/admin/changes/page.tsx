@@ -6,6 +6,7 @@ import {
   type ChangeHistoryPageFilters,
 } from "@/components/fpds/admin/change-history-surface";
 import { fetchAdminSession, fetchChangeHistoryList, getAdminApiOrigin } from "@/lib/admin-api";
+import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
 
@@ -15,6 +16,7 @@ type ChangeHistoryPageProps = {
 
 export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
 
@@ -32,11 +34,11 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
   }
 
   if (!session && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/changes");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/changes", new URLSearchParams(), locale))}`);
   }
 
   if (session && !changes && !apiUnavailable) {
-    redirect("/admin/login?next=/admin/changes");
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/changes", new URLSearchParams(), locale))}`);
   }
 
   if (!session || !changes || apiUnavailable) {
@@ -62,6 +64,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
   return (
     <ApplicationShell5
       environmentLabel={envLabel}
+      locale={locale}
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,
