@@ -8,13 +8,16 @@ Planned scope:
 - runs
 - change history
 - audit log
+- bank registry management
+- source catalog management and collection
+- generated source detail inspection
 - publish monitor
 - usage and health surfaces
 
 Current scaffold:
 - `routes.manifest.json` lists the reserved admin routes and visibility expectations.
 - `route-shells/` keeps the original route-by-route design placeholders.
-- the live Next.js admin package for `WBS 4.1` to `4.10` now lives alongside this scaffold under `src/`.
+- the live Next.js admin package for `WBS 4.1` to `5.15` now lives alongside this scaffold under `src/`.
 - future admin surfaces should follow the template-first baseline from `docs/03-design/fpds-design-system.md` and `docs/03-design/fpds_design_system_stripe_benchmark.md`.
 
 Current runtime:
@@ -27,6 +30,12 @@ Current runtime:
 - protected `/admin/changes` change history route with canonical chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - protected `/admin/audit` audit log route with append-only chronology, actor and target context, request metadata, and review/run drilldowns
 - protected `/admin/usage` usage dashboard v1 with search, provider/stage filters, scope coverage summaries, by-model/by-agent/by-run concentration, trend deltas, and richer anomaly drilldowns
+- protected `/admin/banks` bank registry list with homepage-based bank creation, auto-generated bank code, and drill-in editing
+- protected `/admin/banks/:bankCode` bank detail route with editable bank profile fields and linked source-catalog coverage
+- protected `/admin/source-catalog` source catalog list with bank/product-type dropdown creation, multi-select collection launch, and generated-source counts
+- protected `/admin/source-catalog/:catalogItemId` source catalog detail route with editable bank/product coverage and recent collection history
+- protected `/admin/sources` generated source registry list with bank/country/product/status/role filters and read-only drill-in
+- protected `/admin/sources/:sourceId` source detail route with read-only metadata visibility and recent collection history
 - `WBS 5.12` locale rollout is now implemented with EN/KO/JA locale switching on the admin shell and login surface, locale-preserving protected-route navigation, and locale-aware operator-facing labels while keeping evidence and source-derived content untouched
 - middleware-based route gate backed by the shared session cookie contract
 - Shadcnblocks-based admin login and shell built on `components.json`, `radix-nova`, and app-local shadcn semantic variables

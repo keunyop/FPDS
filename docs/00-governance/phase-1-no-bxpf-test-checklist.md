@@ -77,13 +77,13 @@ These items remain separate follow-on work under `WBS 6.x`.
 
 Check these before starting:
 
-- [ ] DB migrations are applied through `0003_aggregate_refresh.sql`
-- [ ] API service can run locally
-- [ ] public app can run or build locally
-- [ ] admin app can run or build locally
-- [ ] at least one reviewable dataset exists in the DB, or a rerunnable ingestion path is available
-- [ ] a test operator account exists for admin login
-- [ ] BX-PF mode stays `disabled`, `mock`, or otherwise non-live during this checklist
+- [v] DB migrations are applied through `0003_aggregate_refresh.sql`
+- [v] API service can run locally
+- [v] public app can run or build locally
+- [v] admin app can run or build locally
+- [v] at least one reviewable dataset exists in the DB, or a rerunnable ingestion path is available
+- [v] a test operator account exists for admin login
+- [v] BX-PF mode stays `disabled`, `mock`, or otherwise non-live during this checklist
 
 Suggested local verification commands:
 

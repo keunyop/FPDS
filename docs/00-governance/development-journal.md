@@ -1375,6 +1375,106 @@ Each entry should include:
   - passed
 - Known issues: the checklist helps preserve schedule and testing momentum, but it does not reduce the remaining `WBS 6.x` publish/readiness work required for Phase 1 release sign-off
 - Next step: execute the new checklist against the current dev environment and capture a dated QA evidence note with pass/hold results plus representative screenshots and ids
+
+## 2026-04-15 - Source Registry Admin MVP Doc Baseline
+
+- WBS: `5.15` planning support
+- Status: `done`
+- Goal: document the minimum approved direction for DB-backed source registry management before implementation starts
+- Why now: the Product Owner approved admin-side direct source editing and multi-select collection, but asked to lock the docs baseline first and keep the first feature slice intentionally small
+- Outcome: updated the requirements, source-registry policy, admin information architecture, and WBS so they now agree on four points: source registry operational source of truth moves to the DB, admin can edit source rows directly in the UI, source-selected collection means full candidate-producing ingestion through `normalized_candidate`, and candidate-producing scope remains role-aware with `detail` sources as the default primary scope
+- Not done: no DB schema, API, UI route, migration, or runtime collection changes were implemented in this slice
+- Key files: `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/03-design/admin-information-architecture.md`, `docs/01-planning/WBS.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the MVP narrow by deferring diff-heavy registry approval workflow, scheduler governance UI, and generalized auto-discovery management. Explicitly retired JSON as the ongoing operational source of truth once the DB-backed registry lands, while allowing existing JSON files to remain as historical/seed artifacts
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed after rerunning outside the sandbox because the first in-sandbox `app/admin` build attempt hit Windows `spawn EPERM`
+- Known issues: the repo runtime still uses file/catalog-oriented source management today, so these documents define the target implementation baseline rather than describing an already-completed runtime
+- Next step: design the DB schema and admin/API MVP for `/admin/sources` and `source-collections` before starting implementation
+
+## 2026-04-15 - WBS 5.15 Source Registry Admin MVP Implementation
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: implement the minimum live admin slice for DB-backed source registry editing plus source-selected candidate-producing collection
+- Why now: the documentation baseline for `5.15` was already approved, and the next Phase 1 operator gap was the lack of a live source-management surface that could directly own source rows and launch full collection from the admin console
+- Outcome: added a new `source_registry_item` table plus migration, DB-seeded source-registry service utilities, protected admin CRUD and collection-launch APIs, a background collection runner that groups selected sources by bank/product scope and executes snapshot through validation with temporary registry payloads, and live `/admin/sources` plus `/admin/sources/:sourceId` UI routes with filtering, create/edit, multi-select collect, and recent run linkage
+- Scope notes: the MVP keeps direct admin editing intentionally simple, uses the DB as the operational source of truth, treats JSON registry files as first-boot seed artifacts only, defines collect as full candidate-producing ingestion through `normalized_candidate`, and constrains primary candidate production to selected `detail` sources while auto-including the current TD savings supporting sources already required by the live normalization path
+- Key files: `db/migrations/0004_source_registry_admin.sql`, `api/service/api_service/source_registry_utils.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_collection_runner.py`, `api/service/api_service/main.py`, `api/service/api_service/models.py`, `api/service/tests/test_source_registry.py`, `app/admin/src/app/admin/sources/page.tsx`, `app/admin/src/app/admin/sources/[sourceId]/page.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/application-shell5.tsx`, `api/admin/route-manifest.json`, `app/admin/routes.manifest.json`, `README.md`, `api/service/README.md`, `app/admin/README.md`
+- Decisions: kept the collection launch asynchronous behind an API-side runner instead of adding queue infrastructure in this slice, reused existing worker modules via temporary grouped registry files instead of rewriting the worker entrypoints first, and limited supporting-source auto-inclusion to the already-proven TD savings merge path so the MVP would not silently broaden candidate-producing scope
+- Verification:
+  - `python -m unittest discover -s api/service/tests -t api/service`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+  - passed
+- Known issues: source-registry bootstrap still seeds from the committed JSON catalog when the DB table is empty, collection progress currently relies on the existing run surfaces rather than a dedicated source-collection status UI, and supporting-source auto-inclusion is still intentionally narrow rather than generalized across all Big 5 banks and product families
+- Next step: exercise the new `/admin/sources` flow against the live dev database with representative Big 5 selections and decide whether the next slice should focus on collection progress ergonomics, generalized supporting-source rules, or explicit DB import/export tooling for source-registry administration
+
+## 2026-04-15 - WBS 5.15 Source Registry Unique Scope Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: fix the first live `/admin/sources` bootstrap failure caused by reused bank rates URLs across multiple product types
+- Why now: the first manual source-registry screen test hit a `UniqueViolation` while seeding `source_registry_item` because RBC reuses the same rates page URL for both `chequing` and `savings`, which exposed that the original uniqueness scope was too narrow
+- Outcome: updated the source-registry uniqueness model so the DB now treats `(bank_code, product_type, normalized_url, source_type)` as the logical uniqueness boundary, added a follow-up migration to repair databases that already applied `0004`, and updated the API-service run instructions so local operators apply the fix before testing `/admin/sources`
+- Key files: `db/migrations/0004_source_registry_admin.sql`, `db/migrations/0005_source_registry_unique_scope_fix.sql`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Verification:
+  - `python -m unittest discover -s api/service/tests -t api/service`
+  - passed
+- Known issues: existing local databases that already applied `0004` still need `0005_source_registry_unique_scope_fix.sql` run once before `/admin/sources` bootstrap can succeed
+- Next step: apply `0005_source_registry_unique_scope_fix.sql` to the live dev DB, restart the API, and rerun the source-registry screen smoke test
+
+## 2026-04-15 - WBS 5.15 Source Registry Null-Filter Query Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: fix the follow-up `/admin/sources` list failure caused by nullable filter parameters in the source-registry list SQL
+- Why now: after the uniqueness fix, the next live screen request failed with `psycopg.errors.AmbiguousParameter` because PostgreSQL could not infer the type of nullable filter parameters in the `WHERE (%(field)s IS NULL OR ...)` pattern
+- Outcome: replaced the nullable-parameter SQL pattern with a dynamic typed WHERE-clause builder that only binds filters actually provided by the request, and added a unit test that verifies empty-filter list requests now execute with an empty parameter map
+- Key files: `api/service/api_service/source_registry.py`, `api/service/tests/test_source_registry.py`, `docs/00-governance/development-journal.md`
+- Verification:
+  - `python -m unittest discover -s api/service/tests -t api/service`
+  - passed
+  - `python -m py_compile api/service/api_service/source_registry.py api/service/tests/test_source_registry.py`
+  - passed
+- Known issues: local testers still need the earlier `0005_source_registry_unique_scope_fix.sql` applied if their DB already contains the original `0004` constraint
+- Next step: restart the API service and rerun the `/admin/sources` smoke test with empty filters first, then continue with create/edit/collect checks
+
+## 2026-04-15 - WBS 5.15 Bank and Source-Catalog Admin Refinement
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: realign the source-registry admin MVP so operators manage banks and source catalog coverage while generated source rows stay read-only
+- Why now: Product Owner clarified that operators should not edit low-level source detail directly; they should manage a bank list and bank-plus-product coverage, then let collection auto-fill the generated source registry
+- Outcome: added `bank` plus `source_registry_catalog_item` management routes and migration support, auto-generated bank codes from bank creation, introduced source-catalog-driven collection that materializes source rows before launching ingestion, converted `/admin/sources` and `/admin/sources/:sourceId` to read-only inspection surfaces, added `/admin/banks`, `/admin/banks/:bankCode`, `/admin/source-catalog`, and `/admin/source-catalog/:catalogItemId`, and updated the requirements/design/README docs to match the new operating model
+- Key files: `db/migrations/0006_bank_catalog_management.sql`, `api/service/api_service/source_catalog.py`, `api/service/api_service/main.py`, `api/service/api_service/models.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_registry.py`, `app/admin/src/app/admin/banks/page.tsx`, `app/admin/src/app/admin/banks/[bankCode]/page.tsx`, `app/admin/src/app/admin/source-catalog/page.tsx`, `app/admin/src/app/admin/source-catalog/[catalogItemId]/page.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-detail-surface.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/routes.manifest.json`, `api/admin/route-manifest.json`, `README.md`, `app/admin/README.md`, `api/service/README.md`, `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`, `docs/03-design/admin-information-architecture.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/01-planning/WBS.md`
+- Verification:
+  - `python -m unittest discover -s api/service/tests -t api/service`
+  - passed
+  - `pnpm run typecheck`
+  - passed
+  - `pnpm run build`
+  - passed
+- Known issues: the admin UI still keeps legacy `/admin/sources/create`, `/admin/sources/collect`, and `/admin/sources/:sourceId/update` route handlers only to satisfy current Next route validation and legacy compatibility, but the intended operator workflow no longer uses them
+- Next step: run the full foundation harness and then do a live manual smoke test that creates a bank, creates a source catalog item, launches collection, and verifies generated source rows appear in `/admin/sources`
+
+## 2026-04-16 - API Service Worker Import Path Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: fix the API startup failure when running `uv run --directory api/service uvicorn api_service.main:app`
+- Why now: the new `source_catalog.py` module imported `worker.discovery...` directly, but `uv run --directory api/service` only guarantees `api/service` on the import path, not the repo root
+- Outcome: added a small repo-root import-path guard in `api/service/api_service/source_catalog.py` before the `worker.discovery` imports so the API can start from the documented `api/service` working directory again
+- Key files: `api/service/api_service/source_catalog.py`, `docs/00-governance/development-journal.md`
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -c "import sys; sys.path.insert(0, r'...\\api\\service'); import api_service.main; print('ok')"`
+  - passed
+- Known issues: none beyond the existing Windows-specific harness need to rerun builds with enough time budget
+- Next step: restart the FastAPI service and continue with the manual bank/source-catalog smoke test
 ---
 
 ## 7. Change History
@@ -1426,3 +1526,9 @@ Each entry should include:
 | 2026-04-15 | Added the WBS 5.13 freshness and metric note wording entry and verification results |
 | 2026-04-15 | Added the public hydration warning guard entry and verification results |
 | 2026-04-15 | Added the interim Phase 1 no-BXPF test checklist entry |
+| 2026-04-15 | Added the source registry admin MVP documentation baseline entry |
+| 2026-04-15 | Added the WBS 5.15 source registry admin MVP implementation entry |
+| 2026-04-15 | Added the WBS 5.15 source registry unique-scope fix entry |
+| 2026-04-15 | Added the WBS 5.15 source registry null-filter query fix entry |
+| 2026-04-15 | Added the WBS 5.15 bank and source-catalog admin refinement entry |
+| 2026-04-16 | Added the API service worker import path fix entry |

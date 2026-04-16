@@ -1,6 +1,6 @@
 # FPDS API Service
 
-This package is the live FastAPI runtime package for the completed admin slices through `WBS 4.10` plus the first public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
+This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.15` plus the first public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
 
 Current scope:
 - anonymous public aggregate-backed product and dashboard read APIs
@@ -14,6 +14,10 @@ Current scope:
 - change-history list route backed by `change_event` with protected canonical chronology and manual-override audit context
 - audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
 - usage dashboard route backed by `llm_usage_record` with protected totals, richer scope metadata, per-model, per-agent, per-run, trend, and anomaly drilldown aggregations
+- bank registry list/detail/create/update routes backed by `bank`
+- source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
+- source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
+- read-only source registry list/detail routes backed by generated `source_registry_item`
 - approve, reject, defer, and edit-approve review mutations
 - canonical product/version creation or update side effects for approved decisions
 - review and manual-override audit events plus change-event emission
@@ -36,6 +40,21 @@ Current routes:
 - `GET /api/admin/change-history`
 - `GET /api/admin/audit-log`
 - `GET /api/admin/llm-usage`
+- `GET /api/admin/sources`
+- `GET /api/admin/banks`
+- `POST /api/admin/banks`
+- `GET /api/admin/banks/:bankCode`
+- `PATCH /api/admin/banks/:bankCode`
+- `GET /api/admin/source-catalog`
+- `POST /api/admin/source-catalog`
+- `GET /api/admin/source-catalog/:catalogItemId`
+- `PATCH /api/admin/source-catalog/:catalogItemId`
+- `POST /api/admin/source-catalog/collect`
+- `GET /api/admin/sources`
+- `POST /api/admin/sources`
+- `GET /api/admin/sources/:sourceId`
+- `PATCH /api/admin/sources/:sourceId`
+- `POST /api/admin/source-collections`
 - `POST /api/admin/review-tasks/:reviewTaskId/approve`
 - `POST /api/admin/review-tasks/:reviewTaskId/reject`
 - `POST /api/admin/review-tasks/:reviewTaskId/edit-approve`
@@ -50,6 +69,9 @@ Apply the DB baseline in order:
 psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0004_source_registry_admin.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0005_source_registry_unique_scope_fix.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0006_bank_catalog_management.sql
 ```
 
 Create the first operator account:
@@ -81,6 +103,10 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
 - Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
 - LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
+- Bank and source catalog management now seed the DB from the committed JSON catalog only when `bank` and `source_registry_catalog_item` are empty; after bootstrap, admin CRUD treats the DB as the operational source of truth.
+- Source catalog collection now materializes generated `source_registry_item` rows for the selected bank and product-type coverage, then creates grouped `ingestion_run` rows and starts a background runner that executes snapshot, parse, extraction, normalization, and validation in sequence for the selected scope.
+- `POST /api/admin/sources` and `PATCH /api/admin/sources/:sourceId` are intentionally kept as read-only error responses in the MVP so the live operator flow stays centered on `/api/admin/banks` and `/api/admin/source-catalog`.
+- The current source-collection MVP keeps candidate-producing scope centered on selected `detail` sources and only auto-includes the existing TD savings supporting sources already required by the live normalization path.
 - Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.

@@ -296,6 +296,7 @@ Based on:
 | 5.12 | Completed | EN/KO/JA locale 적용 | public/admin trilingual UI | Frontend | 1.7.5 | 2026-05-04 |
 | 5.13 | Completed | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |
 | 5.14 | Next | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 | 2026-05-07 |
+| 5.15 | Completed | source registry admin MVP 구현 | DB-backed bank setup + source-catalog coverage management + candidate-producing collection + read-only generated source inspection | Backend, Frontend, AI/Data | 5.1, 4.10 | 2026-05-10 |
 
 ### 5.5 Scope Baseline
 

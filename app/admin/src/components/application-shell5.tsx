@@ -228,6 +228,27 @@ function getNavGroups(locale: AdminLocale): NavGroup[] {
       title: copy.groups.operations,
       items: [
         {
+          label: "Banks",
+          description: "Bank list and homepage setup",
+          href: "/admin/banks",
+          status: copy.status.live,
+          icon: Search,
+        },
+        {
+          label: "Source Catalog",
+          description: "Bank and product coverage management",
+          href: "/admin/source-catalog",
+          status: copy.status.live,
+          icon: ShieldCheck,
+        },
+        {
+          label: "Sources",
+          description: "Generated source detail, read-only",
+          href: "/admin/sources",
+          status: copy.status.live,
+          icon: BookOpenText,
+        },
+        {
           label: copy.items.runs.label,
           description: copy.items.runs.description,
           href: "/admin/runs",

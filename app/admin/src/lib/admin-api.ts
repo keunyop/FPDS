@@ -544,6 +544,209 @@ export type ReviewTaskDetailResponse = {
   available_actions: ReviewDecisionAction[];
 };
 
+export type SourceRegistryItem = {
+  source_id: string;
+  bank_code: string;
+  country_code: string;
+  product_type: string;
+  product_key: string | null;
+  source_name: string;
+  source_url: string;
+  normalized_url: string;
+  source_type: string;
+  discovery_role: string;
+  status: string;
+  priority: string;
+  source_language: string;
+  purpose: string;
+  expected_fields: string[];
+  seed_source_flag: boolean;
+  last_verified_at: string | null;
+  last_seen_at: string | null;
+  redirect_target_url: string | null;
+  alias_urls: string[];
+  change_reason: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  candidate_producing_flag: boolean;
+};
+
+export type SourceRegistryListResponse = {
+  items: SourceRegistryItem[];
+  summary: {
+    total_items: number;
+    status_counts: Record<string, number>;
+    role_counts: Record<string, number>;
+    candidate_producing_items: number;
+  };
+  facets: {
+    bank_codes: string[];
+    product_types: string[];
+    statuses: string[];
+    discovery_roles: string[];
+  };
+  applied_filters: {
+    bank_code: string | null;
+    country_code: string | null;
+    product_type: string | null;
+    status: string | null;
+    discovery_role: string | null;
+    search: string | null;
+  };
+};
+
+export type SourceRegistryDetailResponse = {
+  source: SourceRegistryItem;
+  recent_runs: Array<{
+    run_id: string;
+    run_status: string;
+    trigger_type: string;
+    triggered_by: string | null;
+    source_scope_count: number;
+    candidate_count: number;
+    review_queued_count: number;
+    partial_completion_flag: boolean;
+    error_summary: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+    pipeline_stage: string;
+  }>;
+};
+
+export type SourceCollectionLaunchResponse = {
+  collection_id: string;
+  correlation_id: string;
+  run_ids: string[];
+  selected_source_ids: string[];
+  target_source_ids: string[];
+  auto_included_source_ids: string[];
+  groups: Array<{
+    run_id: string;
+    bank_code: string;
+    country_code: string;
+    product_type: string;
+    source_language: string;
+    target_source_ids: string[];
+    included_source_ids: string[];
+  }>;
+};
+
+export type BankItem = {
+  bank_code: string;
+  country_code: string;
+  bank_name: string;
+  status: string;
+  homepage_url: string | null;
+  normalized_homepage_url: string | null;
+  source_language: string;
+  managed_flag: boolean;
+  change_reason: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  catalog_item_count: number;
+  generated_source_count: number;
+};
+
+export type BankListResponse = {
+  items: BankItem[];
+  summary: {
+    total_items: number;
+    status_counts: Record<string, number>;
+  };
+  facets: {
+    statuses: string[];
+  };
+  applied_filters: {
+    search: string | null;
+    status: string | null;
+  };
+};
+
+export type BankDetailResponse = {
+  bank: BankItem;
+  catalog_items: Array<{
+    catalog_item_id: string;
+    bank_code: string;
+    bank_name: string;
+    country_code: string;
+    product_type: string;
+    status: string;
+    homepage_url: string | null;
+    normalized_homepage_url: string | null;
+    source_language: string;
+    generated_source_count: number;
+    change_reason: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  }>;
+};
+
+export type SourceCatalogItem = {
+  catalog_item_id: string;
+  bank_code: string;
+  bank_name: string;
+  country_code: string;
+  product_type: string;
+  status: string;
+  homepage_url: string | null;
+  normalized_homepage_url: string | null;
+  source_language: string;
+  generated_source_count: number;
+  change_reason: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type SourceCatalogListResponse = {
+  items: SourceCatalogItem[];
+  summary: {
+    total_items: number;
+    status_counts: Record<string, number>;
+    generated_source_count: number;
+  };
+  facets: {
+    bank_options: Array<{ bank_code: string; bank_name: string }>;
+    product_types: string[];
+    statuses: string[];
+  };
+  applied_filters: {
+    search: string | null;
+    bank_code: string | null;
+    product_type: string | null;
+    status: string | null;
+  };
+};
+
+export type SourceCatalogDetailResponse = {
+  catalog_item: SourceCatalogItem;
+  sample_source_ids: string[];
+  recent_runs: Array<{
+    run_id: string;
+    run_status: string;
+    trigger_type: string;
+    triggered_by: string | null;
+    source_scope_count: number;
+    candidate_count: number;
+    review_queued_count: number;
+    partial_completion_flag: boolean;
+    error_summary: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+    pipeline_stage: string;
+  }>;
+};
+
+export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchResponse & {
+  catalog_item_ids: string[];
+  materialized_items: Array<{
+    catalog_item_id: string;
+    bank_code: string;
+    product_type: string;
+    generated_source_ids: string[];
+    target_source_ids: string[];
+  }>;
+};
+
 type AdminApiResponse<T> = {
   data: T;
 };
@@ -617,4 +820,28 @@ export async function fetchAuditLogList(searchParams: URLSearchParams): Promise<
 
 export async function fetchLlmUsage(searchParams: URLSearchParams): Promise<LlmUsageDashboardResponse | null> {
   return fetchAdminData<LlmUsageDashboardResponse>("/api/admin/llm-usage", searchParams);
+}
+
+export async function fetchSourceRegistryList(searchParams: URLSearchParams): Promise<SourceRegistryListResponse | null> {
+  return fetchAdminData<SourceRegistryListResponse>("/api/admin/sources", searchParams);
+}
+
+export async function fetchSourceRegistryDetail(sourceId: string): Promise<SourceRegistryDetailResponse | null> {
+  return fetchAdminData<SourceRegistryDetailResponse>(`/api/admin/sources/${sourceId}`, undefined, { allowNotFound: true });
+}
+
+export async function fetchBankList(searchParams: URLSearchParams): Promise<BankListResponse | null> {
+  return fetchAdminData<BankListResponse>("/api/admin/banks", searchParams);
+}
+
+export async function fetchBankDetail(bankCode: string): Promise<BankDetailResponse | null> {
+  return fetchAdminData<BankDetailResponse>(`/api/admin/banks/${bankCode}`, undefined, { allowNotFound: true });
+}
+
+export async function fetchSourceCatalogList(searchParams: URLSearchParams): Promise<SourceCatalogListResponse | null> {
+  return fetchAdminData<SourceCatalogListResponse>("/api/admin/source-catalog", searchParams);
+}
+
+export async function fetchSourceCatalogDetail(catalogItemId: string): Promise<SourceCatalogDetailResponse | null> {
+  return fetchAdminData<SourceCatalogDetailResponse>(`/api/admin/source-catalog/${catalogItemId}`, undefined, { allowNotFound: true });
 }

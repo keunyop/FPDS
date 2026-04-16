@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-14`:
+As of `2026-04-15`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -44,6 +44,7 @@ As of `2026-04-14`:
 - `WBS 5.11` grid/dashboard cross-filter is now complete with URL-based shared-scope sibling navigation plus dashboard drill-in links back into the Product Grid from breakdowns, rankings, and scatter points
 - `WBS 5.12` locale rollout is now complete with EN/KO/JA query-param locale support across the public Product Grid and Insight Dashboard plus the protected admin shell and login surfaces
 - `WBS 5.13` freshness/metric note wording is now complete with locale-aware public methodology/freshness note cards on `/products`, richer dashboard methodology wording on `/dashboard`, and clarified snapshot/metric/exclusion messaging for the public surface
+- `WBS 5.15` source registry admin MVP is now complete with DB-backed bank and source-catalog management, source-detail generation during collection, and live `/admin/banks`, `/admin/source-catalog`, and read-only `/admin/sources` operator routes
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -67,6 +68,7 @@ As of `2026-04-14`:
 - a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
 - a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
+- a completed source registry admin MVP surface with `/admin/banks` for bank setup, `/admin/source-catalog` for bank-plus-product coverage and collection launch, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection
 - a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish and health surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
@@ -140,6 +142,7 @@ Out of scope for the current FPDS build:
 - `WBS 5.11` grid/dashboard cross-filter is now implemented and gives the repo scope-preserving public sibling nav plus dashboard-to-grid drill-in links for breakdown, ranking, and scatter views
 - `WBS 5.12` locale rollout is now implemented and gives the repo EN/KO/JA locale-aware public and admin shells with query-preserved locale switching, locale-aware labels, and locale-aware date or number formatting for UI-owned copy
 - `WBS 5.13` freshness/metric note wording is now implemented and gives the repo locale-aware public methodology/freshness note cards plus clearer dashboard note wording for snapshot timing, metric semantics, exclusion rules, and public evidence non-exposure
+- `WBS 5.15` source registry admin MVP is now implemented and gives the repo a live DB-backed bank and source-catalog flow with `/admin/banks`, `/admin/source-catalog`, read-only `/admin/sources`, `GET/POST/PATCH /api/admin/banks`, `GET/POST/PATCH /api/admin/source-catalog`, and `POST /api/admin/source-catalog/collect`
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`

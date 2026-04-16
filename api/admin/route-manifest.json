@@ -116,6 +116,102 @@
       "access": "authenticated"
     },
     {
+      "route": "/api/admin/banks",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/banks/:bankCode",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/source-catalog",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/source-catalog/:catalogItemId",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/source-catalog/collect",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
+      "route": "/api/admin/sources",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true,
+      "notes": "Source registry rows are read-only in the MVP. POST returns a read-only error and operators should use /api/admin/banks or /api/admin/source-catalog instead."
+    },
+    {
+      "route": "/api/admin/sources/:sourceId",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true,
+      "notes": "Source registry rows are read-only in the MVP. PATCH returns a read-only error and operators should use /api/admin/banks or /api/admin/source-catalog instead."
+    },
+    {
+      "route": "/api/admin/source-collections",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
+    },
+    {
       "route": "/api/admin/audit-log",
       "methods": [
         "GET"

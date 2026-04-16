@@ -53,6 +53,48 @@
       "access": "authenticated"
     },
     {
+      "route": "/admin/banks",
+      "route_id": "admin.banks",
+      "shell_dir": "route-shells/banks",
+      "resource_key": "admin_operations.banks",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/banks/:bankCode",
+      "route_id": "admin.bank_detail",
+      "shell_dir": "route-shells/bank-detail",
+      "resource_key": "admin_operations.bank_detail",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/source-catalog",
+      "route_id": "admin.source_catalog",
+      "shell_dir": "route-shells/source-catalog",
+      "resource_key": "admin_operations.source_catalog",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/source-catalog/:catalogItemId",
+      "route_id": "admin.source_catalog_detail",
+      "shell_dir": "route-shells/source-catalog-detail",
+      "resource_key": "admin_operations.source_catalog_detail",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/sources",
+      "route_id": "admin.sources",
+      "shell_dir": "route-shells/sources",
+      "resource_key": "admin_operations.sources",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/sources/:sourceId",
+      "route_id": "admin.source_detail",
+      "shell_dir": "route-shells/source-detail",
+      "resource_key": "admin_operations.source_detail",
+      "access": "authenticated"
+    },
+    {
       "route": "/admin/audit",
       "route_id": "admin.audit",
       "shell_dir": "route-shells/audit",

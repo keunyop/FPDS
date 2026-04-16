@@ -1,13 +1,13 @@
-# FPDS Source Registry Refresh and Approval Policy
+# FPDS Source Registry Operations Policy
 
-Version: 1.0
-Date: 2026-04-10
+Version: 1.1
+Date: 2026-04-15
 Status: Active Operating Baseline
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/02-requirements/scope-baseline.md`
 - `docs/01-planning/WBS.md`
-- `docs/01-planning/td-savings-source-inventory.md`
+- `docs/03-design/admin-information-architecture.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/source-snapshot-evidence-storage-strategy.md`
 - `docs/00-governance/decision-log.md`
@@ -16,298 +16,210 @@ Source Documents:
 
 ## 1. Purpose
 
-이 문서는 prototype와 Phase 1에서 사용할 source registry 운영 정책을 정의한다.
+This document defines the Phase 1 operating policy for source registry management.
 
-목적:
-- bank 사이트의 URL drift, 상품 폐지, 신규 상품 출시를 운영 가능한 방식으로 다룬다.
-- ingestion 재현성과 evidence traceability를 지키면서도 source drift를 빠르게 감지한다.
-- active registry, 자동 refresh 결과, 운영자 승인 반영의 책임 경계를 고정한다.
+Goals:
+- make source registry ownership explicit before implementation starts
+- let operators manage bank and product coverage from the admin UI without editing repo JSON files
+- keep collection runs reproducible even when registry entries are edited over time
+- keep the first implementation intentionally small: bank management, source catalog management, and source-selected product collection
 
-이 문서는 운영 정책과 refresh flow를 정의한다.
-candidate registry 저장 방식, admin UI, diff 화면, scheduler 배포 방식 같은 exact 구현은 후속 slice에서 구체화한다.
-
----
-
-## 2. Problem Statement
-
-은행 public site의 source는 아래 이유로 고정 자산이 아니다.
-
-- 상품 detail URL이 별도 공지 없이 바뀔 수 있다.
-- PDF 링크가 새 버전으로 교체되거나 redirect될 수 있다.
-- 기존 상품이 종료되거나 비노출 처리될 수 있다.
-- 신규 상품이 출시되어 entry page와 fee/rate page에 추가될 수 있다.
-
-따라서 registry를 한 번 만든 뒤 수동으로만 오래 유지하면 drift가 누적된다.
-반대로 ingestion 시작마다 registry를 자동 변경하면 run 재현성, evidence auditability, 운영 통제가 약해진다.
+This is an operating-policy baseline, not an implementation approval by itself.
 
 ---
 
-## 3. Baseline Policy
+## 2. Baseline Decisions
 
-FPDS는 아래 하이브리드 방식을 baseline으로 채택한다.
+1. The operational source of truth for the active source registry will be the FPDS database.
+2. Admin operators will manage banks and source catalog coverage directly in the admin UI, while generated source rows remain read-only.
+3. After the DB-backed source registry is introduced, `source_registry_catalog.json` and per-bank registry JSON files will no longer be the ongoing operational control surface.
+4. The admin `collect` action means full product collection through candidate creation, not raw fetch only.
+5. The first collection target is `normalized_candidate` plus normal validation/routing side effects such as `review_task` creation when rules require it.
+6. Candidate-producing scope is controlled by registry role. `detail` sources are candidate-producing by default. Supporting sources may be included for evidence support, but they should not create standalone product candidates unless their registry role explicitly allows it.
+7. Registry edits are direct operational changes, so they must be audit-visible.
+8. The MVP stays intentionally narrow: no diff-heavy refresh approval workflow is required for the first admin-managed registry slice.
 
-1. `active registry`는 승인된 source set만 가진다.
-2. ingestion 실행 시에는 registry를 자동 변경하지 않는다.
-3. ingestion 실행 시에는 drift를 감지만 하고 warning 또는 review signal로 남긴다.
-4. 별도 `refresh flow`는 source drift와 신규 candidate를 탐지할 수 있다.
-5. refresh 결과는 바로 active registry로 승격하지 않고 `candidate diff`로 남긴다.
-6. Product Owner 또는 운영자가 검토 후 승인한 변경만 active registry에 반영한다.
+Short form:
 
-한 줄로 정리하면 아래와 같다.
-
-`active registry is stable, refresh is exploratory, promotion is approved`
-
----
-
-## 4. Why This Policy Was Chosen
-
-### 4.1 Why Not Auto-Update On Every Ingestion Run
-
-매 run 시작 시 registry를 자동 최신화하면 아래 문제가 생긴다.
-
-- 같은 run type이라도 source scope가 시점마다 달라진다.
-- evidence trace와 replay 결과가 흔들린다.
-- 새 URL이나 새 상품이 operator review 없이 production-like flow에 들어온다.
-- source registry가 운영 통제 문서가 아니라 crawler side effect가 된다.
-
-### 4.2 Why Not Manual-Only Refresh
-
-관리자가 필요할 때만 registry를 고치면 아래 문제가 생긴다.
-
-- 404, redirect, drift를 늦게 발견한다.
-- 신규 상품 누락이 길어질 수 있다.
-- approved inventory와 live site의 차이가 누적된다.
-
-### 4.3 Why The Hybrid Model Fits FPDS
-
-하이브리드 모델은 아래 균형을 맞춘다.
-
-- 재현성: ingestion은 승인된 active registry로 고정된다.
-- 민감도: refresh와 preflight가 drift를 빠르게 감지한다.
-- 통제: active registry 반영은 사람 승인 후에만 일어난다.
-- 확장성: prototype에서는 CLI/문서 기반 승인으로 시작하고 later admin UI로 확장할 수 있다.
+`source registry is DB-backed, admin-managed, and collect means candidate-producing ingestion`
 
 ---
 
-## 5. Registry States
+## 3. Why This Policy Was Chosen
 
-source registry 운영에는 최소 아래 상태가 필요하다.
+### 3.1 Why Not Keep JSON as the Live Registry
 
-| State | Meaning | Can Ingestion Use It |
-|---|---|---|
-| `active` | 승인되어 현재 ingestion scope에 포함되는 source | Yes |
-| `candidate` | refresh에서 새로 발견되었거나 변경 제안이 필요한 source | No |
-| `deprecated` | 현재는 active에서 제외되지만 기록상 보존하는 source | No |
-| `removed` | 더 이상 사용하지 않으며 운영상 종료된 source | No |
+Repo JSON files were useful to bootstrap the Big 5 registry baseline, but they are not a good long-term operator control surface.
 
-prototype 현재 구현은 사실상 `active`만 직접 사용한다.
-`candidate`, `deprecated`, `removed`는 이번 문서에서 운영 정책으로 먼저 정의하고, runtime persistence와 UI는 후속 구현 범위로 둔다.
+Problems with JSON-as-operations:
+- non-developers cannot safely manage it from the admin runtime
+- edit history is tied to git workflow instead of operator workflow
+- runtime state and operator action history drift apart
+- launching collection from a selected source list becomes awkward if the true registry still lives in files
+
+### 3.2 Why Bank and Catalog Editing Is Acceptable for MVP
+
+The Product Owner explicitly prefers a minimal management flow over a heavier approval system.
+
+That makes sense for the next slice because:
+- the team needs a practical operator surface now, not a full registry governance product
+- bank/profile editing plus catalog coverage management is simpler than candidate-diff plus promotion workflow
+- it keeps focus on the immediate business value: maintain source scope and collect product candidates
+
+### 3.3 Why Collect Should Produce Candidates
+
+FPDS is not building a crawl archive for its own sake. The useful operator outcome is a reviewable product candidate.
+
+Benefits:
+- operators see whether a selected source actually leads to product candidates
+- source management and operational outcome stay connected
+- the admin console can link registry, run, candidate, and review flows directly
+
+Tradeoff:
+- the collection action is heavier than raw fetch-only collection
+- quality guardrails matter more because supporting pages should not become noisy standalone candidates
+
+That is why candidate-producing scope must stay registry-role-aware.
 
 ---
 
-## 6. Registry Data Model Expectations
+## 4. Minimum Registry Data Model
 
-active registry와 candidate diff에는 아래 메타데이터가 필요하다.
+The DB-backed source registry should retain at least the following fields for generated or materialized source rows:
 
 - `source_id`
-- `product_key` or equivalent stable logical product identifier
+- `bank_code`
+- `country_code`
+- `product_type`
+- `product_key` or equivalent stable logical grouping key
+- `source_name`
 - `normalized_url`
 - `source_type`
+- `discovery_role`
 - `status`
 - `priority`
-- `discovery_role`
-- `seed_source_flag`
+- `source_language`
 - `last_verified_at`
 - `last_seen_at`
 - `change_reason`
-- `redirect_target_url` if applicable
-- `alias_urls` if applicable
+- `redirect_target_url` when applicable
+- `alias_urls` when applicable
+- `created_at`
+- `updated_at`
 
-중요 원칙:
-- `source_id`는 운영 식별자다.
-- URL은 바뀔 수 있으므로 stable product grouping key가 필요하다.
-- URL 기반 `source_document_id`는 runtime lineage용으로 계속 유효하지만, registry 운영 관점에서는 URL과 독립적인 식별자도 함께 가져야 한다.
+Minimum status vocabulary for the MVP:
 
----
-
-## 7. Operational Flows
-
-### 7.1 Ingestion Preflight
-
-목적:
-- active registry를 바꾸지 않고도 drift를 조기에 감지한다.
-
-권장 동작:
-- active registry의 각 source에 대해 lightweight fetch 또는 head-equivalent 확인
-- `200`, `3xx redirect`, `404`, `content-type changed`, `final URL changed` 같은 상태 기록
-- entry/detail page에서는 기존 known product link set과 큰 차이가 있는지 체크
-- 결과는 ingestion run metadata, warning, or operator note로 기록
-
-중요 규칙:
-- preflight는 registry를 자동 수정하지 않는다.
-- preflight에서 신규 source를 active ingestion scope에 자동 추가하지 않는다.
-
-### 7.2 Scheduled Refresh
-
-목적:
-- live site를 기준으로 source drift와 신규 candidate를 체계적으로 탐지한다.
-
-권장 범위:
-- entry page
-- active detail pages
-- known fee/rate pages
-- active PDF links
-
-refresh 결과는 아래 유형의 diff를 만들 수 있어야 한다.
-
-- `new_source_candidate`
-- `redirect_detected`
-- `url_changed`
-- `content_type_changed`
-- `source_missing`
-- `source_reappeared`
-- `pdf_version_changed`
-- `entry_listing_changed`
-
-중요 규칙:
-- refresh는 active registry를 직접 덮어쓰지 않는다.
-- refresh 결과는 candidate change set 또는 equivalent review artifact로 남긴다.
-
-### 7.3 Manual Approval and Promotion
-
-운영자 또는 Product Owner는 refresh 결과를 보고 아래 중 하나를 선택한다.
-
-- approve and promote to `active`
-- keep as `candidate`
-- mark as `deprecated`
-- reject as out-of-scope
-
-approval 시 필요한 최소 판단은 아래와 같다.
-
-- 이 source가 현재 prototype 또는 Phase scope에 포함되는가
-- 기존 source의 alias/redirect인가, 새로운 source인가
-- 기존 canonical evidence 역할을 대체하는가, 보조 source인가
-- URL 변경이 단순 drift인가, source identity 재정의가 필요한가
-
----
-
-## 8. Recommended Cadence
-
-prototype baseline 권장 cadence는 아래와 같다.
-
-| Activity | Recommended Cadence | Purpose |
+| Status | Meaning | Default Collection Eligible |
 |---|---|---|
-| ingestion preflight | every ingestion run | 직전 drift 감지 |
-| scheduled refresh | once per day on business days | 신규 candidate 및 drift 탐지 |
-| manual review | 2 to 3 times per week or on alert | candidate diff 처리 |
-| active registry promotion | after explicit approval | 재현성 유지 |
+| `active` | current approved source row | Yes |
+| `inactive` | stored but not part of default collection scope | No |
+| `deprecated` | historical row kept for traceability | No |
+| `removed` | no longer operationally used | No |
 
-트래픽과 site volatility가 높아지면 refresh cadence는 늘릴 수 있다.
-하지만 active registry promotion은 계속 approval 기반을 유지하는 것을 원칙으로 한다.
+Minimum role vocabulary for the MVP:
 
----
-
-## 9. Sequence Baseline
-
-```text
-Scheduler or Operator
-    -> refresh job starts
-    -> live entry/detail/pdf sources scanned
-    -> candidate diffs generated
-    -> review artifact stored
-
-Operator or Product Owner
-    -> reviews candidate diffs
-    -> approves / rejects / deprecates
-
-Registry Maintainer
-    -> updates active registry
-    -> records approval reason and date
-
-Ingestion Run
-    -> loads active registry only
-    -> performs preflight drift check
-    -> logs warnings if drift exists
-    -> continues with approved active sources
-```
+| Role | Meaning | Candidate-Producing |
+|---|---|---|
+| `detail` | primary product truth source | Yes |
+| `supporting_html` | supporting page for fees/rates/terms | No by default |
+| `supporting_pdf` | supporting governing/rates PDF | No by default |
+| `entry` | listing/discovery page | No by default |
 
 ---
 
-## 10. Decision Rules for Common Cases
+## 5. Minimal Admin Functions
 
-### 10.1 Redirect From Old URL To New URL
+The first admin-managed source registry slice should support only the following functions:
 
-- refresh는 `redirect_detected`와 `redirect_target_url`를 기록한다.
-- 기존 source와 동일 문서 역할이면 approval 후 active URL을 새 주소로 교체한다.
-- 필요하면 old URL은 `alias_urls` 또는 change history에 남긴다.
+1. List and filter banks.
+2. Create and edit bank profiles with auto-generated bank codes.
+3. List and filter source catalog items by bank, product type, and status.
+4. Create and edit source catalog items using controlled bank and product-type inputs.
+5. Select one or more source catalog items and start collection.
+6. See the resulting run id and success/failure summary.
+7. Inspect generated source rows in a read-only source registry surface.
 
-### 10.2 Product Removed From Entry Page
-
-- 즉시 삭제하지 않는다.
-- `source_missing` 또는 `deprecated candidate`로 기록한다.
-- 일정 기간 연속 미노출 또는 운영 확인 후 `deprecated`로 내린다.
-
-### 10.3 New Product Appears On Entry Page
-
-- 자동 active 추가 금지
-- `candidate`로 생성
-- scope 적합성과 expected field value를 검토 후 승인 반영
-
-### 10.4 PDF File Name Changes But Role Stays The Same
-
-- source role continuity를 우선 판단한다.
-- 같은 governing document의 새 버전이면 같은 logical source 아래 URL만 갱신할 수 있다.
-- 완전히 다른 약관 문서라면 새 candidate source로 본다.
+Explicitly deferred from the MVP:
+- crawler-driven registry auto-promotion
+- candidate-diff review UI for registry changes
+- scheduler-level refresh governance UI
+- visual diffing between historical registry versions
 
 ---
 
-## 11. Current Repository State vs Target Operating Model
+## 6. Collection Semantics
 
-현재 repo 구현 상태:
+For this policy, `collect` means:
 
-- `worker/discovery/data/td_savings_source_registry.json`은 approved active registry seed다.
-- discovery는 active registry를 source of truth로 사용한다.
-- snapshot capture는 selected source에 대해 lightweight preflight drift check를 수행할 수 있다.
-- scheduled refresh artifact generation은 discovery warnings와 preflight drift 결과를 JSON artifact로 만들 수 있다.
-- active registry 자동 승격, candidate persistence, approval UI는 아직 없다.
+1. use the selected source rows as run scope
+2. fetch and persist snapshots as needed
+3. parse and chunk the fetched content
+4. run extraction and normalization
+5. persist `normalized_candidate`
+6. run normal validation/routing behavior
+7. create `review_task` rows when the candidate is not auto-clear
 
-이번 문서가 정의하는 target operating model:
-
-- ingestion preflight drift check 추가
-- scheduled refresh 결과 artifact 추가
-- candidate diff review and promotion 절차 추가
-- later admin review UI 또는 equivalent operator tooling 추가
-
-즉, 현재 구현은 `approved active registry + preflight signal + refresh artifact` 단계까지 와 있고, approval workflow automation은 후속 구현 범위다.
-
----
-
-## 12. Non-Goals
-
-이번 정책 문서가 아직 정하지 않는 것:
-
-- exact scheduler platform
-- admin UI wireframe
-- diff persistence table schema
-- notification channel detail
-- cross-bank generalized registry engine
-
-이 항목들은 prototype 운영 필요가 실제로 생기는 시점에 별도 slice로 닫는다.
+Important rules:
+- the run must persist which source rows were selected so the collection scope is reproducible later
+- `detail` sources are the default candidate-producing scope
+- supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
+- supporting sources should not create primary standalone candidates unless the registry explicitly marks them as candidate-producing
 
 ---
 
-## 13. Follow-On Work Unlocked
+## 7. JSON Retirement Rule
 
-- discovery preflight drift check
-- refresh result artifact design
-- candidate diff persistence model
-- operator review CLI or admin UI
-- registry promotion audit log
+Current repo JSON registry files remain useful as historical baseline artifacts and migration input.
+
+However, once the DB-backed admin-managed registry is introduced:
+- operators do not manage live registry state through JSON anymore
+- runtime collection must read the DB-backed registry state
+- JSON files stop being the operational source of truth
+
+This is an operations-policy change, not a requirement to immediately delete the historical files from the repository.
 
 ---
 
-## 14. Change History
+## 8. Current Repository State
+
+Current repository state:
+- the repo contains `source_registry_catalog.json` and per-bank registry JSON baselines
+- the live admin runtime now includes `/admin/banks`, `/admin/source-catalog`, and read-only `/admin/sources`
+- operator-managed registry ownership now lives in `bank` and `source_registry_catalog_item`
+- generated source detail lives in `source_registry_item`
+- the DB tables are bootstrapped from the committed JSON catalog only when empty
+- collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
+- the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
+- candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only the existing TD savings supporting-source merge path auto-included today
+
+---
+
+## 9. Non-Goals
+
+The following are intentionally out of scope for the first source-registry admin slice:
+
+- automatic source discovery that silently edits the active registry
+- complex candidate-diff review UX for registry promotion
+- generalized multi-bank supporting-source inference engine beyond what the existing pipeline already needs
+- replacing run diagnostics, review queue, or change history with a source-centric workflow
+- bulk destructive actions without audit visibility
+
+---
+
+## 10. Follow-On Work Remaining
+
+- explicit DB import/export tooling for source-registry administration beyond first-boot seeding
+- broader supporting-source auto-inclusion rules beyond the existing TD savings path
+- dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
+- optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
+
+---
+
+## 11. Change History
 
 | Date | Change |
 |---|---|
 | 2026-04-10 | Initial source registry refresh and approval policy added |
+| 2026-04-15 | Replaced the JSON-first approval baseline with a DB-backed admin-managed source registry baseline and defined `collect` as candidate-producing ingestion |
+| 2026-04-15 | Refined the MVP so operators manage banks and source catalog coverage while generated source rows remain read-only |
+| 2026-04-15 | Updated the policy after the `WBS 5.15` implementation so current-state notes now reflect the live DB-backed `/admin/sources` runtime |

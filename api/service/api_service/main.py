@@ -17,8 +17,13 @@ from api_service.change_history import load_change_history_list, normalize_chang
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
+from api_service.models import BankWriteRequest
 from api_service.models import LoginRequest
 from api_service.models import ReviewDecisionRequest
+from api_service.models import SourceCatalogCollectionRequest
+from api_service.models import SourceCatalogWriteRequest
+from api_service.models import SourceCollectionRequest
+from api_service.models import SourceRegistryWriteRequest
 from api_service.public_dashboard import (
     SUPPORTED_AXIS_PRESETS,
     load_public_dashboard_rankings,
@@ -41,6 +46,25 @@ from api_service.review_detail import (
 )
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.run_status import load_run_status_detail, load_run_status_list, normalize_run_status_filters
+from api_service.source_registry import (
+    SourceRegistryError,
+    load_source_registry_detail,
+    load_source_registry_list,
+    normalize_source_registry_filters,
+)
+from api_service.source_catalog import (
+    create_bank_profile,
+    create_source_catalog_item,
+    load_bank_detail,
+    load_bank_list,
+    load_source_catalog_detail,
+    load_source_catalog_list,
+    normalize_bank_filters,
+    normalize_source_catalog_filters,
+    start_source_catalog_collection,
+    update_bank_profile,
+    update_source_catalog_item,
+)
 
 
 def _request_ip(request: Request) -> str | None:
@@ -143,6 +167,11 @@ async def review_task_error_handler(request: Request, exc: ReviewTaskError):
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
 
 
+@app.exception_handler(SourceRegistryError)
+async def source_registry_error_handler(request: Request, exc: SourceRegistryError):
+    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError):
     return _error(status_code=422, code="validation_error", message="Invalid request payload.", request=request)
@@ -157,7 +186,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=sorted({*settings.allowed_public_origins, *settings.allowed_admin_origins}),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
     allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
 )
 
@@ -184,6 +213,11 @@ def _require_csrf(request: Request, *, session_info: dict[str, Any]) -> None:
     provided = request.headers.get("x-csrf-token")
     if not expected or provided != expected:
         raise ReviewTaskError(status_code=403, code="invalid_csrf_token", message="A valid CSRF token is required.")
+
+
+def _require_admin_role(actor: dict[str, Any]) -> None:
+    if str(actor.get("role") or "").lower() != "admin":
+        raise SourceRegistryError(status_code=403, code="admin_role_required", message="Admin role is required for source registry changes.")
 
 
 @app.get("/healthz")
@@ -262,6 +296,264 @@ async def session(request: Request) -> JSONResponse:
         },
         request,
     )
+
+
+@app.get("/api/admin/sources")
+async def source_registry_list(
+    request: Request,
+    bank_code: str | None = None,
+    country_code: str | None = None,
+    product_type: str | None = None,
+    status: str | None = None,
+    discovery_role: str | None = None,
+    q: str | None = None,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_source_registry_filters(
+        bank_code=bank_code,
+        country_code=country_code,
+        product_type=product_type,
+        status=status,
+        discovery_role=discovery_role,
+        search=q,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_source_registry_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/sources")
+async def create_source_registry(
+    request: Request,
+    payload: SourceRegistryWriteRequest,
+) -> JSONResponse:
+    _resolve_session(request)
+    return _error(
+        status_code=405,
+        code="source_registry_read_only",
+        message="Source registry rows are read-only. Update Banks or Source Catalog instead.",
+        request=request,
+    )
+
+
+@app.get("/api/admin/sources/{source_id}")
+async def source_registry_detail(request: Request, source_id: str) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_source_registry_detail(connection, source_id=source_id)
+    if not payload:
+        return _error(status_code=404, code="source_registry_item_not_found", message="Source registry item was not found.", request=request)
+    return _success(payload, request)
+
+
+@app.patch("/api/admin/sources/{source_id}")
+async def patch_source_registry(
+    request: Request,
+    source_id: str,
+    payload: SourceRegistryWriteRequest,
+) -> JSONResponse:
+    _resolve_session(request)
+    return _error(
+        status_code=405,
+        code="source_registry_read_only",
+        message="Source registry rows are read-only. Update Banks or Source Catalog instead.",
+        request=request,
+    )
+
+
+@app.post("/api/admin/source-collections")
+async def launch_source_collection(request: Request, payload: SourceCollectionRequest) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        result = start_source_collection(
+            connection,
+            source_ids=payload.source_ids,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success(result, request, status_code=202)
+
+
+@app.get("/api/admin/banks")
+async def bank_list(
+    request: Request,
+    status: str | None = None,
+    q: str | None = None,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_bank_filters(search=q, status=status)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_bank_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/banks")
+async def create_bank(
+    request: Request,
+    payload: BankWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        bank = create_bank_profile(
+            connection,
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"bank": bank}, request, status_code=201)
+
+
+@app.get("/api/admin/banks/{bank_code}")
+async def bank_detail(request: Request, bank_code: str) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_bank_detail(connection, bank_code=bank_code.upper())
+    if not payload:
+        return _error(status_code=404, code="bank_profile_not_found", message="Bank profile was not found.", request=request)
+    return _success(payload, request)
+
+
+@app.patch("/api/admin/banks/{bank_code}")
+async def patch_bank(
+    request: Request,
+    bank_code: str,
+    payload: BankWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        bank = update_bank_profile(
+            connection,
+            bank_code=bank_code.upper(),
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"bank": bank}, request)
+
+
+@app.get("/api/admin/source-catalog")
+async def source_catalog_list(
+    request: Request,
+    bank_code: str | None = None,
+    product_type: str | None = None,
+    status: str | None = None,
+    q: str | None = None,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_source_catalog_filters(
+        search=q,
+        bank_code=bank_code,
+        product_type=product_type,
+        status=status,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_source_catalog_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/source-catalog")
+async def create_source_catalog(
+    request: Request,
+    payload: SourceCatalogWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        catalog_item = create_source_catalog_item(
+            connection,
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"catalog_item": catalog_item}, request, status_code=201)
+
+
+@app.get("/api/admin/source-catalog/{catalog_item_id}")
+async def source_catalog_detail(request: Request, catalog_item_id: str) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
+    if not payload:
+        return _error(status_code=404, code="source_catalog_not_found", message="Source catalog item was not found.", request=request)
+    return _success(payload, request)
+
+
+@app.patch("/api/admin/source-catalog/{catalog_item_id}")
+async def patch_source_catalog(
+    request: Request,
+    catalog_item_id: str,
+    payload: SourceCatalogWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        catalog_item = update_source_catalog_item(
+            connection,
+            catalog_item_id=catalog_item_id,
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"catalog_item": catalog_item}, request)
+
+
+@app.post("/api/admin/source-catalog/collect")
+async def launch_source_catalog_collection(request: Request, payload: SourceCatalogCollectionRequest) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        result = start_source_catalog_collection(
+            connection,
+            catalog_item_ids=payload.catalog_item_ids,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success(result, request, status_code=202)
 
 
 @app.get("/api/public/products")
