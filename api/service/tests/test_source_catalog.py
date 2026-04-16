@@ -4,6 +4,8 @@ import unittest
 from unittest.mock import patch
 
 from api_service.source_catalog import (
+    _backfill_seeded_bank_profile_fields,
+    _record_catalog_audit_event,
     create_bank_profile,
     create_source_catalog_item,
     start_source_catalog_collection,
@@ -189,6 +191,54 @@ class SourceCatalogTests(unittest.TestCase):
             actor={"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
             request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
         )
+
+    def test_backfill_seeded_bank_profile_fields_updates_missing_homepage_data(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with patch(
+            "api_service.source_catalog.load_seed_bank_profiles",
+            return_value=[
+                {
+                    "bank_code": "RBC",
+                    "homepage_url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html",
+                    "normalized_homepage_url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html",
+                    "source_language": "en",
+                }
+            ],
+        ):
+            _backfill_seeded_bank_profile_fields(connection)
+
+        self.assertEqual(len(connection.calls), 1)
+        sql, params = connection.calls[0]
+        self.assertIn("UPDATE bank", sql)
+        self.assertEqual(params["bank_code"], "RBC")
+        self.assertIn("homepage_url", params)
+
+    def test_record_catalog_audit_event_uses_current_audit_schema(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with patch("api_service.source_catalog.new_id", return_value="audit-001"):
+            _record_catalog_audit_event(
+                connection,
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+                event_type="bank_profile_updated",
+                target_id="BMO",
+                target_type="bank",
+                diff_summary="Updated bank profile `BMO`: Homepage URL.",
+                metadata={"bank_code": "BMO"},
+            )
+
+        self.assertEqual(len(connection.calls), 1)
+        sql, params = connection.calls[0]
+        self.assertIn("event_category", sql)
+        self.assertIn("actor_role_snapshot", sql)
+        self.assertIn("occurred_at", sql)
+        self.assertEqual(params["audit_event_id"], "audit-001")
+        self.assertEqual(params["event_category"], "config")
+        self.assertEqual(params["actor_id"], "usr-001")
+        self.assertEqual(params["actor_role_snapshot"], "admin")
+        self.assertEqual(params["diff_summary"], "Updated bank profile `BMO`: Homepage URL.")
 
 
 if __name__ == "__main__":

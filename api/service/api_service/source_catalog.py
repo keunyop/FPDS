@@ -898,6 +898,8 @@ def _ensure_bank_and_catalog_seeded(connection: Connection) -> None:
                 },
             )
 
+    _backfill_seeded_bank_profile_fields(connection)
+
     row = connection.execute("SELECT COUNT(*) AS item_count FROM source_registry_catalog_item").fetchone()
     if row and int(row["item_count"]) > 0:
         return
@@ -933,6 +935,26 @@ def _ensure_bank_and_catalog_seeded(connection: Connection) -> None:
                 "created_at": seeded_at,
                 "updated_at": seeded_at,
             },
+        )
+
+
+def _backfill_seeded_bank_profile_fields(connection: Connection) -> None:
+    for item in load_seed_bank_profiles():
+        connection.execute(
+            """
+            UPDATE bank
+            SET
+                homepage_url = COALESCE(NULLIF(BTRIM(homepage_url), ''), %(homepage_url)s),
+                normalized_homepage_url = COALESCE(NULLIF(BTRIM(normalized_homepage_url), ''), %(normalized_homepage_url)s),
+                source_language = COALESCE(NULLIF(BTRIM(source_language), ''), %(source_language)s)
+            WHERE bank_code = %(bank_code)s
+              AND (
+                NULLIF(BTRIM(homepage_url), '') IS NULL
+                OR NULLIF(BTRIM(normalized_homepage_url), '') IS NULL
+                OR NULLIF(BTRIM(source_language), '') IS NULL
+              )
+            """,
+            item,
         )
 
 
@@ -1332,40 +1354,54 @@ def _record_catalog_audit_event(
         """
         INSERT INTO audit_event (
             audit_event_id,
-            actor_user_id,
+            event_category,
             event_type,
+            actor_type,
+            actor_id,
+            actor_role_snapshot,
             target_type,
             target_id,
             request_id,
+            diff_summary,
+            source_ref,
             ip_address,
             user_agent,
             event_payload,
-            created_at
+            occurred_at
         )
         VALUES (
             %(audit_event_id)s,
-            %(actor_user_id)s,
+            %(event_category)s,
             %(event_type)s,
+            'user',
+            %(actor_id)s,
+            %(actor_role_snapshot)s,
             %(target_type)s,
             %(target_id)s,
             %(request_id)s,
+            %(diff_summary)s,
+            %(source_ref)s,
             %(ip_address)s,
             %(user_agent)s,
             %(event_payload)s::jsonb,
-            %(created_at)s
+            %(occurred_at)s
         )
         """,
         {
             "audit_event_id": new_id("audit"),
-            "actor_user_id": actor.get("user_id"),
+            "event_category": "config",
             "event_type": event_type,
+            "actor_id": actor.get("user_id"),
+            "actor_role_snapshot": actor.get("role"),
             "target_type": target_type,
             "target_id": target_id,
             "request_id": request_context.get("request_id"),
+            "diff_summary": diff_summary,
+            "source_ref": request_context.get("request_id"),
             "ip_address": request_context.get("ip_address"),
             "user_agent": request_context.get("user_agent"),
             "event_payload": json.dumps({"diff_summary": diff_summary, **metadata}, ensure_ascii=True),
-            "created_at": utc_now(),
+            "occurred_at": utc_now(),
         },
     )
 

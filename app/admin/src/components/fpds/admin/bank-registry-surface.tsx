@@ -4,15 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
+import { OfferModal4 } from "@/components/offer-modal4";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
-import { BankDetailSurface } from "@/components/fpds/admin/bank-detail-surface";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
 import type { BankDetailResponse, BankItem, BankListResponse } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -154,7 +148,7 @@ export function BankRegistrySurface({
           </button>
         </div>
         <div className="overflow-x-auto px-6 py-5">
-          <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
+          <table className="min-w-[880px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">Bank</th>
@@ -163,13 +157,12 @@ export function BankRegistrySurface({
                 <th className="border-b border-border px-3 py-3 font-medium">Status</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Catalog items</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Generated sources</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Updated</th>
               </tr>
             </thead>
             <tbody>
               {banks.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={7}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
                     No banks matched the current filter set.
                   </td>
                 </tr>
@@ -194,7 +187,6 @@ export function BankRegistrySurface({
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.catalog_item_count}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">{item.updated_at ?? "n/a"}</td>
                   </tr>
                 ))
               )}
@@ -203,24 +195,67 @@ export function BankRegistrySurface({
         </div>
       </article>
 
-      <Dialog onOpenChange={handleAddDialogChange} open={addModalOpen}>
-        <DialogContent className="p-0">
-          <DialogHeader>
-            <DialogTitle>Add bank</DialogTitle>
-            <DialogDescription>
-              Add the public bank profile here. The system will generate the bank code and keep the workflow on the
-              current list screen.
-            </DialogDescription>
-          </DialogHeader>
-          <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} />
-        </DialogContent>
-      </Dialog>
+      <OfferModal4
+        description="Add a bank profile without leaving the current bank list."
+        footer={
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            Bank code is generated automatically after save, and the current search context stays in place.
+          </p>
+        }
+        onOpenChange={handleAddDialogChange}
+        open={addModalOpen}
+        panelBadge="Admin workflow"
+        panelDescription="Capture the public bank profile here, then reuse it from source catalog coverage and generated source inspection."
+        panelStats={[
+          { label: "Current scope", value: `${banks.summary.total_items} banks` },
+          { label: "Active banks", value: `${banks.summary.status_counts.active ?? 0}` },
+        ]}
+        panelTitle="Bank registry workflow"
+        title="Add bank"
+      >
+        <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} />
+      </OfferModal4>
 
-      <Dialog onOpenChange={handleDetailDialogChange} open={detailModalOpen}>
-        <DialogContent className="p-0">
-          {activeBankDetail ? <BankDetailSurface csrfToken={csrfToken} detail={activeBankDetail} locale={locale} variant="dialog" /> : null}
-        </DialogContent>
-      </Dialog>
+      <OfferModal4
+        description={
+          activeBankDetail
+            ? "Review and update the public bank profile while keeping search and list context anchored on /admin/banks."
+            : undefined
+        }
+        footer={
+          activeBankDetail ? (
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">
+              Bank code and country stay read-only here. Source coverage work continues from source catalog.
+            </p>
+          ) : undefined
+        }
+        onOpenChange={handleDetailDialogChange}
+        open={detailModalOpen}
+        panelBadge={activeBankDetail?.bank.status === "active" ? "Active bank" : "Inactive bank"}
+        panelDescription={
+          activeBankDetail
+            ? "Open detail editing in place, then jump to source catalog when you want to expand product coverage for this bank."
+            : "Bank detail is loading."
+        }
+        panelStats={
+          activeBankDetail
+            ? [
+                { label: "Catalog items", value: `${activeBankDetail.bank.catalog_item_count}` },
+                { label: "Generated sources", value: `${activeBankDetail.bank.generated_source_count}` },
+              ]
+            : []
+        }
+        panelTitle={activeBankDetail ? activeBankDetail.bank.bank_name : "Bank detail"}
+        title={activeBankDetail ? activeBankDetail.bank.bank_name : "Bank detail"}
+      >
+        {activeBankDetail ? (
+          <BankDetailDialogContent
+            csrfToken={csrfToken}
+            detail={activeBankDetail}
+            locale={locale}
+          />
+        ) : null}
+      </OfferModal4>
     </section>
   );
 }

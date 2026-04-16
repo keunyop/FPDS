@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { FileText, Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
+import { Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -13,19 +14,13 @@ import {
   InputGroupInput,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import type { BankItem } from "@/lib/admin-api";
+import type { BankDetailResponse } from "@/lib/admin-api";
+import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
-type BankCreateDialogContentProps = {
+type BankDetailDialogContentProps = {
+  detail: BankDetailResponse;
+  locale: AdminLocale;
   csrfToken: string | null | undefined;
-  onCreated: (bank: BankItem | null) => void;
-};
-
-type CreateBankFormState = {
-  bank_name: string;
-  homepage_url: string;
-  source_language: string;
-  status: string;
-  change_reason: string;
 };
 
 const LANGUAGE_OPTIONS = [
@@ -39,46 +34,47 @@ const STATUS_OPTIONS = [
   { label: "inactive", value: "inactive" },
 ] as const;
 
-const DEFAULT_CREATE_FORM: CreateBankFormState = {
-  bank_name: "",
-  homepage_url: "",
-  source_language: "en",
-  status: "active",
-  change_reason: "",
-};
-
-export function BankCreateDialogContent({ csrfToken, onCreated }: BankCreateDialogContentProps) {
+export function BankDetailDialogContent({
+  detail,
+  locale,
+  csrfToken,
+}: BankDetailDialogContentProps) {
   const router = useRouter();
-  const [createForm, setCreateForm] = useState<CreateBankFormState>(DEFAULT_CREATE_FORM);
+  const [form, setForm] = useState({
+    bank_name: detail.bank.bank_name,
+    homepage_url: detail.bank.homepage_url ?? "",
+    source_language: detail.bank.source_language,
+    status: detail.bank.status,
+    change_reason: detail.bank.change_reason ?? "",
+  });
   const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+  async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
+    setMessage(null);
     setError(null);
 
     try {
-      const response = await fetch("/admin/banks/create", {
-        method: "POST",
+      const response = await fetch(`/admin/banks/${detail.bank.bank_code}/update`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
         },
-        body: JSON.stringify(createForm),
+        body: JSON.stringify(form),
       });
-      const payload = (await response.json()) as { data?: { bank?: BankItem }; error?: { message?: string } };
+      const payload = (await response.json()) as { error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Bank could not be created.");
+        setError(payload.error?.message ?? "Bank could not be updated.");
         return;
       }
-
-      const createdBank = payload.data?.bank ?? null;
-      setCreateForm(DEFAULT_CREATE_FORM);
-      onCreated(createdBank);
+      setMessage("Bank profile was updated.");
       router.refresh();
     } catch {
-      setError("Bank could not be created. Check the admin API and try again.");
+      setError("Bank could not be updated. Check the admin API and try again.");
     } finally {
       setPending(false);
     }
@@ -86,77 +82,109 @@ export function BankCreateDialogContent({ csrfToken, onCreated }: BankCreateDial
 
   return (
     <div className="space-y-5">
-      {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ReadonlySummary label="Bank code" value={detail.bank.bank_code} />
+        <ReadonlySummary label="Country" value={detail.bank.country_code} />
+      </div>
 
-      <form className="space-y-4" onSubmit={handleCreate}>
+      {message ? (
+        <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {message}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      <form className="space-y-4" onSubmit={handleSave}>
         <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
           <InputField
             icon={<Landmark className="size-4" />}
             label="Bank name"
             onChange={(value) =>
-              setCreateForm((current) => ({ ...current, bank_name: value }))
+              setForm((current) => ({ ...current, bank_name: value }))
             }
-            value={createForm.bank_name}
+            value={form.bank_name}
           />
           <InputField
             icon={<Globe className="size-4" />}
             label="Homepage URL"
             onChange={(value) =>
-              setCreateForm((current) => ({ ...current, homepage_url: value }))
+              setForm((current) => ({ ...current, homepage_url: value }))
             }
-            value={createForm.homepage_url}
+            value={form.homepage_url}
           />
         </FieldGroup>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField
             icon={<Languages className="size-4" />}
             label="Language"
-            options={LANGUAGE_OPTIONS}
-            value={createForm.source_language}
             onChange={(value) =>
-              setCreateForm((current) => ({
-                ...current,
-                source_language: value,
-              }))
+              setForm((current) => ({ ...current, source_language: value }))
             }
+            options={LANGUAGE_OPTIONS}
+            value={form.source_language}
           />
           <SelectField
             icon={<ShieldCheck className="size-4" />}
             label="Status"
-            options={STATUS_OPTIONS}
-            value={createForm.status}
             onChange={(value) =>
-              setCreateForm((current) => ({ ...current, status: value }))
+              setForm((current) => ({ ...current, status: value }))
             }
+            options={STATUS_OPTIONS}
+            value={form.status}
           />
         </div>
+
         <Field data-invalid={Boolean(error)}>
           <FieldLabel>Change reason</FieldLabel>
           <InputGroup className="min-h-24 items-start">
-            <InputGroupAddon align="block-start">
-              <FileText className="size-4" />
-            </InputGroupAddon>
             <InputGroupTextarea
               aria-invalid={Boolean(error)}
               onChange={(event) =>
-                setCreateForm((current) => ({
+                setForm((current) => ({
                   ...current,
                   change_reason: event.target.value,
                 }))
               }
-              placeholder="Why is this bank being added?"
+              placeholder="Why was this bank profile updated?"
               rows={3}
-              value={createForm.change_reason}
+              value={form.change_reason}
             />
           </InputGroup>
           {error ? <FieldError>{error}</FieldError> : null}
         </Field>
-        <div className="flex justify-end">
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <Link
+            className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+            href={buildAdminHref(
+              "/admin/source-catalog",
+              new URLSearchParams(`bank_code=${detail.bank.bank_code}`),
+              locale,
+            )}
+          >
+            View source catalog
+          </Link>
           <Button disabled={pending} type="submit">
-            {pending ? "Adding..." : "Add bank"}
+            {pending ? "Saving..." : "Save bank"}
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function ReadonlySummary({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3">
+      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

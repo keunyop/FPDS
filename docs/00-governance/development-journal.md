@@ -1500,10 +1500,10 @@ Each entry should include:
 - Status: `done`
 - Goal: move the bank admin flow to a search-first list with modal-based add and detail editing so operators do not leave `/admin/banks` for routine bank management
 - Why now: Product Owner requested that the bank list sit directly under search and that both add-bank and bank-detail work open in modals instead of forcing a second page transition
-- Outcome: reordered `/admin/banks` so search is followed immediately by the bank list, replaced the inline create section with an `Add bank` dialog, switched bank-name clicks to open an editable bank-detail dialog, and kept the direct `/admin/banks/:bankCode` route only as a compatibility deep link
+- Outcome: reordered `/admin/banks` so search is followed immediately by the bank list, replaced the inline create section with an `Add bank` dialog, switched bank-name clicks to open an editable bank-detail dialog, then refreshed both dialogs to use the requested Shadcnblocks `offer-modal4` shell plus its `field` and `input-group` primitives while keeping the direct `/admin/banks/:bankCode` route as a compatibility deep link
 - Not done: this slice did not change the source-catalog workflow, did not remove the direct bank-detail page route, and did not add new backend APIs
-- Key files: `app/admin/src/app/admin/banks/page.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/ui/dialog.tsx`, `app/admin/README.md`
-- Decisions: kept the modal state URL-addressable through query params so refresh and shareable local QA links still restore the active add/detail modal. Reused the existing bank detail and create proxy routes instead of widening the API surface
+- Key files: `app/admin/src/app/admin/banks/page.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/ui/dialog.tsx`, `app/admin/src/components/ui/field.tsx`, `app/admin/src/components/ui/input-group.tsx`, `app/admin/src/components/ui/textarea.tsx`, `app/admin/README.md`
+- Decisions: kept the modal state URL-addressable through query params so refresh and shareable local QA links still restore the active add/detail modal. Reused the existing bank detail and create proxy routes instead of widening the API surface. Installed the requested Shadcnblocks `offer-modal4` block and adapted its shell as the modal foundation instead of keeping a bespoke dialog wrapper
 - Verification:
   - `pnpm run typecheck`
   - passed in `app/admin`
@@ -1511,6 +1511,62 @@ Each entry should include:
   - passed in `app/admin`
 - Known issues: the list now prefers the modal workflow, but the direct `/admin/banks/:bankCode` route remains in place for compatibility and route-level fallback behavior
 - Next step: smoke test the revised `/admin/banks` flow in local dev and decide whether source-catalog coverage should adopt the same modal pattern later
+
+## 2026-04-16 - Bank Registry Modal Width Tuning
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: keep the requested Shadcnblocks `offer-modal4` base while resizing the bank add and detail dialogs so the full workflow fits a single desktop screen more reliably
+- Why now: Product Owner clarified that `offer-modal4` should be used as the implementation base, but the bank workflow still needed FPDS look-and-feel and a wider layout because the imported shell was too narrow for practical admin use
+- Outcome: widened the shared modal shell, reduced its large-screen left rail, aligned its color treatment with the existing FPDS admin surface, shortened dialog copy, and changed the bank create/detail forms to use two-column top rows plus shorter textarea height so the content fits without the cramped tall layout from the vendor default
+- Not done: this slice did not change modal routing, did not alter the bank backend APIs, and did not apply the same width treatment to other admin workflows
+- Key files: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/README.md`
+- Decisions: kept the Shadcnblocks block as the implementation foundation, but treated it as a vendor primitive rather than a fixed visual spec so the resulting dialog could follow FPDS tone, spacing, and width requirements
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: actual viewport fit still depends on browser zoom level and local font rendering, so final ergonomic validation should happen in a real `/admin/banks` browser session
+- Next step: smoke test add-bank and bank-detail modals in local dev at the Product Owner's usual browser zoom and decide whether the same widened shell should be standardized for source-catalog modals later
+
+## 2026-04-16 - Bank Registry Language and Homepage Cleanup
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: align the bank-management UI with the approved EN/KO/JA operator language vocabulary, restore missing homepage URLs on existing seeded banks, and simplify the bank list columns
+- Why now: Product Owner requested that the bank modal language selector use English, Korean, and Japanese, reported that currently registered banks were showing blank homepage URLs, and asked to remove the low-value `Updated` column from the bank list
+- Outcome: changed the bank create and detail surfaces to use `English`, `Korean`, and `Japanese` options backed by `en`, `ko`, and `ja`, removed the `Updated` column from `/admin/banks`, and added a safe seed-profile backfill in the admin API so existing registry banks recover missing homepage URL, normalized homepage URL, and source-language values without overwriting already populated fields
+- Not done: this slice did not change source-catalog field labels, did not alter the public UI locale policy, and did not override non-empty bank profile values that operators may already have edited manually
+- Key files: `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-surface.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `app/admin/README.md`
+- Decisions: kept the bank field named as source language even though the selectable values now mirror the approved EN/KO/JA operator language set. Implemented homepage repair as a missing-field-only backfill from the committed Big 5 seed registry so routine page loads can heal older local DB rows without wiping customized bank records
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `api/service/.venv/Scripts/python.exe -m unittest tests.test_source_catalog`
+  - passed
+- Known issues: seed backfill only helps banks that exist in the committed seed registry, so manually created banks with genuinely missing homepage URLs still need operator edits
+- Next step: reload `/admin/banks` in local dev and confirm the existing Big 5 bank rows now show homepage URLs without requiring a manual resave
+
+## 2026-04-16 - Bank Profile Audit Schema Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: restore successful bank-profile updates after the bank homepage edit flow started failing with a 500 from the admin API
+- Why now: editing a bank homepage URL triggered `psycopg.errors.UndefinedColumn` because the source-catalog audit writer still inserted into the pre-runtime `audit_event` column shape instead of the current canonical audit schema
+- Outcome: updated the source-catalog audit writer to use the live `audit_event` contract with `event_category`, `actor_id`, `actor_role_snapshot`, `diff_summary`, `source_ref`, and `occurred_at`, and added a unit test that locks the catalog audit insert shape to the current schema
+- Not done: this slice did not change bank editing UX, did not add a DB migration, and did not alter audit-log list rendering
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `docs/00-governance/development-journal.md`
+- Decisions: matched the source-catalog audit insert pattern to the existing source-registry and review-detail implementations instead of introducing a second audit schema variant or a compatibility shim
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest tests.test_source_catalog`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: none identified beyond needing a live browser retry to confirm the previously failing BMO update path is clear
+- Next step: retry editing a bank homepage in `/admin/banks` and confirm the audit event now persists cleanly with the update
 ---
 
 ## 7. Change History

@@ -11,15 +11,15 @@ type BankDetailSurfaceProps = {
   detail: BankDetailResponse;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
-  variant?: "page" | "dialog";
 };
 
-export function BankDetailSurface({
-  detail,
-  locale,
-  csrfToken,
-  variant = "page",
-}: BankDetailSurfaceProps) {
+const LANGUAGE_OPTIONS = [
+  { label: "English", value: "en" },
+  { label: "Korean", value: "ko" },
+  { label: "Japanese", value: "ja" },
+] as const;
+
+export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfaceProps) {
   const router = useRouter();
   const [form, setForm] = useState({
     bank_name: detail.bank.bank_name,
@@ -61,8 +61,6 @@ export function BankDetailSurface({
     }
   }
 
-  const pageMode = variant === "page";
-
   return (
     <section className="grid gap-6">
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
@@ -83,22 +81,14 @@ export function BankDetailSurface({
           </div>
         </div>
 
-        {pageMode ? (
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
-              Back to banks
-            </Link>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
-              View source catalog
-            </Link>
-          </div>
-        ) : (
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
-              View source catalog
-            </Link>
-          </div>
-        )}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
+            Back to banks
+          </Link>
+          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
+            View source catalog
+          </Link>
+        </div>
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -110,7 +100,7 @@ export function BankDetailSurface({
             <ReadonlyField label="Country" value={detail.bank.country_code} />
             <TextField label="Bank name" value={form.bank_name} onChange={(value) => setForm((current) => ({ ...current, bank_name: value }))} />
             <TextField label="Homepage URL" value={form.homepage_url} onChange={(value) => setForm((current) => ({ ...current, homepage_url: value }))} />
-            <SelectField label="Language" options={["en", "fr"]} value={form.source_language} onChange={(value) => setForm((current) => ({ ...current, source_language: value }))} />
+            <SelectField label="Language" options={LANGUAGE_OPTIONS} value={form.source_language} onChange={(value) => setForm((current) => ({ ...current, source_language: value }))} />
             <SelectField label="Status" options={["active", "inactive"]} value={form.status} onChange={(value) => setForm((current) => ({ ...current, status: value }))} />
           </div>
           <TextField label="Change reason" value={form.change_reason} onChange={(value) => setForm((current) => ({ ...current, change_reason: value }))} />
@@ -164,7 +154,7 @@ function SelectField({
   onChange,
 }: {
   label: string;
-  options: string[];
+  options: ReadonlyArray<string> | ReadonlyArray<{ label: string; value: string }>;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -173,8 +163,8 @@ function SelectField({
       <span className="font-medium text-foreground">{label}</span>
       <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
         {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
+          <option key={typeof option === "string" ? option : option.value} value={typeof option === "string" ? option : option.value}>
+            {typeof option === "string" ? option : option.label}
           </option>
         ))}
       </select>
