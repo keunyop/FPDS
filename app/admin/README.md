@@ -30,8 +30,8 @@ Current runtime:
 - protected `/admin/changes` change history route with canonical chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - protected `/admin/audit` audit log route with append-only chronology, actor and target context, request metadata, and review/run drilldowns
 - protected `/admin/usage` usage dashboard v1 with search, provider/stage filters, scope coverage summaries, by-model/by-agent/by-run concentration, trend deltas, and richer anomaly drilldowns
-- protected `/admin/banks` bank registry list with homepage-based bank creation, auto-generated bank code, and drill-in editing
-- protected `/admin/banks/:bankCode` bank detail route with editable bank profile fields and linked source-catalog coverage
+- protected `/admin/banks` bank registry list with search-first layout, modal-based `Add bank`, auto-generated bank code, and modal-driven bank detail editing
+- protected `/admin/banks/:bankCode` bank detail route kept for direct-link compatibility while the primary list workflow now opens bank detail in a modal
 - protected `/admin/source-catalog` source catalog list with bank/product-type dropdown creation, multi-select collection launch, and generated-source counts
 - protected `/admin/source-catalog/:catalogItemId` source catalog detail route with editable bank/product coverage and recent collection history
 - protected `/admin/sources` generated source registry list with bank/country/product/status/role filters and read-only drill-in

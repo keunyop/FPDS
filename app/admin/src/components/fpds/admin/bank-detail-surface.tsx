@@ -11,9 +11,15 @@ type BankDetailSurfaceProps = {
   detail: BankDetailResponse;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  variant?: "page" | "dialog";
 };
 
-export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfaceProps) {
+export function BankDetailSurface({
+  detail,
+  locale,
+  csrfToken,
+  variant = "page",
+}: BankDetailSurfaceProps) {
   const router = useRouter();
   const [form, setForm] = useState({
     bank_name: detail.bank.bank_name,
@@ -55,6 +61,8 @@ export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfa
     }
   }
 
+  const pageMode = variant === "page";
+
   return (
     <section className="grid gap-6">
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
@@ -75,14 +83,22 @@ export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfa
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
-            Back to banks
-          </Link>
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
-            View source catalog
-          </Link>
-        </div>
+        {pageMode ? (
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
+              Back to banks
+            </Link>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
+              View source catalog
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(`bank_code=${detail.bank.bank_code}`), locale)}>
+              View source catalog
+            </Link>
+          </div>
+        )}
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">

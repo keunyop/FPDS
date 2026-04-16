@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useMemo } from "react";
 
-import type { BankItem, BankListResponse } from "@/lib/admin-api";
+import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
+import { BankDetailSurface } from "@/components/fpds/admin/bank-detail-surface";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { BankDetailResponse, BankItem, BankListResponse } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
 export type BankRegistryPageFilters = {
@@ -17,60 +26,69 @@ type BankRegistrySurfaceProps = {
   filters: BankRegistryPageFilters;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  activeBankCode: string | null;
+  activeBankDetail: BankDetailResponse | null;
+  addModalOpen: boolean;
 };
 
-type CreateBankFormState = {
-  bank_name: string;
-  homepage_url: string;
-  source_language: string;
-  status: string;
-  change_reason: string;
-};
-
-const DEFAULT_CREATE_FORM: CreateBankFormState = {
-  bank_name: "",
-  homepage_url: "",
-  source_language: "en",
-  status: "active",
-  change_reason: "",
-};
-
-export function BankRegistrySurface({ banks, filters, locale, csrfToken }: BankRegistrySurfaceProps) {
+export function BankRegistrySurface({
+  banks,
+  filters,
+  locale,
+  csrfToken,
+  activeBankCode,
+  activeBankDetail,
+  addModalOpen,
+}: BankRegistrySurfaceProps) {
   const router = useRouter();
-  const [createForm, setCreateForm] = useState<CreateBankFormState>(DEFAULT_CREATE_FORM);
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const detailModalOpen = Boolean(activeBankCode && activeBankDetail);
+  const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    setMessage(null);
-    setError(null);
-
-    try {
-      const response = await fetch("/admin/banks/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
-        },
-        body: JSON.stringify(createForm),
-      });
-      const payload = (await response.json()) as { data?: { bank?: BankItem }; error?: { message?: string } };
-      if (!response.ok) {
-        setError(payload.error?.message ?? "Bank could not be created.");
-        return;
-      }
-      const createdBank = payload.data?.bank;
-      setMessage(`Bank ${createdBank?.bank_name ?? createForm.bank_name} was created with code ${createdBank?.bank_code ?? "auto"}.`);
-      setCreateForm(DEFAULT_CREATE_FORM);
-      router.refresh();
-    } catch {
-      setError("Bank could not be created. Check the admin API and try again.");
-    } finally {
-      setPending(false);
+  function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
+    const href = buildAdminHref("/admin/banks", params, locale);
+    if (options?.replace) {
+      router.replace(href, { scroll: false });
+      return;
     }
+    router.push(href, { scroll: false });
+  }
+
+  function openAddModal() {
+    const params = new URLSearchParams(baseSearchParams);
+    params.set("modal", "add");
+    params.delete("bank");
+    navigateWithParams(params);
+  }
+
+  function openBankModal(bankCode: string) {
+    const params = new URLSearchParams(baseSearchParams);
+    params.set("bank", bankCode);
+    params.delete("modal");
+    navigateWithParams(params);
+  }
+
+  function closeModal() {
+    navigateWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+  }
+
+  function handleAddDialogChange(open: boolean) {
+    if (!open) {
+      closeModal();
+    }
+  }
+
+  function handleDetailDialogChange(open: boolean) {
+    if (!open) {
+      closeModal();
+    }
+  }
+
+  function handleBankCreated(bank: BankItem | null) {
+    if (bank?.bank_code) {
+      openBankModal(bank.bank_code);
+      return;
+    }
+    closeModal();
   }
 
   return (
@@ -87,9 +105,14 @@ export function BankRegistrySurface({ banks, filters, locale, csrfToken }: BankR
               status metadata here.
             </p>
           </div>
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
-            Go to source catalog
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+              Add bank
+            </button>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
+              Go to source catalog
+            </Link>
+          </div>
         </div>
       </article>
 
@@ -117,37 +140,19 @@ export function BankRegistrySurface({ banks, filters, locale, csrfToken }: BankR
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="border-b border-border/80 pb-5">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Create bank</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Add the public bank profile once. The system generates the bank code and uses the homepage as the starting
-            point for source discovery later.
-          </p>
-        </div>
-
-        {message ? <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="mt-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
-
-        <form className="mt-6 grid gap-4" onSubmit={handleCreate}>
-          <div className="grid gap-4 lg:grid-cols-2">
-            <TextField label="Bank name" value={createForm.bank_name} onChange={(value) => setCreateForm((current) => ({ ...current, bank_name: value }))} />
-            <TextField label="Homepage URL" value={createForm.homepage_url} onChange={(value) => setCreateForm((current) => ({ ...current, homepage_url: value }))} />
-          </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            <SelectField label="Language" options={["en", "fr"]} value={createForm.source_language} onChange={(value) => setCreateForm((current) => ({ ...current, source_language: value }))} />
-            <SelectField label="Status" options={["active", "inactive"]} value={createForm.status} onChange={(value) => setCreateForm((current) => ({ ...current, status: value }))} />
-            <TextField label="Change reason" value={createForm.change_reason} onChange={(value) => setCreateForm((current) => ({ ...current, change_reason: value }))} />
-          </div>
-          <div className="flex justify-end">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70" disabled={pending} type="submit">
-              {pending ? "Creating..." : "Create bank"}
-            </button>
-          </div>
-        </form>
-      </article>
-
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Bank list</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Review the current bank registry under the active search filter, then open add or detail work in a modal
+              without leaving this page.
+            </p>
+          </div>
+          <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+            Add bank
+          </button>
+        </div>
         <div className="overflow-x-auto px-6 py-5">
           <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
             <thead>
@@ -172,9 +177,9 @@ export function BankRegistrySurface({ banks, filters, locale, csrfToken }: BankR
                 banks.items.map((item) => (
                   <tr className="align-top text-sm" key={item.bank_code}>
                     <td className="border-b border-border/70 px-3 py-4">
-                      <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/banks/${item.bank_code}`, new URLSearchParams(), locale)}>
+                      <button className="bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
                         {item.bank_name}
-                      </Link>
+                      </button>
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.bank_code}</td>
                     <td className="border-b border-border/70 px-3 py-4">
@@ -197,6 +202,25 @@ export function BankRegistrySurface({ banks, filters, locale, csrfToken }: BankR
           </table>
         </div>
       </article>
+
+      <Dialog onOpenChange={handleAddDialogChange} open={addModalOpen}>
+        <DialogContent className="p-0">
+          <DialogHeader>
+            <DialogTitle>Add bank</DialogTitle>
+            <DialogDescription>
+              Add the public bank profile here. The system will generate the bank code and keep the workflow on the
+              current list screen.
+            </DialogDescription>
+          </DialogHeader>
+          <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog onOpenChange={handleDetailDialogChange} open={detailModalOpen}>
+        <DialogContent className="p-0">
+          {activeBankDetail ? <BankDetailSurface csrfToken={csrfToken} detail={activeBankDetail} locale={locale} variant="dialog" /> : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
@@ -237,44 +261,13 @@ function FilterSelect({
   );
 }
 
-function SelectField({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function TextField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
-      <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" onChange={(event) => onChange(event.target.value)} value={value} />
-    </label>
-  );
+function buildRegistrySearchParams(filters: BankRegistryPageFilters) {
+  const params = new URLSearchParams();
+  if (filters.q) {
+    params.set("q", filters.q);
+  }
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+  return params;
 }

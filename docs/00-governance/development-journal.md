@@ -1475,6 +1475,42 @@ Each entry should include:
   - passed
 - Known issues: none beyond the existing Windows-specific harness need to rerun builds with enough time budget
 - Next step: restart the FastAPI service and continue with the manual bank/source-catalog smoke test
+
+## 2026-04-16 - Admin Hydration Warning Guard
+
+- WBS: `5.14`
+- Status: `done`
+- Goal: remove noisy admin-app hydration warnings caused by browser-injected root HTML attributes without changing admin page behavior
+- Why now: the `/admin/login` route raised a hydration mismatch warning in browser dev tools, and the reported diff showed an extra `crxemulator` attribute on the root `<html>` element rather than an admin-surface render mismatch
+- Outcome: added `suppressHydrationWarning` to the admin app root `<html>` in `app/admin/src/app/layout.tsx` so extension-injected attributes on the root element no longer raise a misleading hydration warning during local development
+- Not done: this slice did not suppress deeper subtree mismatches, did not change admin auth or locale behavior, and did not alter login rendering
+- Key files: `app/admin/src/app/layout.tsx`, `docs/00-governance/development-journal.md`
+- Decisions: kept the fix intentionally narrow at the root layout because the observed mismatch was extension-driven and isolated to `<html>`. Avoided broad suppression lower in the tree so real admin-surface hydration bugs would still surface
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: if a real mismatch appears inside the admin app subtree later, React will still surface it; this guard only quiets root-level browser-extension attribute drift
+- Next step: rerun the `/admin/login` smoke check in local dev to confirm the warning is gone while keeping subtree hydration checks intact
+
+## 2026-04-16 - Bank Registry Modal Workflow Refresh
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: move the bank admin flow to a search-first list with modal-based add and detail editing so operators do not leave `/admin/banks` for routine bank management
+- Why now: Product Owner requested that the bank list sit directly under search and that both add-bank and bank-detail work open in modals instead of forcing a second page transition
+- Outcome: reordered `/admin/banks` so search is followed immediately by the bank list, replaced the inline create section with an `Add bank` dialog, switched bank-name clicks to open an editable bank-detail dialog, and kept the direct `/admin/banks/:bankCode` route only as a compatibility deep link
+- Not done: this slice did not change the source-catalog workflow, did not remove the direct bank-detail page route, and did not add new backend APIs
+- Key files: `app/admin/src/app/admin/banks/page.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/ui/dialog.tsx`, `app/admin/README.md`
+- Decisions: kept the modal state URL-addressable through query params so refresh and shareable local QA links still restore the active add/detail modal. Reused the existing bank detail and create proxy routes instead of widening the API surface
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: the list now prefers the modal workflow, but the direct `/admin/banks/:bankCode` route remains in place for compatibility and route-level fallback behavior
+- Next step: smoke test the revised `/admin/banks` flow in local dev and decide whether source-catalog coverage should adopt the same modal pattern later
 ---
 
 ## 7. Change History
@@ -1532,3 +1568,5 @@ Each entry should include:
 | 2026-04-15 | Added the WBS 5.15 source registry null-filter query fix entry |
 | 2026-04-15 | Added the WBS 5.15 bank and source-catalog admin refinement entry |
 | 2026-04-16 | Added the API service worker import path fix entry |
+| 2026-04-16 | Added the admin hydration warning guard entry and verification results |
+| 2026-04-16 | Added the bank registry modal workflow refresh entry and verification results |

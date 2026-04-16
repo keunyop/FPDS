@@ -64,7 +64,7 @@ export default async function BankDetailPage({ params, searchParams }: BankDetai
         role: session.user.role,
       }}
     >
-      <BankDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
+      <BankDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} variant="page" />
     </ApplicationShell5>
   );
 }

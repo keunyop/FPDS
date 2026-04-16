@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { BankRegistrySurface, type BankRegistryPageFilters } from "@/components/fpds/admin/bank-registry-surface";
-import { fetchAdminSession, fetchBankList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchBankDetail, fetchBankList, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
@@ -16,15 +16,21 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
+  const activeBankCode = firstValue(resolvedSearchParams.bank) || null;
+  const addModalOpen = firstValue(resolvedSearchParams.modal).toLowerCase() === "add";
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let banks: Awaited<ReturnType<typeof fetchBankList>> = null;
+  let activeBankDetail: Awaited<ReturnType<typeof fetchBankDetail>> = null;
   let apiUnavailable = false;
 
   try {
     session = await fetchAdminSession();
     if (session) {
       banks = await fetchBankList(apiSearchParams);
+      if (activeBankCode) {
+        activeBankDetail = await fetchBankDetail(activeBankCode);
+      }
     }
   } catch {
     apiUnavailable = true;
@@ -60,7 +66,15 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
         role: session.user.role,
       }}
     >
-      <BankRegistrySurface banks={banks} csrfToken={session.csrf_token} filters={filters} locale={locale} />
+      <BankRegistrySurface
+        activeBankCode={activeBankCode}
+        activeBankDetail={activeBankDetail}
+        addModalOpen={addModalOpen}
+        banks={banks}
+        csrfToken={session.csrf_token}
+        filters={filters}
+        locale={locale}
+      />
     </ApplicationShell5>
   );
 }
