@@ -1341,6 +1341,40 @@ Each entry should include:
   - passed
 - Known issues: some public locale copy still remains app-local instead of coming from one shared runtime package, and `5.14` responsive QA is still the next separate slice
 - Next step: execute `WBS 5.14` responsive QA across the locale-aware public Product Grid and Insight Dashboard
+
+## 2026-04-15 - Public Hydration Warning Guard
+
+- WBS: `5.14`
+- Status: `done`
+- Goal: remove noisy public-app hydration warnings caused by browser-injected root HTML attributes without changing public page behavior
+- Why now: the `/products` route was raising a hydration mismatch warning in browser dev tools, and the reported diff showed an extra `crxemulator` attribute on the root `<html>` element rather than a product-surface render mismatch
+- Outcome: added `suppressHydrationWarning` to the public app root `<html>` in `app/public/src/app/layout.tsx` so extension-injected attributes on the root element no longer raise a misleading hydration warning during local development
+- Not done: this slice did not suppress deeper subtree mismatches, did not change public data rendering, and did not alter locale or formatting behavior
+- Key files: `app/public/src/app/layout.tsx`, `docs/00-governance/development-journal.md`
+- Decisions: kept the fix intentionally narrow at the root layout because the observed mismatch was extension-driven and isolated to `<html>`. Avoided broad suppression lower in the tree so real public-surface hydration bugs would still surface
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/public`
+  - `cmd /c npm run build`
+  - passed in `app/public`
+- Known issues: if a real mismatch appears inside the public app subtree later, React will still surface it; this guard only quiets root-level browser-extension attribute drift
+- Next step: continue `WBS 5.14` responsive QA across the locale-aware public Product Grid and Insight Dashboard
+
+## 2026-04-15 - Interim Phase 1 No-BXPF Test Checklist
+
+- WBS: `5.14`, `6.x` support
+- Status: `done`
+- Goal: document a safe interim test boundary so the team can keep validating Phase 1 work while BX-PF publish remains externally blocked
+- Why now: BX-PF readiness is outside the current repo and schedule pressure makes it important to separate "publish blocked" from "all other Phase 1 verification blocked"
+- Outcome: added a dedicated governance checklist that states what can be tested now without BX-PF, what must remain explicitly out of scope, which FPDS-owned records already persist approved product data internally, and what evidence to capture for interim QA execution
+- Not done: this slice did not implement BX-PF connector code, publish monitor routes, retry/reconciliation runtime behavior, or a completed release-hardening pack
+- Key files: `docs/00-governance/phase-1-no-bxpf-test-checklist.md`, `docs/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the checklist as an interim QA baseline rather than a scope change. Explicitly separated FPDS internal approval/persistence/public/admin verification from BX-PF publish verification so later release readiness work still has a clear remaining boundary
+- Verification:
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1`
+  - passed
+- Known issues: the checklist helps preserve schedule and testing momentum, but it does not reduce the remaining `WBS 6.x` publish/readiness work required for Phase 1 release sign-off
+- Next step: execute the new checklist against the current dev environment and capture a dated QA evidence note with pass/hold results plus representative screenshots and ids
 ---
 
 ## 7. Change History
@@ -1390,3 +1424,5 @@ Each entry should include:
 | 2026-04-14 | Added the WBS 5.10 Insight Dashboard UI implementation entry and verification results |
 | 2026-04-14 | Added the WBS 5.11 grid/dashboard cross-filter implementation entry and verification results |
 | 2026-04-15 | Added the WBS 5.13 freshness and metric note wording entry and verification results |
+| 2026-04-15 | Added the public hydration warning guard entry and verification results |
+| 2026-04-15 | Added the interim Phase 1 no-BXPF test checklist entry |

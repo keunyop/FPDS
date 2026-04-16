@@ -41,7 +41,7 @@ Status: Active Navigation Index
 - `harness-engineering-baseline.md`
 - `development-journal.md`
 - `pre-development-owner-preparation-guide.md`
-- `pre-development-owner-preparation-guide.md`
+- `phase-1-no-bxpf-test-checklist.md`
 
 ### 2.2 `docs/01-planning`
 
@@ -133,3 +133,4 @@ Status: Active Navigation Index
 |---|---|
 | 2026-04-06 | Added root-level docs map and confirmed current folder classification is valid without file moves |
 | 2026-04-13 | Added the Canada Big 5 source registry baseline document to the planning index |
+| 2026-04-15 | Added the interim Phase 1 no-BXPF test checklist to the governance index |
