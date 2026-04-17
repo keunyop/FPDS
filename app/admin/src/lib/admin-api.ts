@@ -644,6 +644,7 @@ export type BankItem = {
   created_at: string | null;
   updated_at: string | null;
   catalog_item_count: number;
+  catalog_product_types: string[];
   generated_source_count: number;
 };
 

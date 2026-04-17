@@ -4,6 +4,7 @@ import argparse
 from datetime import UTC, datetime
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from typing import Any
@@ -11,6 +12,8 @@ from urllib.parse import urlparse
 
 from api_service.config import Settings
 from api_service.db import open_connection
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def main() -> int:
@@ -48,22 +51,57 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     included_source_ids = [str(item) for item in group.get("included_source_ids", [])]
     target_source_ids = [str(item) for item in group.get("target_source_ids", [])]
 
-    _run_stage("worker.discovery.fpds_snapshot", base_args + _source_args(included_source_ids))
-    _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(included_source_ids))
-    _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(included_source_ids))
-    _run_stage("worker.pipeline.fpds_normalization", base_args + _source_args(target_source_ids))
+    snapshot_output = _run_stage("worker.discovery.fpds_snapshot", base_args + _source_args(included_source_ids))
+    successful_source_ids = _successful_source_ids(snapshot_output)
+    if not successful_source_ids:
+        raise RuntimeError("Snapshot capture failed for all selected sources.")
+
+    successful_source_id_set = set(successful_source_ids)
+    successful_target_source_ids = [source_id for source_id in target_source_ids if source_id in successful_source_id_set]
+    if not successful_target_source_ids:
+        raise RuntimeError("Snapshot capture produced no target sources eligible for normalization.")
+
+    _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(successful_source_ids))
+    _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(successful_source_ids))
+    _run_stage("worker.pipeline.fpds_normalization", base_args + _source_args(successful_target_source_ids))
     _run_stage(
         "worker.pipeline.fpds_validation_routing",
-        base_args + ["--routing-mode", "phase1"] + _source_args(target_source_ids),
+        base_args + ["--routing-mode", "phase1"] + _source_args(successful_target_source_ids),
     )
 
 
-def _run_stage(module_name: str, args: list[str]) -> None:
-    command = [sys.executable, "-m", module_name, *args]
-    completed = subprocess.run(command, check=False)  # noqa: S603
+def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
+    command = _build_worker_command(module_name, args)
+    completed = subprocess.run(command, check=False, capture_output=True, text=True, cwd=str(REPO_ROOT))  # noqa: S603
+    if completed.stdout:
+        print(completed.stdout, end="")
+    if completed.stderr:
+        print(completed.stderr, end="", file=sys.stderr)
     if completed.returncode != 0:
         stage_name = module_name.rsplit(".", 1)[-1]
         raise RuntimeError(f"{stage_name} failed with exit code {completed.returncode}.")
+    stdout = completed.stdout.strip()
+    if not stdout:
+        return {}
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError:
+        return {}
+
+
+def _build_worker_command(module_name: str, args: list[str]) -> list[str]:
+    uv_executable = shutil.which("uv")
+    if not uv_executable:
+        raise RuntimeError("`uv` is required to launch worker stages from the source collection runner.")
+    return [uv_executable, "run", "--project", str(REPO_ROOT), "python", "-m", module_name, *args]
+
+
+def _successful_source_ids(snapshot_output: dict[str, Any]) -> list[str]:
+    source_ids: list[str] = []
+    for item in snapshot_output.get("source_results", []):
+        if str(item.get("snapshot_action")) in {"stored", "reused"} and item.get("source_id"):
+            source_ids.append(str(item["source_id"]))
+    return source_ids
 
 
 def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:

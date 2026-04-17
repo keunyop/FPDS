@@ -36,15 +36,21 @@ class DiscoveryFetchPolicy:
     max_redirects: int = 5
 
     @classmethod
-    def from_env(cls) -> "DiscoveryFetchPolicy":
+    def from_env(cls, *, extra_allowed_domains: tuple[str, ...] | list[str] = ()) -> "DiscoveryFetchPolicy":
         import os
 
         raw_allowlist = os.getenv("FPDS_SOURCE_FETCH_ALLOWLIST", "td.com,tdcanadatrust.com")
-        allowed_domains = tuple(
+        allowlist = [
             domain.strip().lower()
             for domain in raw_allowlist.split(",")
             if domain.strip()
+        ]
+        allowlist.extend(
+            domain.strip().lower()
+            for domain in extra_allowed_domains
+            if str(domain).strip()
         )
+        allowed_domains = tuple(dict.fromkeys(allowlist))
         block_private = os.getenv("FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS", "true").strip().lower() != "false"
         return cls(allowed_domains=allowed_domains, block_private_networks=block_private)
 

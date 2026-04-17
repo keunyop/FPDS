@@ -37,10 +37,7 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
           </div>
           <div className="flex flex-wrap gap-2">
             <Link className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
-              Manage banks
-            </Link>
-            <Link className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
-              Manage source catalog
+              Manage banks and coverage
             </Link>
           </div>
         </div>

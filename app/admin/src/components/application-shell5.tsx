@@ -229,17 +229,10 @@ function getNavGroups(locale: AdminLocale): NavGroup[] {
       items: [
         {
           label: "Banks",
-          description: "Bank list and homepage setup",
+          description: "Bank list, homepage setup, and coverage",
           href: "/admin/banks",
           status: copy.status.live,
           icon: Search,
-        },
-        {
-          label: "Source Catalog",
-          description: "Bank and product coverage management",
-          href: "/admin/source-catalog",
-          status: copy.status.live,
-          icon: ShieldCheck,
         },
         {
           label: "Sources",

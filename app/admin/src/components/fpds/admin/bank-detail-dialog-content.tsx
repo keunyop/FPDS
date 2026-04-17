@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
@@ -15,7 +15,7 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group";
 import type { BankDetailResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import type { AdminLocale } from "@/lib/admin-i18n";
 
 type BankDetailDialogContentProps = {
   detail: BankDetailResponse;
@@ -82,9 +82,17 @@ export function BankDetailDialogContent({
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <ReadonlySummary label="Bank code" value={detail.bank.bank_code} />
         <ReadonlySummary label="Country" value={detail.bank.country_code} />
+        <ReadonlySummary
+          label="Coverage"
+          value={`${detail.catalog_items.length} item(s)`}
+        />
+        <ReadonlySummary
+          label="Generated sources"
+          value={String(detail.bank.generated_source_count)}
+        />
       </div>
 
       {message ? (
@@ -98,82 +106,96 @@ export function BankDetailDialogContent({
         </p>
       ) : null}
 
-      <form className="space-y-4" onSubmit={handleSave}>
-        <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
-          <InputField
-            icon={<Landmark className="size-4" />}
-            label="Bank name"
-            onChange={(value) =>
-              setForm((current) => ({ ...current, bank_name: value }))
-            }
-            value={form.bank_name}
-          />
-          <InputField
-            icon={<Globe className="size-4" />}
-            label="Homepage URL"
-            onChange={(value) =>
-              setForm((current) => ({ ...current, homepage_url: value }))
-            }
-            value={form.homepage_url}
-          />
-        </FieldGroup>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <section className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Bank profile
+            </p>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Operator-supplied bank information
+            </h2>
+            <p className="text-sm leading-6 text-muted-foreground">
+              This is the only URL operators enter manually. FPDS uses this homepage as the
+              discovery starting point for all coverage below.
+            </p>
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField
-            icon={<Languages className="size-4" />}
-            label="Language"
-            onChange={(value) =>
-              setForm((current) => ({ ...current, source_language: value }))
-            }
-            options={LANGUAGE_OPTIONS}
-            value={form.source_language}
-          />
-          <SelectField
-            icon={<ShieldCheck className="size-4" />}
-            label="Status"
-            onChange={(value) =>
-              setForm((current) => ({ ...current, status: value }))
-            }
-            options={STATUS_OPTIONS}
-            value={form.status}
-          />
-        </div>
+          <form className="mt-5 space-y-4" onSubmit={handleSave}>
+            <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
+              <InputField
+                icon={<Landmark className="size-4" />}
+                label="Bank name"
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, bank_name: value }))
+                }
+                value={form.bank_name}
+              />
+              <InputField
+                icon={<Globe className="size-4" />}
+                label="Homepage URL"
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, homepage_url: value }))
+                }
+                value={form.homepage_url}
+              />
+            </FieldGroup>
 
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel>Change reason</FieldLabel>
-          <InputGroup className="min-h-24 items-start">
-            <InputGroupTextarea
-              aria-invalid={Boolean(error)}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  change_reason: event.target.value,
-                }))
-              }
-              placeholder="Why was this bank profile updated?"
-              rows={3}
-              value={form.change_reason}
-            />
-          </InputGroup>
-          {error ? <FieldError>{error}</FieldError> : null}
-        </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SelectField
+                icon={<Languages className="size-4" />}
+                label="Language"
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, source_language: value }))
+                }
+                options={LANGUAGE_OPTIONS}
+                value={form.source_language}
+              />
+              <SelectField
+                icon={<ShieldCheck className="size-4" />}
+                label="Status"
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, status: value }))
+                }
+                options={STATUS_OPTIONS}
+                value={form.status}
+              />
+            </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <Link
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
-            href={buildAdminHref(
-              "/admin/source-catalog",
-              new URLSearchParams(`bank_code=${detail.bank.bank_code}`),
-              locale,
-            )}
-          >
-            View source catalog
-          </Link>
-          <Button disabled={pending} type="submit">
-            {pending ? "Saving..." : "Save bank"}
-          </Button>
-        </div>
-      </form>
+            <Field data-invalid={Boolean(error)}>
+              <FieldLabel>Change reason</FieldLabel>
+              <InputGroup className="min-h-20 items-start">
+                <InputGroupTextarea
+                  aria-invalid={Boolean(error)}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      change_reason: event.target.value,
+                    }))
+                  }
+                  placeholder="Why was this bank profile updated?"
+                  rows={2}
+                  value={form.change_reason}
+                />
+              </InputGroup>
+              {error ? <FieldError>{error}</FieldError> : null}
+            </Field>
+
+            <div className="flex justify-end">
+              <Button disabled={pending} type="submit">
+                {pending ? "Saving..." : "Save bank"}
+              </Button>
+            </div>
+          </form>
+        </section>
+
+        <BankCoverageSection
+          bankCode={detail.bank.bank_code}
+          catalogItems={detail.catalog_items}
+          csrfToken={csrfToken}
+          locale={locale}
+        />
+      </div>
     </div>
   );
 }

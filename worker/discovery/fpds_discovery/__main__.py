@@ -44,7 +44,7 @@ def main() -> int:
             discovery_mode=args.discovery_mode,
         )
     else:
-        policy = DiscoveryFetchPolicy.from_env()
+        policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=registry.allowed_domains)
         result = service.discover_live(
             html_loader=lambda url: fetch_text(url, policy),
             run_id=args.run_id,

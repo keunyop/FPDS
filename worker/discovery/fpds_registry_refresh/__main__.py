@@ -40,7 +40,7 @@ def main() -> int:
     registry = load_registry(args.registry_path)
     service = RegistryRefreshService(
         registry=registry,
-        fetch_policy=DiscoveryFetchPolicy.from_env(),
+        fetch_policy=DiscoveryFetchPolicy.from_env(extra_allowed_domains=registry.allowed_domains),
     )
     result = service.refresh_live(
         run_id=args.run_id,

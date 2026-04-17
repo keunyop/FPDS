@@ -97,7 +97,7 @@ def main() -> int:
         )
 
     storage_config = SnapshotStorageConfig.from_env()
-    fetch_policy = DiscoveryFetchPolicy.from_env()
+    fetch_policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=registry.allowed_domains)
     preflight_result = None
     if not args.skip_preflight_drift_check:
         preflight_service = RegistryPreflightDriftService(fetch_policy=fetch_policy)

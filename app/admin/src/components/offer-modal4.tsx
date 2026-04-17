@@ -12,19 +12,21 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 type OfferModal4Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description?: string;
-  panelTitle: string;
-  panelDescription: string;
+  panelTitle?: string;
+  panelDescription?: string;
   panelBadge?: string;
   panelStats?: Array<{
     label: string;
     value: string;
   }>;
+  showPanel?: boolean;
   children: ReactNode;
   footer?: ReactNode;
 };
@@ -38,6 +40,7 @@ function OfferModal4({
   panelDescription,
   panelBadge,
   panelStats = [],
+  showPanel = true,
   children,
   footer,
 }: OfferModal4Props) {
@@ -45,7 +48,12 @@ function OfferModal4({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
         showCloseButton={false}
-        className="group grid max-h-[calc(100dvh-2rem)] w-[calc(100vw-1.5rem)] gap-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-background p-0 shadow-2xl shadow-slate-950/12 data-[state=closed]:slide-out-to-bottom-30 data-[state=open]:slide-in-from-bottom-30 sm:w-[calc(100vw-2.5rem)] sm:max-w-[min(68rem,calc(100vw-2.5rem))] lg:max-h-[calc(100dvh-3rem)] lg:max-w-[min(72rem,calc(100vw-4rem))]"
+        className={cn(
+          "group grid max-h-[calc(100dvh-2rem)] w-[calc(100vw-1.5rem)] gap-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-background p-0 shadow-2xl shadow-slate-950/12 data-[state=closed]:slide-out-to-bottom-30 data-[state=open]:slide-in-from-bottom-30 sm:w-[calc(100vw-2.5rem)] lg:max-h-[calc(100dvh-3rem)]",
+          showPanel
+            ? "sm:max-w-[min(68rem,calc(100vw-2.5rem))] lg:max-w-[min(72rem,calc(100vw-4rem))]"
+            : "sm:max-w-[min(74rem,calc(100vw-2.5rem))] lg:max-w-[min(78rem,calc(100vw-4rem))]",
+        )}
       >
         <div className="absolute -end-px -top-px">
           <DialogClose asChild>
@@ -58,8 +66,9 @@ function OfferModal4({
           </DialogClose>
         </div>
 
-        <div className="lg:grid lg:grid-cols-[20rem_minmax(0,1fr)]">
-          <div className="relative hidden overflow-hidden bg-[radial-gradient(circle_at_top,_rgb(14_116_144_/_0.24),_transparent_56%),linear-gradient(160deg,#0f172a_0%,#122033_42%,#153047_100%)] text-white lg:flex lg:min-h-[36rem] lg:flex-col lg:justify-between lg:px-8 lg:py-7">
+        <div className={cn(showPanel ? "lg:grid lg:grid-cols-[20rem_minmax(0,1fr)]" : "")}>
+          {showPanel ? (
+            <div className="relative hidden overflow-hidden bg-[radial-gradient(circle_at_top,_rgb(14_116_144_/_0.24),_transparent_56%),linear-gradient(160deg,#0f172a_0%,#122033_42%,#153047_100%)] text-white lg:flex lg:min-h-[36rem] lg:flex-col lg:justify-between lg:px-8 lg:py-7">
           <div className="absolute inset-0 opacity-35">
             <div className="absolute left-8 top-10 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute bottom-8 right-8 h-32 w-32 rounded-full bg-sky-300/20 blur-2xl" />
@@ -112,11 +121,17 @@ function OfferModal4({
               ))}
             </div>
           ) : null}
-          </div>
+            </div>
+          ) : null}
 
-          <div className="min-w-0 space-y-4 overflow-y-auto bg-card/96 px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7">
+          <div
+            className={cn(
+              "min-w-0 space-y-4 overflow-y-auto bg-card/96 px-5 py-5 sm:px-7 sm:py-6 lg:px-8 lg:py-7",
+              showPanel ? "" : "lg:max-h-[calc(100dvh-3rem)]",
+            )}
+          >
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground lg:hidden">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 <Building2 className="size-3.5" />
                 FPDS Admin
               </div>

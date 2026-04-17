@@ -1603,6 +1603,62 @@ Each entry should include:
   - passed in `app/admin`
 - Known issues: the modal still relies on viewport height and browser zoom level, so final comfort should be confirmed in a real browser session at the Product Owner's usual zoom
 - Next step: reopen a populated source-catalog detail modal in local dev and confirm the summary, form, and run preview all fit without clipping on the target desktop viewport
+
+## 2026-04-17 - Source Collection Runner Reliability Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: restore Big 5 source-catalog collection runs after operator testing exposed misleading `fpds_parse_chunk failed with exit code 1` errors on a BMO chequing collection attempt
+- Why now: the failing run log showed two separate problems in the collection path: snapshot capture still respected only the env starter allowlist instead of the active registry domains, and downstream worker stages were launched from the API service virtualenv so worker-only dependencies like `bs4` were missing at runtime
+- Outcome: updated discovery, registry-refresh, and snapshot CLIs to merge registry `allowed_domains` into the env allowlist; changed the API-side source-collection runner to launch worker stages through the repo-root `uv` project environment; and filtered downstream parse/extraction/normalization work to only the sources whose snapshots were actually stored or reused so all-failed snapshot runs now stop with a clearer collection-stage error
+- Not done: this slice did not change the admin UI, did not broaden the static `.env.dev.example` starter allowlist, and did not add retry UX for failed collections
+- Key files: `api/service/api_service/source_collection_runner.py`, `api/service/tests/test_source_collection_runner.py`, `api/service/README.md`, `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/fpds_discovery/__main__.py`, `worker/discovery/fpds_snapshot/__main__.py`, `worker/discovery/fpds_registry_refresh/__main__.py`, `worker/discovery/tests/test_discovery.py`
+- Decisions: kept the SSRF-safe env allowlist model but treated registry domains as an approved extension of that allowlist for registry-scoped runs. Preferred running worker stages via repo-root `uv` instead of duplicating worker dependencies into the API package because the worker/runtime boundary is already an approved architecture split
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest tests.test_source_collection_runner tests.test_source_catalog tests.test_source_registry`
+  - passed
+  - `api/service/.venv/Scripts/python.exe -m unittest worker.discovery.tests.test_discovery`
+  - passed
+- Known issues: a collection can still fail later on genuine source fetch drift or parsing issues, but the run should now report the true failing stage instead of masking snapshot failures behind a missing worker dependency
+- Next step: rerun the BMO chequing source-catalog collection from `/admin/source-catalog` and confirm that generated sources, run history, and candidate counts now progress past snapshot and parse successfully
+
+## 2026-04-17 - Homepage-First Source Catalog Collection Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: realign source-catalog collection so operators manage only bank profiles plus product coverage while the system regenerates collection sources from the bank homepage instead of reusing stale seeded detail URLs
+- Why now: Product Owner testing showed BMO chequing collection no longer crashed at parse time but still produced `0` candidates, and the deeper cause was that source-catalog collection still preferred committed Big 5 seed rows plus product-entry homepages instead of a bank-homepage-driven discovery path
+- Outcome: changed seeded bank homepage defaults to bank-level personal landing pages, added automatic repair for legacy managed bank rows that still stored product-entry URLs, switched source-catalog materialization to regenerate sources from the bank homepage on every collect, broadened collection launch to include generated entry/supporting rows alongside detail targets, and added homepage-generation tests that lock the new flow
+- Not done: this slice did not add a new admin UI field for product hub hints, did not remove the underlying committed Big 5 registry assets, and did not add manual retry UX for low-yield homepage discovery
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry_utils.py`, `api/service/tests/test_source_catalog.py`, `api/service/README.md`
+- Decisions: treated source-catalog coverage as a homepage-first discovery contract rather than a seed-detail selection contract. Kept the committed Big 5 entry URLs only as internal fallback hints for known banks so the operator-facing model can stay at `bank homepage + product type`
+- Verification:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_source_catalog tests.test_source_registry tests.test_source_collection_runner`
+  - passed in `api/service`
+  - `api/service/.venv/Scripts/python.exe -m unittest worker.discovery.tests.test_discovery`
+  - passed
+- Known issues: candidate yield still depends on what the live homepage and discovered hub pages expose, so genuinely sparse or heavily scripted bank pages may still need follow-on discovery heuristics later
+- Next step: refresh `/admin/banks` once so legacy managed homepage URLs repair, then rerun the affected source-catalog collection and confirm that generated sources now come from homepage discovery rather than the old seed detail set
+
+## 2026-04-17 - Bank-Centered Coverage Workflow Consolidation
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: remove the standalone source-catalog operator screen from the normal admin flow and fold coverage management directly into the bank workflow so operators manage one bank at a time in one place
+- Why now: Product Owner decided the separate `Source Catalog` screen was adding unnecessary model-driven complexity, and requested that bank coverage be added and collected directly from the bank modal while keeping the FPDS visual system and the Shadcnblocks modal foundation
+- Outcome: moved the operator coverage workflow into the `/admin/banks` detail modal with a structured two-section layout, removed the bank modal left rail, added inline coverage creation and per-coverage collect actions, changed the bank list to show comma-separated product coverage labels instead of only a count, removed the source-catalog nav entry, and converted `/admin/banks/:bankCode`, `/admin/source-catalog`, and `/admin/source-catalog/:catalogItemId` into compatibility redirects back into the bank-centered modal flow
+- Not done: this slice did not remove the underlying source-catalog API routes, did not delete the legacy source-catalog UI components from the repo, and did not add inline editing of existing coverage status or product type inside the new bank modal
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/app/admin/banks/[bankCode]/page.tsx`, `app/admin/src/app/admin/source-catalog/page.tsx`, `app/admin/src/app/admin/source-catalog/[catalogItemId]/page.tsx`, `README.md`, `app/admin/README.md`, `docs/03-design/admin-information-architecture.md`
+- Decisions: treated `source_catalog` as a backend coverage entity that still powers collection APIs, but no longer as a primary operator navigation surface. Kept compatibility redirects instead of hard-deleting the old routes so existing deep links and route manifests stay valid during the transition. Used the existing Shadcnblocks `offer-modal4` shell without its left panel for bank flows so the denser bank-plus-coverage content fits the FPDS admin use case more cleanly
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_source_catalog`
+  - passed in `api/service`
+- Known issues: existing coverage rows are collectable and inspectable from the bank modal, but they are not yet editable inline; operators would still need a follow-on slice if status or product-type mutation must stay available after the source-catalog screen removal
+- Next step: smoke test `/admin/banks` by opening a populated bank modal, adding missing coverage, launching collect from a coverage card, and confirming the bank list coverage labels and generated-source counts refresh as expected
 ---
 
 ## 7. Change History

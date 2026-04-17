@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from api_service.source_catalog import (
     _backfill_seeded_bank_profile_fields,
+    _materialize_sources_for_catalog_item,
     _record_catalog_audit_event,
     create_bank_profile,
     create_source_catalog_item,
@@ -187,7 +188,7 @@ class SourceCatalogTests(unittest.TestCase):
         materialize_sources.assert_called_once()
         launch_collection.assert_called_once_with(
             connection,
-            source_ids=["AUTO-ATL-SAV-001"],
+            source_ids=["AUTO-ATL-SAV-001", "AUTO-ATL-SAV-002"],
             actor={"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
             request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
         )
@@ -196,13 +197,14 @@ class SourceCatalogTests(unittest.TestCase):
         connection = _QueuedConnection([None])
 
         with patch(
-            "api_service.source_catalog.load_seed_bank_profiles",
+            "api_service.source_catalog.load_seed_bank_homepage_repairs",
             return_value=[
                 {
                     "bank_code": "RBC",
-                    "homepage_url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html",
-                    "normalized_homepage_url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html",
+                    "homepage_url": "https://www.rbcroyalbank.com/",
+                    "normalized_homepage_url": "https://www.rbcroyalbank.com/",
                     "source_language": "en",
+                    "legacy_homepage_urls": ["https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html"],
                 }
             ],
         ):
@@ -239,6 +241,59 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(params["actor_id"], "usr-001")
         self.assertEqual(params["actor_role_snapshot"], "admin")
         self.assertEqual(params["diff_summary"], "Updated bank profile `BMO`: Homepage URL.")
+
+    def test_materialize_sources_for_catalog_item_regenerates_from_bank_homepage(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with (
+            patch(
+                "api_service.source_catalog._generate_sources_from_homepage",
+                return_value=[
+                    {
+                        "source_id": "AUTO-BMO-CHQ-001",
+                        "bank_code": "BMO",
+                        "country_code": "CA",
+                        "product_type": "chequing",
+                        "source_name": "BMO chequing catalog entry",
+                        "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/",
+                        "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+                        "source_type": "html",
+                        "discovery_role": "entry",
+                        "status": "active",
+                        "priority": "P0",
+                        "source_language": "en",
+                        "purpose": "entry",
+                        "expected_fields": ["product_name"],
+                        "seed_source_flag": False,
+                        "redirect_target_url": None,
+                        "alias_urls": [],
+                        "change_reason": "generated_from_bank_homepage",
+                    }
+                ],
+            ) as generate_sources,
+            patch("api_service.source_catalog._upsert_source_registry_rows") as upsert_rows,
+        ):
+            result = _materialize_sources_for_catalog_item(
+                connection,
+                row={
+                    "bank_code": "BMO",
+                    "bank_name": "Bank of Montreal",
+                    "country_code": "CA",
+                    "product_type": "chequing",
+                    "homepage_url": "https://www.bmo.com/en-ca/main/personal/",
+                    "source_language": "en",
+                },
+            )
+
+        self.assertEqual([item["source_id"] for item in result], ["AUTO-BMO-CHQ-001"])
+        generate_sources.assert_called_once()
+        upsert_rows.assert_called_once()
+        self.assertEqual(upsert_rows.call_args.args[1][0]["source_id"], "AUTO-BMO-CHQ-001")
+        self.assertEqual(len(connection.calls), 1)
+        sql, params = connection.calls[0]
+        self.assertIn("UPDATE source_registry_item", sql)
+        self.assertEqual(params["bank_code"], "BMO")
+        self.assertEqual(params["product_type"], "chequing")
 
 
 if __name__ == "__main__":

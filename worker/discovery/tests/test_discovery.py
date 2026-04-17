@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from worker.discovery.fpds_discovery.discovery import SourceDiscoveryService
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, validate_fetch_url
@@ -34,6 +36,12 @@ class UrlUtilsTests(unittest.TestCase):
 
 
 class FetchPolicyTests(unittest.TestCase):
+    def test_from_env_merges_extra_allowed_domains(self) -> None:
+        with patch.dict(os.environ, {"FPDS_SOURCE_FETCH_ALLOWLIST": "td.com,tdcanadatrust.com"}, clear=False):
+            policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=("bmo.com", "www.bmo.com"))
+
+        self.assertEqual(policy.allowed_domains, ("td.com", "tdcanadatrust.com", "bmo.com", "www.bmo.com"))
+
     def test_validate_fetch_url_allows_td_https_urls(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
         validate_fetch_url("https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates", policy)

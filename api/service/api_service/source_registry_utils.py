@@ -12,6 +12,13 @@ _SEED_BANK_NAMES = {
     "SCOTIA": "Scotiabank",
     "CIBC": "CIBC",
 }
+_SEED_BANK_HOMEPAGE_URLS = {
+    "RBC": "https://www.rbcroyalbank.com/",
+    "TD": "https://www.td.com/ca/en/personal-banking",
+    "BMO": "https://www.bmo.com/en-ca/main/personal/",
+    "SCOTIA": "https://www.scotiabank.com/ca/en/personal.html",
+    "CIBC": "https://www.cibc.com/en/personal-banking.html",
+}
 
 
 def repo_root() -> Path:
@@ -116,9 +123,11 @@ def load_seed_bank_profiles() -> list[dict[str, object]]:
             continue
         country_code = str(raw_registry.get("country_code", default_country_code)).strip().upper()
         source_language = str(raw_registry.get("source_language", "en")).strip().lower()
-        entry_source_id = str(raw_registry["entry_source_id"]).strip()
-        entry_source = next((item for item in raw_registry.get("sources", []) if str(item.get("source_id", "")).strip() == entry_source_id), None)
-        homepage_url = str((entry_source or raw_registry["sources"][0])["url"]).strip()
+        homepage_url = _SEED_BANK_HOMEPAGE_URLS.get(bank_code)
+        if homepage_url is None:
+            entry_source_id = str(raw_registry["entry_source_id"]).strip()
+            entry_source = next((item for item in raw_registry.get("sources", []) if str(item.get("source_id", "")).strip() == entry_source_id), None)
+            homepage_url = str((entry_source or raw_registry["sources"][0])["url"]).strip()
         profiles[bank_code] = {
             "bank_code": bank_code,
             "country_code": country_code,
@@ -130,6 +139,44 @@ def load_seed_bank_profiles() -> list[dict[str, object]]:
             "change_reason": "seeded_from_json_catalog",
         }
     return list(profiles.values())
+
+
+def load_seed_bank_homepage_repairs() -> list[dict[str, object]]:
+    catalog_path = default_registry_catalog_path()
+    raw_catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    default_country_code = str(raw_catalog["country_code"]).strip().upper()
+    repairs: dict[str, dict[str, object]] = {}
+    for registry_entry in raw_catalog.get("registries", []):
+        registry_path = Path(str(registry_entry["registry_path"]))
+        if not registry_path.is_absolute():
+            registry_path = (catalog_path.parent / registry_path).resolve()
+        raw_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        bank_code = str(raw_registry["bank_code"]).strip().upper()
+        country_code = str(raw_registry.get("country_code", default_country_code)).strip().upper()
+        source_language = str(raw_registry.get("source_language", "en")).strip().lower()
+        entry_source_id = str(raw_registry["entry_source_id"]).strip()
+        entry_source = next((item for item in raw_registry.get("sources", []) if str(item.get("source_id", "")).strip() == entry_source_id), None)
+        if entry_source is None and raw_registry.get("sources"):
+            entry_source = raw_registry["sources"][0]
+        if entry_source is None:
+            continue
+        legacy_url = normalize_source_url(str(entry_source["url"]).strip())
+        if bank_code not in repairs:
+            homepage_url = _SEED_BANK_HOMEPAGE_URLS.get(bank_code, str(entry_source["url"]).strip())
+            repairs[bank_code] = {
+                "bank_code": bank_code,
+                "country_code": country_code,
+                "homepage_url": homepage_url,
+                "normalized_homepage_url": normalize_source_url(homepage_url),
+                "source_language": source_language,
+                "legacy_homepage_urls": [legacy_url],
+            }
+            continue
+        legacy_urls = list(repairs[bank_code]["legacy_homepage_urls"])
+        if legacy_url not in legacy_urls:
+            legacy_urls.append(legacy_url)
+            repairs[bank_code]["legacy_homepage_urls"] = legacy_urls
+    return list(repairs.values())
 
 
 def load_seed_source_catalog_items() -> list[dict[str, object]]:

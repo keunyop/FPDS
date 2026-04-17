@@ -1,0 +1,311 @@
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+Using CPython 3.14.3 interpreter at: C:\Users\kylee\AppData\Local\Programs\Python\Python314\python.exe
+Creating virtual environment at: .venv
+   Building fpds-worker @ file:///D:/10%20Development/10%20%EA%B0%9C%EC%9D%B8%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/70.%20Mybank/workspace
+      Built fpds-worker @ file:///D:/10%20Development/10%20%EA%B0%9C%EC%9D%B8%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8/70.%20Mybank/workspace
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 5 packages in 446ms
+{
+  "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+  "correlation_id": "corr_xDnfTqSltx9daI0b",
+  "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+  "partial_completion_flag": true,
+  "stats": {
+    "source_total": 4,
+    "stored_count": 0,
+    "reused_count": 0,
+    "failed_count": 4
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-CHQ-002",
+      "source_document_id": "src-bmo-html-9ee1a133ac5a1742",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-232605b85a8c424f",
+        "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+        "source_document_id": "src-bmo-html-9ee1a133ac5a1742",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+          "attempt_count": 3,
+          "correlation_id": "corr_xDnfTqSltx9daI0b",
+          "requested_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-003",
+      "source_document_id": "src-bmo-html-3017dfe2f0d0579a",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0505a5ed73c63d81",
+        "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+        "source_document_id": "src-bmo-html-3017dfe2f0d0579a",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+          "attempt_count": 3,
+          "correlation_id": "corr_xDnfTqSltx9daI0b",
+          "requested_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-004",
+      "source_document_id": "src-bmo-html-1506c7261b8c8f0d",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c8899541f1506b39",
+        "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+        "source_document_id": "src-bmo-html-1506c7261b8c8f0d",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+          "attempt_count": 3,
+          "correlation_id": "corr_xDnfTqSltx9daI0b",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-005",
+      "source_document_id": "src-bmo-html-ea729f042dfdfa54",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-37a3af706fa43df5",
+        "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+        "source_document_id": "src-bmo-html-ea729f042dfdfa54",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+          "attempt_count": 3,
+          "correlation_id": "corr_xDnfTqSltx9daI0b",
+          "requested_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+    "correlation_id": "corr_xDnfTqSltx9daI0b",
+    "request_id": "req_f0e4acd161914c34b77df3889a482b20",
+    "stats": {
+      "source_total": 4,
+      "ok_count": 0,
+      "warning_count": 0,
+      "error_count": 4,
+      "issue_total": 4
+    },
+    "source_checks": [
+      {
+        "source_id": "BMO-CHQ-002",
+        "source_document_id": "src-bmo-html-9ee1a133ac5a1742",
+        "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-CHQ-002",
+            "source_document_id": "src-bmo-html-9ee1a133ac5a1742",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-CHQ-003",
+        "source_document_id": "src-bmo-html-3017dfe2f0d0579a",
+        "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-CHQ-003",
+            "source_document_id": "src-bmo-html-3017dfe2f0d0579a",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-CHQ-004",
+        "source_document_id": "src-bmo-html-1506c7261b8c8f0d",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-CHQ-004",
+            "source_document_id": "src-bmo-html-1506c7261b8c8f0d",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-CHQ-005",
+        "source_document_id": "src-bmo-html-ea729f042dfdfa54",
+        "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-CHQ-005",
+            "source_document_id": "src-bmo-html-ea729f042dfdfa54",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 50,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260417_143215_bmo_chequing_collect_PwFFGO3V",
+    "run_state": "failed",
+    "source_document_count": 4,
+    "stored_snapshot_count": 0,
+    "run_source_item_count": 4,
+    "source_success_count": 0,
+    "source_failure_count": 4,
+    "partial_completion_flag": true,
+    "started_at": "2026-04-17T14:32:26.218577+00:00",
+    "completed_at": "2026-04-17T14:37:49.690268+00:00"
+  }
+}

@@ -35,7 +35,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 1. The admin console is a browser-based operator surface protected by server-side session auth.
 2. Review, runs, change history, audit, publish, usage, and dashboard health remain separate operator surfaces.
 3. Source registry management is an operations surface, not a hidden settings page.
-4. The first source-registry slice is intentionally minimal: bank setup plus source-catalog coverage management, while generated source rows remain read-only.
+4. The first source-registry slice is intentionally minimal: bank setup plus bank-owned coverage management, while generated source rows remain read-only.
 5. Collection launched from the source registry means candidate-producing ingestion through `normalized_candidate`, not raw fetch only.
 6. `detail` sources are the default candidate-producing scope. Supporting sources may be included for evidence support, but should not create standalone primary candidates unless explicitly configured.
 7. UI-owned labels and navigation support `en`, `ko`, and `ja`, while source-derived product text stays in source language.
@@ -112,8 +112,7 @@ All admin surfaces should share:
 |---|---|---|---|
 | Overview | Admin Overview Dashboard | `/admin` | operator triage |
 | Review | Review Queue | `/admin/reviews` | review intake and decision workload |
-| Operations | Banks | `/admin/banks` | bank profile setup and maintenance |
-| Operations | Source Catalog | `/admin/source-catalog` | bank-plus-product coverage management and collection kickoff |
+| Operations | Banks | `/admin/banks` | bank profile setup, product coverage management, and collection kickoff |
 | Operations | Source Registry | `/admin/sources` | generated source inspection |
 | Operations | Runs | `/admin/runs` | ingestion diagnostics |
 | Operations | Change History | `/admin/changes` | canonical change chronology |
@@ -127,8 +126,8 @@ All admin surfaces should share:
 | Surface | Route Baseline | Entry Path |
 |---|---|---|
 | Review Detail / Trace Viewer | `/admin/reviews/:reviewTaskId` | review queue, run detail, search |
-| Bank Detail | `/admin/banks/:bankCode` | bank list, source catalog |
-| Source Catalog Detail | `/admin/source-catalog/:catalogItemId` | source catalog list, bank detail, runs |
+| Bank Detail | `/admin/banks/:bankCode` | bank list |
+| Source Catalog Detail | `/admin/source-catalog/:catalogItemId` | compatibility redirect into bank detail |
 | Source Registry Detail | `/admin/sources/:sourceId` | source registry list, source catalog detail, run detail, search |
 | Run Detail | `/admin/runs/:runId` | runs list, review detail, usage drilldown, source collection history, search |
 | Product Record | `/admin/products/:productId` | change history, publish monitor, review result context, search |
@@ -244,9 +243,9 @@ Minimum panels:
 
 Purpose:
 - own active source scope
-- let operators manage banks and source catalog coverage with minimal controlled inputs
+- let operators manage banks and product coverage with minimal controlled inputs
 - let operators inspect generated source rows after collection
-- let operators start collection from selected source catalog items
+- let operators start collection from bank-owned coverage items
 
 `/admin/sources` minimum list behavior:
 - filter by bank, country, product type, status, role
@@ -273,7 +272,8 @@ Minimum row fields:
 
 Rules:
 - `/admin/banks` owns visible bank profile editing
-- `/admin/source-catalog` owns bank/product-type coverage editing and collection launch
+- `/admin/banks` also owns bank/product-type coverage editing and collection launch
+- `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
 - `/admin/sources` and `/admin/sources/:sourceId` are read-only generated-source surfaces
 - collection means full candidate-producing ingestion through `normalized_candidate`
 - `detail` sources are candidate-producing by default

@@ -19,6 +19,7 @@ from api_service.security import new_id, utc_now
 from api_service.source_registry import SourceRegistryError, start_source_collection
 from api_service.source_registry_utils import (
     infer_source_type,
+    load_seed_bank_homepage_repairs,
     load_seed_bank_profiles,
     load_seed_source_catalog_items,
     load_seed_source_registry_rows,
@@ -37,6 +38,7 @@ _PRODUCT_TYPE_OPTIONS = ("chequing", "savings", "gic")
 _AUTOGEN_SOURCE_PREFIX = "AUTO"
 _EXCLUDED_LINK_KEYWORDS = ("login", "sign-in", "signin", "secure", "apply", "open-account", "openaccount", "promo", "offer", "compare")
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
+_HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
 _PRODUCT_KEYWORDS = {
     "chequing": ("chequing", "checking", "bank-account", "banking-plan", "daily-banking"),
     "savings": ("savings", "save", "high-interest", "interest"),
@@ -125,7 +127,11 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             b.created_at,
             b.updated_at,
             COUNT(DISTINCT sci.catalog_item_id) AS catalog_item_count,
-            COUNT(DISTINCT sri.source_id) AS generated_source_count
+            COUNT(DISTINCT sri.source_id) AS generated_source_count,
+            COALESCE(
+                ARRAY_AGG(DISTINCT sci.product_type) FILTER (WHERE sci.product_type IS NOT NULL),
+                ARRAY[]::text[]
+            ) AS catalog_product_types
         FROM bank AS b
         LEFT JOIN source_registry_catalog_item AS sci
             ON sci.bank_code = b.bank_code
@@ -208,10 +214,46 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
         """,
         {"bank_code": bank_code},
     ).fetchall()
+    generated_counts_by_type_rows = connection.execute(
+        """
+        SELECT product_type, COUNT(DISTINCT source_id) AS generated_source_count
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+        GROUP BY product_type
+        """,
+        {"bank_code": bank_code},
+    ).fetchall()
+    generated_source_count_row = connection.execute(
+        """
+        SELECT COUNT(DISTINCT source_id) AS generated_source_count
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+        """,
+        {"bank_code": bank_code},
+    ).fetchone()
+    generated_counts_by_type = {
+        str(item["product_type"]): int(item["generated_source_count"] or 0)
+        for item in generated_counts_by_type_rows
+    }
+    catalog_product_types = sorted(str(item["product_type"]) for item in catalog_rows)
 
     return {
-        "bank": _serialize_bank_row({**row, "catalog_item_count": len(catalog_rows), "generated_source_count": 0}),
-        "catalog_items": [_serialize_source_catalog_row(item, bank_row=row, generated_source_count=0) for item in catalog_rows],
+        "bank": _serialize_bank_row(
+            {
+                **row,
+                "catalog_item_count": len(catalog_rows),
+                "generated_source_count": int((generated_source_count_row or {}).get("generated_source_count") or 0),
+                "catalog_product_types": catalog_product_types,
+            }
+        ),
+        "catalog_items": [
+            _serialize_source_catalog_row(
+                item,
+                bank_row=row,
+                generated_source_count=generated_counts_by_type.get(str(item["product_type"]), 0),
+            )
+            for item in catalog_rows
+        ],
     }
 
 
@@ -804,6 +846,11 @@ def start_source_catalog_collection(
     materialization_summary: list[dict[str, Any]] = []
     for row in rows:
         generated_rows = _materialize_sources_for_catalog_item(connection, row=row)
+        generated_source_ids = [
+            str(item["source_id"])
+            for item in generated_rows
+            if str(item["status"]) != "removed"
+        ]
         target_source_ids = [
             str(item["source_id"])
             for item in generated_rows
@@ -815,13 +862,13 @@ def start_source_catalog_collection(
                 code="source_catalog_generation_missing_detail",
                 message=f"No detail sources could be generated for {row['bank_name']} {row['product_type']}.",
             )
-        selected_source_ids.extend(target_source_ids)
+        selected_source_ids.extend(generated_source_ids)
         materialization_summary.append(
             {
                 "catalog_item_id": str(row["catalog_item_id"]),
                 "bank_code": str(row["bank_code"]),
                 "product_type": str(row["product_type"]),
-                "generated_source_ids": [str(item["source_id"]) for item in generated_rows],
+                "generated_source_ids": generated_source_ids,
                 "target_source_ids": target_source_ids,
             }
         )
@@ -939,18 +986,28 @@ def _ensure_bank_and_catalog_seeded(connection: Connection) -> None:
 
 
 def _backfill_seeded_bank_profile_fields(connection: Connection) -> None:
-    for item in load_seed_bank_profiles():
+    for item in load_seed_bank_homepage_repairs():
         connection.execute(
             """
             UPDATE bank
             SET
-                homepage_url = COALESCE(NULLIF(BTRIM(homepage_url), ''), %(homepage_url)s),
-                normalized_homepage_url = COALESCE(NULLIF(BTRIM(normalized_homepage_url), ''), %(normalized_homepage_url)s),
+                homepage_url = CASE
+                    WHEN NULLIF(BTRIM(homepage_url), '') IS NULL THEN %(homepage_url)s
+                    WHEN normalized_homepage_url = ANY(%(legacy_homepage_urls)s) THEN %(homepage_url)s
+                    ELSE homepage_url
+                END,
+                normalized_homepage_url = CASE
+                    WHEN NULLIF(BTRIM(normalized_homepage_url), '') IS NULL THEN %(normalized_homepage_url)s
+                    WHEN normalized_homepage_url = ANY(%(legacy_homepage_urls)s) THEN %(normalized_homepage_url)s
+                    ELSE normalized_homepage_url
+                END,
                 source_language = COALESCE(NULLIF(BTRIM(source_language), ''), %(source_language)s)
             WHERE bank_code = %(bank_code)s
+              AND managed_flag = true
               AND (
                 NULLIF(BTRIM(homepage_url), '') IS NULL
                 OR NULLIF(BTRIM(normalized_homepage_url), '') IS NULL
+                OR normalized_homepage_url = ANY(%(legacy_homepage_urls)s)
                 OR NULLIF(BTRIM(source_language), '') IS NULL
               )
             """,
@@ -961,15 +1018,6 @@ def _backfill_seeded_bank_profile_fields(connection: Connection) -> None:
 def _materialize_sources_for_catalog_item(connection: Connection, *, row: dict[str, Any]) -> list[dict[str, Any]]:
     bank_code = str(row["bank_code"])
     product_type = str(row["product_type"])
-    committed_rows = [
-        item
-        for item in load_seed_source_registry_rows()
-        if str(item["bank_code"]) == bank_code and str(item["product_type"]) == product_type
-    ]
-    if committed_rows:
-        _upsert_source_registry_rows(connection, committed_rows)
-        return committed_rows
-
     generated_rows = _generate_sources_from_homepage(
         bank_code=bank_code,
         bank_name=str(row["bank_name"]),
@@ -987,14 +1035,12 @@ def _materialize_sources_for_catalog_item(connection: Connection, *, row: dict[s
             change_reason = %(change_reason)s
         WHERE bank_code = %(bank_code)s
           AND product_type = %(product_type)s
-          AND source_id LIKE %(source_prefix)s
         """,
         {
             "updated_at": utc_now(),
-            "change_reason": "superseded_by_regenerated_source_catalog",
+            "change_reason": "superseded_by_homepage_catalog_generation",
             "bank_code": bank_code,
             "product_type": product_type,
-            "source_prefix": f"{_AUTOGEN_SOURCE_PREFIX}-%",
         },
     )
     _upsert_source_registry_rows(connection, generated_rows)
@@ -1098,19 +1144,48 @@ def _generate_sources_from_homepage(
     if not hostname:
         raise SourceRegistryError(status_code=422, code="bank_homepage_invalid", message="Bank homepage URL must include a hostname.")
 
+    fetch_policy = DiscoveryFetchPolicy(allowed_domains=(hostname,))
     detail_links: list[tuple[int, Any]] = []
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
+    hub_pages: list[tuple[int, str, str]] = []
     try:
-        html_text = fetch_text(normalized_homepage_url, DiscoveryFetchPolicy(allowed_domains=(hostname,)))
+        homepage_html = fetch_text(normalized_homepage_url, fetch_policy)
     except Exception:
-        html_text = ""
+        homepage_html = ""
 
-    if html_text:
-        for link in extract_links(html_text, base_url=normalized_homepage_url):
-            link_hostname = urlparse(link.normalized_url).hostname
-            if not link_hostname or not (link_hostname == hostname or link_hostname.endswith(f".{hostname}")):
-                continue
+    homepage_links = _extract_allowed_links(html_text=homepage_html, base_url=normalized_homepage_url, hostname=hostname)
+    for link in homepage_links:
+        fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
+        if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+            continue
+        score = _score_product_link(product_type=product_type, normalized_url=link.normalized_url, anchor_text=link.anchor_text)
+        if link.source_type == "pdf":
+            if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+                pdf_links.append((score, link))
+            continue
+        if score > 0:
+            detail_links.append((score, link))
+        elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+            supporting_links.append((1, link))
+        hub_score = _score_catalog_hub_link(product_type=product_type, normalized_url=link.normalized_url, anchor_text=link.anchor_text)
+        if hub_score > 0:
+            hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
+
+    seed_entry_url = _load_seed_entry_url(bank_code=bank_code, product_type=product_type)
+    if seed_entry_url is not None:
+        seed_score = _score_catalog_hub_link(product_type=product_type, normalized_url=seed_entry_url, anchor_text="")
+        hub_pages.append((max(seed_score, 1), seed_entry_url, seed_entry_url))
+
+    unique_hub_pages = _dedupe_page_candidates(hub_pages)
+    for _score, normalized_page_url, resolved_page_url in unique_hub_pages[:3]:
+        if normalized_page_url == normalized_homepage_url:
+            continue
+        try:
+            page_html = fetch_text(resolved_page_url, fetch_policy)
+        except Exception:
+            continue
+        for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
                 continue
@@ -1128,6 +1203,8 @@ def _generate_sources_from_homepage(
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
     source_rows: list[dict[str, Any]] = []
+    entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
+    entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
 
     if unique_detail_links:
         source_rows.append(
@@ -1136,12 +1213,12 @@ def _generate_sources_from_homepage(
                 country_code=country_code,
                 product_type=product_type,
                 source_language=source_language,
-                normalized_url=normalized_homepage_url,
-                raw_url=homepage_url,
-                source_name=f"{bank_name} {product_type.title()} homepage",
+                normalized_url=entry_url,
+                raw_url=entry_raw_url,
+                source_name=f"{bank_name} {product_type.title()} catalog entry",
                 discovery_role="entry",
                 priority="P0",
-                purpose=f"{bank_name} {product_type} entry and discovery",
+                purpose=f"{bank_name} {product_type} catalog discovery entry",
                 expected_fields=["product_name"],
             )
         )
@@ -1162,18 +1239,20 @@ def _generate_sources_from_homepage(
                 )
             )
     else:
+        fallback_url = entry_url
+        fallback_raw_url = entry_raw_url
         source_rows.append(
             _build_generated_source_row(
                 bank_code=bank_code,
                 country_code=country_code,
                 product_type=product_type,
                 source_language=source_language,
-                normalized_url=normalized_homepage_url,
-                raw_url=homepage_url,
-                source_name=f"{bank_name} {product_type.title()} homepage fallback",
+                normalized_url=fallback_url,
+                raw_url=fallback_raw_url,
+                source_name=f"{bank_name} {product_type.title()} catalog fallback",
                 discovery_role="detail",
                 priority="P0",
-                purpose=f"Homepage fallback detail source for {product_type}",
+                purpose=f"Homepage-derived fallback detail source for {product_type}",
                 expected_fields=_PRODUCT_FIELD_HINTS[product_type],
             )
         )
@@ -1211,6 +1290,47 @@ def _generate_sources_from_homepage(
             )
         )
     return source_rows
+
+
+def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
+    for item in load_seed_source_registry_rows():
+        if (
+            str(item["bank_code"]) == bank_code
+            and str(item["product_type"]) == product_type
+            and str(item["discovery_role"]) == "entry"
+        ):
+            return str(item["normalized_url"])
+    return None
+
+
+def _extract_allowed_links(*, html_text: str, base_url: str, hostname: str) -> list[Any]:
+    allowed_links: list[Any] = []
+    for link in extract_links(html_text, base_url=base_url):
+        link_hostname = urlparse(link.normalized_url).hostname
+        if not link_hostname or not (link_hostname == hostname or link_hostname.endswith(f".{hostname}")):
+            continue
+        allowed_links.append(link)
+    return allowed_links
+
+
+def _dedupe_page_candidates(items: list[tuple[int, str, str]]) -> list[tuple[int, str, str]]:
+    by_url: dict[str, tuple[int, str, str]] = {}
+    for score, normalized_url, resolved_url in sorted(items, key=lambda item: (-item[0], item[1])):
+        if normalized_url not in by_url:
+            by_url[normalized_url] = (score, normalized_url, resolved_url)
+    return list(by_url.values())
+
+
+def _score_catalog_hub_link(*, product_type: str, normalized_url: str, anchor_text: str) -> int:
+    fingerprint = f"{normalized_url} {anchor_text}".lower()
+    score = _score_product_link(product_type=product_type, normalized_url=normalized_url, anchor_text=anchor_text)
+    for keyword in _HUB_KEYWORDS:
+        if keyword in fingerprint:
+            score += 1
+    for keyword in _SUPPORTING_KEYWORDS:
+        if keyword in fingerprint:
+            score -= 2
+    return score
 
 
 def _build_generated_source_row(
@@ -1281,6 +1401,7 @@ def _generated_link_name(bank_name: str, product_type: str, anchor_text: str, *,
 
 
 def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
+    catalog_product_types = sorted(str(value) for value in (row.get("catalog_product_types") or []) if value)
     return {
         "bank_code": str(row["bank_code"]),
         "country_code": str(row["country_code"]),
@@ -1294,6 +1415,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
         "created_at": _serialize_datetime(row.get("created_at")),
         "updated_at": _serialize_datetime(row.get("updated_at")),
         "catalog_item_count": int(row.get("catalog_item_count") or 0),
+        "catalog_product_types": catalog_product_types,
         "generated_source_count": int(row.get("generated_source_count") or 0),
     }
 

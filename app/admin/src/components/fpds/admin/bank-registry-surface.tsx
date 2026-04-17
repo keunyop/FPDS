@@ -92,20 +92,17 @@ export function BankRegistrySurface({
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Banks</p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Manage the bank list once, then reuse it in source catalog coverage.
+              Manage bank profiles and coverage from one place.
             </h1>
             <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Bank code is generated automatically. Operators only need the visible bank name, homepage URL, and basic
-              status metadata here.
+              Operators enter the bank homepage once, then add product coverage inside the bank modal. FPDS generates
+              the actual source URLs later during collection.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
               Add bank
             </button>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
-              Go to source catalog
-            </Link>
           </div>
         </div>
       </article>
@@ -155,7 +152,7 @@ export function BankRegistrySurface({
                 <th className="border-b border-border px-3 py-3 font-medium">Code</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Homepage</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Status</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Catalog items</th>
+                <th className="border-b border-border px-3 py-3 font-medium">Catalogs</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Generated sources</th>
               </tr>
             </thead>
@@ -185,7 +182,13 @@ export function BankRegistrySurface({
                       )}
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.catalog_item_count}</td>
+                    <td className="border-b border-border/70 px-3 py-4 text-foreground">
+                      {item.catalog_product_types.length > 0 ? (
+                        formatProductTypeList(item.catalog_product_types)
+                      ) : (
+                        <span className="text-muted-foreground">none</span>
+                      )}
+                    </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
                   </tr>
                 ))
@@ -199,18 +202,12 @@ export function BankRegistrySurface({
         description="Add a bank profile without leaving the current bank list."
         footer={
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            Bank code is generated automatically after save, and the current search context stays in place.
+            Bank code is generated automatically after save, and coverage can be added right after from the same bank modal.
           </p>
         }
         onOpenChange={handleAddDialogChange}
         open={addModalOpen}
-        panelBadge="Admin workflow"
-        panelDescription="Capture the public bank profile here, then reuse it from source catalog coverage and generated source inspection."
-        panelStats={[
-          { label: "Current scope", value: `${banks.summary.total_items} banks` },
-          { label: "Active banks", value: `${banks.summary.status_counts.active ?? 0}` },
-        ]}
-        panelTitle="Bank registry workflow"
+        showPanel={false}
         title="Add bank"
       >
         <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} />
@@ -225,27 +222,13 @@ export function BankRegistrySurface({
         footer={
           activeBankDetail ? (
             <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              Bank code and country stay read-only here. Source coverage work continues from source catalog.
+              Edit the bank profile and manage product coverage together without leaving the bank list.
             </p>
           ) : undefined
         }
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
-        panelBadge={activeBankDetail?.bank.status === "active" ? "Active bank" : "Inactive bank"}
-        panelDescription={
-          activeBankDetail
-            ? "Open detail editing in place, then jump to source catalog when you want to expand product coverage for this bank."
-            : "Bank detail is loading."
-        }
-        panelStats={
-          activeBankDetail
-            ? [
-                { label: "Catalog items", value: `${activeBankDetail.bank.catalog_item_count}` },
-                { label: "Generated sources", value: `${activeBankDetail.bank.generated_source_count}` },
-              ]
-            : []
-        }
-        panelTitle={activeBankDetail ? activeBankDetail.bank.bank_name : "Bank detail"}
+        showPanel={false}
         title={activeBankDetail ? activeBankDetail.bank.bank_name : "Bank detail"}
       >
         {activeBankDetail ? (
@@ -305,4 +288,15 @@ function buildRegistrySearchParams(filters: BankRegistryPageFilters) {
     params.set("status", filters.status);
   }
   return params;
+}
+
+function formatProductTypeList(productTypes: string[]) {
+  return productTypes
+    .map((item) => {
+      if (item === "gic") {
+        return "GIC";
+      }
+      return item.charAt(0).toUpperCase() + item.slice(1);
+    })
+    .join(", ");
 }
