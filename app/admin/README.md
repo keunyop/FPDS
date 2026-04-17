@@ -32,8 +32,8 @@ Current runtime:
 - protected `/admin/usage` usage dashboard v1 with search, provider/stage filters, scope coverage summaries, by-model/by-agent/by-run concentration, trend deltas, and richer anomaly drilldowns
 - protected `/admin/banks` bank registry list with search-first layout, slimmer list columns, FPDS-styled wide dialogs built on Shadcnblocks `offer-modal4`, EN/KO/JA bank source-language selection, auto-generated bank code, and in-place bank detail editing that stays within the list workflow
 - protected `/admin/banks/:bankCode` bank detail route kept for direct-link compatibility while the primary list workflow now opens bank detail in a modal
-- protected `/admin/source-catalog` source catalog list with bank/product-type dropdown creation, multi-select collection launch, and generated-source counts
-- protected `/admin/source-catalog/:catalogItemId` source catalog detail route with editable bank/product coverage and recent collection history
+- protected `/admin/source-catalog` source catalog list with search-first bank/product coverage modals, multi-select collection launch, and generated-source counts while staying on the filtered list workflow
+- protected `/admin/source-catalog/:catalogItemId` source catalog detail route kept for direct-link compatibility while the primary list workflow now opens source-catalog detail in a modal
 - protected `/admin/sources` generated source registry list with bank/country/product/status/role filters and read-only drill-in
 - protected `/admin/sources/:sourceId` source detail route with read-only metadata visibility and recent collection history
 - `WBS 5.12` locale rollout is now implemented with EN/KO/JA locale switching on the admin shell and login surface, locale-preserving protected-route navigation, and locale-aware operator-facing labels while keeping evidence and source-derived content untouched

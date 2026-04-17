@@ -1567,6 +1567,42 @@ Each entry should include:
   - passed in `app/admin`
 - Known issues: none identified beyond needing a live browser retry to confirm the previously failing BMO update path is clear
 - Next step: retry editing a bank homepage in `/admin/banks` and confirm the audit event now persists cleanly with the update
+
+## 2026-04-16 - Source Catalog Modal Workflow Refresh
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: move source-catalog add and detail work into modals so operators can stay on the filtered `/admin/source-catalog` list the same way they now do on `/admin/banks`
+- Why now: Product Owner requested that the source-catalog `Create coverage` area and detail view follow the same modal workflow already applied to the bank registry screen
+- Outcome: replaced the inline `Create coverage` form with an `Add coverage` modal, switched source-catalog row detail from a page transition to an editable detail modal, preserved the direct `/admin/source-catalog/:catalogItemId` route as a compatibility deep link, and kept collection launch anchored on the list surface so operators can add coverage and then collect without losing filter context
+- Not done: this slice did not remove the direct source-catalog detail page route, did not change generated-source read-only behavior, and did not alter the backend API surface
+- Key files: `app/admin/src/app/admin/source-catalog/page.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/source-catalog-detail-dialog-content.tsx`, `app/admin/README.md`
+- Decisions: reused the existing `offer-modal4` shell and the bank-screen URL-addressable modal pattern instead of introducing a second source-catalog-specific modal state system. Kept collect action on the list header because that action is list-scoped rather than item-detail-scoped
+- Verification:
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: direct detail-page compatibility remains in place for now, so there are still two valid entry points into source-catalog detail during the transition
+- Next step: smoke test `/admin/source-catalog` in local dev by opening `Add coverage`, clicking an existing row into detail modal, and confirming that filter state survives modal open and close
+
+## 2026-04-16 - Source Catalog Modal Density Tuning
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: remove the low-value `Updated` column from the source-catalog list and reshape the source-catalog detail modal so its key content fits on one screen more reliably
+- Why now: Product Owner reported that the `Coverage list` still showed an unnecessary `Updated` column and that the source-catalog detail modal stacked too much content vertically to fit comfortably within one viewport
+- Outcome: removed the `Updated` column from the source-catalog list, narrowed the table minimum width accordingly, and reworked the detail modal into a two-column desktop layout with compact summary cards on the left and a shorter recent-run panel on the right while limiting the in-modal run history preview to the latest three runs
+- Not done: this slice did not change source-catalog routing, did not remove the direct compatibility route, and did not alter collection or generated-source backend behavior
+- Key files: `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-detail-dialog-content.tsx`, `docs/00-governance/development-journal.md`
+- Decisions: kept the recent history visible inside the modal but constrained it to a smaller preview so the operator still gets run context without turning the modal into a long scrolling surface
+- Verification:
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: the modal still relies on viewport height and browser zoom level, so final comfort should be confirmed in a real browser session at the Product Owner's usual zoom
+- Next step: reopen a populated source-catalog detail modal in local dev and confirm the summary, form, and run preview all fit without clipping on the target desktop viewport
 ---
 
 ## 7. Change History

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { SourceCatalogSurface, type SourceCatalogPageFilters } from "@/components/fpds/admin/source-catalog-surface";
-import { fetchAdminSession, fetchSourceCatalogList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchSourceCatalogDetail, fetchSourceCatalogList, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
@@ -16,15 +16,21 @@ export default async function SourceCatalogPage({ searchParams }: SourceCatalogP
   const locale = resolveAdminLocale(resolvedSearchParams);
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
+  const activeCatalogItemId = firstValue(resolvedSearchParams.catalog) || null;
+  const addModalOpen = firstValue(resolvedSearchParams.modal).toLowerCase() === "add";
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let catalog: Awaited<ReturnType<typeof fetchSourceCatalogList>> = null;
+  let activeCatalogDetail: Awaited<ReturnType<typeof fetchSourceCatalogDetail>> = null;
   let apiUnavailable = false;
 
   try {
     session = await fetchAdminSession();
     if (session) {
       catalog = await fetchSourceCatalogList(apiSearchParams);
+      if (activeCatalogItemId) {
+        activeCatalogDetail = await fetchSourceCatalogDetail(activeCatalogItemId);
+      }
     }
   } catch {
     apiUnavailable = true;
@@ -60,7 +66,15 @@ export default async function SourceCatalogPage({ searchParams }: SourceCatalogP
         role: session.user.role,
       }}
     >
-      <SourceCatalogSurface catalog={catalog} csrfToken={session.csrf_token} filters={filters} locale={locale} />
+      <SourceCatalogSurface
+        activeCatalogDetail={activeCatalogDetail}
+        activeCatalogItemId={activeCatalogItemId}
+        addModalOpen={addModalOpen}
+        catalog={catalog}
+        csrfToken={session.csrf_token}
+        filters={filters}
+        locale={locale}
+      />
     </ApplicationShell5>
   );
 }

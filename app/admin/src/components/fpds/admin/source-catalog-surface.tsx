@@ -2,9 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 
-import type { SourceCatalogCollectionLaunchResponse, SourceCatalogItem, SourceCatalogListResponse } from "@/lib/admin-api";
+import { OfferModal4 } from "@/components/offer-modal4";
+import { SourceCatalogCreateDialogContent } from "@/components/fpds/admin/source-catalog-create-dialog-content";
+import { SourceCatalogDetailDialogContent } from "@/components/fpds/admin/source-catalog-detail-dialog-content";
+import type {
+  SourceCatalogCollectionLaunchResponse,
+  SourceCatalogDetailResponse,
+  SourceCatalogItem,
+  SourceCatalogListResponse,
+} from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
 export type SourceCatalogPageFilters = {
@@ -19,59 +27,73 @@ type SourceCatalogSurfaceProps = {
   filters: SourceCatalogPageFilters;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  activeCatalogItemId: string | null;
+  activeCatalogDetail: SourceCatalogDetailResponse | null;
+  addModalOpen: boolean;
 };
 
-type CreateCatalogFormState = {
-  bank_code: string;
-  product_type: string;
-  status: string;
-  change_reason: string;
-};
-
-const PRODUCT_TYPE_OPTIONS = ["chequing", "savings", "gic"];
-
-export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: SourceCatalogSurfaceProps) {
+export function SourceCatalogSurface({
+  catalog,
+  filters,
+  locale,
+  csrfToken,
+  activeCatalogItemId,
+  activeCatalogDetail,
+  addModalOpen,
+}: SourceCatalogSurfaceProps) {
   const router = useRouter();
   const [selectedCatalogItemIds, setSelectedCatalogItemIds] = useState<string[]>([]);
-  const [createForm, setCreateForm] = useState<CreateCatalogFormState>({
-    bank_code: catalog.facets.bank_options[0]?.bank_code ?? "",
-    product_type: "savings",
-    status: "active",
-    change_reason: "",
-  });
   const [collectPending, setCollectPending] = useState(false);
-  const [createPending, setCreatePending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const detailModalOpen = Boolean(activeCatalogItemId && activeCatalogDetail);
+  const baseSearchParams = useMemo(() => buildCatalogSearchParams(filters), [filters]);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setCreatePending(true);
-    setMessage(null);
-    setError(null);
-
-    try {
-      const response = await fetch("/admin/source-catalog/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
-        },
-        body: JSON.stringify(createForm),
-      });
-      const payload = (await response.json()) as { data?: { catalog_item?: SourceCatalogItem }; error?: { message?: string } };
-      if (!response.ok) {
-        setError(payload.error?.message ?? "Source catalog item could not be created.");
-        return;
-      }
-      setMessage(`Source catalog item ${payload.data?.catalog_item?.catalog_item_id ?? ""} was created.`);
-      setCreateForm((current) => ({ ...current, change_reason: "" }));
-      router.refresh();
-    } catch {
-      setError("Source catalog item could not be created. Check the admin API and try again.");
-    } finally {
-      setCreatePending(false);
+  function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
+    const href = buildAdminHref("/admin/source-catalog", params, locale);
+    if (options?.replace) {
+      router.replace(href, { scroll: false });
+      return;
     }
+    router.push(href, { scroll: false });
+  }
+
+  function openAddModal() {
+    const params = new URLSearchParams(baseSearchParams);
+    params.set("modal", "add");
+    params.delete("catalog");
+    navigateWithParams(params);
+  }
+
+  function openDetailModal(catalogItemId: string) {
+    const params = new URLSearchParams(baseSearchParams);
+    params.set("catalog", catalogItemId);
+    params.delete("modal");
+    navigateWithParams(params);
+  }
+
+  function closeModal() {
+    navigateWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+  }
+
+  function handleAddDialogChange(open: boolean) {
+    if (!open) {
+      closeModal();
+    }
+  }
+
+  function handleDetailDialogChange(open: boolean) {
+    if (!open) {
+      closeModal();
+    }
+  }
+
+  function handleCatalogItemCreated(item: SourceCatalogItem | null) {
+    if (item?.catalog_item_id) {
+      openDetailModal(item.catalog_item_id);
+      return;
+    }
+    closeModal();
   }
 
   async function handleCollect() {
@@ -99,7 +121,8 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
         setError(payload.error?.message ?? "Collection could not be launched.");
         return;
       }
-      const generatedSourceCount = payload.data?.materialized_items.reduce((sum, item) => sum + item.generated_source_ids.length, 0) ?? 0;
+      const generatedSourceCount =
+        payload.data?.materialized_items.reduce((sum, item) => sum + item.generated_source_ids.length, 0) ?? 0;
       setMessage(`Collection launched for ${selectedCatalogItemIds.length} catalog item(s). Materialized ${generatedSourceCount} source row(s).`);
       setSelectedCatalogItemIds([]);
       router.refresh();
@@ -129,13 +152,18 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
               Choose the bank and product type, then let collection generate source detail.
             </h1>
             <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This is the only place operators add or edit product coverage. Bank and product type are selected from
-              controlled dropdowns, and generated source rows stay read-only afterwards.
+              This is the only place operators add or edit product coverage. Bank and product type stay controlled,
+              and generated source rows remain read-only afterwards.
             </p>
           </div>
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
-            View generated sources
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+              Add coverage
+            </button>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
+              View generated sources
+            </Link>
+          </div>
         </div>
       </article>
 
@@ -166,40 +194,29 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 pb-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Create coverage</p>
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Coverage list</p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Pick an existing bank and a supported product type. Collection will fill source detail automatically.
+              Review the current source-catalog coverage under the active filter set, then open add or detail work in a modal without leaving this page.
             </p>
           </div>
-          <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70" disabled={collectPending || selectedCatalogItemIds.length === 0} onClick={handleCollect} type="button">
-            {collectPending ? "Launching..." : `Collect selected (${selectedCatalogItemIds.length})`}
-          </button>
-        </div>
-
-        {message ? <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="mt-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
-
-        <form className="mt-6 grid gap-4" onSubmit={handleCreate}>
-          <div className="grid gap-4 lg:grid-cols-4">
-            <BankSelectClient label="Bank" options={catalog.facets.bank_options} value={createForm.bank_code} onChange={(value) => setCreateForm((current) => ({ ...current, bank_code: value }))} />
-            <SelectFieldClient label="Product type" options={PRODUCT_TYPE_OPTIONS} value={createForm.product_type} onChange={(value) => setCreateForm((current) => ({ ...current, product_type: value }))} />
-            <SelectFieldClient label="Status" options={["active", "inactive"]} value={createForm.status} onChange={(value) => setCreateForm((current) => ({ ...current, status: value }))} />
-            <TextField label="Change reason" value={createForm.change_reason} onChange={(value) => setCreateForm((current) => ({ ...current, change_reason: value }))} />
-          </div>
-          <div className="flex justify-end">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70" disabled={createPending} type="submit">
-              {createPending ? "Creating..." : "Create source catalog item"}
+          <div className="flex flex-wrap gap-2">
+            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+              Add coverage
+            </button>
+            <button className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-70" disabled={collectPending || selectedCatalogItemIds.length === 0} onClick={handleCollect} type="button">
+              {collectPending ? "Launching..." : `Collect selected (${selectedCatalogItemIds.length})`}
             </button>
           </div>
-        </form>
-      </article>
+        </div>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+        {message ? <p className="mx-6 mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
+        {error ? <p className="mx-6 mt-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+
         <div className="overflow-x-auto px-6 py-5">
-          <table className="min-w-[1040px] table-fixed border-separate border-spacing-0">
+          <table className="min-w-[940px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">Select</th>
@@ -208,13 +225,12 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
                 <th className="border-b border-border px-3 py-3 font-medium">Status</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Homepage</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Generated sources</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Updated</th>
               </tr>
             </thead>
             <tbody>
               {catalog.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={7}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
                     No source catalog items matched the current filter set.
                   </td>
                 </tr>
@@ -225,9 +241,9 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
                       <input checked={selectedCatalogItemIds.includes(item.catalog_item_id)} className="h-4 w-4 rounded border-border text-primary focus:ring-primary" onChange={(event) => toggleCatalogItem(item.catalog_item_id, event.target.checked)} type="checkbox" />
                     </td>
                     <td className="border-b border-border/70 px-3 py-4">
-                      <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/source-catalog/${item.catalog_item_id}`, new URLSearchParams(), locale)}>
+                      <button className="bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openDetailModal(item.catalog_item_id)} type="button">
                         {item.bank_name}
-                      </Link>
+                      </button>
                       <p className="mt-1 text-sm text-muted-foreground">{item.bank_code}</p>
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.product_type}</td>
@@ -242,7 +258,6 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
                       )}
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">{item.updated_at ?? "n/a"}</td>
                   </tr>
                 ))
               )}
@@ -250,6 +265,47 @@ export function SourceCatalogSurface({ catalog, filters, locale, csrfToken }: So
           </table>
         </div>
       </article>
+
+      <OfferModal4
+        description="Add source-catalog coverage without leaving the current filtered list."
+        footer={
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            Collection stays on the list surface, and generated source rows remain read-only afterwards.
+          </p>
+        }
+        onOpenChange={handleAddDialogChange}
+        open={addModalOpen}
+        panelBadge="Coverage setup"
+        panelDescription="Pick an existing bank and an approved product type, then let collection generate the source detail automatically."
+        panelStats={[
+          { label: "Current scope", value: `${catalog.summary.total_items} catalog items` },
+          { label: "Generated sources", value: `${catalog.summary.generated_source_count}` },
+        ]}
+        panelTitle="Source catalog workflow"
+        title="Add coverage"
+      >
+        <SourceCatalogCreateDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} onCreated={handleCatalogItemCreated} />
+      </OfferModal4>
+
+      <OfferModal4
+        description={activeCatalogDetail ? "Review and update bank-plus-product coverage while keeping the filtered source-catalog list anchored in place." : undefined}
+        footer={
+          activeCatalogDetail ? (
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">
+              Generated source rows stay read-only. Use collection and generated sources for the next step.
+            </p>
+          ) : undefined
+        }
+        onOpenChange={handleDetailDialogChange}
+        open={detailModalOpen}
+        panelBadge={activeCatalogDetail?.catalog_item.status === "active" ? "Active coverage" : "Inactive coverage"}
+        panelDescription={activeCatalogDetail ? "Adjust the bank-product coverage in place, then jump straight to generated sources or recent run history." : "Coverage detail is loading."}
+        panelStats={activeCatalogDetail ? [{ label: "Generated sources", value: `${activeCatalogDetail.catalog_item.generated_source_count}` }, { label: "Recent runs", value: `${activeCatalogDetail.recent_runs.length}` }] : []}
+        panelTitle={activeCatalogDetail ? `${activeCatalogDetail.catalog_item.bank_name} ${activeCatalogDetail.catalog_item.product_type}` : "Coverage detail"}
+        title={activeCatalogDetail ? `${activeCatalogDetail.catalog_item.bank_name} ${activeCatalogDetail.catalog_item.product_type}` : "Coverage detail"}
+      >
+        {activeCatalogDetail ? <SourceCatalogDetailDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} detail={activeCatalogDetail} locale={locale} /> : null}
+      </OfferModal4>
     </section>
   );
 }
@@ -290,31 +346,6 @@ function BankSelect({
   );
 }
 
-function BankSelectClient({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: Array<{ bank_code: string; bank_name: string }>;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
-        {options.map((option) => (
-          <option key={option.bank_code} value={option.bank_code}>
-            {option.bank_name}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
 function SelectField({
   label,
   options,
@@ -341,36 +372,19 @@ function SelectField({
   );
 }
 
-function SelectFieldClient({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="grid gap-2 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function TextField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return (
-    <label className="grid gap-2 text-sm">
-      <span className="font-medium text-foreground">{label}</span>
-      <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" onChange={(event) => onChange(event.target.value)} value={value} />
-    </label>
-  );
+function buildCatalogSearchParams(filters: SourceCatalogPageFilters) {
+  const params = new URLSearchParams();
+  if (filters.q) {
+    params.set("q", filters.q);
+  }
+  if (filters.bankCode) {
+    params.set("bank_code", filters.bankCode);
+  }
+  if (filters.productType) {
+    params.set("product_type", filters.productType);
+  }
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+  return params;
 }
