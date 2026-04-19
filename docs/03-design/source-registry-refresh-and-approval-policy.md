@@ -154,6 +154,8 @@ Current live dynamic onboarding note:
 - `/admin/product-types` now lets operators manage product type definitions with searchable name and description fields.
 - Bank coverage creation validates against that registry instead of the old hard-coded canonical list.
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
+- the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
+- generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
 - Dynamic product types continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
 
 ---
@@ -202,7 +204,7 @@ Current repository state:
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only the existing TD savings supporting-source merge path auto-included today
-- dynamic operator-defined product type onboarding is not live yet and remains a later design/workflow slice
+- dynamic operator-defined product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 
 ---
 
@@ -225,7 +227,7 @@ The following are intentionally out of scope for the first source-registry admin
 - dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
 - optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
 - operator-managed product type registry with searchable `name` and `description`
-- AI-assisted homepage discovery rules that can use product-type definitions beyond the current fixed canonical set
+- hybrid homepage discovery scoring that uses deterministic candidate generation, AI parallel scoring, and page-level evidence validation
 - parser, normalization, validation, and vocabulary fallback rules for newly added product types
 
 ---
@@ -238,3 +240,5 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-04-15 | Replaced the JSON-first approval baseline with a DB-backed admin-managed source registry baseline and defined `collect` as candidate-producing ingestion |
 | 2026-04-15 | Refined the MVP so operators manage banks and source catalog coverage while generated source rows remain read-only |
 | 2026-04-15 | Updated the policy after the `WBS 5.15` implementation so current-state notes now reflect the live DB-backed `/admin/sources` runtime |
+| 2026-04-18 | Linked the approved homepage-discovery quality follow-on design and corrected the current-state note for live dynamic product-type onboarding |
+| 2026-04-18 | Recorded the first homepage-discovery explainability implementation slice on generated source rows and source-detail inspection |

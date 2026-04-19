@@ -4,6 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import hashlib
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
@@ -46,6 +47,39 @@ _AUTOGEN_SOURCE_PREFIX = "AUTO"
 _EXCLUDED_LINK_KEYWORDS = ("login", "sign-in", "signin", "secure", "apply", "open-account", "openaccount", "promo", "offer", "compare")
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
 _HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
+_PAGE_NEGATIVE_KEYWORDS = ("compare", "apply", "open account", "sign in", "login", "legal", "terms and conditions", "promotion", "offer")
+_DISCOVERY_STOPWORDS = {
+    "account",
+    "accounts",
+    "bank",
+    "banking",
+    "certificate",
+    "daily",
+    "deposit",
+    "details",
+    "focused",
+    "guaranteed",
+    "interest",
+    "monthly",
+    "official",
+    "page",
+    "pages",
+    "product",
+    "products",
+    "public",
+    "rules",
+    "service",
+    "with",
+    "your",
+}
+_PRODUCT_TYPE_ATTRIBUTE_HINTS = {
+    "chequing": ("transaction", "transactions", "debit", "everyday", "day-to-day", "monthly fee", "overdraft", "interac"),
+    "savings": ("interest", "rate", "rates", "savings", "balance", "withdrawal", "tier", "tiering", "bonus"),
+    "gic": ("term", "maturity", "redeemable", "non-redeemable", "minimum deposit", "compounding", "investment"),
+}
+_PAGE_EVIDENCE_MINIMUM_SCORE = 4
+_AI_DISCOVERY_MAX_CANDIDATES = 12
+_PAGE_EVIDENCE_MAX_CANDIDATES = 6
 
 
 @dataclass(frozen=True)
@@ -74,6 +108,43 @@ class CatalogItemMaterializationResult:
     generated_rows: list[dict[str, Any]]
     discovery_notes: list[str]
     detail_source_ids: list[str]
+
+
+@dataclass(frozen=True)
+class HomepageCandidate:
+    normalized_url: str
+    raw_url: str
+    anchor_text: str
+    source_type: str
+    origin: str
+    heuristic_score: int
+    supporting_signal: bool
+    seed_source_id: str | None
+    source_name_hint: str | None
+    priority_hint: str | None
+    expected_fields_hint: list[str]
+
+
+@dataclass(frozen=True)
+class AiParallelCandidateScore:
+    candidate_url: str
+    predicted_role: str
+    relevance_score: float
+    confidence_band: str
+    reason_codes: list[str]
+    short_rationale: str
+
+
+@dataclass(frozen=True)
+class PageEvidenceAssessment:
+    page_evidence_score: int
+    page_evidence_reason_codes: list[str]
+    page_title: str | None
+    primary_heading: str | None
+    heading_match: bool
+    attribute_signal_count: int
+    negative_signal_count: int
+    fetch_error: str | None = None
 
 
 def normalize_bank_filters(*, search: str | None, status: str | None) -> BankFilters:
@@ -1284,6 +1355,7 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 seed_source_flag,
                 redirect_target_url,
                 alias_urls,
+                discovery_metadata,
                 change_reason,
                 created_at,
                 updated_at
@@ -1307,6 +1379,7 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 %(seed_source_flag)s,
                 %(redirect_target_url)s,
                 %(alias_urls)s::jsonb,
+                %(discovery_metadata)s::jsonb,
                 %(change_reason)s,
                 %(created_at)s,
                 %(updated_at)s
@@ -1326,6 +1399,7 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 seed_source_flag = EXCLUDED.seed_source_flag,
                 redirect_target_url = EXCLUDED.redirect_target_url,
                 alias_urls = EXCLUDED.alias_urls,
+                discovery_metadata = EXCLUDED.discovery_metadata,
                 change_reason = EXCLUDED.change_reason,
                 updated_at = EXCLUDED.updated_at
             RETURNING
@@ -1347,12 +1421,14 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 seed_source_flag,
                 redirect_target_url,
                 alias_urls,
+                discovery_metadata,
                 change_reason
             """,
             {
                 **item,
                 "expected_fields": json.dumps(item.get("expected_fields", []), ensure_ascii=True),
                 "alias_urls": json.dumps(item.get("alias_urls", []), ensure_ascii=True),
+                "discovery_metadata": json.dumps(item.get("discovery_metadata", {}), ensure_ascii=True),
                 "created_at": now,
                 "updated_at": now,
             },
@@ -1464,30 +1540,45 @@ def _generate_sources_from_homepage(
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
     seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=product_type)
-    if not unique_detail_links:
-        ai_detail_rows, ai_notes = _resolve_detail_rows_with_ai(
-            bank_code=bank_code,
-            bank_name=bank_name,
-            country_code=country_code,
-            product_type=product_type,
-            product_type_definition=product_type_definition,
-            source_language=source_language,
-            homepage_url=homepage_url,
-            normalized_homepage_url=normalized_homepage_url,
-            homepage_fetch_error=homepage_fetch_error,
-            extracted_links=homepage_links,
-            seed_detail_hints=seed_detail_hints,
-        )
-        discovery_notes.extend(ai_notes)
-    else:
-        ai_detail_rows = []
     source_rows: list[dict[str, Any]] = []
     entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
     entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
+    html_candidates = _build_html_candidates(
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        detail_links=unique_detail_links,
+        supporting_links=unique_supporting_links,
+        seed_detail_hints=seed_detail_hints,
+    )
+    ai_scores, ai_notes = _score_candidate_links_with_ai(
+        bank_code=bank_code,
+        bank_name=bank_name,
+        country_code=country_code,
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        source_language=source_language,
+        homepage_url=homepage_url,
+        normalized_homepage_url=normalized_homepage_url,
+        homepage_fetch_error=homepage_fetch_error,
+        candidates=html_candidates,
+    )
+    discovery_notes.extend(ai_notes)
+    detail_rows, detail_notes = _promote_detail_candidates(
+        bank_code=bank_code,
+        bank_name=bank_name,
+        country_code=country_code,
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        source_language=source_language,
+        fetch_policy=fetch_policy,
+        candidates=html_candidates,
+        ai_scores=ai_scores,
+    )
+    discovery_notes.extend(detail_notes)
 
-    if unique_detail_links:
+    if detail_rows:
         source_rows.append(
             _build_generated_source_row(
                 bank_code=bank_code,
@@ -1501,30 +1592,25 @@ def _generate_sources_from_homepage(
                 priority="P0",
                 purpose=f"{bank_name} {product_type_label} catalog discovery entry",
                 expected_fields=["product_name"],
+                discovery_metadata={
+                    "selection_path": "entry_seed",
+                    "selection_confidence": "n/a",
+                    "selection_reason_codes": ["catalog_entry_context"],
+                    "candidate_origin": "hub_page" if unique_hub_pages else "homepage",
+                },
             )
         )
-        for _, link in unique_detail_links:
-            source_rows.append(
-                _build_generated_source_row(
-                    bank_code=bank_code,
-                    country_code=country_code,
-                    product_type=product_type,
-                    source_language=source_language,
-                    normalized_url=link.normalized_url,
-                    raw_url=link.resolved_url,
-                    source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="detail"),
-                    discovery_role="detail",
-                    priority="P1",
-                    purpose=f"Auto-generated {product_type_label} detail source from bank homepage",
-                    expected_fields=expected_fields,
-                )
-            )
-    elif ai_detail_rows:
-        source_rows.extend(ai_detail_rows)
+        source_rows.extend(detail_rows)
     else:
-        discovery_notes.append("Homepage discovery completed but no candidate-producing detail sources were identified.")
+        if html_candidates:
+            discovery_notes.append("Homepage discovery completed but candidate validation did not promote any detail sources.")
+        else:
+            discovery_notes.append("Homepage discovery completed but no candidate-producing detail sources were identified.")
 
+    promoted_detail_urls = {str(item["normalized_url"]) for item in detail_rows}
     for _, link in unique_supporting_links:
+        if link.normalized_url in promoted_detail_urls:
+            continue
         source_rows.append(
             _build_generated_source_row(
                 bank_code=bank_code,
@@ -1538,6 +1624,23 @@ def _generate_sources_from_homepage(
                 priority="P2",
                 purpose=f"Auto-generated supporting source for {product_type_label}",
                 expected_fields=expected_fields,
+                discovery_metadata={
+                    "selection_path": "supporting_only",
+                    "selection_confidence": "medium" if _score_product_link(
+                        product_type=product_type,
+                        product_type_definition=product_type_definition,
+                        normalized_url=link.normalized_url,
+                        anchor_text=link.anchor_text,
+                    ) > 0 else "low",
+                    "selection_reason_codes": ["supporting_keyword_match"],
+                    "candidate_origin": "homepage_or_hub_link",
+                    "heuristic_score": _score_product_link(
+                        product_type=product_type,
+                        product_type_definition=product_type_definition,
+                        normalized_url=link.normalized_url,
+                        anchor_text=link.anchor_text,
+                    ),
+                },
             )
         )
     for _, link in unique_pdf_links:
@@ -1554,6 +1657,18 @@ def _generate_sources_from_homepage(
                 priority="P2",
                 purpose=f"Auto-generated linked PDF source for {product_type_label}",
                 expected_fields=expected_fields,
+                discovery_metadata={
+                    "selection_path": "linked_pdf",
+                    "selection_confidence": "medium",
+                    "selection_reason_codes": ["supporting_pdf_signal"],
+                    "candidate_origin": "homepage_or_hub_link",
+                    "heuristic_score": _score_product_link(
+                        product_type=product_type,
+                        product_type_definition=product_type_definition,
+                        normalized_url=link.normalized_url,
+                        anchor_text=link.anchor_text,
+                    ),
+                },
             )
         )
     detail_source_ids = [
@@ -1565,6 +1680,104 @@ def _generate_sources_from_homepage(
         rows=source_rows,
         discovery_notes=_dedupe_preserve_order([note for note in discovery_notes if note]),
         detail_source_ids=detail_source_ids,
+    )
+
+
+def _build_html_candidates(
+    *,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    detail_links: list[tuple[int, Any]],
+    supporting_links: list[tuple[int, Any]],
+    seed_detail_hints: list[dict[str, Any]],
+) -> list[HomepageCandidate]:
+    by_url: dict[str, HomepageCandidate] = {}
+    for score, link in [*detail_links, *supporting_links]:
+        supporting_signal = any(keyword in f"{link.normalized_url} {link.anchor_text}".lower() for keyword in _SUPPORTING_KEYWORDS)
+        candidate = HomepageCandidate(
+            normalized_url=str(link.normalized_url),
+            raw_url=str(link.resolved_url),
+            anchor_text=str(link.anchor_text),
+            source_type=str(link.source_type),
+            origin="homepage_or_hub_link",
+            heuristic_score=int(score),
+            supporting_signal=supporting_signal,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        _merge_homepage_candidate(by_url, candidate)
+
+    for hint in seed_detail_hints:
+        normalized_url = normalize_source_url(str(hint["source_url"]))
+        candidate = HomepageCandidate(
+            normalized_url=normalized_url,
+            raw_url=str(hint["source_url"]),
+            anchor_text=str(hint.get("source_name") or ""),
+            source_type=infer_source_type(normalized_url),
+            origin="seed_detail_hint",
+            heuristic_score=_score_product_link(
+                product_type=product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=normalized_url,
+                anchor_text=str(hint.get("source_name") or ""),
+            ),
+            supporting_signal=False,
+            seed_source_id=str(hint.get("source_id") or "") or None,
+            source_name_hint=str(hint.get("source_name") or "") or None,
+            priority_hint=str(hint.get("priority") or "P1"),
+            expected_fields_hint=[str(item) for item in (hint.get("expected_fields") or []) if str(item).strip()],
+        )
+        _merge_homepage_candidate(by_url, candidate)
+
+    candidates = list(by_url.values())
+    candidates.sort(
+        key=lambda item: (
+            0 if item.origin == "seed_detail_hint" else 1,
+            -item.heuristic_score,
+            item.normalized_url,
+        )
+    )
+    return candidates[:_AI_DISCOVERY_MAX_CANDIDATES]
+
+
+def _merge_homepage_candidate(by_url: dict[str, HomepageCandidate], candidate: HomepageCandidate) -> None:
+    current = by_url.get(candidate.normalized_url)
+    if current is None:
+        by_url[candidate.normalized_url] = candidate
+        return
+    if (
+        candidate.origin == "seed_detail_hint"
+        and current.origin != "seed_detail_hint"
+        or candidate.heuristic_score > current.heuristic_score
+    ):
+        by_url[candidate.normalized_url] = HomepageCandidate(
+            normalized_url=candidate.normalized_url,
+            raw_url=candidate.raw_url,
+            anchor_text=candidate.anchor_text or current.anchor_text,
+            source_type=candidate.source_type,
+            origin=candidate.origin,
+            heuristic_score=max(candidate.heuristic_score, current.heuristic_score),
+            supporting_signal=current.supporting_signal or candidate.supporting_signal,
+            seed_source_id=candidate.seed_source_id or current.seed_source_id,
+            source_name_hint=candidate.source_name_hint or current.source_name_hint,
+            priority_hint=candidate.priority_hint or current.priority_hint,
+            expected_fields_hint=candidate.expected_fields_hint or current.expected_fields_hint,
+        )
+        return
+    by_url[candidate.normalized_url] = HomepageCandidate(
+        normalized_url=current.normalized_url,
+        raw_url=current.raw_url,
+        anchor_text=current.anchor_text or candidate.anchor_text,
+        source_type=current.source_type,
+        origin=current.origin,
+        heuristic_score=max(current.heuristic_score, candidate.heuristic_score),
+        supporting_signal=current.supporting_signal or candidate.supporting_signal,
+        seed_source_id=current.seed_source_id or candidate.seed_source_id,
+        source_name_hint=current.source_name_hint or candidate.source_name_hint,
+        priority_hint=current.priority_hint or candidate.priority_hint,
+        expected_fields_hint=current.expected_fields_hint or candidate.expected_fields_hint,
     )
 
 
@@ -1612,7 +1825,7 @@ def _dedupe_preserve_order(items: list[str]) -> list[str]:
     return deduped
 
 
-def _resolve_detail_rows_with_ai(
+def _score_candidate_links_with_ai(
     *,
     bank_code: str,
     bank_name: str,
@@ -1623,24 +1836,27 @@ def _resolve_detail_rows_with_ai(
     homepage_url: str,
     normalized_homepage_url: str,
     homepage_fetch_error: str | None,
-    extracted_links: list[Any],
-    seed_detail_hints: list[dict[str, Any]],
-) -> tuple[list[dict[str, Any]], list[str]]:
+    candidates: list[HomepageCandidate],
+) -> tuple[dict[str, AiParallelCandidateScore], list[str]]:
+    if not candidates:
+        return {}, []
     provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
     api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
     if provider != "openai" or not api_key:
-        return [], ["AI-assisted homepage discovery was unavailable because the OpenAI provider or API key was not configured."]
+        return {}, ["AI parallel scorer was unavailable because the OpenAI provider or API key was not configured."]
 
     candidate_links = [
         {
-            "url": str(link.normalized_url),
-            "anchor_text": str(link.anchor_text),
-            "source_type": str(link.source_type),
+            "candidate_url": item.normalized_url,
+            "candidate_label": item.anchor_text or item.source_name_hint or item.normalized_url,
+            "source_type": item.source_type,
+            "heuristic_score": item.heuristic_score,
+            "candidate_origin": item.origin,
         }
-        for link in extracted_links[:24]
+        for item in candidates
     ]
     try:
-        resolution = _invoke_openai_detail_resolution(
+        resolution = _invoke_openai_parallel_scorer(
             model_id=os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
             api_key=api_key,
             payload={
@@ -1661,68 +1877,53 @@ def _resolve_detail_rows_with_ai(
                 "normalized_homepage_url": normalized_homepage_url,
                 "homepage_fetch_error": homepage_fetch_error,
                 "candidate_links": candidate_links,
-                "seed_detail_hints": seed_detail_hints,
             },
         )
     except Exception as exc:
-        return [], [f"AI-assisted homepage discovery was unavailable: {exc}"]
+        return {}, [f"AI parallel scorer was unavailable: {exc}"]
 
-    detail_rows: list[dict[str, Any]] = []
     notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
-    hints_by_id = {str(item["source_id"]): item for item in seed_detail_hints}
     hostname = urlparse(normalized_homepage_url).hostname or ""
-    expected_fields = _product_type_expected_fields(product_type_definition)
-    product_type_label = _product_type_label(product_type_definition)
-    for item in resolution.get("discovered_details", []):
-        source_id = str(item.get("source_id") or "").strip()
-        source_url = str(item.get("source_url") or "").strip()
-        source_name = str(item.get("source_name") or "").strip()
-        reason = str(item.get("reason") or "").strip()
-        hint = hints_by_id.get(source_id)
-        if not source_url:
+    scores: dict[str, AiParallelCandidateScore] = {}
+    valid_candidate_urls = {item.normalized_url for item in candidates}
+    for item in resolution.get("candidate_scores", []):
+        candidate_url = str(item.get("candidate_url") or "").strip()
+        if not candidate_url:
             continue
-        normalized_url = normalize_source_url(source_url)
+        normalized_url = normalize_source_url(candidate_url)
         parsed_hostname = urlparse(normalized_url).hostname or ""
-        candidate_label = source_id or source_url
+        candidate_label = str(item.get("candidate_label") or normalized_url)
+        if normalized_url not in valid_candidate_urls:
+            notes.append(f"AI scored an unbounded candidate for {candidate_label}; the score was ignored.")
+            continue
         if not parsed_hostname or not (parsed_hostname == hostname or parsed_hostname.endswith(f".{hostname}")):
-            notes.append(f"AI suggested an out-of-scope URL for {candidate_label}; the candidate was ignored.")
+            notes.append(f"AI scored an out-of-scope URL for {candidate_label}; the score was ignored.")
             continue
         if infer_source_type(normalized_url) != "html":
-            notes.append(f"AI suggested a non-HTML URL for {candidate_label}; the candidate was ignored.")
+            notes.append(f"AI scored a non-HTML URL for {candidate_label}; the score was ignored.")
             continue
-        row = _build_generated_source_row(
-            bank_code=bank_code,
-            country_code=country_code,
-            product_type=product_type,
-            source_language=source_language,
-            normalized_url=normalized_url,
-            raw_url=source_url,
-            source_name=str(hint["source_name"]) if hint else (source_name or _generated_link_name(bank_name, product_type_label, "", fallback="detail")),
-            discovery_role="detail",
-            priority=str(hint["priority"]) if hint else "P1",
-            purpose=reason or f"AI-resolved {product_type_label} detail source from the bank homepage",
-            expected_fields=list(hint["expected_fields"]) if hint else expected_fields,
+        scores[normalized_url] = AiParallelCandidateScore(
+            candidate_url=normalized_url,
+            predicted_role=str(item.get("predicted_role") or "irrelevant"),
+            relevance_score=float(item.get("relevance_score") or 0.0),
+            confidence_band=str(item.get("confidence_band") or "low"),
+            reason_codes=[str(code) for code in (item.get("reason_codes") or []) if str(code).strip()],
+            short_rationale=str(item.get("short_rationale") or "").strip(),
         )
-        if hint and source_id:
-            row["source_id"] = source_id
-        detail_rows.append(row)
-
-    if detail_rows:
-        notes.append(f"AI-assisted homepage discovery resolved {len(detail_rows)} detail source(s).")
+    if scores:
+        notes.append(f"AI parallel scorer evaluated {len(scores)} candidate link(s).")
     else:
-        notes.append("AI-assisted homepage discovery did not identify any detail sources with enough confidence.")
-    return detail_rows, _dedupe_preserve_order([note for note in notes if note])
+        notes.append("AI parallel scorer returned no usable candidate scores.")
+    return scores, _dedupe_preserve_order([note for note in notes if note])
 
 
-def _invoke_openai_detail_resolution(*, model_id: str, api_key: str, payload: dict[str, Any]) -> dict[str, Any]:
+def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict[str, Any]) -> dict[str, Any]:
     request_body = {
         "model": model_id,
         "instructions": (
-            "You resolve Canadian bank deposit-product detail page URLs from a bank homepage context. "
-            "Return only official public HTML detail pages on the same bank domain. "
-            "Use the product type definition and candidate links to infer the most likely public detail page. "
-            "If seed detail hints are present, you may reuse them when they still match, but you may also nominate a new same-domain public detail URL. "
-            "If there is not enough evidence, return an empty discovered_details list and explain why in summary."
+            "You score bounded Canadian bank candidate URLs for homepage-first product discovery. "
+            "Do not invent URLs. Score only the candidate links provided. "
+            "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type."
         ),
         "input": [
             {
@@ -1738,29 +1939,43 @@ def _invoke_openai_detail_resolution(*, model_id: str, api_key: str, payload: di
         "text": {
             "format": {
                 "type": "json_schema",
-                "name": "homepage_detail_resolution",
+                "name": "homepage_parallel_candidate_scores",
                 "strict": True,
                 "schema": {
                     "type": "object",
                     "additionalProperties": False,
                     "properties": {
                         "summary": {"type": "string"},
-                        "discovered_details": {
+                        "candidate_scores": {
                             "type": "array",
                             "items": {
                                 "type": "object",
                                 "additionalProperties": False,
                                 "properties": {
-                                    "source_id": {"type": "string"},
-                                    "source_url": {"type": "string"},
-                                    "source_name": {"type": "string"},
-                                    "reason": {"type": "string"},
+                                    "candidate_url": {"type": "string"},
+                                    "candidate_label": {"type": "string"},
+                                    "predicted_role": {"type": "string", "enum": ["detail", "supporting_html", "irrelevant"]},
+                                    "relevance_score": {"type": "number"},
+                                    "confidence_band": {"type": "string", "enum": ["high", "medium", "low"]},
+                                    "reason_codes": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "short_rationale": {"type": "string"},
                                 },
-                                "required": ["source_id", "source_url", "source_name", "reason"],
+                                "required": [
+                                    "candidate_url",
+                                    "candidate_label",
+                                    "predicted_role",
+                                    "relevance_score",
+                                    "confidence_band",
+                                    "reason_codes",
+                                    "short_rationale",
+                                ],
                             },
                         },
                     },
-                    "required": ["summary", "discovered_details"],
+                    "required": ["summary", "candidate_scores"],
                 },
             }
         },
@@ -1785,7 +2000,7 @@ def _invoke_openai_detail_resolution(*, model_id: str, api_key: str, payload: di
     try:
         return json.loads(response_text)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"OpenAI detail resolution returned invalid JSON: {response_text}") from exc
+        raise RuntimeError(f"OpenAI parallel scorer returned invalid JSON: {response_text}") from exc
 
 
 def _extract_response_output_text(response_payload: dict[str, Any]) -> str:
@@ -1798,7 +2013,300 @@ def _extract_response_output_text(response_payload: dict[str, Any]) -> str:
                 raise RuntimeError(str(content.get("refusal") or "OpenAI refused the homepage discovery request."))
             if content_type == "output_text" and content.get("text"):
                 return str(content["text"])
-    raise RuntimeError("OpenAI detail resolution returned no text output.")
+    raise RuntimeError("OpenAI discovery scorer returned no text output.")
+
+
+def _promote_detail_candidates(
+    *,
+    bank_code: str,
+    bank_name: str,
+    country_code: str,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    source_language: str,
+    fetch_policy: DiscoveryFetchPolicy,
+    candidates: list[HomepageCandidate],
+    ai_scores: dict[str, AiParallelCandidateScore],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    product_type_label = _product_type_label(product_type_definition)
+    expected_fields = _product_type_expected_fields(product_type_definition)
+    notes: list[str] = []
+    detail_rows: list[dict[str, Any]] = []
+    promoted_count = 0
+    evaluated = 0
+    for candidate in sorted(candidates, key=lambda item: (-_candidate_combined_score(item, ai_scores), item.normalized_url))[:_PAGE_EVIDENCE_MAX_CANDIDATES]:
+        ai_score = ai_scores.get(candidate.normalized_url)
+        if ai_score and ai_score.predicted_role == "irrelevant":
+            continue
+        if not candidate.seed_source_id and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
+            continue
+        evaluated += 1
+        page_evidence = _score_page_evidence(
+            raw_url=candidate.raw_url,
+            fetch_policy=fetch_policy,
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+        )
+        if page_evidence.fetch_error:
+            notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
+            continue
+        if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence):
+            continue
+        metadata = _build_detail_discovery_metadata(
+            candidate=candidate,
+            ai_score=ai_score,
+            page_evidence=page_evidence,
+        )
+        row = _build_generated_source_row(
+            bank_code=bank_code,
+            country_code=country_code,
+            product_type=product_type,
+            source_language=source_language,
+            normalized_url=candidate.normalized_url,
+            raw_url=candidate.raw_url,
+            source_name=candidate.source_name_hint or _generated_link_name(bank_name, product_type_label, candidate.anchor_text, fallback="detail"),
+            discovery_role="detail",
+            priority=candidate.priority_hint or "P1",
+            purpose=(
+                ai_score.short_rationale
+                if ai_score and ai_score.short_rationale
+                else f"Auto-generated {product_type_label} detail source from bank homepage"
+            ),
+            expected_fields=candidate.expected_fields_hint or expected_fields,
+            discovery_metadata=metadata,
+        )
+        if candidate.seed_source_id:
+            row["source_id"] = candidate.seed_source_id
+        detail_rows.append(row)
+        promoted_count += 1
+    if promoted_count:
+        notes.append(f"Homepage discovery promoted {promoted_count} detail source(s) after candidate scoring and page evidence validation.")
+    elif evaluated:
+        notes.append("Homepage discovery candidate validation rejected all tentative detail pages.")
+    return detail_rows, _dedupe_preserve_order([note for note in notes if note])
+
+
+def _candidate_combined_score(candidate: HomepageCandidate, ai_scores: dict[str, AiParallelCandidateScore]) -> float:
+    ai_score = ai_scores.get(candidate.normalized_url)
+    total = float(candidate.heuristic_score * 2)
+    if ai_score is None:
+        return total
+    role_bonus = {"detail": 2.0, "supporting_html": -1.0, "irrelevant": -3.0}.get(ai_score.predicted_role, 0.0)
+    return total + ai_score.relevance_score + role_bonus
+
+
+def _candidate_promotes_to_detail(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
+        return False
+    if page_evidence.negative_signal_count >= 2:
+        return False
+    if candidate.seed_source_id and page_evidence.page_evidence_score >= _PAGE_EVIDENCE_MINIMUM_SCORE:
+        return True
+    if ai_score is not None:
+        if ai_score.predicted_role != "detail":
+            return False
+        return ai_score.relevance_score >= 4.0
+    return candidate.heuristic_score > 0
+
+
+def _build_detail_discovery_metadata(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> dict[str, Any]:
+    combined = _candidate_combined_score(candidate, {candidate.normalized_url: ai_score} if ai_score is not None else {})
+    if page_evidence.page_evidence_score >= 7 and combined >= 8:
+        confidence = "high"
+    elif page_evidence.page_evidence_score >= _PAGE_EVIDENCE_MINIMUM_SCORE and combined >= 4:
+        confidence = "medium"
+    else:
+        confidence = "low"
+    selection_reason_codes = list(
+        dict.fromkeys(
+            [
+                *(_coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else []),
+                *page_evidence.page_evidence_reason_codes,
+                "seed_hint_alignment" if candidate.seed_source_id else "",
+            ]
+        )
+    )
+    return {
+        "selection_path": _selection_path(candidate=candidate, ai_score=ai_score),
+        "selection_confidence": confidence,
+        "selection_reason_codes": [code for code in selection_reason_codes if code],
+        "candidate_origin": candidate.origin,
+        "heuristic_score": candidate.heuristic_score,
+        "ai_parallel_score": ai_score.relevance_score if ai_score is not None else None,
+        "ai_predicted_role": ai_score.predicted_role if ai_score is not None else None,
+        "ai_confidence_band": ai_score.confidence_band if ai_score is not None else None,
+        "ai_reason_codes": _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else [],
+        "ai_short_rationale": ai_score.short_rationale if ai_score is not None else None,
+        "page_evidence_score": page_evidence.page_evidence_score,
+        "page_evidence_reason_codes": page_evidence.page_evidence_reason_codes,
+        "page_title": page_evidence.page_title,
+        "primary_heading": page_evidence.primary_heading,
+        "heading_match": page_evidence.heading_match,
+        "attribute_signal_count": page_evidence.attribute_signal_count,
+        "negative_signal_count": page_evidence.negative_signal_count,
+    }
+
+
+def _selection_path(*, candidate: HomepageCandidate, ai_score: AiParallelCandidateScore | None) -> str:
+    if ai_score is not None and candidate.seed_source_id:
+        return "seed_hint_plus_ai_plus_page_evidence"
+    if ai_score is not None:
+        return "heuristic_plus_ai_plus_page_evidence"
+    if candidate.seed_source_id:
+        return "seed_hint_plus_page_evidence"
+    return "heuristic_plus_page_evidence"
+
+
+def _coerce_reason_codes(values: list[str]) -> list[str]:
+    return [str(item) for item in values if str(item).strip()]
+
+
+def _score_page_evidence(
+    *,
+    raw_url: str,
+    fetch_policy: DiscoveryFetchPolicy,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+) -> PageEvidenceAssessment:
+    try:
+        html_text = fetch_text(raw_url, fetch_policy)
+    except Exception as exc:
+        return PageEvidenceAssessment(
+            page_evidence_score=0,
+            page_evidence_reason_codes=["page_fetch_unavailable"],
+            page_title=None,
+            primary_heading=None,
+            heading_match=False,
+            attribute_signal_count=0,
+            negative_signal_count=0,
+            fetch_error=str(exc),
+        )
+
+    parser = _PageSignalParser()
+    parser.feed(html_text)
+    title_text = parser.title_text
+    primary_heading = parser.primary_heading
+    heading_text = " ".join([primary_heading, *parser.secondary_headings]).strip()
+    body_text = " ".join(parser.body_chunks[:40]).strip()
+    semantic_terms = _product_type_semantic_terms(product_type_definition)
+    attribute_terms = _product_type_attribute_keywords(product_type, product_type_definition)
+    title_match = _term_hits(title_text, semantic_terms)
+    primary_heading_match = _term_hits(primary_heading, semantic_terms)
+    body_match = _term_hits(body_text, semantic_terms)
+    attribute_hits = _term_hits(body_text, attribute_terms) + _term_hits(heading_text, attribute_terms)
+    negative_hits = _negative_term_hits(" ".join([title_text, heading_text, body_text]))
+
+    score = 0
+    reason_codes: list[str] = []
+    if title_match:
+        score += 3
+        reason_codes.append("title_semantic_match")
+    if primary_heading_match:
+        score += 3
+        reason_codes.append("detail_page_layout_signal")
+    if body_match:
+        score += 1
+        reason_codes.append("product_type_semantic_match")
+    if attribute_hits >= 2:
+        score += 2
+        reason_codes.append("pricing_or_feature_signal")
+    elif attribute_hits == 1:
+        score += 1
+        reason_codes.append("pricing_or_feature_signal")
+    if negative_hits:
+        score -= min(4, negative_hits * 2)
+        reason_codes.append("insufficient_evidence")
+    if not title_match and not primary_heading_match and not body_match and attribute_hits == 0:
+        reason_codes.append("insufficient_evidence")
+
+    return PageEvidenceAssessment(
+        page_evidence_score=max(score, 0),
+        page_evidence_reason_codes=_dedupe_preserve_order([code for code in reason_codes if code]),
+        page_title=title_text or None,
+        primary_heading=primary_heading or None,
+        heading_match=bool(primary_heading_match),
+        attribute_signal_count=attribute_hits,
+        negative_signal_count=negative_hits,
+    )
+
+
+class _PageSignalParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._tag_stack: list[str] = []
+        self._ignore_depth = 0
+        self._title_parts: list[str] = []
+        self._h1_parts: list[str] = []
+        self._h2_parts: list[str] = []
+        self.body_chunks: list[str] = []
+
+    @property
+    def title_text(self) -> str:
+        return _collapse_whitespace(" ".join(self._title_parts))
+
+    @property
+    def primary_heading(self) -> str:
+        return _collapse_whitespace(" ".join(self._h1_parts))
+
+    @property
+    def secondary_headings(self) -> list[str]:
+        return [_collapse_whitespace(" ".join(self._h2_parts))] if self._h2_parts else []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        normalized = tag.lower()
+        if normalized in {"script", "style", "noscript"}:
+            self._ignore_depth += 1
+            return
+        self._tag_stack.append(normalized)
+
+    def handle_endtag(self, tag: str) -> None:
+        normalized = tag.lower()
+        if normalized in {"script", "style", "noscript"} and self._ignore_depth > 0:
+            self._ignore_depth -= 1
+            return
+        for index in range(len(self._tag_stack) - 1, -1, -1):
+            if self._tag_stack[index] == normalized:
+                del self._tag_stack[index]
+                break
+
+    def handle_data(self, data: str) -> None:
+        if self._ignore_depth > 0:
+            return
+        text = _collapse_whitespace(data)
+        if not text:
+            return
+        if "title" in self._tag_stack:
+            self._title_parts.append(text)
+        elif "h1" in self._tag_stack:
+            self._h1_parts.append(text)
+        elif "h2" in self._tag_stack or "h3" in self._tag_stack:
+            self._h2_parts.append(text)
+        else:
+            self.body_chunks.append(text)
+
+
+def _collapse_whitespace(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _term_hits(text: str, terms: list[str]) -> int:
+    fingerprint = text.lower()
+    return sum(1 for term in terms if term and term in fingerprint)
+
+
+def _negative_term_hits(text: str) -> int:
+    fingerprint = text.lower()
+    return sum(1 for term in _PAGE_NEGATIVE_KEYWORDS if term in fingerprint)
 
 
 def _extract_allowed_links(*, html_text: str, base_url: str, hostname: str) -> list[Any]:
@@ -1855,6 +2363,7 @@ def _build_generated_source_row(
     priority: str,
     purpose: str,
     expected_fields: list[str],
+    discovery_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     source_type = infer_source_type(normalized_url)
     digest = hashlib.sha1(f"{bank_code}|{product_type}|{normalized_url}|{discovery_role}".encode("utf-8")).hexdigest()[:10]
@@ -1878,6 +2387,7 @@ def _build_generated_source_row(
         "seed_source_flag": False,
         "redirect_target_url": None,
         "alias_urls": [],
+        "discovery_metadata": discovery_metadata or {},
         "change_reason": "generated_from_bank_homepage",
     }
 
@@ -1934,6 +2444,9 @@ def _score_product_link(
     for keyword in _product_type_keywords(product_type_definition):
         if keyword in fingerprint:
             score += 2
+    for keyword in _product_type_description_terms(product_type_definition):
+        if keyword in fingerprint:
+            score += 1
     normalized_product_type = product_type.replace("-", " ")
     if normalized_product_type and normalized_product_type in fingerprint:
         score += 1
@@ -1960,6 +2473,29 @@ def _product_type_keywords(product_type_definition: dict[str, Any]) -> list[str]
     if display_name and display_name not in keywords:
         keywords.append(display_name)
     return keywords
+
+
+def _product_type_description_terms(product_type_definition: dict[str, Any]) -> list[str]:
+    tokens: list[str] = []
+    for token in re.findall(r"[a-z0-9][a-z0-9-]{2,}", str(product_type_definition.get("description") or "").lower()):
+        if token in _DISCOVERY_STOPWORDS or token in tokens:
+            continue
+        tokens.append(token)
+        if len(tokens) >= 16:
+            break
+    return tokens
+
+
+def _product_type_semantic_terms(product_type_definition: dict[str, Any]) -> list[str]:
+    return _dedupe_preserve_order([*_product_type_keywords(product_type_definition), *_product_type_description_terms(product_type_definition)])
+
+
+def _product_type_attribute_keywords(product_type: str, product_type_definition: dict[str, Any]) -> list[str]:
+    hints = list(_PRODUCT_TYPE_ATTRIBUTE_HINTS.get(product_type, ()))
+    for token in _product_type_description_terms(product_type_definition):
+        if token not in hints:
+            hints.append(token)
+    return hints[:16]
 
 
 def _product_type_expected_fields(product_type_definition: dict[str, Any]) -> list[str]:

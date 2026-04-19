@@ -36,7 +36,7 @@ Current runtime:
 - protected `/admin/source-catalog` and `/admin/source-catalog/:catalogItemId` now redirect into the bank-centered workflow for compatibility while the underlying source-catalog APIs remain live
 - the redirected source-catalog collect actions now share the same source-materialization feedback as `/admin/banks`, including discovery notes returned from the homepage-first collection path
 - protected `/admin/sources` generated source registry list with bank/country/product/status/role filters and read-only drill-in
-- protected `/admin/sources/:sourceId` source detail route with read-only metadata visibility and recent collection history
+- protected `/admin/sources/:sourceId` source detail route with read-only metadata visibility, persisted discovery explainability for generated sources, and recent collection history
 - protected `/admin/product-types` product type registry with the same modal-first list workflow used by `/admin/banks`, searchable operator-managed definitions, modal-based create/detail editing, create/edit/delete for non-built-in types, usage-safe delete guards, registry-backed coverage options inside `/admin/banks`, and dynamic-type onboarding that feeds homepage-first discovery plus the generic AI fallback path
 - operator-facing delete confirmations should use the shared Shadcnblocks-inspired destructive alert dialog pattern instead of browser-native confirm popups so destructive actions stay visually consistent across the admin surface
 - `WBS 5.12` locale rollout is now implemented with EN/KO/JA locale switching on the admin shell and login surface, locale-preserving protected-route navigation, and locale-aware operator-facing labels while keeping evidence and source-derived content untouched

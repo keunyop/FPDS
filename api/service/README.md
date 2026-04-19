@@ -74,6 +74,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0004_source_registry_admin.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0005_source_registry_unique_scope_fix.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0006_bank_catalog_management.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0007_dynamic_product_type_onboarding.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence.sql
 ```
 
 Create the first operator account:
@@ -112,8 +114,10 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Managed Big 5 bank profiles now backfill to bank-level homepage URLs instead of product-entry URLs, and legacy seeded product-entry homepages are repaired automatically when the bank or source-catalog surfaces reload.
 - Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, and only launches a collection run when homepage discovery produces candidate-producing `detail` rows.
 - Homepage-first collection now records discovery notes instead of failing the admin action when the homepage fetch times out or produces no detail pages, preserves the existing active detail scope when no replacement detail rows were found, and returns a no-detail result the admin UI can surface directly to operators.
+- Homepage-first discovery now uses bounded hybrid scoring over the candidate set instead of AI-only fallback after heuristic failure: deterministic candidate generation still happens first, but the API layer now runs AI parallel candidate scoring when configured, uses stronger product-type-description terms in heuristic scoring, validates tentative detail pages with page-level evidence scoring, and persists generated-source `discovery_metadata` for explainability.
 - The bank list payload now includes its attached coverage items so `/admin/banks` can drive multi-bank bulk collect without reopening each bank detail modal first.
 - For known seeded banks, homepage-first source generation can still use committed product-entry URLs as fallback discovery hints, and when link extraction comes up empty it can ask the configured OpenAI model to resolve which approved seed detail pages match the current homepage context.
+- Source collection plans now carry generated-source discovery metadata into the worker registry payload so the runtime `source_document.source_metadata` stays aligned with the source registry explanation fields.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Downstream collection stages now stop when snapshot capture produces no usable sources, and they only process the subset of sources whose snapshots were actually stored or reused so the final run error reflects the real failing stage more accurately.

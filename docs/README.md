@@ -85,6 +85,7 @@ Status: Active Navigation Index
 - `erd-draft.md`
 - `source-snapshot-evidence-storage-strategy.md`
 - `source-registry-refresh-and-approval-policy.md`
+- `homepage-discovery-scoring-enhancement.md`
 - `retrieval-vector-starting-point.md`
 - `aggregate-cache-refresh-strategy.md`
 - `environment-separation-strategy.md`
@@ -134,3 +135,4 @@ Status: Active Navigation Index
 | 2026-04-06 | Added root-level docs map and confirmed current folder classification is valid without file moves |
 | 2026-04-13 | Added the Canada Big 5 source registry baseline document to the planning index |
 | 2026-04-15 | Added the interim Phase 1 no-BXPF test checklist to the governance index |
+| 2026-04-18 | Added the homepage-discovery scoring enhancement design to the design index |

@@ -11,6 +11,11 @@ type SourceDetailSurfaceProps = {
 };
 
 export function SourceDetailSurface({ detail, locale }: SourceDetailSurfaceProps) {
+  const discoveryMetadata = detail.source.discovery_metadata ?? {};
+  const selectionReasonCodes = asStringArray(discoveryMetadata.selection_reason_codes);
+  const aiReasonCodes = asStringArray(discoveryMetadata.ai_reason_codes);
+  const pageReasonCodes = asStringArray(discoveryMetadata.page_evidence_reason_codes);
+
   return (
     <section className="grid gap-6">
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
@@ -63,6 +68,53 @@ export function SourceDetailSurface({ detail, locale }: SourceDetailSurfaceProps
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Discovery explainability</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Why this source was promoted</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Generated source rows now keep bounded discovery scoring so operators can inspect whether a page was
+              promoted by heuristic scoring, AI parallel scoring, and page-level evidence.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+              {asString(discoveryMetadata.selection_path) ?? "selection path n/a"}
+            </span>
+            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+              {asString(discoveryMetadata.selection_confidence) ?? "confidence n/a"}
+            </span>
+          </div>
+        </div>
+
+        {Object.keys(discoveryMetadata).length === 0 ? (
+          <p className="mt-6 text-sm leading-6 text-muted-foreground">
+            No discovery explainability metadata was persisted for this source.
+          </p>
+        ) : (
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <ReadonlyField label="Candidate origin" value={asString(discoveryMetadata.candidate_origin) ?? "n/a"} />
+            <ReadonlyField label="Heuristic score" value={asNumber(discoveryMetadata.heuristic_score) ?? "n/a"} />
+            <ReadonlyField label="AI parallel score" value={asNumber(discoveryMetadata.ai_parallel_score) ?? "n/a"} />
+            <ReadonlyField label="AI predicted role" value={asString(discoveryMetadata.ai_predicted_role) ?? "n/a"} />
+            <ReadonlyField label="AI confidence band" value={asString(discoveryMetadata.ai_confidence_band) ?? "n/a"} />
+            <ReadonlyField label="Page evidence score" value={asNumber(discoveryMetadata.page_evidence_score) ?? "n/a"} />
+            <ReadonlyField label="Primary heading" value={asString(discoveryMetadata.primary_heading) ?? "n/a"} />
+            <ReadonlyField className="lg:col-span-2" label="Page title" value={asString(discoveryMetadata.page_title) ?? "n/a"} />
+            <ReadonlyField label="Attribute signal count" value={asNumber(discoveryMetadata.attribute_signal_count) ?? "n/a"} />
+            <ReadonlyField label="Negative signal count" value={asNumber(discoveryMetadata.negative_signal_count) ?? "n/a"} />
+            <ReadonlyField className="lg:col-span-2" label="AI rationale" value={asString(discoveryMetadata.ai_short_rationale) ?? "n/a"} />
+          </div>
+        )}
+
+        {selectionReasonCodes.length > 0 ? (
+          <TagRow label="Selection reason codes" values={selectionReasonCodes} />
+        ) : null}
+        {aiReasonCodes.length > 0 ? <TagRow label="AI reason codes" values={aiReasonCodes} /> : null}
+        {pageReasonCodes.length > 0 ? <TagRow label="Page evidence codes" values={pageReasonCodes} /> : null}
+      </article>
+
+      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Recent collection history</p>
         {detail.recent_runs.length === 0 ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">No recent collection runs were linked to this source yet.</p>
@@ -95,6 +147,21 @@ export function SourceDetailSurface({ detail, locale }: SourceDetailSurfaceProps
   );
 }
 
+function TagRow({ label, values }: { label: string; values: string[] }) {
+  return (
+    <div className="mt-4">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {values.map((value) => (
+          <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info" key={`${label}-${value}`}>
+            {value}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ReadonlyField({
   label,
   value,
@@ -110,4 +177,28 @@ function ReadonlyField({
       <p className="mt-3 break-words text-sm leading-6 text-foreground">{value}</p>
     </article>
   );
+}
+
+function asString(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function asNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return null;
+}
+
+function asStringArray(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter((item) => item.length > 0);
 }

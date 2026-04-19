@@ -531,6 +531,9 @@ Minimum later capability:
 - admin can search product types when attaching coverage to a bank
 - AI-assisted discovery can use the stored product type name and description to infer relevant bank-site URLs during homepage-first source generation
 - downstream parser, extraction, normalization, validation, and public/admin vocabulary rules must define safe fallback behavior when a newly added product type does not yet have full dedicated domain logic
+- homepage-first discovery should use a bounded hybrid scoring model: deterministic link candidate generation plus AI parallel scoring over those candidates, rather than relying on AI only after heuristic failure
+- product type `description` should be treated as a first-class discovery input for semantic matching, not only as a source of derived keywords
+- page-level evidence scoring should validate title, heading, and early body signals before a candidate URL is promoted to a generated `detail` source
 
 Current boundary:
 - this capability is now implemented in live `WBS 5.16` for the admin registry and collection pipeline
@@ -1147,7 +1150,7 @@ Later follow-on requirement:
 1. Admin opens a dedicated product type management surface
 2. Admin creates or edits a product type with at least `name` and `description`
 3. Admin searches that product type when attaching coverage to a bank
-4. AI-assisted discovery uses the stored product type definition when inferring relevant bank-site URLs from the homepage
+4. AI-assisted discovery uses the stored product type definition when inferring relevant bank-site URLs from the homepage, with deterministic candidate generation plus AI parallel scoring and page-level evidence validation
 5. Parser and normalization flows either use dedicated product-type logic or fall back to an approved safe handling path
 
 ## 12.2 Review Workflow

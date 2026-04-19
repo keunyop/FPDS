@@ -1814,6 +1814,35 @@ Each entry should include:
 - Not done: this slice does not add per-bank timeout tuning, browser-like user-agent overrides, or richer retry telemetry in the run UI; it only makes the existing timeout policy more realistic and operable
 - Key files: `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/tests/test_discovery.py`, `.env.dev.example`, `.env.prod.example`, `worker/discovery/README.md`, `docs/03-design/dev-prod-environment-spec.md`, `docs/00-governance/development-journal.md`
 - Decisions: kept one shared timeout control for discovery, preflight drift, and snapshot capture instead of adding a bank-specific override system, because the immediate product value is operational recovery from slow-but-public pages rather than a more complex fetch policy matrix
+
+## 2026-04-18 - Homepage Discovery Quality Design Baseline
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: define the next discovery-quality design step without replacing the current homepage-first, DB-backed source-registry architecture
+- Why now: Product Owner asked how FPDS can materially improve homepage-first discovery quality while preserving the current operator workflow. The requested direction was to promote AI from fallback to bounded parallel scorer, strengthen product-type-description usage, and add page-level evidence scoring before `detail` promotion
+- Outcome: added a dedicated design baseline for homepage discovery quality that keeps deterministic candidate generation, adds AI parallel scoring over bounded candidates, requires stronger product-type-description grounding, and introduces page-level evidence scoring as the main guardrail before generated `detail` rows are promoted. Linked the design back into requirements, source-registry operations policy, the docs map, and the decision log
+- Not done: this was a documentation-only slice. It did not implement the new scorer, persist discovery-scoring metadata, or widen run-detail diagnostics yet
+- Key files: `docs/03-design/homepage-discovery-scoring-enhancement.md`, `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/00-governance/decision-log.md`, `docs/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: pushed back on jumping directly to vector-first or browser-default discovery. The approved direction is a bounded hybrid scorer that fits the existing architecture and should deliver better semantic matching and explainability with lower implementation risk
+- Verification:
+  - documentation review only; no runtime code or tests changed
+
+## 2026-04-18 - Homepage Discovery Hybrid Scoring Implementation Slice 1
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: implement the first bounded runtime slice from the approved homepage-discovery scoring design without replacing the existing bank-homepage-first registry architecture
+- Why now: Product Owner asked to move from documentation into code by adding the AI parallel scorer contract, page-level evidence scoring, and generated-source discovery metadata persistence while keeping the current collection workflow intact
+- Outcome: homepage-first discovery in `api_service.source_catalog` now builds a bounded HTML candidate set, uses stronger product-type-description terms in heuristic scoring, calls an OpenAI-based parallel candidate scorer when configured, validates tentative detail pages with page-level evidence scoring before promotion, persists structured `discovery_metadata` on generated `source_registry_item` rows, carries that metadata into the source-collection runner payload, and exposes the persisted explainability block on `/admin/sources/:sourceId`
+- Not done: this slice did not widen run detail with a separate discovery diagnostics panel, did not persist discovery-stage `model_execution` or `llm_usage_record` rows, and did not redesign the no-detail bank/source-catalog collect summaries yet
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_collection_runner.py`, `db/migrations/0008_discovery_metadata_persistence.sql`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_registry.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, `api/service/README.md`, `app/admin/README.md`, `README.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the implementation narrowly focused on generated-source explainability and source-detail inspection instead of also widening run diagnostics in the same slice; added a dedicated `source_registry_item.discovery_metadata` JSONB column rather than trying to overload `purpose` or rely only on transient collect-response notes
+- Verification:
+  - `python -m unittest tests.test_source_catalog tests.test_source_registry`
+  - `python -m unittest tests.test_source_collection_runner`
+  - `python -m compileall api_service`
+  - `pnpm run typecheck`
 ---
 
 ## 7. Change History

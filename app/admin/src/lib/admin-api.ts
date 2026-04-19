@@ -565,6 +565,7 @@ export type SourceRegistryItem = {
   last_seen_at: string | null;
   redirect_target_url: string | null;
   alias_urls: string[];
+  discovery_metadata: Record<string, unknown>;
   change_reason: string | null;
   created_at: string | null;
   updated_at: string | null;

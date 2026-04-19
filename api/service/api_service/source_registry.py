@@ -127,6 +127,7 @@ def load_source_registry_list(connection: Connection, *, filters: SourceRegistry
             last_seen_at,
             redirect_target_url,
             alias_urls,
+            discovery_metadata,
             change_reason,
             created_at,
             updated_at
@@ -190,6 +191,7 @@ def load_source_registry_detail(connection: Connection, *, source_id: str) -> di
             last_seen_at,
             redirect_target_url,
             alias_urls,
+            discovery_metadata,
             change_reason,
             created_at,
             updated_at
@@ -272,6 +274,7 @@ def create_source_registry_item(
             last_seen_at,
             redirect_target_url,
             alias_urls,
+            discovery_metadata,
             change_reason,
             created_at,
             updated_at
@@ -297,6 +300,7 @@ def create_source_registry_item(
             %(last_seen_at)s,
             %(redirect_target_url)s,
             %(alias_urls)s::jsonb,
+            %(discovery_metadata)s::jsonb,
             %(change_reason)s,
             %(created_at)s,
             %(updated_at)s
@@ -306,6 +310,7 @@ def create_source_registry_item(
             **prepared,
             "expected_fields": json.dumps(prepared["expected_fields"], ensure_ascii=True),
             "alias_urls": json.dumps(prepared["alias_urls"], ensure_ascii=True),
+            "discovery_metadata": json.dumps(prepared["discovery_metadata"], ensure_ascii=True),
             "created_at": now,
             "updated_at": now,
         },
@@ -363,6 +368,7 @@ def update_source_registry_item(
             last_seen_at,
             redirect_target_url,
             alias_urls,
+            discovery_metadata,
             change_reason,
             created_at,
             updated_at
@@ -399,6 +405,7 @@ def update_source_registry_item(
             last_seen_at = %(last_seen_at)s,
             redirect_target_url = %(redirect_target_url)s,
             alias_urls = %(alias_urls)s::jsonb,
+            discovery_metadata = %(discovery_metadata)s::jsonb,
             change_reason = %(change_reason)s,
             updated_at = %(updated_at)s
         WHERE source_id = %(source_id)s
@@ -408,6 +415,7 @@ def update_source_registry_item(
             "source_id": source_id,
             "expected_fields": json.dumps(prepared["expected_fields"], ensure_ascii=True),
             "alias_urls": json.dumps(prepared["alias_urls"], ensure_ascii=True),
+            "discovery_metadata": json.dumps(prepared["discovery_metadata"], ensure_ascii=True),
             "updated_at": utc_now(),
         },
     )
@@ -466,6 +474,7 @@ def start_source_collection(
             last_seen_at,
             redirect_target_url,
             alias_urls,
+            discovery_metadata,
             change_reason,
             created_at,
             updated_at
@@ -532,6 +541,7 @@ def start_source_collection(
                 last_seen_at,
                 redirect_target_url,
                 alias_urls,
+                discovery_metadata,
                 change_reason,
                 created_at,
                 updated_at
@@ -724,6 +734,7 @@ def _ensure_source_registry_seeded(connection: Connection) -> None:
                 seed_source_flag,
                 redirect_target_url,
                 alias_urls,
+                discovery_metadata,
                 change_reason,
                 created_at,
                 updated_at
@@ -747,6 +758,7 @@ def _ensure_source_registry_seeded(connection: Connection) -> None:
                 %(seed_source_flag)s,
                 %(redirect_target_url)s,
                 %(alias_urls)s::jsonb,
+                %(discovery_metadata)s::jsonb,
                 %(change_reason)s,
                 %(created_at)s,
                 %(updated_at)s
@@ -757,6 +769,7 @@ def _ensure_source_registry_seeded(connection: Connection) -> None:
                 **item,
                 "expected_fields": json.dumps(item["expected_fields"], ensure_ascii=True),
                 "alias_urls": json.dumps(item["alias_urls"], ensure_ascii=True),
+                "discovery_metadata": json.dumps(item.get("discovery_metadata", {}), ensure_ascii=True),
                 "created_at": seeded_at,
                 "updated_at": seeded_at,
             },
@@ -805,6 +818,7 @@ def _prepare_source_registry_payload(payload: dict[str, Any], *, existing_row: d
         "last_seen_at": _coerce_optional_timestamp(payload.get("last_seen_at", existing.get("last_seen_at"))),
         "redirect_target_url": _normalize_optional_url(payload.get("redirect_target_url", existing.get("redirect_target_url"))),
         "alias_urls": [_normalize_optional_url(item) for item in _normalize_string_list(payload.get("alias_urls", existing.get("alias_urls", [])))],
+        "discovery_metadata": _coerce_mapping(payload.get("discovery_metadata", existing.get("discovery_metadata"))),
         "change_reason": _optional_text(payload.get("change_reason", existing.get("change_reason"))),
     }
 
@@ -831,6 +845,7 @@ def _serialize_source_registry_row(row: dict[str, Any]) -> dict[str, Any]:
         "last_seen_at": _serialize_timestamp(row.get("last_seen_at")),
         "redirect_target_url": row.get("redirect_target_url"),
         "alias_urls": list(row.get("alias_urls") or []),
+        "discovery_metadata": _coerce_mapping(row.get("discovery_metadata")),
         "change_reason": row.get("change_reason"),
         "created_at": _serialize_timestamp(row.get("created_at")),
         "updated_at": _serialize_timestamp(row.get("updated_at")),
@@ -875,6 +890,7 @@ def _collection_source_record(row: dict[str, Any], *, product_type_definition: d
         "product_type_dynamic": bool(product_type_definition.get("dynamic_onboarding_enabled")),
         "discovery_keywords": list(product_type_definition.get("discovery_keywords") or []),
         "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
+        "discovery_metadata": _coerce_mapping(row.get("discovery_metadata")),
     }
 
 
@@ -1082,6 +1098,7 @@ def _build_source_registry_diff_summary(existing_row: dict[str, Any], prepared: 
         "expected_fields": "Expected fields",
         "redirect_target_url": "Redirect target URL",
         "alias_urls": "Alias URLs",
+        "discovery_metadata": "Discovery metadata",
         "change_reason": "Change reason",
     }
     changes: list[str] = []
@@ -1195,9 +1212,17 @@ def _serialize_timestamp(value: Any) -> str | None:
 def format_diff_value(value: Any) -> str:
     if value is None or value == "":
         return "empty"
+    if isinstance(value, dict):
+        return json.dumps(value, ensure_ascii=True, sort_keys=True)
     if isinstance(value, list):
         return ", ".join(str(item) for item in value) or "empty"
     return str(value)
+
+
+def _coerce_mapping(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return {str(key): item for key, item in value.items()}
+    return {}
 
 
 def _dedupe_preserve_order(values: list[str]) -> list[str]:

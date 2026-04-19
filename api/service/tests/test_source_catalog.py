@@ -4,12 +4,14 @@ import unittest
 from unittest.mock import patch
 
 from api_service.source_catalog import (
+    AiParallelCandidateScore,
     CatalogItemMaterializationResult,
     HomepageSourceGenerationResult,
     _backfill_seeded_bank_profile_fields,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
     _record_catalog_audit_event,
+    _score_product_link,
     _upsert_source_registry_rows,
     create_bank_profile,
     delete_bank_profile,
@@ -66,6 +68,21 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_score_product_link_uses_product_type_description_terms(self) -> None:
+        product_type_definition = _product_type_definition("tfsa")
+        product_type_definition["display_name"] = "TFSA"
+        product_type_definition["discovery_keywords"] = []
+        product_type_definition["description"] = "Tax free savings account with contribution room and withdrawal rules."
+
+        score = _score_product_link(
+            product_type="tfsa",
+            product_type_definition=product_type_definition,
+            normalized_url="https://www.atlasbank.ca/accounts/contribution-room",
+            anchor_text="Contribution room details",
+        )
+
+        self.assertGreater(score, 0)
+
     def test_create_bank_profile_auto_generates_bank_code(self) -> None:
         connection = _QueuedConnection([None, None])
 
@@ -736,48 +753,43 @@ class SourceCatalogTests(unittest.TestCase):
         launch_collection.assert_not_called()
 
     def test_generate_sources_from_homepage_can_use_ai_to_resolve_detail_rows(self) -> None:
-        ai_detail_row = {
-            "source_id": "BMO-CHQ-002",
-            "bank_code": "BMO",
-            "country_code": "CA",
-            "product_type": "chequing",
-            "product_key": "BMO:chequing",
-            "source_name": "BMO Performance Chequing Account",
-            "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account/",
-            "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account",
-            "source_type": "html",
-            "discovery_role": "detail",
-            "status": "active",
-            "priority": "P1",
-            "source_language": "en",
-            "purpose": "AI-resolved chequing detail source from homepage context",
-            "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
-            "seed_source_flag": False,
-            "redirect_target_url": None,
-            "alias_urls": [],
-            "change_reason": "generated_from_bank_homepage",
-        }
-
+        homepage_html = """
+        <html>
+          <body>
+            <a href="/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account/">
+              Everyday transaction account
+            </a>
+          </body>
+        </html>
+        """
+        detail_html = """
+        <html>
+          <head><title>BMO Performance Chequing Account</title></head>
+          <body>
+            <h1>BMO Performance Chequing Account</h1>
+            <p>Monthly fee details, debit usage, and included transactions for day-to-day banking.</p>
+          </body>
+        </html>
+        """
         with (
-            patch("api_service.source_catalog.fetch_text", side_effect=TimeoutError("timed out")),
+            patch("api_service.source_catalog.fetch_text", side_effect=[homepage_html, detail_html, detail_html]),
             patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
             patch(
-                "api_service.source_catalog._load_seed_detail_hints",
-                return_value=[
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=(
                     {
-                        "source_id": "BMO-CHQ-002",
-                        "source_name": "BMO Performance Chequing Account",
-                        "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account/",
-                        "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account",
-                        "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
-                        "purpose": "detail",
-                        "priority": "P1",
-                    }
-                ],
-            ),
-            patch(
-                "api_service.source_catalog._resolve_detail_rows_with_ai",
-                return_value=([ai_detail_row], ["AI-assisted homepage discovery resolved 1 detail source(s)."]),
+                        "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account": AiParallelCandidateScore(
+                            candidate_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account",
+                            predicted_role="detail",
+                            relevance_score=8.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                            short_rationale="Likely official chequing detail page.",
+                        )
+                    },
+                    ["AI parallel scorer evaluated 1 candidate link(s)."],
+                ),
             ),
         ):
             result = _generate_sources_from_homepage(
@@ -790,9 +802,12 @@ class SourceCatalogTests(unittest.TestCase):
                 source_language="en",
             )
 
-        self.assertEqual([item["source_id"] for item in result.rows], ["BMO-CHQ-002"])
-        self.assertEqual(result.detail_source_ids, ["BMO-CHQ-002"])
-        self.assertIn("AI-assisted homepage discovery resolved 1 detail source(s).", result.discovery_notes)
+        self.assertEqual(len(result.detail_source_ids), 1)
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertEqual(len(detail_rows), 1)
+        self.assertEqual(detail_rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
+        self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
+        self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
 
     def test_upsert_source_registry_rows_targets_unique_scope_and_returns_persisted_rows(self) -> None:
         connection = _QueuedConnection(

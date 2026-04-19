@@ -91,6 +91,7 @@ class SourceRegistryTests(unittest.TestCase):
                 "purpose": "detail",
                 "expected_fields": ["product_name"],
                 "seed_source_flag": True,
+                "discovery_metadata": {"selection_path": "heuristic_plus_ai_plus_page_evidence"},
             }
         ]
         included_rows = selected_rows + [
@@ -108,6 +109,7 @@ class SourceRegistryTests(unittest.TestCase):
                 "purpose": "support",
                 "expected_fields": ["standard_rate"],
                 "seed_source_flag": True,
+                "discovery_metadata": {"selection_path": "supporting_only"},
             }
         ]
 
@@ -126,6 +128,10 @@ class SourceRegistryTests(unittest.TestCase):
         self.assertEqual(plan["auto_included_source_ids"], ["TD-SAV-005"])
         self.assertEqual(len(plan["groups"]), 1)
         self.assertEqual(plan["groups"][0]["included_source_ids"], ["TD-SAV-002", "TD-SAV-005"])
+        self.assertEqual(
+            plan["groups"][0]["included_sources"][0]["discovery_metadata"],
+            {"selection_path": "heuristic_plus_ai_plus_page_evidence"},
+        )
 
     def test_load_source_registry_list_omits_null_filter_params(self) -> None:
         connection = _QueuedConnection(
