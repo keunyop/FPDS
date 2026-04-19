@@ -5,18 +5,27 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import sys
 from typing import TYPE_CHECKING, Any
+import urllib.error
+import urllib.request
 from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
     sys.path.insert(0, str(REPO_ROOT))
 
+from api_service.errors import SourceRegistryError
+from api_service.product_types import (
+    ensure_product_type_registry_seeded,
+    load_product_type_definitions_map,
+    require_product_type_definition,
+)
 from api_service.security import new_id, utc_now
-from api_service.source_registry import SourceRegistryError, start_source_collection
+from api_service.source_registry import start_source_collection
 from api_service.source_registry_utils import (
     infer_source_type,
     load_seed_bank_homepage_repairs,
@@ -33,22 +42,10 @@ if TYPE_CHECKING:
 else:  # pragma: no cover
     Connection = Any
 
-
-_PRODUCT_TYPE_OPTIONS = ("chequing", "savings", "gic")
 _AUTOGEN_SOURCE_PREFIX = "AUTO"
 _EXCLUDED_LINK_KEYWORDS = ("login", "sign-in", "signin", "secure", "apply", "open-account", "openaccount", "promo", "offer", "compare")
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
 _HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
-_PRODUCT_KEYWORDS = {
-    "chequing": ("chequing", "checking", "bank-account", "banking-plan", "daily-banking"),
-    "savings": ("savings", "save", "high-interest", "interest"),
-    "gic": ("gic", "term-deposit", "term-deposits", "certificate", "investment"),
-}
-_PRODUCT_FIELD_HINTS = {
-    "chequing": ["product_name", "monthly_fee", "included_transactions"],
-    "savings": ["product_name", "standard_rate", "monthly_fee"],
-    "gic": ["product_name", "term_length_text", "minimum_deposit"],
-}
 
 
 @dataclass(frozen=True)
@@ -63,6 +60,20 @@ class SourceCatalogFilters:
     bank_code: str | None
     product_type: str | None
     status: str | None
+
+
+@dataclass(frozen=True)
+class HomepageSourceGenerationResult:
+    rows: list[dict[str, Any]]
+    discovery_notes: list[str]
+    detail_source_ids: list[str]
+
+
+@dataclass(frozen=True)
+class CatalogItemMaterializationResult:
+    generated_rows: list[dict[str, Any]]
+    discovery_notes: list[str]
+    detail_source_ids: list[str]
 
 
 def normalize_bank_filters(*, search: str | None, status: str | None) -> BankFilters:
@@ -155,7 +166,40 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
         params,
     ).fetchall()
 
-    items = [_serialize_bank_row(row) for row in rows]
+    bank_codes = [str(row["bank_code"]) for row in rows]
+    catalog_item_rows = connection.execute(
+        """
+        SELECT
+            sci.catalog_item_id,
+            sci.bank_code,
+            sci.product_type,
+            sci.status,
+            COUNT(DISTINCT sri.source_id) AS generated_source_count
+        FROM source_registry_catalog_item AS sci
+        LEFT JOIN source_registry_item AS sri
+            ON sri.bank_code = sci.bank_code
+           AND sri.product_type = sci.product_type
+        WHERE sci.bank_code = ANY(%(bank_codes)s)
+        GROUP BY sci.catalog_item_id, sci.bank_code, sci.product_type, sci.status
+        ORDER BY sci.bank_code, sci.product_type
+        """,
+        {"bank_codes": bank_codes or [""]},
+    ).fetchall() if bank_codes else []
+    catalog_items_by_bank: dict[str, list[dict[str, Any]]] = {}
+    for item in catalog_item_rows:
+        catalog_items_by_bank.setdefault(str(item["bank_code"]), []).append(
+            {
+                "catalog_item_id": str(item["catalog_item_id"]),
+                "product_type": str(item["product_type"]),
+                "status": str(item["status"]),
+                "generated_source_count": int(item["generated_source_count"] or 0),
+            }
+        )
+
+    items = [
+        _serialize_bank_row({**row, "catalog_items": catalog_items_by_bank.get(str(row["bank_code"]), [])})
+        for row in rows
+    ]
     status_counts = Counter(item["status"] for item in items)
     return {
         "items": items,
@@ -266,8 +310,10 @@ def create_bank_profile(
 ) -> dict[str, Any]:
     _ensure_bank_and_catalog_seeded(connection)
     bank_name = _required_text(payload.get("bank_name"), "bank_name")
-    homepage_url = _required_text(payload.get("homepage_url"), "homepage_url")
-    normalized_homepage_url = normalize_source_url(homepage_url)
+    homepage_url, normalized_homepage_url = _normalize_bank_homepage_url(
+        _required_text(payload.get("homepage_url"), "homepage_url")
+    )
+    initial_coverage_product_types = list(payload.get("initial_coverage_product_types") or [])
     existing_by_homepage = connection.execute(
         """
         SELECT bank_code
@@ -334,6 +380,18 @@ def create_bank_profile(
         diff_summary=f"Created bank profile `{bank_code}`.",
         metadata={"bank_code": bank_code, "bank_name": bank_name},
     )
+    for product_type in initial_coverage_product_types:
+        create_source_catalog_item(
+            connection,
+            payload={
+                "bank_code": bank_code,
+                "product_type": product_type,
+                "status": (_clean_text(payload.get("status")) or "active").lower(),
+                "change_reason": _clean_text(payload.get("change_reason")),
+            },
+            actor=actor,
+            request_context=request_context,
+        )
     detail = load_bank_detail(connection, bank_code=bank_code)
     if detail is None:
         raise SourceRegistryError(status_code=500, code="bank_profile_missing_after_create", message="Created bank profile could not be reloaded.")
@@ -372,8 +430,9 @@ def update_bank_profile(
         raise SourceRegistryError(status_code=404, code="bank_profile_not_found", message="Bank profile was not found.")
 
     bank_name = _required_text(payload.get("bank_name", existing_row["bank_name"]), "bank_name")
-    homepage_url = _required_text(payload.get("homepage_url", existing_row["homepage_url"]), "homepage_url")
-    normalized_homepage_url = normalize_source_url(homepage_url)
+    homepage_url, normalized_homepage_url = _normalize_bank_homepage_url(
+        _required_text(payload.get("homepage_url", existing_row["homepage_url"]), "homepage_url")
+    )
     conflict_row = connection.execute(
         """
         SELECT bank_code
@@ -440,8 +499,125 @@ def update_bank_profile(
     return detail["bank"]
 
 
+def delete_bank_profile(
+    connection: Connection,
+    *,
+    bank_code: str,
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+) -> dict[str, Any]:
+    _ensure_bank_and_catalog_seeded(connection)
+    normalized_bank_code = _required_text(bank_code, "bank_code").upper()
+    detail = load_bank_detail(connection, bank_code=normalized_bank_code)
+    if detail is None:
+        raise SourceRegistryError(status_code=404, code="bank_profile_not_found", message="Bank profile was not found.")
+
+    dependency_counts = connection.execute(
+        """
+        SELECT
+            (
+                SELECT COUNT(*)
+                FROM source_registry_catalog_item
+                WHERE bank_code = %(bank_code)s
+            ) AS catalog_count,
+            (
+                SELECT COUNT(*)
+                FROM source_registry_item
+                WHERE bank_code = %(bank_code)s
+            ) AS source_registry_count,
+            (
+                SELECT COUNT(*)
+                FROM source_document
+                WHERE bank_code = %(bank_code)s
+            ) AS source_document_count,
+            (
+                SELECT COUNT(*)
+                FROM normalized_candidate
+                WHERE bank_code = %(bank_code)s
+            ) AS candidate_count,
+            (
+                SELECT COUNT(*)
+                FROM canonical_product
+                WHERE bank_code = %(bank_code)s
+            ) AS canonical_product_count,
+            (
+                SELECT COUNT(*)
+                FROM public_product_projection
+                WHERE bank_code = %(bank_code)s
+            ) AS public_projection_count,
+            (
+                SELECT COUNT(*)
+                FROM dashboard_ranking_snapshot
+                WHERE bank_code = %(bank_code)s
+            ) AS dashboard_ranking_count,
+            (
+                SELECT COUNT(*)
+                FROM dashboard_scatter_snapshot
+                WHERE bank_code = %(bank_code)s
+            ) AS dashboard_scatter_count
+        """,
+        {"bank_code": normalized_bank_code},
+    ).fetchone()
+    blocking_dependency_total = sum(
+        int((dependency_counts or {}).get(key) or 0)
+        for key in (
+            "source_document_count",
+            "candidate_count",
+            "canonical_product_count",
+            "public_projection_count",
+            "dashboard_ranking_count",
+            "dashboard_scatter_count",
+        )
+    )
+    if blocking_dependency_total > 0:
+        raise SourceRegistryError(
+            status_code=409,
+            code="bank_profile_in_use",
+            message="This bank already has collected source documents or downstream product history. Remove those dependent records before deleting the bank profile.",
+        )
+
+    connection.execute(
+        """
+        DELETE FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+        """,
+        {"bank_code": normalized_bank_code},
+    )
+    connection.execute(
+        """
+        DELETE FROM source_registry_catalog_item
+        WHERE bank_code = %(bank_code)s
+        """,
+        {"bank_code": normalized_bank_code},
+    )
+    connection.execute(
+        """
+        DELETE FROM bank
+        WHERE bank_code = %(bank_code)s
+        """,
+        {"bank_code": normalized_bank_code},
+    )
+    _record_catalog_audit_event(
+        connection,
+        actor=actor,
+        request_context=request_context,
+        event_type="bank_profile_deleted",
+        target_id=normalized_bank_code,
+        target_type="bank",
+        diff_summary=f"Deleted bank profile `{normalized_bank_code}`.",
+        metadata={
+            "bank_code": normalized_bank_code,
+            "bank_name": detail["bank"]["bank_name"],
+            "deleted_catalog_count": int((dependency_counts or {}).get("catalog_count") or 0),
+            "deleted_source_registry_count": int((dependency_counts or {}).get("source_registry_count") or 0),
+        },
+    )
+    return detail["bank"]
+
+
 def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFilters) -> dict[str, Any]:
     _ensure_bank_and_catalog_seeded(connection)
+    product_type_map = load_product_type_definitions_map(connection, active_only=False)
     where_clauses = ["1 = 1"]
     params: dict[str, Any] = {}
     if filters.bank_code:
@@ -525,7 +701,7 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
         },
         "facets": {
             "bank_options": [{"bank_code": str(row["bank_code"]), "bank_name": str(row["bank_name"])} for row in bank_rows],
-            "product_types": list(_PRODUCT_TYPE_OPTIONS),
+            "product_types": sorted(product_type_map),
             "statuses": sorted(status_counts),
         },
         "applied_filters": {
@@ -633,8 +809,7 @@ def create_source_catalog_item(
     _ensure_bank_and_catalog_seeded(connection)
     bank_code = _required_text(payload.get("bank_code"), "bank_code").upper()
     product_type = _required_text(payload.get("product_type"), "product_type").lower()
-    if product_type not in _PRODUCT_TYPE_OPTIONS:
-        raise SourceRegistryError(status_code=422, code="invalid_product_type", message="product_type must be chequing, savings, or gic.")
+    require_product_type_definition(connection, product_type_code=product_type, active_only=True)
 
     bank_row = connection.execute(
         """
@@ -734,8 +909,7 @@ def update_source_catalog_item(
 
     bank_code = _required_text(payload.get("bank_code", existing["bank_code"]), "bank_code").upper()
     product_type = _required_text(payload.get("product_type", existing["product_type"]), "product_type").lower()
-    if product_type not in _PRODUCT_TYPE_OPTIONS:
-        raise SourceRegistryError(status_code=422, code="invalid_product_type", message="product_type must be chequing, savings, or gic.")
+    require_product_type_definition(connection, product_type_code=product_type, active_only=True)
 
     bank_row = connection.execute(
         """
@@ -845,51 +1019,71 @@ def start_source_catalog_collection(
     selected_source_ids: list[str] = []
     materialization_summary: list[dict[str, Any]] = []
     for row in rows:
-        generated_rows = _materialize_sources_for_catalog_item(connection, row=row)
+        materialized = _materialize_sources_for_catalog_item(connection, row=row)
+        generated_rows = list(materialized.generated_rows)
         generated_source_ids = [
             str(item["source_id"])
             for item in generated_rows
             if str(item["status"]) != "removed"
+        ]
+        collection_source_ids = [
+            str(item["source_id"])
+            for item in generated_rows
+            if str(item["discovery_role"]) != "entry" and str(item["status"]) != "removed"
         ]
         target_source_ids = [
             str(item["source_id"])
             for item in generated_rows
             if str(item["discovery_role"]) == "detail" and str(item["status"]) != "removed"
         ]
-        if not target_source_ids:
-            raise SourceRegistryError(
-                status_code=422,
-                code="source_catalog_generation_missing_detail",
-                message=f"No detail sources could be generated for {row['bank_name']} {row['product_type']}.",
-            )
-        selected_source_ids.extend(generated_source_ids)
+        if target_source_ids:
+            selected_source_ids.extend(collection_source_ids)
         materialization_summary.append(
             {
                 "catalog_item_id": str(row["catalog_item_id"]),
                 "bank_code": str(row["bank_code"]),
                 "product_type": str(row["product_type"]),
                 "generated_source_ids": generated_source_ids,
+                "collection_source_ids": collection_source_ids,
                 "target_source_ids": target_source_ids,
+                "discovery_notes": list(materialized.discovery_notes),
+                "discovery_status": "detail_sources_ready" if target_source_ids else "no_detail_sources_discovered",
             }
         )
 
-    result = start_source_collection(
-        connection,
-        source_ids=selected_source_ids,
-        actor=actor,
-        request_context=request_context,
-    )
+    if selected_source_ids:
+        result = start_source_collection(
+            connection,
+            source_ids=selected_source_ids,
+            actor=actor,
+            request_context=request_context,
+        )
+    else:
+        result = {
+            "collection_id": new_id("collection"),
+            "correlation_id": new_id("corr"),
+            "run_ids": [],
+            "selected_source_ids": [],
+            "target_source_ids": [],
+            "auto_included_source_ids": [],
+            "groups": [],
+        }
     _record_catalog_audit_event(
         connection,
         actor=actor,
         request_context=request_context,
-        event_type="source_catalog_collection_launched",
+        event_type="source_catalog_collection_launched" if selected_source_ids else "source_catalog_collection_no_detail",
         target_id=result["collection_id"],
         target_type="source_catalog_collection",
-        diff_summary=f"Launched source catalog collection for {len(rows)} catalog item(s).",
+        diff_summary=(
+            f"Launched source catalog collection for {len(rows)} catalog item(s)."
+            if selected_source_ids
+            else f"Homepage discovery found no detail sources for {len(rows)} catalog item(s); no collection run was launched."
+        ),
         metadata={
             "catalog_item_ids": list(catalog_item_ids),
             "selected_source_ids": selected_source_ids,
+            "materialized_items": materialization_summary,
         },
     )
     return {
@@ -900,6 +1094,7 @@ def start_source_catalog_collection(
 
 
 def _ensure_bank_and_catalog_seeded(connection: Connection) -> None:
+    ensure_product_type_registry_seeded(connection)
     bank_row = connection.execute("SELECT COUNT(*) AS item_count FROM bank").fetchone()
     if bank_row and int(bank_row["item_count"]) == 0:
         seeded_at = utc_now()
@@ -1015,42 +1210,60 @@ def _backfill_seeded_bank_profile_fields(connection: Connection) -> None:
         )
 
 
-def _materialize_sources_for_catalog_item(connection: Connection, *, row: dict[str, Any]) -> list[dict[str, Any]]:
+def _materialize_sources_for_catalog_item(
+    connection: Connection,
+    *,
+    row: dict[str, Any],
+) -> CatalogItemMaterializationResult:
     bank_code = str(row["bank_code"])
     product_type = str(row["product_type"])
-    generated_rows = _generate_sources_from_homepage(
+    product_type_definition = require_product_type_definition(connection, product_type_code=product_type, active_only=False)
+    generation_result = _generate_sources_from_homepage(
         bank_code=bank_code,
         bank_name=str(row["bank_name"]),
         country_code=str(row["country_code"]),
         product_type=product_type,
+        product_type_definition=product_type_definition,
         homepage_url=str(row["homepage_url"]),
         source_language=str(row.get("source_language") or "en"),
     )
-    connection.execute(
-        """
-        UPDATE source_registry_item
-        SET
-            status = 'inactive',
-            updated_at = %(updated_at)s,
-            change_reason = %(change_reason)s
-        WHERE bank_code = %(bank_code)s
-          AND product_type = %(product_type)s
-        """,
-        {
-            "updated_at": utc_now(),
-            "change_reason": "superseded_by_homepage_catalog_generation",
-            "bank_code": bank_code,
-            "product_type": product_type,
-        },
-    )
-    _upsert_source_registry_rows(connection, generated_rows)
-    return generated_rows
-
-
-def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, Any]]) -> None:
-    now = utc_now()
-    for item in rows:
+    generated_rows = _dedupe_generated_source_rows(generation_result.rows)
+    discovery_notes = list(generation_result.discovery_notes)
+    if generation_result.detail_source_ids:
         connection.execute(
+            """
+            UPDATE source_registry_item
+            SET
+                status = 'inactive',
+                updated_at = %(updated_at)s,
+                change_reason = %(change_reason)s
+            WHERE bank_code = %(bank_code)s
+              AND product_type = %(product_type)s
+            """,
+            {
+                "updated_at": utc_now(),
+                "change_reason": "superseded_by_homepage_catalog_generation",
+                "bank_code": bank_code,
+                "product_type": product_type,
+            },
+        )
+    else:
+        discovery_notes.append(
+            "Existing active detail sources were preserved because homepage discovery did not produce replacement detail sources."
+        )
+    persisted_rows = _upsert_source_registry_rows(connection, generated_rows) if generated_rows else []
+    return CatalogItemMaterializationResult(
+        generated_rows=persisted_rows,
+        discovery_notes=_dedupe_preserve_order([note for note in discovery_notes if note]),
+        detail_source_ids=list(generation_result.detail_source_ids),
+    )
+
+
+def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    now = utc_now()
+    persisted_rows: list[dict[str, Any]] = []
+    for item in rows:
+        row = connection.execute(
             """
             INSERT INTO source_registry_item (
                 source_id,
@@ -1098,16 +1311,12 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 %(created_at)s,
                 %(updated_at)s
             )
-            ON CONFLICT (source_id) DO UPDATE
+            ON CONFLICT (bank_code, product_type, normalized_url, source_type) DO UPDATE
             SET
-                bank_code = EXCLUDED.bank_code,
                 country_code = EXCLUDED.country_code,
-                product_type = EXCLUDED.product_type,
                 product_key = EXCLUDED.product_key,
                 source_name = EXCLUDED.source_name,
                 source_url = EXCLUDED.source_url,
-                normalized_url = EXCLUDED.normalized_url,
-                source_type = EXCLUDED.source_type,
                 discovery_role = EXCLUDED.discovery_role,
                 status = EXCLUDED.status,
                 priority = EXCLUDED.priority,
@@ -1119,6 +1328,26 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 alias_urls = EXCLUDED.alias_urls,
                 change_reason = EXCLUDED.change_reason,
                 updated_at = EXCLUDED.updated_at
+            RETURNING
+                source_id,
+                bank_code,
+                country_code,
+                product_type,
+                product_key,
+                source_name,
+                source_url,
+                normalized_url,
+                source_type,
+                discovery_role,
+                status,
+                priority,
+                source_language,
+                purpose,
+                expected_fields,
+                seed_source_flag,
+                redirect_target_url,
+                alias_urls,
+                change_reason
             """,
             {
                 **item,
@@ -1127,7 +1356,11 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 "created_at": now,
                 "updated_at": now,
             },
-        )
+        ).fetchone()
+        if row is None:
+            raise SourceRegistryError(status_code=500, code="source_registry_upsert_failed", message="Generated source row could not be reloaded after upsert.")
+        persisted_rows.append(dict(row))
+    return persisted_rows
 
 
 def _generate_sources_from_homepage(
@@ -1136,9 +1369,10 @@ def _generate_sources_from_homepage(
     bank_name: str,
     country_code: str,
     product_type: str,
+    product_type_definition: dict[str, Any],
     homepage_url: str,
     source_language: str,
-) -> list[dict[str, Any]]:
+) -> HomepageSourceGenerationResult:
     normalized_homepage_url = normalize_source_url(homepage_url)
     hostname = urlparse(normalized_homepage_url).hostname
     if not hostname:
@@ -1149,17 +1383,28 @@ def _generate_sources_from_homepage(
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
     hub_pages: list[tuple[int, str, str]] = []
+    discovery_notes: list[str] = []
+    homepage_fetch_error: str | None = None
     try:
         homepage_html = fetch_text(normalized_homepage_url, fetch_policy)
-    except Exception:
+    except Exception as exc:
         homepage_html = ""
+        homepage_fetch_error = str(exc)
+        discovery_notes.append(f"Homepage fetch was unavailable: {homepage_fetch_error}")
 
     homepage_links = _extract_allowed_links(html_text=homepage_html, base_url=normalized_homepage_url, hostname=hostname)
+    if homepage_html and not homepage_links:
+        discovery_notes.append("Homepage fetch succeeded but no allowed detail or supporting links were extracted.")
     for link in homepage_links:
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
         if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
             continue
-        score = _score_product_link(product_type=product_type, normalized_url=link.normalized_url, anchor_text=link.anchor_text)
+        score = _score_product_link(
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+            normalized_url=link.normalized_url,
+            anchor_text=link.anchor_text,
+        )
         if link.source_type == "pdf":
             if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                 pdf_links.append((score, link))
@@ -1168,13 +1413,23 @@ def _generate_sources_from_homepage(
             detail_links.append((score, link))
         elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
             supporting_links.append((1, link))
-        hub_score = _score_catalog_hub_link(product_type=product_type, normalized_url=link.normalized_url, anchor_text=link.anchor_text)
+        hub_score = _score_catalog_hub_link(
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+            normalized_url=link.normalized_url,
+            anchor_text=link.anchor_text,
+        )
         if hub_score > 0:
             hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
 
     seed_entry_url = _load_seed_entry_url(bank_code=bank_code, product_type=product_type)
     if seed_entry_url is not None:
-        seed_score = _score_catalog_hub_link(product_type=product_type, normalized_url=seed_entry_url, anchor_text="")
+        seed_score = _score_catalog_hub_link(
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+            normalized_url=seed_entry_url,
+            anchor_text="",
+        )
         hub_pages.append((max(seed_score, 1), seed_entry_url, seed_entry_url))
 
     unique_hub_pages = _dedupe_page_candidates(hub_pages)
@@ -1183,13 +1438,19 @@ def _generate_sources_from_homepage(
             continue
         try:
             page_html = fetch_text(resolved_page_url, fetch_policy)
-        except Exception:
+        except Exception as exc:
+            discovery_notes.append(f"Hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
         for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
                 continue
-            score = _score_product_link(product_type=product_type, normalized_url=link.normalized_url, anchor_text=link.anchor_text)
+            score = _score_product_link(
+                product_type=product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            )
             if link.source_type == "pdf":
                 if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                     pdf_links.append((score, link))
@@ -1202,9 +1463,29 @@ def _generate_sources_from_homepage(
     unique_detail_links = _dedupe_scored_links(detail_links)[:6]
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
+    seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=product_type)
+    if not unique_detail_links:
+        ai_detail_rows, ai_notes = _resolve_detail_rows_with_ai(
+            bank_code=bank_code,
+            bank_name=bank_name,
+            country_code=country_code,
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+            source_language=source_language,
+            homepage_url=homepage_url,
+            normalized_homepage_url=normalized_homepage_url,
+            homepage_fetch_error=homepage_fetch_error,
+            extracted_links=homepage_links,
+            seed_detail_hints=seed_detail_hints,
+        )
+        discovery_notes.extend(ai_notes)
+    else:
+        ai_detail_rows = []
     source_rows: list[dict[str, Any]] = []
     entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
     entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
+    product_type_label = _product_type_label(product_type_definition)
+    expected_fields = _product_type_expected_fields(product_type_definition)
 
     if unique_detail_links:
         source_rows.append(
@@ -1215,10 +1496,10 @@ def _generate_sources_from_homepage(
                 source_language=source_language,
                 normalized_url=entry_url,
                 raw_url=entry_raw_url,
-                source_name=f"{bank_name} {product_type.title()} catalog entry",
+                source_name=f"{bank_name} {product_type_label} catalog entry",
                 discovery_role="entry",
                 priority="P0",
-                purpose=f"{bank_name} {product_type} catalog discovery entry",
+                purpose=f"{bank_name} {product_type_label} catalog discovery entry",
                 expected_fields=["product_name"],
             )
         )
@@ -1231,31 +1512,17 @@ def _generate_sources_from_homepage(
                     source_language=source_language,
                     normalized_url=link.normalized_url,
                     raw_url=link.resolved_url,
-                    source_name=_generated_link_name(bank_name, product_type, link.anchor_text, fallback="detail"),
+                    source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="detail"),
                     discovery_role="detail",
                     priority="P1",
-                    purpose=f"Auto-generated {product_type} detail source from bank homepage",
-                    expected_fields=_PRODUCT_FIELD_HINTS[product_type],
+                    purpose=f"Auto-generated {product_type_label} detail source from bank homepage",
+                    expected_fields=expected_fields,
                 )
             )
+    elif ai_detail_rows:
+        source_rows.extend(ai_detail_rows)
     else:
-        fallback_url = entry_url
-        fallback_raw_url = entry_raw_url
-        source_rows.append(
-            _build_generated_source_row(
-                bank_code=bank_code,
-                country_code=country_code,
-                product_type=product_type,
-                source_language=source_language,
-                normalized_url=fallback_url,
-                raw_url=fallback_raw_url,
-                source_name=f"{bank_name} {product_type.title()} catalog fallback",
-                discovery_role="detail",
-                priority="P0",
-                purpose=f"Homepage-derived fallback detail source for {product_type}",
-                expected_fields=_PRODUCT_FIELD_HINTS[product_type],
-            )
-        )
+        discovery_notes.append("Homepage discovery completed but no candidate-producing detail sources were identified.")
 
     for _, link in unique_supporting_links:
         source_rows.append(
@@ -1266,11 +1533,11 @@ def _generate_sources_from_homepage(
                 source_language=source_language,
                 normalized_url=link.normalized_url,
                 raw_url=link.resolved_url,
-                source_name=_generated_link_name(bank_name, product_type, link.anchor_text, fallback="support"),
+                source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="support"),
                 discovery_role="supporting_html",
                 priority="P2",
-                purpose=f"Auto-generated supporting source for {product_type}",
-                expected_fields=_PRODUCT_FIELD_HINTS[product_type],
+                purpose=f"Auto-generated supporting source for {product_type_label}",
+                expected_fields=expected_fields,
             )
         )
     for _, link in unique_pdf_links:
@@ -1282,14 +1549,23 @@ def _generate_sources_from_homepage(
                 source_language=source_language,
                 normalized_url=link.normalized_url,
                 raw_url=link.resolved_url,
-                source_name=_generated_link_name(bank_name, product_type, link.anchor_text, fallback="pdf"),
+                source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="pdf"),
                 discovery_role="linked_pdf",
                 priority="P2",
-                purpose=f"Auto-generated linked PDF source for {product_type}",
-                expected_fields=_PRODUCT_FIELD_HINTS[product_type],
+                purpose=f"Auto-generated linked PDF source for {product_type_label}",
+                expected_fields=expected_fields,
             )
         )
-    return source_rows
+    detail_source_ids = [
+        str(item["source_id"])
+        for item in source_rows
+        if str(item["discovery_role"]) == "detail" and str(item["status"]) != "removed"
+    ]
+    return HomepageSourceGenerationResult(
+        rows=source_rows,
+        discovery_notes=_dedupe_preserve_order([note for note in discovery_notes if note]),
+        detail_source_ids=detail_source_ids,
+    )
 
 
 def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
@@ -1301,6 +1577,228 @@ def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
         ):
             return str(item["normalized_url"])
     return None
+
+
+def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+    hints: list[dict[str, Any]] = []
+    for item in load_seed_source_registry_rows():
+        if (
+            str(item["bank_code"]) == bank_code
+            and str(item["product_type"]) == product_type
+            and str(item["discovery_role"]) == "detail"
+        ):
+            hints.append(
+                {
+                    "source_id": str(item["source_id"]),
+                    "source_name": str(item.get("source_name") or item.get("purpose") or item["source_id"]),
+                    "source_url": str(item["source_url"]),
+                    "normalized_url": str(item["normalized_url"]),
+                    "expected_fields": list(item.get("expected_fields") or []),
+                    "purpose": str(item.get("purpose") or ""),
+                    "priority": str(item.get("priority") or "P1"),
+                }
+            )
+    return hints
+
+
+def _dedupe_preserve_order(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        deduped.append(item)
+    return deduped
+
+
+def _resolve_detail_rows_with_ai(
+    *,
+    bank_code: str,
+    bank_name: str,
+    country_code: str,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    source_language: str,
+    homepage_url: str,
+    normalized_homepage_url: str,
+    homepage_fetch_error: str | None,
+    extracted_links: list[Any],
+    seed_detail_hints: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
+    api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
+    if provider != "openai" or not api_key:
+        return [], ["AI-assisted homepage discovery was unavailable because the OpenAI provider or API key was not configured."]
+
+    candidate_links = [
+        {
+            "url": str(link.normalized_url),
+            "anchor_text": str(link.anchor_text),
+            "source_type": str(link.source_type),
+        }
+        for link in extracted_links[:24]
+    ]
+    try:
+        resolution = _invoke_openai_detail_resolution(
+            model_id=os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
+            api_key=api_key,
+            payload={
+                "bank_code": bank_code,
+                "bank_name": bank_name,
+                "country_code": country_code,
+                "product_type": product_type,
+                "product_type_definition": {
+                    "display_name": _product_type_label(product_type_definition),
+                    "description": str(product_type_definition.get("description") or ""),
+                    "discovery_keywords": _product_type_keywords(product_type_definition),
+                    "expected_fields": _product_type_expected_fields(product_type_definition),
+                    "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
+                    "dynamic_onboarding_enabled": bool(product_type_definition.get("dynamic_onboarding_enabled")),
+                },
+                "source_language": source_language,
+                "homepage_url": homepage_url,
+                "normalized_homepage_url": normalized_homepage_url,
+                "homepage_fetch_error": homepage_fetch_error,
+                "candidate_links": candidate_links,
+                "seed_detail_hints": seed_detail_hints,
+            },
+        )
+    except Exception as exc:
+        return [], [f"AI-assisted homepage discovery was unavailable: {exc}"]
+
+    detail_rows: list[dict[str, Any]] = []
+    notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
+    hints_by_id = {str(item["source_id"]): item for item in seed_detail_hints}
+    hostname = urlparse(normalized_homepage_url).hostname or ""
+    expected_fields = _product_type_expected_fields(product_type_definition)
+    product_type_label = _product_type_label(product_type_definition)
+    for item in resolution.get("discovered_details", []):
+        source_id = str(item.get("source_id") or "").strip()
+        source_url = str(item.get("source_url") or "").strip()
+        source_name = str(item.get("source_name") or "").strip()
+        reason = str(item.get("reason") or "").strip()
+        hint = hints_by_id.get(source_id)
+        if not source_url:
+            continue
+        normalized_url = normalize_source_url(source_url)
+        parsed_hostname = urlparse(normalized_url).hostname or ""
+        candidate_label = source_id or source_url
+        if not parsed_hostname or not (parsed_hostname == hostname or parsed_hostname.endswith(f".{hostname}")):
+            notes.append(f"AI suggested an out-of-scope URL for {candidate_label}; the candidate was ignored.")
+            continue
+        if infer_source_type(normalized_url) != "html":
+            notes.append(f"AI suggested a non-HTML URL for {candidate_label}; the candidate was ignored.")
+            continue
+        row = _build_generated_source_row(
+            bank_code=bank_code,
+            country_code=country_code,
+            product_type=product_type,
+            source_language=source_language,
+            normalized_url=normalized_url,
+            raw_url=source_url,
+            source_name=str(hint["source_name"]) if hint else (source_name or _generated_link_name(bank_name, product_type_label, "", fallback="detail")),
+            discovery_role="detail",
+            priority=str(hint["priority"]) if hint else "P1",
+            purpose=reason or f"AI-resolved {product_type_label} detail source from the bank homepage",
+            expected_fields=list(hint["expected_fields"]) if hint else expected_fields,
+        )
+        if hint and source_id:
+            row["source_id"] = source_id
+        detail_rows.append(row)
+
+    if detail_rows:
+        notes.append(f"AI-assisted homepage discovery resolved {len(detail_rows)} detail source(s).")
+    else:
+        notes.append("AI-assisted homepage discovery did not identify any detail sources with enough confidence.")
+    return detail_rows, _dedupe_preserve_order([note for note in notes if note])
+
+
+def _invoke_openai_detail_resolution(*, model_id: str, api_key: str, payload: dict[str, Any]) -> dict[str, Any]:
+    request_body = {
+        "model": model_id,
+        "instructions": (
+            "You resolve Canadian bank deposit-product detail page URLs from a bank homepage context. "
+            "Return only official public HTML detail pages on the same bank domain. "
+            "Use the product type definition and candidate links to infer the most likely public detail page. "
+            "If seed detail hints are present, you may reuse them when they still match, but you may also nominate a new same-domain public detail URL. "
+            "If there is not enough evidence, return an empty discovered_details list and explain why in summary."
+        ),
+        "input": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_text",
+                        "text": json.dumps(payload, ensure_ascii=True),
+                    }
+                ],
+            }
+        ],
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "homepage_detail_resolution",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "summary": {"type": "string"},
+                        "discovered_details": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "properties": {
+                                    "source_id": {"type": "string"},
+                                    "source_url": {"type": "string"},
+                                    "source_name": {"type": "string"},
+                                    "reason": {"type": "string"},
+                                },
+                                "required": ["source_id", "source_url", "source_name", "reason"],
+                            },
+                        },
+                    },
+                    "required": ["summary", "discovered_details"],
+                },
+            }
+        },
+    }
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps(request_body, ensure_ascii=True).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            response_payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        response_body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"OpenAI Responses API request failed with status {exc.code}: {response_body}") from exc
+
+    response_text = _extract_response_output_text(response_payload)
+    try:
+        return json.loads(response_text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"OpenAI detail resolution returned invalid JSON: {response_text}") from exc
+
+
+def _extract_response_output_text(response_payload: dict[str, Any]) -> str:
+    for item in response_payload.get("output", []):
+        if str(item.get("type")) != "message":
+            continue
+        for content in item.get("content", []):
+            content_type = str(content.get("type") or "")
+            if content_type == "refusal":
+                raise RuntimeError(str(content.get("refusal") or "OpenAI refused the homepage discovery request."))
+            if content_type == "output_text" and content.get("text"):
+                return str(content["text"])
+    raise RuntimeError("OpenAI detail resolution returned no text output.")
 
 
 def _extract_allowed_links(*, html_text: str, base_url: str, hostname: str) -> list[Any]:
@@ -1321,9 +1819,20 @@ def _dedupe_page_candidates(items: list[tuple[int, str, str]]) -> list[tuple[int
     return list(by_url.values())
 
 
-def _score_catalog_hub_link(*, product_type: str, normalized_url: str, anchor_text: str) -> int:
+def _score_catalog_hub_link(
+    *,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    normalized_url: str,
+    anchor_text: str,
+) -> int:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
-    score = _score_product_link(product_type=product_type, normalized_url=normalized_url, anchor_text=anchor_text)
+    score = _score_product_link(
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
+    )
     for keyword in _HUB_KEYWORDS:
         if keyword in fingerprint:
             score += 1
@@ -1349,7 +1858,7 @@ def _build_generated_source_row(
 ) -> dict[str, Any]:
     source_type = infer_source_type(normalized_url)
     digest = hashlib.sha1(f"{bank_code}|{product_type}|{normalized_url}|{discovery_role}".encode("utf-8")).hexdigest()[:10]
-    type_code = {"chequing": "CHQ", "savings": "SAV", "gic": "GIC"}[product_type]
+    type_code = _product_type_short_code(product_type)
     return {
         "source_id": f"{_AUTOGEN_SOURCE_PREFIX}-{bank_code}-{type_code}-{digest}",
         "bank_code": bank_code,
@@ -1373,6 +1882,38 @@ def _build_generated_source_row(
     }
 
 
+def _dedupe_generated_source_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_scope: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    for item in rows:
+        scope = (
+            str(item["bank_code"]),
+            str(item["product_type"]),
+            str(item["normalized_url"]),
+            str(item["source_type"]),
+        )
+        current = by_scope.get(scope)
+        if current is None or _generated_source_row_sort_key(item) < _generated_source_row_sort_key(current):
+            by_scope[scope] = item
+    return list(by_scope.values())
+
+
+def _generated_source_row_sort_key(item: dict[str, Any]) -> tuple[int, int, str]:
+    role_rank = {
+        "detail": 0,
+        "entry": 1,
+        "linked_pdf": 2,
+        "supporting_pdf": 3,
+        "supporting_html": 4,
+    }.get(str(item.get("discovery_role")), 9)
+    priority_rank = {
+        "P0": 0,
+        "P1": 1,
+        "P2": 2,
+        "P3": 3,
+    }.get(str(item.get("priority") or "P9").upper(), 9)
+    return (role_rank, priority_rank, str(item.get("source_id", "")))
+
+
 def _dedupe_scored_links(items: list[tuple[int, Any]]) -> list[tuple[int, Any]]:
     by_url: dict[str, tuple[int, Any]] = {}
     for score, link in sorted(items, key=lambda item: (-item[0], item[1].normalized_url)):
@@ -1381,27 +1922,76 @@ def _dedupe_scored_links(items: list[tuple[int, Any]]) -> list[tuple[int, Any]]:
     return list(by_url.values())
 
 
-def _score_product_link(*, product_type: str, normalized_url: str, anchor_text: str) -> int:
+def _score_product_link(
+    *,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    normalized_url: str,
+    anchor_text: str,
+) -> int:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
     score = 0
-    for keyword in _PRODUCT_KEYWORDS[product_type]:
+    for keyword in _product_type_keywords(product_type_definition):
         if keyword in fingerprint:
             score += 2
+    normalized_product_type = product_type.replace("-", " ")
+    if normalized_product_type and normalized_product_type in fingerprint:
+        score += 1
     for keyword in _SUPPORTING_KEYWORDS:
         if keyword in fingerprint:
             score -= 1
     return score
 
 
-def _generated_link_name(bank_name: str, product_type: str, anchor_text: str, *, fallback: str) -> str:
+def _generated_link_name(bank_name: str, product_type_label: str, anchor_text: str, *, fallback: str) -> str:
     cleaned = re.sub(r"\s+", " ", anchor_text.strip())
     if cleaned:
         return cleaned[:280]
-    return f"{bank_name} {product_type.title()} {fallback}"
+    return f"{bank_name} {product_type_label} {fallback}"
+
+
+def _product_type_keywords(product_type_definition: dict[str, Any]) -> list[str]:
+    keywords = []
+    for item in product_type_definition.get("discovery_keywords", []):
+        normalized = str(item).strip().lower()
+        if normalized and normalized not in keywords:
+            keywords.append(normalized)
+    display_name = str(product_type_definition.get("display_name") or "").strip().lower()
+    if display_name and display_name not in keywords:
+        keywords.append(display_name)
+    return keywords
+
+
+def _product_type_expected_fields(product_type_definition: dict[str, Any]) -> list[str]:
+    fields = [str(item).strip() for item in product_type_definition.get("expected_fields", []) if str(item).strip()]
+    return fields or ["product_name", "description_short", "standard_rate", "monthly_fee", "notes"]
+
+
+def _product_type_label(product_type_definition: dict[str, Any]) -> str:
+    return str(product_type_definition.get("display_name") or product_type_definition.get("product_type_code") or "Product").strip()
+
+
+def _product_type_short_code(product_type: str) -> str:
+    built_in_codes = {"chequing": "CHQ", "savings": "SAV", "gic": "GIC"}
+    if product_type in built_in_codes:
+        return built_in_codes[product_type]
+    compact = re.sub(r"[^A-Z0-9]", "", product_type.upper())
+    if not compact:
+        return "GEN"
+    return compact[:3].ljust(3, "X")
 
 
 def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
     catalog_product_types = sorted(str(value) for value in (row.get("catalog_product_types") or []) if value)
+    catalog_items = [
+        {
+            "catalog_item_id": str(item["catalog_item_id"]),
+            "product_type": str(item["product_type"]),
+            "status": str(item["status"]),
+            "generated_source_count": int(item.get("generated_source_count") or 0),
+        }
+        for item in (row.get("catalog_items") or [])
+    ]
     return {
         "bank_code": str(row["bank_code"]),
         "country_code": str(row["country_code"]),
@@ -1416,6 +2006,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
         "updated_at": _serialize_datetime(row.get("updated_at")),
         "catalog_item_count": int(row.get("catalog_item_count") or 0),
         "catalog_product_types": catalog_product_types,
+        "catalog_items": catalog_items,
         "generated_source_count": int(row.get("generated_source_count") or 0),
     }
 
@@ -1624,6 +2215,21 @@ def _required_text(value: Any, field_name: str) -> str:
     if cleaned is None:
         raise SourceRegistryError(status_code=422, code="required_field_missing", message=f"{field_name} is required.")
     return cleaned
+
+
+def _normalize_bank_homepage_url(homepage_url: str) -> tuple[str, str]:
+    candidate = homepage_url.strip()
+    if "://" not in candidate:
+        candidate = f"https://{candidate.lstrip('/')}"
+    try:
+        normalized = normalize_source_url(candidate)
+    except ValueError as exc:
+        raise SourceRegistryError(
+            status_code=422,
+            code="homepage_url_invalid",
+            message="homepage_url must be a valid public http or https URL.",
+        ) from exc
+    return normalized, normalized
 
 
 def _normalize_search(value: Any) -> str | None:

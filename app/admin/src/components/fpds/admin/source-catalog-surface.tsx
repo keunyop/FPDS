@@ -121,9 +121,7 @@ export function SourceCatalogSurface({
         setError(payload.error?.message ?? "Collection could not be launched.");
         return;
       }
-      const generatedSourceCount =
-        payload.data?.materialized_items.reduce((sum, item) => sum + item.generated_source_ids.length, 0) ?? 0;
-      setMessage(`Collection launched for ${selectedCatalogItemIds.length} catalog item(s). Materialized ${generatedSourceCount} source row(s).`);
+      setMessage(buildCatalogCollectMessage(payload.data, selectedCatalogItemIds.length));
       setSelectedCatalogItemIds([]);
       router.refresh();
     } catch {
@@ -308,6 +306,42 @@ export function SourceCatalogSurface({
       </OfferModal4>
     </section>
   );
+}
+
+function buildCatalogCollectMessage(
+  payload: SourceCatalogCollectionLaunchResponse | undefined,
+  selectedCatalogItemCount: number,
+) {
+  const materializedItems = payload?.materialized_items ?? [];
+  const generatedSourceCount = materializedItems.reduce(
+    (sum, item) => sum + item.generated_source_ids.length,
+    0,
+  );
+  const readyCount = materializedItems.filter(
+    (item) => item.discovery_status === "detail_sources_ready",
+  ).length;
+  const noDetailCount = materializedItems.length - readyCount;
+  const firstNote =
+    materializedItems.find((item) => item.discovery_notes.length > 0)?.discovery_notes[0] ?? null;
+
+  if (!payload?.run_ids?.length || readyCount === 0) {
+    return [
+      `Homepage discovery completed for ${selectedCatalogItemCount} catalog item(s), but no detail sources were identified for collection.`,
+      `Materialized ${generatedSourceCount} source row(s).`,
+      firstNote,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return [
+    `Collection launched for ${selectedCatalogItemCount} catalog item(s).`,
+    `${readyCount} catalog item(s) produced detail sources${noDetailCount > 0 ? ` and ${noDetailCount} did not` : ""}.`,
+    `Materialized ${generatedSourceCount} source row(s).`,
+    firstNote,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function StatCard({ label, value, note }: { label: string; value: string; note: string }) {

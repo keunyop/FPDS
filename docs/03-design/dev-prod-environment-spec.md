@@ -132,6 +132,7 @@ Rules:
 | `FPDS_SOURCE_FETCH_MODE` | fetch policy such as `controlled` or `live` |
 | `FPDS_SOURCE_FETCH_ALLOWLIST` | approved source domains |
 | `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS` | SSRF guardrail toggle |
+| `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` | per-request fetch timeout for discovery, preflight drift, and snapshot capture |
 | `FPDS_LLM_PROVIDER` | model provider label |
 | `FPDS_LLM_MODEL` | model name |
 | `FPDS_LLM_API_KEY` | model provider credential |

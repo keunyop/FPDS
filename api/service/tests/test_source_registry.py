@@ -42,6 +42,21 @@ class _QueuedConnection:
         return _QueuedCursor(self._responses.pop(0))
 
 
+def _product_type_definitions(*codes: str) -> dict[str, dict[str, object]]:
+    definitions: dict[str, dict[str, object]] = {}
+    for code in codes:
+        label = code.replace("-", " ").title()
+        definitions[code] = {
+            "product_type_code": code,
+            "display_name": label,
+            "description": f"{label} product type",
+            "dynamic_onboarding_enabled": code not in {"chequing", "savings", "gic"},
+            "discovery_keywords": [code],
+            "fallback_policy": "generic_ai_review",
+        }
+    return definitions
+
+
 class SourceRegistryTests(unittest.TestCase):
     def test_filter_normalization_compacts_values(self) -> None:
         filters = normalize_source_registry_filters(
@@ -99,6 +114,7 @@ class SourceRegistryTests(unittest.TestCase):
         plan = build_source_collection_plan(
             selected_rows=selected_rows,
             included_rows=included_rows,
+            product_type_definitions=_product_type_definitions("savings"),
             collection_id="collection-001",
             correlation_id="corr-001",
             actor={"email": "admin@example.com"},
@@ -293,7 +309,13 @@ class SourceRegistryTests(unittest.TestCase):
             ]
         )
 
-        with patch("api_service.source_registry._launch_source_collection_runner") as launch_runner:
+        with (
+            patch(
+                "api_service.source_registry.load_product_type_definitions_map",
+                return_value=_product_type_definitions("savings"),
+            ),
+            patch("api_service.source_registry._launch_source_collection_runner") as launch_runner,
+        ):
             result = start_source_collection(
                 connection,
                 source_ids=["TD-SAV-002"],

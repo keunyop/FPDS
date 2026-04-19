@@ -73,7 +73,7 @@ Notes:
 - The registry catalog is the planning baseline for Canada Big 5 expansion. Bank-specific parser or discovery behavior can still be enriched in later slices without rewriting the `5.1` cutline.
 - Registry refresh strategy is approval-first: ingestion uses the active registry, while future refresh automation should produce candidate diffs instead of rewriting the active registry in place.
 - Snapshot capture now performs lightweight preflight drift checks by default before fetching and storing raw artifacts. Use `--skip-preflight-drift-check` only when intentionally bypassing that operator signal.
-- Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST` and `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS` env settings from the shared baseline.
+- Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST`, `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS`, and `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` env settings from the shared baseline.
 - Snapshot capture writes raw artifacts to the approved `{env}/snapshots/{country_code}/{bank_code}/{source_document_id}/{snapshot_id}/raw` key layout and returns DB-shaped metadata for `source_snapshot` and `run_source_item`.
 - `--env-file` now overrides ambient process env values so live dev runs stay aligned to the chosen local env file.
 - `--persist-db` creates or updates `ingestion_run`, upserts `source_document`, inserts new `source_snapshot`, and upserts `run_source_item`.

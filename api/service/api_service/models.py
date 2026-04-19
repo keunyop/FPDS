@@ -50,6 +50,7 @@ class BankWriteRequest(BaseModel):
     source_language: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, max_length=30)
     change_reason: str | None = Field(default=None, max_length=2000)
+    initial_coverage_product_types: list[str] = Field(default_factory=list)
 
 
 class SourceCatalogWriteRequest(BaseModel):
@@ -61,3 +62,10 @@ class SourceCatalogWriteRequest(BaseModel):
 
 class SourceCatalogCollectionRequest(BaseModel):
     catalog_item_ids: list[str] = Field(default_factory=list, min_length=1)
+
+
+class ProductTypeWriteRequest(BaseModel):
+    product_type_code: str | None = Field(default=None, max_length=50)
+    display_name: str | None = Field(default=None, max_length=120)
+    description: str | None = Field(default=None, max_length=2000)
+    status: str | None = Field(default=None, max_length=30)

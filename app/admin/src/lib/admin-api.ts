@@ -645,6 +645,12 @@ export type BankItem = {
   updated_at: string | null;
   catalog_item_count: number;
   catalog_product_types: string[];
+  catalog_items: Array<{
+    catalog_item_id: string;
+    product_type: string;
+    status: string;
+    generated_source_count: number;
+  }>;
   generated_source_count: number;
 };
 
@@ -744,8 +750,43 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
     bank_code: string;
     product_type: string;
     generated_source_ids: string[];
+    collection_source_ids: string[];
     target_source_ids: string[];
+    discovery_notes: string[];
+    discovery_status: "detail_sources_ready" | "no_detail_sources_discovered";
   }>;
+};
+
+export type ProductTypeItem = {
+  product_type_code: string;
+  product_family: string;
+  display_name: string;
+  description: string;
+  status: string;
+  built_in_flag: boolean;
+  managed_flag: boolean;
+  dynamic_onboarding_enabled: boolean;
+  discovery_keywords: string[];
+  expected_fields: string[];
+  fallback_policy: string;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type ProductTypeListResponse = {
+  items: ProductTypeItem[];
+  summary: {
+    total_items: number;
+    status_counts: Record<string, number>;
+    built_in_count: number;
+  };
+  facets: {
+    statuses: string[];
+  };
+  applied_filters: {
+    search: string | null;
+    status: string | null;
+  };
 };
 
 type AdminApiResponse<T> = {
@@ -829,6 +870,15 @@ export async function fetchSourceRegistryList(searchParams: URLSearchParams): Pr
 
 export async function fetchSourceRegistryDetail(sourceId: string): Promise<SourceRegistryDetailResponse | null> {
   return fetchAdminData<SourceRegistryDetailResponse>(`/api/admin/sources/${sourceId}`, undefined, { allowNotFound: true });
+}
+
+export async function fetchProductTypeList(searchParams?: URLSearchParams): Promise<ProductTypeListResponse | null> {
+  return fetchAdminData<ProductTypeListResponse>("/api/admin/product-types", searchParams);
+}
+
+export async function fetchProductTypeDetail(productTypeCode: string): Promise<ProductTypeItem | null> {
+  const payload = await fetchAdminData<{ product_type: ProductTypeItem }>(`/api/admin/product-types/${productTypeCode}`, undefined, { allowNotFound: true });
+  return payload?.product_type ?? null;
 }
 
 export async function fetchBankList(searchParams: URLSearchParams): Promise<BankListResponse | null> {

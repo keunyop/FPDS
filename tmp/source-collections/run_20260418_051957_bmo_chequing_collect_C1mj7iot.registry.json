@@ -1,0 +1,121 @@
+{
+  "registry_version": "2026-04-18",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-CHQ-002",
+  "sources": [
+    {
+      "source_id": "BMO-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official BMO same-domain public chequing product page; matches the chequing product type and expected fee/transaction details.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser"
+    },
+    {
+      "source_id": "BMO-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official BMO same-domain public chequing product page; matches the chequing product type and bundled banking-plan features.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_savings_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser"
+    },
+    {
+      "source_id": "BMO-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official BMO same-domain public chequing product page; matches the chequing product type and premium transaction benefits.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser"
+    },
+    {
+      "source_id": "BMO-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official BMO same-domain public chequing product page; matches the chequing product type and family bundle benefits.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "family_bundle_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser"
+    }
+  ]
+}

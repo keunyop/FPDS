@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .url_utils import build_source_document_id, build_source_identity, normalize_source_url
@@ -24,6 +24,7 @@ class RegistrySource:
     bank_code: str
     country_code: str
     product_type: str
+    extra_metadata: dict[str, object] = field(default_factory=dict)
 
     @property
     def identity(self) -> str:
@@ -50,6 +51,7 @@ class RegistrySource:
                 "discovery_role": self.discovery_role,
                 "seed_source_flag": self.seed_source_flag,
                 "expected_fields": list(self.expected_fields),
+                **self.extra_metadata,
             },
         }
 
@@ -107,6 +109,22 @@ def load_registry(path: Path | None = None) -> SourceRegistry:
     sources: list[RegistrySource] = []
     for item in raw["sources"]:
         normalized_url = normalize_source_url(item["url"])
+        extra_metadata = {
+            key: value
+            for key, value in item.items()
+            if key
+            not in {
+                "source_id",
+                "priority",
+                "seed_source_flag",
+                "source_type",
+                "discovery_role",
+                "purpose",
+                "url",
+                "expected_fields",
+                "source_language",
+            }
+        }
         sources.append(
             RegistrySource(
                 source_id=item["source_id"],
@@ -122,6 +140,7 @@ def load_registry(path: Path | None = None) -> SourceRegistry:
                 bank_code=bank_code,
                 country_code=country_code,
                 product_type=product_type,
+                extra_metadata=extra_metadata,
             )
         )
 

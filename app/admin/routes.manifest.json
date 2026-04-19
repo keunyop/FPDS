@@ -60,6 +60,13 @@
       "access": "authenticated"
     },
     {
+      "route": "/admin/product-types",
+      "route_id": "admin.product_types",
+      "shell_dir": "route-shells/banks",
+      "resource_key": "admin_operations.product_types",
+      "access": "authenticated"
+    },
+    {
       "route": "/admin/banks/:bankCode",
       "route_id": "admin.bank_detail",
       "shell_dir": "route-shells/bank-detail",

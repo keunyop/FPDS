@@ -1,0 +1,53 @@
+{
+  "collection_id": "collection_kIGE3O8a5l-4pFU5",
+  "correlation_id": "corr_6kxvtesjQtz4v4lN",
+  "request_id": "req_b073d31a4062487d9d7a4f3a75cd8eda",
+  "trigger_type": "admin_source_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "selected_source_ids": [
+    "BMO-CHQ-001"
+  ],
+  "target_source_ids": [
+    "BMO-CHQ-001"
+  ],
+  "auto_included_source_ids": [],
+  "groups": [
+    {
+      "run_id": "run_20260417_191740_bmo_chequing_collect_ir5HMwrE",
+      "country_code": "CA",
+      "bank_code": "BMO",
+      "product_type": "chequing",
+      "source_language": "en",
+      "selected_source_ids": [
+        "BMO-CHQ-001"
+      ],
+      "target_source_ids": [
+        "BMO-CHQ-001"
+      ],
+      "included_source_ids": [
+        "BMO-CHQ-001"
+      ],
+      "included_sources": [
+        {
+          "source_id": "BMO-CHQ-001",
+          "bank_code": "BMO",
+          "country_code": "CA",
+          "product_type": "chequing",
+          "source_name": "BMO Chequing catalog fallback",
+          "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+          "source_type": "html",
+          "discovery_role": "detail",
+          "priority": "P0",
+          "source_language": "en",
+          "purpose": "Homepage-derived fallback detail source for chequing",
+          "expected_fields": [
+            "product_name",
+            "monthly_fee",
+            "included_transactions"
+          ],
+          "seed_source_flag": false
+        }
+      ]
+    }
+  ]
+}

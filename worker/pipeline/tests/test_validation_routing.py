@@ -149,6 +149,57 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_dynamic_product_type_stays_in_review_even_in_phase1_mode(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            dynamic_candidate = dict(input_item.normalized_candidate_record)
+            dynamic_candidate["product_type"] = "tfsa-savings"
+            dynamic_candidate["subtype_code"] = "other"
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "TD-TFSA-001",
+                    "source_metadata": {
+                        "product_type": "tfsa-savings",
+                        "product_type_dynamic": True,
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "normalized_candidate_record": dynamic_candidate,
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-dyn-001",
+                inputs=[input_item],
+                taxonomy_registry={},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertEqual(source_result.review_reason_code, "manual_sampling_review")
+            self.assertIn("manual_sampling_review", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
 
 class ValidationRoutingPersistenceTests(unittest.TestCase):
     def test_load_policies_and_persist_queue(self) -> None:

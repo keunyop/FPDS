@@ -12,14 +12,25 @@ import {
   InputGroupAddon,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import type { BankDetailResponse, SourceCatalogCollectionLaunchResponse, SourceCatalogItem } from "@/lib/admin-api";
+import type {
+  BankDetailResponse,
+  ProductTypeItem,
+  SourceCatalogCollectionLaunchResponse,
+  SourceCatalogItem,
+} from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import {
+  buildAdminProductTypeLabelMap,
+  buildAdminProductTypeOptions,
+  formatAdminProductType,
+} from "@/lib/admin-product-types";
 
 type BankCoverageSectionProps = {
   bankCode: string;
   catalogItems: BankDetailResponse["catalog_items"];
   csrfToken: string | null | undefined;
   locale: AdminLocale;
+  productTypes: ProductTypeItem[];
 };
 
 type CreateCoverageFormState = {
@@ -27,12 +38,6 @@ type CreateCoverageFormState = {
   status: string;
   change_reason: string;
 };
-
-const PRODUCT_TYPE_OPTIONS = [
-  { label: "Chequing", value: "chequing" },
-  { label: "Savings", value: "savings" },
-  { label: "GIC", value: "gic" },
-] as const;
 
 const STATUS_OPTIONS = [
   { label: "active", value: "active" },
@@ -44,16 +49,32 @@ export function BankCoverageSection({
   catalogItems,
   csrfToken,
   locale,
+  productTypes,
 }: BankCoverageSectionProps) {
   const router = useRouter();
+  const [productTypeSearch, setProductTypeSearch] = useState("");
   const existingTypes = useMemo(
     () => new Set(catalogItems.map((item) => item.product_type)),
     [catalogItems],
   );
-  const availableProductTypes = useMemo(
-    () => PRODUCT_TYPE_OPTIONS.filter((option) => !existingTypes.has(option.value)),
-    [existingTypes],
+  const productTypeOptions = useMemo(
+    () => buildAdminProductTypeOptions(productTypes.filter((item) => item.status === "active")),
+    [productTypes],
   );
+  const availableProductTypes = useMemo(
+    () => productTypeOptions.filter((option) => !existingTypes.has(option.value)),
+    [existingTypes, productTypeOptions],
+  );
+  const filteredProductTypes = useMemo(() => {
+    const needle = productTypeSearch.trim().toLowerCase();
+    if (!needle) {
+      return availableProductTypes;
+    }
+    return availableProductTypes.filter((option) =>
+      `${option.label} ${option.value} ${option.description}`.toLowerCase().includes(needle),
+    );
+  }, [availableProductTypes, productTypeSearch]);
+  const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
   const [createForm, setCreateForm] = useState<CreateCoverageFormState>({
     product_type: availableProductTypes[0]?.value ?? "",
     status: "active",
@@ -97,7 +118,7 @@ export function BankCoverageSection({
       }
       const createdProductType =
         payload.data?.catalog_item?.product_type ?? createForm.product_type;
-      setMessage(`${formatProductType(createdProductType)} coverage was added.`);
+      setMessage(`${formatProductType(createdProductType, productTypeLabelMap)} coverage was added.`);
       const nextProductTypes = availableProductTypes.filter(
         (option) => option.value !== createdProductType,
       );
@@ -138,11 +159,7 @@ export function BankCoverageSection({
         setError(payload.error?.message ?? "Collection could not be started.");
         return;
       }
-      const generatedCount =
-        payload.data?.materialized_items?.[0]?.generated_source_ids?.length ?? 0;
-      setMessage(
-        `${formatProductType(item.product_type)} collection started. Materialized ${generatedCount} source row(s).`,
-      );
+      setMessage(buildSingleCoverageCollectMessage(item.product_type, payload.data, productTypeLabelMap));
       router.refresh();
     } catch {
       setError("Collection could not be started. Check the admin API and try again.");
@@ -192,7 +209,7 @@ export function BankCoverageSection({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-base font-semibold text-foreground">
-                      {formatProductType(item.product_type)}
+                      {formatProductType(item.product_type, productTypeLabelMap)}
                     </p>
                     <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                       {item.status}
@@ -252,13 +269,25 @@ export function BankCoverageSection({
           </p>
         ) : (
           <form className="mt-4 space-y-4" onSubmit={handleCreate}>
+            <div className="grid gap-4">
+              <label className="grid gap-2 text-sm">
+                <span className="font-medium text-foreground">Search product types</span>
+                <input
+                  className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+                  onChange={(event) => setProductTypeSearch(event.target.value)}
+                  placeholder="Search by name or description"
+                  type="search"
+                  value={productTypeSearch}
+                />
+              </label>
+            </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <SelectField
                 label="Product type"
                 onChange={(value) =>
                   setCreateForm((current) => ({ ...current, product_type: value }))
                 }
-                options={availableProductTypes}
+                options={filteredProductTypes.length > 0 ? filteredProductTypes : availableProductTypes}
                 value={createForm.product_type}
               />
               <SelectField
@@ -338,7 +367,34 @@ function SelectField({
   );
 }
 
-function formatProductType(productType: string) {
-  const option = PRODUCT_TYPE_OPTIONS.find((item) => item.value === productType);
-  return option?.label ?? productType;
+function formatProductType(productType: string, labelMap?: Record<string, string>) {
+  return formatAdminProductType(productType, labelMap);
+}
+
+function buildSingleCoverageCollectMessage(
+  productType: string,
+  payload: SourceCatalogCollectionLaunchResponse | undefined,
+  labelMap?: Record<string, string>,
+) {
+  const materializedItem = payload?.materialized_items?.[0];
+  const generatedCount = materializedItem?.generated_source_ids?.length ?? 0;
+  const firstNote = materializedItem?.discovery_notes?.[0];
+
+  if (!payload?.run_ids?.length || materializedItem?.discovery_status === "no_detail_sources_discovered") {
+    return [
+      `${formatProductType(productType, labelMap)} homepage discovery completed, but no detail sources were identified for collection.`,
+      `Materialized ${generatedCount} source row(s).`,
+      firstNote ?? null,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return [
+    `${formatProductType(productType, labelMap)} collection started.`,
+    `Materialized ${generatedCount} source row(s).`,
+    firstNote ?? null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }

@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { OfferModal4 } from "@/components/offer-modal4";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
-import type { BankDetailResponse, BankItem, BankListResponse } from "@/lib/admin-api";
+import type {
+  BankDetailResponse,
+  BankItem,
+  BankListResponse,
+  ProductTypeItem,
+  SourceCatalogCollectionLaunchResponse,
+} from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminProductTypeLabelMap, formatAdminProductType } from "@/lib/admin-product-types";
 
 export type BankRegistryPageFilters = {
   q: string;
@@ -23,6 +30,7 @@ type BankRegistrySurfaceProps = {
   activeBankCode: string | null;
   activeBankDetail: BankDetailResponse | null;
   addModalOpen: boolean;
+  productTypes: ProductTypeItem[];
 };
 
 export function BankRegistrySurface({
@@ -33,10 +41,25 @@ export function BankRegistrySurface({
   activeBankCode,
   activeBankDetail,
   addModalOpen,
+  productTypes,
 }: BankRegistrySurfaceProps) {
   const router = useRouter();
   const detailModalOpen = Boolean(activeBankCode && activeBankDetail);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
+  const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
+  const [selectedBankCodes, setSelectedBankCodes] = useState<string[]>([]);
+  const [bulkPending, setBulkPending] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const selectedCatalogItems = useMemo(
+    () =>
+      banks.items
+        .filter((item) => selectedBankCodes.includes(item.bank_code))
+        .flatMap((item) => item.catalog_items),
+    [banks.items, selectedBankCodes],
+  );
+  const selectedCoverageCount = selectedCatalogItems.length;
+  const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
 
   function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/banks", params, locale);
@@ -83,6 +106,74 @@ export function BankRegistrySurface({
       return;
     }
     closeModal();
+  }
+
+  function toggleBankSelection(bankCode: string) {
+    setSelectedBankCodes((current) =>
+      current.includes(bankCode)
+        ? current.filter((item) => item !== bankCode)
+        : [...current, bankCode],
+    );
+  }
+
+  function toggleAllVisibleBanks() {
+    setSelectedBankCodes((current) => {
+      if (allVisibleSelected) {
+        return current.filter((item) => !banks.items.some((bank) => bank.bank_code === item));
+      }
+      const next = new Set(current);
+      for (const item of banks.items) {
+        next.add(item.bank_code);
+      }
+      return Array.from(next);
+    });
+  }
+
+  async function handleBulkCollect() {
+    setBulkPending(true);
+    setMessage(null);
+    setError(null);
+
+    const catalogItemIds = selectedCatalogItems.map((item) => item.catalog_item_id);
+    if (catalogItemIds.length === 0) {
+      setError("Select at least one bank with added coverage before starting collection.");
+      setBulkPending(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/admin/source-catalog/collect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
+        body: JSON.stringify({
+          catalog_item_ids: catalogItemIds,
+        }),
+      });
+      const payload = (await response.json()) as {
+        data?: SourceCatalogCollectionLaunchResponse;
+        error?: { message?: string };
+      };
+      if (!response.ok) {
+        setError(payload.error?.message ?? "Collection could not be started.");
+        return;
+      }
+      setMessage(
+        buildBulkCollectMessage({
+          payload: payload.data,
+          selectedBankCount: selectedBankCodes.length,
+          selectedCoverageCount,
+        }),
+      );
+      setSelectedBankCodes([]);
+      router.refresh();
+    } catch {
+      setError("Collection could not be started. Check the admin API and try again.");
+    } finally {
+      setBulkPending(false);
+    }
   }
 
   return (
@@ -140,14 +231,43 @@ export function BankRegistrySurface({
               without leaving this page.
             </p>
           </div>
-          <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
-            Add bank
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+              Add bank
+            </button>
+            <button
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={bulkPending}
+              onClick={() => void handleBulkCollect()}
+              type="button"
+            >
+              {bulkPending ? "Collecting..." : `Collect selected${selectedCoverageCount > 0 ? ` (${selectedCoverageCount})` : ""}`}
+            </button>
+          </div>
         </div>
+        {message ? (
+          <p className="mx-6 mt-5 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {message}
+          </p>
+        ) : null}
+        {error ? (
+          <p className="mx-6 mt-5 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
         <div className="overflow-x-auto px-6 py-5">
-          <table className="min-w-[880px] table-fixed border-separate border-spacing-0">
+          <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                <th className="border-b border-border px-3 py-3 font-medium">
+                  <input
+                    aria-label="Select all visible banks"
+                    checked={allVisibleSelected}
+                    className="h-4 w-4 rounded border-border"
+                    onChange={toggleAllVisibleBanks}
+                    type="checkbox"
+                  />
+                </th>
                 <th className="border-b border-border px-3 py-3 font-medium">Bank</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Code</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Homepage</th>
@@ -159,13 +279,22 @@ export function BankRegistrySurface({
             <tbody>
               {banks.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={7}>
                     No banks matched the current filter set.
                   </td>
                 </tr>
               ) : (
                 banks.items.map((item) => (
                   <tr className="align-top text-sm" key={item.bank_code}>
+                    <td className="border-b border-border/70 px-3 py-4">
+                      <input
+                        aria-label={`Select ${item.bank_name}`}
+                        checked={selectedBankCodes.includes(item.bank_code)}
+                        className="h-4 w-4 rounded border-border"
+                        onChange={() => toggleBankSelection(item.bank_code)}
+                        type="checkbox"
+                      />
+                    </td>
                     <td className="border-b border-border/70 px-3 py-4">
                       <button className="bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
                         {item.bank_name}
@@ -184,7 +313,7 @@ export function BankRegistrySurface({
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">
                       {item.catalog_product_types.length > 0 ? (
-                        formatProductTypeList(item.catalog_product_types)
+                        formatProductTypeList(item.catalog_product_types, productTypeLabelMap)
                       ) : (
                         <span className="text-muted-foreground">none</span>
                       )}
@@ -210,7 +339,7 @@ export function BankRegistrySurface({
         showPanel={false}
         title="Add bank"
       >
-        <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} />
+        <BankCreateDialogContent csrfToken={csrfToken} onCreated={handleBankCreated} productTypes={productTypes} />
       </OfferModal4>
 
       <OfferModal4
@@ -236,11 +365,53 @@ export function BankRegistrySurface({
             csrfToken={csrfToken}
             detail={activeBankDetail}
             locale={locale}
+            productTypes={productTypes}
           />
         ) : null}
       </OfferModal4>
     </section>
   );
+}
+
+function buildBulkCollectMessage({
+  payload,
+  selectedBankCount,
+  selectedCoverageCount,
+}: {
+  payload: SourceCatalogCollectionLaunchResponse | undefined;
+  selectedBankCount: number;
+  selectedCoverageCount: number;
+}) {
+  const materializedItems = payload?.materialized_items ?? [];
+  const generatedCount = materializedItems.reduce(
+    (total, item) => total + item.generated_source_ids.length,
+    0,
+  );
+  const readyCount = materializedItems.filter(
+    (item) => item.discovery_status === "detail_sources_ready",
+  ).length;
+  const noDetailCount = materializedItems.length - readyCount;
+  const firstNote =
+    materializedItems.find((item) => item.discovery_notes.length > 0)?.discovery_notes[0] ?? null;
+
+  if (!payload?.run_ids?.length || readyCount === 0) {
+    return [
+      `Homepage discovery completed for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s), but no detail sources were identified for collection.`,
+      `Materialized ${generatedCount} source row(s).`,
+      firstNote,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return [
+    `Started collection for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s).`,
+    `${readyCount} coverage item(s) produced detail sources${noDetailCount > 0 ? ` and ${noDetailCount} did not` : ""}.`,
+    `Materialized ${generatedCount} source row(s).`,
+    firstNote,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
@@ -290,13 +461,6 @@ function buildRegistrySearchParams(filters: BankRegistryPageFilters) {
   return params;
 }
 
-function formatProductTypeList(productTypes: string[]) {
-  return productTypes
-    .map((item) => {
-      if (item === "gic") {
-        return "GIC";
-      }
-      return item.charAt(0).toUpperCase() + item.slice(1);
-    })
-    .join(", ");
+function formatProductTypeList(productTypes: string[], labelMap?: Record<string, string>) {
+  return productTypes.map((item) => formatAdminProductType(item, labelMap)).join(", ");
 }

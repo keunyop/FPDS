@@ -517,6 +517,26 @@ Source registry row 최소 정보:
 
 ---
 
+Current Phase 1 source-registry admin note:
+- `/admin/banks` is the primary operator-owned surface for bank profile setup, bank-owned coverage management, and collection launch.
+- `/admin/source-catalog` may remain as a compatibility route, but it is no longer the preferred primary operator workflow.
+- operators may launch collection per bank coverage item from the bank detail modal.
+- operators may also multi-select banks from the bank list and bulk-launch collection across all attached coverage items.
+
+### FR-ADM-017 Deferred Dynamic Product Type Management
+FPDS should support an operator-managed product type registry, not only a fixed hard-coded product-type list.
+
+Minimum later capability:
+- admin can create and edit product types with at least `name` and `description`
+- admin can search product types when attaching coverage to a bank
+- AI-assisted discovery can use the stored product type name and description to infer relevant bank-site URLs during homepage-first source generation
+- downstream parser, extraction, normalization, validation, and public/admin vocabulary rules must define safe fallback behavior when a newly added product type does not yet have full dedicated domain logic
+
+Current boundary:
+- this capability is now implemented in live `WBS 5.16` for the admin registry and collection pipeline
+- the live runtime now lets operators define additional deposit product types, attach them to bank coverage, and run homepage-first discovery plus generic AI fallback through manual review
+- public publish, dashboard aggregation, and auto-approval semantics remain constrained to the existing reviewed canonical flow until later slices widen those downstream surfaces intentionally
+
 ## 8.3 Data Ingestion Requirements
 
 ### FR-DATA-001 Source Types
@@ -880,12 +900,19 @@ API key, DB credential, BX-PF integration credential, crawler secret, webhook se
 - `/admin/banks/[bankCode]`
 - `/admin/source-catalog`
 - `/admin/source-catalog/[catalogItemId]`
+- `/admin/product-types` (later follow-on)
 - `/admin/sources`
 - `/admin/sources/[sourceId]`
 - `/admin/bxpf-publish`
 - `/admin/llm-usage`
 
 > Note: `/admin/banks` 와 `/admin/source-catalog` 가 operator-owned 관리 surface이며, `/admin/sources` 는 generated source detail read-only surface다.
+
+Admin IA note:
+- `/admin/banks` is the primary live operator-owned management surface for bank setup, coverage management, and collection launch.
+- `/admin/source-catalog` may remain as a compatibility route, but it is no longer the preferred primary operator workflow.
+- `/admin/product-types` is the live operator-managed product type registry surface.
+- `/admin/sources` remains the generated-source detail read-only surface.
 
 ## 10.3 External API / Docs IA (Phase 2)
 - `/api/v1/products`
@@ -1071,6 +1098,16 @@ Acceptance Criteria:
 - supporting source는 evidence support를 위해 포함될 수 있으나 기본적으로 standalone candidate를 만들지 않는다
 
 
+Current live admin behavior:
+- bank create can include initial coverage selection for the currently supported product types
+- bank detail can add more coverage and launch per-coverage collection
+- bank list can multi-select banks and bulk-launch collection across all attached coverage items
+
+Later follow-on requirement:
+- operator-managed dynamic product type onboarding should exist as a separate management surface
+- that later product type registry should support searchable `name` and `description`
+- AI-assisted discovery should be able to use those product type definitions when inferring bank-site URLs from a homepage
+
 ---
 
 ## 12. Workflow Requirements
@@ -1095,17 +1132,23 @@ Acceptance Criteria:
 15. Admin can inspect and override if needed
 
 ## 12.3 Source Registry Collection Workflow
-1. Admin opens bank registry and source catalog
+1. Admin opens bank registry
 2. Admin creates or edits a bank profile if needed
-3. Admin creates or edits one or more source catalog items by selecting bank and product type
-4. Admin selects one or more source catalog items
-5. Admin starts collection
+3. Admin adds one or more bank-owned coverage items for the desired product types
+4. Admin starts collection either from a single bank coverage item or from a multi-bank bank-list bulk selection
 6. System materializes or refreshes generated source rows for the selected catalog scope
 7. System records the selected source scope for the run
 8. System fetches, parses, extracts, normalizes, and validates the selected scope
 9. `normalized_candidate` rows are persisted
 10. Review tasks are created when validation/confidence rules require them
 11. Admin drills into generated Sources, Runs, and Review surfaces to inspect the outcome
+
+## 12.3A Deferred Dynamic Product Type Onboarding Workflow
+1. Admin opens a dedicated product type management surface
+2. Admin creates or edits a product type with at least `name` and `description`
+3. Admin searches that product type when attaching coverage to a bank
+4. AI-assisted discovery uses the stored product type definition when inferring relevant bank-site URLs from the homepage
+5. Parser and normalization flows either use dedicated product-type logic or fall back to an approved safe handling path
 
 ## 12.2 Review Workflow
 1. Candidate enters review queue
@@ -1129,6 +1172,9 @@ Acceptance Criteria:
 
 ### BR-001 Phase 1 Product Type Constraint
 Phase 1 확정 상품군은 chequing, savings, gic이다.
+
+### BR-001A Deferred Product Type Extensibility
+FPDS now supports operator-defined product types for the admin registry and collection pipeline, with the matching AI-assisted discovery contract plus generic extraction, normalization, validation, and vocabulary fallback rules. Those dynamic types remain review-first and are not implicitly widened into downstream public publish behavior without later approved slices.
 
 ### BR-002 Phase 2 Country Constraint
 Phase 2 확정 범위는 일본 Big 5 은행의 수신상품이다.

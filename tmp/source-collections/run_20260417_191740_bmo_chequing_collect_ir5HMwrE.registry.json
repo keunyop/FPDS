@@ -1,0 +1,28 @@
+{
+  "registry_version": "2026-04-17",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-CHQ-001",
+  "sources": [
+    {
+      "source_id": "BMO-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Homepage-derived fallback detail source for chequing",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions"
+      ],
+      "source_language": "en"
+    }
+  ]
+}

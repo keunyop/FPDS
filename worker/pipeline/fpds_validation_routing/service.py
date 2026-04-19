@@ -119,6 +119,10 @@ class ValidationRoutingService:
                 field_evidence_links=item.field_evidence_links,
                 runtime_notes=item.runtime_notes,
                 taxonomy_registry=taxonomy_registry,
+                dynamic_product_type=_uses_dynamic_product_type(
+                    product_type=_string_or_none(candidate_before.get("product_type")),
+                    source_metadata=item.source_metadata,
+                ),
             )
             validation_status = _resolve_validation_status(validation_issue_codes)
             source_confidence = _compute_source_confidence(
@@ -128,12 +132,20 @@ class ValidationRoutingService:
                 validation_status=validation_status,
                 validation_issue_codes=validation_issue_codes,
                 runtime_notes=item.runtime_notes,
+                dynamic_product_type=_uses_dynamic_product_type(
+                    product_type=_string_or_none(candidate_before.get("product_type")),
+                    source_metadata=item.source_metadata,
+                ),
             )
             route_decision = _route_candidate(
                 validation_status=validation_status,
                 validation_issue_codes=validation_issue_codes,
                 source_confidence=source_confidence,
                 routing_config=routing_config,
+                dynamic_product_type=_uses_dynamic_product_type(
+                    product_type=_string_or_none(candidate_before.get("product_type")),
+                    source_metadata=item.source_metadata,
+                ),
             )
             review_task_id = _build_review_task_id(item.candidate_id) if route_decision["review_required"] else None
             issue_summary = _build_issue_summary(
@@ -383,6 +395,7 @@ def _compute_validation_issue_codes(
     field_evidence_links: list[ValidationEvidenceLink],
     runtime_notes: list[str],
     taxonomy_registry: dict[str, set[str]],
+    dynamic_product_type: bool = False,
 ) -> list[str]:
     issues = set(str(item) for item in candidate_record.get("validation_issue_codes", []))
 
@@ -400,9 +413,9 @@ def _compute_validation_issue_codes(
 
     product_type = _string_or_none(candidate_record.get("product_type"))
     subtype_code = _string_or_none(candidate_record.get("subtype_code"))
-    if product_type not in taxonomy_registry:
+    if not dynamic_product_type and product_type not in taxonomy_registry:
         issues.add("invalid_taxonomy_code")
-    elif subtype_code and subtype_code not in taxonomy_registry[product_type]:
+    elif not dynamic_product_type and subtype_code and subtype_code not in taxonomy_registry[product_type]:
         issues.add("invalid_taxonomy_code")
 
     source_language = _string_or_none(candidate_record.get("source_language"))
@@ -449,6 +462,14 @@ def _compute_validation_issue_codes(
         issues.add("inconsistent_cross_field_logic")
     if product_type == "gic" and candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
         issues.add("inconsistent_cross_field_logic")
+    if dynamic_product_type:
+        non_core_values = [
+            value
+            for field_name, value in candidate_payload.items()
+            if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label"}
+        ]
+        if not any(_has_meaningful_value(value) for value in non_core_values):
+            issues.add("required_field_missing")
 
     conflicting_values: dict[str, set[str]] = {}
     for link in field_evidence_links:
@@ -471,6 +492,10 @@ def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
     return "pass"
 
 
+def _has_meaningful_value(value: object) -> bool:
+    return value not in (None, "", [], {})
+
+
 def _compute_source_confidence(
     *,
     candidate_record: dict[str, object],
@@ -479,6 +504,7 @@ def _compute_source_confidence(
     validation_status: str,
     validation_issue_codes: list[str],
     runtime_notes: list[str],
+    dynamic_product_type: bool = False,
 ) -> float:
     product_type = _string_or_none(candidate_record.get("product_type"))
     required_fields = [
@@ -528,6 +554,8 @@ def _compute_source_confidence(
         score -= 0.15
     if "partial_source_failure" in validation_issue_codes:
         score -= 0.08
+    if dynamic_product_type:
+        score = min(score - 0.08, 0.72)
     return round(max(0.0, min(0.99, score)), 4)
 
 
@@ -537,6 +565,7 @@ def _route_candidate(
     validation_issue_codes: list[str],
     source_confidence: float,
     routing_config: ValidationRoutingConfig,
+    dynamic_product_type: bool = False,
 ) -> dict[str, object]:
     queue_reason_codes: list[str] = []
     if validation_status == "error":
@@ -549,6 +578,8 @@ def _route_candidate(
     ):
         if code in validation_issue_codes and code not in queue_reason_codes:
             queue_reason_codes.append(code)
+    if dynamic_product_type and "manual_sampling_review" not in queue_reason_codes:
+        queue_reason_codes.append("manual_sampling_review")
 
     force_review = any(code in routing_config.force_review_issue_codes for code in validation_issue_codes)
     warning_requires_review = validation_status == "warning" and source_confidence < routing_config.review_warning_confidence_floor
@@ -560,7 +591,9 @@ def _route_candidate(
         and not warning_requires_review
     )
 
-    if routing_config.routing_mode == "prototype":
+    if dynamic_product_type:
+        review_required = True
+    elif routing_config.routing_mode == "prototype":
         if "manual_sampling_review" not in queue_reason_codes:
             queue_reason_codes.append("manual_sampling_review")
         review_required = True
@@ -578,6 +611,12 @@ def _route_candidate(
         "review_reason_code": review_reason_code,
         "queue_reason_codes": queue_reason_codes,
     }
+
+
+def _uses_dynamic_product_type(*, product_type: str | None, source_metadata: dict[str, object]) -> bool:
+    if product_type in {"chequing", "savings", "gic"}:
+        return False
+    return bool(source_metadata.get("product_type_dynamic", True))
 
 
 def _build_issue_summary(

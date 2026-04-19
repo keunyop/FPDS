@@ -1,11 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
+import { Globe, Landmark, Languages, ShieldCheck, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
+import { DestructiveConfirmDialog } from "@/components/fpds/admin/destructive-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
@@ -14,13 +15,14 @@ import {
   InputGroupInput,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import type { BankDetailResponse } from "@/lib/admin-api";
-import type { AdminLocale } from "@/lib/admin-i18n";
+import type { BankDetailResponse, ProductTypeItem } from "@/lib/admin-api";
+import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
 type BankDetailDialogContentProps = {
   detail: BankDetailResponse;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  productTypes: ProductTypeItem[];
 };
 
 const LANGUAGE_OPTIONS = [
@@ -38,6 +40,7 @@ export function BankDetailDialogContent({
   detail,
   locale,
   csrfToken,
+  productTypes,
 }: BankDetailDialogContentProps) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -47,13 +50,15 @@ export function BankDetailDialogContent({
     status: detail.bank.status,
     change_reason: detail.bank.change_reason ?? "",
   });
-  const [pending, setPending] = useState(false);
+  const [pendingSave, setPendingSave] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
+    setPendingSave(true);
     setMessage(null);
     setError(null);
 
@@ -76,7 +81,36 @@ export function BankDetailDialogContent({
     } catch {
       setError("Bank could not be updated. Check the admin API and try again.");
     } finally {
-      setPending(false);
+      setPendingSave(false);
+    }
+  }
+
+  async function handleDelete() {
+    setPendingDelete(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch(`/admin/banks/${detail.bank.bank_code}/delete`, {
+        method: "DELETE",
+        headers: {
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
+      });
+      const payload = (await response.json()) as { error?: { message?: string } };
+      if (!response.ok) {
+        setError(payload.error?.message ?? "Bank could not be deleted.");
+        setDeleteDialogOpen(false);
+        return;
+      }
+      setDeleteDialogOpen(false);
+      router.push(buildAdminHref("/admin/banks", new URLSearchParams(), locale), { scroll: false });
+      router.refresh();
+    } catch {
+      setError("Bank could not be deleted. Check the admin API and try again.");
+      setDeleteDialogOpen(false);
+    } finally {
+      setPendingDelete(false);
     }
   }
 
@@ -181,9 +215,13 @@ export function BankDetailDialogContent({
               {error ? <FieldError>{error}</FieldError> : null}
             </Field>
 
-            <div className="flex justify-end">
-              <Button disabled={pending} type="submit">
-                {pending ? "Saving..." : "Save bank"}
+            <div className="flex justify-between gap-3">
+              <Button disabled={pendingDelete} onClick={() => setDeleteDialogOpen(true)} type="button" variant="destructive">
+                <Trash2 className="size-4" />
+                {pendingDelete ? "Deleting..." : "Delete bank"}
+              </Button>
+              <Button disabled={pendingSave} type="submit">
+                {pendingSave ? "Saving..." : "Save bank"}
               </Button>
             </div>
           </form>
@@ -194,8 +232,20 @@ export function BankDetailDialogContent({
           catalogItems={detail.catalog_items}
           csrfToken={csrfToken}
           locale={locale}
+          productTypes={productTypes}
         />
       </div>
+
+      <DestructiveConfirmDialog
+        cancelLabel="Keep bank"
+        confirmLabel="Delete bank"
+        description={`Delete ${detail.bank.bank_name} from the bank registry. Admin-managed coverage and generated source rows will be removed, but collected runtime data or published history will block this action.`}
+        onConfirm={handleDelete}
+        onOpenChange={setDeleteDialogOpen}
+        open={deleteDialogOpen}
+        pending={pendingDelete}
+        title={`Delete ${detail.bank.bank_name}?`}
+      />
     </div>
   );
 }

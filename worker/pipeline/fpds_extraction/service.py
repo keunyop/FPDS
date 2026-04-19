@@ -6,6 +6,12 @@ from hashlib import sha256
 import json
 import re
 
+from worker.pipeline.fpds_ai_runtime import (
+    configured_model_id,
+    estimated_cost_usd,
+    invoke_openai_json_schema,
+    llm_provider_configured,
+)
 from worker.pipeline.fpds_evidence_retrieval.models import (
     EvidenceChunkCandidate,
     EvidenceMatch,
@@ -68,6 +74,7 @@ _TERM_RE = re.compile(
     re.IGNORECASE,
 )
 _WHITESPACE_RE = re.compile(r"\s+")
+_CANONICAL_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 
 
 class ExtractionService:
@@ -162,6 +169,38 @@ class ExtractionService:
                 matches=retrieval_result.matches,
                 requested_fields=field_names,
             )
+            runtime_notes = list(retrieval_result.runtime_notes)
+            agent_name = self.agent_name
+            model_id = self.model_id
+            usage_metadata: dict[str, object] = {
+                "usage_mode": "heuristic-no-llm-call",
+                "provider": "local",
+                "model_id": self.model_id,
+            }
+            prompt_tokens = 0
+            completion_tokens = 0
+            provider_request_id = None
+
+            if _uses_dynamic_product_type(context):
+                ai_fields, ai_notes, ai_usage = _extract_dynamic_fields_with_ai(
+                    context=context,
+                    candidates=extraction_input.candidates,
+                    requested_fields=field_names,
+                )
+                runtime_notes.extend(ai_notes)
+                if ai_fields:
+                    extracted_fields = _merge_extracted_fields(base_fields=extracted_fields, ai_fields=ai_fields)
+                if ai_usage:
+                    agent_name = "fpds-dynamic-product-extractor"
+                    model_id = str(ai_usage["model_id"])
+                    prompt_tokens = int(ai_usage.get("prompt_tokens") or 0)
+                    completion_tokens = int(ai_usage.get("completion_tokens") or 0)
+                    provider_request_id = ai_usage.get("provider_request_id")
+                    usage_metadata = {
+                        "usage_mode": "openai-dynamic-product-extraction",
+                        "provider": "openai",
+                        "model_id": model_id,
+                    }
             evidence_links = [
                 EvidenceLinkDraft(
                     field_name=field.field_name,
@@ -203,8 +242,8 @@ class ExtractionService:
                 extracted_fields=extracted_fields,
                 evidence_links=evidence_links,
                 model_execution_id=model_execution_id,
-                agent_name=self.agent_name,
-                model_id=self.model_id,
+                agent_name=agent_name,
+                model_id=model_id,
                 started_at=started_at,
             )
             metadata_payload = _build_metadata_payload(
@@ -214,7 +253,7 @@ class ExtractionService:
                 metadata_storage_key=metadata_storage_key,
                 extracted_fields=extracted_fields,
                 evidence_links=evidence_links,
-                runtime_notes=retrieval_result.runtime_notes,
+                runtime_notes=runtime_notes,
             )
             self.object_store.put_object_bytes(
                 object_key=extracted_storage_key,
@@ -226,8 +265,6 @@ class ExtractionService:
                 data=json.dumps(metadata_payload, indent=2, ensure_ascii=True).encode("utf-8"),
                 content_type="application/json",
             )
-
-            runtime_notes = list(retrieval_result.runtime_notes)
             if not evidence_links:
                 runtime_notes.append("No evidence-linked field candidates were extracted for this parsed document.")
 
@@ -238,8 +275,8 @@ class ExtractionService:
                 run_id=run_id,
                 source_document_id=context.source_document_id,
                 execution_status="completed",
-                agent_name=self.agent_name,
-                model_id=self.model_id,
+                agent_name=agent_name,
+                model_id=model_id,
                 started_at=started_at,
                 completed_at=completed_at,
                 execution_metadata={
@@ -258,11 +295,10 @@ class ExtractionService:
                 run_id=run_id,
                 model_execution_id=model_execution_id,
                 recorded_at=completed_at,
-                usage_metadata={
-                    "usage_mode": "heuristic-no-llm-call",
-                    "provider": "local",
-                    "model_id": self.model_id,
-                },
+                usage_metadata=usage_metadata,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                provider_request_id=provider_request_id,
             )
             return ExtractionSourceResult(
                 source_id=context.source_id,
@@ -604,7 +640,159 @@ def _extract_description(candidates: list[EvidenceChunkCandidate]) -> str | None
 
 def _infer_product_type(context: ExtractionDocumentContext) -> str:
     raw_value = str(context.source_metadata.get("product_type", "")).strip().lower()
-    return raw_value or "savings"
+    return raw_value or "deposit"
+
+
+def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
+    product_type = _infer_product_type(context)
+    if product_type in _CANONICAL_PRODUCT_TYPES:
+        return False
+    return bool(context.source_metadata.get("product_type_dynamic", True))
+
+
+def _merge_extracted_fields(
+    *,
+    base_fields: list[ExtractedFieldCandidate],
+    ai_fields: list[ExtractedFieldCandidate],
+) -> list[ExtractedFieldCandidate]:
+    ai_by_field = {field.field_name: field for field in ai_fields}
+    merged: list[ExtractedFieldCandidate] = []
+    for field in base_fields:
+        if field.field_name in ai_by_field and field.evidence_chunk_id is not None:
+            continue
+        merged.append(ai_by_field.pop(field.field_name, field))
+    merged.extend(ai_by_field.values())
+    return _dedupe_fields(merged)
+
+
+def _extract_dynamic_fields_with_ai(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+    requested_fields: list[str],
+) -> tuple[list[ExtractedFieldCandidate], list[str], dict[str, Any] | None]:
+    if not llm_provider_configured():
+        return [], ["Dynamic product extraction kept heuristic mode because the OpenAI provider or API key was not configured."], None
+
+    candidate_map = {candidate.evidence_chunk_id: candidate for candidate in candidates}
+    ai_requested_fields = [
+        field_name
+        for field_name in requested_fields
+        if field_name
+        not in {"product_family", "product_type", "bank_code", "country_code", "source_language", "currency"}
+    ]
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary": {"type": "string"},
+            "field_candidates": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "field_name": {"type": "string"},
+                        "candidate_value": {"type": "string"},
+                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean"]},
+                        "evidence_chunk_id": {"type": "string"},
+                        "confidence": {"type": "number"},
+                    },
+                    "required": ["field_name", "candidate_value", "value_type", "evidence_chunk_id", "confidence"],
+                },
+            },
+        },
+        "required": ["summary", "field_candidates"],
+    }
+    try:
+        response_payload, usage = invoke_openai_json_schema(
+            model_id=configured_model_id(),
+            instructions=(
+                "You are the FPDS Extraction Agent for dynamic deposit product types. "
+                "Read the product type definition and candidate evidence chunks, then extract only grounded field candidates. "
+                "Do not invent values. Prefer exact values from one evidence chunk. "
+                "If a field is not supported by the evidence, omit it."
+            ),
+            payload={
+                "product_type": _infer_product_type(context),
+                "product_type_name": context.source_metadata.get("product_type_name"),
+                "product_type_description": context.source_metadata.get("product_type_description"),
+                "expected_fields": list(context.source_metadata.get("expected_fields", [])),
+                "requested_fields": ai_requested_fields,
+                "candidate_chunks": [
+                    {
+                        "evidence_chunk_id": candidate.evidence_chunk_id,
+                        "anchor_value": candidate.anchor_value,
+                        "excerpt": candidate.evidence_excerpt[:1200],
+                    }
+                    for candidate in candidates[:12]
+                ],
+            },
+            schema_name="dynamic_product_extraction",
+            schema=schema,
+        )
+    except Exception as exc:
+        return [], [f"Dynamic product extraction AI fallback was unavailable: {exc}"], None
+
+    extracted_fields: list[ExtractedFieldCandidate] = []
+    for item in response_payload.get("field_candidates", []):
+        field_name = str(item.get("field_name") or "").strip()
+        evidence_chunk_id = str(item.get("evidence_chunk_id") or "").strip()
+        if field_name not in ai_requested_fields or evidence_chunk_id not in candidate_map:
+            continue
+        candidate = candidate_map[evidence_chunk_id]
+        candidate_value = _coerce_ai_candidate_value(
+            value=str(item.get("candidate_value") or ""),
+            value_type=str(item.get("value_type") or "string"),
+        )
+        if candidate_value is None:
+            continue
+        extracted_fields.append(
+            ExtractedFieldCandidate(
+                field_name=field_name,
+                candidate_value=candidate_value,
+                value_type=str(item.get("value_type") or "string"),
+                confidence=round(min(0.99, max(0.5, float(item.get("confidence") or 0.75))), 4),
+                extraction_method="openai_dynamic_extractor",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id=candidate.evidence_chunk_id,
+                evidence_text_excerpt=candidate.evidence_excerpt,
+                anchor_type=candidate.anchor_type,
+                anchor_value=candidate.anchor_value,
+                page_no=candidate.page_no,
+                chunk_index=candidate.chunk_index,
+                field_metadata={"dynamic_product_type": True},
+            )
+        )
+    notes = []
+    summary = str(response_payload.get("summary") or "").strip()
+    if summary:
+        notes.append(summary)
+    if extracted_fields:
+        notes.append(f"Dynamic product extraction AI supplemented {len(extracted_fields)} field candidate(s).")
+    return extracted_fields, notes, usage
+
+
+def _coerce_ai_candidate_value(*, value: str, value_type: str) -> object | None:
+    normalized = value.strip()
+    if not normalized:
+        return None
+    if value_type == "decimal":
+        return _normalize_decimal(normalized.strip("%$ ").replace(",", ""))
+    if value_type == "integer":
+        try:
+            return int(re.sub(r"[^0-9-]", "", normalized))
+        except ValueError:
+            return None
+    if value_type == "boolean":
+        lowered = normalized.lower()
+        if lowered in {"true", "yes", "1"}:
+            return True
+        if lowered in {"false", "no", "0"}:
+            return False
+        return None
+    return _normalize_text(normalized)[:280]
 
 
 def _infer_currency(candidates: list[EvidenceChunkCandidate]) -> str:
@@ -849,6 +1037,9 @@ def _build_extracted_artifact_payload(
             "product_type": _infer_product_type(context),
             "source_language": context.source_language,
             "expected_fields": context.source_metadata.get("expected_fields", []),
+            "product_type_name": context.source_metadata.get("product_type_name"),
+            "product_type_description": context.source_metadata.get("product_type_description"),
+            "product_type_dynamic": context.source_metadata.get("product_type_dynamic"),
         },
         "requested_fields": field_names,
         "retrieval_result": retrieval_result,
@@ -913,16 +1104,19 @@ def _build_usage_record(
     model_execution_id: str,
     recorded_at: str,
     usage_metadata: dict[str, object],
+    prompt_tokens: int = 0,
+    completion_tokens: int = 0,
+    provider_request_id: str | None = None,
 ) -> dict[str, object]:
     return {
         "llm_usage_id": _build_usage_id(model_execution_id),
         "model_execution_id": model_execution_id,
         "run_id": run_id,
         "candidate_id": None,
-        "provider_request_id": None,
-        "prompt_tokens": 0,
-        "completion_tokens": 0,
-        "estimated_cost": "0.000000",
+        "provider_request_id": provider_request_id,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "estimated_cost": estimated_cost_usd(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens),
         "usage_metadata": usage_metadata,
         "recorded_at": recorded_at,
     }

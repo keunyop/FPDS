@@ -15,6 +15,7 @@ Current scope:
 - audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
 - usage dashboard route backed by `llm_usage_record` with protected totals, richer scope metadata, per-model, per-agent, per-run, trend, and anomaly drilldown aggregations
 - bank registry list/detail/create/update routes backed by `bank`
+- guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
 - read-only source registry list/detail routes backed by generated `source_registry_item`
@@ -45,6 +46,7 @@ Current routes:
 - `POST /api/admin/banks`
 - `GET /api/admin/banks/:bankCode`
 - `PATCH /api/admin/banks/:bankCode`
+- `DELETE /api/admin/banks/:bankCode`
 - `GET /api/admin/source-catalog`
 - `POST /api/admin/source-catalog`
 - `GET /api/admin/source-catalog/:catalogItemId`
@@ -104,13 +106,19 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
 - LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
 - Bank and source catalog management now seed the DB from the committed JSON catalog only when `bank` and `source_registry_catalog_item` are empty; after bootstrap, admin CRUD treats the DB as the operational source of truth.
+- Bank creation now accepts optional initial coverage product types and creates the related `source_registry_catalog_item` rows in the same admin write flow so the bank modal can start with coverage already attached.
+- Bank create and update now accept homepage URLs without an explicit scheme by normalizing them to `https://...`, while still rejecting invalid non-http(s) values with a validation error instead of a server crash.
+- Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
 - Managed Big 5 bank profiles now backfill to bank-level homepage URLs instead of product-entry URLs, and legacy seeded product-entry homepages are repaired automatically when the bank or source-catalog surfaces reload.
-- Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, includes generated entry/supporting/detail rows in the launched collection scope, and only treats generated `detail` rows as candidate-producing targets.
-- For known seeded banks, homepage-first source generation can still use committed product-entry URLs as fallback discovery hints, but it no longer reuses the old seed detail rows as the primary source-catalog collection input.
+- Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, and only launches a collection run when homepage discovery produces candidate-producing `detail` rows.
+- Homepage-first collection now records discovery notes instead of failing the admin action when the homepage fetch times out or produces no detail pages, preserves the existing active detail scope when no replacement detail rows were found, and returns a no-detail result the admin UI can surface directly to operators.
+- The bank list payload now includes its attached coverage items so `/admin/banks` can drive multi-bank bulk collect without reopening each bank detail modal first.
+- For known seeded banks, homepage-first source generation can still use committed product-entry URLs as fallback discovery hints, and when link extraction comes up empty it can ask the configured OpenAI model to resolve which approved seed detail pages match the current homepage context.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Downstream collection stages now stop when snapshot capture produces no usable sources, and they only process the subset of sources whose snapshots were actually stored or reused so the final run error reflects the real failing stage more accurately.
 - `POST /api/admin/sources` and `PATCH /api/admin/sources/:sourceId` are intentionally kept as read-only error responses in the MVP so the live operator flow stays centered on `/api/admin/banks` and `/api/admin/source-catalog`.
+- Dynamic product-type onboarding is now live for the admin registry and collection pipeline: `/api/admin/product-types` now supports list/create/detail/update/delete for operator-defined types, delete is blocked when bank coverage or generated sources still reference the type, bank coverage writes validate against the registry, source collection plans carry product-type definitions into the worker stages, and non-canonical types use the generic AI extraction or normalization fallback path with safe manual-review routing.
 - The current source-collection MVP keeps candidate-producing scope centered on selected `detail` sources and only auto-includes the existing TD savings supporting sources already required by the live normalization path.
 - Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.

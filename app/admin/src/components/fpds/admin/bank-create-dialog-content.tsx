@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { FileText, Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -13,10 +13,12 @@ import {
   InputGroupInput,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import type { BankItem } from "@/lib/admin-api";
+import type { BankItem, ProductTypeItem } from "@/lib/admin-api";
+import { buildAdminProductTypeOptions, formatAdminProductType } from "@/lib/admin-product-types";
 
 type BankCreateDialogContentProps = {
   csrfToken: string | null | undefined;
+  productTypes: ProductTypeItem[];
   onCreated: (bank: BankItem | null) => void;
 };
 
@@ -26,6 +28,7 @@ type CreateBankFormState = {
   source_language: string;
   status: string;
   change_reason: string;
+  initial_coverage_product_types: string[];
 };
 
 const LANGUAGE_OPTIONS = [
@@ -45,13 +48,29 @@ const DEFAULT_CREATE_FORM: CreateBankFormState = {
   source_language: "en",
   status: "active",
   change_reason: "",
+  initial_coverage_product_types: [],
 };
 
-export function BankCreateDialogContent({ csrfToken, onCreated }: BankCreateDialogContentProps) {
+export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: BankCreateDialogContentProps) {
   const router = useRouter();
   const [createForm, setCreateForm] = useState<CreateBankFormState>(DEFAULT_CREATE_FORM);
+  const [coverageSearch, setCoverageSearch] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const productTypeOptions = useMemo(() => buildAdminProductTypeOptions(productTypes.filter((item) => item.status === "active")), [productTypes]);
+  const productTypeLabelMap = useMemo(
+    () => Object.fromEntries(productTypeOptions.map((item) => [item.value, item.label])),
+    [productTypeOptions],
+  );
+  const filteredOptions = useMemo(() => {
+    const needle = coverageSearch.trim().toLowerCase();
+    if (!needle) {
+      return productTypeOptions;
+    }
+    return productTypeOptions.filter((option) =>
+      `${option.label} ${option.value} ${option.description}`.toLowerCase().includes(needle),
+    );
+  }, [coverageSearch, productTypeOptions]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -130,6 +149,50 @@ export function BankCreateDialogContent({ csrfToken, onCreated }: BankCreateDial
             }
           />
         </div>
+        <Field>
+          <FieldLabel>Initial coverage</FieldLabel>
+          <div className="grid gap-3 rounded-2xl border border-border/80 bg-muted/20 p-4">
+            <p className="text-sm leading-6 text-muted-foreground">
+              Search and pick any product families you already want this bank to cover. You can add more later in the bank detail modal.
+            </p>
+            <input
+              className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
+              onChange={(event) => setCoverageSearch(event.target.value)}
+              placeholder="Search product types"
+              type="search"
+              value={coverageSearch}
+            />
+            <div className="flex flex-wrap gap-2">
+              {filteredOptions.map((option) => {
+                const selected = createForm.initial_coverage_product_types.includes(option.value);
+                return (
+                  <button
+                    className={`inline-flex h-10 items-center justify-center rounded-xl border px-4 text-sm font-medium transition ${
+                      selected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:border-primary hover:text-primary"
+                    }`}
+                    key={option.value}
+                    onClick={() =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        initial_coverage_product_types: selected
+                          ? current.initial_coverage_product_types.filter((item) => item !== option.value)
+                          : [...current.initial_coverage_product_types, option.value],
+                      }))
+                    }
+                    type="button"
+                  >
+                    {formatAdminProductType(option.value, productTypeLabelMap)}
+                  </button>
+                );
+              })}
+            </div>
+            {filteredOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No product types matched the current search.</p>
+            ) : null}
+          </div>
+        </Field>
         <Field data-invalid={Boolean(error)}>
           <FieldLabel>Change reason</FieldLabel>
           <InputGroup className="min-h-24 items-start">

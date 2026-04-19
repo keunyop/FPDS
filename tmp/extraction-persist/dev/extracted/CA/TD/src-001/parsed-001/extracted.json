@@ -9,12 +9,15 @@
   "model_execution_id": "modelexec-4b034e76c39c9326",
   "agent_name": "fpds-heuristic-extractor",
   "model_id": "heuristic-extractor-v1",
-  "started_at": "2026-04-14T04:22:27.681590+00:00",
+  "started_at": "2026-04-17T23:50:37.668696+00:00",
   "schema_context": {
     "product_family": "deposit",
     "product_type": "savings",
     "source_language": "en",
-    "expected_fields": []
+    "expected_fields": [],
+    "product_type_name": null,
+    "product_type_description": null,
+    "product_type_dynamic": null
   },
   "requested_fields": [
     "product_name",

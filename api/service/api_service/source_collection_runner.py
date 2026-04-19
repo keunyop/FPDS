@@ -134,6 +134,11 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
                 "url": item["source_url"],
                 "expected_fields": item["expected_fields"],
                 "source_language": item["source_language"],
+                "product_type_name": item.get("product_type_name"),
+                "product_type_description": item.get("product_type_description"),
+                "product_type_dynamic": item.get("product_type_dynamic"),
+                "discovery_keywords": item.get("discovery_keywords", []),
+                "fallback_policy": item.get("fallback_policy"),
             }
             for item in sources
         ],

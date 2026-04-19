@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { BankRegistrySurface, type BankRegistryPageFilters } from "@/components/fpds/admin/bank-registry-surface";
-import { fetchAdminSession, fetchBankDetail, fetchBankList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchBankDetail, fetchBankList, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "../LogoutButton";
@@ -22,12 +22,14 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let banks: Awaited<ReturnType<typeof fetchBankList>> = null;
   let activeBankDetail: Awaited<ReturnType<typeof fetchBankDetail>> = null;
+  let productTypes: Awaited<ReturnType<typeof fetchProductTypeList>> = null;
   let apiUnavailable = false;
 
   try {
     session = await fetchAdminSession();
     if (session) {
       banks = await fetchBankList(apiSearchParams);
+      productTypes = await fetchProductTypeList();
       if (activeBankCode) {
         activeBankDetail = await fetchBankDetail(activeBankCode);
       }
@@ -40,7 +42,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
     redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/banks", new URLSearchParams(), locale))}`);
   }
 
-  if (!session || !banks || apiUnavailable) {
+  if (!session || !banks || !productTypes || apiUnavailable) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-4 py-8 md:px-6">
         <section className="w-full rounded-[1.75rem] border border-destructive/20 bg-card/95 p-6 shadow-sm md:p-8">
@@ -74,6 +76,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
         csrfToken={session.csrf_token}
         filters={filters}
         locale={locale}
+        productTypes={productTypes.items}
       />
     </ApplicationShell5>
   );

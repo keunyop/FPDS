@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from shutil import rmtree
 import unittest
+from unittest.mock import patch
 
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext, ExtractionInput
@@ -363,6 +364,104 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertIn("Tiered interest rates apply", extracted_by_field["tier_definition_text"].candidate_value)
             self.assertIn("withdrawals cost $5 each", extracted_by_field["withdrawal_limit_text"].candidate_value)
             self.assertTrue(extracted_by_field["registered_flag"].candidate_value)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_dynamic_product_type_uses_ai_fallback_when_configured(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-dynamic-service")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="TD-TFSA-001",
+                parsed_document_id="parsed-dyn-001",
+                source_document_id="src-dyn-001",
+                snapshot_id="snap-dyn-001",
+                bank_code="TD",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "tfsa-savings",
+                    "product_type_dynamic": True,
+                    "product_type_name": "TFSA Savings",
+                    "product_type_description": "Tax-free savings deposit account for retail customers.",
+                    "expected_fields": ["product_name", "minimum_deposit", "eligibility_text"],
+                    "fallback_policy": "generic_ai_review",
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-dyn-001",
+                    parsed_document_id="parsed-dyn-001",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="tfsa-overview",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "TD TFSA Savings Account\n"
+                        "Minimum deposit: $100. Available to Canadian residents aged 18 or older."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-dyn-001",
+                    source_snapshot_id="snap-dyn-001",
+                    bank_code="TD",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            with (
+                patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.4-mini"),
+                patch(
+                    "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
+                    return_value=(
+                        {
+                            "summary": "AI mapped one dynamic product eligibility field.",
+                            "field_candidates": [
+                                {
+                                    "field_name": "eligibility_text",
+                                    "candidate_value": "Canadian residents aged 18 or older.",
+                                    "value_type": "string",
+                                    "evidence_chunk_id": "chunk-dyn-001",
+                                    "confidence": 0.83,
+                                }
+                            ],
+                        },
+                        {
+                            "model_id": "gpt-5.4-mini",
+                            "prompt_tokens": 120,
+                            "completion_tokens": 34,
+                            "provider_request_id": "resp-dyn-001",
+                        },
+                    ),
+                ),
+            ):
+                result = service.extract_documents(
+                    run_id="run-dyn-001",
+                    correlation_id="corr-dyn-001",
+                    request_id="req-dyn-001",
+                    inputs=[ExtractionInput(context=context, candidates=candidates)],
+                )
+
+            source_result = result.source_results[0]
+            extracted_by_field = {item.field_name: item for item in source_result.extracted_fields}
+            self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-dynamic-product-extractor")
+            self.assertEqual(source_result.usage_record["usage_metadata"]["usage_mode"], "openai-dynamic-product-extraction")
+            self.assertEqual(extracted_by_field["eligibility_text"].candidate_value, "Canadian residents aged 18 or older.")
+            self.assertEqual(extracted_by_field["eligibility_text"].extraction_method, "openai_dynamic_extractor")
+            self.assertIn("AI mapped one dynamic product eligibility field.", source_result.runtime_notes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 

@@ -6,6 +6,14 @@ from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 import json
 import re
+from typing import Any
+
+from worker.pipeline.fpds_ai_runtime import (
+    configured_model_id,
+    estimated_cost_usd,
+    invoke_openai_json_schema,
+    llm_provider_configured,
+)
 
 from .models import (
     NormalizationEvidenceLink,
@@ -102,12 +110,22 @@ class NormalizationService:
                 source_document_id=item.source_document_id,
                 parsed_document_id=item.parsed_document_id,
             )
-            normalized_candidate_record, evidence_links, runtime_notes = _normalize_candidate(
+            normalized_candidate_record, evidence_links, runtime_notes, normalization_meta = _normalize_candidate(
                 run_id=run_id,
                 candidate_id=candidate_id,
                 normalization_model_execution_id=normalization_model_execution_id,
                 item=item,
             )
+            agent_name = str(normalization_meta.get("agent_name") or self.agent_name)
+            model_id = str(normalization_meta.get("model_id") or self.model_id)
+            usage_metadata = dict(normalization_meta.get("usage_metadata") or {
+                "usage_mode": "heuristic-no-llm-call",
+                "provider": "local",
+                "model_id": self.model_id,
+            })
+            prompt_tokens = int(normalization_meta.get("prompt_tokens") or 0)
+            completion_tokens = int(normalization_meta.get("completion_tokens") or 0)
+            provider_request_id = normalization_meta.get("provider_request_id")
             normalized_storage_key = self.storage_config.build_normalized_object_key(
                 country_code=item.country_code,
                 bank_code=item.bank_code,
@@ -164,8 +182,8 @@ class NormalizationService:
                 execution_status="completed",
                 started_at=started_at,
                 completed_at=completed_at,
-                agent_name=self.agent_name,
-                model_id=self.model_id,
+                agent_name=agent_name,
+                model_id=model_id,
                 execution_metadata={
                     "candidate_id": candidate_id,
                     "parsed_document_id": item.parsed_document_id,
@@ -185,11 +203,10 @@ class NormalizationService:
                 run_id=run_id,
                 model_execution_id=normalization_model_execution_id,
                 recorded_at=completed_at,
-                usage_metadata={
-                    "usage_mode": "heuristic-no-llm-call",
-                    "provider": "local",
-                    "model_id": self.model_id,
-                },
+                usage_metadata=usage_metadata,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                provider_request_id=provider_request_id,
             )
             return NormalizationSourceResult(
                 source_id=item.source_id,
@@ -293,7 +310,7 @@ def _normalize_candidate(
     candidate_id: str,
     normalization_model_execution_id: str,
     item: NormalizationInput,
-) -> tuple[dict[str, object], list[dict[str, object]], list[str]]:
+) -> tuple[dict[str, object], list[dict[str, object]], list[str], dict[str, object]]:
     extracted_by_field = {field.field_name: field for field in item.extracted_fields}
     runtime_notes = list(item.runtime_notes)
 
@@ -313,6 +330,7 @@ def _normalize_candidate(
         str(item.schema_context.get("product_type", "")) or None,
         str(item.source_metadata.get("product_type", "")) or None,
     )
+    dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
     product_name = _coalesce_string(_field_value(extracted_by_field, "product_name"))
     source_language = _coalesce_string(_field_value(extracted_by_field, "source_language"), item.source_language, "und")
     currency = _coalesce_string(_field_value(extracted_by_field, "currency"), "CAD")
@@ -341,11 +359,53 @@ def _normalize_candidate(
             continue
         candidate_payload[field_name] = normalized_value
 
+    normalization_meta: dict[str, object] = {
+        "agent_name": "fpds-heuristic-normalizer",
+        "model_id": "heuristic-normalizer-v1",
+        "usage_metadata": {
+            "usage_mode": "heuristic-no-llm-call",
+            "provider": "local",
+            "model_id": "heuristic-normalizer-v1",
+        },
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "provider_request_id": None,
+    }
+    dynamic_payload: dict[str, Any] = {}
+    if dynamic_product_type:
+        dynamic_payload, dynamic_notes, dynamic_usage = _normalize_dynamic_fields_with_ai(
+            item=item,
+            extracted_by_field=extracted_by_field,
+            candidate_payload=candidate_payload,
+        )
+        runtime_notes.extend(dynamic_notes)
+        for field_name, value in dynamic_payload.get("candidate_payload", {}).items():
+            candidate_payload[field_name] = value
+        if dynamic_payload.get("product_name") not in {None, ""}:
+            product_name = _coalesce_string(dynamic_payload.get("product_name"), product_name)
+            candidate_payload["product_name"] = product_name
+        if dynamic_usage:
+            normalization_meta = {
+                "agent_name": "fpds-dynamic-product-normalizer",
+                "model_id": str(dynamic_usage["model_id"]),
+                "usage_metadata": {
+                    "usage_mode": "openai-dynamic-product-normalization",
+                    "provider": "openai",
+                    "model_id": str(dynamic_usage["model_id"]),
+                },
+                "prompt_tokens": int(dynamic_usage.get("prompt_tokens") or 0),
+                "completion_tokens": int(dynamic_usage.get("completion_tokens") or 0),
+                "provider_request_id": dynamic_usage.get("provider_request_id"),
+            }
+
     subtype_code, source_subtype_label = _infer_subtype_code(
         product_type=product_type,
         currency=currency,
         candidate_payload=candidate_payload,
     )
+    if dynamic_product_type:
+        subtype_code = str(dynamic_payload.get("subtype_code") or subtype_code or "other")
+        source_subtype_label = _coalesce_string(dynamic_payload.get("source_subtype_label"), source_subtype_label, product_name)
     if source_subtype_label is not None:
         runtime_notes.append("Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.")
     candidate_payload["source_subtype_label"] = source_subtype_label
@@ -374,6 +434,7 @@ def _normalize_candidate(
         currency=currency,
         candidate_payload=candidate_payload,
         evidence_links=item.evidence_links,
+        dynamic_product_type=dynamic_product_type,
     )
     validation_status = _resolve_validation_status(validation_issue_codes)
     source_confidence = _compute_source_confidence(
@@ -384,6 +445,7 @@ def _normalize_candidate(
         product_type=product_type,
         product_name=product_name,
         currency=currency,
+        dynamic_product_type=dynamic_product_type,
     )
 
     candidate_record = {
@@ -413,7 +475,7 @@ def _normalize_candidate(
         source_document_id=item.source_document_id,
         evidence_links=item.evidence_links,
     )
-    return candidate_record, field_evidence_link_records, runtime_notes
+    return candidate_record, field_evidence_link_records, runtime_notes, normalization_meta
 
 
 def _compute_validation_issue_codes(
@@ -428,6 +490,7 @@ def _compute_validation_issue_codes(
     currency: str | None,
     candidate_payload: dict[str, object],
     evidence_links: list[NormalizationEvidenceLink],
+    dynamic_product_type: bool = False,
 ) -> list[str]:
     issues: list[str] = []
     required_identity = {
@@ -440,9 +503,9 @@ def _compute_validation_issue_codes(
     }
     if any(value in {None, ""} for value in required_identity.values()):
         issues.append("required_field_missing")
-    if product_type not in _ACTIVE_PRODUCT_TYPES:
+    if not dynamic_product_type and product_type not in _ACTIVE_PRODUCT_TYPES:
         issues.append("invalid_taxonomy_code")
-    if subtype_code and product_type in _SUBTYPE_REGISTRY and subtype_code not in _SUBTYPE_REGISTRY[product_type]:
+    if not dynamic_product_type and subtype_code and product_type in _SUBTYPE_REGISTRY and subtype_code not in _SUBTYPE_REGISTRY[product_type]:
         issues.append("invalid_taxonomy_code")
     if source_language and not _looks_like_language_code(source_language):
         issues.append("ambiguous_mapping")
@@ -483,6 +546,16 @@ def _compute_validation_issue_codes(
             issues.append("inconsistent_cross_field_logic")
         if candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
             issues.append("inconsistent_cross_field_logic")
+    if dynamic_product_type:
+        non_core_fields = [
+            value
+            for field_name, value in candidate_payload.items()
+            if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label", "subtype_code"}
+        ]
+        if not any(_has_meaningful_value(value) for value in non_core_fields):
+            issues.append("required_field_missing")
+        if subtype_code in {None, ""}:
+            issues.append("ambiguous_mapping")
 
     conflicting_fields = defaultdict(set)
     for link in evidence_links:
@@ -507,6 +580,10 @@ def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
     return "pass"
 
 
+def _has_meaningful_value(value: object) -> bool:
+    return value not in (None, "", [], {})
+
+
 def _compute_source_confidence(
     *,
     validation_status: str,
@@ -516,6 +593,7 @@ def _compute_source_confidence(
     product_type: str | None,
     product_name: str | None,
     currency: str | None,
+    dynamic_product_type: bool = False,
 ) -> float:
     required_values = [product_type, product_name, currency, candidate_payload.get("status"), candidate_payload.get("last_verified_at")]
     completeness = sum(1 for item in required_values if item not in {None, ""}) / len(required_values)
@@ -539,6 +617,8 @@ def _compute_source_confidence(
         score -= 0.25
     if "conflicting_evidence" in validation_issue_codes:
         score -= 0.15
+    if dynamic_product_type:
+        score = min(score - 0.08, 0.74)
     return round(max(0.0, min(0.99, score)), 4)
 
 
@@ -565,8 +645,107 @@ def _build_field_evidence_link_records(
                 "candidate_value": _stringify(candidate_value),
                 "citation_confidence": round(link.citation_confidence, 4),
             }
-        )
+    )
     return records
+
+
+def _uses_dynamic_product_type(*, product_type: str | None, item: NormalizationInput) -> bool:
+    if not product_type:
+        return bool(item.source_metadata.get("product_type_dynamic"))
+    if product_type in _ACTIVE_PRODUCT_TYPES:
+        return False
+    return bool(item.source_metadata.get("product_type_dynamic", True))
+
+
+def _normalize_dynamic_fields_with_ai(
+    *,
+    item: NormalizationInput,
+    extracted_by_field: dict[str, NormalizationExtractedField],
+    candidate_payload: dict[str, object],
+) -> tuple[dict[str, Any], list[str], dict[str, Any] | None]:
+    if not llm_provider_configured():
+        return {}, ["Dynamic product normalization kept heuristic mode because the OpenAI provider or API key was not configured."], None
+
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary": {"type": "string"},
+            "product_name": {"type": "string"},
+            "subtype_code": {"type": "string"},
+            "source_subtype_label": {"type": "string"},
+            "normalized_fields": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "field_name": {"type": "string"},
+                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean"]},
+                        "candidate_value": {"type": "string"},
+                    },
+                    "required": ["field_name", "value_type", "candidate_value"],
+                },
+            },
+        },
+        "required": ["summary", "product_name", "subtype_code", "source_subtype_label", "normalized_fields"],
+    }
+    try:
+        response_payload, usage = invoke_openai_json_schema(
+            model_id=configured_model_id(),
+            instructions=(
+                "You are the FPDS Normalization Agent for dynamic deposit product types. "
+                "Map extracted fields into a conservative canonical candidate payload. "
+                "Keep only values grounded in the extracted inputs. "
+                "Use subtype_code `other` unless the subtype is obvious from the product definition and extracted evidence."
+            ),
+            payload={
+                "product_type": item.source_metadata.get("product_type"),
+                "product_type_name": item.source_metadata.get("product_type_name"),
+                "product_type_description": item.source_metadata.get("product_type_description"),
+                "fallback_policy": item.source_metadata.get("fallback_policy"),
+                "extracted_fields": [
+                    {
+                        "field_name": field.field_name,
+                        "candidate_value": str(field.candidate_value),
+                        "value_type": field.value_type,
+                        "confidence": field.confidence,
+                    }
+                    for field in extracted_by_field.values()
+                ],
+                "current_candidate_payload": candidate_payload,
+            },
+            schema_name="dynamic_product_normalization",
+            schema=schema,
+        )
+    except Exception as exc:
+        return {}, [f"Dynamic product normalization AI fallback was unavailable: {exc}"], None
+
+    normalized_payload: dict[str, object] = {}
+    for item_payload in response_payload.get("normalized_fields", []):
+        field_name = str(item_payload.get("field_name") or "").strip()
+        if not field_name:
+            continue
+        normalized_value = _normalize_field_value(
+            field_name=field_name,
+            value=str(item_payload.get("candidate_value") or ""),
+            value_type=str(item_payload.get("value_type") or "string"),
+        )
+        if normalized_value is None:
+            continue
+        normalized_payload[field_name] = normalized_value
+    notes = []
+    summary = str(response_payload.get("summary") or "").strip()
+    if summary:
+        notes.append(summary)
+    if normalized_payload:
+        notes.append(f"Dynamic product normalization AI mapped {len(normalized_payload)} canonical field(s).")
+    return {
+        "product_name": _coalesce_string(response_payload.get("product_name")),
+        "subtype_code": _coalesce_string(response_payload.get("subtype_code"), "other"),
+        "source_subtype_label": _coalesce_string(response_payload.get("source_subtype_label")),
+        "candidate_payload": normalized_payload,
+    }, notes, usage
 
 
 def _infer_subtype_code(
@@ -782,16 +961,19 @@ def _build_usage_record(
     model_execution_id: str,
     recorded_at: str,
     usage_metadata: dict[str, object],
+    prompt_tokens: int = 0,
+    completion_tokens: int = 0,
+    provider_request_id: str | None = None,
 ) -> dict[str, object]:
     return {
         "llm_usage_id": _build_usage_id(model_execution_id),
         "model_execution_id": model_execution_id,
         "run_id": run_id,
         "candidate_id": None,
-        "provider_request_id": None,
-        "prompt_tokens": 0,
-        "completion_tokens": 0,
-        "estimated_cost": "0.000000",
+        "provider_request_id": provider_request_id,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "estimated_cost": estimated_cost_usd(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens),
         "usage_metadata": usage_metadata,
         "recorded_at": recorded_at,
     }

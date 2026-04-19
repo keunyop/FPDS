@@ -1,0 +1,173 @@
+{
+  "collection_id": "collection_lkd39oXvCJH8FmC7",
+  "correlation_id": "corr_hpXLWI5aksFjK8G6",
+  "request_id": "req_a162bdc8ce494753a580484a1d7e64e3",
+  "trigger_type": "admin_source_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "selected_source_ids": [
+    "BMO-CHQ-002",
+    "BMO-CHQ-003",
+    "BMO-CHQ-004",
+    "BMO-CHQ-005"
+  ],
+  "target_source_ids": [
+    "BMO-CHQ-002",
+    "BMO-CHQ-003",
+    "BMO-CHQ-004",
+    "BMO-CHQ-005"
+  ],
+  "auto_included_source_ids": [],
+  "groups": [
+    {
+      "run_id": "run_20260419_050536_bmo_chequing_collect_oJ_Vdzei",
+      "country_code": "CA",
+      "bank_code": "BMO",
+      "product_type": "chequing",
+      "source_language": "en",
+      "selected_source_ids": [
+        "BMO-CHQ-002",
+        "BMO-CHQ-003",
+        "BMO-CHQ-004",
+        "BMO-CHQ-005"
+      ],
+      "target_source_ids": [
+        "BMO-CHQ-002",
+        "BMO-CHQ-003",
+        "BMO-CHQ-004",
+        "BMO-CHQ-005"
+      ],
+      "included_source_ids": [
+        "BMO-CHQ-002",
+        "BMO-CHQ-003",
+        "BMO-CHQ-004",
+        "BMO-CHQ-005"
+      ],
+      "included_sources": [
+        {
+          "source_id": "BMO-CHQ-002",
+          "bank_code": "BMO",
+          "country_code": "CA",
+          "product_type": "chequing",
+          "source_name": "BMO Practical Chequing detail source",
+          "source_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical/",
+          "source_type": "html",
+          "discovery_role": "detail",
+          "priority": "P0",
+          "source_language": "en",
+          "purpose": "Official same-domain chequing account product page; matches the daily banking/chequing product type and likely includes fee and transaction details.",
+          "expected_fields": [
+            "product_name",
+            "monthly_fee",
+            "included_transactions",
+            "transaction_fee"
+          ],
+          "seed_source_flag": false,
+          "product_type_name": "Chequing",
+          "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+          "product_type_dynamic": false,
+          "discovery_keywords": [
+            "chequing",
+            "checking",
+            "bank account",
+            "banking plan",
+            "daily banking"
+          ],
+          "fallback_policy": "canonical_parser"
+        },
+        {
+          "source_id": "BMO-CHQ-003",
+          "bank_code": "BMO",
+          "country_code": "CA",
+          "product_type": "chequing",
+          "source_name": "BMO Plus Chequing detail source",
+          "source_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus/",
+          "source_type": "html",
+          "discovery_role": "detail",
+          "priority": "P0",
+          "source_language": "en",
+          "purpose": "Official same-domain chequing account product page; matches the chequing account category and likely contains monthly fee and bundled transaction information.",
+          "expected_fields": [
+            "product_name",
+            "monthly_fee",
+            "included_transactions",
+            "bundled_savings_benefits"
+          ],
+          "seed_source_flag": false,
+          "product_type_name": "Chequing",
+          "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+          "product_type_dynamic": false,
+          "discovery_keywords": [
+            "chequing",
+            "checking",
+            "bank account",
+            "banking plan",
+            "daily banking"
+          ],
+          "fallback_policy": "canonical_parser"
+        },
+        {
+          "source_id": "BMO-CHQ-004",
+          "bank_code": "BMO",
+          "country_code": "CA",
+          "product_type": "chequing",
+          "source_name": "BMO Performance Chequing detail source",
+          "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance/",
+          "source_type": "html",
+          "discovery_role": "detail",
+          "priority": "P0",
+          "source_language": "en",
+          "purpose": "Official same-domain chequing account product page in BMO\u2019s Canadian site namespace; matches the product type and is a likely public detail page.",
+          "expected_fields": [
+            "product_name",
+            "monthly_fee",
+            "included_transactions",
+            "credit_card_rebate"
+          ],
+          "seed_source_flag": false,
+          "product_type_name": "Chequing",
+          "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+          "product_type_dynamic": false,
+          "discovery_keywords": [
+            "chequing",
+            "checking",
+            "bank account",
+            "banking plan",
+            "daily banking"
+          ],
+          "fallback_policy": "canonical_parser"
+        },
+        {
+          "source_id": "BMO-CHQ-005",
+          "bank_code": "BMO",
+          "country_code": "CA",
+          "product_type": "chequing",
+          "source_name": "BMO Premium Chequing detail source",
+          "source_url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium/",
+          "source_type": "html",
+          "discovery_role": "detail",
+          "priority": "P0",
+          "source_language": "en",
+          "purpose": "Official same-domain chequing account product page; matches the chequing product type and likely provides fee, transaction, and benefit details.",
+          "expected_fields": [
+            "product_name",
+            "monthly_fee",
+            "included_transactions",
+            "family_bundle_benefits"
+          ],
+          "seed_source_flag": false,
+          "product_type_name": "Chequing",
+          "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+          "product_type_dynamic": false,
+          "discovery_keywords": [
+            "chequing",
+            "checking",
+            "bank account",
+            "banking plan",
+            "daily banking"
+          ],
+          "fallback_policy": "canonical_parser"
+        }
+      ]
+    }
+  ]
+}

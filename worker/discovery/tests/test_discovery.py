@@ -41,6 +41,20 @@ class FetchPolicyTests(unittest.TestCase):
             policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=("bmo.com", "www.bmo.com"))
 
         self.assertEqual(policy.allowed_domains, ("td.com", "tdcanadatrust.com", "bmo.com", "www.bmo.com"))
+        self.assertEqual(policy.timeout_seconds, 45)
+
+    def test_from_env_reads_fetch_timeout_seconds(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "FPDS_SOURCE_FETCH_ALLOWLIST": "td.com",
+                "FPDS_SOURCE_FETCH_TIMEOUT_SECONDS": "60",
+            },
+            clear=False,
+        ):
+            policy = DiscoveryFetchPolicy.from_env()
+
+        self.assertEqual(policy.timeout_seconds, 60)
 
     def test_validate_fetch_url_allows_td_https_urls(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)

@@ -235,6 +235,13 @@ function getNavGroups(locale: AdminLocale): NavGroup[] {
           icon: Search,
         },
         {
+          label: "Product Types",
+          description: "Registry, descriptions, and AI fallback metadata",
+          href: "/admin/product-types",
+          status: copy.status.live,
+          icon: Sparkles,
+        },
+        {
           label: "Sources",
           description: "Generated source detail, read-only",
           href: "/admin/sources",

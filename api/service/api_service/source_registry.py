@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 else:  # pragma: no cover - keeps unit tests lightweight when psycopg is unavailable.
     Connection = Any
 
+from api_service.errors import SourceRegistryError
+from api_service.product_types import load_product_type_definitions_map
 from api_service.security import new_id, utc_now
 from api_service.source_registry_utils import infer_source_type, load_seed_source_registry_rows, normalize_source_url, repo_root
 
@@ -31,14 +33,6 @@ _AUTO_SUPPORT_SOURCE_IDS = {
     "TD-SAV-003": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-004": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
 }
-
-
-class SourceRegistryError(Exception):
-    def __init__(self, *, status_code: int, code: str, message: str) -> None:
-        self.status_code = status_code
-        self.code = code
-        self.message = message
-        super().__init__(message)
 
 
 @dataclass(frozen=True)
@@ -551,12 +545,18 @@ def start_source_collection(
     auto_support_by_id = {str(row["source_id"]): row for row in auto_support_rows}
     included_rows_by_id = dict(selected_by_id)
     included_rows_by_id.update(auto_support_by_id)
+    product_type_definitions = load_product_type_definitions_map(
+        connection,
+        codes=[str(row["product_type"]) for row in included_rows_by_id.values()],
+        active_only=False,
+    )
 
     collection_id = new_id("collection")
     correlation_id = new_id("corr")
     plan = build_source_collection_plan(
         selected_rows=[selected_by_id[source_id] for source_id in selected_source_ids],
         included_rows=list(included_rows_by_id.values()),
+        product_type_definitions=product_type_definitions,
         collection_id=collection_id,
         correlation_id=correlation_id,
         actor=actor,
@@ -620,11 +620,13 @@ def build_source_collection_plan(
     *,
     selected_rows: list[dict[str, Any]],
     included_rows: list[dict[str, Any]],
+    product_type_definitions: dict[str, dict[str, Any]] | None = None,
     collection_id: str,
     correlation_id: str,
     actor: dict[str, Any],
     request_id: str | None,
 ) -> dict[str, Any]:
+    product_type_definitions = product_type_definitions or {}
     selected_rows_by_id = {str(row["source_id"]): row for row in selected_rows}
     selected_source_ids = [str(row["source_id"]) for row in _sort_source_rows(selected_rows)]
     target_source_ids = [
@@ -663,7 +665,13 @@ def build_source_collection_plan(
                 "selected_source_ids": [str(row["source_id"]) for row in selected_group_rows],
                 "target_source_ids": [str(row["source_id"]) for row in target_group_rows],
                 "included_source_ids": [str(row["source_id"]) for row in included_group_rows],
-                "included_sources": [_collection_source_record(row) for row in included_group_rows],
+                "included_sources": [
+                    _collection_source_record(
+                        row,
+                        product_type_definition=product_type_definitions.get(str(row["product_type"]), {}),
+                    )
+                    for row in included_group_rows
+                ],
             }
         )
 
@@ -847,7 +855,7 @@ def _serialize_recent_run_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _collection_source_record(row: dict[str, Any]) -> dict[str, Any]:
+def _collection_source_record(row: dict[str, Any], *, product_type_definition: dict[str, Any]) -> dict[str, Any]:
     return {
         "source_id": str(row["source_id"]),
         "bank_code": str(row["bank_code"]),
@@ -862,6 +870,11 @@ def _collection_source_record(row: dict[str, Any]) -> dict[str, Any]:
         "purpose": str(row.get("purpose") or ""),
         "expected_fields": list(row.get("expected_fields") or []),
         "seed_source_flag": bool(row.get("seed_source_flag")),
+        "product_type_name": str(product_type_definition.get("display_name") or row["product_type"]),
+        "product_type_description": str(product_type_definition.get("description") or ""),
+        "product_type_dynamic": bool(product_type_definition.get("dynamic_onboarding_enabled")),
+        "discovery_keywords": list(product_type_definition.get("discovery_keywords") or []),
+        "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
     }
 
 

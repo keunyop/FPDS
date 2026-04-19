@@ -139,11 +139,22 @@ The first admin-managed source registry slice should support only the following 
 6. See the resulting run id and success/failure summary.
 7. Inspect generated source rows in a read-only source registry surface.
 
-Explicitly deferred from the MVP:
+Current live workflow note:
+- `/admin/banks` is now the primary operator-owned surface for bank setup, bank-owned coverage management, and collection launch.
+- `/admin/source-catalog` may still exist as a compatibility route, but it is no longer the preferred primary workflow.
+- bank list bulk collect is allowed as long as the action resolves to the underlying bank-plus-product coverage items.
+
+Still deferred from the MVP:
 - crawler-driven registry auto-promotion
 - candidate-diff review UI for registry changes
 - scheduler-level refresh governance UI
 - visual diffing between historical registry versions
+
+Current live dynamic onboarding note:
+- `/admin/product-types` now lets operators manage product type definitions with searchable name and description fields.
+- Bank coverage creation validates against that registry instead of the old hard-coded canonical list.
+- Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
+- Dynamic product types continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
 
 ---
 
@@ -191,6 +202,7 @@ Current repository state:
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only the existing TD savings supporting-source merge path auto-included today
+- dynamic operator-defined product type onboarding is not live yet and remains a later design/workflow slice
 
 ---
 
@@ -212,6 +224,9 @@ The following are intentionally out of scope for the first source-registry admin
 - broader supporting-source auto-inclusion rules beyond the existing TD savings path
 - dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
 - optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
+- operator-managed product type registry with searchable `name` and `description`
+- AI-assisted homepage discovery rules that can use product-type definitions beyond the current fixed canonical set
+- parser, normalization, validation, and vocabulary fallback rules for newly added product types
 
 ---
 

@@ -1659,6 +1659,161 @@ Each entry should include:
   - passed in `api/service`
 - Known issues: existing coverage rows are collectable and inspectable from the bank modal, but they are not yet editable inline; operators would still need a follow-on slice if status or product-type mutation must stay available after the source-catalog screen removal
 - Next step: smoke test `/admin/banks` by opening a populated bank modal, adding missing coverage, launching collect from a coverage card, and confirming the bank list coverage labels and generated-source counts refresh as expected
+
+## 2026-04-17 - Initial Coverage and Bank-List Bulk Collect
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: let operators attach coverage at bank creation time, keep per-coverage collect inside the bank detail modal, and add multi-bank bulk collect from the bank list while explicitly deferring free-form product-type onboarding
+- Why now: Product Owner wanted the bank workflow to handle more of the real operator job in one place, but also agreed that truly dynamic product-type management would expand into discovery, AI scoring, and parser-contract work beyond the safe scope of the current admin slice
+- Outcome: bank creation now accepts optional initial coverage for the current supported product families, bank list payloads now include attached coverage items so `/admin/banks` can multi-select banks and bulk-launch collection across all selected coverage rows, and the bank create modal plus bank list UI were updated to expose those actions without reopening the older source-catalog surface
+- Not done: this slice did not ship a live product-type management menu, did not add searchable free-form product-type onboarding, and did not widen the discovery/parser contracts beyond the current canonical `chequing`, `savings`, and `gic` coverage set
+- Key files: `api/service/api_service/models.py`, `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/lib/admin-product-types.ts`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `README.md`, `app/admin/README.md`, `api/service/README.md`, `docs/03-design/admin-information-architecture.md`, `docs/01-planning/WBS.md`
+- Decisions: kept initial coverage creation in the bank create write flow so bank plus coverage setup stays atomic from the operator perspective. Reused the existing source-catalog collection API for bulk collect instead of creating a second bank-specific collect endpoint. Deferred dynamic product-type onboarding into new `WBS 5.16` planning because the AI-assisted homepage discovery contract is larger than a UI-only slice
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_source_catalog`
+  - passed in `api/service`
+- Known issues: initial coverage selection and add-coverage inside bank detail still use the current fixed product-family list rather than a searchable registry, and bank-list selection currently operates at the bank level rather than letting operators pick an arbitrary subset of coverage rows from the list itself
+- Next step: smoke test `/admin/banks` by adding a bank with initial coverage, selecting multiple banks in the list, running `Collect selected`, and then confirming the corresponding coverage cards and generated-source counts refresh after the run is launched
+
+## 2026-04-17 - Dynamic Product Type Requirement Capture
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: record the Product Owner's requested free-form product type capability in the authoritative requirement and design documents without accidentally implying that the feature is already live
+- Why now: Product Owner clarified that product types should eventually be operator-defined and AI-usable for homepage-first discovery, but also agreed that the runtime scope is too large for the current admin slice and should be deferred cleanly
+- Outcome: updated the requirements baseline, admin information architecture, source-registry policy, and WBS so the repo now explicitly captures a later `/admin/product-types` management surface, searchable product type `name` and `description`, AI-assisted homepage discovery usage of those definitions, and the need for parser/normalization/validation fallback rules before the feature can ship
+- Not done: this slice did not add a live product type management route, DB table, API, or UI, and it did not widen the current runtime beyond the fixed canonical `chequing`, `savings`, and `gic` coverage set
+- Key files: `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`, `docs/03-design/admin-information-architecture.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/01-planning/WBS.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the requirement explicit enough to guide later design while also preserving the current operational boundary that only the fixed Phase 1 product types are live today
+- Verification:
+  - document-only update; no code/runtime checks required
+- Known issues: the requirements doc now contains both current-state and deferred-state product type language, so future implementation work should keep those two scopes distinct rather than treating the deferred capability as already approved for immediate build
+- Next step: when `WBS 5.16` starts, design the product type registry schema, the AI discovery scoring/prompt contract, and the parser/normalization fallback behavior before building UI
+
+## 2026-04-17 - Source Catalog Duplicate-Scope Collection Fix
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: stop homepage-first bank coverage collection from crashing when the same generated bank URL is discovered under two roles and collides on the source registry unique scope
+- Why now: Product Owner hit a live `POST /api/admin/source-catalog/collect` failure for BMO chequing because the materialized source set generated the same normalized URL as both `entry` and `detail`, while the DB correctly enforces uniqueness by bank, product type, normalized URL, and source type
+- Outcome: generated source rows are now deduped by the DB-backed unique scope before persistence, duplicate-scope ties prefer `detail` over non-candidate roles, and source upsert now targets the real unique scope and returns the persisted row identity so reruns can reuse existing source ids safely
+
+## 2026-04-17 - Dynamic Product Type Onboarding Implementation
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: make product types operator-managed and usable by homepage-first discovery without introducing a new per-type hardcoded parser branch for every future deposit product
+- Why now: Product Owner approved implementing the deferred dynamic product type onboarding slice, but explicitly wanted the runtime to stay flexible by using generic AI-assisted discovery, extraction, and normalization fallback instead of one-off parser logic per new product type
+- Outcome: added `product_type_registry` plus migration `0007`, live `/api/admin/product-types` read/write routes, a new `/admin/product-types` management screen, registry-backed product type search in the bank create and add-coverage flows, homepage-first discovery prompts that include product type name/description/keywords, collection-plan metadata that carries product type definitions into worker stages, generic AI extraction and normalization fallback for dynamic product types, and review-first validation routing that keeps those dynamic candidates out of auto-publish paths
+- Not done: this slice did not widen public product/grid/dashboard publishing to dynamic product types, did not implement scheduler-driven discovery refresh, and did not run the new migration against a live database from this session
+- Key files: `db/migrations/0007_dynamic_product_type_onboarding.sql`, `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `worker/pipeline/fpds_ai_runtime.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_validation_routing/service.py`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/app/admin/product-types/page.tsx`
+- Decisions: kept built-in `chequing`, `savings`, and `gic` behavior intact while routing new operator-defined types through a generic AI fallback contract. Forced dynamic types into manual review even in non-prototype routing so the canonical/public surfaces do not silently absorb unsupported mappings. Synced dynamic product types into taxonomy as an `other` subtype to preserve safe downstream validation semantics without pretending subtype coverage is complete
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `python -m unittest tests.test_product_types tests.test_source_catalog tests.test_source_registry tests.test_source_collection_runner`
+  - passed in `api/service`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - passed in repo root
+- Known issues: dynamic product types currently rely on the configured OpenAI provider for the richer fallback path; if the provider is not configured, the system stays on heuristic mode and still routes outcomes conservatively into review. This slice also leaves test-generated temp artifacts in `tmp/` unless they are cleaned separately
+- Next step: apply migration `0007` in the target database, create one real dynamic product type in `/admin/product-types`, attach it to a bank, and smoke test a collect run to confirm the provider-backed discovery and review flow in the live environment
+- Not done: this slice did not change homepage scoring heuristics, did not widen the source uniqueness contract, and did not add a new operator-facing error surface in the admin UI
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `docs/00-governance/development-journal.md`
+- Decisions: kept the DB uniqueness rule as the source of truth and aligned generation/upsert behavior to it instead of allowing multiple rows for the same normalized page. When the same page can act as both a catalog hub and a candidate-producing detail page, the candidate-producing `detail` role now wins
+- Verification:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_source_catalog tests.test_source_collection_runner`
+  - passed in `api/service`
+- Known issues: this fix addresses duplicate-scope generation inside the homepage materialization path, but genuinely different pages can still fail later in the collection pipeline if fetch or parse behavior drifts
+- Next step: rerun the failed BMO chequing collect action from `/admin/banks` and confirm the collection now launches past source materialization into run execution
+
+## 2026-04-17 - Homepage Discovery No-Detail Handling and AI Resolution
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: make homepage-first coverage collection resilient when homepage fetch or link extraction fails, while still giving operators a truthful no-detail outcome and an AI-assisted path to approved seed detail pages
+- Why now: Product Owner reran the BMO chequing collect action after the duplicate-scope fix and the admin action still ended as a failed run because snapshot capture was pointed at a homepage-derived entry URL that timed out. The desired operator contract is that homepage discovery should not fail the admin action just because the homepage is slow or empty, and AI should be able to resolve the approved seed detail targets from homepage context
+- Outcome: homepage generation no longer turns the homepage itself into a fallback `detail` source, source-catalog collect now returns a successful no-detail result when discovery cannot identify candidate-producing detail rows, and existing active detail rows stay preserved instead of being inactivated by a degraded discovery pass. Added an OpenAI Responses API-backed resolver that can map homepage context plus approved seed detail hints to same-domain detail URLs, and updated the admin collect messages so operators can see when discovery finished without launching a run plus the first discovery note
+- Not done: this slice does not yet persist model-execution or token-usage records for the AI-assisted homepage resolver, and it still depends on the environment having `FPDS_LLM_PROVIDER=openai` plus `FPDS_LLM_API_KEY` configured before the AI path can run live
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `api/service/README.md`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: treat `no detail sources discovered` as an operator-visible outcome rather than a failed collect action; only replace the existing active source scope when new detail rows are actually discovered; keep the AI resolver constrained to approved seed detail hints and same-domain HTML URLs so the model can help recover detail-page scope without widening the product boundary
+- Verification:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_source_catalog tests.test_source_collection_runner`
+  - `pnpm run typecheck`
+  - passed in `api/service` and `app/admin`
+- Known issues: the AI resolver currently reports its outcome through discovery notes only, so deeper operational observability still relies on audit history and follow-up collection results rather than a dedicated resolver diagnostics surface
+- Next step: rerun BMO chequing collect from `/admin/banks` and confirm either that AI-assisted homepage discovery produces detail sources and launches a run, or that the UI cleanly reports a no-detail outcome without creating a failed run
+
+## 2026-04-18 - Product Type Create Audit Fix and Delete Support
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: fix the live `POST /api/admin/product-types` failure and finish the missing product-type lifecycle controls so operator-defined types can be created and removed safely
+- Why now: Product Owner hit a real admin runtime error while creating a dynamic product type. The request reached the create path, but the follow-up audit insert still used columns that do not exist on the current `audit_event` schema. The same surface also still lacked an operator-facing delete action for dynamic types
+- Outcome: aligned product-type audit inserts to the actual live `audit_event` schema, added backend delete support for non-built-in product types, blocked deletion when a type is still referenced by bank coverage or generated source rows, added an admin delete action on `/admin/product-types`, and tightened the product-type unit tests so the audit SQL shape and delete guard behavior are both covered
+- Not done: this slice did not add bulk delete, did not introduce soft-delete history for product types, and did not widen built-in product types beyond the existing read-only rule
+- Key files: `api/service/api_service/product_types.py`, `api/service/api_service/main.py`, `api/service/tests/test_product_types.py`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/app/admin/product-types/[productTypeCode]/delete/route.ts`, `api/service/README.md`, `app/admin/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept delete as a guarded hard delete for operator-defined types only. If a type is already in active bank coverage or generated source scope, the API now rejects deletion with a clear conflict message instead of silently inactivating or orphaning dependent rows
+- Verification:
+  - `python -m unittest tests.test_product_types`
+  - passed in `api/service`
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: dynamic product type delete currently checks live bank-coverage and source-registry references only; it does not yet expose a richer dependency drilldown in the UI, so operators still get a blocking message rather than a linked “where used” list
+- Next step: retry product type creation in `/admin/product-types`, then verify edit and delete on a fresh unused dynamic type and separately confirm that deletion is correctly blocked once the type is attached to bank coverage
+
+## 2026-04-18 - Product Type Modal Workflow Alignment
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: align `/admin/product-types` to the same list-plus-modal interaction model already used by `/admin/banks`
+- Why now: Product Owner wanted product type onboarding to feel consistent with the existing bank workflow instead of mixing a list view with a permanently embedded create form and inline edits
+- Outcome: replaced the split registry-plus-sidebar layout with a bank-style list surface, moved create into an `OfferModal4` add modal, moved edit/delete into a detail modal opened from the list row, added server-side detail loading for the active product type, and kept built-in types readable from the same modal while leaving them non-editable
+- Not done: this slice did not add list selection or bulk actions for product types, and it did not add usage-drilldown links when delete is blocked by existing bank/source references
+- Key files: `app/admin/src/app/admin/product-types/page.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: matched the Banks UX pattern closely instead of inventing a lighter variation for product types. That means list context stays anchored, add opens through a query-param modal state, and detail work happens in the same modal family rather than inline card editing
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: if a product type code is placed directly into the query string but no longer exists, the page currently stays on the filtered list without opening the detail modal rather than auto-clearing the stale query param
+- Next step: smoke test `/admin/product-types` by opening add, creating a dynamic type, reopening it from the list detail modal, editing it, and deleting an unused type while confirming Banks-style context retention
+
+## 2026-04-18 - Destructive Confirm Dialog Standardization
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: replace browser-native delete confirmation with a reusable FPDS admin destructive confirm dialog aligned to the requested Shadcnblocks destructive alert-dialog pattern
+- Why now: Product Owner asked for site-wide delete confirmations to stop using `window.confirm` and instead use a consistent modal treatment that matches the rest of the admin surface
+- Outcome: added shared `alert-dialog` UI primitives plus a reusable destructive confirm block, wired the product-type delete action to that dialog, and documented the expectation that future operator-facing delete actions should use the shared component instead of native browser confirms
+- Not done: this slice only converted the one active delete confirmation currently present in the admin app; future delete actions should reuse the same component when they are introduced
+- Key files: `app/admin/src/components/ui/alert-dialog.tsx`, `app/admin/src/components/fpds/admin/destructive-confirm-dialog.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: standardized on a reusable modal component rather than styling each delete flow ad hoc, and kept the copy explicit about dependency-blocked deletes so operators understand why a destructive action may still fail after confirmation
+
+## 2026-04-18 - Bank Create URL Guard and Delete Lifecycle
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: stop `/api/admin/banks` from crashing on scheme-less homepage input and finish the missing bank delete lifecycle so `/admin/banks` matches the product-type modal flow more closely
+- Why now: Product Owner hit a live bank-create failure by entering a homepage without `http(s)://`, and the bank detail modal still allowed update only even though newly added operator-managed banks should also be removable from the same workflow
+- Outcome: bank create and update now normalize scheme-less homepage values to `https://...` before URL validation, invalid homepage input now returns a 422-style domain error instead of a server 500, the API now exposes guarded `DELETE /api/admin/banks/:bankCode`, and the bank detail modal now includes the shared destructive confirm dialog plus delete action routing
+- Not done: bank delete intentionally stops when collected source documents or downstream candidate/product/public snapshot rows already exist; this slice did not add a richer dependency drilldown or a deeper runtime-data purge workflow
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/main.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/app/admin/banks/[bankCode]/delete/route.ts`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `api/service/README.md`, `app/admin/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: treat missing URL scheme as operator input cleanup rather than as a hard error, but keep non-http(s) values invalid; allow bank delete only while the bank is still in the admin-managed setup layer and block it once runtime or published history exists so we do not orphan evidence, candidates, or public projections
+
+## 2026-04-18 - Discovery Fetch Timeout Control for Slow Bank Pages
+
+- WBS: `5.15`
+- Status: `done`
+- Goal: reduce avoidable source-collection failures on slower bank sites by making discovery and snapshot fetch timeout configurable and less aggressive by default
+- Why now: Product Owner ran BMO chequing collect and the run failed during snapshot capture because all four selected detail pages timed out under the current fixed 20-second fetch policy, even though the operator flow and AI-assisted homepage discovery had already selected a plausible detail scope
+- Outcome: `DiscoveryFetchPolicy.from_env()` now reads `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS`, the default timeout was raised from 20 seconds to 45 seconds, env examples and the discovery/runtime docs were updated, and unit coverage now checks both the default and an explicit env override
+- Not done: this slice does not add per-bank timeout tuning, browser-like user-agent overrides, or richer retry telemetry in the run UI; it only makes the existing timeout policy more realistic and operable
+- Key files: `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/tests/test_discovery.py`, `.env.dev.example`, `.env.prod.example`, `worker/discovery/README.md`, `docs/03-design/dev-prod-environment-spec.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept one shared timeout control for discovery, preflight drift, and snapshot capture instead of adding a bank-specific override system, because the immediate product value is operational recovery from slow-but-public pages rather than a more complex fetch policy matrix
 ---
 
 ## 7. Change History

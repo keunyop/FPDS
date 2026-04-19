@@ -1,0 +1,114 @@
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260417_191740_bmo_chequing_collect_ir5HMwrE",
+  "correlation_id": "corr_6kxvtesjQtz4v4lN",
+  "request_id": "req_b073d31a4062487d9d7a4f3a75cd8eda",
+  "partial_completion_flag": true,
+  "stats": {
+    "source_total": 1,
+    "stored_count": 0,
+    "reused_count": 0,
+    "failed_count": 1
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-CHQ-001",
+      "source_document_id": "src-bmo-html-9fe5b7db44076c29",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-d0206dcfa7a6101a",
+        "run_id": "run_20260417_191740_bmo_chequing_collect_ir5HMwrE",
+        "source_document_id": "src-bmo-html-9fe5b7db44076c29",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_b073d31a4062487d9d7a4f3a75cd8eda",
+          "attempt_count": 3,
+          "correlation_id": "corr_6kxvtesjQtz4v4lN",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260417_191740_bmo_chequing_collect_ir5HMwrE",
+    "correlation_id": "corr_6kxvtesjQtz4v4lN",
+    "request_id": "req_b073d31a4062487d9d7a4f3a75cd8eda",
+    "stats": {
+      "source_total": 1,
+      "ok_count": 0,
+      "warning_count": 0,
+      "error_count": 1,
+      "issue_total": 1
+    },
+    "source_checks": [
+      {
+        "source_id": "BMO-CHQ-001",
+        "source_document_id": "src-bmo-html-9fe5b7db44076c29",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-CHQ-001",
+            "source_document_id": "src-bmo-html-9fe5b7db44076c29",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 50,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260417_191740_bmo_chequing_collect_ir5HMwrE",
+    "run_state": "failed",
+    "source_document_count": 1,
+    "stored_snapshot_count": 0,
+    "run_source_item_count": 1,
+    "source_success_count": 0,
+    "source_failure_count": 1,
+    "partial_completion_flag": true,
+    "started_at": "2026-04-17T19:17:42.080227+00:00",
+    "completed_at": "2026-04-17T19:19:03.654881+00:00"
+  }
+}

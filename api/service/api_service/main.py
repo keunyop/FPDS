@@ -16,9 +16,11 @@ from api_service.audit_log import load_audit_log_list, normalize_audit_log_filte
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
 from api_service.db import open_connection
+from api_service.errors import SourceRegistryError
 from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
 from api_service.models import BankWriteRequest
 from api_service.models import LoginRequest
+from api_service.models import ProductTypeWriteRequest
 from api_service.models import ReviewDecisionRequest
 from api_service.models import SourceCatalogCollectionRequest
 from api_service.models import SourceCatalogWriteRequest
@@ -37,6 +39,14 @@ from api_service.public_products import (
     load_public_products,
     normalize_public_products_query,
 )
+from api_service.product_types import (
+    create_product_type_definition,
+    delete_product_type_definition,
+    load_product_type_definition,
+    load_product_type_list,
+    normalize_product_type_filters,
+    update_product_type_definition,
+)
 from api_service.review_detail import (
     ReviewRequestContext,
     ReviewTaskError,
@@ -47,13 +57,13 @@ from api_service.review_detail import (
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.run_status import load_run_status_detail, load_run_status_list, normalize_run_status_filters
 from api_service.source_registry import (
-    SourceRegistryError,
     load_source_registry_detail,
     load_source_registry_list,
     normalize_source_registry_filters,
 )
 from api_service.source_catalog import (
     create_bank_profile,
+    delete_bank_profile,
     create_source_catalog_item,
     load_bank_detail,
     load_bank_list,
@@ -456,6 +466,26 @@ async def patch_bank(
     return _success({"bank": bank}, request)
 
 
+@app.delete("/api/admin/banks/{bank_code}")
+async def delete_bank(request: Request, bank_code: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        bank = delete_bank_profile(
+            connection,
+            bank_code=bank_code.upper(),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"bank": bank}, request)
+
+
 @app.get("/api/admin/source-catalog")
 async def source_catalog_list(
     request: Request,
@@ -554,6 +584,99 @@ async def launch_source_catalog_collection(request: Request, payload: SourceCata
             },
         )
     return _success(result, request, status_code=202)
+
+
+@app.get("/api/admin/product-types")
+async def product_type_list(
+    request: Request,
+    status: str | None = None,
+    q: str | None = None,
+) -> JSONResponse:
+    _resolve_session(request)
+    filters = normalize_product_type_filters(search=q, status=status)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_product_type_list(connection, filters=filters)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/product-types")
+async def create_product_type(
+    request: Request,
+    payload: ProductTypeWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        product_type = create_product_type_definition(
+            connection,
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"product_type": product_type}, request, status_code=201)
+
+
+@app.get("/api/admin/product-types/{product_type_code}")
+async def product_type_detail(request: Request, product_type_code: str) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_product_type_definition(connection, product_type_code=product_type_code.lower())
+    if not payload:
+        return _error(status_code=404, code="product_type_not_found", message="Product type was not found.", request=request)
+    return _success({"product_type": payload}, request)
+
+
+@app.patch("/api/admin/product-types/{product_type_code}")
+async def patch_product_type(
+    request: Request,
+    product_type_code: str,
+    payload: ProductTypeWriteRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        product_type = update_product_type_definition(
+            connection,
+            product_type_code=product_type_code.lower(),
+            payload=payload.model_dump(exclude_unset=True),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+    )
+    return _success({"product_type": product_type}, request)
+
+
+@app.delete("/api/admin/product-types/{product_type_code}")
+async def delete_product_type(request: Request, product_type_code: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        product_type = delete_product_type_definition(
+            connection,
+            product_type_code=product_type_code.lower(),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"product_type": product_type}, request)
 
 
 @app.get("/api/public/products")

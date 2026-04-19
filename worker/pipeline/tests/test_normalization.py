@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from shutil import rmtree
 import unittest
+from unittest.mock import patch
 
 from worker.pipeline.fpds_normalization.models import (
     NormalizationArtifactLookup,
@@ -239,6 +240,90 @@ class NormalizationServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_dynamic_product_type_uses_ai_normalization_fallback(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-dynamic-service")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            dynamic_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "product_type":
+                    dynamic_fields.append(
+                        NormalizationExtractedField(**{**field.__dict__, "candidate_value": "tfsa-savings"})
+                    )
+                else:
+                    dynamic_fields.append(field)
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "TD-TFSA-001",
+                    "source_metadata": {
+                        "product_type": "tfsa-savings",
+                        "product_type_dynamic": True,
+                        "product_type_name": "TFSA Savings",
+                        "product_type_description": "Tax-free savings deposit account for retail customers.",
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "schema_context": {"product_family": "deposit", "product_type": "tfsa-savings"},
+                    "extracted_fields": dynamic_fields,
+                }
+            )
+
+            with (
+                patch("worker.pipeline.fpds_normalization.service.llm_provider_configured", return_value=True),
+                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-5.4-mini"),
+                patch(
+                    "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
+                    return_value=(
+                        {
+                            "summary": "AI normalized TFSA-specific eligibility and subtype.",
+                            "product_name": "TD TFSA Savings Account",
+                            "subtype_code": "other",
+                            "source_subtype_label": "tax-free savings",
+                            "normalized_fields": [
+                                {
+                                    "field_name": "eligibility_text",
+                                    "value_type": "string",
+                                    "candidate_value": "Available to Canadian residents aged 18 or older.",
+                                }
+                            ],
+                        },
+                        {
+                            "model_id": "gpt-5.4-mini",
+                            "prompt_tokens": 140,
+                            "completion_tokens": 42,
+                            "provider_request_id": "resp-norm-dyn-001",
+                        },
+                    ),
+                ),
+            ):
+                result = service.normalize_inputs(
+                    run_id="run-dyn-001",
+                    inputs=[input_item],
+                )
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-dynamic-product-normalizer")
+            self.assertEqual(source_result.usage_record["usage_metadata"]["usage_mode"], "openai-dynamic-product-normalization")
+            self.assertEqual(candidate["product_type"], "tfsa-savings")
+            self.assertEqual(candidate["subtype_code"], "other")
+            self.assertEqual(candidate["candidate_payload"]["eligibility_text"], "Available to Canadian residents aged 18 or older.")
+            self.assertLess(source_result.source_confidence or 1.0, 0.75)
+            self.assertIn("AI normalized TFSA-specific eligibility and subtype.", source_result.runtime_notes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
