@@ -1908,6 +1908,154 @@ Each entry should include:
   - `python -m unittest worker.discovery.tests.test_discovery worker.discovery.tests.test_snapshot_capture`
 - Known issues: if no supported browser executable is installed and `FPDS_SOURCE_BROWSER_EXECUTABLE` is not set, eligible BMO fetches will still fail and now report a missing-browser fallback error instead of an opaque read timeout
 - Next step: rerun the BMO chequing collect and confirm the run advances past snapshot capture with stored snapshots plus a warning for HTML-to-PDF fallback rather than failing all sources
+
+## 2026-04-20 - Review Detail List-Value Trace Fix
+
+- WBS: `4.4`
+- Status: `done`
+- Goal: stop `/api/admin/review-tasks/:reviewTaskId` from returning `500` when a normalized candidate payload contains list-valued fields
+- Why now: opening review detail failed in the live admin flow with `TypeError: cannot use 'list' as a set element`, which blocked the review trace surface for candidates that carry array-like normalized fields
+- Outcome: replaced the review-detail module's repeated `value in {None, ""}` checks with one shared helper that safely treats only `None` and empty-string values as empty. The review-detail response can now keep non-empty list values in both `candidate.field_items` and `field_trace_groups` without raising an unhashable-type error
+- Not done: this slice did not change the review-detail UI layout, did not alter normalization output shapes, and did not add special list formatting beyond the existing JSON-style frontend rendering
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `docs/00-governance/development-journal.md`
+- Decisions: kept the fix narrow to review-detail serialization instead of coercing list-valued candidate fields into strings earlier in the pipeline, because list payloads are valid normalized data and should remain inspectable in the trace view
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail`
+  - passed
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_ops_scenario_qa`
+  - passed
+- Known issues: review detail still renders list and object values through the existing frontend `JSON.stringify` fallback, so the route is stable again but deeply nested values may still deserve future UX polish if operators find them hard to scan
+- Next step: reload the failing review detail page in local dev and confirm the previously failing review task now opens with trace cards for list-valued fields
+
+## 2026-04-20 - Review Detail Dedicated Product Name Override
+
+- WBS: `4.3`, `4.4`
+- Status: `done`
+- Goal: let operators correct approved product names through a dedicated review-detail input instead of typing `product_name` inside raw override JSON
+- Why now: Product Owner asked for a safer review-detail workflow for product-name corrections after confirming that the existing `Edit approval override JSON` field was too free-form for a core identity field
+- Outcome: review detail now exposes a dedicated `Approved product name` input above the JSON override textarea, blocks `product_name` inside the raw JSON field, and includes product-name edits in the diff preview used by `Edit & approve`. The approval backend now trims product-name overrides, uses the approved name when matching or updating canonical products, and persists the corrected canonical `product_name` during edit-approve flows
+- Not done: this slice did not replace the remaining JSON override workflow for other fields, did not backfill older review decisions, and did not change the source-derived candidate name stored on the original normalized candidate row
+- Key files: `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `api/service/tests/test_ops_scenario_qa.py`, `app/admin/README.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the existing generic JSON override path for non-name field edits, but treated `product_name` as a safer dedicated control because it affects canonical continuity more directly than routine field-value fixes. The backend still accepts `product_name` in override payloads for compatibility, but the first-party admin UI now steers operators to the dedicated input and rejects duplicate `product_name` edits in the JSON box
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: after an edited approval, the review-detail page still reflects the original source-derived candidate heading until future work teaches the closed-task detail view to foreground the approved canonical name or latest override result
+- Next step: open a live review detail, change only the dedicated product-name field, submit `Edit & approve`, and confirm the diff preview plus resulting canonical product snapshot reflect the corrected name
+
+## 2026-04-20 - Review Detail Approved Name Display Fix
+
+- WBS: `4.4`
+- Status: `done`
+- Goal: make review detail visibly reflect approved product-name edits after an `Edit & approve` decision is already stored
+- Why now: Product Owner confirmed that the edit history showed a product-name override had been saved, but the review-detail screen still looked unchanged because the page header continued to show only the original candidate name
+- Outcome: the review-detail header and summary now resolve the displayed product name from the latest decision-history product-name override first, then the current canonical product snapshot, and only fall back to the original candidate name when no approved name exists yet. When the approved name differs from the source-derived candidate name, the page now also shows the original candidate name as supporting context instead of silently replacing it
+- Not done: this slice did not rewrite the candidate summary cards to pretend the normalized candidate row itself changed, and it did not add a separate “approved vs source name” comparison card beyond the lighter inline context line
+- Key files: `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `docs/00-governance/development-journal.md`
+- Decisions: kept the source-derived candidate payload intact for traceability, but changed the page-level display priority so closed review tasks foreground what was actually approved rather than what the model originally proposed
+- Verification:
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: the candidate summary section still shows the original normalized field values for traceability, so operators will now see the approved name in the header while lower trace cards continue to reflect the source-derived candidate payload unless a future slice adds a dedicated approved-payload pane
+- Next step: reload the previously edited review task and confirm the header now shows the approved product name while still preserving the original candidate name as context
+
+## 2026-04-20 - Review Detail Candidate Name Sync on Edit Approve
+
+- WBS: `4.3`, `4.4`
+- Status: `done`
+- Goal: make `candidate.product_name` itself persist the reviewer-corrected name after `Edit & approve`
+- Why now: Product Owner asked for the original candidate name in review detail to become the edited product name instead of only showing the correction through decision history or canonical-product display priority
+- Outcome: edit-approve now updates `normalized_candidate.product_name` and synchronizes `candidate_payload.product_name` to the approved name alongside the existing canonical-product update. Review detail can therefore load the edited product name directly from the stored candidate record on later page loads instead of relying only on display-layer fallback logic
+- Not done: this slice did not generalize the same persistence rule to every manual-override field; it stays narrowly scoped to product-name synchronization
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_ops_scenario_qa.py`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the persistence change narrow to `product_name` because that is the field the Product Owner explicitly asked to treat as part of the candidate record after review. Other edit-approve overrides still remain review-decision deltas rather than fully mutating the stored candidate payload baseline
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail api.service.tests.test_ops_scenario_qa`
+  - passed
+- Known issues: review detail may still show original source-derived values for other overridden fields because this slice intentionally did not widen candidate-record mutation beyond `product_name`
+- Next step: reopen a review task whose product name was edited and confirm the candidate summary as well as the page header now load the corrected product name directly from the stored candidate row
+
+## 2026-04-20 - Candidate Product Name Backfill SQL
+
+- WBS: `4.3`, `4.4`
+- Status: `done`
+- Goal: add a separate SQL script that backfills already-stored review tasks so older `edit_approve` product-name overrides also update `normalized_candidate.product_name`
+- Why now: Product Owner asked for a standalone SQL after confirming that the runtime fix only helps future edits, while previously stored review decisions still need one-time DB repair
+- Outcome: added `db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql`, which finds the latest non-empty `product_name` override from each candidate's `edit_approve` decision history and backfills both `normalized_candidate.product_name` and `candidate_payload.product_name`. Updated DB and API service README files to include the new script in the documented apply order
+- Not done: this slice did not execute the SQL against a live database from Codex, and it did not broaden the backfill to other override fields beyond `product_name`
+- Key files: `db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql`, `db/README.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the backfill idempotent and narrow. It uses the latest stored `edit_approve` decision per candidate, trims whitespace-only names away, and updates rows only when the stored candidate name or `candidate_payload.product_name` still differs from the approved override
+- Verification:
+  - manual SQL review of `db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql`
+  - README apply-order updates reviewed in `db/README.md` and `api/service/README.md`
+- Known issues: Codex did not run the SQL because this workspace has no live Postgres target attached in-session, so DB execution and result verification still need to happen against your environment
+- Next step: run `psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql` against the target database, then reload the affected review detail and confirm the candidate name now matches the approved product name
+
+## 2026-04-20 - Approved Review Reopen for Edit Approve
+
+- WBS: `4.3`
+- Status: `done`
+- Goal: let operators reopen already-approved review tasks for a follow-up `Edit & approve` correction
+- Why now: Product Owner asked to reopen approved reviews so previously approved tasks can still receive a controlled edit pass without creating a separate recovery workflow
+- Outcome: the review-detail API now exposes `edit_approve` as the only mutation action for `approved` tasks, and the backend decision guard now allows `approved -> edit_approve` while still keeping `rejected` and already-`edited` tasks closed. This preserves a narrow correction path instead of fully reopening every terminal state
+- Not done: this slice did not reopen approved tasks for `reject` or `defer`, and it did not allow already-`edited` tasks to be edited again
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `api/service/tests/test_ops_scenario_qa.py`, `app/admin/README.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: limited the reopen path to `approved` plus `edit_approve` only. That is the smallest change that satisfies the operator correction need without weakening the broader terminal-state model for rejected or already-edited work
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: a previously approved task will now move to `edited` after the follow-up correction, so operators should treat that path as a controlled post-approval fix rather than as a no-history overwrite
+- Next step: reopen one approved review in the admin UI, confirm only `Edit & approve` is available, and verify the follow-up correction lands as an appended decision-history entry with review state `edited`
+
+## 2026-04-20 - Edited Review Reopen for Additional Edit Approve
+
+- WBS: `4.3`
+- Status: `done`
+- Goal: keep already-`edited` review tasks editable through the same `Edit & approve` path instead of making them read-only after the first correction
+- Why now: Product Owner reported that the review detail still showed the read-only message after a first edit because the task had already moved from `approved` to `edited`, which the prior fix still treated as closed
+- Outcome: review-detail action availability and backend decision guards now allow both `approved` and `edited` tasks to run another `edit_approve`. Rejected tasks remain closed, and the correction flow still stays append-only through additional decision-history entries
+- Not done: this slice did not reopen rejected tasks and did not add a separate “reopen” state; it only widened the existing post-approval correction path
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_review_detail.py`, `api/service/tests/test_ops_scenario_qa.py`, `app/admin/README.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: extended the narrow correction path from `approved` to `edited` because an approved task becomes `edited` immediately after the first correction, and keeping that state closed would make the first reopen fix feel broken in normal operator use
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: repeated edit passes continue to append history while leaving the review state as `edited`, so operators need to read decision history to understand how many post-approval corrections have already happened
+- Next step: reload the previously read-only edited review and confirm the decision form now shows `Edit & approve` instead of the closed-task message
+
+## 2026-04-20 - Repeated Edit Approve Product Version Constraint Fix
+
+- WBS: `4.3`
+- Status: `done`
+- Goal: stop repeated `Edit & approve` on the same candidate from failing with `product_version_approved_candidate_id_key` unique-constraint errors
+- Why now: after reopening edited reviews, Product Owner hit a live `500` because the backend tried to create another `product_version` row with the same `approved_candidate_id`, but the schema only allows one direct candidate-to-version link per candidate
+- Outcome: repeated post-approval edit passes now insert new `product_version` rows with `approved_candidate_id = NULL` when the review task is already in `approved` or `edited`. The first approval keeps the candidate link, while later correction versions still append normally without violating the unique constraint
+- Not done: this slice did not redesign the schema or remove the existing unique constraint; it fixed the runtime write path to respect the current data model
+- Key files: `api/service/api_service/review_detail.py`, `api/service/tests/test_ops_scenario_qa.py`, `docs/00-governance/development-journal.md`
+- Decisions: treated `approved_candidate_id` as the original direct approval link rather than as a field that must be copied onto every later correction version. That keeps the current schema intact and avoids an unnecessary migration while still allowing repeated edit passes
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_review_detail api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: if you want every later correction version to preserve an explicit candidate foreign key rather than `NULL`, that would need a broader schema change instead of this runtime fix
+- Next step: retry the same repeated `Edit & approve` flow in local dev and confirm the request now succeeds without the unique-constraint error
 ---
 
 ## 7. Change History
@@ -1971,3 +2119,11 @@ Each entry should include:
 | 2026-04-19 | Added the preserved-detail fallback fix entry for source-catalog background runs |
 | 2026-04-19 | Added the per-run isolation and stage-timeout guard entry for source-catalog background runs |
 | 2026-04-19 | Added the BMO browser snapshot fallback entry |
+| 2026-04-20 | Added the review detail list-value trace fix entry |
+| 2026-04-20 | Added the review detail dedicated product-name override entry |
+| 2026-04-20 | Added the review detail approved-name display fix entry |
+| 2026-04-20 | Added the review detail candidate-name sync-on-edit-approve entry |
+| 2026-04-20 | Added the candidate product-name backfill SQL entry |
+| 2026-04-20 | Added the approved-review reopen-for-edit-approve entry |
+| 2026-04-20 | Added the edited-review reopen-for-additional-edit-approve entry |
+| 2026-04-20 | Added the repeated edit-approve product-version constraint fix entry |

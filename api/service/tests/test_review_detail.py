@@ -5,9 +5,11 @@ import unittest
 from api_service.review_detail import (
     _available_actions,
     _build_diff_summary,
+    _build_field_trace_groups,
     _build_validation_issues,
     _changed_field_names,
     _collect_model_execution_ids,
+    _is_empty_review_value,
     _normalize_override_payload,
     _serialize_field_mapping,
     record_evidence_trace_viewed,
@@ -46,6 +48,23 @@ class ReviewDetailTests(unittest.TestCase):
             },
         )
 
+    def test_normalize_override_payload_trims_product_name_override(self) -> None:
+        normalized = _normalize_override_payload(
+            override_payload={
+                "product_name": "  TD Every Day Savings Plus  ",
+            },
+            base_payload={
+                "product_name": "TD Every Day Savings Account",
+            },
+        )
+
+        self.assertEqual(
+            normalized,
+            {
+                "product_name": "TD Every Day Savings Plus",
+            },
+        )
+
     def test_changed_field_names_and_diff_summary_cover_edit_preview(self) -> None:
         changed_fields = _changed_field_names(
             before={"monthly_fee": 5, "notes": None},
@@ -64,7 +83,9 @@ class ReviewDetailTests(unittest.TestCase):
     def test_available_actions_hide_mutations_for_read_only_and_closed_tasks(self) -> None:
         self.assertEqual(_available_actions(review_state="queued", actor_role="admin"), ["approve", "reject", "edit_approve", "defer"])
         self.assertEqual(_available_actions(review_state="queued", actor_role="read_only"), [])
-        self.assertEqual(_available_actions(review_state="approved", actor_role="admin"), [])
+        self.assertEqual(_available_actions(review_state="approved", actor_role="admin"), ["edit_approve"])
+        self.assertEqual(_available_actions(review_state="edited", actor_role="admin"), ["edit_approve"])
+        self.assertEqual(_available_actions(review_state="rejected", actor_role="admin"), [])
 
     def test_build_validation_issues_merges_summary_items_with_fallback_codes(self) -> None:
         issues = _build_validation_issues(
@@ -76,6 +97,12 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(issues[0]["code"], "required_field_missing")
         self.assertEqual(issues[1]["code"], "conflicting_evidence")
         self.assertEqual(issues[1]["severity"], "error")
+
+    def test_is_empty_review_value_handles_list_without_hash_error(self) -> None:
+        self.assertTrue(_is_empty_review_value(None))
+        self.assertTrue(_is_empty_review_value(""))
+        self.assertFalse(_is_empty_review_value([]))
+        self.assertFalse(_is_empty_review_value(["bonus_rate"]))
 
     def test_collect_model_execution_ids_keeps_stage_order_and_deduplicates(self) -> None:
         model_execution_ids = _collect_model_execution_ids(
@@ -108,6 +135,26 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(field_mapping["source_field_name"], "monthly_fee")
         self.assertEqual(field_mapping["normalized_value"], 0)
         self.assertEqual(field_mapping["extraction_confidence"], 0.84)
+
+    def test_build_field_trace_groups_keeps_non_empty_list_values(self) -> None:
+        groups = _build_field_trace_groups(
+            candidate_payload={
+                "bonus_rate_conditions": ["keep_balance", "new_deposit"],
+                "monthly_fee": 0,
+                "notes": "",
+            },
+            field_mapping_metadata={},
+            evidence_links=[
+                {
+                    "field_name": "bonus_rate_conditions",
+                    "evidence_chunk_id": "chunk-conditions",
+                }
+            ],
+        )
+
+        self.assertEqual([item["field_name"] for item in groups], ["bonus_rate_conditions", "monthly_fee"])
+        self.assertEqual(groups[0]["value"], ["keep_balance", "new_deposit"])
+        self.assertEqual(groups[0]["evidence_count"], 1)
 
     def test_record_evidence_trace_viewed_emits_review_audit_event(self) -> None:
         connection = _RecordingConnection()

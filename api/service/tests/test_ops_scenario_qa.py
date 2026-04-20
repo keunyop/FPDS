@@ -159,6 +159,277 @@ class OpsScenarioQATests(unittest.TestCase):
         self.assertIn("Monthly Fee: 5 -> 0", str(review_decision_call["diff_summary"]))
         self.assertIn("Notes: empty -> No monthly fee", str(review_decision_call["diff_summary"]))
 
+    def test_review_edit_approve_updates_canonical_product_name_from_override(self) -> None:
+        decided_at = datetime(2026, 4, 13, 23, 30, tzinfo=UTC)
+        connection = _QueuedConnection(
+            [
+                {
+                    "review_task_id": "rt-001",
+                    "candidate_id": "cand-001",
+                    "run_id": "run-001",
+                    "product_id": "prod-001",
+                    "review_state": "queued",
+                    "queue_reason_code": "manual_sampling_review",
+                    "country_code": "CA",
+                    "bank_code": "TD",
+                    "product_family": "deposit",
+                    "product_type": "savings",
+                    "subtype_code": "high_interest",
+                    "product_name": "TD Every Day Savings Account",
+                    "source_language": "en",
+                    "currency": "CAD",
+                    "candidate_payload": {
+                        "product_name": "TD Every Day Savings Account",
+                        "monthly_fee": 5,
+                        "status": "active",
+                    },
+                },
+                {
+                    "product_id": "prod-001",
+                    "status": "active",
+                    "current_version_no": 2,
+                    "product_name": "TD Every Day Savings Account",
+                    "product_type": "savings",
+                    "subtype_code": "high_interest",
+                    "last_verified_at": decided_at,
+                    "last_changed_at": decided_at,
+                    "normalized_payload": {
+                        "product_name": "TD Every Day Savings Account",
+                        "monthly_fee": 5,
+                        "status": "active",
+                    },
+                },
+                None,
+                None,
+                [],
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ]
+        )
+
+        from unittest.mock import patch
+
+        with patch("api_service.review_detail.utc_now", return_value=decided_at):
+            result = apply_review_decision(
+                connection,
+                review_task_id="rt-001",
+                action_type="edit_approve",
+                actor={"user_id": "usr-001", "role": "admin"},
+                reason_code="manual_override",
+                reason_text="Aligned the approved product name with reviewer guidance.",
+                override_payload={"product_name": " TD Every Day Savings Plus "},
+                context=ReviewRequestContext(
+                    request_id="req-001",
+                    ip_address="127.0.0.1",
+                    user_agent="ops-scenario-test",
+                ),
+            )
+
+        self.assertEqual(result["product_id"], "prod-001")
+        candidate_update_call = next(
+            params
+            for sql, params in connection.calls
+            if "UPDATE normalized_candidate" in sql
+        )
+        self.assertEqual(candidate_update_call["product_name"], "TD Every Day Savings Plus")
+        self.assertIn('"product_name": "TD Every Day Savings Plus"', str(candidate_update_call["candidate_payload"]))
+
+        canonical_update_call = next(
+            params
+            for sql, params in connection.calls
+            if "UPDATE canonical_product" in sql
+            and "product_name = %(product_name)s" in sql
+        )
+        self.assertEqual(canonical_update_call["product_name"], "TD Every Day Savings Plus")
+
+        review_decision_call = next(
+            params
+            for sql, params in connection.calls
+            if "INSERT INTO review_decision" in sql
+        )
+        self.assertIn("Product Name: TD Every Day Savings Account -> TD Every Day Savings Plus", str(review_decision_call["diff_summary"]))
+        self.assertIn('"product_name": "TD Every Day Savings Plus"', str(review_decision_call["override_payload"]))
+
+    def test_approved_review_can_be_reopened_with_edit_approve(self) -> None:
+        decided_at = datetime(2026, 4, 20, 13, 5, tzinfo=UTC)
+        connection = _QueuedConnection(
+            [
+                {
+                    "review_task_id": "rt-002",
+                    "candidate_id": "cand-002",
+                    "run_id": "run-002",
+                    "product_id": "prod-002",
+                    "review_state": "approved",
+                    "queue_reason_code": "manual_sampling_review",
+                    "country_code": "CA",
+                    "bank_code": "BMO",
+                    "product_family": "deposit",
+                    "product_type": "chequing",
+                    "subtype_code": None,
+                    "product_name": "Benefits",
+                    "source_language": "en",
+                    "currency": "CAD",
+                    "candidate_payload": {
+                        "product_name": "Benefits",
+                        "monthly_fee": 16.95,
+                        "status": "active",
+                    },
+                },
+                {
+                    "product_id": "prod-002",
+                    "status": "active",
+                    "current_version_no": 3,
+                    "product_name": "Benefits",
+                    "product_type": "chequing",
+                    "subtype_code": None,
+                    "last_verified_at": decided_at,
+                    "last_changed_at": decided_at,
+                    "normalized_payload": {
+                        "product_name": "Benefits",
+                        "monthly_fee": 16.95,
+                        "status": "active",
+                    },
+                },
+                None,
+                None,
+                [],
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ]
+        )
+
+        from unittest.mock import patch
+
+        with patch("api_service.review_detail.utc_now", return_value=decided_at):
+            result = apply_review_decision(
+                connection,
+                review_task_id="rt-002",
+                action_type="edit_approve",
+                actor={"user_id": "usr-001", "role": "admin"},
+                reason_code="manual_override",
+                reason_text="Reopened approved task to correct the product name.",
+                override_payload={"product_name": "Plus Chequing Account"},
+                context=ReviewRequestContext(
+                    request_id="req-002",
+                    ip_address="127.0.0.1",
+                    user_agent="ops-scenario-test",
+                ),
+            )
+
+        self.assertEqual(result["review_task_id"], "rt-002")
+        self.assertEqual(result["review_state"], "edited")
+        review_task_update_call = next(
+            params
+            for sql, params in connection.calls
+            if "UPDATE review_task" in sql
+        )
+        self.assertEqual(review_task_update_call["review_state"], "edited")
+        product_version_insert_call = next(
+            params
+            for sql, params in connection.calls
+            if "INSERT INTO product_version" in sql
+        )
+        self.assertIsNone(product_version_insert_call["approved_candidate_id"])
+
+    def test_edited_review_can_be_reopened_with_edit_approve(self) -> None:
+        decided_at = datetime(2026, 4, 20, 13, 20, tzinfo=UTC)
+        connection = _QueuedConnection(
+            [
+                {
+                    "review_task_id": "rt-003",
+                    "candidate_id": "cand-003",
+                    "run_id": "run-003",
+                    "product_id": "prod-003",
+                    "review_state": "edited",
+                    "queue_reason_code": "manual_sampling_review",
+                    "country_code": "CA",
+                    "bank_code": "BMO",
+                    "product_family": "deposit",
+                    "product_type": "chequing",
+                    "subtype_code": None,
+                    "product_name": "Plus Chequing Account",
+                    "source_language": "en",
+                    "currency": "CAD",
+                    "candidate_payload": {
+                        "product_name": "Plus Chequing Account",
+                        "monthly_fee": 16.95,
+                        "status": "active",
+                    },
+                },
+                {
+                    "product_id": "prod-003",
+                    "status": "active",
+                    "current_version_no": 4,
+                    "product_name": "Plus Chequing Account",
+                    "product_type": "chequing",
+                    "subtype_code": None,
+                    "last_verified_at": decided_at,
+                    "last_changed_at": decided_at,
+                    "normalized_payload": {
+                        "product_name": "Plus Chequing Account",
+                        "monthly_fee": 16.95,
+                        "status": "active",
+                    },
+                },
+                None,
+                None,
+                [],
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ]
+        )
+
+        from unittest.mock import patch
+
+        with patch("api_service.review_detail.utc_now", return_value=decided_at):
+            result = apply_review_decision(
+                connection,
+                review_task_id="rt-003",
+                action_type="edit_approve",
+                actor={"user_id": "usr-001", "role": "admin"},
+                reason_code="manual_override",
+                reason_text="Applied a second correction after approval.",
+                override_payload={"monthly_fee": 14.95},
+                context=ReviewRequestContext(
+                    request_id="req-003",
+                    ip_address="127.0.0.1",
+                    user_agent="ops-scenario-test",
+                ),
+            )
+
+        self.assertEqual(result["review_task_id"], "rt-003")
+        self.assertEqual(result["review_state"], "edited")
+        review_task_update_call = next(
+            params
+            for sql, params in connection.calls
+            if "UPDATE review_task" in sql
+        )
+        self.assertEqual(review_task_update_call["review_state"], "edited")
+        product_version_insert_call = next(
+            params
+            for sql, params in connection.calls
+            if "INSERT INTO product_version" in sql
+        )
+        self.assertIsNone(product_version_insert_call["approved_candidate_id"])
+
     def test_change_history_links_review_decision_to_manual_override_audit(self) -> None:
         connection = _QueuedConnection(
             [

@@ -24,7 +24,7 @@ Current runtime:
 - `/admin/login` login screen
 - protected `/admin` overview entry
 - protected `/admin/reviews` review queue with active-state defaults, search, filters, sort, and pagination
-- protected `/admin/reviews/:reviewTaskId` review detail route with field-selectable evidence trace, model-run context, action history, and approve/reject/defer/edit-approve controls
+- protected `/admin/reviews/:reviewTaskId` review detail route with field-selectable evidence trace, model-run context, action history, a dedicated approved-product-name input for safer rename corrections, and approve/reject/defer/edit-approve controls; already-approved and already-edited tasks now reopen into `Edit & approve` for follow-up operator corrections
 - protected `/admin/runs` run list with status filters, partial-completion triage, and stable drill-in links
 - protected `/admin/runs/:runId` run detail route with stage summary, source processing summary, related review-task links, and usage summary
 - protected `/admin/changes` change history route with canonical chronology, changed-field summaries, review/run drilldowns, and manual-override audit context

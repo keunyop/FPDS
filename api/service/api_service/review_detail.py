@@ -229,7 +229,7 @@ def load_review_task_detail(
                     "value": value,
                 }
                 for field_name, value in sorted(candidate_payload.items())
-                if value not in {None, ""}
+                if not _is_empty_review_value(value)
             ],
         },
         "source_context": {
@@ -378,17 +378,20 @@ def apply_review_decision(
     current_state = str(review_row["review_state"])
     target_state = ACTION_TO_STATE[action_type]
     if current_state in TERMINAL_REVIEW_STATES:
-        if current_state == target_state:
+        if _can_reedit_review(current_state=current_state, action_type=action_type):
+            pass
+        elif current_state == target_state:
             return {
                 "review_task_id": review_task_id,
                 "review_state": current_state,
                 "already_applied": True,
             }
-        raise ReviewTaskError(
-            status_code=409,
-            code="review_task_already_closed",
-            message="Terminal review tasks cannot transition to a different decision.",
-        )
+        else:
+            raise ReviewTaskError(
+                status_code=409,
+                code="review_task_already_closed",
+                message="Terminal review tasks cannot transition to a different decision.",
+            )
 
     normalized_reason_code = _normalize_text(reason_code)
     normalized_reason_text = _normalize_text(reason_text)
@@ -423,6 +426,11 @@ def apply_review_decision(
     approved_payload = {
         **candidate_payload,
         **normalized_override_payload,
+    }
+    approved_product_name = _approved_product_name(review_row=review_row, approved_payload=approved_payload)
+    persisted_candidate_payload = {
+        **candidate_payload,
+        "product_name": approved_product_name,
     }
     changed_fields = sorted(normalized_override_payload.keys())
     diff_summary = _build_diff_summary(
@@ -467,12 +475,16 @@ def apply_review_decision(
         SET
             candidate_state = %(candidate_state)s,
             review_reason_code = %(review_reason_code)s,
+            product_name = %(product_name)s,
+            candidate_payload = %(candidate_payload)s::jsonb,
             updated_at = %(updated_at)s
         WHERE candidate_id = %(candidate_id)s
         """,
         {
             "candidate_state": candidate_state,
             "review_reason_code": normalized_reason_code,
+            "product_name": approved_product_name,
+            "candidate_payload": json.dumps(persisted_candidate_payload, ensure_ascii=True, sort_keys=True),
             "updated_at": decided_at,
             "candidate_id": review_row["candidate_id"],
         },
@@ -565,7 +577,7 @@ def _apply_canonical_approval(
     decided_at: datetime,
     request_id: str,
 ) -> dict[str, Any]:
-    current_product = _find_current_product(connection, review_row=review_row)
+    current_product = _find_current_product(connection, review_row=review_row, approved_payload=approved_payload)
     product_id = current_product["product_id"] if current_product else new_id("prod")
     current_payload = _coerce_mapping(current_product.get("normalized_payload")) if current_product else {}
     current_version_no = int(current_product["current_version_no"]) if current_product else 0
@@ -624,7 +636,7 @@ def _apply_canonical_approval(
             connection,
             product_version_id=product_version_id,
             product_id=product_id,
-            approved_candidate_id=str(review_row["candidate_id"]),
+            approved_candidate_id=_product_version_approved_candidate_id(review_row=review_row, action_type=action_type),
             version_no=1,
             normalized_payload=approved_payload,
             approved_at=decided_at,
@@ -674,7 +686,7 @@ def _apply_canonical_approval(
             connection,
             product_version_id=product_version_id,
             product_id=product_id,
-            approved_candidate_id=str(review_row["candidate_id"]),
+            approved_candidate_id=_product_version_approved_candidate_id(review_row=review_row, action_type=action_type),
             version_no=next_version_no,
             normalized_payload=approved_payload,
             approved_at=decided_at,
@@ -797,7 +809,7 @@ def _canonical_product_params(
         "product_family": str(review_row["product_family"]),
         "product_type": str(review_row["product_type"]),
         "subtype_code": _string_or_none(review_row.get("subtype_code")),
-        "product_name": str(review_row["product_name"]),
+        "product_name": _approved_product_name(review_row=review_row, approved_payload=approved_payload),
         "source_language": str(review_row["source_language"]),
         "currency": str(review_row["currency"]),
         "status": str(approved_payload.get("status") or "active"),
@@ -814,7 +826,7 @@ def _insert_product_version(
     *,
     product_version_id: str,
     product_id: str,
-    approved_candidate_id: str,
+    approved_candidate_id: str | None,
     version_no: int,
     normalized_payload: dict[str, Any],
     approved_at: datetime,
@@ -849,6 +861,12 @@ def _insert_product_version(
             "approved_at": approved_at,
         },
     )
+
+
+def _product_version_approved_candidate_id(*, review_row: dict[str, Any], action_type: str) -> str | None:
+    if action_type == "edit_approve" and str(review_row.get("review_state")) in {"approved", "edited"}:
+        return None
+    return str(review_row["candidate_id"])
 
 
 def _clone_field_evidence_links(
@@ -1173,7 +1191,12 @@ def _load_current_product_summary(connection: Connection, *, review_row: dict[st
     }
 
 
-def _find_current_product(connection: Connection, *, review_row: dict[str, Any]) -> dict[str, Any] | None:
+def _find_current_product(
+    connection: Connection,
+    *,
+    review_row: dict[str, Any],
+    approved_payload: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
     if review_row.get("product_id"):
         product_row = connection.execute(
             """
@@ -1231,16 +1254,24 @@ def _find_current_product(connection: Connection, *, review_row: dict[str, Any])
             "bank_code": review_row["bank_code"],
             "product_family": review_row["product_family"],
             "product_type": review_row["product_type"],
-            "product_name": review_row["product_name"],
+            "product_name": _approved_product_name(review_row=review_row, approved_payload=approved_payload),
             "subtype_code": review_row.get("subtype_code"),
         },
     ).fetchone()
 
 
 def _available_actions(*, review_state: str, actor_role: str) -> list[str]:
-    if actor_role not in MUTATION_ROLES or review_state in TERMINAL_REVIEW_STATES:
+    if actor_role not in MUTATION_ROLES:
+        return []
+    if review_state in {"approved", "edited"}:
+        return ["edit_approve"]
+    if review_state in TERMINAL_REVIEW_STATES:
         return []
     return ["approve", "reject", "edit_approve", "defer"]
+
+
+def _can_reedit_review(*, current_state: str, action_type: str) -> bool:
+    return current_state in {"approved", "edited"} and action_type == "edit_approve"
 
 
 def _candidate_state_for_action(action_type: str) -> str:
@@ -1323,7 +1354,7 @@ def _build_field_trace_groups(
 
     groups: list[dict[str, Any]] = []
     for field_name, value in sorted(candidate_payload.items()):
-        if value in {None, ""}:
+        if _is_empty_review_value(value):
             continue
         field_evidence = evidence_by_field.get(field_name, [])
         groups.append(
@@ -1501,6 +1532,14 @@ def _normalize_override_payload(*, override_payload: dict[str, Any] | None, base
             continue
         if field_name in {"product_id", "candidate_id", "run_id", "review_task_id"}:
             continue
+        if field_name == "product_name":
+            normalized_product_name = _normalize_text(str(value)) if value is not None else None
+            if not normalized_product_name:
+                continue
+            if base_payload.get(field_name) == normalized_product_name:
+                continue
+            normalized[field_name] = normalized_product_name
+            continue
         normalized_value = _normalize_json_value(value)
         if base_payload.get(field_name) == normalized_value:
             continue
@@ -1590,7 +1629,7 @@ def _summarize_issue_items(issue_items: list[dict[str, str]], *, fallback_reason
 def _build_anchor_label(*, page_no: int | None, anchor_type: Any, anchor_value: Any, chunk_index: int | None) -> str:
     if page_no is not None:
         return f"Page {page_no}"
-    if anchor_value not in {None, ""}:
+    if not _is_empty_review_value(anchor_value):
         return f"{_titleize(str(anchor_type or 'anchor'))} {anchor_value}"
     if chunk_index is not None:
         return f"Chunk {chunk_index}"
@@ -1601,8 +1640,21 @@ def _titleize(value: str) -> str:
     return value.replace("_", " ").strip().title()
 
 
+def _approved_product_name(*, review_row: dict[str, Any], approved_payload: dict[str, Any] | None) -> str:
+    if approved_payload:
+        approved_value = approved_payload.get("product_name")
+        normalized = _normalize_text(str(approved_value)) if approved_value is not None else None
+        if normalized:
+            return normalized
+    return str(review_row["product_name"])
+
+
+def _is_empty_review_value(value: Any) -> bool:
+    return value is None or value == ""
+
+
 def _short_value(value: Any) -> str:
-    if value in {None, ""}:
+    if _is_empty_review_value(value):
         return "empty"
     if isinstance(value, str):
         compact = " ".join(value.split())
@@ -1621,7 +1673,7 @@ def _normalize_text(value: str | None) -> str | None:
 
 
 def _string_or_none(value: Any) -> str | None:
-    if value in {None, ""}:
+    if _is_empty_review_value(value):
         return None
     normalized = str(value).strip()
     return normalized or None

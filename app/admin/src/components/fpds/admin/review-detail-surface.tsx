@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type {
   ReviewDecisionAction,
   ReviewEvidenceLink,
@@ -34,8 +35,12 @@ const REASON_CODE_OPTIONS = [
 
 export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfaceProps) {
   const router = useRouter();
+  const sourceDerivedProductName = resolveCandidateProductName(detail);
+  const approvedDisplayProductName = resolveApprovedDisplayProductName(detail);
+  const showingApprovedName = approvedDisplayProductName !== sourceDerivedProductName;
   const [reasonCode, setReasonCode] = useState(detail.review_task.queue_reason_code ?? "");
   const [reasonText, setReasonText] = useState("");
+  const [approvedProductName, setApprovedProductName] = useState(sourceDerivedProductName);
   const [overrideJson, setOverrideJson] = useState("{}");
   const [pendingAction, setPendingAction] = useState<ReviewDecisionAction | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -50,24 +55,46 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
       if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
         return { value: null, error: "Override JSON must be an object." };
       }
+      if (Object.prototype.hasOwnProperty.call(parsed, "product_name")) {
+        return { value: null, error: "Use the dedicated approved product name field instead of product_name in override JSON." };
+      }
       return { value: parsed as Record<string, unknown>, error: null };
     } catch {
       return { value: null, error: "Override JSON is not valid." };
     }
   }, [overrideJson]);
 
+  const productNameError = useMemo(() => {
+    if (approvedProductName.trim().length > 0) {
+      return null;
+    }
+    return "Approved product name cannot be empty.";
+  }, [approvedProductName]);
+
+  const approvalOverridePayload = useMemo(() => {
+    if (!parsedOverride.value || productNameError) {
+      return null;
+    }
+    const nextPayload = { ...parsedOverride.value };
+    const normalizedApprovedProductName = approvedProductName.trim();
+    if (normalizedApprovedProductName !== sourceDerivedProductName) {
+      nextPayload.product_name = normalizedApprovedProductName;
+    }
+    return nextPayload;
+  }, [approvedProductName, parsedOverride.value, productNameError, sourceDerivedProductName]);
+
   const diffPreview = useMemo(() => {
-    if (!parsedOverride.value) {
+    if (!approvalOverridePayload) {
       return [];
     }
-    return Object.entries(parsedOverride.value)
+    return Object.entries(approvalOverridePayload)
       .filter(([fieldName, nextValue]) => detail.candidate.candidate_payload[fieldName] !== nextValue)
       .map(([fieldName, nextValue]) => ({
         fieldName,
         before: detail.candidate.candidate_payload[fieldName],
         after: nextValue,
       }));
-  }, [detail.candidate.candidate_payload, parsedOverride.value]);
+  }, [approvalOverridePayload, detail.candidate.candidate_payload]);
 
   const activeField = useMemo(() => {
     if (detail.field_trace_groups.length === 0) {
@@ -100,7 +127,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
           action_type: action,
           reason_code: reasonCode || null,
           reason_text: reasonText || null,
-          override_payload: action === "edit_approve" ? parsedOverride.value ?? {} : {},
+          override_payload: action === "edit_approve" ? approvalOverridePayload ?? {} : {},
         }),
       });
 
@@ -126,12 +153,17 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
           <div className="max-w-4xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Review detail</p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              {detail.candidate.product_name}
+              {approvedDisplayProductName}
             </h1>
             <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
               This surface now keeps field selection, trace drilldown, and review actions together so operators can
               verify evidence before making a decision.
             </p>
+            {showingApprovedName ? (
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                Source-derived candidate name: <span className="font-medium text-foreground">{sourceDerivedProductName}</span>
+              </p>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -159,6 +191,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
           <SummaryStat label="Updated" value={formatTimestamp(detail.review_task.updated_at)} />
           <SummaryStat label="Fetched" value={formatTimestamp(detail.source_context.fetched_at)} />
           <SummaryStat label="Focused field" value={activeField?.label ?? "n/a"} />
+          <SummaryStat label="Displayed name" value={approvedDisplayProductName} />
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -430,6 +463,26 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
                 </label>
 
                 <label className="grid gap-2 text-sm">
+                  <span className="font-medium text-foreground">Approved product name</span>
+                  <Input
+                    className="h-11 rounded-2xl border-border bg-background px-3 text-sm text-foreground"
+                    onChange={(event) => setApprovedProductName(event.target.value)}
+                    placeholder="Enter the reviewed canonical product name."
+                    value={approvedProductName}
+                  />
+                  <span className="text-xs leading-5 text-muted-foreground">
+                    This field controls the approved canonical product name. Leave the existing value in place unless
+                    the source-derived name needs a reviewer correction.
+                  </span>
+                </label>
+
+                {productNameError ? (
+                  <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {productNameError}
+                  </div>
+                ) : null}
+
+                <label className="grid gap-2 text-sm">
                   <span className="font-medium text-foreground">Edit approval override JSON</span>
                   <textarea
                     className="min-h-40 rounded-2xl border border-border bg-background px-3 py-3 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
@@ -465,7 +518,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
                     {pendingAction === "reject" ? "Rejecting..." : "Reject"}
                   </Button>
                   <Button
-                    disabled={Boolean(pendingAction) || Boolean(parsedOverride.error) || diffPreview.length === 0}
+                    disabled={Boolean(pendingAction) || Boolean(parsedOverride.error) || Boolean(productNameError) || diffPreview.length === 0}
                     onClick={() => handleDecision("edit_approve")}
                     type="button"
                     variant="outline"
@@ -659,6 +712,27 @@ function formatCost(value: number | null) {
     return "n/a";
   }
   return `$${value.toFixed(6)}`;
+}
+
+function resolveCandidateProductName(detail: ReviewTaskDetailResponse) {
+  const payloadValue = detail.candidate.candidate_payload.product_name;
+  if (typeof payloadValue === "string" && payloadValue.trim().length > 0) {
+    return payloadValue.trim();
+  }
+  return detail.candidate.product_name;
+}
+
+function resolveApprovedDisplayProductName(detail: ReviewTaskDetailResponse) {
+  for (const item of detail.decision_history) {
+    const overrideValue = item.override_payload.product_name;
+    if (typeof overrideValue === "string" && overrideValue.trim().length > 0) {
+      return overrideValue.trim();
+    }
+  }
+  if (detail.current_product?.product_name.trim()) {
+    return detail.current_product.product_name.trim();
+  }
+  return resolveCandidateProductName(detail);
 }
 
 function formatValue(value: unknown) {

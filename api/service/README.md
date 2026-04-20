@@ -20,7 +20,9 @@ Current scope:
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
 - read-only source registry list/detail routes backed by generated `source_registry_item`
 - approve, reject, defer, and edit-approve review mutations
+- approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
 - canonical product/version creation or update side effects for approved decisions
+- edit-approve manual overrides can now carry reviewer-corrected product names and sync that name into both the canonical product record and the stored normalized candidate
 - review and manual-override audit events plus change-event emission
 - login failure tracking and auth audit events
 - bootstrap CLI for the first operator account
@@ -76,6 +78,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0005_source_registry_unique_scope_f
 psql $env:FPDS_DATABASE_URL -f db/migrations/0006_bank_catalog_management.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0007_dynamic_product_type_onboarding.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
 ```
 
 Create the first operator account:
