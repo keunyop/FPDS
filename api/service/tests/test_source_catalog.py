@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import shutil
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from api_service.source_catalog import (
@@ -10,6 +13,7 @@ from api_service.source_catalog import (
     _backfill_seeded_bank_profile_fields,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
+    _launch_source_catalog_collection_runner,
     _record_catalog_audit_event,
     _score_product_link,
     _upsert_source_registry_rows,
@@ -68,6 +72,13 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def _workspace_temp_path(self, name: str) -> Path:
+        path = Path.cwd() / "tmp" / "test-source-catalog" / name
+        if path.exists():
+            shutil.rmtree(path, ignore_errors=True)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
     def test_score_product_link_uses_product_type_description_terms(self) -> None:
         product_type_definition = _product_type_definition("tfsa")
         product_type_definition["display_name"] = "TFSA"
@@ -399,36 +410,10 @@ class SourceCatalogTests(unittest.TestCase):
 
         with (
             patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
-            patch(
-                "api_service.source_catalog._materialize_sources_for_catalog_item",
-                return_value=CatalogItemMaterializationResult(
-                    generated_rows=[
-                        {
-                            "source_id": "AUTO-ATL-SAV-001",
-                            "discovery_role": "detail",
-                            "status": "active",
-                        },
-                        {
-                            "source_id": "AUTO-ATL-SAV-002",
-                            "discovery_role": "supporting_html",
-                            "status": "active",
-                        },
-                    ],
-                    discovery_notes=[],
-                    detail_source_ids=["AUTO-ATL-SAV-001"],
-                ),
-            ) as materialize_sources,
-            patch(
-                "api_service.source_catalog.start_source_collection",
-                return_value={
-                    "collection_id": "collection-001",
-                    "run_ids": ["run-001"],
-                    "selected_source_ids": ["AUTO-ATL-SAV-001"],
-                    "target_source_ids": ["AUTO-ATL-SAV-001"],
-                    "auto_included_source_ids": [],
-                    "groups": [],
-                },
-            ) as launch_collection,
+            patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
+            patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
+            patch("api_service.source_catalog._insert_collection_run_row") as queue_run,
+            patch("api_service.source_catalog._launch_source_catalog_collection_runner") as launch_runner,
             patch("api_service.source_catalog._record_catalog_audit_event"),
         ):
             result = start_source_catalog_collection(
@@ -439,16 +424,37 @@ class SourceCatalogTests(unittest.TestCase):
             )
 
         self.assertEqual(result["catalog_item_ids"], ["catalog-ca-atl-savings-12345678"])
-        self.assertEqual(result["materialized_items"][0]["generated_source_ids"], ["AUTO-ATL-SAV-001", "AUTO-ATL-SAV-002"])
-        self.assertEqual(result["materialized_items"][0]["collection_source_ids"], ["AUTO-ATL-SAV-001", "AUTO-ATL-SAV-002"])
-        self.assertEqual(result["materialized_items"][0]["discovery_status"], "detail_sources_ready")
-        materialize_sources.assert_called_once()
-        launch_collection.assert_called_once_with(
+        self.assertEqual(result["collection_id"], "collection-001")
+        self.assertEqual(result["correlation_id"], "corr-001")
+        self.assertEqual(result["run_ids"], ["run-001"])
+        self.assertEqual(result["materialized_items"], [])
+        self.assertEqual(result["workflow_state"], "queued")
+        self.assertEqual(result["queued_catalog_item_count"], 1)
+        queue_run.assert_called_once_with(
             connection,
-            source_ids=["AUTO-ATL-SAV-001", "AUTO-ATL-SAV-002"],
-            actor={"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
-            request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            run_id="run-001",
+            triggered_by="admin@example.com",
+            request_id="req-001",
+            correlation_id="corr-001",
+            collection_id="collection-001",
+            group={
+                "run_id": "run-001",
+                "catalog_item_id": "catalog-ca-atl-savings-12345678",
+                "bank_code": "ATL",
+                "bank_name": "Atlas Bank",
+                "country_code": "CA",
+                "product_type": "savings",
+                "source_language": "en",
+                "homepage_url": "https://www.atlasbank.ca",
+                "normalized_homepage_url": "https://www.atlasbank.ca",
+                "selected_source_ids": [],
+                "target_source_ids": [],
+                "included_source_ids": [],
+                "included_sources": [],
+            },
+            pipeline_stage="source_catalog_collection",
         )
+        launch_runner.assert_called_once()
 
     def test_backfill_seeded_bank_profile_fields_updates_missing_homepage_data(self) -> None:
         connection = _QueuedConnection([None])
@@ -703,7 +709,7 @@ class SourceCatalogTests(unittest.TestCase):
         upsert_rows.assert_not_called()
         self.assertEqual(connection.calls, [])
 
-    def test_start_source_catalog_collection_returns_no_detail_result_without_launching_collection(self) -> None:
+    def test_start_source_catalog_collection_queues_background_work_before_detail_outcome_is_known(self) -> None:
         connection = _QueuedConnection(
             [
                 [
@@ -724,16 +730,10 @@ class SourceCatalogTests(unittest.TestCase):
 
         with (
             patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
-            patch(
-                "api_service.source_catalog._materialize_sources_for_catalog_item",
-                return_value=CatalogItemMaterializationResult(
-                    generated_rows=[],
-                    discovery_notes=["Homepage discovery completed but no candidate-producing detail sources were identified."],
-                    detail_source_ids=[],
-                ),
-            ),
-            patch("api_service.source_catalog.start_source_collection") as launch_collection,
+            patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
             patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
+            patch("api_service.source_catalog._insert_collection_run_row"),
+            patch("api_service.source_catalog._launch_source_catalog_collection_runner") as launch_runner,
             patch("api_service.source_catalog._record_catalog_audit_event"),
         ):
             result = start_source_catalog_collection(
@@ -743,14 +743,66 @@ class SourceCatalogTests(unittest.TestCase):
                 request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
             )
 
-        self.assertEqual(result["run_ids"], [])
+        self.assertEqual(result["run_ids"], ["run-001"])
         self.assertEqual(result["selected_source_ids"], [])
-        self.assertEqual(result["materialized_items"][0]["discovery_status"], "no_detail_sources_discovered")
-        self.assertEqual(
-            result["materialized_items"][0]["discovery_notes"],
-            ["Homepage discovery completed but no candidate-producing detail sources were identified."],
-        )
-        launch_collection.assert_not_called()
+        self.assertEqual(result["materialized_items"], [])
+        self.assertEqual(result["workflow_state"], "queued")
+        launch_runner.assert_called_once()
+
+    def test_launch_source_catalog_collection_runner_spawns_one_process_per_group(self) -> None:
+        plan = {
+            "collection_id": "collection-001",
+            "correlation_id": "corr-001",
+            "request_id": "req-001",
+            "trigger_type": "admin_source_catalog_collection",
+            "triggered_by": "admin@example.com",
+            "actor": {"user_id": "usr-001", "email": "admin@example.com", "role": "admin"},
+            "groups": [
+                {
+                    "run_id": "run-001",
+                    "catalog_item_id": "catalog-ca-bmo-chequing",
+                    "bank_code": "BMO",
+                    "bank_name": "BMO",
+                    "country_code": "CA",
+                    "product_type": "chequing",
+                    "source_language": "en",
+                    "homepage_url": "https://www.bmo.com",
+                    "normalized_homepage_url": "https://www.bmo.com/",
+                    "selected_source_ids": [],
+                    "target_source_ids": [],
+                    "included_source_ids": [],
+                    "included_sources": [],
+                },
+                {
+                    "run_id": "run-002",
+                    "catalog_item_id": "catalog-ca-bmo-savings",
+                    "bank_code": "BMO",
+                    "bank_name": "BMO",
+                    "country_code": "CA",
+                    "product_type": "savings",
+                    "source_language": "en",
+                    "homepage_url": "https://www.bmo.com",
+                    "normalized_homepage_url": "https://www.bmo.com/",
+                    "selected_source_ids": [],
+                    "target_source_ids": [],
+                    "included_source_ids": [],
+                    "included_sources": [],
+                },
+            ],
+        }
+
+        repo_root = self._workspace_temp_path("launch-runner")
+        with (
+            patch("api_service.source_catalog.REPO_ROOT", repo_root),
+            patch("api_service.source_catalog.subprocess.Popen") as popen,
+        ):
+            _launch_source_catalog_collection_runner(plan)
+
+        self.assertEqual(popen.call_count, 2)
+        first_plan = json.loads((repo_root / "tmp" / "source-catalog-collections" / "run-001.json").read_text(encoding="utf-8"))
+        second_plan = json.loads((repo_root / "tmp" / "source-catalog-collections" / "run-002.json").read_text(encoding="utf-8"))
+        self.assertEqual([group["run_id"] for group in first_plan["groups"]], ["run-001"])
+        self.assertEqual([group["run_id"] for group in second_plan["groups"]], ["run-002"])
 
     def test_generate_sources_from_homepage_can_use_ai_to_resolve_detail_rows(self) -> None:
         homepage_html = """

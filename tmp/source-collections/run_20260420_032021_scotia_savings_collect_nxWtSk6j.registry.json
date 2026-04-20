@@ -1,0 +1,435 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "SCOTIA-SAV-002",
+  "sources": [
+    {
+      "source_id": "SCOTIA-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank High Interest Savings Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/scotia-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "eligibility_conditions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Momentum PLUS Savings detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/momentum-plus-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "bonus_interest_rules",
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Money Master Savings detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/money-master-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "smart_savings_tools",
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank savings account rates page",
+      "url": "https://www.scotiabank.com/ca/en/personal/rates-prices/savings-account-rates.html",
+      "expected_fields": [
+        "savings_account_rates",
+        "rate_effective_date",
+        "tier_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-SAV-005",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank U.S. Dollar Daily Interest Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-daily-interest-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-180c030900",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.scotiabank.com/ca/en/about/inside-scotiabank/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-913810ac11",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.scotiabank.com/ca/en/about/contact-us/legal.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-e6d7ceb8e1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.scotiabank.com/ca/en/about/our-company.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-f445de68a5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.scotiabank.com/ca/en/0,,1070,00.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-662814b3de",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/en/documents/fees_interest_schedules.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-6d319c7f4b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/en/documents/chequing-&-savings/day-to-day_banking_companion_booklet.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-8691a6f424",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/en/documents/chequing-&-savings/hisa-eligible-product-list.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-SAV-e6a6663e6b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/common/documents/Disclosure-Policy-January-2026.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

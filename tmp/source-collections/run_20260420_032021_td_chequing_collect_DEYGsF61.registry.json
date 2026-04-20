@@ -1,0 +1,448 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "TD-CHQ-002",
+  "sources": [
+    {
+      "source_id": "TD-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD All-Inclusive Banking Plan detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/all-inclusive-banking-plan",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Unlimited Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/unlimited-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "atm_fee_summary"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Every Day Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/every-day-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Minimum Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/minimum-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD bank account fee summary page",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges",
+      "expected_fields": [
+        "monthly_fee",
+        "atm_fee_summary",
+        "chequing_fee_table"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-713368e254",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.td.com/ca/en/about-td/customer-care/legal-notices-and-disclaimers",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-d180f05919",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/merchant-solutions/integrated-partnerships-program",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-e285884676",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/small-business/tools-and-resources",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-f402b4cdc8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/manage-my-business-credit-card/card-features",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-0e252ae4c4",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-36a9ccb1ba",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/business-banking/513796-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-6393b14eb8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/aa-eng.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-CHQ-b160de61f9",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/business-banking/521998.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

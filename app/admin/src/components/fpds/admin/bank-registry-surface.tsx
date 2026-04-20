@@ -382,6 +382,14 @@ function buildBulkCollectMessage({
   selectedBankCount: number;
   selectedCoverageCount: number;
 }) {
+  if (payload?.workflow_state === "queued") {
+    return [
+      `Queued collection for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s).`,
+      `${payload.run_ids.length} run(s) were created immediately, and homepage discovery plus source collection will continue on the server in the background.`,
+      "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
+    ].join(" ");
+  }
+
   const materializedItems = payload?.materialized_items ?? [];
   const generatedCount = materializedItems.reduce(
     (total, item) => total + item.generated_source_ids.length,

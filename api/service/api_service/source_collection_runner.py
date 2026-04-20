@@ -51,6 +51,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     included_source_ids = [str(item) for item in group.get("included_source_ids", [])]
     target_source_ids = [str(item) for item in group.get("target_source_ids", [])]
 
+    print(
+        f"[source-collection-runner] run {run_id} starting snapshot for {len(included_source_ids)} source(s)",
+        flush=True,
+    )
     snapshot_output = _run_stage("worker.discovery.fpds_snapshot", base_args + _source_args(included_source_ids))
     successful_source_ids = _successful_source_ids(snapshot_output)
     if not successful_source_ids:
@@ -61,6 +65,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     if not successful_target_source_ids:
         raise RuntimeError("Snapshot capture produced no target sources eligible for normalization.")
 
+    print(
+        f"[source-collection-runner] run {run_id} continuing with {len(successful_source_ids)} successful snapshot source(s)",
+        flush=True,
+    )
     _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(successful_source_ids))
     _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(successful_source_ids))
     _run_stage("worker.pipeline.fpds_normalization", base_args + _source_args(successful_target_source_ids))
@@ -68,17 +76,34 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         "worker.pipeline.fpds_validation_routing",
         base_args + ["--routing-mode", "phase1"] + _source_args(successful_target_source_ids),
     )
+    print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
 
 
 def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
     command = _build_worker_command(module_name, args)
-    completed = subprocess.run(command, check=False, capture_output=True, text=True, cwd=str(REPO_ROOT))  # noqa: S603
+    stage_name = module_name.rsplit(".", 1)[-1]
+    timeout_seconds = _stage_timeout_seconds_from_env()
+    print(f"[source-collection-runner] launching stage {stage_name} with timeout {timeout_seconds}s", flush=True)
+    try:
+        completed = subprocess.run(  # noqa: S603
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        if exc.stdout:
+            print(exc.stdout, end="")
+        if exc.stderr:
+            print(exc.stderr, end="", file=sys.stderr)
+        raise RuntimeError(f"{stage_name} timed out after {timeout_seconds} seconds.") from exc
     if completed.stdout:
         print(completed.stdout, end="")
     if completed.stderr:
         print(completed.stderr, end="", file=sys.stderr)
     if completed.returncode != 0:
-        stage_name = module_name.rsplit(".", 1)[-1]
         raise RuntimeError(f"{stage_name} failed with exit code {completed.returncode}.")
     stdout = completed.stdout.strip()
     if not stdout:
@@ -94,6 +119,16 @@ def _build_worker_command(module_name: str, args: list[str]) -> list[str]:
     if not uv_executable:
         raise RuntimeError("`uv` is required to launch worker stages from the source collection runner.")
     return [uv_executable, "run", "--project", str(REPO_ROOT), "python", "-m", module_name, *args]
+
+
+def _stage_timeout_seconds_from_env() -> int:
+    import os
+
+    raw = os.getenv("FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS", "1800").strip()
+    try:
+        return max(60, int(raw))
+    except ValueError:
+        return 1800
 
 
 def _successful_source_ids(snapshot_output: dict[str, Any]) -> list[str]:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Callable
@@ -152,12 +153,14 @@ class SnapshotCaptureService:
         object_store: SnapshotObjectStore,
         fetcher: Callable[[str, DiscoveryFetchPolicy], FetchedResponse] = fetch_response,
         max_attempts: int = 3,
+        max_concurrency: int = 4,
     ):
         self.fetch_policy = fetch_policy
         self.storage_config = storage_config
         self.object_store = object_store
         self.fetcher = fetcher
         self.max_attempts = max_attempts
+        self.max_concurrency = max(1, max_concurrency)
 
     def capture_sources(
         self,
@@ -172,19 +175,36 @@ class SnapshotCaptureService:
         known_snapshots = {
             record.dedupe_key: record for record in (existing_snapshots or [])
         }
-        source_results: list[SnapshotSourceResult] = []
-        partial_completion_flag = False
+        if self.max_concurrency <= 1 or len(sources) <= 1:
+            source_results = [
+                self._capture_single_source(
+                    run_id=run_id,
+                    source=source,
+                    correlation_id=correlation_id,
+                    request_id=request_id,
+                    known_snapshots=known_snapshots,
+                    preflight_result=preflight_result,
+                )
+                for source in sources
+            ]
+        else:
+            with ThreadPoolExecutor(max_workers=min(self.max_concurrency, len(sources))) as executor:
+                futures = [
+                    executor.submit(
+                        self._capture_single_source,
+                        run_id=run_id,
+                        source=source,
+                        correlation_id=correlation_id,
+                        request_id=request_id,
+                        known_snapshots=dict(known_snapshots),
+                        preflight_result=preflight_result,
+                    )
+                    for source in sources
+                ]
+                source_results = [future.result() for future in futures]
 
-        for source in sources:
-            result = self._capture_single_source(
-                run_id=run_id,
-                source=source,
-                correlation_id=correlation_id,
-                request_id=request_id,
-                known_snapshots=known_snapshots,
-                preflight_result=preflight_result,
-            )
-            source_results.append(result)
+        partial_completion_flag = False
+        for result in source_results:
             if result.snapshot_action == "stored" and result.source_snapshot_record is not None:
                 record = ExistingSnapshotRecord(**result.source_snapshot_record)
                 known_snapshots[record.dedupe_key] = record

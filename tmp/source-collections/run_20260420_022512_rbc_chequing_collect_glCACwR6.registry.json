@@ -1,0 +1,448 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-CHQ-002",
+  "sources": [
+    {
+      "source_id": "RBC-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Day to Day Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/day-to-day-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_etransfer_support"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Advantage Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/advantage-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "atm_fee_summary"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Signature No Limit Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/signature-no-limit-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC VIP Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/vip-banking.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_account_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC personal account rates and interest support page",
+      "url": "https://www.rbcroyalbank.com/rates/persacct.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "no_interest_accounts",
+        "rate_effective_date"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-0107d4ff5b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.rbcroyalbank.com/banking-services/estatements.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-5b720d0fe6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.rbcroyalbank.com/banking-services/direct-deposit.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-b044e8b6c3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/value-program.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-d7eb877b2c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.rbcroyalbank.com/banking-services/additional-account-services.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-086207342c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.rbcroyalbank.com/onlinebanking/servicech/pdf/PDA_Account_Disclosure_Booklet.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-67cacc3a00",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "http://www.rbcroyalbank.com/online/_assets-custom/pdf/mca-agreement-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-c6168abd3e",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.rbcroyalbank.com/online/_assets-custom/pdf/mca-agreement-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-CHQ-f13cad0579",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.rbcroyalbank.com/onlinebanking/servicech/pdf/PDA_Client_Card_Personal_Identification_Number_Agreement.PDF",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

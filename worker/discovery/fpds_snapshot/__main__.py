@@ -129,6 +129,8 @@ def main() -> int:
         "triggered_by": args.triggered_by,
         "database_schema": repository.active_schema if repository is not None else None,
         "storage_driver": storage_config.driver,
+        "source_fetch_timeout_seconds": fetch_policy.timeout_seconds,
+        "source_fetch_concurrency": service.max_concurrency,
         "preflight_drift_check_enabled": not args.skip_preflight_drift_check,
     }
     if repository is not None:

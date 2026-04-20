@@ -132,7 +132,11 @@ Rules:
 | `FPDS_SOURCE_FETCH_MODE` | fetch policy such as `controlled` or `live` |
 | `FPDS_SOURCE_FETCH_ALLOWLIST` | approved source domains |
 | `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS` | SSRF guardrail toggle |
-| `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` | per-request fetch timeout for discovery, preflight drift, and snapshot capture |
+| `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` | per-request fetch timeout for discovery, preflight drift, and snapshot capture. Current default baseline: `90` seconds |
+| `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS` | optional allowlist for domains that should fall back to a local headless browser PDF snapshot when normal HTTPS fetches are blocked or repeatedly time out. Current default baseline: `bmo.com,www.bmo.com` |
+| `FPDS_SOURCE_BROWSER_FALLBACK_TIMEOUT_SECONDS` | max time for one browser-based snapshot fallback attempt. Current default baseline: `120` seconds |
+| `FPDS_SOURCE_BROWSER_EXECUTABLE` | optional explicit path to the browser executable used for fallback capture when auto-detection is not enough |
+| `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` | max runtime for one worker stage launched by the source-collection runner before the run is failed instead of remaining indefinitely `started`. Current default baseline: `1800` seconds |
 | `FPDS_LLM_PROVIDER` | model provider label |
 | `FPDS_LLM_MODEL` | model name |
 | `FPDS_LLM_API_KEY` | model provider credential |

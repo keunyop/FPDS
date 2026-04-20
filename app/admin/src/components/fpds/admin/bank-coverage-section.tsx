@@ -376,6 +376,14 @@ function buildSingleCoverageCollectMessage(
   payload: SourceCatalogCollectionLaunchResponse | undefined,
   labelMap?: Record<string, string>,
 ) {
+  if (payload?.workflow_state === "queued") {
+    return [
+      `${formatProductType(productType, labelMap)} collection was queued.`,
+      "Homepage discovery and source collection are now running on the server in the background.",
+      "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
+    ].join(" ");
+  }
+
   const materializedItem = payload?.materialized_items?.[0];
   const generatedCount = materializedItem?.generated_source_ids?.length ?? 0;
   const firstNote = materializedItem?.discovery_notes?.[0];

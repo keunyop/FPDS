@@ -756,6 +756,8 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
     discovery_notes: string[];
     discovery_status: "detail_sources_ready" | "no_detail_sources_discovered";
   }>;
+  workflow_state?: "queued" | "completed";
+  queued_catalog_item_count?: number;
 };
 
 export type ProductTypeItem = {

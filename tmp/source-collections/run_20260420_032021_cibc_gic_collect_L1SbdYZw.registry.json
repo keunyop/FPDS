@@ -1,0 +1,217 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-GIC-002",
+  "sources": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Flexible GIC detail source",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "interest_payment_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Bonus Rate GIC detail source",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "rate_structure"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-0e91fbdaa7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-3cf473582f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-governance.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-6bd37bcf18",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-8c11394145",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility/service-commitment/resolving-your-complaints.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

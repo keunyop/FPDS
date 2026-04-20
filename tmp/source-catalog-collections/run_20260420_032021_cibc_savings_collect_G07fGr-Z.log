@@ -1,0 +1,60 @@
+[source-catalog-runner] starting run run_20260420_032021_cibc_savings_collect_G07fGr-Z for CIBC savings
+[source-collection-runner] run run_20260420_032021_cibc_savings_collect_G07fGr-Z starting snapshot for 11 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\10 Development\10 개인프로젝트\70. Mybank\workspace\worker\discovery\fpds_snapshot\__main__.py", line 153, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "D:\10 Development\10 개인프로젝트\70. Mybank\workspace\worker\discovery\fpds_snapshot\__main__.py", line 137, in main
+    persistence_result = repository.persist_capture_result(
+        run_id=args.run_id,
+    ...<5 lines>...
+        completed_at=utc_now_iso(),
+    )
+  File "D:\10 Development\10 개인프로젝트\70. Mybank\workspace\worker\discovery\fpds_snapshot\persistence.py", line 387, in persist_capture_result
+    self._execute(
+    ~~~~~~~~~~~~~^
+        sql,
+        ^^^^
+    ...<15 lines>...
+        },
+        ^^
+    )
+    ^
+  File "D:\10 Development\10 개인프로젝트\70. Mybank\workspace\worker\discovery\fpds_snapshot\persistence.py", line 423, in _execute
+    return self.command_runner(command, sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\10 Development\10 개인프로젝트\70. Mybank\workspace\worker\discovery\fpds_snapshot\persistence.py", line 460, in _run_psql
+    completed = subprocess.run(
+        [*command, "-v", "ON_ERROR_STOP=1", "-X", "-q", "-A", "-t"],
+    ...<3 lines>...
+        check=False,
+    )
+  File "C:\Users\kylee\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 554, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kylee\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kylee\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1552, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 206] The filename or extension is too long
+[source-catalog-runner] failed run run_20260420_032021_cibc_savings_collect_G07fGr-Z: fpds_snapshot failed with exit code 1.

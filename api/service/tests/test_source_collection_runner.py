@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import tempfile
+import subprocess
+import shutil
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -9,6 +10,13 @@ from api_service import source_collection_runner
 
 
 class SourceCollectionRunnerTests(unittest.TestCase):
+    def _workspace_temp_path(self, name: str) -> Path:
+        path = Path.cwd() / "tmp" / "test-source-collection-runner" / name
+        if path.exists():
+            shutil.rmtree(path, ignore_errors=True)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
     def test_run_group_filters_downstream_sources_to_snapshot_successes(self) -> None:
         plan = {
             "trigger_type": "admin_source_collection",
@@ -73,13 +81,13 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                 }
             return {}
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with (
-                patch("api_service.source_collection_runner.args_temp_dir", return_value=Path(temp_dir)),
-                patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
-                patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
-            ):
-                source_collection_runner._run_group(plan=plan, group=group)
+        temp_dir = self._workspace_temp_path("filter-successes")
+        with (
+            patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
+            patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+        ):
+            source_collection_runner._run_group(plan=plan, group=group)
 
         self.assertEqual(
             [module_name for module_name, _args in stage_calls],
@@ -129,17 +137,17 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             ],
         }
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with (
-                patch("api_service.source_collection_runner.args_temp_dir", return_value=Path(temp_dir)),
-                patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
-                patch(
-                    "api_service.source_collection_runner._run_stage",
-                    return_value={"source_results": [{"source_id": "BMO-CHQ-002", "snapshot_action": "failed"}]},
-                ) as run_stage,
-            ):
-                with self.assertRaisesRegex(RuntimeError, "Snapshot capture failed for all selected sources."):
-                    source_collection_runner._run_group(plan=plan, group=group)
+        temp_dir = self._workspace_temp_path("snapshot-no-success")
+        with (
+            patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
+            patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch(
+                "api_service.source_collection_runner._run_stage",
+                return_value={"source_results": [{"source_id": "BMO-CHQ-002", "snapshot_action": "failed"}]},
+            ) as run_stage,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "Snapshot capture failed for all selected sources."):
+                source_collection_runner._run_group(plan=plan, group=group)
 
         run_stage.assert_called_once()
 
@@ -156,6 +164,24 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             ),
             ["SRC-001", "SRC-002"],
         )
+
+    def test_run_stage_raises_clear_error_when_worker_stage_times_out(self) -> None:
+        with (
+            patch("api_service.source_collection_runner.shutil.which", return_value="uv"),
+            patch(
+                "api_service.source_collection_runner.subprocess.run",
+                side_effect=subprocess.TimeoutExpired(cmd=["uv"], timeout=120),
+            ),
+            patch.dict("os.environ", {"FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS": "120"}, clear=False),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "fpds_snapshot timed out after 120 seconds."):
+                source_collection_runner._run_stage("worker.discovery.fpds_snapshot", ["--run-id", "run-001"])
+
+    def test_stage_timeout_seconds_from_env_uses_floor_and_default(self) -> None:
+        with patch.dict("os.environ", {"FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS": "45"}, clear=False):
+            self.assertEqual(source_collection_runner._stage_timeout_seconds_from_env(), 60)
+        with patch.dict("os.environ", {"FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS": "bad"}, clear=False):
+            self.assertEqual(source_collection_runner._stage_timeout_seconds_from_env(), 1800)
 
 
 if __name__ == "__main__":

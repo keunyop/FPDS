@@ -73,10 +73,11 @@ Notes:
 - The registry catalog is the planning baseline for Canada Big 5 expansion. Bank-specific parser or discovery behavior can still be enriched in later slices without rewriting the `5.1` cutline.
 - Registry refresh strategy is approval-first: ingestion uses the active registry, while future refresh automation should produce candidate diffs instead of rewriting the active registry in place.
 - Snapshot capture now performs lightweight preflight drift checks by default before fetching and storing raw artifacts. Use `--skip-preflight-drift-check` only when intentionally bypassing that operator signal.
-- Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST`, `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS`, and `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` env settings from the shared baseline.
+- Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST`, `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS`, and `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` env settings from the shared baseline. The current default timeout baseline is `90` seconds.
 - Snapshot capture writes raw artifacts to the approved `{env}/snapshots/{country_code}/{bank_code}/{source_document_id}/{snapshot_id}/raw` key layout and returns DB-shaped metadata for `source_snapshot` and `run_source_item`.
 - `--env-file` now overrides ambient process env values so live dev runs stay aligned to the chosen local env file.
 - `--persist-db` creates or updates `ingestion_run`, upserts `source_document`, inserts new `source_snapshot`, and upserts `run_source_item`.
+- Snapshot capture now fetches multiple sources concurrently inside the same run, which reduces bank-wide collect wall-clock time when several sources are slow at once.
 - Scheduled refresh generates a JSON artifact with preflight drift findings, discovery warnings, and candidate diffs. It does not mutate the active registry.
 - When `FPDS_DATABASE_SCHEMA` points at a schema without the required snapshot tables but `public` contains them, snapshot persistence falls back to `public` and reports the resolved schema in the runtime output.
 - `fetch_status` currently uses `fetched` or `reused`, while per-source `stage_status` stays conservative at `completed` or `failed` and keeps the finer-grained action in `stage_metadata.snapshot_action`.

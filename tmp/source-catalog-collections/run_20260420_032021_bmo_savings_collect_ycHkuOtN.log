@@ -1,0 +1,435 @@
+[source-catalog-runner] starting run run_20260420_032021_bmo_savings_collect_ycHkuOtN for BMO savings
+[source-collection-runner] run run_20260420_032021_bmo_savings_collect_ycHkuOtN starting snapshot for 6 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+  "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+  "request_id": "req_8fa21992be184deda1674c38fe21c471",
+  "partial_completion_flag": true,
+  "stats": {
+    "source_total": 6,
+    "stored_count": 0,
+    "reused_count": 0,
+    "failed_count": 6
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-SAV-002",
+      "source_document_id": "src-bmo-html-743a2b56e385568c",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e862a6bd82615dd2",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-743a2b56e385568c",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-SAV-003",
+      "source_document_id": "src-bmo-html-3409e672965b9e0a",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-7ae18cbc2ed2a80a",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-3409e672965b9e0a",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-SAV-004",
+      "source_document_id": "src-bmo-html-7c4e0c864c6479fb",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-5e370d9c0ceef37d",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-7c4e0c864c6479fb",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-SAV-006",
+      "source_document_id": "src-bmo-html-350a0637e1d269fd",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-66a6547450774ee9",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-350a0637e1d269fd",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-SAV-007",
+      "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-83b1cad1544f61a9",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-SAV-005",
+      "source_document_id": "src-bmo-html-dfecc2fa41d9f5f3",
+      "snapshot_action": "failed",
+      "attempt_count": 3,
+      "snapshot_id": null,
+      "object_storage_key": null,
+      "checksum": null,
+      "fingerprint": null,
+      "content_type": null,
+      "fetch_status": null,
+      "fetched_at": null,
+      "error_summary": "The read operation timed out",
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-3306c03f271affdf",
+        "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+        "source_document_id": "src-bmo-html-dfecc2fa41d9f5f3",
+        "selected_snapshot_id": null,
+        "stage_status": "failed",
+        "warning_count": 1,
+        "error_count": 3,
+        "error_summary": "The read operation timed out",
+        "stage_metadata": {
+          "snapshot_action": "failed",
+          "request_id": "req_8fa21992be184deda1674c38fe21c471",
+          "attempt_count": 3,
+          "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+          "requested_url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings/",
+          "preflight_status": "error",
+          "preflight_issue_codes": [
+            "fetch_failed"
+          ]
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+    "correlation_id": "corr_h6iuI1KhFuDzO3_F",
+    "request_id": "req_8fa21992be184deda1674c38fe21c471",
+    "stats": {
+      "source_total": 6,
+      "ok_count": 0,
+      "warning_count": 0,
+      "error_count": 6,
+      "issue_total": 6
+    },
+    "source_checks": [
+      {
+        "source_id": "BMO-SAV-002",
+        "source_document_id": "src-bmo-html-743a2b56e385568c",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-002",
+            "source_document_id": "src-bmo-html-743a2b56e385568c",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-SAV-003",
+        "source_document_id": "src-bmo-html-3409e672965b9e0a",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-003",
+            "source_document_id": "src-bmo-html-3409e672965b9e0a",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-SAV-004",
+        "source_document_id": "src-bmo-html-7c4e0c864c6479fb",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-004",
+            "source_document_id": "src-bmo-html-7c4e0c864c6479fb",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-SAV-006",
+        "source_document_id": "src-bmo-html-350a0637e1d269fd",
+        "expected_url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-006",
+            "source_document_id": "src-bmo-html-350a0637e1d269fd",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-SAV-007",
+        "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-007",
+            "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-SAV-005",
+        "source_document_id": "src-bmo-html-dfecc2fa41d9f5f3",
+        "expected_url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings",
+        "expected_source_type": "html",
+        "status": "error",
+        "fetched_at": null,
+        "final_url": null,
+        "normalized_final_url": null,
+        "status_code": null,
+        "content_type": null,
+        "redirect_count": null,
+        "error_summary": "The read operation timed out",
+        "issues": [
+          {
+            "source_id": "BMO-SAV-005",
+            "source_document_id": "src-bmo-html-dfecc2fa41d9f5f3",
+            "issue_code": "fetch_failed",
+            "severity": "error",
+            "expected_url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings",
+            "detected_url": null,
+            "expected_source_type": "html",
+            "detected_content_type": null,
+            "message": "The read operation timed out"
+          }
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260420_032021_bmo_savings_collect_ycHkuOtN",
+    "run_state": "failed",
+    "source_document_count": 6,
+    "stored_snapshot_count": 0,
+    "run_source_item_count": 6,
+    "source_success_count": 0,
+    "source_failure_count": 6,
+    "partial_completion_flag": true,
+    "started_at": "2026-04-20T03:29:34.081723+00:00",
+    "completed_at": "2026-04-20T03:38:37.795781+00:00"
+  }
+}
+[source-catalog-runner] failed run run_20260420_032021_bmo_savings_collect_ycHkuOtN: Snapshot capture failed for all selected sources.

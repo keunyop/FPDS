@@ -447,6 +447,79 @@ def start_source_collection(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
+    prepared = prepare_source_collection(
+        connection,
+        source_ids=source_ids,
+        actor=actor,
+        request_id=request_context.get("request_id"),
+    )
+    collection_id = str(prepared["collection_id"])
+    correlation_id = str(prepared["correlation_id"])
+    plan = prepared["plan"]
+
+    for group in plan["groups"]:
+        _insert_collection_run_row(
+            connection,
+            run_id=str(group["run_id"]),
+            triggered_by=str(plan["triggered_by"]),
+            request_id=request_context.get("request_id"),
+            correlation_id=correlation_id,
+            collection_id=collection_id,
+            group=group,
+        )
+
+    _record_source_registry_audit_event(
+        connection,
+        event_type="source_collection_started",
+        actor=actor,
+        target_id=collection_id,
+        request_context=request_context,
+        previous_state=None,
+        new_state="started",
+        reason_text=None,
+        diff_summary="Launched source-selected collection run batch.",
+        payload={
+            "selected_source_ids": plan["selected_source_ids"],
+            "auto_included_source_ids": plan["auto_included_source_ids"],
+            "run_ids": [group["run_id"] for group in plan["groups"]],
+        },
+        event_category="run",
+        target_type="source_collection",
+    )
+    _launch_source_collection_runner(plan)
+
+    return {
+        "collection_id": collection_id,
+        "correlation_id": correlation_id,
+        "run_ids": [group["run_id"] for group in plan["groups"]],
+        "selected_source_ids": plan["selected_source_ids"],
+        "target_source_ids": plan["target_source_ids"],
+        "auto_included_source_ids": plan["auto_included_source_ids"],
+        "groups": [
+            {
+                "run_id": group["run_id"],
+                "bank_code": group["bank_code"],
+                "country_code": group["country_code"],
+                "product_type": group["product_type"],
+                "source_language": group["source_language"],
+                "target_source_ids": group["target_source_ids"],
+                "included_source_ids": group["included_source_ids"],
+            }
+            for group in plan["groups"]
+        ],
+    }
+
+
+def prepare_source_collection(
+    connection: Connection,
+    *,
+    source_ids: list[str],
+    actor: dict[str, Any],
+    request_id: str | None,
+    collection_id: str | None = None,
+    correlation_id: str | None = None,
+    run_id_overrides: dict[tuple[str, str, str, str], str] | None = None,
+) -> dict[str, Any]:
     selected_source_ids = _dedupe_preserve_order([item.strip() for item in source_ids if item and item.strip()])
     if not selected_source_ids:
         raise SourceRegistryError(status_code=400, code="source_collection_empty_selection", message="Select at least one source before starting collection.")
@@ -561,68 +634,22 @@ def start_source_collection(
         active_only=False,
     )
 
-    collection_id = new_id("collection")
-    correlation_id = new_id("corr")
+    resolved_collection_id = collection_id or new_id("collection")
+    resolved_correlation_id = correlation_id or new_id("corr")
     plan = build_source_collection_plan(
         selected_rows=[selected_by_id[source_id] for source_id in selected_source_ids],
         included_rows=list(included_rows_by_id.values()),
         product_type_definitions=product_type_definitions,
-        collection_id=collection_id,
-        correlation_id=correlation_id,
+        collection_id=resolved_collection_id,
+        correlation_id=resolved_correlation_id,
         actor=actor,
-        request_id=request_context.get("request_id"),
+        request_id=request_id,
+        run_id_overrides=run_id_overrides,
     )
-
-    for group in plan["groups"]:
-        _insert_collection_run_row(
-            connection,
-            run_id=str(group["run_id"]),
-            triggered_by=str(plan["triggered_by"]),
-            request_id=request_context.get("request_id"),
-            correlation_id=correlation_id,
-            collection_id=collection_id,
-            group=group,
-        )
-
-    _record_source_registry_audit_event(
-        connection,
-        event_type="source_collection_started",
-        actor=actor,
-        target_id=collection_id,
-        request_context=request_context,
-        previous_state=None,
-        new_state="started",
-        reason_text=None,
-        diff_summary="Launched source-selected collection run batch.",
-        payload={
-            "selected_source_ids": plan["selected_source_ids"],
-            "auto_included_source_ids": plan["auto_included_source_ids"],
-            "run_ids": [group["run_id"] for group in plan["groups"]],
-        },
-        event_category="run",
-        target_type="source_collection",
-    )
-    _launch_source_collection_runner(plan)
-
     return {
-        "collection_id": collection_id,
-        "correlation_id": correlation_id,
-        "run_ids": [group["run_id"] for group in plan["groups"]],
-        "selected_source_ids": plan["selected_source_ids"],
-        "target_source_ids": plan["target_source_ids"],
-        "auto_included_source_ids": plan["auto_included_source_ids"],
-        "groups": [
-            {
-                "run_id": group["run_id"],
-                "bank_code": group["bank_code"],
-                "country_code": group["country_code"],
-                "product_type": group["product_type"],
-                "source_language": group["source_language"],
-                "target_source_ids": group["target_source_ids"],
-                "included_source_ids": group["included_source_ids"],
-            }
-            for group in plan["groups"]
-        ],
+        "collection_id": resolved_collection_id,
+        "correlation_id": resolved_correlation_id,
+        "plan": plan,
     }
 
 
@@ -635,6 +662,7 @@ def build_source_collection_plan(
     correlation_id: str,
     actor: dict[str, Any],
     request_id: str | None,
+    run_id_overrides: dict[tuple[str, str, str, str], str] | None = None,
 ) -> dict[str, Any]:
     product_type_definitions = product_type_definitions or {}
     selected_rows_by_id = {str(row["source_id"]): row for row in selected_rows}
@@ -665,9 +693,10 @@ def build_source_collection_plan(
         if not target_group_rows:
             continue
         country_code, bank_code, product_type, source_language = group_key
+        run_id = (run_id_overrides or {}).get(group_key) or _build_collection_run_id(bank_code=bank_code, product_type=product_type)
         groups.append(
             {
-                "run_id": _build_collection_run_id(bank_code=bank_code, product_type=product_type),
+                "run_id": run_id,
                 "country_code": country_code,
                 "bank_code": bank_code,
                 "product_type": product_type,
@@ -903,10 +932,11 @@ def _insert_collection_run_row(
     correlation_id: str,
     collection_id: str,
     group: dict[str, Any],
+    pipeline_stage: str = "source_collection",
 ) -> None:
     started_at = utc_now()
     run_metadata = {
-        "pipeline_stage": "source_collection",
+        "pipeline_stage": pipeline_stage,
         "collection_id": collection_id,
         "correlation_id": correlation_id,
         "request_id": request_id,
@@ -957,6 +987,21 @@ def _insert_collection_run_row(
             %(started_at)s,
             NULL
         )
+        ON CONFLICT (run_id) DO UPDATE
+        SET
+            run_state = 'started',
+            trigger_type = 'admin_source_collection',
+            triggered_by = COALESCE(EXCLUDED.triggered_by, ingestion_run.triggered_by),
+            source_scope_count = GREATEST(ingestion_run.source_scope_count, EXCLUDED.source_scope_count),
+            source_success_count = 0,
+            source_failure_count = 0,
+            candidate_count = 0,
+            review_queued_count = 0,
+            error_summary = NULL,
+            partial_completion_flag = false,
+            run_metadata = ingestion_run.run_metadata || EXCLUDED.run_metadata,
+            started_at = LEAST(ingestion_run.started_at, EXCLUDED.started_at),
+            completed_at = NULL
         """,
         {
             "run_id": run_id,

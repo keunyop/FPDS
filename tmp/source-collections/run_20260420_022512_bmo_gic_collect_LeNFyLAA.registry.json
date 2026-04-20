@@ -1,0 +1,68 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-GIC-003",
+  "sources": [
+    {
+      "source_id": "BMO-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Progressive GIC detail source",
+      "url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+      "expected_fields": [
+        "product_name",
+        "return_structure",
+        "term_options",
+        "principal_protection"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO GIC rates reference page",
+      "url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+      "expected_fields": [
+        "gic_rate_table",
+        "term_options",
+        "rate_effective_date"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    }
+  ]
+}

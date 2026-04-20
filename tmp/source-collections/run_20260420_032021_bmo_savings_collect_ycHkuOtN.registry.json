@@ -1,0 +1,173 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-SAV-002",
+  "sources": [
+    {
+      "source_id": "BMO-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Savings Amplifier detail source",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Savings Builder detail source",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder/",
+      "expected_fields": [
+        "product_name",
+        "bonus_interest_rule",
+        "monthly_fee",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO Premium Rate Savings detail source",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings/",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "plan_fee_dependency",
+        "transaction_limits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO chequing and savings interest rates page",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+      "expected_fields": [
+        "savings_account_rates",
+        "rate_effective_date",
+        "account_list"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO bank account terms and conditions",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+      "expected_fields": [
+        "terms_version",
+        "service_fee_terms",
+        "account_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-005",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO U.S. Dollar Premium Rate Savings detail source",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings/",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "interest_rate_summary",
+        "transaction_limits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    }
+  ]
+}

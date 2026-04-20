@@ -1,0 +1,518 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "TD-SAV-002",
+  "sources": [
+    {
+      "source_id": "TD-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Every Day Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/every-day-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD ePremium Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "transaction_fee",
+        "free_online_transfers"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Growth Savings primary detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "transaction_fee",
+        "boosted_rate_eligibility"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "current interest rate truth and tier values",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates",
+      "expected_fields": [
+        "public_display_rate",
+        "standard_rate",
+        "boosted_rate",
+        "rate_tiers"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "cross-product fee comparison and normalization",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings",
+      "expected_fields": [
+        "monthly_transaction_limit",
+        "transaction_fee",
+        "bill_payment_fee",
+        "atm_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account and service fee governing document",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf",
+      "expected_fields": [
+        "effective_date",
+        "account_lineup",
+        "detailed_account_fees",
+        "transaction_definitions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-009",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account-level general legal terms",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/tdct-accounts-fst-en.pdf",
+      "expected_fields": [
+        "record_availability",
+        "account_change_rules",
+        "interest_applicability_references"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-SAV-012",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "general service fee supplement evidence",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/802234-en.pdf",
+      "expected_fields": [
+        "ancillary_service_fees",
+        "service_definitions",
+        "non_core_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-TD-SAV-7bab0e22e7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/merchant-solutions/integrated-partnerships-program",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-SAV-83b6ee38dc",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/manage-my-business-credit-card/card-features",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-SAV-cd134336a1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.td.com/ca/en/about-td/customer-care/legal-notices-and-disclaimers",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-SAV-ff8d4dbeee",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/small-business/tools-and-resources",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-SAV-80bd66aab5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/business-banking/513796-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-008",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513782-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-010",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/522050-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-011",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/aa-eng.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

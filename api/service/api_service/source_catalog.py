@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 from typing import TYPE_CHECKING, Any
 import urllib.error
@@ -26,7 +27,7 @@ from api_service.product_types import (
     require_product_type_definition,
 )
 from api_service.security import new_id, utc_now
-from api_service.source_registry import start_source_collection
+from api_service.source_registry import _insert_collection_run_row
 from api_service.source_registry_utils import (
     infer_source_type,
     load_seed_bank_homepage_repairs,
@@ -1087,80 +1088,153 @@ def start_source_catalog_collection(
     if len(rows) != len(set(catalog_item_ids)):
         raise SourceRegistryError(status_code=404, code="source_catalog_not_found", message="One or more source catalog items could not be found.")
 
-    selected_source_ids: list[str] = []
-    materialization_summary: list[dict[str, Any]] = []
-    for row in rows:
-        materialized = _materialize_sources_for_catalog_item(connection, row=row)
-        generated_rows = list(materialized.generated_rows)
-        generated_source_ids = [
-            str(item["source_id"])
-            for item in generated_rows
-            if str(item["status"]) != "removed"
-        ]
-        collection_source_ids = [
-            str(item["source_id"])
-            for item in generated_rows
-            if str(item["discovery_role"]) != "entry" and str(item["status"]) != "removed"
-        ]
-        target_source_ids = [
-            str(item["source_id"])
-            for item in generated_rows
-            if str(item["discovery_role"]) == "detail" and str(item["status"]) != "removed"
-        ]
-        if target_source_ids:
-            selected_source_ids.extend(collection_source_ids)
-        materialization_summary.append(
-            {
-                "catalog_item_id": str(row["catalog_item_id"]),
-                "bank_code": str(row["bank_code"]),
-                "product_type": str(row["product_type"]),
-                "generated_source_ids": generated_source_ids,
-                "collection_source_ids": collection_source_ids,
-                "target_source_ids": target_source_ids,
-                "discovery_notes": list(materialized.discovery_notes),
-                "discovery_status": "detail_sources_ready" if target_source_ids else "no_detail_sources_discovered",
-            }
+    collection_id = new_id("collection")
+    correlation_id = new_id("corr")
+    plan = _build_source_catalog_collection_plan(
+        rows=rows,
+        actor=actor,
+        request_context=request_context,
+        collection_id=collection_id,
+        correlation_id=correlation_id,
+    )
+
+    for group in plan["groups"]:
+        _insert_collection_run_row(
+            connection,
+            run_id=str(group["run_id"]),
+            triggered_by=str(plan["triggered_by"]),
+            request_id=request_context.get("request_id"),
+            correlation_id=correlation_id,
+            collection_id=collection_id,
+            group=group,
+            pipeline_stage="source_catalog_collection",
         )
 
-    if selected_source_ids:
-        result = start_source_collection(
-            connection,
-            source_ids=selected_source_ids,
-            actor=actor,
-            request_context=request_context,
-        )
-    else:
-        result = {
-            "collection_id": new_id("collection"),
-            "correlation_id": new_id("corr"),
-            "run_ids": [],
-            "selected_source_ids": [],
-            "target_source_ids": [],
-            "auto_included_source_ids": [],
-            "groups": [],
-        }
     _record_catalog_audit_event(
         connection,
         actor=actor,
         request_context=request_context,
-        event_type="source_catalog_collection_launched" if selected_source_ids else "source_catalog_collection_no_detail",
-        target_id=result["collection_id"],
+        event_type="source_catalog_collection_started",
+        target_id=collection_id,
         target_type="source_catalog_collection",
-        diff_summary=(
-            f"Launched source catalog collection for {len(rows)} catalog item(s)."
-            if selected_source_ids
-            else f"Homepage discovery found no detail sources for {len(rows)} catalog item(s); no collection run was launched."
-        ),
+        diff_summary=f"Queued source catalog collection for {len(rows)} catalog item(s).",
         metadata={
             "catalog_item_ids": list(catalog_item_ids),
-            "selected_source_ids": selected_source_ids,
-            "materialized_items": materialization_summary,
+            "run_ids": [str(group["run_id"]) for group in plan["groups"]],
         },
     )
+    _launch_source_catalog_collection_runner(plan)
+    return _serialize_source_catalog_collection_launch(plan=plan, catalog_item_ids=catalog_item_ids)
+
+
+def _build_source_catalog_collection_plan(
+    *,
+    rows: list[dict[str, Any]],
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+    collection_id: str,
+    correlation_id: str,
+) -> dict[str, Any]:
+    triggered_by = str(actor.get("email") or actor.get("display_name") or actor.get("user_id") or "admin")
+    actor_payload = {
+        "user_id": actor.get("user_id"),
+        "email": actor.get("email"),
+        "display_name": actor.get("display_name"),
+        "role": actor.get("role"),
+    }
+    groups: list[dict[str, Any]] = []
+    for row in rows:
+        groups.append(
+            {
+                "run_id": _build_source_catalog_collection_run_id(
+                    bank_code=str(row["bank_code"]),
+                    product_type=str(row["product_type"]),
+                ),
+                "catalog_item_id": str(row["catalog_item_id"]),
+                "bank_code": str(row["bank_code"]),
+                "bank_name": str(row["bank_name"]),
+                "country_code": str(row["country_code"]),
+                "product_type": str(row["product_type"]),
+                "source_language": str(row.get("source_language") or "en"),
+                "homepage_url": str(row["homepage_url"]),
+                "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
+                "selected_source_ids": [],
+                "target_source_ids": [],
+                "included_source_ids": [],
+                "included_sources": [],
+            }
+        )
+
     return {
-        **result,
+        "collection_id": collection_id,
+        "correlation_id": correlation_id,
+        "request_id": request_context.get("request_id"),
+        "trigger_type": "admin_source_catalog_collection",
+        "triggered_by": triggered_by,
+        "actor": actor_payload,
+        "groups": groups,
+    }
+
+
+def _launch_source_catalog_collection_runner(plan: dict[str, Any]) -> None:
+    temp_dir = REPO_ROOT / "tmp" / "source-catalog-collections"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    env = os.environ.copy()
+    current_python_path = env.get("PYTHONPATH", "")
+    api_service_path = str(REPO_ROOT / "api" / "service")
+    env["PYTHONPATH"] = os.pathsep.join([api_service_path, current_python_path]) if current_python_path else api_service_path
+
+    for group in plan.get("groups", []):
+        group_plan = {
+            **plan,
+            "groups": [group],
+        }
+        run_id = str(group["run_id"])
+        plan_path = temp_dir / f"{run_id}.json"
+        log_path = temp_dir / f"{run_id}.log"
+        plan_path.write_text(json.dumps(group_plan, indent=2, ensure_ascii=True), encoding="utf-8")
+
+        with log_path.open("a", encoding="utf-8") as log_file:
+            try:
+                subprocess.Popen(  # noqa: S603
+                    [sys.executable, "-m", "api_service.source_catalog_collection_runner", "--plan-path", str(plan_path)],
+                    cwd=str(REPO_ROOT),
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                )
+            except OSError as exc:
+                raise SourceRegistryError(
+                    status_code=500,
+                    code="source_catalog_collection_launch_failed",
+                    message=f"Source catalog collection could not be launched: {exc}",
+                ) from exc
+
+
+def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog_item_ids: list[str]) -> dict[str, Any]:
+    return {
+        "collection_id": str(plan["collection_id"]),
+        "correlation_id": str(plan["correlation_id"]),
+        "run_ids": [str(group["run_id"]) for group in plan["groups"]],
+        "selected_source_ids": [],
+        "target_source_ids": [],
+        "auto_included_source_ids": [],
+        "groups": [
+            {
+                "run_id": str(group["run_id"]),
+                "bank_code": str(group["bank_code"]),
+                "country_code": str(group["country_code"]),
+                "product_type": str(group["product_type"]),
+                "source_language": str(group["source_language"]),
+                "target_source_ids": [],
+                "included_source_ids": [],
+            }
+            for group in plan["groups"]
+        ],
         "catalog_item_ids": list(catalog_item_ids),
-        "materialized_items": materialization_summary,
+        "materialized_items": [],
+        "workflow_state": "queued",
+        "queued_catalog_item_count": len(plan["groups"]),
     }
 
 
@@ -2461,6 +2535,12 @@ def _generated_link_name(bank_name: str, product_type_label: str, anchor_text: s
     if cleaned:
         return cleaned[:280]
     return f"{bank_name} {product_type_label} {fallback}"
+
+
+def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str) -> str:
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    suffix = new_id("src").split("_", 1)[1][:8]
+    return f"run_{timestamp}_{bank_code.lower()}_{product_type}_collect_{suffix}"
 
 
 def _product_type_keywords(product_type_definition: dict[str, Any]) -> list[str]:

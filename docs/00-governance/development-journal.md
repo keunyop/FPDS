@@ -1843,6 +1843,71 @@ Each entry should include:
   - `python -m unittest tests.test_source_collection_runner`
   - `python -m compileall api_service`
   - `pnpm run typecheck`
+
+## 2026-04-19 - Source Catalog Collect Async Queue and Snapshot Hardening
+
+- WBS: `5.15`, `5.16`
+- Status: `done`
+- Goal: stop bank-wide collect from failing at the admin request layer when homepage discovery runs too long, and reduce bank-scope snapshot wall-clock blowups when several slow source pages time out in sequence
+- Why now: Product Owner hit a real `/admin/source-catalog/collect` failure where the Next.js proxy waited about 5 minutes for the admin API to return headers and then raised `UND_ERR_HEADERS_TIMEOUT`, while the downstream BMO chequing run still showed per-source read timeouts across four selected detail pages
+- Outcome: `POST /api/admin/source-catalog/collect` now creates run rows immediately and returns a queued background response instead of doing homepage discovery and source materialization inline. A new `source_catalog_collection_runner` now performs homepage-first source generation in the background, reuses the precreated run ids, and then hands successful detail scope into the existing collection stages. Snapshot capture now fetches multiple sources concurrently inside a run, and the shared discovery/snapshot fetch timeout baseline moved from `45` to `90` seconds so slower Big 5 pages get a larger read window without making bank-wide collection wall-clock time grow linearly per source
+- Not done: this slice did not add a dedicated queued-job dashboard outside `/admin/runs`, did not add per-bank fetch-policy overrides, and did not guarantee success against every hostile/sluggish bank page pattern
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/api_service/source_registry.py`, `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/fpds_snapshot/capture.py`, `worker/discovery/fpds_snapshot/__main__.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `worker/discovery/tests/test_discovery.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `api/service/README.md`, `app/admin/README.md`, `worker/discovery/README.md`, `.env.dev.example`, `.env.prod.example`
+- Decisions: treated the request-layer timeout and the downstream source fetch timeout as separate problems and fixed both. Kept the existing run-detail surface as the main operator diagnosis path instead of inventing a second collection-progress surface in the same slice. Reused the existing run ids and source-collection plan builder so the queued source-catalog path stays compatible with the established run, review, and audit linkage patterns
+- Verification:
+  - `python -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry`
+  - `python -m unittest worker.discovery.tests.test_discovery worker.discovery.tests.test_snapshot_capture`
+  - `pnpm run typecheck`
+  - `python -m compileall api\service\api_service worker\discovery`
+- Known issues: the background no-detail outcome now appears in `/admin/runs` instead of as a fully computed immediate toast payload, and the existing `api.service.tests.test_source_collection_runner` temp-dir tests are still awkward under the current Windows sandbox because OS temp writes can be denied during automated execution even when the runner logic itself is unchanged
+- Next step: rerun BMO bank-wide collect from `/admin/banks`, confirm the admin action returns immediately with queued run ids, and then inspect the resulting run detail to see whether the longer timeout plus concurrent snapshot fetches clear the current BMO read-timeout pattern or whether BMO now needs a bank-specific fetch-policy follow-up
+
+## 2026-04-19 - Source Catalog Background Runner Preserved Detail Fallback Fix
+
+- WBS: `5.15`, `5.16`
+- Status: `done`
+- Goal: stop queued bank-wide source-catalog runs from being marked as `Partial completion` when homepage rediscovery fails to generate replacement detail rows but the bank still has an existing active detail scope that should remain collectible
+- Why now: Product Owner reran bank-wide collect after the async queue change and saw many Big 5 runs complete with `Homepage discovery produced no detail sources eligible for collection.` even though the run metadata still showed existing bank/product source ids that should have been reused
+- Outcome: the background `source_catalog_collection_runner` now reloads the current active source-registry scope for the bank/product when homepage materialization produces no replacement detail rows. If preserved active detail rows still exist, the runner reuses that preserved scope for downstream collection instead of closing the run as degraded with zero source items. Only truly empty active detail scope now ends as the no-detail partial-completion outcome
+- Not done: this slice did not redesign the run-status UI wording, and it did not change the homepage discovery scorer or page-evidence thresholds themselves
+- Key files: `api/service/api_service/source_catalog_collection_runner.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the fix in the background runner instead of widening the source-catalog materialization contract, because the bug was in how the queued path interpreted preserved scope rather than in the preservation rule itself
+- Verification:
+  - `python -m unittest api.service.tests.test_source_catalog_collection_runner`
+  - passed
+- Known issues: if homepage discovery and the preserved active scope are both empty, the run still correctly lands in partial completion with the no-detail summary
+- Next step: rerun a previously affected bank-wide collect and confirm `/admin/runs` now shows normal source-item counts for preserved-scope banks instead of zero-item partial completions
+
+## 2026-04-19 - Source Catalog Per-Run Isolation and Worker Stage Timeout Guard
+
+- WBS: `5.15`, `5.16`
+- Status: `done`
+- Goal: stop bank-wide async collect from leaving most runs permanently in `Started` when one product-type runner hangs mid-batch
+- Why now: Product Owner reran bank-wide collect and saw only the first few BMO runs progress while most later CIBC/RBC/Scotia/TD runs stayed at `0 source items` and `Started` with no error summary, which indicated one sequential background process had stalled before it reached the remaining runs
+- Outcome: source-catalog async launch now starts one background subprocess per bank/product run instead of one sequential process for the entire bank-wide batch, so one hung run cannot block later runs from starting or completing. The downstream `source_collection_runner` now also enforces a configurable `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` timeout for each worker stage and raises a clear failure summary when that watchdog trips, preventing indefinitely `started` runs when a worker subprocess stops returning
+- Not done: this slice did not redesign the `/admin/runs` UI or eliminate normal fetch timeout failures on slow bank pages; it focused on preventing indefinite stuck states and improving operator-visible closure
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/api_service/source_collection_runner.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_collection_runner.py`, `.env.dev.example`, `.env.prod.example`, `docs/03-design/dev-prod-environment-spec.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: preferred per-run subprocess isolation over adding more orchestration around the existing sequential batch runner because the product value is operational containment and predictable run closure, not keeping a large bank collect inside one long-lived controller process
+- Verification:
+  - `python -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_collection_runner api.service.tests.test_source_registry`
+  - `python -m compileall api\service\api_service`
+- Known issues: genuinely slow sites can still fail with snapshot read timeouts, but those runs should now close as `failed` instead of leaving unrelated later runs stuck in `started`
+- Next step: rerun a bank-wide collect and confirm that later bank/product runs progress independently even if an earlier run times out or fails
+
+## 2026-04-19 - BMO Browser Snapshot Fallback
+
+- WBS: `5.15`, `5.16`
+- Status: `done`
+- Goal: stop BMO chequing and similar BMO detail-source collects from failing at snapshot capture with repeated read timeouts
+- Why now: the Product Owner reran a single BMO chequing collect and all four detail sources failed in snapshot capture after three attempts each, with `The read operation timed out` even though the pages are reachable in a normal browser
+- Outcome: the shared discovery fetch layer now supports a targeted browser fallback path for domains in `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS`. When normal HTTPS fetches time out, reset, or return certain anti-bot statuses for those domains, the worker uses a local headless browser with a more browser-like profile to render the page and stores a PDF snapshot instead of failing the run outright. The downstream parse stage already supports `application/pdf`, so BMO HTML sources can continue through parse and extraction with only a content-type warning instead of a hard snapshot failure. HTML-only fetch paths still reject non-HTML fallback payloads so homepage discovery and page-evidence scoring do not accidentally ingest PDF fallback bytes as page HTML
+- Not done: this slice did not add a Linux browser-packaging story or remove every possible bank-specific fetch quirk; it focused on the current BMO failure mode visible on the Product Owner's machine
+- Key files: `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/tests/test_discovery.py`, `.env.dev.example`, `.env.prod.example`, `docs/03-design/dev-prod-environment-spec.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: preferred a narrow browser fallback over further timeout increases because live probing showed BMO was resetting or stalling non-browser clients on this machine while headless Edge could still render the same URLs
+- Verification:
+  - `python -m unittest worker.discovery.tests.test_discovery worker.discovery.tests.test_snapshot_capture`
+- Known issues: if no supported browser executable is installed and `FPDS_SOURCE_BROWSER_EXECUTABLE` is not set, eligible BMO fetches will still fail and now report a missing-browser fallback error instead of an opaque read timeout
+- Next step: rerun the BMO chequing collect and confirm the run advances past snapshot capture with stored snapshots plus a warning for HTML-to-PDF fallback rather than failing all sources
 ---
 
 ## 7. Change History
@@ -1902,3 +1967,7 @@ Each entry should include:
 | 2026-04-16 | Added the API service worker import path fix entry |
 | 2026-04-16 | Added the admin hydration warning guard entry and verification results |
 | 2026-04-16 | Added the bank registry modal workflow refresh entry and verification results |
+| 2026-04-19 | Added the source-catalog async queue and snapshot hardening entry |
+| 2026-04-19 | Added the preserved-detail fallback fix entry for source-catalog background runs |
+| 2026-04-19 | Added the per-run isolation and stage-timeout guard entry for source-catalog background runs |
+| 2026-04-19 | Added the BMO browser snapshot fallback entry |
