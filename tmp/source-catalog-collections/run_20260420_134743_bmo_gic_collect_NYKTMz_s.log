@@ -1,0 +1,2339 @@
+[source-catalog-runner] starting run run_20260420_134743_bmo_gic_collect_NYKTMz_s for BMO gic
+[source-collection-runner] run run_20260420_134743_bmo_gic_collect_NYKTMz_s starting snapshot for 2 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+  "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+  "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-7ce7c3195a7cb47e",
+      "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-7ce7c3195a7cb47e/raw",
+      "checksum": "ca511479c4193e3a359cdb27fda0442087d4f2ea8b0295cc3d8030096ce3feb6",
+      "fingerprint": "85951e6688ea7fe7c6c439fb68d13cd54945497d1fe7b444eda077679e5784f6",
+      "content_type": "application/pdf",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-04-20T13:55:28.602119+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-7ce7c3195a7cb47e",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-7ce7c3195a7cb47e/raw",
+        "content_type": "application/pdf",
+        "checksum": "ca511479c4193e3a359cdb27fda0442087d4f2ea8b0295cc3d8030096ce3feb6",
+        "fingerprint": "85951e6688ea7fe7c6c439fb68d13cd54945497d1fe7b444eda077679e5784f6",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "BMO-GIC-003",
+          "request_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+          "final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+          "status_code": 200,
+          "content_length": 444064,
+          "content_type": "application/pdf",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": null,
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-04-20T13:55:28.602119+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-dbc92e6ecdb229e3",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-7ce7c3195a7cb47e",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+          "content_type": "application/pdf",
+          "checksum": "ca511479c4193e3a359cdb27fda0442087d4f2ea8b0295cc3d8030096ce3feb6",
+          "fingerprint": "85951e6688ea7fe7c6c439fb68d13cd54945497d1fe7b444eda077679e5784f6",
+          "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-7ce7c3195a7cb47e/raw",
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "attempt_count": 1,
+          "preflight_status": "warning",
+          "preflight_issue_codes": [
+            "content_type_changed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "source_document_id": "src-bmo-html-75f472dc44bce8be",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-660fce62732008ed",
+      "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-660fce62732008ed/raw",
+      "checksum": "ad6de6c96045cb1d5ca2719227ad0084aa33527c2413139c967faa4d1ba0eabf",
+      "fingerprint": "decaae0c130362aefb6221c057284b0106a2b3f06058e0fdd7ea763fa12048ee",
+      "content_type": "application/pdf",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-04-20T13:55:28.423808+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-660fce62732008ed",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-660fce62732008ed/raw",
+        "content_type": "application/pdf",
+        "checksum": "ad6de6c96045cb1d5ca2719227ad0084aa33527c2413139c967faa4d1ba0eabf",
+        "fingerprint": "decaae0c130362aefb6221c057284b0106a2b3f06058e0fdd7ea763fa12048ee",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "BMO-GIC-002",
+          "request_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+          "final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+          "status_code": 200,
+          "content_length": 1135665,
+          "content_type": "application/pdf",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": null,
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-04-20T13:55:28.423808+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-feeb7d1fc0206332",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "selected_snapshot_id": "snap-660fce62732008ed",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+          "content_type": "application/pdf",
+          "checksum": "ad6de6c96045cb1d5ca2719227ad0084aa33527c2413139c967faa4d1ba0eabf",
+          "fingerprint": "decaae0c130362aefb6221c057284b0106a2b3f06058e0fdd7ea763fa12048ee",
+          "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-660fce62732008ed/raw",
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "attempt_count": 1,
+          "preflight_status": "warning",
+          "preflight_issue_codes": [
+            "content_type_changed"
+          ]
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+    "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+    "stats": {
+      "source_total": 2,
+      "ok_count": 0,
+      "warning_count": 2,
+      "error_count": 0,
+      "issue_total": 2
+    },
+    "source_checks": [
+      {
+        "source_id": "BMO-GIC-003",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "expected_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+        "expected_source_type": "html",
+        "status": "warning",
+        "fetched_at": "2026-04-20T13:53:15.861593+00:00",
+        "final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+        "normalized_final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": [
+          {
+            "source_id": "BMO-GIC-003",
+            "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+            "issue_code": "content_type_changed",
+            "severity": "warning",
+            "expected_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+            "detected_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+            "expected_source_type": "html",
+            "detected_content_type": "application/pdf",
+            "message": "Fetched content type does not match the registry source type."
+          }
+        ]
+      },
+      {
+        "source_id": "BMO-GIC-002",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "expected_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+        "expected_source_type": "html",
+        "status": "warning",
+        "fetched_at": "2026-04-20T13:54:17.310112+00:00",
+        "final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+        "normalized_final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": [
+          {
+            "source_id": "BMO-GIC-002",
+            "source_document_id": "src-bmo-html-75f472dc44bce8be",
+            "issue_code": "content_type_changed",
+            "severity": "warning",
+            "expected_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+            "detected_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+            "expected_source_type": "html",
+            "detected_content_type": "application/pdf",
+            "message": "Fetched content type does not match the registry source type."
+          }
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "run_state": "completed",
+    "source_document_count": 2,
+    "stored_snapshot_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-04-20T13:52:19.803328+00:00",
+    "completed_at": "2026-04-20T13:55:34.543067+00:00"
+  }
+}
+[source-collection-runner] run run_20260420_134743_bmo_gic_collect_NYKTMz_s continuing with 2 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+  "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+  "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_id": "snap-7ce7c3195a7cb47e",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-68a9099f62210f0a",
+      "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/metadata.json",
+      "chunk_count": 7,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-dbc92e6ecdb229e3",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-7ce7c3195a7cb47e",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-68a9099f62210f0a",
+          "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/metadata.json",
+          "chunk_count": 7,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "source_document_id": "src-bmo-html-75f472dc44bce8be",
+      "snapshot_id": "snap-660fce62732008ed",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-4db1dcb766498962",
+      "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/metadata.json",
+      "chunk_count": 26,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-feeb7d1fc0206332",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "selected_snapshot_id": "snap-660fce62732008ed",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-4db1dcb766498962",
+          "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/metadata.json",
+          "chunk_count": 26,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "run_state": "completed",
+    "parsed_document_count": 2,
+    "evidence_chunk_count": 33,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-20T13:55:59.899649+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+{
+  "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+  "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+  "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "extracted_field_count": 55,
+    "evidence_link_count": 39
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_id": "snap-7ce7c3195a7cb47e",
+      "parsed_document_id": "parsed-68a9099f62210f0a",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+      "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "BMO",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "may also use your",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "BMO Progressive GIC Series search tool",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Legal Modern Slavery Act Statement Careers Accessibility at BMO Accessibility Feedback Site map Customer Complaint Handling Process Feedback We, and third parties we select, use cookies, tracking tools, webforms and other similar technologies to collect certain information about ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-a1d31825f637befa",
+          "evidence_text_excerpt": "Legal\nModern Slavery Act Statement\nCareers\nAccessibility at BMO\nAccessibility Feedback\nSite map\nCustomer Complaint Handling Process\nFeedback\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Let's meet Prefer to meet in person? Great! Drop by your nearest branch to touch base about your financial future. BOOK AN APPOINTMENT Get in touch Visit our contact page to find your preferred way to get in touch with a BMO investment professional. CONTACT US *The current index value represents the index value on the last business day of the previous month and is to be used for information purposes only. The current index value does not represent the actual present value of your investment or what you will receive at maturity. We are members of the Canada Deposit Insurance Corporation (CDIC) Explore our services Bank Accounts We, and third parties we select, use cookies, tracking tools, webforms and other similar technologies to collect certain information about you, your device and use of our digital properties. This protects you from fraud, improves your online experience, monitors",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Credit Card Mortgages Loans Investments Creditor Insurance Travel Insurance Security Centre How We Protect You How to Protect Yourself Security Tips Learning Centre Report Fraud Report Lost/Stolen Debit Card Report Lost/Stolen Credit Card Security Alerts Ways to Bank Overview Reg",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-6efbc3b889a69c01",
+          "evidence_text_excerpt": "Credit Card\nMortgages\nLoans\nInvestments\nCreditor Insurance\nTravel Insurance\nSecurity Centre\nHow We Protect You\nHow to Protect Yourself\nSecurity Tips\nLearning Centre\nReport Fraud\nReport Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "debit"
+            ]
+          }
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_payout_option",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "at",
+              "at maturity",
+              "maturity"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-1d5865cd2914c2c3",
+          "evidence_text_excerpt": "Global Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nCustomer support\nBranch locator\nBook an appointment\nAbout BMO\nInvestor Relations\nPrivacy\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "cheque_book_info",
+          "candidate_value": "Let's meet Prefer to meet in person? Great! Drop by your nearest branch to touch base about your financial future. BOOK AN APPOINTMENT Get in touch Visit our contact page to find your preferred way to get in touch with a BMO investment professional. CONTACT US *The current index ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "book"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "information"
+            ]
+          }
+        },
+        {
+          "field_name": "return_structure",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "options"
+            ]
+          }
+        },
+        {
+          "field_name": "principal_protection",
+          "candidate_value": "Global Money Transfer Pay Bills BMO Debit Card Overdraft Protection CRA Direct Deposit Digital Demos BMO Alerts Customer support Branch locator Book an appointment About BMO Investor Relations Privacy We, and third parties we select, use cookies, tracking tools, webforms and othe",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "evidence_chunk_id": "chunk-1d5865cd2914c2c3",
+          "evidence_text_excerpt": "Global Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nCustomer support\nBranch locator\nBook an appointment\nAbout BMO\nInvestor Relations\nPrivacy\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "protection"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Legal Modern Slavery Act Statement Careers Accessibility at BMO Accessibility Feedback Site map Customer Complaint Handling Process Feedback We, and third parties we select, use cookies, tracking tools, webforms and other similar technologies to collect certain information about ",
+          "evidence_chunk_id": "chunk-a1d31825f637befa",
+          "evidence_text_excerpt": "Legal\nModern Slavery Act Statement\nCareers\nAccessibility at BMO\nAccessibility Feedback\nSite map\nCustomer Complaint Handling Process\nFeedback\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Let's meet Prefer to meet in person? Great! Drop by your nearest branch to touch base about your financial future. BOOK AN APPOINTMENT Get in touch Visit our contact page to find your preferred way to get in touch with a BMO investment professional. CONTACT US *The current index value represents the index value on the last business day of the previous month and is to be used for information purposes only. The current index value does not represent the actual present value of your investment or what you will receive at maturity. We are members of the Canada Deposit Insurance Corporation (CDIC) Explore our services Bank Accounts We, and third parties we select, use cookies, tracking tools, webforms and other similar technologies to collect certain information about you, your device and use of our digital properties. This protects you from fraud, improves your online experience, monitors",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Credit Card Mortgages Loans Investments Creditor Insurance Travel Insurance Security Centre How We Protect You How to Protect Yourself Security Tips Learning Centre Report Fraud Report Lost/Stolen Debit Card Report Lost/Stolen Credit Card Security Alerts Ways to Bank Overview Reg",
+          "evidence_chunk_id": "chunk-6efbc3b889a69c01",
+          "evidence_text_excerpt": "Credit Card\nMortgages\nLoans\nInvestments\nCreditor Insurance\nTravel Insurance\nSecurity Centre\nHow We Protect You\nHow to Protect Yourself\nSecurity Tips\nLearning Centre\nReport Fraud\nReport Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-1d5865cd2914c2c3",
+          "evidence_text_excerpt": "Global Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nCustomer support\nBranch locator\nBook an appointment\nAbout BMO\nInvestor Relations\nPrivacy\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "cheque_book_info",
+          "candidate_value": "Let's meet Prefer to meet in person? Great! Drop by your nearest branch to touch base about your financial future. BOOK AN APPOINTMENT Get in touch Visit our contact page to find your preferred way to get in touch with a BMO investment professional. CONTACT US *The current index ",
+          "evidence_chunk_id": "chunk-824261e9df013bb7",
+          "evidence_text_excerpt": "Let's meet\nPrefer to meet in person? Great! Drop by your nearest\nbranch to touch base about your financial future.\nBOOK AN APPOINTMENT\nGet in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\n*The current index value represents the index value on the last business day of the previous month and is to be\nused for information purposes only. The current index value does not represent the actual present value of your\ninvestment or what you will receive at maturity.\nWe are members of the Canada Deposit Insurance Corporation (CDIC)\nExplore our services\nBank Accounts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "return_structure",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "GIC BMO Progressive GIC Series search tool Select a GIC from the dropdown menu and filter your results to view returns, product profiles and more. Have questions? That's what we're here for. We'll call you Let one of our investment experts get in touch to chat about your options.",
+          "evidence_chunk_id": "chunk-3da76ae0e2f48618",
+          "evidence_text_excerpt": "GIC\nBMO Progressive GIC Series search tool\nSelect a GIC\nfrom the dropdown menu and filter your results to view returns, product profiles and more.\nHave questions? That's what we're here for.\nWe'll call you\nLet one of our investment experts get in touch to chat\nabout your options.\nLET US CONTACT YOU\nSelect a Progressive GIC\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "principal_protection",
+          "candidate_value": "Global Money Transfer Pay Bills BMO Debit Card Overdraft Protection CRA Direct Deposit Digital Demos BMO Alerts Customer support Branch locator Book an appointment About BMO Investor Relations Privacy We, and third parties we select, use cookies, tracking tools, webforms and othe",
+          "evidence_chunk_id": "chunk-1d5865cd2914c2c3",
+          "evidence_text_excerpt": "Global Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nCustomer support\nBranch locator\nBook an appointment\nAbout BMO\nInvestor Relations\nPrivacy\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+          "source_snapshot_id": "snap-7ce7c3195a7cb47e",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-dbc92e6ecdb229e3",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-7ce7c3195a7cb47e",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-68a9099f62210f0a",
+          "model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-283cc9030bf48bf7/parsed-68a9099f62210f0a/metadata.json",
+          "extracted_field_count": 21,
+          "evidence_link_count": 13,
+          "runtime_notes": [],
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "source_document_id": "src-bmo-html-75f472dc44bce8be",
+      "snapshot_id": "snap-660fce62732008ed",
+      "parsed_document_id": "parsed-4db1dcb766498962",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-b78f6cd4f33706d7",
+      "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "BMO",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "GICs",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "GIC Interest Rates",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "1000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "1000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Eligible for CDIC deposit insurance, up to applicable limits.Learn more Rates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage Corporation (BMMC), BMO Trust Company (TRCO).",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "1000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "minimum"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "1000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "amount",
+              "minimum"
+            ]
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.50",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.50",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "2.50",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rate",
+              "special"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Term ($1,000+ investment) Interest rate (annually / compounded annually) Interest rate (monthly / semi-annually) 19 months - under 2 years2.400% 2 years - under 3 years 2.650% SHOW MORE RATES For under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Inv",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "period",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "100% Principal protection regardless of what happens in the market Eligible for CDIC deposit insurance, up to applicable limits BOOK AN APPOINTMENT BOOK AN APPOINTMENT 2.450% 12 Month BMO GIC6 3.100% We, and third parties we select, use cookies, tracking tools, webforms and other",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "SIGN IN Disclaimer Interest is calculated daily, paid at maturity.",
+          "value_type": "string",
+          "confidence": 0.9,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-43fdb53333cd0f87",
+          "evidence_text_excerpt": "Get in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\nAlready a BMO customer?\nIf you have an investment account, you can sign in to purchase GICs online.\nSIGN IN\nDisclaimer\nInterest is calculated daily, paid at maturity. The indicated interest rate subject to change at any time. The\nterms and conditions of this offer, including its overall availability, are at the sole and absolute discretion of\nBMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid semi-annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "calculated",
+              "calculated daily",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-96b02f463ce260b9",
+          "evidence_text_excerpt": "sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid annually or compounded annually and paid at maturity. The indicated interest\nrate subject to change at any time. The terms and conditions of this offer, including its overall availability, are at\nthe sole and absolute discretion of BMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid monthly, annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 14,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "is",
+              "monthly",
+              "paid",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Report Lost/Stolen Debit Card Report Lost/Stolen Credit Card Security Alerts Ways to Bank Overview Register for Online Banking Digital Banking Deposit Money Request Money Transfer Money Send Money Global Money Transfer Pay Bills BMO Debit Card Overdraft Protection CRA Direct Depo",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-596af319cdacb4f3",
+          "evidence_text_excerpt": "Report Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nGlobal Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-11",
+          "page_no": 11,
+          "chunk_index": 24,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "debit"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "12 month",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_term_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "month",
+              "term"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": 360,
+          "value_type": "integer",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_term_days",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "month",
+              "term"
+            ]
+          }
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cashable",
+              "early"
+            ]
+          }
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-801c583c606db25d",
+          "evidence_text_excerpt": "Browse our GIC rates\nWant the best GIC\nrates for your portfolio? Let\u2019s find something that\u2019s aligned with your financial goals.\nNon-Cashable Investments\nThis type of GIC cannot be cashed in before its maturity date. Your funds are locked in for a specific\nterm. However, it usually yields a higher return than a cashable GIC.\nBMO Guaranteed Investment Certificate (GIC)\nAn ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\n3\n5-Year BMO GIC6\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cashable",
+              "non"
+            ]
+          }
+        },
+        {
+          "field_name": "compounding_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "compounded",
+              "interest"
+            ]
+          }
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "value_type": "string",
+          "confidence": 0.98,
+          "extraction_method": "heuristic_payout_option",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-96b02f463ce260b9",
+          "evidence_text_excerpt": "sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid annually or compounded annually and paid at maturity. The indicated interest\nrate subject to change at any time. The terms and conditions of this offer, including its overall availability, are at\nthe sole and absolute discretion of BMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid monthly, annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 14,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "annually",
+              "at",
+              "at maturity",
+              "interest",
+              "maturity",
+              "monthly",
+              "paid",
+              "paid annually",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-596af319cdacb4f3",
+          "evidence_text_excerpt": "Report Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nGlobal Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-11",
+          "page_no": 11,
+          "chunk_index": 24,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "cheque_book_info",
+          "candidate_value": "An ideal investment that provides guaranteed interest for a short-term savings goal. 100% Principal protection regardless of what happens in the market Eligible for CDIC deposit insurance, up to applicable limits BOOK AN APPOINTMENT BOOK AN APPOINTMENT 2.450% 12 Month BMO GIC6 3.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "book"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "The terms and conditions of this offer, including its overall availability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior notice.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-271b1aacac0b2cf0",
+          "evidence_text_excerpt": "is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The terms and conditions of this offer, including its overall availability, are at the sole and absolute\ndiscretion of BMO and are subject to change at any time without prior notice.\n1\n2\n3\n4\n5\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 15,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "conditions",
+              "information"
+            ]
+          }
+        },
+        {
+          "field_name": "gic_rate_table",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "gic",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment options and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more Rates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage Cor",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "options",
+              "term"
+            ]
+          }
+        },
+        {
+          "field_name": "rate_effective_date",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rate"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "1000.00",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "1000.00",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "fee_waiver_condition",
+          "candidate_value": "Eligible for CDIC deposit insurance, up to applicable limits.Learn more Rates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage Corporation (BMMC), BMO Trust Company (TRCO).",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "1000.00",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "1000.00",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.50",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.50",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "2.50",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Term ($1,000+ investment) Interest rate (annually / compounded annually) Interest rate (monthly / semi-annually) 19 months - under 2 years2.400% 2 years - under 3 years 2.650% SHOW MORE RATES For under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Inv",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "100% Principal protection regardless of what happens in the market Eligible for CDIC deposit insurance, up to applicable limits BOOK AN APPOINTMENT BOOK AN APPOINTMENT 2.450% 12 Month BMO GIC6 3.100% We, and third parties we select, use cookies, tracking tools, webforms and other",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "SIGN IN Disclaimer Interest is calculated daily, paid at maturity.",
+          "evidence_chunk_id": "chunk-43fdb53333cd0f87",
+          "evidence_text_excerpt": "Get in touch\nVisit our contact page to find your preferred way to\nget in touch with a BMO investment professional.\nCONTACT US\nAlready a BMO customer?\nIf you have an investment account, you can sign in to purchase GICs online.\nSIGN IN\nDisclaimer\nInterest is calculated daily, paid at maturity. The indicated interest rate subject to change at any time. The\nterms and conditions of this offer, including its overall availability, are at the sole and absolute discretion of\nBMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid semi-annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.9,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-96b02f463ce260b9",
+          "evidence_text_excerpt": "sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid annually or compounded annually and paid at maturity. The indicated interest\nrate subject to change at any time. The terms and conditions of this offer, including its overall availability, are at\nthe sole and absolute discretion of BMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid monthly, annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 14
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Report Lost/Stolen Debit Card Report Lost/Stolen Credit Card Security Alerts Ways to Bank Overview Register for Online Banking Digital Banking Deposit Money Request Money Transfer Money Send Money Global Money Transfer Pay Bills BMO Debit Card Overdraft Protection CRA Direct Depo",
+          "evidence_chunk_id": "chunk-596af319cdacb4f3",
+          "evidence_text_excerpt": "Report Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nGlobal Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-11",
+          "page_no": 11,
+          "chunk_index": 24
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "12 month",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": "360",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-4b1a0c60de92e38e",
+          "evidence_text_excerpt": "Term\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\n19 months - under 2 years2.400%\n2 years - under 3 years 2.650%\nSHOW MORE RATES\nFor under 1 year GIC rates within an RSP, see the under 1 year rates on a Short Term Investment\nCertificate\nIf monthly interest payment options chosen, then minimum investment amount required is $5,000.\nView our Auto-Renewal Rates\nSIGN IN TO BUY\nBOOK AN APPOINTMENT\nBMO RateRiser Max GIC\nBMO Short Term Investment Certificate\nBMO RateOptimizer Max GIC\nCashable Investments\nThis type of GIC gets you a guaranteed rate of return for the period of your term, while also giving\nyou access to your funds at prescribed early cash-in rates.\n\u00ae 3\n1\n\u00ae 4\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-5",
+          "page_no": 5,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-801c583c606db25d",
+          "evidence_text_excerpt": "Browse our GIC rates\nWant the best GIC\nrates for your portfolio? Let\u2019s find something that\u2019s aligned with your financial goals.\nNon-Cashable Investments\nThis type of GIC cannot be cashed in before its maturity date. Your funds are locked in for a specific\nterm. However, it usually yields a higher return than a cashable GIC.\nBMO Guaranteed Investment Certificate (GIC)\nAn ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\n3\n5-Year BMO GIC6\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "compounding_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "evidence_chunk_id": "chunk-96b02f463ce260b9",
+          "evidence_text_excerpt": "sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid annually or compounded annually and paid at maturity. The indicated interest\nrate subject to change at any time. The terms and conditions of this offer, including its overall availability, are at\nthe sole and absolute discretion of BMO and are subject to change at any time without prior notice.\nInterest is calculated daily, paid monthly, annually or compounded annually and paid at maturity. The indicated\ninterest rate subject to change at any time. The terms and conditions of this offer, including its overall\navailability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior\nnotice.\nInterest is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 14
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-596af319cdacb4f3",
+          "evidence_text_excerpt": "Report Lost/Stolen Debit Card\nReport Lost/Stolen Credit Card\nSecurity Alerts\nWays to Bank\nOverview\nRegister for Online Banking\nDigital Banking\nDeposit Money\nRequest Money\nTransfer Money\nSend Money\nGlobal Money Transfer\nPay Bills\nBMO Debit Card\nOverdraft Protection\nCRA Direct Deposit\nDigital Demos\nBMO Alerts\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-11",
+          "page_no": 11,
+          "chunk_index": 24
+        },
+        {
+          "field_name": "cheque_book_info",
+          "candidate_value": "An ideal investment that provides guaranteed interest for a short-term savings goal. 100% Principal protection regardless of what happens in the market Eligible for CDIC deposit insurance, up to applicable limits BOOK AN APPOINTMENT BOOK AN APPOINTMENT 2.450% 12 Month BMO GIC6 3.",
+          "evidence_chunk_id": "chunk-70a673ec9c116072",
+          "evidence_text_excerpt": "An ideal investment that provides guaranteed interest for a short-term savings goal.\n100% Principal protection regardless of what happens in the market\nEligible for CDIC deposit insurance, up to applicable limits\nBOOK AN APPOINTMENT\nBOOK AN APPOINTMENT\n2.450%\n12 Month BMO GIC6\n3.100%\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-2",
+          "page_no": 2,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "The terms and conditions of this offer, including its overall availability, are at the sole and absolute discretion of BMO and are subject to change at any time without prior notice.",
+          "evidence_chunk_id": "chunk-271b1aacac0b2cf0",
+          "evidence_text_excerpt": "is calculated daily, paid semi-annually or at maturity. The indicated interest rate subject to change at\nany time. The terms and conditions of this offer, including its overall availability, are at the sole and absolute\ndiscretion of BMO and are subject to change at any time without prior notice.\n1\n2\n3\n4\n5\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects you\nfrom fraud, improves your online experience, monitors analytics and\nperformance of our digital properties, and presents you with relevant\nmarketing messages. The third parties we select may also use your\ninformation in accordance with their privacy policies. Learn more\nabout our Digital Privacy Policy on bmo.com.",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-8",
+          "page_no": 8,
+          "chunk_index": 15
+        },
+        {
+          "field_name": "gic_rate_table",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment options and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more Rates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage Cor",
+          "evidence_chunk_id": "chunk-bce87fe65672539c",
+          "evidence_text_excerpt": "Enjoy attractive, guaranteed rates of interest with the flexibility to choose from several payment\noptions and terms. Eligible for CDIC deposit insurance, up to applicable limits.Learn more\nRates displayed are for all issuers: Bank of Montreal (BMO), Bank of Montreal Mortgage\nCorporation (BMMC), BMO Trust Company (TRCO).\nTerm\n($1,000+ investment)\nInterest rate\n(annually / compounded\nannually)\nInterest rate\n(monthly / semi-annually)\nAnnually / compounded annually\n1 year - under 18 months 2.450% 2.350%\n18 months - under 19 months2.500% 2.400%\n19 months - under 2 years2.500% 2.400%\n2 years - under 3 years 2.750% 2.650%\n3 years - under 4 years 2.850% 2.750%\n4 years - under 5 years 3.000% 2.900%\n5 years - under 6 years 3.100% 3.000%\n6 years - under 7 years 3.250% 3.150%\n7 years - under 10 years 3.300% 3.200%\n10 years exactly 3.350% 3.250%\nMonthly / semi-annually\n1 year - under 18 months",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "rate_effective_date",
+          "candidate_value": "GICs GIC Interest Rates Special Offers & Interest Rates for GICs GIC Overview GIC Rates GIC List GIC Calculator Grow your money securely by participating in the growth potential of two BMO Exchange Traded Funds that track the performance of select Canadian utility companies and t",
+          "evidence_chunk_id": "chunk-99cebb47f5f1f5ae",
+          "evidence_text_excerpt": "GICs\nGIC Interest Rates\nSpecial Offers & Interest Rates for GICs\nGIC Overview GIC Rates GIC List GIC Calculator\nGrow your money securely by participating in the growth potential of two BMO Exchange\nTraded Funds that track the performance of select Canadian utility companies and the six\nmajor Canadian banks, with no risk to your principal investment.\n100% Principal protection regardless of what happens in the market.\nHigher potential returns linked to the performance of ETFs that track utilities and\nfinancials.\nGuaranteed minimum rate of return of 2.50% after 5 years.8\nUp to 35.00%\n(Based on market performance)\nBMO Fund Linked GIC8\nSIGN IN\nACCEPT\nAND\nCONTINU\nE\nManage your\npreferences\nWe, and third parties we select, use cookies, tracking tools, webforms\nand other similar technologies to collect certain information about\nyou, your device and use of our digital properties. This protects",
+          "source_document_id": "src-bmo-html-75f472dc44bce8be",
+          "source_snapshot_id": "snap-660fce62732008ed",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-feeb7d1fc0206332",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "selected_snapshot_id": "snap-660fce62732008ed",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-4db1dcb766498962",
+          "model_execution_id": "modelexec-b78f6cd4f33706d7",
+          "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-75f472dc44bce8be/parsed-4db1dcb766498962/metadata.json",
+          "extracted_field_count": 34,
+          "evidence_link_count": 26,
+          "runtime_notes": [],
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "run_state": "completed",
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "extracted_draft_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-20T13:56:14.703282+00:00"
+  }
+}
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+  "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+  "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "stored_count": 1,
+    "failed_count": 0,
+    "candidate_count": 1,
+    "field_evidence_link_count": 12
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_id": "snap-7ce7c3195a7cb47e",
+      "parsed_document_id": "parsed-68a9099f62210f0a",
+      "extraction_model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+      "normalization_action": "stored",
+      "candidate_id": "cand-cdad010507de79db",
+      "normalization_model_execution_id": "modelexec-f22855fdcccfd58b",
+      "normalized_storage_key": "dev/normalized/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5475,
+      "runtime_notes": [
+        "Suppressed `promotional_period_text` because the extracted text described marketing copy rather than a bounded promotional period.",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+      ],
+      "error_summary": null,
+      "field_evidence_link_count": 12,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-dbc92e6ecdb229e3",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-7ce7c3195a7cb47e",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-cdad010507de79db",
+          "normalization_model_execution_id": "modelexec-f22855fdcccfd58b",
+          "extraction_model_execution_id": "modelexec-4eef2f2e0d0bc5cb",
+          "normalized_storage_key": "dev/normalized/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5475,
+          "field_evidence_link_count": 12,
+          "runtime_notes": [
+            "Suppressed `promotional_period_text` because the extracted text described marketing copy rather than a bounded promotional period.",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+          ],
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "field_evidence_link_count": 12,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-20T13:56:26.888999+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+  "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+  "request_id": "req_2d375762dcb74f378e1046dfbec73bf8",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "queued_count": 1,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 1
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_id": "snap-7ce7c3195a7cb47e",
+      "parsed_document_id": "parsed-68a9099f62210f0a",
+      "candidate_id": "cand-cdad010507de79db",
+      "candidate_run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-66e281bf083697e7",
+      "validation_storage_key": "dev/validated/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/metadata.json",
+      "review_task_id": "review-17936e3c67059e18",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6418,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Suppressed `promotional_period_text` because the extracted text described marketing copy rather than a bounded promotional period.",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-dbc92e6ecdb229e3",
+        "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-7ce7c3195a7cb47e",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-cdad010507de79db",
+          "candidate_run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+          "validation_model_execution_id": "modelexec-66e281bf083697e7",
+          "normalization_model_execution_id": "modelexec-f22855fdcccfd58b",
+          "validation_storage_key": "dev/validated/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/BMO/src-bmo-html-283cc9030bf48bf7/cand-cdad010507de79db/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6418,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-17936e3c67059e18",
+          "runtime_notes": [
+            "Suppressed `promotional_period_text` because the extracted text described marketing copy rather than a bounded promotional period.",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_2tJ5QF7-vmlJDpGI",
+          "request_id": "req_2d375762dcb74f378e1046dfbec73bf8"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260420_134743_bmo_gic_collect_NYKTMz_s",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "review_task_count": 1,
+    "review_queued_count": 1,
+    "auto_validated_count": 0,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-04-20T13:56:37.732670+00:00"
+  }
+}
+[source-collection-runner] run run_20260420_134743_bmo_gic_collect_NYKTMz_s completed downstream stages
+[source-catalog-runner] finished run run_20260420_134743_bmo_gic_collect_NYKTMz_s

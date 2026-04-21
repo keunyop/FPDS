@@ -76,12 +76,13 @@ class FetchPolicyTests(unittest.TestCase):
 
     def test_validate_fetch_url_allows_td_https_urls(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
-        validate_fetch_url("https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates", policy)
+        normalized = validate_fetch_url("https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates", policy)
+        self.assertEqual(normalized, "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates")
 
-    def test_validate_fetch_url_rejects_non_https(self) -> None:
+    def test_validate_fetch_url_upgrades_allowlisted_http_to_https(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
-        with self.assertRaises(ValueError):
-            validate_fetch_url("http://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates", policy)
+        normalized = validate_fetch_url("http://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates", policy)
+        self.assertEqual(normalized, "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates")
 
     def test_validate_fetch_url_rejects_unapproved_domains(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)

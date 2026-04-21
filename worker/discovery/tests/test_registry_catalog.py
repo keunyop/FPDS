@@ -57,6 +57,13 @@ class RegistryCatalogTests(unittest.TestCase):
         self.assertEqual(resolved["TD-CHQ-002"].product_type, "chequing")
         self.assertEqual(resolved["RBC-CHQ-002"].bank_code, "RBC")
 
+    def test_scotia_savings_seed_registry_uses_current_us_dollar_account_url(self) -> None:
+        resolved = resolve_sources_by_id(["SCOTIA-SAV-005"])
+        self.assertEqual(
+            resolved["SCOTIA-SAV-005"].normalized_url,
+            "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

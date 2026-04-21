@@ -367,6 +367,479 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_extracts_bmo_product_name_from_noisy_pdf_candidates(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-bmo-pdf-title")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="BMO-SAV-002",
+                parsed_document_id="parsed-bmo-sav-001",
+                source_document_id="src-bmo-sav-001",
+                snapshot_id="snap-bmo-sav-001",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="pdf",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "expected_fields": ["product_name", "monthly_fee"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-001",
+                    parsed_document_id="parsed-bmo-sav-001",
+                    chunk_index=0,
+                    anchor_type="page",
+                    anchor_value="page-1",
+                    page_no=1,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "B E N E F I T S\n"
+                        "Get a high interest rate, pay no monthly plan fee, and more\n"
+                        "Earn a 0.50% savings interest rate or a promotional rate of 4.50%\n"
+                        "Benefits Rates and Fees Mobile FAQs"
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-001",
+                    source_snapshot_id="snap-bmo-sav-001",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="pdf",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-002",
+                    parsed_document_id="parsed-bmo-sav-001",
+                    chunk_index=1,
+                    anchor_type="page",
+                    anchor_value="page-2",
+                    page_no=2,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Sign up for BMO Online Banking\n"
+                        "Savings Amplifier Account FAQs\n"
+                        "What is a savings account?"
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-001",
+                    source_snapshot_id="snap-bmo-sav-001",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="pdf",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-003",
+                    parsed_document_id="parsed-bmo-sav-001",
+                    chunk_index=2,
+                    anchor_type="page",
+                    anchor_value="page-3",
+                    page_no=3,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "R A T E S A N D F E E S\n"
+                        "Explore the features of the Savings Amplifier Account\n"
+                        "Monthly fee $0"
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-001",
+                    source_snapshot_id="snap-bmo-sav-001",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="pdf",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-bmo-sav-001",
+                correlation_id="corr-bmo-sav-001",
+                request_id="req-bmo-sav-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "Savings Amplifier Account")
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "0.00")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_extracts_product_name_from_marketing_wrapper_headings(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-wrapper-title")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="TD-GIC-003",
+                parsed_document_id="parsed-td-gic-003",
+                source_document_id="src-td-gic-003",
+                snapshot_id="snap-td-gic-003",
+                bank_code="TD",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "gic", "expected_fields": ["product_name"]},
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-wrapper-001",
+                    parsed_document_id="parsed-td-gic-003",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="benefits-of-td-special-offer-gics",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Benefits of TD Special Offer GICs\n"
+                        "Potentially earn a higher rate than traditional GICs."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-td-gic-003",
+                    source_snapshot_id="snap-td-gic-003",
+                    bank_code="TD",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-wrapper-001",
+                correlation_id="corr-wrapper-001",
+                request_id="req-wrapper-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "TD Special Offer GICs")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_extracts_product_name_prefers_real_account_name_over_feature_heading(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-feature-title")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="RBC-SAV-002",
+                parsed_document_id="parsed-rbc-sav-002",
+                source_document_id="src-rbc-sav-002",
+                snapshot_id="snap-rbc-sav-002",
+                bank_code="RBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "savings", "expected_fields": ["product_name"]},
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-feature-001",
+                    parsed_document_id="parsed-rbc-sav-002",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="more-great-account-features",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "More Great Account Features\n"
+                        "RBC High Interest eSavings Account\n"
+                        "Earn interest daily and pay no monthly fee."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-rbc-sav-002",
+                    source_snapshot_id="snap-rbc-sav-002",
+                    bank_code="RBC",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-feature-001",
+                correlation_id="corr-feature-001",
+                request_id="req-feature-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "RBC High Interest eSavings Account")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_money_extraction_prefers_fee_label_over_unrelated_amounts(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-money-labels")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="CIBC-SAV-002",
+                parsed_document_id="parsed-cibc-sav-002",
+                source_document_id="src-cibc-sav-002",
+                snapshot_id="snap-cibc-sav-002",
+                bank_code="CIBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "expected_fields": ["monthly_fee", "public_display_fee"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-fee-001",
+                    parsed_document_id="parsed-cibc-sav-002",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Rates and fees\n"
+                        "Earned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\n"
+                        "Monthly fee\n"
+                        "$0\n"
+                        "Transactions\n"
+                        "$5.00 each"
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-sav-002",
+                    source_snapshot_id="snap-cibc-sav-002",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-cibc-fee-001",
+                correlation_id="corr-cibc-fee-001",
+                request_id="req-cibc-fee-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "0.00")
+            self.assertEqual(extracted_by_field["public_display_fee"].candidate_value, "0.00")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_money_extraction_treats_free_fee_labels_as_zero(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-money-free-labels")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="RBC-SAV-004",
+                parsed_document_id="parsed-rbc-sav-004",
+                source_document_id="src-rbc-sav-004",
+                snapshot_id="snap-rbc-sav-004",
+                bank_code="RBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "savings", "expected_fields": ["monthly_fee", "public_display_fee"]},
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-rbc-fee-001",
+                    parsed_document_id="parsed-rbc-sav-004",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "More Great Features Details Fees Monthly Fee Free Currency Canadian "
+                        "Monthly Debits included 1 per monthly cycle Additional debits $2.00 each "
+                        "Balances of $5,000 or more earn premium interest rates."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-rbc-sav-004",
+                    source_snapshot_id="snap-rbc-sav-004",
+                    bank_code="RBC",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-free-fee-001",
+                correlation_id="corr-free-fee-001",
+                request_id="req-free-fee-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "0.00")
+            self.assertEqual(extracted_by_field["public_display_fee"].candidate_value, "0.00")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_money_extraction_requires_minimum_labels(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-money-minimums")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="CIBC-SAV-002",
+                parsed_document_id="parsed-cibc-sav-003",
+                source_document_id="src-cibc-sav-003",
+                snapshot_id="snap-cibc-sav-003",
+                bank_code="CIBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "expected_fields": ["minimum_balance", "minimum_deposit"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-minimum-001",
+                    parsed_document_id="parsed-cibc-sav-003",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Earned on balances up to $200,000 when you save $200 or more in any month. Limits apply.",
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-sav-003",
+                    source_snapshot_id="snap-cibc-sav-003",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-minimum-002",
+                    parsed_document_id="parsed-cibc-sav-003",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="eligibility",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="No minimum balance required. No minimum opening deposit required.",
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-sav-003",
+                    source_snapshot_id="snap-cibc-sav-003",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-cibc-minimum-001",
+                correlation_id="corr-cibc-minimum-001",
+                request_id="req-cibc-minimum-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["minimum_balance"].candidate_value, "0.00")
+            self.assertEqual(extracted_by_field["minimum_deposit"].candidate_value, "0.00")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_term_extraction_ignores_non_term_day_counts_without_term_context(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-term-context")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="RBC-SAV-999",
+                parsed_document_id="parsed-rbc-sav-999",
+                source_document_id="src-rbc-sav-999",
+                snapshot_id="snap-rbc-sav-999",
+                bank_code="RBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "savings", "expected_fields": ["term_length_text", "term_length_days"]},
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-term-001",
+                    parsed_document_id="parsed-rbc-sav-999",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="mobile-deposit",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Cheque images can be viewed online for less than 90 days old in the mobile app.",
+                    retrieval_metadata={},
+                    source_document_id="src-rbc-sav-999",
+                    source_snapshot_id="snap-rbc-sav-999",
+                    bank_code="RBC",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-term-001",
+                correlation_id="corr-term-001",
+                request_id="req-term-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertNotIn("term_length_text", extracted_by_field)
+            self.assertNotIn("term_length_days", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_dynamic_product_type_uses_ai_fallback_when_configured(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-dynamic-service")
         try:

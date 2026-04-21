@@ -1,16 +1,50 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { RunStatusDetailResponse } from "@/lib/admin-api";
+import type { RunRetryResponse, RunStatusDetailResponse } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
 
 type RunDetailSurfaceProps = {
+  csrfToken: string | null | undefined;
   detail: RunStatusDetailResponse;
 };
 
-export function RunDetailSurface({ detail }: RunDetailSurfaceProps) {
+export function RunDetailSurface({ csrfToken, detail }: RunDetailSurfaceProps) {
+  const router = useRouter();
+  const [retryPending, setRetryPending] = useState(false);
+  const [retryMessage, setRetryMessage] = useState<string | null>(null);
+  const [retryError, setRetryError] = useState<string | null>(null);
+
+  async function handleRetry() {
+    setRetryPending(true);
+    setRetryMessage(null);
+    setRetryError(null);
+    try {
+      const response = await fetch(`/admin/runs/${detail.run.run_id}/retry`, {
+        method: "POST",
+        headers: {
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
+      });
+      const payload = (await response.json()) as { data?: RunRetryResponse; error?: { message?: string } };
+      if (!response.ok || !payload.data?.retry_run_id) {
+        setRetryError(payload.error?.message ?? "Run retry could not be queued.");
+        return;
+      }
+      setRetryMessage("Retry queued.");
+      router.push(`/admin/runs/${payload.data.retry_run_id}`);
+      router.refresh();
+    } catch {
+      setRetryError("Run retry could not be queued. Check the admin API and try again.");
+    } finally {
+      setRetryPending(false);
+    }
+  }
+
   return (
     <section className="grid gap-6">
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
@@ -57,6 +91,11 @@ export function RunDetailSurface({ detail }: RunDetailSurfaceProps) {
           <Button asChild variant="outline">
             <Link href="/admin/runs">Back to runs</Link>
           </Button>
+          {detail.run.retry_action.available ? (
+            <Button disabled={retryPending} onClick={handleRetry} type="button">
+              {retryPending ? "Retrying..." : "Retry run"}
+            </Button>
+          ) : null}
           {detail.run.retry_of_run_id ? (
             <Button asChild variant="outline">
               <Link href={`/admin/runs/${detail.run.retry_of_run_id}`}>Previous attempt</Link>
@@ -68,6 +107,19 @@ export function RunDetailSurface({ detail }: RunDetailSurfaceProps) {
             </Button>
           ) : null}
         </div>
+        {retryMessage ? (
+          <p className="mt-4 rounded-2xl border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
+            {retryMessage}
+          </p>
+        ) : null}
+        {retryError ? (
+          <p className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+            {retryError}
+          </p>
+        ) : null}
+        {!detail.run.retry_action.available && detail.run.run_status === "failed" && !detail.run.retried_by_run_id && detail.run.retry_action.reason ? (
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">{detail.run.retry_action.reason}</p>
+        ) : null}
       </article>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.16fr)_minmax(20rem,0.84fr)]">

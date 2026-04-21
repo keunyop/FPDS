@@ -6,6 +6,8 @@ from decimal import Decimal
 from typing import Any, Iterable
 from typing import TYPE_CHECKING
 
+from api_service.run_retry import describe_run_retry_action
+
 if TYPE_CHECKING:
     from psycopg import Connection
 
@@ -363,6 +365,12 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
             "correlation_id": _string_or_none(run_metadata.get("correlation_id")),
             "request_id": _string_or_none(run_metadata.get("request_id")),
             "source_ids": _coerce_string_list(run_metadata.get("source_ids")),
+            "retry_action": describe_run_retry_action(
+                run_state=str(run_row["run_state"]),
+                retried_by_run_id=_string_or_none(run_row.get("retried_by_run_id")),
+                run_type=str(run_row["run_type"]),
+                run_metadata=run_metadata,
+            ),
         },
         "source_items": serialized_source_rows,
         "stage_summaries": _build_stage_summaries(run_row=run_row, source_rows=source_rows, model_execution_rows=model_execution_rows),

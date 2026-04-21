@@ -181,6 +181,61 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_normalizes_gic_subtype_from_cashability_context_when_title_is_generic(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-context-subtype")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            context_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "product_name":
+                    context_fields.append(NormalizationExtractedField(**{**field.__dict__, "candidate_value": "Guaranteed Investment Certificates (GICs)"}))
+                    continue
+                context_fields.append(field)
+            context_fields.append(
+                _field(
+                    "cashability",
+                    "Document Investments Guaranteed Investment Certificates (GICs) Non-redeemable GIC",
+                    "string",
+                    0.72,
+                    evidence_chunk_id="chunk-gic-context",
+                )
+            )
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "extracted_fields": context_fields,
+                    "evidence_links": [
+                        *input_item.evidence_links,
+                        _evidence(
+                            "cashability",
+                            "Document Investments Guaranteed Investment Certificates (GICs) Non-redeemable GIC",
+                            "chunk-gic-context",
+                        ),
+                    ],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-gic-context-001", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertEqual(candidate["subtype_code"], "non_redeemable")
+            self.assertNotIn("ambiguous_mapping", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_missing_rate_sets_error_status(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-error")
         try:
@@ -209,6 +264,59 @@ class NormalizationServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_business_tag_ignores_business_day_phrases(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-business-day")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            notes_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "notes":
+                    continue
+                notes_fields.append(field)
+            notes_fields.append(
+                _field(
+                    "notes",
+                    "Funds will be available on the next business day following redemption.",
+                    "string",
+                    0.7,
+                    evidence_chunk_id="chunk-business-day",
+                )
+            )
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "extracted_fields": notes_fields,
+                    "evidence_links": [
+                        *input_item.evidence_links,
+                        _evidence(
+                            "notes",
+                            "Funds will be available on the next business day following redemption.",
+                            "chunk-business-day",
+                        ),
+                    ],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-business-day-001", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertNotIn("business", candidate["candidate_payload"]["target_customer_tags"])
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -333,6 +441,7 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-002"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-003"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-004"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
+        self.assertEqual(supporting_source_ids_for_target("SCOTIA-SAV-004"), ("SCOTIA-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-999"), ())
 
     def test_merge_supports_everyday_rate_fields_from_current_rates(self) -> None:
@@ -598,6 +707,44 @@ class SupportingMergeTests(unittest.TestCase):
             "Interest is calculated on the daily closing balance.",
         )
         self.assertNotIn("notes", fields_by_name)
+
+    def test_merge_supports_scotia_money_master_rates_from_rate_page(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "Money Master Savings Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.84, evidence_chunk_id="chunk-detail-fee"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="money-master-savings-account",
+                        excerpt=(
+                            "Money Master Savings Account\n"
+                            "Annual Interest Rate\n"
+                            "0.01%\n"
+                            "Annual Interest Rate with Bonus Interest Rate if enrolled in Smart Savings tools\n"
+                            "0.50%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="SCOTIA-SAV-004",
+            base_artifact=base_artifact,
+            supporting_artifacts={"SCOTIA-SAV-006": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.50")
+        self.assertIn("SCOTIA-SAV-006", " ".join(merged["runtime_notes"]))
 
 
 class NormalizationPersistenceTests(unittest.TestCase):

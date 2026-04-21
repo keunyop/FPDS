@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import os
 import re
-import subprocess
 from dataclasses import dataclass
 from typing import Callable, Sequence
+
+from worker.psql_cli import run_psql_command
 
 from .models import AggregateRefreshResult, CanonicalAggregateRow
 
@@ -449,22 +450,7 @@ SELECT COALESCE((
 
     @staticmethod
     def _run_psql(command: Sequence[str], sql: str) -> str:
-        env = dict(os.environ)
-        env["PGCLIENTENCODING"] = "UTF8"
-        completed = subprocess.run(
-            [*command, "-v", "ON_ERROR_STOP=1", "-X", "-q", "-A", "-t"],
-            input=sql,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            capture_output=True,
-            check=False,
-            env=env,
-        )
-        if completed.returncode != 0:
-            stderr = completed.stderr.strip() or completed.stdout.strip() or "unknown psql error"
-            raise RuntimeError(f"psql command failed: {stderr}")
-        return completed.stdout.strip()
+        return run_psql_command(command, sql, force_utf8=True)
 
 
 def _sql_literal(value: str | None) -> str:

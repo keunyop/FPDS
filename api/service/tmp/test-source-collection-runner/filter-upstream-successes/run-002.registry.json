@@ -1,0 +1,70 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-SAV-002",
+  "sources": [
+    {
+      "source_id": "BMO-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "detail",
+      "url": "https://www.bmo.com/sav-002",
+      "expected_fields": [
+        "product_name"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "detail",
+      "url": "https://www.bmo.com/sav-003",
+      "expected_fields": [
+        "product_name"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-SAV-007",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "supporting_pdf",
+      "purpose": "rates",
+      "url": "https://www.bmo.com/sav-007.pdf",
+      "expected_fields": [
+        "standard_rate"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    }
+  ]
+}

@@ -69,7 +69,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
         role: session.user.role,
       }}
     >
-      <RunDetailSurface detail={detail} />
+      <RunDetailSurface csrfToken={session.csrf_token} detail={detail} />
     </ApplicationShell5>
   );
 }

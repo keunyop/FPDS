@@ -654,8 +654,25 @@ domain row baseline:
 - `status`
 - `missing_data_ratio`
 - `cache_ttl_sec`
+- `serving_snapshot_id`
+- `queued_request_count`
+- `in_progress_request_count`
+- `retry_action`
 
-### 5.14 Admin API Notes
+### 5.14 `POST /api/admin/dashboard-health/retry`
+
+목적:
+- manual operator retry를 통해 aggregate refresh request를 큐잉한다.
+- retry는 latest successful snapshot serving을 끊지 않고 background refresh만 다시 요청한다.
+
+응답 `data` baseline:
+- `aggregate_refresh_request_id`
+- `request_status`
+- `trigger_reason`
+- `already_pending`
+- `launch`
+
+### 5.15 Admin API Notes
 
 - exact admin auth mechanism은 `1.6.1`에서 닫는다.
 - exact role matrix는 `1.6.2`에서 닫는다.

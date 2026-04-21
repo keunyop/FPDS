@@ -388,7 +388,7 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
                         <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", validationBadgeClasses(item.validation_status))}>
-                          {toTitleCase(item.validation_status)}
+                          {formatValidationStatusLabel(item.validation_status)}
                         </span>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -510,6 +510,16 @@ function formatConfidence(value: number | null) {
     return "n/a";
   }
   return `${Math.round(value * 100)}%`;
+}
+
+function formatValidationStatusLabel(value: string) {
+  if (value === "error") {
+    return "Validation Error";
+  }
+  if (value === "warning") {
+    return "Validation Warning";
+  }
+  return toTitleCase(value);
 }
 
 function toTitleCase(value: string) {

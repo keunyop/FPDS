@@ -1,0 +1,70 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-CHQ-002",
+  "sources": [
+    {
+      "source_id": "BMO-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "detail",
+      "url": "https://www.bmo.com/practical",
+      "expected_fields": [
+        "product_name"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "rates",
+      "url": "https://www.bmo.com/rates",
+      "expected_fields": [
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "BMO-CHQ-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "terms",
+      "url": "https://www.bmo.com/terms",
+      "expected_fields": [
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": null,
+      "product_type_description": null,
+      "product_type_dynamic": null,
+      "discovery_keywords": [],
+      "fallback_policy": null,
+      "discovery_metadata": {}
+    }
+  ]
+}

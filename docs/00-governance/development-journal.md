@@ -2056,6 +2056,175 @@ Each entry should include:
   - passed in `app/admin`
 - Known issues: if you want every later correction version to preserve an explicit candidate foreign key rather than `NULL`, that would need a broader schema change instead of this runtime fix
 - Next step: retry the same repeated `Edit & approve` flow in local dev and confirm the request now succeeds without the unique-constraint error
+
+## 2026-04-20 - BMO Product Name Extraction Hardening
+
+- WBS: `3.5`, `5.3`
+- Status: `done`
+- Goal: stop BMO savings detail collects from deriving section labels like `B E N E F I T S` as `product_name`
+- Why now: Product Owner found that BMO product pages were collecting the correct detail URLs but still saving the wrong product name because the current extraction heuristic trusted the first PDF chunk line after the BMO browser-snapshot fallback
+- Outcome: product-name extraction now scores multiple early lines across the parsed evidence chunks instead of blindly taking the first line. The heuristic now downranks navigation or CTA text, recognizes generic section labels even when PDF text spacing splits them into `B E N E F I T S`, and strips wrappers such as `... FAQs` or `Explore the features of ...` so BMO PDF fallback pages can still resolve titles like `Savings Amplifier Account`
+- Not done: this slice did not rerun a live BMO collection from the admin UI inside the session, and it did not redesign the broader PDF parsing pipeline beyond the title-selection heuristic
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_extraction.py`, `docs/00-governance/development-journal.md`
+- Decisions: kept the fix inside extraction rather than adding BMO-only registry overrides. The heuristic stays evidence-first by reading multiple candidate lines from the parsed document and only using cleaned title-like text when it scores above generic section or CTA lines
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction`
+  - passed
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization`
+  - passed
+- Known issues: live BMO pages still arrive through the targeted browser-to-PDF fallback, so future quality work may still want parser-level cleanup for cookie-banner or navigation noise that appears in the rendered PDFs
+- Next step: rerun the BMO savings collect flow against the real page and confirm the stored candidate product names now resolve to the account title instead of `B E N E F I T S`
+
+## 2026-04-20 - Worker Psql Windows Command-Length Hardening
+
+- WBS: `3.2`, `3.3`, `3.5`, `3.6`, `3.7`, `3.8`, `5.6`
+- Status: `done`
+- Goal: stop Big 5 collection runs from failing on Windows when worker persistence sends large JSON payloads to `psql` through `-v key=value` command-line arguments
+- Why now: Product Owner reported that the CIBC savings collect failed at the snapshot stage with `FileNotFoundError: [WinError 206] The filename or extension is too long`, which pointed to a local worker persistence bug rather than a bank-site fetch failure
+- Outcome: added a shared worker `psql` helper that strips large `-v` payloads off the process command line, rewrites `:'var'` placeholders to stdin-safe hex-decoded expressions, and sends the variable content through the `psql` input stream instead. Snapshot persistence now uses that helper, and the same fix was applied to the downstream worker persistence modules so parse, extraction, normalization, validation, result-viewer export, evidence retrieval, and aggregate refresh do not hit the same Windows command-length limit later in the run
+- Not done: this slice did not rerun the live CIBC savings collect from the admin UI inside the session, and it did not change the homepage-first source-selection quality that still allows low-confidence supporting CIBC pages into the generated registry scope
+- Key files: `worker/psql_cli.py`, `worker/discovery/fpds_snapshot/persistence.py`, `worker/pipeline/fpds_parse_chunk/persistence.py`, `worker/pipeline/fpds_extraction/persistence.py`, `worker/pipeline/fpds_normalization/persistence.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `worker/pipeline/fpds_result_viewer/persistence.py`, `worker/pipeline/fpds_evidence_retrieval/persistence.py`, `worker/pipeline/fpds_aggregate_refresh/persistence.py`, `worker/discovery/tests/test_psql_cli.py`, `docs/00-governance/development-journal.md`
+- Decisions: fixed the issue at the shared worker `psql` boundary instead of adding a snapshot-only workaround. That keeps the SQL text mostly unchanged, avoids widening the live schema surface, and hardens the other worker stages that still used the same `-v` argument pattern
+- Verification:
+  - `python -m unittest worker.discovery.tests.test_psql_cli`
+  - passed
+  - `python -m unittest worker.discovery.tests.test_snapshot_persistence`
+  - passed
+  - `python -m unittest worker.pipeline.tests.test_parse_chunk worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing worker.pipeline.tests.test_result_viewer worker.pipeline.tests.test_evidence_retrieval worker.pipeline.tests.test_aggregate_refresh`
+  - passed
+- Known issues: this fixes the Windows command-length failure, but it does not reduce overscoped generated-source batches such as CIBC savings pulling unrelated low-confidence supporting pages and PDFs into the run
+- Next step: rerun the failing CIBC savings collect in local dev and confirm the snapshot stage now persists successfully instead of failing before `run_source_item` rows are written
+
+## 2026-04-20 - Failed Run Retry From Run Detail
+
+- WBS: `4.5`, `5.15`
+- Status: `done`
+- Goal: let operators retry failed collection runs directly from `/admin/runs/:runId` instead of leaving the run detail screen to reconstruct the same collect action elsewhere
+- Why now: Product Owner asked for a run-detail retry path after diagnosing failed collection runs, especially when the failure root cause was local runtime behavior rather than a bad bank source
+- Outcome: added `POST /api/admin/runs/:runId/retry` plus a matching admin proxy route and run-detail action button. Failed run detail now shows retry availability for supported collection runs, and retrying creates a fresh queued run while linking the original run as `retried` and the new run as its next attempt. The current implementation supports failed `source_catalog_collection` and `source_collection` runs, which are the collection-safe run types with enough persisted scope metadata to reconstruct their input safely
+- Not done: this slice does not retry arbitrary internal stage runs such as standalone snapshot, parse, extraction, or normalization attempts. Those remain diagnostic-only because replaying a partial stage without its parent collection context would be riskier and less predictable
+- Key files: `api/service/api_service/run_retry.py`, `api/service/api_service/main.py`, `api/service/api_service/run_status.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_catalog.py`, `api/service/tests/test_run_retry.py`, `api/service/tests/test_run_status.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/app/admin/runs/[runId]/page.tsx`, `app/admin/src/app/admin/runs/[runId]/retry/route.ts`, `app/admin/src/components/fpds/admin/run-detail-surface.tsx`, `app/admin/README.md`, `api/service/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: kept the retry feature narrow to failed collection runs only. That gives operators a practical recovery path without pretending every failed ingestion sub-stage can be safely replayed in isolation. The original failed run now moves to `retried`, so default run-list filters may hide it unless operators include the `retried` state
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_run_retry api.service.tests.test_run_status api.service.tests.test_source_catalog api.service.tests.test_source_registry`
+  - passed
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_ops_scenario_qa`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+- Known issues: if a failed run's stored metadata is incomplete, unsupported, or expands back into multiple run groups during reconstruction, the retry endpoint returns a controlled error instead of forcing an unsafe replay
+- Next step: retry a live failed `source_catalog_collection` run from `/admin/runs/:runId` and confirm the button redirects into the new queued attempt while the original run now shows `Retried by`
+
+## 2026-04-20 - CIBC Review Validation Clarification And Money Extraction Hardening
+
+- WBS: `3.5`, `4.2`, `4.4`
+- Status: `done`
+- Goal: explain why a completed CIBC savings collect still produced review tasks with `error`, reduce misleading money extraction on those candidates, and make the review UI distinguish validation errors from run failures more clearly
+- Why now: Product Owner reported confusion because `run_20260420_203122_cibc_savings_collect_e_X9pLAb` completed successfully while two review tasks still showed `error`. Investigation showed the run itself had succeeded, but candidate validation failed because the fetched CIBC HTML exposed unresolved `RDS%rate[...]` placeholders instead of canonical numeric savings rates. The same candidates also had noisy money extraction such as `monthly_fee = 200000.00`
+- Outcome: money extraction is now field-aware for `monthly_fee`, `public_display_fee`, `minimum_balance`, and `minimum_deposit`. The extractor now reads money values near the relevant label instead of grabbing the first dollar amount in the chunk, which stops CIBC savings review payloads from treating values like `$200,000` or unrelated contribution limits as fees. On the admin side, review queue and review detail now label `error` and `warning` badges as `Validation Error` and `Validation Warning` so operators do not read candidate-validation state as a run-execution failure
+- Not done: this slice did not eliminate the CIBC review errors entirely. The current raw CIBC savings HTML still does not expose canonical numeric rates in a form the heuristic pipeline can store, so those candidates continue to require review until a larger bank-specific rate-capture slice lands
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_extraction.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `docs/00-governance/development-journal.md`
+- Decisions: kept the data fix narrow and safe. Instead of weakening validation or pretending unresolved placeholder strings satisfy required canonical savings-rate fields, the slice fixes the clearly wrong money extraction and clarifies the UI label so the remaining `Validation Error` still reflects a real data-quality gap
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: CIBC savings still needs a follow-on source-specific solution if we want those candidates to auto-pass validation. The underlying page content currently persists unresolved rate placeholders, so canonical numeric rate extraction remains incomplete
+- Next step: rerun the CIBC savings collect after this extraction fix and confirm the review payload no longer shows impossible fee values, then decide whether the next slice should target CIBC-specific rate capture or supporting-source merge logic
+
+## 2026-04-20 - Multi-Bank Collection Partial-Failure Hardening And Generic Title Cleanup
+
+- WBS: `3.2`, `3.5`, `3.6`, `5.15`
+- Status: `done`
+- Goal: stop mixed-bank collection batches from failing the whole run when a subset of sources fails snapshot or parse, and reduce the generic marketing-title noise that was creating low-quality review tasks across RBC, Scotia, and TD
+- Why now: Product Owner ran three banks together and surfaced two classes of problems. First, some sources failed for generic reasons such as stale `http://` links, stale `404` pages, and encrypted PDFs that local `pypdf` could not open without extra crypto support. Those per-source failures still cascaded into run-level `fpds_extraction failed with exit code 1` because the source-collection runner passed every snapshot-success source into downstream stages even when parse or extraction had already failed for part of the set. Second, review tasks showed recurring cross-bank extraction noise such as `Benefits of ...` or `More Great ... Features` becoming `product_name`, `Monthly Fee Free` being read as nonzero fees, `90 days old` becoming a false term length, and `next business day` falsely tagging products as business banking
+- Outcome: hardened `source_collection_runner` so each downstream stage now filters its input to the source ids that actually succeeded in the previous stage. Snapshot, parse, extraction, and normalization success are now chained explicitly, so one bad PDF or stale source no longer causes extraction to crash on missing parsed documents for unrelated survivors. Discovery fetch now upgrades allowlisted `http://` URLs to `https://` before validation and marks `404` fetches as non-retryable so snapshot capture fails them once instead of wasting repeated attempts. Extraction title cleanup now strips wrappers like `Benefits of ...`, `About ...`, and `What are ...`, downranks trailing `... Features` headings, treats fee labels followed by `Free` as zero, and requires term-like context before turning day/month/year phrases into `term_length_*`. Normalization now infers GIC subtype from a wider set of evidence fields and no longer tags a product as `business` just because text mentions a `business day`
+- Not done: this slice does not make encrypted AES PDFs parse locally without the missing crypto dependency, and it does not auto-heal stale registry URLs like the dead Scotia savings page. Those sources still fail individually, but they no longer take down otherwise healthy runs. Some review tasks for broad category pages will also still require human review because the source page itself does not expose a clean single-product payload
+- Key files: `api/service/api_service/source_collection_runner.py`, `api/service/tests/test_source_collection_runner.py`, `worker/discovery/fpds_discovery/fetch.py`, `worker/discovery/fpds_snapshot/capture.py`, `worker/discovery/tests/test_discovery.py`, `worker/discovery/tests/test_snapshot_capture.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `docs/00-governance/development-journal.md`
+- Decisions: fixed the run fragility at the orchestration boundary instead of weakening stage-level validation or pretending missing parse artifacts are acceptable input to extraction. Kept the fetch fix generic by canonicalizing allowlisted `http://` links to `https://` rather than bank-specific registry overrides. For review quality, preferred conservative heuristic cleanup over bank-specific title maps so the same fix helps TD `Benefits of ...` GIC pages, RBC `... Features` headings, and Scotia generic subtype text
+- Verification:
+  - `python -m unittest tests.test_source_collection_runner`
+  - passed in `api/service`
+  - `python -m unittest worker.discovery.tests.test_discovery worker.discovery.tests.test_snapshot_capture`
+  - passed
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization`
+  - passed
+- Known issues: stale registry links will still surface as failed source items until the registry materialization slice learns how to replace or suppress them proactively. Encrypted PDFs that require unavailable AES crypto support still fail parse on this machine, but the surviving HTML and PDF sources now continue through the run instead of causing downstream stage crashes
+- Next step: rerun the previously failing RBC chequing and Scotia chequing/savings collects, confirm they finish as partial completion instead of failed runs, and then review whether the remaining stale-source rows should become a separate registry-refresh cleanup slice
+
+## 2026-04-20 - Partial-Failure Hardening Live Rerun Verification
+
+- WBS: `3.2`, `3.5`, `3.6`, `5.15`
+- Status: `done`
+- Goal: confirm that the interrupted partial-failure hardening slice actually fixes the previously failed live source-catalog runs instead of only passing unit tests
+- Why now: the prior session was interrupted before we could verify the real failed runs, so the repo still had confusing live logs that showed RBC and Scotia collections dying in extraction with `No parsed document was found...`
+- Outcome: confirmed that the live failure logs predated the hardening patch. `api/service/api_service/source_collection_runner.py` was last modified after the stored failed RBC and Scotia logs, and rerunning the same stored source-catalog plans against the live dev DB now completes successfully. `run_20260420_222518_rbc_chequing_collect_IYDOM_51`, `run_20260420_222518_scotia_chequing_collect_h6WIxrEK`, and `run_20260420_222518_scotia_savings_collect_b1zEZ9d_` all reached validation/routing instead of crashing in extraction. The Scotia savings rerun still carried one expected source-level `404` snapshot failure plus one candidate-level `validation_error`, but the run completed and queued review work instead of failing the whole batch
+- Not done: this slice did not add new runtime code because the filtering fix was already present in the working tree. It also did not resolve the stale Scotia savings source URL or the remaining savings candidate validation gap
+- Key files: `docs/00-governance/development-journal.md`, `api/service/api_service/source_collection_runner.py`, `tmp/source-catalog-collections/run_20260420_222518_rbc_chequing_collect_IYDOM_51.log`, `tmp/source-catalog-collections/run_20260420_222518_scotia_chequing_collect_h6WIxrEK.log`, `tmp/source-catalog-collections/run_20260420_222518_scotia_savings_collect_b1zEZ9d_.log`
+- Decisions: treated this as a verification-and-closeout slice rather than widening scope into extra lineage or run-status redesign work. The current runner filtering is sufficient to prevent the original extraction crash on the reproduced live runs
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_run_retry api.service.tests.test_run_status api.service.tests.test_source_catalog api.service.tests.test_source_registry api.service.tests.test_source_collection_runner`
+  - passed
+  - `python -m unittest worker.discovery.tests.test_psql_cli worker.discovery.tests.test_discovery worker.discovery.tests.test_snapshot_capture`
+  - passed
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization`
+  - passed
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+  - `pnpm run build`
+  - passed in `app/admin`
+  - `api/service/.venv/Scripts/python.exe -m api_service.source_catalog_collection_runner --plan-path tmp/source-catalog-collections/run_20260420_222518_rbc_chequing_collect_IYDOM_51.json`
+  - completed successfully; run reached validation/routing and finished
+  - `api/service/.venv/Scripts/python.exe -m api_service.source_catalog_collection_runner --plan-path tmp/source-catalog-collections/run_20260420_222518_scotia_chequing_collect_h6WIxrEK.json`
+  - completed successfully; run reached validation/routing and finished
+  - `api/service/.venv/Scripts/python.exe -m api_service.source_catalog_collection_runner --plan-path tmp/source-catalog-collections/run_20260420_222518_scotia_savings_collect_b1zEZ9d_.json`
+  - completed successfully; run reached validation/routing and finished with source-level partial data quality issues instead of a run-level extraction crash
+- Known issues: Scotia savings still has a dead `404` source URL in the generated scope, and one savings candidate still lands in review with `validation_error`. Those are real data-quality follow-ons, not orchestration failures
+- Next step: separate the remaining Scotia savings stale-source cleanup from the already-fixed orchestration bug, then decide whether the next slice should focus on registry materialization cleanup or source-specific validation improvement
+
+## 2026-04-20 - Scotia Savings Seed Scope Refresh and Money Master Follow-up
+
+- WBS: `3.6`, `5.15`
+- Status: `done`
+- Goal: close the two remaining Scotia savings follow-ups by fixing the stale preserved-scope `404` and the Money Master savings validation gap
+- Why now: after the partial-failure hardening verification, Scotia savings still reused an old active `SCOTIA-SAV-005` row when homepage discovery preserved existing detail scope, so the run kept carrying a dead U.S. Dollar savings URL even though the seed JSON had already been corrected. At the same time, `SCOTIA-SAV-004` Money Master still lacked rate fields and landed in review with `validation_error`
+- Outcome: updated the Scotia savings seed registry URL for `SCOTIA-SAV-005` and added a focused preserved-scope refresh step in `source_catalog_collection_runner` so active seeded rows are rewritten from the current seed baseline before preserved detail scope is reused. This removed the stale `404` from the live Scotia savings run and changed `SCOTIA-SAV-005` snapshot capture from fetch failure to successful HTML capture on `https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html`. Also extended normalization supporting-merge logic so `SCOTIA-SAV-004` can borrow `standard_rate` and `public_display_rate` from `SCOTIA-SAV-006`, which moved Money Master from `validation_error` to `validation_status=pass` in the live rerun
+- Not done: `SCOTIA-SAV-005` now reaches normalization and validation, but it still lands in review with `required_field_missing`. This is a new real content or parser gap that was previously masked by the dead URL, and it should be treated as the next separate savings-quality slice rather than part of the stale-link fix
+- Key files: `api/service/api_service/source_catalog_collection_runner.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `worker/discovery/data/scotia_savings_source_registry.json`, `worker/discovery/tests/test_registry_catalog.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/tests/test_normalization.py`, `tmp/source-collections/run_20260420_222518_scotia_savings_collect_b1zEZ9d_.registry.json`, `tmp/source-catalog-collections/run_20260420_222518_scotia_savings_collect_b1zEZ9d_.log`
+- Decisions: kept the preserved-scope fix narrow by refreshing only active seed-backed rows for the current bank and product type immediately before preserved detail reuse, instead of widening this slice into a broader registry reseed or migration job. For Money Master, used the existing supporting-artifact merge pattern rather than adding a Scotia-only extraction special case
+- Verification:
+  - `api/service/.venv/Scripts/python.exe -m unittest api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_catalog`
+  - passed
+  - `python -m unittest worker.discovery.tests.test_registry_catalog worker.pipeline.tests.test_normalization`
+  - passed
+  - `api/service/.venv/Scripts/python.exe -m api_service.source_catalog_collection_runner --plan-path tmp/source-catalog-collections/run_20260420_222518_scotia_savings_collect_b1zEZ9d_.json`
+  - completed successfully; `SCOTIA-SAV-005` fetched from the new U.S. Dollar interest account URL and `SCOTIA-SAV-004` validated with supplemented rate fields
+- Known issues: `SCOTIA-SAV-005` still has a candidate-level `required_field_missing` validation error after the stale URL is fixed. That issue is now isolated and reproducible against the live page content
+- Next step: inspect the normalized and validated artifacts for `SCOTIA-SAV-005`, identify which required field is still missing, and decide whether the correct fix belongs in savings extraction heuristics or in a Scotia-specific supporting merge
+
+## 2026-04-21 - Aggregate Refresh Auto Queue and Dashboard Health
+
+- WBS: `5.6`, `5.7`, `5.8`, `5.13`
+- Status: `done`
+- Goal: make approved canonical changes propagate to public aggregate snapshots automatically, preserve latest-successful serving on failure, and expose the refresh state on a real admin health route with manual retry
+- Why now: `/products` was showing zero products even though `canonical_product` already had live approved rows because no successful aggregate snapshot existed yet. The current review approval flow wrote canonical truth but did not enqueue the post-commit aggregate refresh step described in the design docs, so public serving could silently drift from admin truth
+- Outcome: added `db/migrations/0010_aggregate_refresh_queue.sql` with a new `aggregate_refresh_request` table, implemented `api_service.aggregate_refresh` plus `api_service.aggregate_refresh_runner`, and wired `approve` / `edit-approve` to insert queue rows in the same transaction before launching a background runner after commit. The runner now coalesces queued requests into one refresh execution, reuses the existing aggregate worker persistence path, and keeps public serving on the latest successful snapshot when newer refreshes fail. Added `GET /api/admin/dashboard-health` and `POST /api/admin/dashboard-health/retry`, then shipped the live `/admin/health/dashboard` surface with pending, stale, failed, and healthy status visibility plus manual retry
+- Not done: this slice did not introduce a broader scheduler, lease-expiry governance, or a second publish approval gate. The queue is single-scope for the current Canada public aggregate baseline and intentionally keeps operator control to visibility plus retry
+- Key files: `db/migrations/0010_aggregate_refresh_queue.sql`, `api/service/api_service/aggregate_refresh.py`, `api/service/api_service/aggregate_refresh_runner.py`, `api/service/api_service/main.py`, `api/service/tests/test_aggregate_refresh.py`, `app/admin/src/app/admin/health/dashboard/page.tsx`, `app/admin/src/app/admin/health/dashboard/retry/route.ts`, `app/admin/src/components/fpds/admin/health-dashboard-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/components/application-shell5.tsx`, `api/service/README.md`, `app/admin/README.md`, `db/README.md`, `README.md`
+- Decisions: kept `aggregate_refresh_run` as execution history and added a separate queue table instead of overloading execution rows with `queued` semantics. Kept refresh asynchronous and post-commit so review approval never depends on public projection success. Chose visibility plus retry over a second public-release approval because review approval is already the human gate in Phase 1
+- Verification:
+  - `python -m unittest tests.test_aggregate_refresh tests.test_run_retry tests.test_public_products tests.test_review_detail`
+  - passed in `api/service`
+  - `python -m compileall api_service`
+  - passed in `api/service`
+  - `pnpm run typecheck`
+  - passed in `app/admin`
+- Known issues: the queue currently assumes one active Canada public aggregate scope and relies on the single-runner advisory lock rather than a broader scheduler or lease system. If the runtime later needs multi-country or per-scope refresh governance, the queue contract should expand explicitly instead of growing implicitly
+- Next step: apply `0010_aggregate_refresh_queue.sql` to the target database, restart the admin API so the new routes and runner module are available, then approve or edit-approve one review task and confirm `/admin/health/dashboard` moves through `pending` to `healthy` while `/products` continues serving the latest successful snapshot
+
 ---
 
 ## 7. Change History
@@ -2127,3 +2296,10 @@ Each entry should include:
 | 2026-04-20 | Added the approved-review reopen-for-edit-approve entry |
 | 2026-04-20 | Added the edited-review reopen-for-additional-edit-approve entry |
 | 2026-04-20 | Added the repeated edit-approve product-version constraint fix entry |
+| 2026-04-20 | Added the worker psql Windows command-length hardening entry |
+| 2026-04-20 | Added the failed run retry from run detail entry |
+| 2026-04-20 | Added the CIBC review validation clarification and money extraction hardening entry |
+| 2026-04-20 | Added the multi-bank collection partial-failure hardening and generic title cleanup entry |
+| 2026-04-20 | Added the partial-failure hardening live rerun verification entry |
+| 2026-04-20 | Added the Scotia savings seed-scope refresh and Money Master follow-up entry |
+| 2026-04-21 | Added the aggregate refresh auto-queue and dashboard health entry |

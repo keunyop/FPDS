@@ -1,0 +1,371 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-SAV-002",
+  "sources": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC eAdvantage Savings detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "regular_interest_rate",
+        "smart_interest_rate",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC personal bank account rates page",
+      "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "personal_account_rate_tables"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC eAdvantage interest rate terms page",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+      "expected_fields": [
+        "special_rate_rules",
+        "regular_interest_rules",
+        "bonus_interest_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC US Personal Account detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "regular_interest_rate",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-1a6e56be90",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility/service-commitment/resolving-your-complaints.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-539d12cc63",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-governance.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-87c86e96e8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-a4e86f15e0",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-4b58a0767d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.cibc.com/content/dam/personal_banking/bank_accounts/pdfs/cibc-pasf-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-b65c190c1e",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.cibc.com/content/dam/personal_banking/bank_accounts/pdfs/12419-personal-deposit-account-terms-and-conditions-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-e790a18681",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

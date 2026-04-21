@@ -1,0 +1,30 @@
+{
+  "collection_id": "collection_TIPkwzW0_83_b86f",
+  "correlation_id": "corr_nmQ1UIA4Ym55o_NY",
+  "request_id": "req_534b6a66a27442f09ca5c4e29569c8dc",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260420_203122_cibc_savings_collect_e_X9pLAb",
+      "catalog_item_id": "catalog-ca-cibc-savings",
+      "bank_code": "CIBC",
+      "bank_name": "CIBC",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_language": "en",
+      "homepage_url": "https://www.cibc.com",
+      "normalized_homepage_url": "https://www.cibc.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

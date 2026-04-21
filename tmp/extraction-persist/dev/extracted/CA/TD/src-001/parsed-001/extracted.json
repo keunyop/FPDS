@@ -9,7 +9,7 @@
   "model_execution_id": "modelexec-4b034e76c39c9326",
   "agent_name": "fpds-heuristic-extractor",
   "model_id": "heuristic-extractor-v1",
-  "started_at": "2026-04-17T23:50:37.668696+00:00",
+  "started_at": "2026-04-21T01:25:33.327905+00:00",
   "schema_context": {
     "product_family": "deposit",
     "product_type": "savings",
@@ -880,24 +880,6 @@
       "value_type": "string",
       "confidence": 0.99,
       "extraction_method": "derived_context",
-      "source_document_id": "src-001",
-      "source_snapshot_id": "snap-001",
-      "evidence_chunk_id": null,
-      "evidence_text_excerpt": null,
-      "anchor_type": null,
-      "anchor_value": null,
-      "page_no": null,
-      "chunk_index": null,
-      "field_metadata": {
-        "derived_field": true
-      }
-    },
-    {
-      "field_name": "product_name",
-      "candidate_value": "Interest rate: 1.10%. Interest is paid monthly.",
-      "value_type": "string",
-      "confidence": 0.88,
-      "extraction_method": "derived_title",
       "source_document_id": "src-001",
       "source_snapshot_id": "snap-001",
       "evidence_chunk_id": null,

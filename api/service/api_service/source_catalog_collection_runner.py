@@ -11,6 +11,7 @@ from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.source_catalog import _materialize_sources_for_catalog_item
 from api_service.source_registry import _insert_collection_run_row, prepare_source_collection
+from api_service.source_registry_utils import load_seed_source_registry_rows
 
 
 def main() -> int:
@@ -73,6 +74,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 "source_language": group["source_language"],
             },
         )
+        discovery_notes = list(materialized.discovery_notes)
         generated_rows = list(materialized.generated_rows)
         generated_source_ids = [
             str(item["source_id"])
@@ -92,6 +94,15 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         if target_source_ids:
             discovery_status = "detail_sources_ready"
         else:
+            refreshed_seed_source_ids = _refresh_active_seed_scope_rows(
+                connection,
+                bank_code=str(group["bank_code"]),
+                product_type=str(group["product_type"]),
+            )
+            if refreshed_seed_source_ids:
+                discovery_notes.append(
+                    "Active seeded source rows were refreshed from the current seed baseline before preserved detail scope reuse."
+                )
             preserved_scope = _load_active_collection_scope(
                 connection,
                 bank_code=str(group["bank_code"]),
@@ -107,7 +118,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             plan=plan,
             group=group,
             discovery_status=discovery_status,
-            discovery_notes=list(materialized.discovery_notes),
+            discovery_notes=discovery_notes,
             generated_source_ids=generated_source_ids,
             collection_source_ids=collection_source_ids,
             target_source_ids=target_source_ids,
@@ -204,6 +215,50 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
         "collection_source_ids": collection_source_ids,
         "target_source_ids": target_source_ids,
     }
+
+
+def _refresh_active_seed_scope_rows(connection: Any, *, bank_code: str, product_type: str) -> list[str]:
+    refreshed_source_ids: list[str] = []
+    updated_at = datetime.now(UTC)
+    for item in load_seed_source_registry_rows():
+        if str(item["bank_code"]) != bank_code or str(item["product_type"]) != product_type:
+            continue
+        row = connection.execute(
+            """
+            UPDATE source_registry_item
+            SET
+                country_code = %(country_code)s,
+                product_key = %(product_key)s,
+                source_name = %(source_name)s,
+                source_url = %(source_url)s,
+                normalized_url = %(normalized_url)s,
+                source_type = %(source_type)s,
+                discovery_role = %(discovery_role)s,
+                priority = %(priority)s,
+                source_language = %(source_language)s,
+                purpose = %(purpose)s,
+                expected_fields = %(expected_fields)s::jsonb,
+                seed_source_flag = %(seed_source_flag)s,
+                redirect_target_url = %(redirect_target_url)s,
+                alias_urls = %(alias_urls)s::jsonb,
+                change_reason = %(change_reason)s,
+                updated_at = %(updated_at)s
+            WHERE source_id = %(source_id)s
+              AND bank_code = %(bank_code)s
+              AND product_type = %(product_type)s
+              AND status = 'active'
+            RETURNING source_id
+            """,
+            {
+                **item,
+                "expected_fields": json.dumps(item.get("expected_fields") or [], ensure_ascii=True),
+                "alias_urls": json.dumps(item.get("alias_urls") or [], ensure_ascii=True),
+                "updated_at": updated_at,
+            },
+        ).fetchone()
+        if row:
+            refreshed_source_ids.append(str(row["source_id"]))
+    return refreshed_source_ids
 
 
 def _catalog_run_metadata(

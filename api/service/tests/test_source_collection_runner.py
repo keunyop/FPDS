@@ -79,6 +79,26 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                         {"source_id": "BMO-CHQ-007", "snapshot_action": "failed"},
                     ]
                 }
+            if module_name == "worker.pipeline.fpds_parse_chunk":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-CHQ-002", "parse_action": "stored"},
+                        {"source_id": "BMO-CHQ-006", "parse_action": "reused"},
+                    ]
+                }
+            if module_name == "worker.pipeline.fpds_extraction":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-CHQ-002", "extraction_action": "stored"},
+                        {"source_id": "BMO-CHQ-006", "extraction_action": "failed"},
+                    ]
+                }
+            if module_name == "worker.pipeline.fpds_normalization":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-CHQ-002", "normalization_action": "stored"},
+                    ]
+                }
             return {}
 
         temp_dir = self._workspace_temp_path("filter-successes")
@@ -111,6 +131,112 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         self.assertNotIn("BMO-CHQ-006", normalization_args)
         self.assertNotIn("BMO-CHQ-007", normalization_args)
         self.assertIn("BMO-CHQ-002", validation_args)
+
+    def test_run_group_filters_normalization_and_validation_to_upstream_stage_successes(self) -> None:
+        plan = {
+            "trigger_type": "admin_source_collection",
+            "triggered_by": "admin@example.com",
+        }
+        group = {
+            "run_id": "run-002",
+            "bank_code": "BMO",
+            "country_code": "CA",
+            "product_type": "savings",
+            "source_language": "en",
+            "included_source_ids": ["BMO-SAV-002", "BMO-SAV-003", "BMO-SAV-007"],
+            "target_source_ids": ["BMO-SAV-002", "BMO-SAV-003"],
+            "included_sources": [
+                {
+                    "source_id": "BMO-SAV-002",
+                    "priority": "P0",
+                    "seed_source_flag": True,
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "purpose": "detail",
+                    "source_url": "https://www.bmo.com/sav-002",
+                    "expected_fields": ["product_name"],
+                    "source_language": "en",
+                },
+                {
+                    "source_id": "BMO-SAV-003",
+                    "priority": "P0",
+                    "seed_source_flag": True,
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "purpose": "detail",
+                    "source_url": "https://www.bmo.com/sav-003",
+                    "expected_fields": ["product_name"],
+                    "source_language": "en",
+                },
+                {
+                    "source_id": "BMO-SAV-007",
+                    "priority": "P1",
+                    "seed_source_flag": False,
+                    "source_type": "pdf",
+                    "discovery_role": "supporting_pdf",
+                    "purpose": "rates",
+                    "source_url": "https://www.bmo.com/sav-007.pdf",
+                    "expected_fields": ["standard_rate"],
+                    "source_language": "en",
+                },
+            ],
+        }
+
+        stage_calls: list[tuple[str, list[str]]] = []
+
+        def fake_run_stage(module_name: str, args: list[str]) -> dict[str, object]:
+            stage_calls.append((module_name, args))
+            if module_name == "worker.discovery.fpds_snapshot":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-SAV-002", "snapshot_action": "stored"},
+                        {"source_id": "BMO-SAV-003", "snapshot_action": "stored"},
+                        {"source_id": "BMO-SAV-007", "snapshot_action": "stored"},
+                    ]
+                }
+            if module_name == "worker.pipeline.fpds_parse_chunk":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-SAV-002", "parse_action": "stored"},
+                        {"source_id": "BMO-SAV-003", "parse_action": "failed"},
+                        {"source_id": "BMO-SAV-007", "parse_action": "reused"},
+                    ]
+                }
+            if module_name == "worker.pipeline.fpds_extraction":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-SAV-002", "extraction_action": "stored"},
+                        {"source_id": "BMO-SAV-007", "extraction_action": "failed"},
+                    ]
+                }
+            if module_name == "worker.pipeline.fpds_normalization":
+                return {
+                    "source_results": [
+                        {"source_id": "BMO-SAV-002", "normalization_action": "stored"},
+                    ]
+                }
+            return {}
+
+        temp_dir = self._workspace_temp_path("filter-upstream-successes")
+        with (
+            patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
+            patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+        ):
+            source_collection_runner._run_group(plan=plan, group=group)
+
+        extraction_args = stage_calls[2][1]
+        normalization_args = stage_calls[3][1]
+        validation_args = stage_calls[4][1]
+        self.assertIn("BMO-SAV-002", extraction_args)
+        self.assertIn("BMO-SAV-007", extraction_args)
+        self.assertNotIn("BMO-SAV-003", extraction_args)
+        self.assertEqual(normalization_args.count("BMO-SAV-002"), 1)
+        self.assertNotIn("BMO-SAV-003", normalization_args)
+        self.assertNotIn("BMO-SAV-007", normalization_args)
+        self.assertEqual(validation_args.count("BMO-SAV-002"), 1)
+        self.assertNotIn("BMO-SAV-003", validation_args)
+        self.assertNotIn("BMO-SAV-007", validation_args)
 
     def test_run_group_stops_when_snapshot_has_no_successes(self) -> None:
         plan = {"trigger_type": "admin_source_collection", "triggered_by": "admin@example.com"}
@@ -163,6 +289,21 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                 }
             ),
             ["SRC-001", "SRC-002"],
+        )
+
+    def test_successful_stage_source_ids_supports_non_snapshot_stages(self) -> None:
+        self.assertEqual(
+            source_collection_runner._successful_stage_source_ids(
+                stage_output={
+                    "source_results": [
+                        {"source_id": "SRC-001", "normalization_action": "stored"},
+                        {"source_id": "SRC-002", "normalization_action": "failed"},
+                    ]
+                },
+                action_field="normalization_action",
+                success_actions={"stored"},
+            ),
+            ["SRC-001"],
         )
 
     def test_run_stage_raises_clear_error_when_worker_stage_times_out(self) -> None:

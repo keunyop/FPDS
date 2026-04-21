@@ -1,0 +1,448 @@
+{
+  "registry_version": "2026-04-21",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "SCOTIA-CHQ-002",
+  "sources": [
+    {
+      "source_id": "SCOTIA-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Ultimate Package detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Preferred Package detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "savings_rate_boost"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Basic Plus Bank Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_etransfer_support"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Basic Bank Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "eligibility_fee_waivers"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank chequing comparison page",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+      "expected_fields": [
+        "account_comparison_rows",
+        "monthly_fee",
+        "included_transactions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-48e3a3358b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/about/inside-scotiabank/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-5d824a7b3c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "http://www.scotiabank.com/ca/en/personal/ways-to-bank/scotiabank-international-money-transfer-agreement.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-8978e402d7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/about/our-company.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-9e7e2e0de5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/about/contact-us/legal.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-4a42d71bcb",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/common/documents/Disclosure-Policy-January-2026.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-ac36967a29",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/en/documents/chequing-&-savings/day-to-day_banking_companion_booklet.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-c650641b16",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/common/documents/pdf/day_to_day/PAD_PAC_Payroll-Transaction-Descriptions_EN.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-CHQ-f50fe257ca",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/corporate/quarterly-reports/2026/q1/Q126_Scotiabank_Investor_Factsheet.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

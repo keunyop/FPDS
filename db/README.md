@@ -12,14 +12,18 @@ Current decisions:
 Files:
 - `migrations/0001_initial_baseline.sql`: core schema and seed data
 - `migrations/0002_admin_auth.sql`: DB-backed admin user, session, and login-attempt tables for `WBS 4.1`
+- `migrations/0003_aggregate_refresh.sql`: aggregate snapshot execution history plus public projection tables
 - `migrations/0009_backfill_review_edit_approved_candidate_product_name.sql`: backfills `normalized_candidate.product_name` plus `candidate_payload.product_name` from the latest stored `edit_approve` product-name override
+- `migrations/0010_aggregate_refresh_queue.sql`: aggregate refresh request queue for auto-enqueued review approvals and manual retry
 
 How to apply when a database is available:
 
 ```powershell
 psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 ```
 
 Notes:

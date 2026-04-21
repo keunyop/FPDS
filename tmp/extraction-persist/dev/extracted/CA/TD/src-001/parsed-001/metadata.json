@@ -6,7 +6,7 @@
   "model_execution_id": "modelexec-4b034e76c39c9326",
   "extracted_storage_key": "dev/extracted/CA/TD/src-001/parsed-001/extracted.json",
   "metadata_storage_key": "dev/extracted/CA/TD/src-001/parsed-001/metadata.json",
-  "extracted_field_count": 22,
+  "extracted_field_count": 21,
   "evidence_link_count": 14,
   "runtime_notes": []
 }

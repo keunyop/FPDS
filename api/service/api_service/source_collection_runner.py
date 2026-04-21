@@ -60,8 +60,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     if not successful_source_ids:
         raise RuntimeError("Snapshot capture failed for all selected sources.")
 
-    successful_source_id_set = set(successful_source_ids)
-    successful_target_source_ids = [source_id for source_id in target_source_ids if source_id in successful_source_id_set]
+    successful_target_source_ids = _filter_requested_source_ids(
+        requested_source_ids=target_source_ids,
+        successful_source_ids=successful_source_ids,
+    )
     if not successful_target_source_ids:
         raise RuntimeError("Snapshot capture produced no target sources eligible for normalization.")
 
@@ -69,12 +71,53 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         f"[source-collection-runner] run {run_id} continuing with {len(successful_source_ids)} successful snapshot source(s)",
         flush=True,
     )
-    _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(successful_source_ids))
-    _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(successful_source_ids))
-    _run_stage("worker.pipeline.fpds_normalization", base_args + _source_args(successful_target_source_ids))
+    parse_output = _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(successful_source_ids))
+    parse_successful_source_ids = _successful_stage_source_ids(
+        stage_output=parse_output,
+        action_field="parse_action",
+        success_actions={"stored", "reused"},
+    )
+    if not parse_successful_source_ids:
+        raise RuntimeError("Parse/chunk failed for all successful snapshot sources.")
+
+    parse_successful_target_source_ids = _filter_requested_source_ids(
+        requested_source_ids=successful_target_source_ids,
+        successful_source_ids=parse_successful_source_ids,
+    )
+    if not parse_successful_target_source_ids:
+        raise RuntimeError("Parse/chunk produced no target sources eligible for extraction.")
+
+    extraction_output = _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(parse_successful_source_ids))
+    extraction_successful_source_ids = _successful_stage_source_ids(
+        stage_output=extraction_output,
+        action_field="extraction_action",
+        success_actions={"stored"},
+    )
+    if not extraction_successful_source_ids:
+        raise RuntimeError("Extraction failed for all parsed sources.")
+
+    extraction_successful_target_source_ids = _filter_requested_source_ids(
+        requested_source_ids=parse_successful_target_source_ids,
+        successful_source_ids=extraction_successful_source_ids,
+    )
+    if not extraction_successful_target_source_ids:
+        raise RuntimeError("Extraction produced no target sources eligible for normalization.")
+
+    normalization_output = _run_stage(
+        "worker.pipeline.fpds_normalization",
+        base_args + _source_args(extraction_successful_target_source_ids),
+    )
+    normalization_successful_target_source_ids = _successful_stage_source_ids(
+        stage_output=normalization_output,
+        action_field="normalization_action",
+        success_actions={"stored"},
+    )
+    if not normalization_successful_target_source_ids:
+        raise RuntimeError("Normalization failed for all extracted target sources.")
+
     _run_stage(
         "worker.pipeline.fpds_validation_routing",
-        base_args + ["--routing-mode", "phase1"] + _source_args(successful_target_source_ids),
+        base_args + ["--routing-mode", "phase1"] + _source_args(normalization_successful_target_source_ids),
     )
     print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
 
@@ -132,11 +175,29 @@ def _stage_timeout_seconds_from_env() -> int:
 
 
 def _successful_source_ids(snapshot_output: dict[str, Any]) -> list[str]:
+    return _successful_stage_source_ids(
+        stage_output=snapshot_output,
+        action_field="snapshot_action",
+        success_actions={"stored", "reused"},
+    )
+
+
+def _successful_stage_source_ids(
+    *,
+    stage_output: dict[str, Any],
+    action_field: str,
+    success_actions: set[str],
+) -> list[str]:
     source_ids: list[str] = []
-    for item in snapshot_output.get("source_results", []):
-        if str(item.get("snapshot_action")) in {"stored", "reused"} and item.get("source_id"):
+    for item in stage_output.get("source_results", []):
+        if str(item.get(action_field)) in success_actions and item.get("source_id"):
             source_ids.append(str(item["source_id"]))
     return source_ids
+
+
+def _filter_requested_source_ids(*, requested_source_ids: list[str], successful_source_ids: list[str]) -> list[str]:
+    successful_source_id_set = set(successful_source_ids)
+    return [source_id for source_id in requested_source_ids if source_id in successful_source_id_set]
 
 
 def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:

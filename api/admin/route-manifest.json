@@ -244,7 +244,19 @@
       "methods": [
         "GET"
       ],
-      "access": "authenticated"
+      "access": "authenticated",
+      "notes": "Returns aggregate freshness, queue visibility, and latest-successful serving health."
+    },
+    {
+      "route": "/api/admin/dashboard-health/retry",
+      "methods": [
+        "POST"
+      ],
+      "access": "authenticated",
+      "allowed_roles": [
+        "admin"
+      ],
+      "csrf_required": true
     }
   ]
 }

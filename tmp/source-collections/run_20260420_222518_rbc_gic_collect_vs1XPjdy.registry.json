@@ -1,0 +1,253 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-GIC-003",
+  "sources": [
+    {
+      "source_id": "RBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC guaranteed-return GIC family detail",
+      "url": "https://www.rbcroyalbank.com/investments/guaranteed-return-gics.html",
+      "expected_fields": [
+        "gic_categories",
+        "minimum_investment",
+        "term_options",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC GIC rates reference page",
+      "url": "https://www.rbcroyalbank.com/investments/gic-rates.html",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_redeemable_gic_rates",
+        "redeemable_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-41bda01c03",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.rbcroyalbank.com/banking-services/direct-deposit.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-61a2f766ac",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.rbcroyalbank.com/banking-services/additional-account-services.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-680a166284",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.rbcroyalbank.com/banking-services/international-money-transfer.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-9c0c176161",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.rbcroyalbank.com/banking-services/estatements.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-c170aca2a3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://www.rbcroyalbank.com/investments/_assets-custom/pdf/quick-reference-guide.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

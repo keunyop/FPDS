@@ -75,6 +75,84 @@ _TERM_RE = re.compile(
 )
 _WHITESPACE_RE = re.compile(r"\s+")
 _CANONICAL_PRODUCT_TYPES = {"chequing", "savings", "gic"}
+_TERM_CONTEXT_KEYWORDS = (
+    "term",
+    "terms",
+    "maturity",
+    "cashable",
+    "redeemable",
+    "gic",
+    "certificate",
+    "deposit",
+    "investment",
+    "principal",
+    "payout",
+)
+_TERM_CONTEXT_BLOCKLIST = (
+    "days old",
+    "day old",
+    "viewed online",
+    "cheque image",
+    "check image",
+    "mobile app",
+    "promo period",
+    "promotional period",
+    "introductory",
+)
+_GENERIC_TITLE_LINES = {
+    "document",
+    "benefits",
+    "ratesandfees",
+    "rates",
+    "rates and fees",
+    "fees",
+    "interest",
+    "mobile",
+    "faq",
+    "faqs",
+    "features",
+    "details",
+    "overview",
+    "open account",
+    "more details",
+    "learn more",
+}
+_GENERIC_TITLE_PREFIXES = (
+    "what ",
+    "how ",
+    "why ",
+    "can ",
+    "do ",
+    "sign up ",
+    "register ",
+    "complete ",
+    "get ",
+    "find out ",
+    "compare ",
+    "explore ",
+    "ready to ",
+    "open ",
+    "apply ",
+    "manage ",
+    "pay ",
+    "earn ",
+)
+_PRODUCT_TITLE_KEYWORDS = (
+    "account",
+    "accounts",
+    "savings",
+    "esavings",
+    "chequing",
+    "checking",
+    "gic",
+    "deposit",
+    "banking",
+    "package",
+    "plan",
+    "bundle",
+    "cashable",
+    "redeemable",
+)
 
 
 class ExtractionService:
@@ -428,7 +506,7 @@ def _extract_fields(
     ]
 
     if "product_name" in requested_fields:
-        title = _extract_document_title(candidates)
+        title = _extract_document_title(context=context, candidates=candidates)
         if title:
             extracted.append(
                 _build_derived_field(
@@ -534,7 +612,7 @@ def _extract_candidate_value(
     lowered = text.lower()
 
     if field_name in {"monthly_fee", "public_display_fee", "minimum_balance", "minimum_deposit"}:
-        money_value = _extract_money_value(lowered)
+        money_value = _extract_money_value(field_name=field_name, text=text, lowered=lowered)
         return money_value, "decimal", "heuristic_money", {}
 
     if field_name in {"standard_rate", "public_display_rate", "promotional_rate"}:
@@ -618,13 +696,136 @@ def _build_derived_field(
     )
 
 
-def _extract_document_title(candidates: list[EvidenceChunkCandidate]) -> str | None:
+def _extract_document_title(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+) -> str | None:
+    ranked_titles: list[tuple[float, int, int, str]] = []
+    seen_titles: set[str] = set()
+
     for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
-        first_line = candidate.evidence_excerpt.splitlines()[0].strip()
-        normalized = _normalize_text(first_line)
-        if 4 <= len(normalized) <= 120 and normalized.lower() not in {"document", "fees", "interest"}:
-            return normalized
-    return None
+        lines = [line for line in candidate.evidence_excerpt.splitlines() if line.strip()]
+        for line_index, line in enumerate(lines[:6]):
+            normalized = _clean_title_candidate(line)
+            if not normalized:
+                continue
+            lowered = normalized.lower()
+            if lowered in seen_titles:
+                continue
+            seen_titles.add(lowered)
+            score = _score_title_candidate(
+                text=normalized,
+                bank_code=context.bank_code,
+                chunk_index=candidate.chunk_index,
+                line_index=line_index,
+            )
+            ranked_titles.append((score, candidate.chunk_index, line_index, normalized))
+
+        anchor_title = _anchor_value_to_title(candidate.anchor_value)
+        if anchor_title:
+            lowered_anchor = anchor_title.lower()
+            if lowered_anchor not in seen_titles:
+                seen_titles.add(lowered_anchor)
+                score = _score_title_candidate(
+                    text=anchor_title,
+                    bank_code=context.bank_code,
+                    chunk_index=candidate.chunk_index,
+                    line_index=0,
+                ) - 0.1
+                ranked_titles.append((score, candidate.chunk_index, 0, anchor_title))
+
+    if not ranked_titles:
+        return None
+
+    ranked_titles.sort(key=lambda item: (-item[0], item[1], item[2], len(item[3])))
+    best_score, _, _, best_title = ranked_titles[0]
+    if best_score <= 0:
+        return None
+    return best_title
+
+
+def _score_title_candidate(*, text: str, bank_code: str, chunk_index: int, line_index: int) -> float:
+    normalized = _normalize_text(text)
+    lowered = normalized.lower()
+    compacted = re.sub(r"[^a-z0-9]+", "", lowered)
+    word_count = len(normalized.split())
+
+    if len(normalized) < 4 or len(normalized) > 120:
+        return -5.0
+
+    score = 0.0
+    if lowered in _GENERIC_TITLE_LINES or compacted in _GENERIC_TITLE_LINES:
+        score -= 5.0
+    if any(lowered.startswith(prefix) for prefix in _GENERIC_TITLE_PREFIXES):
+        score -= 4.0
+    if "?" in normalized:
+        score -= 3.0
+    if any(character in normalized for character in ".!,:;%$"):
+        score -= 2.0
+    if lowered.endswith(" features"):
+        score -= 3.5
+    if lowered.startswith("more great ") and lowered.endswith(" features"):
+        score -= 2.0
+    if word_count == 1:
+        score -= 1.5
+    elif 2 <= word_count <= 8:
+        score += 1.0
+    else:
+        score -= min(2.0, (word_count - 8) * 0.35)
+
+    has_product_keyword = any(keyword in lowered for keyword in _PRODUCT_TITLE_KEYWORDS)
+    if has_product_keyword:
+        score += 4.5
+    else:
+        score -= 3.5
+    if bank_code.lower() in lowered:
+        score += 0.6
+    if normalized == normalized.upper() and len(normalized) > 8:
+        score -= 1.5
+    elif normalized[:1].isupper():
+        score += 0.4
+
+    score += max(0.0, 0.5 - (chunk_index * 0.08))
+    score += max(0.0, 0.35 - (line_index * 0.12))
+    return round(score, 4)
+
+
+def _anchor_value_to_title(anchor_value: str | None) -> str | None:
+    if anchor_value is None:
+        return None
+    normalized = _normalize_text(anchor_value.replace("-", " ").replace("_", " "))
+    if not normalized or normalized.startswith("page "):
+        return None
+    return " ".join(part.capitalize() if part.islower() else part for part in normalized.split())
+
+
+def _clean_title_candidate(value: str) -> str:
+    normalized = _normalize_text(value)
+    if not normalized:
+        return ""
+
+    cleaned = normalized
+    compacted = re.sub(r"[^a-z0-9]+", "", cleaned.lower())
+    if compacted in _GENERIC_TITLE_LINES:
+        return cleaned
+
+    wrapper_patterns = (
+        r"^benefits of (?:the )?(.+?)(?:\.)?$",
+        r"^about (?:the )?(.+?)(?:\.)?$",
+        r"^what (?:is|are) (?:the )?(.+?)(?:\?)?$",
+        r"^explore the features of (?:the )?(.+)$",
+        r"^full disclosure for (?:the )?(.+?)(?:\.)?$",
+        r"^(.+?)\s+faqs$",
+    )
+    for pattern in wrapper_patterns:
+        match = re.match(pattern, cleaned, flags=re.IGNORECASE)
+        if match is None:
+            continue
+        candidate = _normalize_text(match.group(1))
+        if candidate:
+            return candidate
+    return cleaned
 
 
 def _extract_description(candidates: list[EvidenceChunkCandidate]) -> str | None:
@@ -803,13 +1004,82 @@ def _infer_currency(candidates: list[EvidenceChunkCandidate]) -> str:
     return "CAD"
 
 
-def _extract_money_value(lowered: str) -> str | None:
-    if "no monthly fee" in lowered or "no fee" in lowered or "monthly fee: $0" in lowered:
-        return "0.00"
-    match = _MONEY_RE.search(lowered)
-    if match is None:
-        return None
-    return _normalize_decimal(match.group(1))
+def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | None:
+    if field_name in {"monthly_fee", "public_display_fee"}:
+        if any(token in lowered for token in ("no monthly fee", "no monthly plan fee", "monthly fee: $0", "monthly fee\n$0")):
+            return "0.00"
+        if _matches_zero_money_label(
+            text=text,
+            label_patterns=(
+                r"monthly\s+(?:plan\s+)?fee",
+                r"plan\s+fee",
+            ),
+        ):
+            return "0.00"
+        return _extract_money_near_labels(
+            text=text,
+            label_patterns=(
+                r"monthly\s+(?:plan\s+)?fee",
+                r"plan\s+fee",
+            ),
+        )
+
+    if field_name == "minimum_balance":
+        if any(token in lowered for token in ("no minimum balance", "no minimum daily balance")):
+            return "0.00"
+        return _extract_money_near_labels(
+            text=text,
+            label_patterns=(
+                r"minimum\s+daily\s+balance",
+                r"minimum\s+balance",
+            ),
+        )
+
+    if field_name == "minimum_deposit":
+        if any(token in lowered for token in ("no minimum deposit", "no minimum opening deposit")):
+            return "0.00"
+        return _extract_money_near_labels(
+            text=text,
+            label_patterns=(
+                r"minimum\s+opening\s+deposit",
+                r"minimum\s+deposit",
+                r"opening\s+deposit",
+                r"initial\s+deposit",
+            ),
+        )
+
+    return None
+
+
+def _matches_zero_money_label(*, text: str, label_patterns: tuple[str, ...]) -> bool:
+    for label_pattern in label_patterns:
+        if re.search(
+            rf"{label_pattern}[\s\S]{{0,32}}?(?:free|waived|included|no fee|\$0(?:\.00)?)",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            return True
+    return False
+
+
+def _extract_money_near_labels(*, text: str, label_patterns: tuple[str, ...]) -> str | None:
+    for label_pattern in label_patterns:
+        after_match = re.search(
+            rf"{label_pattern}[\s\S]{{0,80}}?\$\s?([0-9][0-9,]*(?:\.\d{{1,2}})?)",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if after_match is not None:
+            return _normalize_decimal(after_match.group(1))
+
+        before_match = re.search(
+            rf"\$\s?([0-9][0-9,]*(?:\.\d{{1,2}})?)[\s\S]{{0,60}}?{label_pattern}",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if before_match is not None:
+            return _normalize_decimal(before_match.group(1))
+    return None
 
 
 def _extract_percent_value(text: str) -> str | None:
@@ -893,7 +1163,7 @@ def _detect_frequency(lowered: str) -> str | None:
 
 
 def _extract_term_length_text(text: str) -> str | None:
-    match = _TERM_RE.search(text)
+    match = _extract_term_match(text)
     if match is None:
         return None
     start_value, start_unit, end_value, end_unit = match.groups()
@@ -904,13 +1174,26 @@ def _extract_term_length_text(text: str) -> str | None:
 
 
 def _extract_term_length_days(text: str) -> int | None:
-    match = _TERM_RE.search(text)
+    match = _extract_term_match(text)
     if match is None:
         return None
     start_value, start_unit, end_value, end_unit = match.groups()
     if end_value or end_unit:
         return None
     return _convert_term_to_days(start_value, start_unit)
+
+
+def _extract_term_match(text: str) -> re.Match[str] | None:
+    lowered = text.lower()
+    for match in _TERM_RE.finditer(text):
+        window_start = max(0, match.start() - 64)
+        window_end = min(len(text), match.end() + 64)
+        window = lowered[window_start:window_end]
+        if any(token in window for token in _TERM_CONTEXT_BLOCKLIST):
+            continue
+        if any(token in window for token in _TERM_CONTEXT_KEYWORDS):
+            return match
+    return None
 
 
 def _extract_payout_option(lowered: str) -> str | None:

@@ -68,8 +68,9 @@ As of `2026-04-15`:
 - a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
 - a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
+- a completed dashboard health surface on `/admin/health/dashboard` with aggregate freshness, queue visibility, serving fallback, stale or failed state signals, and operator retry
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection
-- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish and health surfaces route-oriented
+- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available

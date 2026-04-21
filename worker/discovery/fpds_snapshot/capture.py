@@ -9,6 +9,7 @@ from worker.discovery.fpds_discovery.drift import PreflightDriftResult
 from worker.discovery.fpds_discovery.fetch import (
     DiscoveryFetchPolicy,
     FetchedResponse,
+    NonRetryableFetchError,
     fetch_response,
 )
 from worker.discovery.fpds_discovery.registry import RegistrySource
@@ -324,6 +325,8 @@ class SnapshotCaptureService:
                 )
             except Exception as exc:
                 last_error = str(exc)
+                if isinstance(exc, NonRetryableFetchError):
+                    break
 
         return SnapshotSourceResult(
             source_id=source.source_id,

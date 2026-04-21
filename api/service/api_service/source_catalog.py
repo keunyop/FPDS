@@ -1060,6 +1060,7 @@ def start_source_catalog_collection(
     catalog_item_ids: list[str],
     actor: dict[str, Any],
     request_context: dict[str, Any],
+    retry_of_run_id: str | None = None,
 ) -> dict[str, Any]:
     _ensure_bank_and_catalog_seeded(connection)
     if not catalog_item_ids:
@@ -1108,6 +1109,7 @@ def start_source_catalog_collection(
             collection_id=collection_id,
             group=group,
             pipeline_stage="source_catalog_collection",
+            retry_of_run_id=retry_of_run_id,
         )
 
     _record_catalog_audit_event(
@@ -1121,6 +1123,7 @@ def start_source_catalog_collection(
         metadata={
             "catalog_item_ids": list(catalog_item_ids),
             "run_ids": [str(group["run_id"]) for group in plan["groups"]],
+            "retry_of_run_id": retry_of_run_id,
         },
     )
     _launch_source_catalog_collection_runner(plan)

@@ -171,7 +171,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
               {toTitleCase(detail.review_task.review_state)}
             </span>
             <span className={cn("rounded-full px-3 py-1 text-xs font-medium", validationBadgeClasses(detail.candidate.validation_status))}>
-              {toTitleCase(detail.candidate.validation_status)}
+              {formatValidationStatusLabel(detail.candidate.validation_status)}
             </span>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
               {detail.candidate.bank_name} {toTitleCase(detail.candidate.product_type)}
@@ -712,6 +712,16 @@ function formatCost(value: number | null) {
     return "n/a";
   }
   return `$${value.toFixed(6)}`;
+}
+
+function formatValidationStatusLabel(value: string) {
+  if (value === "error") {
+    return "Validation Error";
+  }
+  if (value === "warning") {
+    return "Validation Warning";
+  }
+  return toTitleCase(value);
 }
 
 function resolveCandidateProductName(detail: ReviewTaskDetailResponse) {

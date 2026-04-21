@@ -40,6 +40,9 @@ Current routes:
 - `GET /api/admin/review-tasks/:reviewTaskId`
 - `GET /api/admin/runs`
 - `GET /api/admin/runs/:runId`
+- `POST /api/admin/runs/:runId/retry`
+- `GET /api/admin/dashboard-health`
+- `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
 - `GET /api/admin/audit-log`
 - `GET /api/admin/llm-usage`
@@ -79,6 +82,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0006_bank_catalog_management.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0007_dynamic_product_type_onboarding.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 ```
 
 Create the first operator account:
@@ -99,6 +103,8 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 ## Notes
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- Approve and edit-approve now queue `aggregate_refresh_request` rows inside the same review-decision transaction, then launch a background aggregate refresh runner after commit so public serving can stay on the latest successful snapshot without blocking review writes.
+- `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.
 - Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.
 - The settings loader now reads both `FPDS_ALLOWED_PUBLIC_ORIGINS` and `FPDS_ALLOWED_ADMIN_ORIGINS`, and the live CORS middleware allows the combined origin set because the same FastAPI service now fronts both public and admin browser surfaces.
 - Passwords are hashed with Python's built-in `scrypt`.
@@ -107,6 +113,7 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
+- Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
 - Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
 - Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
 - LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.

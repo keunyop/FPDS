@@ -134,6 +134,10 @@ export type RunStatusDetailResponse = {
     correlation_id: string | null;
     request_id: string | null;
     source_ids: string[];
+    retry_action: {
+      available: boolean;
+      reason: string | null;
+    };
   };
   source_items: Array<{
     source_document_id: string;
@@ -205,6 +209,83 @@ export type RunStatusDetailResponse = {
     validation_status: string;
     created_at: string | null;
   }>;
+};
+
+export type RunRetryResponse = {
+  original_run_id: string;
+  retry_run_id: string;
+  run_type: string;
+  collection_id: string | null;
+  correlation_id: string | null;
+  run_ids: string[];
+};
+
+export type DashboardHealthDomain = {
+  domain_key: string;
+  latest_snapshot_id: string | null;
+  latest_success_at: string | null;
+  latest_failure_at: string | null;
+  status: "healthy" | "pending" | "failed" | "stale" | "empty";
+  missing_data_ratio: number;
+  cache_ttl_sec: number;
+  serving_snapshot_id: string | null;
+  serving_snapshot_refreshed_at: string | null;
+  serving_note: string;
+  latest_attempt_snapshot_id: string | null;
+  latest_attempt_status: string | null;
+  latest_attempt_at: string | null;
+  latest_attempt_error_summary: string | null;
+  latest_request_id: string | null;
+  latest_request_status: string | null;
+  latest_request_reason: string | null;
+  latest_requested_at: string | null;
+  latest_request_completed_at: string | null;
+  latest_request_snapshot_id: string | null;
+  queued_request_count: number;
+  in_progress_request_count: number;
+  active_product_count: number;
+  projected_active_product_count: number;
+  latest_canonical_change_at: string | null;
+  stale_flag: boolean;
+  stale_reason: string | null;
+  retry_action: {
+    available: boolean;
+    reason: string | null;
+  };
+};
+
+export type DashboardHealthResponse = {
+  domains: DashboardHealthDomain[];
+  summary: {
+    total_domains: number;
+    healthy_domains: number;
+    pending_domains: number;
+    failed_domains: number;
+    stale_domains: number;
+    empty_domains: number;
+  };
+};
+
+export type DashboardHealthRetryResponse = {
+  aggregate_refresh_request_id: string;
+  refresh_scope: string;
+  country_code: string;
+  request_status: "queued" | "started" | "completed" | "failed";
+  trigger_reason: "review_approval" | "manual_retry";
+  requested_by_label: string | null;
+  review_task_id: string | null;
+  product_id: string | null;
+  requested_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  snapshot_id: string | null;
+  error_summary: string | null;
+  already_pending: boolean;
+  launch: {
+    launched: boolean;
+    error: string | null;
+    log_path: string;
+  };
 };
 
 export type ChangeHistoryListItem = {
@@ -853,6 +934,10 @@ export async function fetchRunStatusList(searchParams: URLSearchParams): Promise
 
 export async function fetchRunStatusDetail(runId: string): Promise<RunStatusDetailResponse | null> {
   return fetchAdminData<RunStatusDetailResponse>(`/api/admin/runs/${runId}`, undefined, { allowNotFound: true });
+}
+
+export async function fetchDashboardHealth(): Promise<DashboardHealthResponse | null> {
+  return fetchAdminData<DashboardHealthResponse>("/api/admin/dashboard-health");
 }
 
 export async function fetchChangeHistoryList(searchParams: URLSearchParams): Promise<ChangeHistoryListResponse | null> {

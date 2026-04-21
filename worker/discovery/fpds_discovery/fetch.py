@@ -32,6 +32,10 @@ class FetchedResponse:
     redirect_count: int
 
 
+class NonRetryableFetchError(ValueError):
+    """Fetch failed in a way that should not be retried by snapshot capture."""
+
+
 @dataclass(frozen=True)
 class DiscoveryFetchPolicy:
     allowed_domains: tuple[str, ...]
@@ -104,11 +108,11 @@ def fetch_bytes(url: str, policy: DiscoveryFetchPolicy) -> bytes:
 
 
 def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
-    validate_fetch_url(url, policy)
+    normalized_url = validate_fetch_url(url, policy)
     redirect_handler = _AllowlistRedirectHandler(policy)
     opener = urllib.request.build_opener(redirect_handler)
     request = urllib.request.Request(
-        url,
+        normalized_url,
         headers={
             "User-Agent": policy.user_agent,
             "Accept": "text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.1",
@@ -117,7 +121,7 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
     try:
         with opener.open(request, timeout=policy.timeout_seconds) as response:
             final_url = response.geturl()
-            validate_fetch_url(final_url, policy)
+            final_url = validate_fetch_url(final_url, policy)
             headers = {key.lower(): value for key, value in response.headers.items()}
             content_type = response.headers.get_content_type() or "application/octet-stream"
             status_code = getattr(response, "status", 200)
@@ -131,17 +135,19 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
                 redirect_count=redirect_handler.redirect_count,
             )
     except urllib.error.HTTPError as exc:
-        if _should_try_browser_fallback(url, policy, exc):
-            return _fetch_response_via_browser(url, policy)
-        raise ValueError(f"HTTP fetch failed with status {exc.code} for {url}") from exc
+        if _should_try_browser_fallback(normalized_url, policy, exc):
+            return _fetch_response_via_browser(normalized_url, policy)
+        error_cls = NonRetryableFetchError if exc.code == 404 else ValueError
+        raise error_cls(f"HTTP fetch failed with status {exc.code} for {normalized_url}") from exc
     except Exception as exc:
-        if _should_try_browser_fallback(url, policy, exc):
-            return _fetch_response_via_browser(url, policy)
+        if _should_try_browser_fallback(normalized_url, policy, exc):
+            return _fetch_response_via_browser(normalized_url, policy)
         raise
 
 
-def validate_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> None:
-    parsed = urlparse(url)
+def validate_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> str:
+    normalized_url = _normalize_fetch_url(url, policy)
+    parsed = urlparse(normalized_url)
     if parsed.scheme.lower() != "https":
         raise ValueError(f"Discovery fetch requires https URLs: {url}")
     if not parsed.hostname:
@@ -150,6 +156,15 @@ def validate_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> None:
         raise ValueError(f"Host not in discovery fetch allowlist: {parsed.hostname}")
     if policy.block_private_networks:
         _assert_public_host(parsed.hostname)
+    return normalized_url
+
+
+def _normalize_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> str:
+    parsed = urlparse(url)
+    hostname = (parsed.hostname or "").lower()
+    if parsed.scheme.lower() == "http" and hostname and host_matches_allowed_domains(hostname, policy.allowed_domains):
+        return parsed._replace(scheme="https").geturl()
+    return url
 
 
 def _assert_public_host(hostname: str) -> None:
@@ -197,9 +212,8 @@ class _AllowlistRedirectHandler(urllib.request.HTTPRedirectHandler):
         self.redirect_count += 1
         if self.redirect_count > self.policy.max_redirects:
             raise ValueError(f"Redirect limit exceeded for {req.full_url}")
-        resolved_url = urljoin(req.full_url, newurl)
-        validate_fetch_url(resolved_url, self.policy)
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        resolved_url = validate_fetch_url(urljoin(req.full_url, newurl), self.policy)
+        return super().redirect_request(req, fp, code, msg, headers, resolved_url)
 
 
 def _should_try_browser_fallback(url: str, policy: DiscoveryFetchPolicy, exc: Exception) -> bool:

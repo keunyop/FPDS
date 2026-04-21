@@ -1,0 +1,299 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "TD-GIC-003",
+  "sources": [
+    {
+      "source_id": "TD-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Special Offer GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/special-offer",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "rate_structure",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-GIC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Non-Cashable GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/non-cashable-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "interest_payment_options",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-GIC-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Market Growth GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD GIC rates reference page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/gic-rates-canada",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_cashable_gic_rates",
+        "market_growth_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "TD-GIC-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD Market Growth GIC rates page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic-rates",
+      "expected_fields": [
+        "product_variants",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-TD-GIC-16e2bfba84",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.td.com/ca/en/business-banking/how-to/small-business/tools-and-resources",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-GIC-324ce5c9ef",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.td.com/ca/en/business-banking/solutions/small-business/currency-exchange",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-GIC-47cd2c13cf",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.td.com/ca/en/about-td/customer-care/legal-notices-and-disclaimers",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TD-GIC-a3f296f5b8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.td.com/ca/en/business-banking/solutions/small-business/cheque-services",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from unittest.mock import patch
 
@@ -8,21 +9,32 @@ from api_service.source_catalog import CatalogItemMaterializationResult
 
 
 class _Cursor:
+    def __init__(self, payload: object = None) -> None:
+        self.payload = payload
+
     def fetchone(self):
-        return None
+        if isinstance(self.payload, list):
+            return self.payload[0] if self.payload else None
+        return self.payload if isinstance(self.payload, dict) else None
 
     def fetchall(self):
+        if isinstance(self.payload, list):
+            return self.payload
+        if isinstance(self.payload, dict):
+            return [self.payload]
         return []
 
 
 class _Connection:
-    def __init__(self) -> None:
+    def __init__(self, responses: list[object] | None = None) -> None:
         self.calls: list[tuple[str, dict[str, object]]] = []
+        self._responses = list(responses or [])
         self.committed = False
 
     def execute(self, sql: str, params: dict[str, object] | None = None) -> _Cursor:
         self.calls.append((sql, params or {}))
-        return _Cursor()
+        payload = self._responses.pop(0) if self._responses else None
+        return _Cursor(payload)
 
     def commit(self) -> None:
         self.committed = True
@@ -40,6 +52,57 @@ class _ConnectionContext:
 
 
 class SourceCatalogCollectionRunnerTests(unittest.TestCase):
+    def test_refresh_active_seed_scope_rows_rewrites_seeded_url_from_current_baseline(self) -> None:
+        connection = _Connection([{"source_id": "SCOTIA-SAV-005"}])
+
+        with patch(
+            "api_service.source_catalog_collection_runner.load_seed_source_registry_rows",
+            return_value=[
+                {
+                    "source_id": "SCOTIA-SAV-005",
+                    "bank_code": "SCOTIA",
+                    "country_code": "CA",
+                    "product_type": "savings",
+                    "product_key": None,
+                    "source_name": "Scotiabank U.S. Dollar Interest Account detail source",
+                    "source_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+                    "normalized_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "priority": "P1",
+                    "source_language": "en",
+                    "purpose": "Scotiabank U.S. Dollar Interest Account detail source",
+                    "expected_fields": ["product_name", "currency", "monthly_fee", "interest_rate_summary"],
+                    "seed_source_flag": True,
+                    "redirect_target_url": None,
+                    "alias_urls": [],
+                    "change_reason": "seeded_from_json_catalog",
+                }
+            ],
+        ):
+            refreshed_source_ids = source_catalog_collection_runner._refresh_active_seed_scope_rows(
+                connection,
+                bank_code="SCOTIA",
+                product_type="savings",
+            )
+
+        self.assertEqual(refreshed_source_ids, ["SCOTIA-SAV-005"])
+        sql, params = connection.calls[0]
+        self.assertIn("UPDATE source_registry_item", sql)
+        self.assertIn("status = 'active'", sql)
+        self.assertEqual(
+            params["source_url"],
+            "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+        )
+        self.assertEqual(
+            params["normalized_url"],
+            "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+        )
+        self.assertEqual(
+            json.loads(str(params["expected_fields"])),
+            ["product_name", "currency", "monthly_fee", "interest_rate_summary"],
+        )
+
     def test_run_group_marks_run_completed_when_no_detail_sources_are_found(self) -> None:
         connection = _Connection()
         plan = {
@@ -71,6 +134,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                     detail_source_ids=[],
                 ),
             ),
+            patch("api_service.source_catalog_collection_runner._refresh_active_seed_scope_rows") as refresh_scope,
             patch(
                 "api_service.source_catalog_collection_runner._load_active_collection_scope",
                 return_value={"collection_source_ids": [], "target_source_ids": []},
@@ -82,6 +146,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
 
         prepare_collection.assert_not_called()
         run_group.assert_not_called()
+        refresh_scope.assert_called_once_with(connection, bank_code="BMO", product_type="chequing")
         self.assertFalse(connection.committed)
         update_call = next(params for sql, params in connection.calls if "UPDATE ingestion_run" in sql)
         self.assertEqual(update_call["run_id"], "run-001")
@@ -128,6 +193,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 }
             ],
         }
+        refresh_scope_called = {"value": False}
 
         with (
             patch("api_service.source_catalog_collection_runner.Settings.from_env"),
@@ -143,11 +209,18 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 ),
             ),
             patch(
+                "api_service.source_catalog_collection_runner._refresh_active_seed_scope_rows",
+                side_effect=lambda *_args, **_kwargs: refresh_scope_called.__setitem__("value", True) or ["TD-SAV-010"],
+            ),
+            patch(
                 "api_service.source_catalog_collection_runner._load_active_collection_scope",
-                return_value={
-                    "collection_source_ids": ["TD-SAV-010", "TD-SAV-011"],
-                    "target_source_ids": ["TD-SAV-010"],
-                },
+                side_effect=lambda *_args, **_kwargs: (
+                    self.assertTrue(refresh_scope_called["value"]),
+                    {
+                        "collection_source_ids": ["TD-SAV-010", "TD-SAV-011"],
+                        "target_source_ids": ["TD-SAV-010"],
+                    },
+                )[1],
             ),
             patch(
                 "api_service.source_catalog_collection_runner.prepare_source_collection",

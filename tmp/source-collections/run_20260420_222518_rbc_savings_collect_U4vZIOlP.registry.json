@@ -1,0 +1,290 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.rbcroyalbank.com"
+  ],
+  "entry_source_id": "RBC-SAV-002",
+  "sources": [
+    {
+      "source_id": "RBC-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC High Interest Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Day to Day Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/day-to-day-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_limit"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Enhanced Savings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/enhanced-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "tiered_interest_rules",
+        "transaction_limit"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC personal account rates and interest support page",
+      "url": "https://www.rbcroyalbank.com/rates/persacct.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "savings_rate_table"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "RBC-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC savings fees and options page",
+      "url": "https://www.rbcroyalbank.com/onlinebanking/servicech/disclosures/part2K.html",
+      "expected_fields": [
+        "transaction_fee",
+        "atm_fee_summary",
+        "statement_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-RBC-SAV-4903f0048a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/day-to-day-banking.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-SAV-6d45fc65b7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.rbcroyalbank.com/banking-services/additional-account-services.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-SAV-86d8e273da",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/advantage-banking.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-SAV-c3a17b3fd5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.rbcroyalbank.com/banking-services/direct-deposit.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "interest_payment_frequency"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "savings",
+        "save",
+        "high interest",
+        "interest"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

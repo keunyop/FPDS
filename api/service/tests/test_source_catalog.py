@@ -453,6 +453,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "included_sources": [],
             },
             pipeline_stage="source_catalog_collection",
+            retry_of_run_id=None,
         )
         launch_runner.assert_called_once()
 

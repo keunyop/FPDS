@@ -14,6 +14,6 @@ Planned scope:
 Current scaffold:
 - `route-manifest.json` lists the reserved admin routes and their auth or CSRF expectations.
 - `auth/README.md` captures the login, logout, and session route baseline.
-- `../service/` now contains the first live FastAPI admin auth implementation for `WBS 4.1`.
+- `../service/` now contains the live FastAPI admin runtime through review, runs, usage, and dashboard health, including the aggregate refresh queue and manual retry endpoints.
 
 The route manifest remains the contract source of truth, while runtime code now lives in the separate service package.

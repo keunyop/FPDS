@@ -24,7 +24,7 @@ const OVERVIEW_COPY = {
     sessionVerified: "Session verified",
     bannerTitle: "Current slice boundary",
     bannerDescription:
-      "Review queue, review detail, trace, runs, change history, and audit log are now live, while publish, usage, and health remain separate surfaces and continue to land in follow-on WBS slices.",
+      "Review queue, review detail, trace, runs, change history, audit log, usage, and dashboard health are now live, while publish remains a separate follow-on operational surface.",
     metricsTitle: "Admin shell readiness",
     metricsDescription:
       "The live admin surface now starts from Shadcnblocks-based layout primitives and keeps FPDS workflow meaning on top.",
@@ -38,14 +38,14 @@ const OVERVIEW_COPY = {
       },
       {
         label: "Live admin surfaces",
-        value: "8",
+        value: "9",
         note:
-          "Login, overview, review queue, review detail, runs, changes, audit, and usage are now live inside the protected shell.",
+          "Login, overview, review queue, review detail, runs, changes, audit, usage, and dashboard health are now live inside the protected shell.",
       },
       {
         label: "Newest route",
-        value: "/admin/usage",
-        note: "LLM usage now sits beside audit and run diagnosis as its own observability surface.",
+        value: "/admin/health/dashboard",
+        note: "Dashboard health now shows aggregate freshness, serving fallback, and manual retry beside usage observability.",
       },
       {
         label: "Theme mode",

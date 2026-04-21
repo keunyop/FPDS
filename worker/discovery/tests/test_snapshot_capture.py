@@ -4,6 +4,7 @@ import unittest
 
 from worker.discovery.fpds_discovery.drift import DriftIssue, PreflightDriftResult, SourcePreflightCheck
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, FetchedResponse
+from worker.discovery.fpds_discovery.fetch import NonRetryableFetchError
 from worker.discovery.fpds_discovery.registry import DEFAULT_REGISTRY_PATH, load_registry
 from worker.discovery.fpds_snapshot.capture import (
     CaptureSource,
@@ -201,6 +202,39 @@ class SnapshotCaptureTests(unittest.TestCase):
         self.assertEqual(item.snapshot_action, "failed")
         self.assertEqual(item.attempt_count, 3)
         self.assertEqual(item.run_source_item_record["stage_status"], "failed")
+
+    def test_capture_does_not_retry_non_retryable_fetch_errors(self) -> None:
+        source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-004"))
+        attempts = {"count": 0}
+
+        def stale_fetcher(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
+            attempts["count"] += 1
+            raise NonRetryableFetchError("HTTP fetch failed with status 404 for https://www.td.com/missing")
+
+        service = SnapshotCaptureService(
+            fetch_policy=self.fetch_policy,
+            storage_config=SnapshotStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                snapshot_object_prefix="snapshots",
+                retention_class="hot",
+                filesystem_root="ignored-for-tests",
+            ),
+            object_store=_RecordingObjectStore(),
+            fetcher=stale_fetcher,
+            max_attempts=3,
+        )
+
+        result = service.capture_sources(
+            run_id="run_20260409_0103",
+            sources=[source],
+        )
+
+        self.assertTrue(result.partial_completion_flag)
+        item = result.source_results[0]
+        self.assertEqual(item.snapshot_action, "failed")
+        self.assertEqual(item.attempt_count, 1)
+        self.assertEqual(attempts["count"], 1)
 
 
 def _fetched_response(*, body: bytes, content_type: str, final_url: str) -> FetchedResponse:

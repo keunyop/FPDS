@@ -1,0 +1,318 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "SCOTIA-GIC-003",
+  "sources": [
+    {
+      "source_id": "SCOTIA-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank non-redeemable GIC detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/non-redeemable-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "cashability",
+        "interest_payment_options"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-GIC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank market linked GIC detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/market-linked-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "SCOTIA-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank GIC rates reference page",
+      "url": "https://www.scotiabank.com/ca/en/personal/rates-prices/gic-rates.html",
+      "expected_fields": [
+        "redeemable_gic_rates",
+        "non_redeemable_gic_rates",
+        "market_linked_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-33ec30ee46",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.scotiabank.com/ca/en/about/our-company/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-72f98dbe7a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.scotiabank.com/ca/en/about/our-company.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-7e01616b5d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.scotiabank.com/ca/en/about/inside-scotiabank/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-bd3b5dfe99",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.scotiabank.com/ca/en/about/contact-us/legal.html",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-0c0776bcde",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/common/documents/Disclosure-Policy-January-2026.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-GIC-98c7504ac3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/corporate/quarterly-reports/2026/q1/Q126_Scotiabank_Investor_Factsheet.pdf",
+      "expected_fields": [
+        "product_name",
+        "standard_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "redeemable_flag"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "certificate",
+        "investment",
+        "non-redeemable"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

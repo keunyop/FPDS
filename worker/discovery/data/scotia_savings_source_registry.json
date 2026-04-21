@@ -76,7 +76,7 @@
       "source_type": "html",
       "discovery_role": "detail",
       "purpose": "Scotiabank U.S. Dollar Daily Interest Account detail source",
-      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-daily-interest-account.html",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
       "expected_fields": [
         "product_name",
         "currency",

@@ -446,6 +446,7 @@ def start_source_collection(
     source_ids: list[str],
     actor: dict[str, Any],
     request_context: dict[str, Any],
+    retry_of_run_id: str | None = None,
 ) -> dict[str, Any]:
     prepared = prepare_source_collection(
         connection,
@@ -466,6 +467,7 @@ def start_source_collection(
             correlation_id=correlation_id,
             collection_id=collection_id,
             group=group,
+            retry_of_run_id=retry_of_run_id,
         )
 
     _record_source_registry_audit_event(
@@ -482,6 +484,7 @@ def start_source_collection(
             "selected_source_ids": plan["selected_source_ids"],
             "auto_included_source_ids": plan["auto_included_source_ids"],
             "run_ids": [group["run_id"] for group in plan["groups"]],
+            "retry_of_run_id": retry_of_run_id,
         },
         event_category="run",
         target_type="source_collection",
@@ -933,6 +936,7 @@ def _insert_collection_run_row(
     collection_id: str,
     group: dict[str, Any],
     pipeline_stage: str = "source_collection",
+    retry_of_run_id: str | None = None,
 ) -> None:
     started_at = utc_now()
     run_metadata = {
@@ -981,7 +985,7 @@ def _insert_collection_run_row(
             0,
             NULL,
             false,
-            NULL,
+            %(retry_of_run_id)s,
             NULL,
             %(run_metadata)s::jsonb,
             %(started_at)s,
@@ -1007,6 +1011,7 @@ def _insert_collection_run_row(
             "run_id": run_id,
             "triggered_by": triggered_by,
             "source_scope_count": len(group["included_source_ids"]),
+            "retry_of_run_id": retry_of_run_id,
             "run_metadata": json.dumps(run_metadata, ensure_ascii=True),
             "started_at": started_at,
         },

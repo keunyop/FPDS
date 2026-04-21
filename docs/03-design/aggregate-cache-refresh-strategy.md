@@ -1,8 +1,8 @@
-﻿# FPDS Aggregate and Cache Refresh Strategy
+# FPDS Aggregate and Cache Refresh Strategy
 
-Version: 1.0  
-Date: 2026-04-01  
-Status: Approved Baseline for WBS 1.4.5  
+Version: 1.0
+Date: 2026-04-01
+Status: Approved Baseline for WBS 1.4.5
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -23,7 +23,7 @@ Source Documents:
 - synchronous canonical write와 asynchronous aggregate refresh의 경계를 정한다.
 - TTL과 freshness 노출 규칙을 정의한다.
 
-이 문서는 refresh mechanics를 정의한다.  
+이 문서는 refresh mechanics를 정의한다.
 exact KPI formula, ranking metric semantics, scatter preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`에서 닫고, product-type별 default visualization emphasis는 `docs/03-design/product-type-visualization-principles.md`에서 닫는다.
 
 ---
@@ -71,6 +71,7 @@ exact KPI formula, ranking metric semantics, scatter preset vocabulary는 `docs/
 
 - canonical write는 먼저 commit된다.
 - aggregate refresh는 post-commit asynchronous job로 처리한다.
+- runtime baseline은 `aggregate_refresh_request` queue table이 post-commit enqueue를 받고, background runner가 이를 coalesce한 뒤 `aggregate_refresh_run` plus projection snapshot rows를 기록하는 방식으로 구현한다.
 - aggregate refresh는 `ingestion_run`의 Stage 12 결과로 기록될 수 있다.
 
 ### 4.3 Full vs Incremental Rule

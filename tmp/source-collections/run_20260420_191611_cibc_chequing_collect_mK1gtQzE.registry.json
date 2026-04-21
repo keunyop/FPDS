@@ -1,0 +1,345 @@
+{
+  "registry_version": "2026-04-20",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-CHQ-002",
+  "sources": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Account detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "tiered_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Plus Account detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-plus-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC personal bank account rates page",
+      "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "personal_account_rate_tables"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "CIBC-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC additional service fees page",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+      "expected_fields": [
+        "service_fees",
+        "overdraft_fees",
+        "ancillary_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {}
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-32457f05c0",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility/service-commitment/resolving-your-complaints.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-49f6594733",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-profile.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-8291df4cdc",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-responsibility.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-ab35729d11",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.cibc.com/en/about-cibc/corporate-governance.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-2584089489",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.cibc.com/content/dam/personal_banking/bank_accounts/pdfs/cibc-pasf-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CHQ-bbe7136480",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.cibc.com/content/dam/personal_banking/bank_accounts/pdfs/12419-personal-deposit-account-terms-and-conditions-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_e_transfer_included",
+        "overdraft_available"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
+      "product_type_dynamic": false,
+      "discovery_keywords": [
+        "chequing",
+        "checking",
+        "bank account",
+        "banking plan",
+        "daily banking"
+      ],
+      "fallback_policy": "canonical_parser",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

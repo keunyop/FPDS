@@ -106,13 +106,13 @@ cmd /c npm run build
 
 ## 6.1 Ingestion and Internal Persistence
 
-- [ ] Big 5 source-backed records are available for the approved product types: `chequing`, `savings`, `gic`
-- [ ] ingestion run data is queryable from FPDS run history
-- [ ] source-derived candidate drafts are persisted as `normalized_candidate`
-- [ ] candidate records preserve core identity fields such as `bank_code`, `product_type`, `product_name`, `currency`, and `source_language`
-- [ ] evidence links are persisted for reviewable fields
-- [ ] validation status and issue codes are persisted on the candidate
-- [ ] no step in this flow depends on BX-PF availability
+- [v] Big 5 source-backed records are available for the approved product types: `chequing`, `savings`, `gic`
+- [v] ingestion run data is queryable from FPDS run history
+- [v] source-derived candidate drafts are persisted as `normalized_candidate`
+- [v] candidate records preserve core identity fields such as `bank_code`, `product_type`, `product_name`, `currency`, and `source_language`
+- [v] evidence links are persisted for reviewable fields
+- [v] validation status and issue codes are persisted on the candidate
+- [v] no step in this flow depends on BX-PF availability
 
 Recommended evidence:
 - run id
@@ -122,13 +122,13 @@ Recommended evidence:
 
 ## 6.2 Review Queue and Decision Flow
 
-- [ ] review queue loads protected `queued` and `deferred` tasks
-- [ ] review detail shows candidate payload, evidence trace, and decision context
-- [ ] `approve` updates the review task to a terminal approved state
-- [ ] `edit_approve` records override diff and approved result
-- [ ] `reject` keeps the candidate from being promoted to canonical product
-- [ ] `defer` keeps the task open without promoting the record
-- [ ] review actions require valid session and CSRF protection
+- [v] review queue loads protected `queued` and `deferred` tasks
+- [v] review detail shows candidate payload, evidence trace, and decision context
+- [v] `approve` updates the review task to a terminal approved state
+- [v] `edit_approve` records override diff and approved result
+- [v] `reject` keeps the candidate from being promoted to canonical product
+- [v] `defer` keeps the task open without promoting the record
+- [v] review actions require valid session and CSRF protection
 
 Recommended evidence:
 - review task id
@@ -138,12 +138,12 @@ Recommended evidence:
 
 ## 6.3 Canonical Product and Version Persistence
 
-- [ ] approved or edited-approved review actions create or update `canonical_product`
-- [ ] approved records create a `product_version` snapshot
-- [ ] repeated approvals update continuity/versioning without duplicating the same product identity incorrectly
-- [ ] `last_verified_at`, `current_version_no`, and snapshot payload update as expected
-- [ ] change history reflects `New`, `Updated`, `Reclassified`, or `ManualOverride` when applicable
-- [ ] FPDS retains the approved internal copy even though BX-PF publish is blocked
+- [v] approved or edited-approved review actions create or update `canonical_product`
+- [v] approved records create a `product_version` snapshot
+- [v] repeated approvals update continuity/versioning without duplicating the same product identity incorrectly
+- [v] `last_verified_at`, `current_version_no`, and snapshot payload update as expected
+- [v] change history reflects `New`, `Updated`, `Reclassified`, or `ManualOverride` when applicable
+- [v] FPDS retains the approved internal copy even though BX-PF publish is blocked
 
 Recommended evidence:
 - product id
@@ -153,11 +153,11 @@ Recommended evidence:
 
 ## 6.4 Evidence Traceability and Auditability
 
-- [ ] field-level evidence remains visible from the admin review detail route
-- [ ] evidence trace access is auditable where implemented
-- [ ] review decision audit events are queryable
-- [ ] manual override audit context appears when edited approval changes persisted values
-- [ ] run, review, product, and audit drilldowns stay linked to the same product continuity story
+- [v] field-level evidence remains visible from the admin review detail route
+- [v] evidence trace access is auditable where implemented
+- [v] review decision audit events are queryable
+- [v] manual override audit context appears when edited approval changes persisted values
+- [v] run, review, product, and audit drilldowns stay linked to the same product continuity story
 
 Recommended evidence:
 - sample field trace
@@ -166,7 +166,7 @@ Recommended evidence:
 
 ## 6.5 Public Product Grid
 
-- [ ] `/products` loads against the latest successful aggregate snapshot
+- [v] `/products` loads against the latest successful aggregate snapshot
 - [ ] filter vocabulary loads and applies correctly
 - [ ] product cards render the approved product types with the expected primary metrics
 - [ ] pagination and sorting work for the current aggregate scope

@@ -12,6 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from api_service.auth import LoginError, authenticate_user, get_session_by_token, revoke_session
+from api_service.aggregate_refresh import (
+    AggregateRefreshError,
+    launch_aggregate_refresh_runner,
+    load_dashboard_health,
+    queue_review_aggregate_refresh_request,
+    request_manual_aggregate_refresh,
+)
 from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
@@ -55,6 +62,7 @@ from api_service.review_detail import (
     record_evidence_trace_viewed,
 )
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
+from api_service.run_retry import RunRetryError, retry_failed_run
 from api_service.run_status import load_run_status_detail, load_run_status_list, normalize_run_status_filters
 from api_service.source_registry import (
     load_source_registry_detail,
@@ -179,6 +187,16 @@ async def review_task_error_handler(request: Request, exc: ReviewTaskError):
 
 @app.exception_handler(SourceRegistryError)
 async def source_registry_error_handler(request: Request, exc: SourceRegistryError):
+    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
+
+
+@app.exception_handler(AggregateRefreshError)
+async def aggregate_refresh_error_handler(request: Request, exc: AggregateRefreshError):
+    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
+
+
+@app.exception_handler(RunRetryError)
+async def run_retry_error_handler(request: Request, exc: RunRetryError):
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
 
 
@@ -968,6 +986,55 @@ async def run_status_detail(request: Request, run_id: str) -> JSONResponse:
     return _success(payload, request)
 
 
+@app.post("/api/admin/runs/{run_id}/retry")
+async def retry_run(request: Request, run_id: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = retry_failed_run(
+            connection,
+            run_id=run_id,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success(payload, request, status_code=202)
+
+
+@app.get("/api/admin/dashboard-health")
+async def dashboard_health(request: Request) -> JSONResponse:
+    _resolve_session(request)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_dashboard_health(connection)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/dashboard-health/retry")
+async def retry_dashboard_health(request: Request) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = request_manual_aggregate_refresh(
+            connection,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    payload["launch"] = launch_aggregate_refresh_runner()
+    return _success(payload, request, status_code=202)
+
+
 @app.get("/api/admin/change-history")
 async def change_history_list(
     request: Request,
@@ -1089,6 +1156,7 @@ async def _handle_review_decision(
     actor, session_info = _resolve_session(request)
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
+    aggregate_refresh_request: dict[str, Any] | None = None
     with open_connection(settings) as connection:
         result = apply_review_decision(
             connection,
@@ -1104,11 +1172,28 @@ async def _handle_review_decision(
                 user_agent=request.headers.get("user-agent"),
             ),
         )
+        if action_type in {"approve", "edit_approve"} and result.get("product_id"):
+            aggregate_refresh_request = queue_review_aggregate_refresh_request(
+                connection,
+                actor=actor,
+                request_context={
+                    "request_id": request.state.request_id,
+                    "ip_address": _request_ip(request),
+                    "user_agent": request.headers.get("user-agent"),
+                },
+                review_task_id=review_task_id,
+                product_id=str(result["product_id"]),
+                action_type=action_type,
+                change_event_types=[str(item) for item in result.get("change_event_types", [])],
+            )
         detail = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
+    if aggregate_refresh_request:
+        aggregate_refresh_request["launch"] = launch_aggregate_refresh_runner()
     return _success(
         {
             "result": result,
             "review_task": detail,
+            "aggregate_refresh": aggregate_refresh_request,
         },
         request,
     )

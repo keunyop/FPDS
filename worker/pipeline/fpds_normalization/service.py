@@ -758,7 +758,18 @@ def _infer_subtype_code(
         return None, None
     text = " ".join(
         str(candidate_payload.get(field_name, ""))
-        for field_name in ("product_name", "description_short", "notes", "eligibility_text", "cheque_book_info")
+        for field_name in (
+            "product_name",
+            "description_short",
+            "notes",
+            "eligibility_text",
+            "cheque_book_info",
+            "cashability",
+            "term_options",
+            "tier_definition_text",
+            "withdrawal_limit_text",
+            "interest_calculation_method",
+        )
     ).lower()
     product_name = _coalesce_string(candidate_payload.get("product_name"))
     if product_type == "savings":
@@ -803,7 +814,17 @@ def _infer_target_customer_tags(candidate_payload: dict[str, object]) -> list[st
         tags.append("newcomer")
     if "senior" in merged_text:
         tags.append("senior")
-    if "business" in merged_text:
+    if any(
+        token in merged_text
+        for token in (
+            "business account",
+            "business banking",
+            "small business",
+            "for businesses",
+            "business clients",
+            "business owners",
+        )
+    ):
         tags.append("business")
     return tags
 

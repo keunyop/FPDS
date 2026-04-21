@@ -290,7 +290,8 @@ function getNavGroups(locale: AdminLocale): NavGroup[] {
         {
           label: copy.items.dashboardHealth.label,
           description: copy.items.dashboardHealth.description,
-          status: copy.status.planned,
+          href: "/admin/health/dashboard",
+          status: copy.status.live,
           icon: Gauge,
         },
       ],

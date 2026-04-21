@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import os
 import re
-import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Callable, Sequence
+
+from worker.psql_cli import run_psql_command
 
 from .capture import CaptureSource, ExistingSnapshotRecord, SnapshotCaptureResult
 
@@ -457,17 +458,7 @@ SELECT COALESCE((
 
     @staticmethod
     def _run_psql(command: Sequence[str], sql: str) -> str:
-        completed = subprocess.run(
-            [*command, "-v", "ON_ERROR_STOP=1", "-X", "-q", "-A", "-t"],
-            input=sql,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if completed.returncode != 0:
-            stderr = completed.stderr.strip() or completed.stdout.strip() or "unknown psql error"
-            raise RuntimeError(f"psql command failed: {stderr}")
-        return completed.stdout.strip()
+        return run_psql_command(command, sql)
 
 
 def utc_now_iso() -> str:

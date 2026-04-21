@@ -12,11 +12,13 @@ _TARGET_SUPPORT_SOURCE_IDS = {
     "TD-SAV-002": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-003": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-004": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
+    "SCOTIA-SAV-004": ("SCOTIA-SAV-006",),
 }
 _TARGET_MATCH_TERMS = {
     "TD-SAV-002": ("td every day savings account", "every day savings"),
     "TD-SAV-003": ("td epremium savings account", "epremium savings"),
     "TD-SAV-004": ("td growth savings account", "growth savings"),
+    "SCOTIA-SAV-004": ("money master savings account", "money master savings"),
 }
 
 
@@ -64,6 +66,12 @@ def merge_supporting_artifacts(
             )
         elif support_source_id == "TD-SAV-008":
             supplement = _build_interest_pdf_supplement(
+                target_source_id=target_source_id,
+                supporting_artifact=payload,
+                existing_fields=field_records,
+            )
+        elif support_source_id == "SCOTIA-SAV-006":
+            supplement = _build_scotia_rate_page_supplement(
                 target_source_id=target_source_id,
                 supporting_artifact=payload,
                 existing_fields=field_records,
@@ -269,6 +277,62 @@ def _build_interest_pdf_supplement(
     }
 
 
+def _build_scotia_rate_page_supplement(
+    *,
+    target_source_id: str,
+    supporting_artifact: dict[str, object],
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    if target_source_id != "SCOTIA-SAV-004":
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")):
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    matches = list(supporting_artifact.get("retrieval_result", {}).get("matches", []))
+    match = _find_scotia_money_master_rate_match(target_source_id=target_source_id, matches=matches)
+    if match is None:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    rate_values = _extract_scotia_money_master_rate_values(str(match.get("evidence_text_excerpt", "")))
+    if not rate_values:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    field_updates: dict[str, dict[str, object]] = {}
+    evidence_updates: dict[str, dict[str, object]] = {}
+    for field_name, candidate_value in rate_values.items():
+        if field_name in existing_fields:
+            continue
+        field_updates[field_name] = _build_support_field(
+            field_name=field_name,
+            candidate_value=candidate_value,
+            value_type="decimal",
+            match=match,
+            extraction_method="supporting_scotia_rate_page_merge",
+            field_metadata={
+                "supporting_source_id": "SCOTIA-SAV-006",
+                "supporting_merge": True,
+                "match_terms": list(_TARGET_MATCH_TERMS[target_source_id]),
+            },
+        )
+        evidence_updates[field_name] = _build_support_link(
+            field_name=field_name,
+            candidate_value=candidate_value,
+            match=match,
+        )
+
+    if not field_updates:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    return {
+        "field_updates": field_updates,
+        "evidence_updates": evidence_updates,
+        "runtime_notes": [
+            "Supplemented missing Scotia Money Master savings rate fields from `SCOTIA-SAV-006` supporting rate evidence."
+        ],
+    }
+
+
 def _find_product_matched_rate_table(
     *,
     target_source_id: str,
@@ -296,6 +360,42 @@ def _find_product_matched_rate_table(
             if any(term in haystack for term in terms):
                 return match
     return None
+
+
+def _find_scotia_money_master_rate_match(
+    *,
+    target_source_id: str,
+    matches: list[dict[str, object]],
+) -> dict[str, object] | None:
+    terms = _TARGET_MATCH_TERMS.get(target_source_id, ())
+    ranked: list[tuple[float, dict[str, object]]] = []
+    for match in matches:
+        haystack = _normalize_text(
+            " ".join(
+                str(item or "")
+                for item in (
+                    match.get("field_name"),
+                    match.get("anchor_value"),
+                    match.get("evidence_text_excerpt"),
+                )
+            )
+        )
+        if not any(term in haystack for term in terms):
+            continue
+        percentages = _extract_all_percentages(str(match.get("evidence_text_excerpt", "")))
+        if not percentages:
+            continue
+        score = 0.0
+        try:
+            score = float(match.get("score", 0.0))
+        except (TypeError, ValueError):
+            score = 0.0
+        score += min(0.25, len(percentages) * 0.05)
+        ranked.append((score, match))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked[0][1]
 
 
 def _extract_rate_values_from_match(*, target_source_id: str, match: dict[str, object]) -> dict[str, str]:
@@ -354,6 +454,20 @@ def _extract_growth_rate_values(excerpt: str) -> dict[str, str]:
         "standard_rate": _format_decimal(standard_rate),
         "public_display_rate": _format_decimal(boosted_rate),
         "promotional_rate": _format_decimal(boosted_rate),
+    }
+
+
+def _extract_scotia_money_master_rate_values(excerpt: str) -> dict[str, str]:
+    percentages = _extract_all_percentages(excerpt)
+    if not percentages:
+        return {}
+
+    unique_percentages = sorted(set(percentages))
+    standard_rate = min(unique_percentages)
+    public_display_rate = max(unique_percentages)
+    return {
+        "standard_rate": _format_decimal(standard_rate),
+        "public_display_rate": _format_decimal(public_display_rate),
     }
 
 
