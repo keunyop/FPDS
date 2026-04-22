@@ -18,7 +18,7 @@ else:  # pragma: no cover - keeps unit tests lightweight when psycopg is unavail
 from api_service.errors import SourceRegistryError
 from api_service.product_types import load_product_type_definitions_map
 from api_service.security import new_id, utc_now
-from api_service.source_registry_utils import infer_source_type, load_seed_source_registry_rows, normalize_source_url, repo_root
+from api_service.source_registry_utils import infer_source_type, normalize_source_url, repo_root
 
 
 _ROLE_PRIORITY = {
@@ -248,7 +248,6 @@ def create_source_registry_item(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_source_registry_seeded(connection)
     prepared = _prepare_source_registry_payload(payload, existing_row=None)
     now = utc_now()
     connection.execute(
@@ -344,7 +343,6 @@ def update_source_registry_item(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_source_registry_seeded(connection)
     existing_row = connection.execute(
         """
         SELECT
@@ -736,76 +734,6 @@ def build_source_collection_plan(
         "auto_included_source_ids": auto_included_source_ids,
         "groups": groups,
     }
-
-
-def _ensure_source_registry_seeded(connection: Connection) -> None:
-    row = connection.execute("SELECT COUNT(*) AS item_count FROM source_registry_item").fetchone()
-    if row and int(row["item_count"]) > 0:
-        return
-
-    seeded_at = utc_now()
-    for item in load_seed_source_registry_rows():
-        connection.execute(
-            """
-            INSERT INTO source_registry_item (
-                source_id,
-                bank_code,
-                country_code,
-                product_type,
-                product_key,
-                source_name,
-                source_url,
-                normalized_url,
-                source_type,
-                discovery_role,
-                status,
-                priority,
-                source_language,
-                purpose,
-                expected_fields,
-                seed_source_flag,
-                redirect_target_url,
-                alias_urls,
-                discovery_metadata,
-                change_reason,
-                created_at,
-                updated_at
-            )
-            VALUES (
-                %(source_id)s,
-                %(bank_code)s,
-                %(country_code)s,
-                %(product_type)s,
-                %(product_key)s,
-                %(source_name)s,
-                %(source_url)s,
-                %(normalized_url)s,
-                %(source_type)s,
-                %(discovery_role)s,
-                %(status)s,
-                %(priority)s,
-                %(source_language)s,
-                %(purpose)s,
-                %(expected_fields)s::jsonb,
-                %(seed_source_flag)s,
-                %(redirect_target_url)s,
-                %(alias_urls)s::jsonb,
-                %(discovery_metadata)s::jsonb,
-                %(change_reason)s,
-                %(created_at)s,
-                %(updated_at)s
-            )
-            ON CONFLICT (source_id) DO NOTHING
-            """,
-            {
-                **item,
-                "expected_fields": json.dumps(item["expected_fields"], ensure_ascii=True),
-                "alias_urls": json.dumps(item["alias_urls"], ensure_ascii=True),
-                "discovery_metadata": json.dumps(item.get("discovery_metadata", {}), ensure_ascii=True),
-                "created_at": seeded_at,
-                "updated_at": seeded_at,
-            },
-        )
 
 
 def _prepare_source_registry_payload(payload: dict[str, Any], *, existing_row: dict[str, Any] | None) -> dict[str, Any]:

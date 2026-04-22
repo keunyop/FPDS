@@ -22,7 +22,6 @@ if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `
 
 from api_service.errors import SourceRegistryError
 from api_service.product_types import (
-    ensure_product_type_registry_seeded,
     load_product_type_definitions_map,
     require_product_type_definition,
 )
@@ -30,9 +29,6 @@ from api_service.security import new_id, utc_now
 from api_service.source_registry import _insert_collection_run_row
 from api_service.source_registry_utils import (
     infer_source_type,
-    load_seed_bank_homepage_repairs,
-    load_seed_bank_profiles,
-    load_seed_source_catalog_items,
     load_seed_source_registry_rows,
     normalize_source_url,
 )
@@ -177,7 +173,6 @@ def normalize_source_catalog_filters(
 
 
 def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     where_clauses = ["1 = 1"]
     params: dict[str, Any] = {}
     if filters.status:
@@ -290,7 +285,6 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
 
 
 def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any] | None:
-    _ensure_bank_and_catalog_seeded(connection)
     row = connection.execute(
         """
         SELECT
@@ -380,7 +374,6 @@ def create_bank_profile(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     bank_name = _required_text(payload.get("bank_name"), "bank_name")
     homepage_url, normalized_homepage_url = _normalize_bank_homepage_url(
         _required_text(payload.get("homepage_url"), "homepage_url")
@@ -478,7 +471,6 @@ def update_bank_profile(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     existing_row = connection.execute(
         """
         SELECT
@@ -578,7 +570,6 @@ def delete_bank_profile(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     normalized_bank_code = _required_text(bank_code, "bank_code").upper()
     detail = load_bank_detail(connection, bank_code=normalized_bank_code)
     if detail is None:
@@ -688,7 +679,6 @@ def delete_bank_profile(
 
 
 def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFilters) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     product_type_map = load_product_type_definitions_map(connection, active_only=False)
     where_clauses = ["1 = 1"]
     params: dict[str, Any] = {}
@@ -786,7 +776,6 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
 
 
 def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) -> dict[str, Any] | None:
-    _ensure_bank_and_catalog_seeded(connection)
     row = connection.execute(
         """
         SELECT
@@ -878,7 +867,6 @@ def create_source_catalog_item(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     bank_code = _required_text(payload.get("bank_code"), "bank_code").upper()
     product_type = _required_text(payload.get("product_type"), "product_type").lower()
     require_product_type_definition(connection, product_type_code=product_type, active_only=True)
@@ -967,7 +955,6 @@ def update_source_catalog_item(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     existing = connection.execute(
         """
         SELECT catalog_item_id, bank_code, country_code, product_type, status, change_reason
@@ -1062,7 +1049,6 @@ def start_source_catalog_collection(
     request_context: dict[str, Any],
     retry_of_run_id: str | None = None,
 ) -> dict[str, Any]:
-    _ensure_bank_and_catalog_seeded(connection)
     if not catalog_item_ids:
         raise SourceRegistryError(status_code=400, code="source_catalog_selection_required", message="Select at least one source catalog item.")
 
@@ -1239,123 +1225,6 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
         "workflow_state": "queued",
         "queued_catalog_item_count": len(plan["groups"]),
     }
-
-
-def _ensure_bank_and_catalog_seeded(connection: Connection) -> None:
-    ensure_product_type_registry_seeded(connection)
-    bank_row = connection.execute("SELECT COUNT(*) AS item_count FROM bank").fetchone()
-    if bank_row and int(bank_row["item_count"]) == 0:
-        seeded_at = utc_now()
-        for item in load_seed_bank_profiles():
-            connection.execute(
-                """
-                INSERT INTO bank (
-                    bank_code,
-                    country_code,
-                    bank_name,
-                    status,
-                    homepage_url,
-                    normalized_homepage_url,
-                    source_language,
-                    managed_flag,
-                    change_reason,
-                    created_at,
-                    updated_at
-                )
-                VALUES (
-                    %(bank_code)s,
-                    %(country_code)s,
-                    %(bank_name)s,
-                    'active',
-                    %(homepage_url)s,
-                    %(normalized_homepage_url)s,
-                    %(source_language)s,
-                    %(managed_flag)s,
-                    %(change_reason)s,
-                    %(created_at)s,
-                    %(updated_at)s
-                )
-                ON CONFLICT (bank_code) DO UPDATE
-                SET
-                    homepage_url = COALESCE(bank.homepage_url, EXCLUDED.homepage_url),
-                    normalized_homepage_url = COALESCE(bank.normalized_homepage_url, EXCLUDED.normalized_homepage_url),
-                    source_language = COALESCE(bank.source_language, EXCLUDED.source_language)
-                """,
-                {
-                    **item,
-                    "created_at": seeded_at,
-                    "updated_at": seeded_at,
-                },
-            )
-
-    _backfill_seeded_bank_profile_fields(connection)
-
-    row = connection.execute("SELECT COUNT(*) AS item_count FROM source_registry_catalog_item").fetchone()
-    if row and int(row["item_count"]) > 0:
-        return
-
-    seeded_at = utc_now()
-    for item in load_seed_source_catalog_items():
-        connection.execute(
-            """
-            INSERT INTO source_registry_catalog_item (
-                catalog_item_id,
-                bank_code,
-                country_code,
-                product_type,
-                status,
-                change_reason,
-                created_at,
-                updated_at
-            )
-            VALUES (
-                %(catalog_item_id)s,
-                %(bank_code)s,
-                %(country_code)s,
-                %(product_type)s,
-                %(status)s,
-                %(change_reason)s,
-                %(created_at)s,
-                %(updated_at)s
-            )
-            ON CONFLICT (bank_code, country_code, product_type) DO NOTHING
-            """,
-            {
-                **item,
-                "created_at": seeded_at,
-                "updated_at": seeded_at,
-            },
-        )
-
-
-def _backfill_seeded_bank_profile_fields(connection: Connection) -> None:
-    for item in load_seed_bank_homepage_repairs():
-        connection.execute(
-            """
-            UPDATE bank
-            SET
-                homepage_url = CASE
-                    WHEN NULLIF(BTRIM(homepage_url), '') IS NULL THEN %(homepage_url)s
-                    WHEN normalized_homepage_url = ANY(%(legacy_homepage_urls)s) THEN %(homepage_url)s
-                    ELSE homepage_url
-                END,
-                normalized_homepage_url = CASE
-                    WHEN NULLIF(BTRIM(normalized_homepage_url), '') IS NULL THEN %(normalized_homepage_url)s
-                    WHEN normalized_homepage_url = ANY(%(legacy_homepage_urls)s) THEN %(normalized_homepage_url)s
-                    ELSE normalized_homepage_url
-                END,
-                source_language = COALESCE(NULLIF(BTRIM(source_language), ''), %(source_language)s)
-            WHERE bank_code = %(bank_code)s
-              AND managed_flag = true
-              AND (
-                NULLIF(BTRIM(homepage_url), '') IS NULL
-                OR NULLIF(BTRIM(normalized_homepage_url), '') IS NULL
-                OR normalized_homepage_url = ANY(%(legacy_homepage_urls)s)
-                OR NULLIF(BTRIM(source_language), '') IS NULL
-              )
-            """,
-            item,
-        )
 
 
 def _materialize_sources_for_catalog_item(

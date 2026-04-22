@@ -26,38 +26,7 @@ _GENERIC_EXPECTED_FIELDS = (
     "eligibility_text",
     "notes",
 )
-_BUILT_IN_PRODUCT_TYPES: dict[str, dict[str, Any]] = {
-    "chequing": {
-        "display_name": "Chequing",
-        "description": "Daily transaction account with monthly fee, transaction bundle, debit, and banking-plan benefits.",
-        "status": "active",
-        "built_in_flag": True,
-        "managed_flag": True,
-        "discovery_keywords": ["chequing", "checking", "bank account", "banking plan", "daily banking"],
-        "expected_fields": ["product_name", "monthly_fee", "included_transactions", "interac_e_transfer_included", "overdraft_available"],
-        "fallback_policy": "canonical_parser",
-    },
-    "savings": {
-        "display_name": "Savings",
-        "description": "Savings deposit account focused on interest rate, promotional offer, balance tier, and withdrawal rules.",
-        "status": "active",
-        "built_in_flag": True,
-        "managed_flag": True,
-        "discovery_keywords": ["savings", "save", "high interest", "interest"],
-        "expected_fields": ["product_name", "standard_rate", "promotional_rate", "monthly_fee", "interest_payment_frequency"],
-        "fallback_policy": "canonical_parser",
-    },
-    "gic": {
-        "display_name": "GIC",
-        "description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
-        "status": "active",
-        "built_in_flag": True,
-        "managed_flag": True,
-        "discovery_keywords": ["gic", "term deposit", "certificate", "investment", "non-redeemable"],
-        "expected_fields": ["product_name", "standard_rate", "minimum_deposit", "term_length_text", "redeemable_flag"],
-        "fallback_policy": "canonical_parser",
-    },
-}
+_TAXONOMY_SEEDED_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 _STOPWORDS = {
     "account",
     "accounts",
@@ -93,63 +62,7 @@ def normalize_product_type_filters(*, search: str | None, status: str | None) ->
     )
 
 
-def ensure_product_type_registry_seeded(connection: Connection) -> None:
-    row = connection.execute("SELECT COUNT(*) AS item_count FROM product_type_registry").fetchone()
-    if row and int(row["item_count"] or 0) > 0:
-        return
-
-    now = utc_now()
-    for product_type_code, payload in _BUILT_IN_PRODUCT_TYPES.items():
-        connection.execute(
-            """
-            INSERT INTO product_type_registry (
-                product_type_code,
-                product_family,
-                display_name,
-                description,
-                status,
-                built_in_flag,
-                managed_flag,
-                discovery_keywords,
-                expected_fields,
-                fallback_policy,
-                created_at,
-                updated_at
-            )
-            VALUES (
-                %(product_type_code)s,
-                'deposit',
-                %(display_name)s,
-                %(description)s,
-                %(status)s,
-                %(built_in_flag)s,
-                %(managed_flag)s,
-                %(discovery_keywords)s::jsonb,
-                %(expected_fields)s::jsonb,
-                %(fallback_policy)s,
-                %(created_at)s,
-                %(updated_at)s
-            )
-            ON CONFLICT (product_type_code) DO NOTHING
-            """,
-            {
-                "product_type_code": product_type_code,
-                "display_name": payload["display_name"],
-                "description": payload["description"],
-                "status": payload["status"],
-                "built_in_flag": payload["built_in_flag"],
-                "managed_flag": payload["managed_flag"],
-                "discovery_keywords": json.dumps(payload["discovery_keywords"], ensure_ascii=True),
-                "expected_fields": json.dumps(payload["expected_fields"], ensure_ascii=True),
-                "fallback_policy": payload["fallback_policy"],
-                "created_at": now,
-                "updated_at": now,
-            },
-        )
-
-
 def load_product_type_list(connection: Connection, *, filters: ProductTypeFilters) -> dict[str, Any]:
-    ensure_product_type_registry_seeded(connection)
     where_clauses = ["product_family = 'deposit'"]
     params: dict[str, Any] = {}
     if filters.status:
@@ -208,7 +121,6 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
 
 
 def load_product_type_definition(connection: Connection, *, product_type_code: str) -> dict[str, Any] | None:
-    ensure_product_type_registry_seeded(connection)
     row = connection.execute(
         """
         SELECT
@@ -238,7 +150,6 @@ def load_product_type_definitions_map(
     codes: list[str] | None = None,
     active_only: bool = False,
 ) -> dict[str, dict[str, Any]]:
-    ensure_product_type_registry_seeded(connection)
     where_clauses = ["product_family = 'deposit'"]
     params: dict[str, Any] = {}
     if active_only:
@@ -303,7 +214,6 @@ def create_product_type_definition(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    ensure_product_type_registry_seeded(connection)
     display_name = _required_text(payload.get("display_name"), "display_name")
     description = _required_text(payload.get("description"), "description")
     status = (_clean_text(payload.get("status")) or "active").lower()
@@ -402,12 +312,9 @@ def update_product_type_definition(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    ensure_product_type_registry_seeded(connection)
     existing = load_product_type_definition(connection, product_type_code=product_type_code.lower())
     if existing is None:
         raise SourceRegistryError(status_code=404, code="product_type_not_found", message="Product type was not found.")
-    if existing["built_in_flag"]:
-        raise SourceRegistryError(status_code=405, code="product_type_read_only", message="Built-in product types cannot be edited from admin.")
 
     display_name = _required_text(payload.get("display_name", existing["display_name"]), "display_name")
     description = _required_text(payload.get("description", existing["description"]), "description")
@@ -467,13 +374,10 @@ def delete_product_type_definition(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    ensure_product_type_registry_seeded(connection)
     normalized_code = _required_text(product_type_code, "product_type_code").lower()
     existing = load_product_type_definition(connection, product_type_code=normalized_code)
     if existing is None:
         raise SourceRegistryError(status_code=404, code="product_type_not_found", message="Product type was not found.")
-    if existing["built_in_flag"]:
-        raise SourceRegistryError(status_code=405, code="product_type_read_only", message="Built-in product types cannot be deleted from admin.")
 
     usage_counts = connection.execute(
         """
@@ -529,7 +433,7 @@ def delete_product_type_definition(
 
 
 def _sync_dynamic_taxonomy_registry(connection: Connection, *, product_type_code: str, status: str) -> None:
-    if product_type_code in _BUILT_IN_PRODUCT_TYPES:
+    if product_type_code in _TAXONOMY_SEEDED_PRODUCT_TYPES:
         return
     now = utc_now()
     connection.execute(

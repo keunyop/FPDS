@@ -64,7 +64,6 @@ class ProductTypeRegistryTests(unittest.TestCase):
     def test_load_product_type_list_serializes_dynamic_flag(self) -> None:
         connection = _QueuedConnection(
             [
-                {"item_count": 1},
                 [_dynamic_product_row()],
             ]
         )
@@ -81,7 +80,6 @@ class ProductTypeRegistryTests(unittest.TestCase):
         connection = _QueuedConnection([None, None, None, None])
 
         with (
-            patch("api_service.product_types.ensure_product_type_registry_seeded"),
             patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row()),
             patch("api_service.product_types.new_id", return_value="audit-001"),
         ):
@@ -113,7 +111,6 @@ class ProductTypeRegistryTests(unittest.TestCase):
         updated = _dynamic_product_row(status="inactive")
 
         with (
-            patch("api_service.product_types.ensure_product_type_registry_seeded"),
             patch("api_service.product_types.load_product_type_definition", side_effect=[existing, updated]),
             patch("api_service.product_types.new_id", return_value="audit-002"),
         ):
@@ -148,7 +145,6 @@ class ProductTypeRegistryTests(unittest.TestCase):
         existing = _dynamic_product_row(status="inactive")
 
         with (
-            patch("api_service.product_types.ensure_product_type_registry_seeded"),
             patch("api_service.product_types.load_product_type_definition", return_value=existing),
             patch("api_service.product_types.new_id", return_value="audit-003"),
         ):
@@ -171,7 +167,6 @@ class ProductTypeRegistryTests(unittest.TestCase):
             ]
         )
         with (
-            patch("api_service.product_types.ensure_product_type_registry_seeded"),
             patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row()),
         ):
             with self.assertRaises(SourceRegistryError) as captured:

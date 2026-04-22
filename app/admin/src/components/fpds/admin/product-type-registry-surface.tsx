@@ -113,8 +113,8 @@ export function ProductTypeRegistrySurface({
 
       <article className="grid gap-4 md:grid-cols-3">
         <StatCard label="Product types" note="Current list scope" value={String(productTypes.summary.total_items)} />
-        <StatCard label="Built-in" note="Canonical parser coverage" value={String(productTypes.summary.built_in_count)} />
-        <StatCard label="Dynamic" note="Generic AI fallback path" value={String(productTypes.summary.total_items - productTypes.summary.built_in_count)} />
+        <StatCard label="Active" note="Available for bank coverage" value={String(productTypes.summary.status_counts.active ?? 0)} />
+        <StatCard label="Inactive" note="Hidden from new coverage setup" value={String(productTypes.summary.status_counts.inactive ?? 0)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -171,7 +171,6 @@ export function ProductTypeRegistrySurface({
                 <th className="border-b border-border px-3 py-3 font-medium">Product type</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Code</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Status</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Mode</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Fallback policy</th>
                 <th className="border-b border-border px-3 py-3 font-medium">Discovery keywords</th>
               </tr>
@@ -179,7 +178,7 @@ export function ProductTypeRegistrySurface({
             <tbody>
               {productTypes.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={5}>
                     No product types matched the current filter set.
                   </td>
                 </tr>
@@ -198,9 +197,6 @@ export function ProductTypeRegistrySurface({
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.product_type_code}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">
-                      {item.built_in_flag ? "Built-in" : "Dynamic"}
-                    </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.fallback_policy}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">
                       {item.discovery_keywords.join(", ") || "n/a"}
@@ -237,7 +233,7 @@ export function ProductTypeRegistrySurface({
         footer={
           activeProductType ? (
             <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              Built-in types stay read-only, while dynamic types can be updated or deleted from this modal.
+              Product type definitions stay operator-managed from this modal and feed bank coverage plus discovery.
             </p>
           ) : undefined
         }

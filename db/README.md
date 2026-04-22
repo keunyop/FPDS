@@ -8,6 +8,7 @@ Current decisions:
 - Primary keys use application-generated `text` ids for now, which avoids taking a UUID extension dependency before the runtime is chosen.
 - Flexible candidate and canonical field payloads live in `jsonb` until the implementation needs stricter column-level expansion.
 - `pgvector` is intentionally deferred from the first migration. Metadata-only retrieval fallback is allowed in early `dev`.
+- Runtime admin and API reads no longer auto-reseed `bank`, `product_type_registry`, `source_registry_catalog_item`, or `source_registry_item` from committed JSON seed baselines. Empty tables now remain empty until an explicit operator write, import step, or full migration replay repopulates them.
 
 Files:
 - `migrations/0001_initial_baseline.sql`: core schema and seed data
@@ -31,3 +32,4 @@ Notes:
 - Use the connection target from `.env.dev.example` or `.env.prod.example`.
 - Keep future migrations additive and append-only where possible.
 - Put extension-specific or vendor-specific migrations in later numbered files.
+- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` and in `0007_dynamic_product_type_onboarding.sql` for `product_type_registry`. Those are applied only when migrations are replayed on a new database; they are no longer mirrored by runtime reseed logic.

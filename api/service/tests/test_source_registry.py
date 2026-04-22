@@ -163,7 +163,6 @@ class SourceRegistryTests(unittest.TestCase):
     def test_create_source_registry_item_inserts_row_and_audit_event(self) -> None:
         connection = _QueuedConnection(
             [
-                {"item_count": 1},
                 None,
                 None,
                 {
@@ -249,7 +248,6 @@ class SourceRegistryTests(unittest.TestCase):
         }
         connection = _QueuedConnection(
             [
-                {"item_count": 1},
                 existing_row,
                 None,
                 None,

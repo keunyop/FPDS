@@ -890,22 +890,6 @@ Each entry should include:
 - Known issues: the original CI blocker from missing frontend dependencies is addressed, but this local Windows environment still has a separate `next build` `spawn EPERM` problem that should be treated independently from the GitHub Actions fix
 - Next step: rerun `scripts/harness/invoke-foundation-checks.ps1` and then recheck the GitHub Actions workflow result with the new Node plus Corepack bootstrap in place
 
-## 2026-04-13 - Customer Progress Report Draft Prepared
-
-- WBS: delivery reporting support
-- Status: `done`
-- Goal: prepare a customer-facing first progress report covering project start through `2026-04-12` using a conservative status line that stays aligned to the published schedule
-- Why now: the Product Owner needed a shareable written progress update for the first customer reporting cycle and explicitly wanted the external message to remain on-schedule rather than exposing the full internal lead
-- Outcome: added `docs/customer-reports/customer-progress-report-2026-04-12.md` as the first customer-facing progress report draft and introduced `docs/customer-reports/` as the dedicated location for customer-shareable reporting documents. The report is written in English, summarizes the period as `On schedule`, records detailed design and Foundation Setup as complete, reports the Prototype core pipeline plus first internal end-to-end verification as complete, and keeps `Admin/Ops Core` framed as the next stage rather than over-reporting the internal lead
-- Not done: did not convert this draft into a branded client template, slide deck, or bilingual version. Also did not disclose the fuller internal status line of `Gate B Pass` plus `WBS 4.1` completion because this slice intentionally preserved customer-facing buffer
-- Key files: `docs/customer-reports/README.md`, `docs/customer-reports/customer-progress-report-2026-04-12.md`, `docs/00-governance/development-journal.md`
-- Decisions: used a conservative external reporting line that remains factually correct while avoiding premature customer expectations about later-phase completion. Framed progress around completed foundations, prototype core implementation, and internal verification rather than around internal WBS lead indicators
-- Verification:
-  - `git diff --check`
-  - pending
-- Known issues: the report is currently a repository markdown draft only, so any final customer branding or formatting adaptation still remains a follow-on packaging task
-- Next step: reuse this report draft as the base text for the customer submission and adjust wording only if the Product Owner wants a more formal or more executive-style tone
-
 ## 2026-04-13 - WBS 4.2 Review Queue
 
 - WBS: `4.2`
@@ -2225,6 +2209,42 @@ Each entry should include:
 - Known issues: the queue currently assumes one active Canada public aggregate scope and relies on the single-runner advisory lock rather than a broader scheduler or lease system. If the runtime later needs multi-country or per-scope refresh governance, the queue contract should expand explicitly instead of growing implicitly
 - Next step: apply `0010_aggregate_refresh_queue.sql` to the target database, restart the admin API so the new routes and runner module are available, then approve or edit-approve one review task and confirm `/admin/health/dashboard` moves through `pending` to `healthy` while `/products` continues serving the latest successful snapshot
 
+## 2026-04-21 - Customer Reports Cleanup
+
+- WBS: documentation hygiene
+- Status: `done`
+- Goal: remove the retired external reporting docs and scrub related references so the docs set matches the current operating boundary
+- Why now: the Product Owner asked to delete the retired reporting folder and remove related references from the remaining docs
+- Outcome: deleted the retired reporting documents, removed the old report-specific journal entry, and tightened the Phase 1 QA checklist so evidence now stays under `docs/00-governance/` without referencing a separate external summary artifact
+- Not done: did not introduce a replacement reporting location or a new external-reporting workflow
+- Key files: `docs/00-governance/development-journal.md`, `docs/00-governance/phase-1-no-bxpf-test-checklist.md`
+- Decisions: treated the retired reporting area as intentionally removed rather than relocated, and removed direct historical references so future readers do not chase deleted paths
+- Verification:
+  - `Get-ChildItem -Name docs`
+  - showed only `00-governance`, `01-planning`, `02-requirements`, `03-design`, and `README.md`
+  - `git status --short docs`
+  - showed two modified governance docs and two deleted reporting files
+  - `git diff --check`
+  - passed
+- Known issues: generic product-domain uses of the word `customer` still remain elsewhere in requirements, API, and UI docs because they are unrelated to the deleted reporting folder
+- Next step: if external reporting is needed again later, define a new approved location and governance rule before reintroducing shareable reporting artifacts
+
+## 2026-04-21 - Runtime Reseed Removal for Resettable Registry State
+
+- WBS: `5.15`, `5.16`
+- Status: `done`
+- Goal: stop bank, product type, source catalog, and generated source rows from silently repopulating after an operator reset so empty-state replay testing is possible without dropping the whole DB
+- Why now: after truncating `bank` and `product_type_registry`, the Product Owner saw those rows come back after logging in again and reasonably treated that as an unwanted runtime migration path. The real problem was not auth-session migration, but API and admin reads that were reseeding from committed JSON baselines or refreshing active seed scope behind the scenes
+- Outcome: removed runtime reseeding from `product_types.py`, `source_catalog.py`, and `source_registry.py`, removed the background-runner seed-scope refresh that rewrote active source rows before preserved-detail reuse, and updated the admin product-type surface copy so it no longer implies protected built-in types. Bank, product type, source catalog, and source registry tables now stay empty after operator truncation until an explicit import, migration replay, or admin write repopulates them
+- Not done: did not rewrite historical SQL migrations that insert the original bank and product type baseline on a brand-new database. Those inserts still happen only when a database is recreated and migrations are applied from scratch, and changing that behavior should be treated as a separate migration-strategy decision because existing environments may depend on append-only history
+- Key files: `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/tests/test_product_types.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_registry.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `api/service/README.md`, `app/admin/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- Decisions: kept the fix on runtime behavior and operator-facing copy instead of mutating already-applied historical SQL files. Retained committed JSON baselines only as discovery hints and offline import material, not as an automatic DB repair path
+- Verification:
+  - runtime code search no longer returns `ensure_product_type_registry_seeded`, `_ensure_bank_and_catalog_seeded`, `_ensure_source_registry_seeded`, or `_refresh_active_seed_scope_rows` inside `api/service/api_service`
+  - remaining automatic bootstrap found during inspection is limited to historical fresh-DB migration inserts in `db/migrations/0001_initial_baseline.sql` for `bank` and `db/migrations/0007_dynamic_product_type_onboarding.sql` for `product_type_registry`
+- Known issues: a fully fresh database created by replaying the current migration chain will still receive the historical bank and product type baseline rows from those SQL files. That path is no longer tied to login or admin browsing, but it remains relevant for teardown-and-rebuild environments
+- Next step: if the Product Owner wants brand-new databases to start empty as well, choose an explicit migration strategy first rather than quietly editing historical migration files
+
 ---
 
 ## 7. Change History
@@ -2303,3 +2323,5 @@ Each entry should include:
 | 2026-04-20 | Added the partial-failure hardening live rerun verification entry |
 | 2026-04-20 | Added the Scotia savings seed-scope refresh and Money Master follow-up entry |
 | 2026-04-21 | Added the aggregate refresh auto-queue and dashboard health entry |
+| 2026-04-21 | Removed the retired external reporting artifacts and scrubbed related governance references |
+| 2026-04-21 | Removed runtime reseeding and seed-scope refresh behavior so bank, product type, source catalog, and source registry tables now stay empty after operator resets until explicitly repopulated |

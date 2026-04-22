@@ -10,7 +10,6 @@ from api_service.source_catalog import (
     AiParallelCandidateScore,
     CatalogItemMaterializationResult,
     HomepageSourceGenerationResult,
-    _backfill_seeded_bank_profile_fields,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
@@ -98,7 +97,6 @@ class SourceCatalogTests(unittest.TestCase):
         connection = _QueuedConnection([None, None])
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch("api_service.source_catalog._generate_bank_code", return_value="ATL"),
             patch(
                 "api_service.source_catalog.load_bank_detail",
@@ -134,7 +132,6 @@ class SourceCatalogTests(unittest.TestCase):
         connection = _QueuedConnection([None, None])
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch("api_service.source_catalog._generate_bank_code", return_value="ATL"),
             patch(
                 "api_service.source_catalog.load_bank_detail",
@@ -173,7 +170,6 @@ class SourceCatalogTests(unittest.TestCase):
         connection = _QueuedConnection([None, None])
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch("api_service.source_catalog._generate_bank_code", return_value="ATL"),
             patch(
                 "api_service.source_catalog.load_bank_detail",
@@ -218,7 +214,6 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch(
                 "api_service.source_catalog.require_product_type_definition",
                 return_value=_product_type_definition("savings"),
@@ -293,8 +288,7 @@ class SourceCatalogTests(unittest.TestCase):
             ]
         )
 
-        with patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"):
-            result = load_bank_list(connection, filters=normalize_bank_filters(search=None, status=None))
+        result = load_bank_list(connection, filters=normalize_bank_filters(search=None, status=None))
 
         self.assertEqual(result["items"][0]["catalog_product_types"], ["gic", "savings"])
         self.assertEqual(
@@ -323,7 +317,6 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch(
                 "api_service.source_catalog.load_bank_detail",
                 return_value={
@@ -366,7 +359,6 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch(
                 "api_service.source_catalog.load_bank_detail",
                 return_value={
@@ -409,7 +401,6 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
             patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
             patch("api_service.source_catalog._insert_collection_run_row") as queue_run,
@@ -456,29 +447,6 @@ class SourceCatalogTests(unittest.TestCase):
             retry_of_run_id=None,
         )
         launch_runner.assert_called_once()
-
-    def test_backfill_seeded_bank_profile_fields_updates_missing_homepage_data(self) -> None:
-        connection = _QueuedConnection([None])
-
-        with patch(
-            "api_service.source_catalog.load_seed_bank_homepage_repairs",
-            return_value=[
-                {
-                    "bank_code": "RBC",
-                    "homepage_url": "https://www.rbcroyalbank.com/",
-                    "normalized_homepage_url": "https://www.rbcroyalbank.com/",
-                    "source_language": "en",
-                    "legacy_homepage_urls": ["https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/index.html"],
-                }
-            ],
-        ):
-            _backfill_seeded_bank_profile_fields(connection)
-
-        self.assertEqual(len(connection.calls), 1)
-        sql, params = connection.calls[0]
-        self.assertIn("UPDATE bank", sql)
-        self.assertEqual(params["bank_code"], "RBC")
-        self.assertIn("homepage_url", params)
 
     def test_record_catalog_audit_event_uses_current_audit_schema(self) -> None:
         connection = _QueuedConnection([None])
@@ -730,7 +698,6 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         with (
-            patch("api_service.source_catalog._ensure_bank_and_catalog_seeded"),
             patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
             patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
             patch("api_service.source_catalog._insert_collection_run_row"),

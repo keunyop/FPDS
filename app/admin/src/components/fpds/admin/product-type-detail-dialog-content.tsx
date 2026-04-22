@@ -43,9 +43,6 @@ export function ProductTypeDetailDialogContent({
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (productType.built_in_flag) {
-      return;
-    }
     setPendingSave(true);
     setMessage(null);
     setError(null);
@@ -77,9 +74,6 @@ export function ProductTypeDetailDialogContent({
   }
 
   async function handleDelete() {
-    if (productType.built_in_flag) {
-      return;
-    }
     setPendingDelete(true);
     setMessage(null);
     setError(null);
@@ -116,7 +110,7 @@ export function ProductTypeDetailDialogContent({
         <ReadonlySummary label="Code" value={productType.product_type_code} />
         <ReadonlySummary label="Family" value={productType.product_family} />
         <ReadonlySummary label="Status" value={productType.status} />
-        <ReadonlySummary label="Mode" value={productType.built_in_flag ? "Built-in" : "Dynamic"} />
+        <ReadonlySummary label="Managed" value={productType.managed_flag ? "Yes" : "No"} />
       </div>
 
       {message ? <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
@@ -125,33 +119,26 @@ export function ProductTypeDetailDialogContent({
       <section className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Product type profile</p>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground">
-            {productType.built_in_flag ? "Read-only canonical definition" : "Operator-managed onboarding definition"}
-          </h2>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Operator-managed onboarding definition</h2>
           <p className="text-sm leading-6 text-muted-foreground">
-            {productType.built_in_flag
-              ? "Built-in product types stay read-only so the canonical parser path remains stable."
-              : "Dynamic product types feed homepage-first discovery and the generic AI fallback path."}
+            Product type definitions feed homepage-first discovery and the generic AI fallback path.
           </p>
         </div>
 
         <form className="mt-5 space-y-4" onSubmit={handleSave}>
           <InputField
-            disabled={productType.built_in_flag}
             icon={<Search className="size-4" />}
             label="Display name"
             onChange={(value) => setForm((current) => ({ ...current, display_name: value }))}
             value={form.display_name}
           />
           <TextareaField
-            disabled={productType.built_in_flag}
             icon={<FileText className="size-4" />}
             label="Description"
             onChange={(value) => setForm((current) => ({ ...current, description: value }))}
             value={form.description}
           />
           <SelectField
-            disabled={productType.built_in_flag}
             icon={<Sparkles className="size-4" />}
             label="Status"
             onChange={(value) => setForm((current) => ({ ...current, status: value }))}
@@ -166,22 +153,20 @@ export function ProductTypeDetailDialogContent({
             value={productType.fallback_policy}
           />
           {error ? <FieldError>{error}</FieldError> : null}
-          {!productType.built_in_flag ? (
-            <div className="flex justify-between gap-3">
-              <Button
-                disabled={pendingDelete}
-                onClick={() => setDeleteDialogOpen(true)}
-                type="button"
-                variant="destructive"
-              >
-                <Trash2 className="size-4" />
-                {pendingDelete ? "Deleting..." : "Delete product type"}
-              </Button>
-              <Button disabled={pendingSave} type="submit">
-                {pendingSave ? "Saving..." : "Save product type"}
-              </Button>
-            </div>
-          ) : null}
+          <div className="flex justify-between gap-3">
+            <Button
+              disabled={pendingDelete}
+              onClick={() => setDeleteDialogOpen(true)}
+              type="button"
+              variant="destructive"
+            >
+              <Trash2 className="size-4" />
+              {pendingDelete ? "Deleting..." : "Delete product type"}
+            </Button>
+            <Button disabled={pendingSave} type="submit">
+              {pendingSave ? "Saving..." : "Save product type"}
+            </Button>
+          </div>
         </form>
       </section>
 

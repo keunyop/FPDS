@@ -1,7 +1,7 @@
 # FPDS Source Registry Operations Policy
 
-Version: 1.1
-Date: 2026-04-15
+Version: 1.2
+Date: 2026-04-21
 Status: Active Operating Baseline
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
@@ -200,7 +200,7 @@ Current repository state:
 - the live admin runtime now includes `/admin/banks`, `/admin/source-catalog`, and read-only `/admin/sources`
 - operator-managed registry ownership now lives in `bank` and `source_registry_catalog_item`
 - generated source detail lives in `source_registry_item`
-- the DB tables are bootstrapped from the committed JSON catalog only when empty
+- the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only the existing TD savings supporting-source merge path auto-included today

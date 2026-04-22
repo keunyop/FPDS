@@ -167,12 +167,12 @@ Recommended evidence:
 ## 6.5 Public Product Grid
 
 - [v] `/products` loads against the latest successful aggregate snapshot
-- [ ] filter vocabulary loads and applies correctly
-- [ ] product cards render the approved product types with the expected primary metrics
-- [ ] pagination and sorting work for the current aggregate scope
-- [ ] freshness and methodology notes render
-- [ ] EN/KO/JA locale switching works for UI-owned copy
-- [ ] empty state and API-unavailable fallback remain understandable
+- [v] filter vocabulary loads and applies correctly
+- [v] product cards render the approved product types with the expected primary metrics
+- [v] pagination and sorting work for the current aggregate scope
+- [v] freshness and methodology notes render
+- [v] EN/KO/JA locale switching works for UI-owned copy
+- [v] empty state and API-unavailable fallback remain understandable
 
 Recommended evidence:
 - screenshots for default scope and one filtered scope
@@ -181,12 +181,12 @@ Recommended evidence:
 
 ## 6.6 Public Insight Dashboard
 
-- [ ] `/dashboard` loads summary, ranking, and scatter-backed content from FPDS internal aggregate data
-- [ ] dashboard scope follows the shared public filter vocabulary
-- [ ] dashboard drill-in links return to the Product Grid with meaningful narrowed scope
-- [ ] methodology and freshness messaging render
-- [ ] EN/KO/JA locale switching works for UI-owned copy
-- [ ] single-type and mixed-scope behavior remains consistent with the approved dashboard rules
+- [v] `/dashboard` loads summary, ranking, and scatter-backed content from FPDS internal aggregate data
+- [v] dashboard scope follows the shared public filter vocabulary
+- [v] dashboard drill-in links return to the Product Grid with meaningful narrowed scope
+- [v] methodology and freshness messaging render
+- [v] EN/KO/JA locale switching works for UI-owned copy
+- [v] single-type and mixed-scope behavior remains consistent with the approved dashboard rules
 
 Recommended evidence:
 - default dashboard screenshot
@@ -261,7 +261,7 @@ When this checklist is executed, capture at least:
 - representative screenshots
 - sample ids for run, review task, product, product version, and audit event
 
-Store the resulting evidence as a dated QA note under `docs/00-governance/` unless the Product Owner prefers a customer-facing summary artifact.
+Store the resulting evidence as a dated QA note under `docs/00-governance/`.
 
 ---
 
