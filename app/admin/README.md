@@ -22,7 +22,9 @@ Current scaffold:
 
 Current runtime:
 - `/admin/login` login screen
+- `/admin/signup` access-request screen
 - protected `/admin` overview entry
+- protected `/admin` admin-only access-request approval panel for pending signup requests
 - protected `/admin/reviews` review queue with active-state defaults, search, filters, sort, and pagination
 - protected `/admin/reviews/:reviewTaskId` review detail route with field-selectable evidence trace, model-run context, action history, a dedicated approved-product-name input for safer rename corrections, and approve/reject/defer/edit-approve controls; already-approved and already-edited tasks now reopen into `Edit & approve` for follow-up operator corrections
 - protected `/admin/runs` run list with status filters, partial-completion triage, and stable drill-in links
@@ -42,7 +44,7 @@ Current runtime:
 - operator-facing delete confirmations should use the shared Shadcnblocks-inspired destructive alert dialog pattern instead of browser-native confirm popups so destructive actions stay visually consistent across the admin surface
 - `WBS 5.12` locale rollout is now implemented with EN/KO/JA locale switching on the admin shell and login surface, locale-preserving protected-route navigation, and locale-aware operator-facing labels while keeping evidence and source-derived content untouched
 - middleware-based route gate backed by the shared session cookie contract
-- Shadcnblocks-based admin login and shell built on `components.json`, `radix-nova`, and app-local shadcn semantic variables
+- Shadcnblocks-based admin login and an `application-shell5` floating admin shell built on `components.json`, `radix-nova`, app-local shadcn semantic variables, route-group switching, and locale-preserving navigation
 - vendor-installed shadcn UI primitives under `src/components/ui/` plus edited Shadcnblocks-derived blocks under `src/components/`
 - Tailwind 4 or PostCSS frontend foundation under `src/app/globals.css` and `postcss.config.mjs`
 - the standalone TypeScript check now runs with `allowJs: true` in `tsconfig.json` so the current Next-generated `.next/types` route validators resolve cleanly during local QA and harness verification

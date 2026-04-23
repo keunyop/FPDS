@@ -98,9 +98,9 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
   en: {
     brand: "FPDS Admin",
     shellLabel: "Operations shell",
-    shellNote: "Compact admin shell with route-oriented triage surfaces.",
+    shellNote: "Floating admin shell with route-oriented triage surfaces.",
     searchHint: "Search by bank, product, run, or candidate",
-    mobileTitle: "Compact FPDS operator shell",
+    mobileTitle: "Floating FPDS operator shell",
     mobileNote: "Search, locale, and route actions stay in the shell",
     roleLabel: "Role",
     status: {
@@ -129,9 +129,9 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
   ko: {
     brand: "FPDS 관리자",
     shellLabel: "운영 셸",
-    shellNote: "경로 중심 분류 화면을 담는 컴팩트한 관리자 셸입니다.",
+    shellNote: "경로 중심 분류 화면을 담는 플로팅 관리자 셸입니다.",
     searchHint: "은행, 상품, 실행, 후보로 검색",
-    mobileTitle: "컴팩트 FPDS 운영 셸",
+    mobileTitle: "플로팅 FPDS 운영 셸",
     mobileNote: "검색, 언어, 경로 동작은 셸에서 처리됩니다",
     roleLabel: "권한",
     status: {
@@ -160,9 +160,9 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
   ja: {
     brand: "FPDS 管理",
     shellLabel: "運用シェル",
-    shellNote: "経路中心のトリアージ画面をまとめたコンパクトな管理シェルです。",
+    shellNote: "経路中心のトリアージ画面をまとめたフローティング管理シェルです。",
     searchHint: "銀行、商品、実行、候補で検索",
-    mobileTitle: "コンパクト FPDS 運用シェル",
+    mobileTitle: "フローティング FPDS 運用シェル",
     mobileNote: "検索、言語、経路操作はシェル内で完結します",
     roleLabel: "ロール",
     status: {
@@ -315,6 +315,7 @@ function findMatchingGroupIndex(pathname: string | null, navGroups: NavGroup[]) 
       return pathname === item.href || pathname.startsWith(`${item.href}/`);
     }),
   );
+
   return matchingIndex >= 0 ? matchingIndex : 0;
 }
 
@@ -410,7 +411,7 @@ function AppSidebar({
   const copy = shellCopyByLocale[locale];
 
   return (
-    <Sidebar className="top-14 h-[calc(100svh-3.5rem)]!" collapsible="icon" variant="inset">
+    <Sidebar className="top-14 h-[calc(100svh-3.5rem)]!" collapsible="icon" variant="floating">
       <SidebarHeader className="gap-4 border-b border-sidebar-border/70 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>

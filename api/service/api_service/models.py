@@ -4,10 +4,23 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+AUTH_PASSWORD_MIN_LENGTH = 4
+
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str = Field(min_length=8, max_length=256)
+    login_id: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=AUTH_PASSWORD_MIN_LENGTH, max_length=256)
+
+
+class SignupRequestCreateRequest(BaseModel):
+    login_id: str = Field(min_length=3, max_length=50)
+    display_name: str = Field(min_length=2, max_length=120)
+    password: str = Field(min_length=AUTH_PASSWORD_MIN_LENGTH, max_length=256)
+
+
+class SignupRequestReviewRequest(BaseModel):
+    role: str | None = Field(default=None, max_length=20)
+    reason_text: str | None = Field(default=None, max_length=2000)
 
 
 class ReviewDecisionRequest(BaseModel):

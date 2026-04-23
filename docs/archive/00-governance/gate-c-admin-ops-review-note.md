@@ -8,7 +8,7 @@ Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/00-governance/milestone-tracker.md`
 - `docs/00-governance/development-journal.md`
-- `docs/00-governance/wbs-4-ops-scenario-qa-summary.md`
+- `docs/archive/00-governance/wbs-4-ops-scenario-qa-summary.md`
 - `README.md`
 - `api/service/README.md`
 - `app/admin/README.md`
@@ -43,8 +43,8 @@ Conclusion:
 | review queue and review decision flow work | Pass | `README.md`, `docs/00-governance/development-journal.md`, `api/service/README.md`, `app/admin/README.md` |
 | evidence trace viewer, run status, and change history are accessible | Pass | `README.md`, `docs/00-governance/development-journal.md`, `api/service/README.md`, `app/admin/README.md` |
 | audit log baseline and usage tracking exist | Pass | `README.md`, `api/service/README.md`, `app/admin/README.md`, `docs/00-governance/development-journal.md` |
-| operational scenario QA has been performed | Pass | `docs/00-governance/wbs-4-ops-scenario-qa-summary.md`, `api/service/tests/test_ops_scenario_qa.py` |
-| prototype-stage risk response direction is documented | Pass | `docs/01-planning/prototype-findings-memo.md`, `docs/00-governance/development-journal.md`, `docs/00-governance/gate-b-prototype-review-note.md` |
+| operational scenario QA has been performed | Pass | `docs/archive/00-governance/wbs-4-ops-scenario-qa-summary.md`, `api/service/tests/test_ops_scenario_qa.py` |
+| prototype-stage risk response direction is documented | Pass | `docs/archive/01-planning/prototype-findings-memo.md`, `docs/00-governance/development-journal.md`, `docs/archive/00-governance/gate-b-prototype-review-note.md` |
 
 ---
 
@@ -59,7 +59,7 @@ Validated operator path:
 
 Evidence:
 - new scenario test: `api/service/tests/test_ops_scenario_qa.py`
-- QA artifact: `docs/00-governance/wbs-4-ops-scenario-qa-summary.md`
+- QA artifact: `docs/archive/00-governance/wbs-4-ops-scenario-qa-summary.md`
 - full backend regression rerun
 - admin typecheck and production build rerun
 

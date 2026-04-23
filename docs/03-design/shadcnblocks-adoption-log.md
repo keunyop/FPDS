@@ -97,6 +97,20 @@ Do not add an entry for:
   - `cmd /c npm run typecheck`
 - Notes: no new vendor block was imported for `4.5`; the run surfaces deliberately reuse the existing shell and support blocks rather than widening the vendor footprint before publish, usage, and health routes land
 
+## 2026-04-22 - Admin Shell Correction Back to Application Shell 5 Floating
+
+- Surface or Area: `app/admin` protected shell used by overview, review, operations, and observability routes
+- Vendor Asset: `@shadcnblocks/application-shell5`
+- Source: `https://www.shadcnblocks.com/docs`, authenticated `@shadcnblocks` registry in `app/admin/components.json`
+- Install Method: `pnpm dlx shadcn add @shadcnblocks/application-shell5` with the repo root `.env.dev` loaded so the local `SHADCNBLOCKS_API_KEY` was available to the CLI
+- Files Added or Changed: `app/admin/src/components/application-shell5.tsx`, `app/admin/README.md`
+- FPDS Wrappers or Overrides: restored the live shell to the `application-shell5` base and kept the existing page-level API so protected routes continued to pass `environmentLabel`, `locale`, `user`, and `headerActions` without broad page edits
+- Direct Vendor Edits: yes; the installed Application Shell 5 demo was aligned again to FPDS route groups, locale-aware copy, environment badging, operator context, and the current route-oriented admin scope, while the mistaken `sidebar8` attempt was removed
+- Verification:
+  - `pnpm run typecheck`
+  - `pnpm run build`
+- Notes: the live shell is back on Application Shell 5 and now uses the floating sidebar variant instead of the brief mistaken Sidebar 8 inset implementation
+
 ---
 
 ## 5. Change History

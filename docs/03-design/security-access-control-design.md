@@ -24,7 +24,7 @@ Source Documents:
 - `public/admin/API/worker/storage/BX-PF` 경계가 같은 trust model을 참조하도록 만든다.
 - Gate A 이전에 닫아야 하는 security/access open item을 문서 기준으로 종료한다.
 
-이 문서는 구현 지시서가 아니라 설계 baseline이다.  
+이 문서는 구현 지시서가 아니라 설계 baseline이다.
 구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
 
 ---
@@ -53,6 +53,10 @@ Source Documents:
 - browser local storage나 bearer token 보관보다 노출면을 줄일 수 있다.
 
 ### 3.2 Boundary Rules
+
+Additional onboarding rules:
+- anonymous sign-up is allowed only as a pending access request; it does not create an active operator account by itself
+- a pending access request becomes usable only after an existing `admin` approves it and assigns one of `admin`, `reviewer`, or `read_only`
 
 - admin login은 human user 전용이다.
 - admin API는 cookie-backed authenticated session이 없으면 접근할 수 없다.

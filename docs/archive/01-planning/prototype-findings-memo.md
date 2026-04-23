@@ -4,8 +4,8 @@ Date: `2026-04-11`
 WBS: `3.10`
 Status: `completed`
 Primary evidence base:
-- `docs/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
-- `docs/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`
+- `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
+- `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`
 - `app/prototype/viewer-payload.json`
 
 ## 1. Purpose

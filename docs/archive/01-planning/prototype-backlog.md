@@ -1,12 +1,12 @@
-﻿# Prototype Backlog Baseline
+# Prototype Backlog Baseline
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Approved Baseline for WBS 1.8.2  
+Version: 1.0
+Date: 2026-04-06
+Status: Approved Baseline for WBS 1.8.2
 Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/01-planning/plan.md`
-- `docs/01-planning/td-savings-source-inventory.md`
+- `docs/archive/01-planning/td-savings-source-inventory.md`
 - `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/domain-model-canonical-schema.md`
@@ -25,7 +25,7 @@ Source Documents:
 - Gate B 통과에 직접 필요한 작업과 Prototype 이후로 미뤄도 되는 작업을 분리한다.
 - Product Owner의 명시적 build 승인 전까지 구현 범위를 임의 확장하지 않도록 기준선을 고정한다.
 
-이 문서는 구현 시작 승인을 의미하지 않는다.  
+이 문서는 구현 시작 승인을 의미하지 않는다.
 실제 개발 시작은 `Gate A = Pass + Product Owner explicit approval` 이후에만 가능하다.
 
 ---
@@ -297,9 +297,9 @@ backlog 추가 요청이 위 범위를 넘으면 change control 대상으로 본
 | WBS | This Document Coverage |
 |---|---|
 | `1.8.2` | Sections 2-9 |
-| `1.8.3` | `docs/01-planning/prototype-acceptance-checklist.md` 입력으로 Sections 2, 3, 5, 7, 9 사용 |
-| `1.8.4` | `docs/01-planning/prototype-spike-scope.md` 입력으로 Sections 6, 8 사용 |
-| `1.8.5` | `docs/01-planning/sprint-0-board.md` 입력으로 Sections 4-7 사용 |
+| `1.8.3` | `docs/archive/01-planning/prototype-acceptance-checklist.md` 입력으로 Sections 2, 3, 5, 7, 9 사용 |
+| `1.8.4` | `docs/archive/01-planning/prototype-spike-scope.md` 입력으로 Sections 6, 8 사용 |
+| `1.8.5` | `docs/archive/01-planning/sprint-0-board.md` 입력으로 Sections 4-7 사용 |
 
 ---
 

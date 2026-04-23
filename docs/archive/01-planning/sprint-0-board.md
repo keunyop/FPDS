@@ -1,14 +1,14 @@
-﻿# Sprint 0 Ready Board
+# Sprint 0 Ready Board
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Approved Baseline for WBS 1.8.5  
+Version: 1.0
+Date: 2026-04-06
+Status: Approved Baseline for WBS 1.8.5
 Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/01-planning/plan.md`
-- `docs/01-planning/prototype-backlog.md`
-- `docs/01-planning/prototype-acceptance-checklist.md`
-- `docs/01-planning/prototype-spike-scope.md`
+- `docs/archive/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/prototype-acceptance-checklist.md`
+- `docs/archive/01-planning/prototype-spike-scope.md`
 - `docs/00-governance/stage-gate-checklist.md`
 - `docs/00-governance/milestone-tracker.md`
 - `docs/00-governance/decision-log.md`
@@ -24,7 +24,7 @@ Source Documents:
 - 아직 구현 승인 전인 항목과, 승인 즉시 착수 가능한 항목을 분리한다.
 - prototype backlog의 P0 lane이 실제 실행 순서로 이어지도록 만든다.
 
-이 문서는 Gate A `Pass` 이후 바로 참고할 `ready board`다.  
+이 문서는 Gate A `Pass` 이후 바로 참고할 `ready board`다.
 이 문서 자체는 구현 시작 보고가 아니며, 현재 시점의 `next execution queue`를 정리한 것이다.
 
 ---

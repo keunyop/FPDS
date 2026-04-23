@@ -5,6 +5,7 @@ Route: `/admin/login`
 Purpose:
 - human operator sign-in entrypoint
 - successful auth redirects to `/admin`
+- sign-up requests link to `/admin/signup`
 
 Current scaffold:
 - route reserved only at the design layer

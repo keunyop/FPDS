@@ -1,14 +1,14 @@
-﻿# Prototype Spike Scope
+# Prototype Spike Scope
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Approved Baseline for WBS 1.8.4  
+Version: 1.0
+Date: 2026-04-06
+Status: Approved Baseline for WBS 1.8.4
 Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/01-planning/plan.md`
-- `docs/01-planning/td-savings-source-inventory.md`
-- `docs/01-planning/prototype-backlog.md`
-- `docs/01-planning/prototype-acceptance-checklist.md`
+- `docs/archive/01-planning/td-savings-source-inventory.md`
+- `docs/archive/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/prototype-acceptance-checklist.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/source-snapshot-evidence-storage-strategy.md`
 - `docs/03-design/domain-model-canonical-schema.md`
@@ -218,4 +218,3 @@ Source Documents:
 | Date | Change |
 |---|---|
 | 2026-04-06 | Initial prototype spike scope created for WBS 1.8.4 |
-

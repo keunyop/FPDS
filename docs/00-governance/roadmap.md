@@ -1,65 +1,138 @@
 # FPDS Roadmap
 
-Version: 1.0
-Date: 2026-03-29
-Status: Draft for Planning
+Version: 2.0
+Date: 2026-04-22
+Status: Active current roadmap
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `docs/02-requirements/scope-baseline.md`
 - `docs/01-planning/plan.md`
 - `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/03-design/domain-model-canonical-schema.md`
 - `docs/00-governance/decision-log.md`
-- `docs/00-governance/raid-log.md`
-- `docs/00-governance/working-agreement.md`
+- `docs/00-governance/milestone-tracker.md`
 
-## Gate Update
+---
 
-As of `2026-04-13`:
-- `Gate B` is approved as `Pass`
-- `WBS 3. Prototype Build` is complete for the approved `TD Savings` prototype scope
-- `WBS 4. Admin and Ops Core` implementation is complete through `4.10`, including operational scenario QA evidence
-- `Gate C` is approved as `Pass`
-- `WBS 5` is now the active stage
-- `WBS 5.1 Big 5 source registry` is complete with a committed Canada Big 5 registry catalog and per-bank baseline source files
+## 1. Purpose
 
-## 0. Current Progress Snapshot
+This roadmap is the short current view of what FPDS has already cleared, what stage is active now, and what remains ahead.
 
-As of 2026-04-07, WBS 기준 현재 진행 상태는 아래와 같습니다.
+It is not a detailed task tracker.
+For detailed task state, use `docs/01-planning/WBS.md`.
 
-| Metric | Value | Basis |
-|---|---|---|
-| Overall WBS Progress | 48.2% complete | 114개 WBS task 중 55개 `Completed` |
-| Current Stage Progress | 100% complete | Foundation Setup `2.x` 10개 task 중 1개 `Completed` |
-| Estimated Remaining Duration | about 83 working days | 2026-04-07 실행 시작일부터 2026-07-31 Phase 2 acceptance target까지의 잔여 작업 기간 |
+---
 
-계산 메모:
-- 전체 진행률은 `Completed task count / 전체 WBS task count` 기준이다.
-- 남은 기간은 `2026-04-07` 실행 시작일과 `2026-07-31` 최종 acceptance 목표를 기준으로 잡았다.
-- 이후 수치는 WBS 상태가 바뀔 때마다 함께 업데이트해야 한다.
-- 2026-03-30 기준 WBS `1.1.1`~`1.1.5`가 `docs/02-requirements/scope-baseline.md` 생성과 함께 완료 처리되었다.
-- 2026-03-30 기준 WBS `1.2.1`~`1.2.7`이 `docs/03-design/domain-model-canonical-schema.md` 생성과 함께 완료 처리되었다.
-- 2026-03-31 기준 WBS `1.3.1`이 `docs/03-design/workflow-state-ingestion-design.md` 생성과 함께 완료 처리되었다.
-- 2026-04-01 기준 WBS `1.3.2`~`1.3.5`가 `docs/03-design/review-run-publish-audit-state-design.md` 생성과 함께 완료 처리되었다.
-- 2026-04-01 기준 WBS `1.4.1`이 `docs/03-design/system-context-diagram.md` 생성과 함께 완료 처리되었다.
-- 2026-04-01 기준 WBS `1.4.2`가 `docs/03-design/erd-draft.md` 생성과 함께 완료 처리되었다.
-- 2026-04-01 기준 WBS `1.4.3`~`1.4.6`이 storage/retrieval/aggregate/environment 설계 문서 생성과 함께 완료 처리되었다.
-- 2026-04-01 기준 WBS `1.5.1`~`1.5.5`가 `docs/03-design/api-interface-contracts.md` 생성과 함께 완료 처리되었다.
-- 2026-04-05 기준 WBS `1.6.1`~`1.6.7`이 `docs/03-design/security-access-control-design.md` 생성과 함께 완료 처리되었다.
-- 2026-04-05 기준 WBS `1.7.1`이 `docs/03-design/product-grid-information-architecture.md` 생성과 함께 완료 처리되었다.
-- 2026-04-05 기준 WBS `1.7.2`가 `docs/03-design/insight-dashboard-metric-definition.md` 생성과 함께 완료 처리되었다.
-- 2026-04-05 기준 WBS `1.7.3`이 `docs/03-design/product-type-visualization-principles.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.7.4`가 `docs/03-design/admin-information-architecture.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.7.5`~`1.7.7`이 `docs/03-design/localization-governance-and-fallback-policy.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.1`이 `docs/01-planning/td-savings-source-inventory.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.2`가 `docs/01-planning/prototype-backlog.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.3`이 `docs/01-planning/prototype-acceptance-checklist.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.4`가 `docs/01-planning/prototype-spike-scope.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.5`가 `docs/01-planning/sprint-0-board.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 WBS `1.8.6`이 `docs/00-governance/gate-a-build-start-review-note.md` 생성과 함께 완료 처리되었다.
-- 2026-04-06 기준 Gate A review는 최종 교차 검토 후 `Pass`로 승인되었다.
-- 2026-04-06 기준 Stage 0는 문서 기준으로 마감되었고, Foundation/Prototype build는 `Next` 상태로 전환되었다.
-- 2026-04-06 기준 Gate A `Pass`와 실제 구현 시작 승인은 분리되어 있으며, 구현은 별도 시작 지시 전까지 보류 상태다.
-- 2026-04-07 기준 WBS `2.1`이 repo skeleton 생성과 함께 완료 처리되었다.
-- 2026-04-07 기준 공식 일정 기준은 `Phase 1 development complete = 2026-05-04`, `Phase 1 testing start = 2026-05-05`, `Phase 2 all development and testing complete = 2026-07-31`로 고정한다.
-- 2026-04-07 기준 현실적 일정안은 independent workstream을 앞당겨 `5.1`, `5.6`, `5.7`, `5.8`, `6.1` 같은 선행 가능 작업을 4월 하순 이전에 먼저 배치하고, 4월 말~5월 초 구간은 integration 중심으로 압축한다.
+## 2. Current Stage
+
+Current stage: `WBS 5`
+
+Stage status:
+- Gate A passed on `2026-04-06`
+- Gate B passed on `2026-04-11`
+- Gate C passed on `2026-04-13`
+- WBS 5 is the active implementation stage
+
+Current working interpretation:
+- prototype work is complete and archived by default
+- admin and ops core is complete enough to support current public and source-registry follow-on work
+- Phase 1 public and data hardening work is still in progress
+
+---
+
+## 3. What Is Already Done
+
+### 3.1 Foundation and Prototype
+
+Completed:
+- WBS 2 foundation scaffolds and repo baselines
+- WBS 3 prototype pipeline, viewer, and prototype hardening
+
+### 3.2 Admin and Ops Core
+
+Completed:
+- admin login
+- review queue and review decision flow
+- evidence trace viewer
+- run status
+- change history
+- audit log
+- usage tracking and usage dashboard
+- operational scenario QA
+
+### 3.3 Phase 1 Public and Registry Progress
+
+Completed:
+- Canada Big 5 source registry baseline
+- chequing, savings, and GIC parser expansion baselines
+- aggregate dataset generation
+- public products API
+- dashboard APIs
+- public Product Grid
+- public Insight Dashboard
+- grid/dashboard cross-filter behavior
+- locale rollout
+- freshness and metric wording improvements
+- source registry admin MVP
+- dynamic product type onboarding
+- aggregate refresh queue and dashboard health behavior
+
+---
+
+## 4. What Is Active Now
+
+Current Phase 1 focus:
+- source collection hardening
+- bank-specific data quality fixes
+- public-serving stability and aggregate freshness
+- registry governance and operator workflows
+- responsive QA and follow-on polish only where it protects real product behavior
+
+Default rule:
+- prioritize evidence quality, reviewability, and operator clarity before cosmetic expansion
+
+---
+
+## 5. What Is Next
+
+Near-term next areas:
+1. Continue WBS 5 hardening where real bank-source gaps still produce review or validation noise.
+2. Keep public grid and dashboard behavior aligned to the approved vocabulary and freshness model.
+3. Prepare the remaining release-readiness work needed before Gate D.
+
+Likely later within Phase 1:
+- additional public quality and QA follow-on slices
+- publish readiness and BX-PF integration follow-on work
+- release evidence and operating notes cleanup
+
+---
+
+## 6. Not Active Yet
+
+Not active by default:
+- Phase 2 Japan expansion
+- external SaaS or open API delivery
+- consumer recommendation features
+- public evidence exposure
+- billing or subscription work
+
+These remain outside current execution unless the Product Owner changes scope.
+
+---
+
+## 7. Roadmap Rule
+
+Use this document for stage-level direction only.
+
+If you need:
+- exact task status: use `WBS.md`
+- current risks: use `raid-log.md`
+- current decisions: use `decision-log.md`
+- recent implementation memory: use `development-journal.md`
+
+---
+
+## 8. Change History
+
+| Date | Change |
+|---|---|
+| 2026-04-22 | Rewrote the roadmap as a short current stage view and removed stale early-stage progress detail from the default path |

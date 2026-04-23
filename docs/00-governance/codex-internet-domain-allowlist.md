@@ -1,14 +1,14 @@
 # FPDS Codex Internet Domain Allowlist
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Recommended Baseline  
+Version: 1.0
+Date: 2026-04-06
+Status: Recommended Baseline
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/02-requirements/scope-baseline.md`
 - `docs/01-planning/plan.md`
 - `docs/01-planning/WBS.md`
-- `docs/01-planning/td-savings-source-inventory.md`
+- `docs/archive/01-planning/td-savings-source-inventory.md`
 - `docs/03-design/security-access-control-design.md`
 - `docs/03-design/environment-separation-strategy.md`
 - `docs/03-design/api-interface-contracts.md`
@@ -25,7 +25,7 @@ Source Documents:
 - FPDS가 실제로 필요로 하는 공식 source, vendor docs, 공통 개발 의존성만 열어 둔다.
 - 아직 프로젝트 문서에서 확정되지 않은 외부 통합 도메인과, 지금 열 필요가 없는 범용 인터넷을 구분한다.
 
-이 문서는 `앱 런타임 egress allowlist`가 아니라 `Codex 작업 환경`의 인터넷 허용 정책 기준이다.  
+이 문서는 `앱 런타임 egress allowlist`가 아니라 `Codex 작업 환경`의 인터넷 허용 정책 기준이다.
 실제 앱/worker의 CORS, SSRF, outbound allowlist는 별도 보안 문서 기준을 따른다.
 
 ---
@@ -56,12 +56,12 @@ Source Documents:
 
 ### 4.1 Tier A: Recommended Initial Allowlist
 
-지금 시점에서 가장 먼저 허용할 도메인이다.  
+지금 시점에서 가장 먼저 허용할 도메인이다.
 Prototype 문서 정리, 설계, 구현, 테스트 준비까지 커버하는 최소 추천값이다.
 
 | Domain | Why It Is Needed | Basis |
 |---|---|---|
-| `td.com` | Prototype source inventory의 공식 public source와 PDF 검증 | `docs/01-planning/td-savings-source-inventory.md` |
+| `td.com` | Prototype source inventory의 공식 public source와 PDF 검증 | `docs/archive/01-planning/td-savings-source-inventory.md` |
 | `openai.com` | OpenAI 제품/정책/안내 문서의 공식 루트 | PRD suggested stack: OpenAI |
 | `platform.openai.com` | API/usage/auth 문서 확인 | PRD suggested stack: OpenAI |
 | `developers.openai.com` | 최신 개발 문서 확인 | PRD suggested stack: OpenAI |
@@ -189,4 +189,3 @@ Phase 1 확장용 추가 목록:
 | Date | Change |
 |---|---|
 | 2026-04-06 | Initial Codex internet domain allowlist baseline created from FPDS docs |
-

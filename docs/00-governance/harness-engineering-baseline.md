@@ -8,7 +8,7 @@ Source Documents:
 - `docs/00-governance/stage-gate-checklist.md`
 - `docs/00-governance/decision-log.md`
 - `docs/01-planning/WBS.md`
-- `docs/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/prototype-backlog.md`
 - `docs/02-requirements/scope-baseline.md`
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 

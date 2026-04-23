@@ -5,7 +5,7 @@ Date: 2026-04-07
 Status: Approved Baseline for WBS 2.10
 Source Documents:
 - `docs/01-planning/WBS.md`
-- `docs/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/prototype-backlog.md`
 - `docs/00-governance/harness-engineering-baseline.md`
 - `docs/03-design/dev-prod-environment-spec.md`
 - `docs/03-design/monitoring-error-tracking-baseline.md`

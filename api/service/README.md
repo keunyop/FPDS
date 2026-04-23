@@ -6,7 +6,7 @@ Current scope:
 - anonymous public aggregate-backed product and dashboard read APIs
 - DB-backed admin user accounts
 - DB-backed admin sessions
-- login, logout, and session introspection routes
+- login, logout, session introspection, and approval-gated signup-request routes
 - review queue list route backed by `review_task` and `normalized_candidate`
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
 - run list route backed by `ingestion_run` with protected run-state diagnostics
@@ -34,6 +34,10 @@ Current routes:
 - `GET /api/public/dashboard-rankings`
 - `GET /api/public/dashboard-scatter`
 - `POST /api/admin/auth/login`
+- `POST /api/admin/auth/signup-requests`
+- `GET /api/admin/auth/signup-requests`
+- `POST /api/admin/auth/signup-requests/:signupRequestId/approve`
+- `POST /api/admin/auth/signup-requests/:signupRequestId/reject`
 - `POST /api/admin/auth/logout`
 - `GET /api/admin/auth/session`
 - `GET /api/admin/review-tasks`
@@ -83,13 +87,14 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0007_dynamic_product_type_onboardin
 psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
 ```
 
 Create the first operator account:
 
 ```powershell
 cd api/service
-uv run python -m api_service.bootstrap_admin_user --env-file ..\..\.env.dev --email admin@example.com --display-name "Admin Operator" --role admin
+uv run python -m api_service.bootstrap_admin_user --env-file ..\..\.env.dev --login-id admin --display-name "Admin Operator" --role admin
 ```
 
 Run the API:
@@ -98,6 +103,13 @@ Run the API:
 cd ..\..
 $env:FPDS_ENV_FILE=".env.dev"
 uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
+```
+
+Run the standalone regression suite:
+
+```powershell
+cd api/service
+.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"
 ```
 
 ## Notes
@@ -110,6 +122,7 @@ uv run --directory api/service uvicorn api_service.main:app --reload --host loca
 - Passwords are hashed with Python's built-in `scrypt`.
 - The session cookie is still `fpds_admin_session` per the shared auth contract.
 - Login throttling is DB-backed with per-account lockout and recent-attempt checks.
+- Public signup creates a pending `user_signup_request`; it does not create an active account until an existing `admin` approves the request and assigns a role.
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.

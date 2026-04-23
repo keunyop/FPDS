@@ -22,7 +22,7 @@ As of `2026-04-15`:
 - a first post-`3.10` hardening slice is complete: normalization now supplements missing TD savings rate fields from the `TD-SAV-005` current-rates source, and a live hardening run moved all three target candidates from `validation_error` to `validation_status=pass`
 - a second post-`3.10` hardening slice is complete: normalization now selectively reuses `TD-SAV-008` governing-PDF interest rules, has an opportunistic `TD-SAV-007` fee-waiver merge hook, splits `TD Growth` boosted-rate qualification into cleaner canonical fields, and suppresses several noisy long-text fields before candidate persistence
 - a third post-`3.10` hardening slice is complete: `TD-SAV-007` fee-governing evidence is now used in a live target-safe way to suppress noisy `fee_waiver_condition` fields for zero-monthly-fee TD savings products instead of persisting misleading waiver text
-- `WBS 4.1` admin login is now complete with a DB-backed operator account table, DB-backed session table, FastAPI auth routes, a bootstrap-admin CLI, and a protected Next.js admin entry shell
+- `WBS 4.1` admin auth is now complete with a DB-backed operator account table, DB-backed session table, FastAPI auth routes, a bootstrap-admin CLI, approval-gated signup requests, and a protected Next.js admin entry shell
 - `WBS 4.2` review queue is now complete with a session-protected review-task list API, a protected `/admin/reviews` queue route, active-state defaults, search, filters, sorting, and stable drill-in links
 - `WBS 4.3` review decision flow is now complete with review-task detail read APIs, approve/reject/defer/edit-approve mutations, canonical product/version side effects, review/change audit emission, and a live `/admin/reviews/:reviewTaskId` decision surface with override diff preview
 - `WBS 4.4` evidence trace viewer is now complete with field-selectable trace drilldown, enriched evidence metadata, parsed mapping context, and model-run references on the live `/admin/reviews/:reviewTaskId` route
@@ -58,8 +58,8 @@ As of `2026-04-15`:
 - working prototype normalization code that maps extracted drafts into canonical candidate rows and candidate-level evidence links
 - working prototype validation/routing code that recomputes candidate validation, updates candidate state, and creates prototype review tasks
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
-- a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth and session handling
-- a first live `Next.js` admin package under `app/admin/` with `/admin/login`, protected `/admin`, and session-aware route gating
+- a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth, session handling, and approval-gated signup requests
+- a first live `Next.js` admin package under `app/admin/` with `/admin/login`, `/admin/signup`, protected `/admin`, and session-aware route gating
 - a first live `Next.js` public package under `app/public/` with `/products` for the public Product Grid and `/dashboard` for the public Insight Dashboard
 - a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
@@ -86,15 +86,17 @@ This is still not a full FPDS product yet, but the ingestion core is now activel
 ## Start Here
 
 - docs map: [docs/README.md](docs/README.md)
+- development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
 - requirements baseline: [docs/02-requirements/FPDS_Requirements_Definition_v1_5.md](docs/02-requirements/FPDS_Requirements_Definition_v1_5.md)
+- scope baseline: [docs/02-requirements/scope-baseline.md](docs/02-requirements/scope-baseline.md)
 - execution plan: [docs/01-planning/plan.md](docs/01-planning/plan.md)
 - WBS: [docs/01-planning/WBS.md](docs/01-planning/WBS.md)
-- Canada Big 5 source registry baseline: [docs/01-planning/canada-big5-source-registry.md](docs/01-planning/canada-big5-source-registry.md)
 - working agreement: [docs/00-governance/working-agreement.md](docs/00-governance/working-agreement.md)
-- Gate A review note: [docs/00-governance/gate-a-build-start-review-note.md](docs/00-governance/gate-a-build-start-review-note.md)
 - decision log: [docs/00-governance/decision-log.md](docs/00-governance/decision-log.md)
-- development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
-- owner readiness guide: [docs/00-governance/pre-development-owner-preparation-guide.md](docs/00-governance/pre-development-owner-preparation-guide.md)
+- RAID log: [docs/00-governance/raid-log.md](docs/00-governance/raid-log.md)
+- Canada Big 5 source registry baseline: [docs/01-planning/canada-big5-source-registry.md](docs/01-planning/canada-big5-source-registry.md)
+- design docs index: [docs/03-design/README.md](docs/03-design/README.md)
+- archive index: [docs/archive/README.md](docs/archive/README.md)
 
 ## Delivery Boundary
 
@@ -126,7 +128,7 @@ Out of scope for the current FPDS build:
 - `WBS 3.9` now has a live first end-to-end evidence pack in-repo for the three prototype target products
 - `WBS 3.10` now has a written findings memo, and three follow-up hardening slices have already cleared the original `required_field_missing` validation gap, added selective `TD-SAV-008` PDF merge, improved `TD Growth` qualification cleanup, and removed misleading zero-fee `fee_waiver_condition` fields using `TD-SAV-007` evidence in live reruns
 - Gate B is now closed as `Pass`
-- `WBS 4.1` admin login is now implemented and gives the admin surface its first real runtime bootstrap
+- `WBS 4.1` admin auth is now implemented and gives the admin surface its first real runtime bootstrap plus approval-gated operator onboarding
 - `WBS 4.2` review queue is now implemented and gives the admin surface its first live reviewer intake route
 - `WBS 4.3` review decision flow is now implemented and lets operators complete approve/reject/defer/edit-approve actions against persisted review tasks
 - `WBS 4.4` evidence trace viewer is now implemented and lets operators focus a field, inspect linked evidence, and review model-stage context on the same detail route
@@ -192,7 +194,7 @@ Current implementation evidence is still heaviest in the Python worker path, but
 
 - env contract: [docs/03-design/dev-prod-environment-spec.md](docs/03-design/dev-prod-environment-spec.md)
 - design-system baseline: [docs/03-design/fpds-design-system.md](docs/03-design/fpds-design-system.md)
-- Stripe benchmark + template-first baseline: [docs/03-design/fpds_design_system_stripe_benchmark.md](docs/03-design/fpds_design_system_stripe_benchmark.md)
+- frontend benchmark baseline: [docs/03-design/fpds_design_system_stripe_benchmark.md](docs/03-design/fpds_design_system_stripe_benchmark.md)
 - env examples: `.env.dev.example`, `.env.prod.example`
 - config landing zone: [shared/config/README.md](shared/config/README.md)
 - design landing zone: [shared/design/README.md](shared/design/README.md)

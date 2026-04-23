@@ -1,13 +1,13 @@
-﻿# Prototype Acceptance Checklist
+# Prototype Acceptance Checklist
 
-Version: 1.0  
-Date: 2026-04-06  
-Status: Approved Baseline for WBS 1.8.3  
+Version: 1.0
+Date: 2026-04-06
+Status: Approved Baseline for WBS 1.8.3
 Source Documents:
 - `docs/01-planning/WBS.md`
 - `docs/01-planning/plan.md`
-- `docs/01-planning/prototype-backlog.md`
-- `docs/01-planning/td-savings-source-inventory.md`
+- `docs/archive/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/td-savings-source-inventory.md`
 - `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/domain-model-canonical-schema.md`
@@ -24,7 +24,7 @@ Source Documents:
 - demo, findings memo, evidence pack이 같은 기준을 참조하도록 맞춘다.
 - Prototype이 `완전 자동화`를 증명하는 단계인지, `feasibility + reviewability`를 증명하는 단계인지 경계를 고정한다.
 
-이 문서는 구현 자체를 승인하지 않는다.  
+이 문서는 구현 자체를 승인하지 않는다.
 실제 구현 시작은 별도 build-start approval 이후에만 가능하다.
 
 ---
@@ -199,4 +199,3 @@ Gate B 제출물은 최소 아래를 포함해야 한다.
 | Date | Change |
 |---|---|
 | 2026-04-06 | Initial prototype acceptance checklist created for WBS 1.8.3 |
-

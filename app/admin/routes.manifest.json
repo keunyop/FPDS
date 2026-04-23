@@ -11,6 +11,13 @@
       "access": "anonymous"
     },
     {
+      "route": "/admin/signup",
+      "route_id": "admin.signup",
+      "shell_dir": "route-shells/signup",
+      "resource_key": "admin_operations.signup",
+      "access": "anonymous"
+    },
+    {
       "route": "/admin",
       "route_id": "admin.overview",
       "shell_dir": "route-shells/overview",

@@ -223,6 +223,6 @@ Note:
 
 ### 7.3 Follow-on WBS Mapping
 
-- `1.8.2`: backlog는 Section 4의 source group과 Section 6의 extraction set을 기준으로 `docs/01-planning/prototype-backlog.md`에서 분해한다.
-- `1.8.3`: acceptance는 Section 7 risk와 conclusions를 기준으로 `docs/01-planning/prototype-acceptance-checklist.md`에서 작성한다.
-- `1.8.4`: spike는 `TD-SAV-004`, `TD-SAV-007`, `TD-SAV-008`를 우선 실험 대상으로 두고 `docs/01-planning/prototype-spike-scope.md`에서 종료 조건을 정의한다.
+- `1.8.2`: backlog는 Section 4의 source group과 Section 6의 extraction set을 기준으로 `docs/archive/01-planning/prototype-backlog.md`에서 분해한다.
+- `1.8.3`: acceptance는 Section 7 risk와 conclusions를 기준으로 `docs/archive/01-planning/prototype-acceptance-checklist.md`에서 작성한다.
+- `1.8.4`: spike는 `TD-SAV-004`, `TD-SAV-007`, `TD-SAV-008`를 우선 실험 대상으로 두고 `docs/archive/01-planning/prototype-spike-scope.md`에서 종료 조건을 정의한다.

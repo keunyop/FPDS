@@ -127,6 +127,7 @@ All admin surfaces should share:
 
 | Surface | Route Baseline | Entry Path |
 |---|---|---|
+| Signup Request | `/admin/signup` | login screen, anonymous access-request flow |
 | Review Detail / Trace Viewer | `/admin/reviews/:reviewTaskId` | review queue, run detail, search |
 | Bank Detail | `/admin/banks/:bankCode` | bank list |
 | Source Catalog Detail | `/admin/source-catalog/:catalogItemId` | compatibility redirect into bank detail |
@@ -192,11 +193,13 @@ Recommended result grouping:
 
 Purpose:
 - first-stop triage surface after login
+- for `admin`, also the first-stop approval surface for pending signup requests
 
 Minimum widgets:
 - total products
 - products by bank
 - products by type
+- pending signup requests
 - runs today/this week
 - queued review count
 - approval rate
@@ -475,3 +478,4 @@ Minimum information:
 | 2026-04-13 | Added Audit Log as an operations surface with drilldown rules distinct from canonical change history |
 | 2026-04-15 | Added Source Registry Management as an operations surface for DB-backed source editing and multi-select candidate collection kickoff |
 | 2026-04-15 | Marked Source Registry Management as implemented in the live admin runtime and removed it from follow-on-only lists |
+| 2026-04-22 | Added the anonymous signup-request route and admin-overview approval panel to the active operator IA |

@@ -207,12 +207,12 @@ Based on:
 
 | WBS ID | Status | Task | Key Output | Owner | Dependency |
 |---|---|---|---|---|---|
-| 1.8.1 | Completed | TD Savings source inventory 작성 | `docs/01-planning/td-savings-source-inventory.md` Sections 2-7 | AI/Data | 1.1.1 |
-| 1.8.2 | Completed | prototype backlog 분해 | `docs/01-planning/prototype-backlog.md` Sections 2-10 | Tech Lead, Backend, AI/Data | 1.3.1 |
-| 1.8.3 | Completed | prototype acceptance checklist 고정 | `docs/01-planning/prototype-acceptance-checklist.md` Sections 2-9 | Product Owner, QA | 1.8.2 |
-| 1.8.4 | Completed | Spike 범위 정의 | `docs/01-planning/prototype-spike-scope.md` Sections 2-10 | Tech Lead, AI/Data | 1.8.1 |
-| 1.8.5 | Completed | Sprint 0 작업판 확정 | `docs/01-planning/sprint-0-board.md` Sections 2-8 | Delivery Lead | 1.8.2 |
-| 1.8.6 | Completed | Build Start Gate 검토 | `docs/00-governance/gate-a-build-start-review-note.md` Sections 1-9 | Product Owner, Tech Lead | 1.8.3 |
+| 1.8.1 | Completed | TD Savings source inventory 작성 | `docs/archive/01-planning/td-savings-source-inventory.md` Sections 2-7 | AI/Data | 1.1.1 |
+| 1.8.2 | Completed | prototype backlog 분해 | `docs/archive/01-planning/prototype-backlog.md` Sections 2-10 | Tech Lead, Backend, AI/Data | 1.3.1 |
+| 1.8.3 | Completed | prototype acceptance checklist 고정 | `docs/archive/01-planning/prototype-acceptance-checklist.md` Sections 2-9 | Product Owner, QA | 1.8.2 |
+| 1.8.4 | Completed | Spike 범위 정의 | `docs/archive/01-planning/prototype-spike-scope.md` Sections 2-10 | Tech Lead, AI/Data | 1.8.1 |
+| 1.8.5 | Completed | Sprint 0 작업판 확정 | `docs/archive/01-planning/sprint-0-board.md` Sections 2-8 | Delivery Lead | 1.8.2 |
+| 1.8.6 | Completed | Build Start Gate 검토 | `docs/archive/00-governance/gate-a-build-start-review-note.md` Sections 1-9 | Product Owner, Tech Lead | 1.8.3 |
 
 ## WBS 2. Foundation Setup (Completed)
 

@@ -11,7 +11,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from api_service.auth import LoginError, authenticate_user, get_session_by_token, revoke_session
+from api_service.auth import (
+    LoginError,
+    authenticate_user,
+    create_signup_request,
+    get_session_by_token,
+    load_signup_requests,
+    review_signup_request,
+    revoke_session,
+)
 from api_service.aggregate_refresh import (
     AggregateRefreshError,
     launch_aggregate_refresh_runner,
@@ -29,6 +37,8 @@ from api_service.models import BankWriteRequest
 from api_service.models import LoginRequest
 from api_service.models import ProductTypeWriteRequest
 from api_service.models import ReviewDecisionRequest
+from api_service.models import SignupRequestCreateRequest
+from api_service.models import SignupRequestReviewRequest
 from api_service.models import SourceCatalogCollectionRequest
 from api_service.models import SourceCatalogWriteRequest
 from api_service.models import SourceCollectionRequest
@@ -245,7 +255,7 @@ def _require_csrf(request: Request, *, session_info: dict[str, Any]) -> None:
 
 def _require_admin_role(actor: dict[str, Any]) -> None:
     if str(actor.get("role") or "").lower() != "admin":
-        raise SourceRegistryError(status_code=403, code="admin_role_required", message="Admin role is required for source registry changes.")
+        raise SourceRegistryError(status_code=403, code="admin_role_required", message="Admin role is required.")
 
 
 @app.get("/healthz")
@@ -259,7 +269,7 @@ async def login(request: Request, payload: LoginRequest) -> JSONResponse:
     with open_connection(settings) as connection:
         user, session, session_token = authenticate_user(
             connection,
-            email=payload.email,
+            login_id=payload.login_id,
             password=payload.password,
             ip_address=_request_ip(request),
             user_agent=request.headers.get("user-agent"),
@@ -271,6 +281,7 @@ async def login(request: Request, payload: LoginRequest) -> JSONResponse:
         {
             "user": {
                 "user_id": user["user_id"],
+                "login_id": user["login_id"],
                 "email": user["email"],
                 "role": user["role"],
                 "display_name": user["display_name"],
@@ -289,6 +300,82 @@ async def login(request: Request, payload: LoginRequest) -> JSONResponse:
         csrf_token=session["csrf_token"],
     )
     return response
+
+
+@app.post("/api/admin/auth/signup-requests")
+async def signup_request_create(request: Request, payload: SignupRequestCreateRequest) -> JSONResponse:
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        signup_request = create_signup_request(
+            connection,
+            login_id=payload.login_id,
+            display_name=payload.display_name,
+            password=payload.password,
+            request_id=request.state.request_id,
+            ip_address=_request_ip(request),
+            user_agent=request.headers.get("user-agent"),
+        )
+    return _success({"signup_request": signup_request}, request, status_code=201)
+
+
+@app.get("/api/admin/auth/signup-requests")
+async def signup_request_list(request: Request) -> JSONResponse:
+    actor, _session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_signup_requests(connection)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/auth/signup-requests/{signup_request_id}/approve")
+async def signup_request_approve(
+    request: Request,
+    signup_request_id: str,
+    payload: SignupRequestReviewRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        reviewed_request = review_signup_request(
+            connection,
+            signup_request_id=signup_request_id,
+            action="approve",
+            actor=actor,
+            role=payload.role,
+            reason_text=payload.reason_text,
+            request_id=request.state.request_id,
+            ip_address=_request_ip(request),
+            user_agent=request.headers.get("user-agent"),
+        )
+    return _success({"signup_request": reviewed_request}, request)
+
+
+@app.post("/api/admin/auth/signup-requests/{signup_request_id}/reject")
+async def signup_request_reject(
+    request: Request,
+    signup_request_id: str,
+    payload: SignupRequestReviewRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        reviewed_request = review_signup_request(
+            connection,
+            signup_request_id=signup_request_id,
+            action="reject",
+            actor=actor,
+            role=None,
+            reason_text=payload.reason_text,
+            request_id=request.state.request_id,
+            ip_address=_request_ip(request),
+            user_agent=request.headers.get("user-agent"),
+        )
+    return _success({"signup_request": reviewed_request}, request)
 
 
 @app.post("/api/admin/auth/logout")

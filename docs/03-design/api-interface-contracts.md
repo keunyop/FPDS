@@ -348,6 +348,7 @@ point baseline:
 - `1.5.2 admin API contract`
 
 대상 기능:
+- admin auth and access-request onboarding
 - review queue and decision
 - product detail and change history
 - audit log
@@ -355,6 +356,41 @@ point baseline:
 - BX-PF integration status
 - usage dashboard
 - dashboard refresh and metric health
+
+### 5.1A Admin Auth and Access Request Routes
+
+Admin auth baseline routes:
+- `POST /api/admin/auth/login`
+- `POST /api/admin/auth/logout`
+- `GET /api/admin/auth/session`
+
+Access-request onboarding routes:
+- `POST /api/admin/auth/signup-requests`
+- `GET /api/admin/auth/signup-requests`
+- `POST /api/admin/auth/signup-requests/:id/approve`
+- `POST /api/admin/auth/signup-requests/:id/reject`
+
+`POST /api/admin/auth/login` request baseline:
+
+| Field | Description |
+|---|---|
+| `login_id` | operator login id, not email-shaped by default |
+| `password` | operator password |
+
+`POST /api/admin/auth/signup-requests` request baseline:
+
+| Field | Description |
+|---|---|
+| `login_id` | requested operator id |
+| `display_name` | operator display name |
+| `password` | requested password |
+
+Rules:
+- anonymous signup creates a pending request only
+- signup does not create an active `user_account`
+- approval requires an authenticated `admin`
+- approval assigns exactly one role from `admin`, `reviewer`, or `read_only`
+- rejected or duplicate requests return an error instead of creating a second active account
 
 ### 5.2 `GET /api/admin/review-tasks`
 

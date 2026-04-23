@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { Banner1 } from "@/components/banner1";
+import { SignupRequestReviewPanel } from "@/components/fpds/admin/signup-request-review-panel";
 import { Stats5 } from "@/components/stats5";
-import { fetchAdminSession, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchSignupRequests, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale, type AdminLocale } from "@/lib/admin-i18n";
 
 import { LogoutButton } from "./LogoutButton";
@@ -215,6 +216,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
   const copy = OVERVIEW_COPY[locale];
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
+  let signupRequests: Awaited<ReturnType<typeof fetchSignupRequests>> = null;
   let apiUnavailable = false;
 
   try {
@@ -246,6 +248,13 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
   }
 
   const activeSession = session!;
+  if (activeSession.user.role === "admin") {
+    try {
+      signupRequests = await fetchSignupRequests();
+    } catch {
+      signupRequests = null;
+    }
+  }
   const expiresAt = new Intl.DateTimeFormat(locale === "en" ? "en-CA" : locale === "ko" ? "ko-KR" : "ja-JP", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -265,7 +274,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: activeSession.user.display_name,
-        email: activeSession.user.email,
+        email: activeSession.user.email ?? activeSession.user.login_id,
         role: activeSession.user.role,
       }}
     >
@@ -299,8 +308,8 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
               <p className="mt-2 text-sm font-medium text-foreground">{activeSession.user.display_name}</p>
             </div>
             <div className="rounded-2xl border border-border/80 bg-background px-4 py-4">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Email</p>
-              <p className="mt-2 text-sm font-medium text-foreground">{activeSession.user.email}</p>
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">ID</p>
+              <p className="mt-2 text-sm font-medium text-foreground">{activeSession.user.login_id}</p>
             </div>
             <div className="rounded-2xl border border-border/80 bg-background px-4 py-4">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">Role</p>
@@ -312,6 +321,10 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
             </div>
           </div>
         </div>
+
+        {activeSession.user.role === "admin" ? (
+          <SignupRequestReviewPanel csrfToken={activeSession.csrf_token} locale={locale} requests={signupRequests} />
+        ) : null}
 
         <Stats5 items={statItems} title={copy.metricsTitle} description={copy.metricsDescription} />
 

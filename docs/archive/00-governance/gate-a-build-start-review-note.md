@@ -1,8 +1,8 @@
 # Gate A Build Start Review Note
 
-Version: 1.2  
-Date: 2026-04-06  
-Status: Pass Approved  
+Version: 1.2
+Date: 2026-04-06
+Status: Pass Approved
 Source Documents:
 - `docs/02-requirements/scope-baseline.md`
 - `docs/00-governance/stage-gate-checklist.md`
@@ -11,16 +11,16 @@ Source Documents:
 - `docs/00-governance/milestone-tracker.md`
 - `docs/00-governance/decision-log.md`
 - `docs/00-governance/raid-log.md`
-- `docs/01-planning/prototype-acceptance-checklist.md`
-- `docs/01-planning/sprint-0-board.md`
+- `docs/archive/01-planning/prototype-acceptance-checklist.md`
+- `docs/archive/01-planning/sprint-0-board.md`
 
 ---
 
 ## 1. Review Summary
 
-Gate: `Gate A`  
-Review Date: `2026-04-06`  
-Result: `Pass`  
+Gate: `Gate A`
+Review Date: `2026-04-06`
+Result: `Pass`
 Decision Owner: `Product Owner`
 
 Summary:
@@ -40,7 +40,7 @@ Conclusion:
 
 | Gate A Check | Status | Evidence |
 |---|---|---|
-| Prototype scope and acceptance are fixed | Pass | `docs/02-requirements/scope-baseline.md`, `docs/01-planning/prototype-acceptance-checklist.md` |
+| Prototype scope and acceptance are fixed | Pass | `docs/02-requirements/scope-baseline.md`, `docs/archive/01-planning/prototype-acceptance-checklist.md` |
 | Phase 1 v1 scope and non-goals are fixed | Pass | `docs/02-requirements/scope-baseline.md` |
 | Canonical schema v1, taxonomy, and validation/confidence rules are documented | Pass | `docs/03-design/domain-model-canonical-schema.md` |
 | End-to-end workflow and state model are defined | Pass | `docs/03-design/workflow-state-ingestion-design.md`, `docs/03-design/review-run-publish-audit-state-design.md` |
@@ -48,7 +48,7 @@ Conclusion:
 | Public/admin/BX-PF interface contract drafts exist | Pass | `docs/03-design/api-interface-contracts.md` |
 | Auth, RBAC, CORS, SSRF, session/CSRF, and security header baselines are defined | Pass | `docs/03-design/security-access-control-design.md` |
 | KPI, ranking, scatter axis, and i18n ownership/fallback policies are defined | Pass | `docs/03-design/insight-dashboard-metric-definition.md`, `docs/03-design/product-type-visualization-principles.md`, `docs/03-design/localization-governance-and-fallback-policy.md` |
-| Sprint 0 backlog and Build Start Gate items are organized | Pass | `docs/01-planning/sprint-0-board.md`, `docs/00-governance/stage-gate-checklist.md` |
+| Sprint 0 backlog and Build Start Gate items are organized | Pass | `docs/archive/01-planning/sprint-0-board.md`, `docs/00-governance/stage-gate-checklist.md` |
 | WBS `0.x` and `1.x` gate-blocking items are closed | Pass | `docs/01-planning/WBS.md` |
 | Build Start Sign-off Package is prepared | Pass | Section 3 |
 | Product Owner gate decision is recorded | Pass | Section 8, `docs/00-governance/decision-log.md` |
@@ -89,11 +89,11 @@ Conclusion:
 
 ### 3.3 Prototype Planning Package
 
-- `docs/01-planning/td-savings-source-inventory.md`
-- `docs/01-planning/prototype-backlog.md`
-- `docs/01-planning/prototype-acceptance-checklist.md`
-- `docs/01-planning/prototype-spike-scope.md`
-- `docs/01-planning/sprint-0-board.md`
+- `docs/archive/01-planning/td-savings-source-inventory.md`
+- `docs/archive/01-planning/prototype-backlog.md`
+- `docs/archive/01-planning/prototype-acceptance-checklist.md`
+- `docs/archive/01-planning/prototype-spike-scope.md`
+- `docs/archive/01-planning/sprint-0-board.md`
 
 Conclusion:
 - The Build Start Sign-off Package is in `Prepared` status and accepted for Gate A.

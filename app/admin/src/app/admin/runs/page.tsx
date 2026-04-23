@@ -67,7 +67,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
       headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
       user={{
         name: session.user.display_name,
-        email: session.user.email,
+        email: session.user.email ?? session.user.login_id,
         role: session.user.role,
       }}
     >

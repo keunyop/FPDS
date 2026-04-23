@@ -1,138 +1,95 @@
 # FPDS Docs Map
 
-Version: 1.0
-Date: 2026-04-06
-Status: Active Navigation Index
+Status: Active navigation index
+Last updated: 2026-04-22
 
----
+This file is the main entrypoint for `docs/`.
 
-## 1. Purpose
+Default rule:
+- Read only the active docs first.
+- Ignore `docs/archive/` unless you are validating a past decision, gate record, or prototype artifact.
 
-이 문서는 `docs` 폴더의 분류 기준과 주요 문서 위치를 빠르게 찾기 위한 인덱스다.
+## 1. Resume A Codex Session
 
-원칙:
-- `00-governance`: 운영 규칙, 승인 기록, 상태 추적, 의사결정 로그
-- `01-planning`: 실행 순서, backlog, inventory, sprint 준비 문서
-- `02-requirements`: 요구사항 기준선과 범위 고정 문서
-- `03-design`: 아키텍처, 데이터 모델, 정책, 인터페이스 설계 문서
+Read in this order:
+1. `README.md`
+2. `docs/00-governance/development-journal.md`
+3. `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+4. `docs/02-requirements/scope-baseline.md`
+5. `docs/01-planning/plan.md`
+6. `docs/01-planning/WBS.md`
+7. `docs/00-governance/decision-log.md`
+8. `docs/00-governance/raid-log.md`
+9. only the design docs needed for the current slice
 
----
+## 2. Active Documents
 
-## 2. Folder Classification
+### 2.1 Governance
 
-### 2.1 `docs/00-governance`
+- `docs/00-governance/working-agreement.md`: collaboration and document authority rules
+- `docs/00-governance/development-journal.md`: recent implementation memory and resume context
+- `docs/00-governance/decision-log.md`: active decisions and historical decision trail
+- `docs/00-governance/raid-log.md`: active risks, assumptions, issues, and dependencies
+- `docs/00-governance/scope-change-control.md`: scope change rules
+- `docs/00-governance/stage-gate-checklist.md`: gate criteria
+- `docs/00-governance/roadmap.md`: broader delivery roadmap
+- `docs/00-governance/milestone-tracker.md`: milestone board
+- `docs/00-governance/phase-1-no-bxpf-test-checklist.md`: current interim QA checklist
+- `docs/00-governance/harness-engineering-baseline.md`: repo validation and harness behavior
+- `docs/00-governance/foundation-ci-cd-baseline.md`: CI baseline
+- `docs/00-governance/codex-internet-domain-allowlist.md`: allowed external domains for source work
 
-역할:
-- 프로젝트 운영 기준
-- gate / approval / review 기록
-- decision / risk / milestone / roadmap 추적
+### 2.2 Planning
 
-주요 문서:
-- `working-agreement.md`
-- `scope-change-control.md`
-- `stage-gate-checklist.md`
-- `decision-log.md`
-- `raid-log.md`
-- `roadmap.md`
-- `milestone-tracker.md`
-- `gate-a-build-start-review-note.md`
-- `gate-b-prototype-review-note.md`
-- `codex-internet-domain-allowlist.md`
-- `harness-engineering-baseline.md`
-- `development-journal.md`
-- `pre-development-owner-preparation-guide.md`
-- `phase-1-no-bxpf-test-checklist.md`
+- `docs/01-planning/plan.md`: execution plan
+- `docs/01-planning/WBS.md`: current work breakdown and task status
+- `docs/01-planning/canada-big5-source-registry.md`: active source coverage baseline for Phase 1
 
-### 2.2 `docs/01-planning`
+### 2.3 Requirements
 
-역할:
-- WBS와 실행 계획
-- prototype 준비물
-- source inventory / backlog / sprint board
+- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`: requirements baseline
+- `docs/02-requirements/scope-baseline.md`: scope, non-goals, release cutline, and build-start rule
 
-주요 문서:
-- `plan.md`
-- `WBS.md`
-- `canada-big5-source-registry.md`
-- `td-savings-source-inventory.md`
-- `prototype-backlog.md`
-- `prototype-acceptance-checklist.md`
-- `prototype-findings-memo.md`
-- `prototype-spike-scope.md`
-- `sprint-0-board.md`
-- `evidence/2026-04-11-first-successful-run/evidence-pack.md`
+### 2.4 Design
 
-### 2.3 `docs/02-requirements`
+Start from [docs/03-design/README.md](03-design/README.md).
 
-역할:
-- 상위 요구사항과 공식 범위 기준선
+Most commonly needed:
+- `docs/03-design/domain-model-canonical-schema.md`
+- `docs/03-design/workflow-state-ingestion-design.md`
+- `docs/03-design/review-run-publish-audit-state-design.md`
+- `docs/03-design/api-interface-contracts.md`
+- `docs/03-design/security-access-control-design.md`
+- `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- `docs/03-design/dev-prod-environment-spec.md`
+- `docs/03-design/db-migration-baseline.md`
+- `docs/03-design/object-storage-evidence-bucket-baseline.md`
+- `docs/03-design/fpds-design-system.md`
+- `docs/03-design/fpds_design_system_stripe_benchmark.md`
 
-주요 문서:
-- `FPDS_Requirements_Definition_v1_5.md`
-- `scope-baseline.md`
+## 3. Status Labels
 
-### 2.4 `docs/03-design`
+Use this interpretation when deciding what to read:
+- `active`: default reading path for implementation work
+- `supporting`: read when the current slice touches that topic
+- `historical`: past gate, prototype, or evidence record; skip by default
+- `archive`: retained for traceability only; skip by default
 
-역할:
-- 구현 전 상세 설계 패키지
-- schema, workflow, security, IA, API, storage, localization 기준
+## 4. Archive Boundary
 
-주요 문서:
-- `domain-model-canonical-schema.md`
-- `workflow-state-ingestion-design.md`
-- `review-run-publish-audit-state-design.md`
-- `system-context-diagram.md`
-- `erd-draft.md`
-- `source-snapshot-evidence-storage-strategy.md`
-- `source-registry-refresh-and-approval-policy.md`
-- `homepage-discovery-scoring-enhancement.md`
-- `retrieval-vector-starting-point.md`
-- `aggregate-cache-refresh-strategy.md`
-- `environment-separation-strategy.md`
-- `dev-prod-environment-spec.md`
-- `db-migration-baseline.md`
-- `object-storage-evidence-bucket-baseline.md`
-- `api-interface-contracts.md`
-- `security-access-control-design.md`
-- `fpds-design-system.md`
-- `fpds_design_system_stripe_benchmark.md`
-- `product-grid-information-architecture.md`
-- `insight-dashboard-metric-definition.md`
-- `product-type-visualization-principles.md`
-- `admin-information-architecture.md`
-- `localization-governance-and-fallback-policy.md`
-- `shadcnblocks-adoption-log.md`
-- `shadcnblocks-block-inventory.md`
-- `ui-override-register.md`
+Archived material now lives under [docs/archive/README.md](archive/README.md).
 
----
+By default, Codex should not read:
+- past gate review notes
+- prototype planning documents
+- prototype evidence packs and raw stage outputs
+- pre-WBS-3 owner readiness guidance
 
-## 3. Retrieval Order
+Open archive docs only when you need to verify how a past decision or prototype result was recorded.
 
-문서를 읽을 때는 아래 순서를 권장한다.
+## 5. Cleanup Notes
 
-1. `docs/02-requirements`
-2. `docs/00-governance`
-3. `docs/01-planning`
-4. `docs/03-design`
-
-실행 직전 검토 순서:
-
-1. `scope-baseline.md`
-2. `stage-gate-checklist.md`
-3. `WBS.md`
-4. `roadmap.md`
-5. `milestone-tracker.md`
-6. `gate-a-build-start-review-note.md`
-7. 필요한 prototype/design supporting docs
-
----
-
-## 5. Change History
-
-| Date | Change |
-|---|---|
-| 2026-04-06 | Added root-level docs map and confirmed current folder classification is valid without file moves |
-| 2026-04-13 | Added the Canada Big 5 source registry baseline document to the planning index |
-| 2026-04-15 | Added the interim Phase 1 no-BXPF test checklist to the governance index |
-| 2026-04-18 | Added the homepage-discovery scoring enhancement design to the design index |
+The docs set was simplified on `2026-04-22`:
+- historical gate and prototype docs moved to `docs/archive/`
+- the design benchmark doc was rewritten as a short current baseline
+- the development journal was reduced to recent resume context

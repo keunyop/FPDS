@@ -156,9 +156,9 @@ Sample C. `TD ePremium Savings Account` interest calculation:
 ## 8. Viewer Equivalent
 
 Live viewer export artifacts:
-- [viewer-payload.json](../../../../app/prototype/viewer-payload.json)
-- [viewer-payload.js](../../../../app/prototype/viewer-payload.js)
-- [index.html](../../../../app/prototype/index.html)
+- [viewer-payload.json](/app/prototype/viewer-payload.json)
+- [viewer-payload.js](/app/prototype/viewer-payload.js)
+- [index.html](/app/prototype/index.html)
 
 For prototype acceptance, the static viewer with live payload is used as the `viewer screenshot or equivalent` artifact.
 

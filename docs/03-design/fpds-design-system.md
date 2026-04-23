@@ -399,6 +399,9 @@ Key rules:
 - public is balanced; admin is compact
 - source-derived product text remains in the source language
 - translated UI labels follow locale-resource governance
+- UI copy stays task-focused and minimal across all surfaces
+- avoid explanatory implementation detail, role lists, and process narration unless they are required for the current decision or action
+- keep locale controls available without forcing a second explanatory panel or extra chrome
 
 ---
 
@@ -501,3 +504,4 @@ The next natural implementation artifacts are:
 | 2026-04-13 | Reworked the baseline to adopt Shadcnblocks as the official template-first implementation layer |
 | 2026-04-13 | Standardized on `Radix UI + radix-nova` and added vendor/theme/domain ownership rules |
 | 2026-04-13 | Reframed public/admin surface guidance around template composition rather than bespoke primitives |
+| 2026-04-22 | Added a shared copy-discipline rule: keep screens simple, task-focused, and free of unnecessary explanatory text |

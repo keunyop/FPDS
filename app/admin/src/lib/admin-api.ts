@@ -3,13 +3,35 @@ import { cookies } from "next/headers";
 export type AdminSession = {
   user: {
     user_id: string;
-    email: string;
+    login_id: string;
+    email: string | null;
     role: string;
     display_name: string;
     issued_at: string;
     expires_at: string;
   };
   csrf_token?: string | null;
+};
+
+export type SignupRequestItem = {
+  signup_request_id: string;
+  login_id: string;
+  display_name: string;
+  request_status: "pending" | "approved" | "rejected";
+  requested_at: string;
+  reviewed_at: string | null;
+  reviewed_role: string | null;
+  review_reason: string | null;
+  reviewed_by_user_id: string | null;
+  approved_user_id: string | null;
+};
+
+export type SignupRequestListResponse = {
+  items: SignupRequestItem[];
+  summary: {
+    total_items: number;
+    pending_items: number;
+  };
 };
 
 export type ReviewTaskListItem = {
@@ -918,6 +940,10 @@ async function fetchAdminData<T>(
 
 export async function fetchAdminSession(): Promise<AdminSession | null> {
   return fetchAdminData<AdminSession>("/api/admin/auth/session");
+}
+
+export async function fetchSignupRequests(): Promise<SignupRequestListResponse | null> {
+  return fetchAdminData<SignupRequestListResponse>("/api/admin/auth/signup-requests");
 }
 
 export async function fetchReviewQueue(searchParams: URLSearchParams): Promise<ReviewQueueResponse | null> {
