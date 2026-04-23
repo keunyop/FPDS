@@ -62,6 +62,26 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-22 - Admin Shell Simplification and Collapse Alignment
+
+- WBS: `4.x`, `5.12`
+- Status: `done`
+- Goal: align the protected admin shell to the requested `application-shell5` behavior by removing extra chrome, restoring explicit collapse or expand behavior, and moving sign-out into the footer user menu
+- Why now: the Product Owner asked to remove the navbar `Operations shell` subtitle and search, drop sidebar promo copy/status pills/card styling, and make the sidebar/footer behave more like the intended Shadcnblocks shell
+- Outcome: switched the shared admin shell away from the floating card-style sidebar, removed sidebar header copy plus menu descriptions/status tags, kept the module tabs while simplifying the top bar, added a footer avatar dropdown that shows display name plus `login_id`, and moved sign-out into that menu while the protected route pages now pass `logoutApiOrigin` and `loginId`
+- Not done: no broader admin copy cleanup or route-level search redesign outside the shared shell was included in this slice
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/LogoutButton.tsx`, `app/admin/src/app/admin/page.tsx`, `app/admin/src/app/admin/banks/page.tsx`, `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/app/admin/runs/page.tsx`, `app/admin/README.md`, `docs/03-design/admin-information-architecture.md`
+- Decisions: kept the existing installed `application-shell5` foundation instead of importing another shell; removed shell-level global search because the Product Owner asked for lighter chrome and the active route surfaces already own their own search/filter UX where needed
+- Verification:
+  - `cmd /c npm run typecheck`
+  - passed in `app/admin`
+  - `cmd /c npm run build`
+  - passed in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+  - passed in `api/service`
+- Known issues: the shell locale copy map still contains older unused strings, but those strings no longer render in the simplified header/sidebar path
+- Next step: do a browser pass on collapsed and expanded desktop behavior plus the mobile sheet after the next protected admin slice that touches shell chrome
+
 ## 2026-04-22 - Archive Reference Repair for Pre-Commit Integrity
 
 - WBS: documentation hygiene

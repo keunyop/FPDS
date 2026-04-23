@@ -7,8 +7,6 @@ import { Stats5 } from "@/components/stats5";
 import { fetchAdminSession, fetchSignupRequests, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale, type AdminLocale } from "@/lib/admin-i18n";
 
-import { LogoutButton } from "./LogoutButton";
-
 const OVERVIEW_COPY = {
   en: {
     apiUnavailableTitle: "Admin API unavailable",
@@ -271,10 +269,10 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
     <ApplicationShell5
       environmentLabel={envLabel}
       locale={locale}
-      headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
+      logoutApiOrigin={getAdminApiOrigin()}
       user={{
         name: activeSession.user.display_name,
-        email: activeSession.user.email ?? activeSession.user.login_id,
+        loginId: activeSession.user.login_id,
         role: activeSession.user.role,
       }}
     >

@@ -111,6 +111,21 @@ Do not add an entry for:
   - `pnpm run build`
 - Notes: the live shell is back on Application Shell 5 and now uses the floating sidebar variant instead of the brief mistaken Sidebar 8 inset implementation
 
+## 2026-04-22 - Admin Shell Simplification and Footer Menu Alignment
+
+- Surface or Area: `app/admin` protected shell used by overview, review, operations, and observability routes
+- Vendor Asset: existing `@shadcnblocks/application-shell5`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct edits to the existing shell block plus a small logout-action extension
+- Files Added or Changed: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/LogoutButton.tsx`, protected admin route pages under `app/admin/src/app/admin/*/page.tsx`, `app/admin/README.md`, `docs/03-design/admin-information-architecture.md`
+- FPDS Wrappers or Overrides: the shell now owns the footer user menu while the route pages pass server-derived `logoutApiOrigin` and operator `loginId`
+- Direct Vendor Edits: yes; simplified the navbar and sidebar chrome, removed shell-level search and status pills, switched the sidebar away from the floating-card presentation, and moved sign-out into the footer avatar menu
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: route-level search remains on the owning surfaces such as review queue and usage, but the shared admin shell chrome is now intentionally lighter
+
 ---
 
 ## 5. Change History

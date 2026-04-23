@@ -7,6 +7,7 @@ import {
   Activity,
   ArrowUpRight,
   BookOpenText,
+  ChevronsUpDown,
   FileClock,
   Gauge,
   LayoutDashboard,
@@ -17,7 +18,16 @@ import {
   UploadCloud,
 } from "lucide-react";
 
+import { LogoutButton } from "@/app/admin/LogoutButton";
 import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sidebar,
@@ -26,7 +36,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
@@ -40,16 +49,16 @@ import { cn } from "@/lib/utils";
 
 type ShellUser = {
   name: string;
-  email: string;
+  loginId: string;
   role: string;
 };
 
 type ApplicationShell5Props = {
   children: React.ReactNode;
   environmentLabel: string;
+  logoutApiOrigin: string;
   user: ShellUser;
   locale: AdminLocale;
-  headerActions?: React.ReactNode;
   className?: string;
 };
 
@@ -319,6 +328,18 @@ function findMatchingGroupIndex(pathname: string | null, navGroups: NavGroup[]) 
   return matchingIndex >= 0 ? matchingIndex : 0;
 }
 
+function isNavItemActive(pathname: string | null, href?: string) {
+  if (!pathname || !href) {
+    return false;
+  }
+
+  if (href === "/admin") {
+    return pathname === href;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function ModuleTabs({
   activeGroupIndex,
   groups,
@@ -396,6 +417,7 @@ function AppSidebar({
   activeGroupIndex,
   environmentLabel,
   locale,
+  logoutApiOrigin,
   navGroups,
   pathname,
   user,
@@ -403,67 +425,36 @@ function AppSidebar({
   activeGroupIndex: number;
   environmentLabel: string;
   locale: AdminLocale;
+  logoutApiOrigin: string;
   navGroups: NavGroup[];
   pathname: string | null;
   user: ShellUser;
 }) {
   const activeGroup = navGroups[activeGroupIndex];
-  const copy = shellCopyByLocale[locale];
+  const userInitial = user.loginId.trim().charAt(0).toUpperCase() || "U";
 
   return (
-    <Sidebar className="top-14 h-[calc(100svh-3.5rem)]!" collapsible="icon" variant="floating">
-      <SidebarHeader className="gap-4 border-b border-sidebar-border/70 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{copy.brand}</p>
-            <p className="mt-1 text-sm font-medium text-sidebar-foreground">{activeGroup.title}</p>
-          </div>
-          <span className="inline-flex items-center rounded-full bg-info-soft px-3 py-1 text-[11px] font-medium text-info">
-            {environmentLabel}
-          </span>
-        </div>
-        <div className="rounded-2xl border border-sidebar-border/70 bg-background/80 px-3 py-2 text-sm text-muted-foreground">
-          {copy.shellNote}
-        </div>
-      </SidebarHeader>
-
+    <Sidebar className="top-14 h-[calc(100svh-3.5rem)]! border-r bg-sidebar" collapsible="icon">
       <SidebarContent className="overflow-hidden">
         <ScrollArea className="min-h-0 flex-1">
-          <SidebarGroup>
+          <SidebarGroup className="px-2 py-3">
             <SidebarGroupLabel>{activeGroup.title}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {activeGroup.items.map((item) => {
+              <SidebarMenu className="gap-1">
+                {activeGroup.items
+                  .filter((item) => item.href)
+                  .map((item) => {
                   const Icon = item.icon;
-                  const isActive = item.href === pathname;
+                  const isActive = isNavItemActive(pathname, item.href);
 
                   return (
                     <SidebarMenuItem key={item.label}>
-                      {item.href ? (
-                        <SidebarMenuButton asChild isActive={isActive} size="lg">
-                          <Link href={buildAdminHref(item.href, new URLSearchParams(), locale)}>
-                            <Icon className="h-4 w-4" />
-                            <div className="grid flex-1 text-left">
-                              <span>{item.label}</span>
-                              <span className="text-xs text-muted-foreground">{item.description}</span>
-                            </div>
-                            <span className="rounded-full bg-success-soft px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-success">
-                              {item.status}
-                            </span>
-                          </Link>
-                        </SidebarMenuButton>
-                      ) : (
-                        <div className="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-muted-foreground">
-                          <Icon className="mt-0.5 h-4 w-4 shrink-0" />
-                          <div className="grid flex-1 gap-1">
-                            <span className="font-medium text-sidebar-foreground">{item.label}</span>
-                            <span className="text-xs leading-5">{item.description}</span>
-                          </div>
-                          <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em]">
-                            {item.status}
-                          </span>
-                        </div>
-                      )}
+                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                        <Link href={buildAdminHref(item.href!, new URLSearchParams(), locale)}>
+                          <Icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
                 })}
@@ -473,22 +464,51 @@ function AppSidebar({
         </ScrollArea>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/70 p-4">
-        <div className="rounded-2xl border border-sidebar-border/70 bg-background/80 p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-sidebar-foreground">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2 text-xs">
-            <span className="text-muted-foreground">{copy.roleLabel}</span>
-            <span className="font-medium text-sidebar-foreground">{user.role}</span>
-          </div>
-        </div>
+      <SidebarFooter className="border-t px-2 py-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  size="lg"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/10 font-semibold text-primary">{userInitial}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user.loginId}</span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto h-4 w-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64 min-w-64" side="top">
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-3 px-1 py-1.5 text-left">
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-primary/10 font-semibold text-primary">{userInitial}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid min-w-0 flex-1">
+                      <span className="truncate text-sm font-medium text-foreground">{user.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user.loginId}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="px-1 py-1 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{environmentLabel}</span>
+                  {" · "}
+                  {user.role}
+                </div>
+                <DropdownMenuSeparator />
+                <div className="p-1">
+                  <LogoutButton apiOrigin={logoutApiOrigin} className="w-full justify-start" variant="ghost" />
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
@@ -497,9 +517,9 @@ function AppSidebar({
 const ApplicationShell5 = ({
   children,
   environmentLabel,
+  logoutApiOrigin,
   user,
   locale,
-  headerActions,
   className,
 }: ApplicationShell5Props) => {
   const pathname = usePathname();
@@ -516,28 +536,23 @@ const ApplicationShell5 = ({
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-            <SidebarTrigger className="md:hidden" />
+            <SidebarTrigger />
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 <ShieldCheck className="h-4 w-4" />
               </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-semibold text-foreground">{copy.brand}</p>
-                <p className="text-xs text-muted-foreground">{copy.shellLabel}</p>
-              </div>
+              <p className="text-sm font-semibold text-foreground">{copy.brand}</p>
             </div>
 
             <ModuleTabs activeGroupIndex={activeGroupIndex} groups={navGroups} onChange={setActiveGroupIndex} />
 
-            <div className="ml-auto hidden items-center gap-3 md:flex">
-              <div className="flex items-center gap-2 rounded-full border border-border/80 bg-card px-3 py-2 text-sm text-muted-foreground">
-                <Search className="h-4 w-4" />
-                {copy.searchHint}
-              </div>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="hidden items-center rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+                {environmentLabel}
+              </span>
               <React.Suspense fallback={null}>
                 <AdminLocaleSwitcher locale={locale} />
               </React.Suspense>
-              <React.Suspense fallback={null}>{headerActions}</React.Suspense>
             </div>
           </div>
         </header>
@@ -547,6 +562,7 @@ const ApplicationShell5 = ({
             activeGroupIndex={activeGroupIndex}
             environmentLabel={environmentLabel}
             locale={locale}
+            logoutApiOrigin={logoutApiOrigin}
             navGroups={navGroups}
             pathname={pathname}
             user={user}
@@ -556,16 +572,9 @@ const ApplicationShell5 = ({
             <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
               <div className="border-b bg-background/70 px-4 py-3 backdrop-blur md:hidden">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{navGroups[activeGroupIndex].title}</p>
-                    <p className="text-xs text-muted-foreground">{copy.mobileTitle}</p>
-                  </div>
-                  <React.Suspense fallback={null}>{headerActions}</React.Suspense>
-                </div>
-                <div className="mt-3 flex items-center justify-between rounded-2xl border border-border/80 bg-card px-3 py-2 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-2">
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                    {copy.mobileNote}
+                  <p className="text-sm font-medium text-foreground">{navGroups[activeGroupIndex].title}</p>
+                  <span className="inline-flex items-center rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                    {environmentLabel}
                   </span>
                 </div>
               </div>

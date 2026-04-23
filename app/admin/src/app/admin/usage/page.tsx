@@ -5,8 +5,6 @@ import { LlmUsageSurface, type LlmUsagePageFilters } from "@/components/fpds/adm
 import { fetchAdminSession, fetchLlmUsage, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
-import { LogoutButton } from "../LogoutButton";
-
 type LlmUsagePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -63,10 +61,10 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
     <ApplicationShell5
       environmentLabel={envLabel}
       locale={locale}
-      headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
+      logoutApiOrigin={getAdminApiOrigin()}
       user={{
         name: session.user.display_name,
-        email: session.user.email ?? session.user.login_id,
+        loginId: session.user.login_id,
         role: session.user.role,
       }}
     >

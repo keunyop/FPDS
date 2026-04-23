@@ -8,8 +8,6 @@ import {
 import { fetchAdminSession, fetchChangeHistoryList, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
-import { LogoutButton } from "../LogoutButton";
-
 type ChangeHistoryPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -65,10 +63,10 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
     <ApplicationShell5
       environmentLabel={envLabel}
       locale={locale}
-      headerActions={<LogoutButton apiOrigin={getAdminApiOrigin()} />}
+      logoutApiOrigin={getAdminApiOrigin()}
       user={{
         name: session.user.display_name,
-        email: session.user.email ?? session.user.login_id,
+        loginId: session.user.login_id,
         role: session.user.role,
       }}
     >

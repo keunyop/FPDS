@@ -101,12 +101,11 @@ Not included:
 
 All admin surfaces should share:
 
-1. environment badge
-2. page title and short scope note
-3. global search entry
+1. collapsible primary sidebar
+2. environment badge
+3. top-bar route-group navigation on desktop with an active-route title on smaller screens
 4. locale toggle
-5. freshness or last-updated hint
-6. user/session menu
+5. user/session menu anchored in the sidebar footer
 
 ### 5.2 Navigation Groups
 
