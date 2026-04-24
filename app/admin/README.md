@@ -23,7 +23,7 @@ Current scaffold:
 Current runtime:
 - `/admin/login` login screen
 - `/admin/signup` access-request screen
-- protected `/admin` overview entry
+- protected `/admin` dashboard entry with a breadcrumb-led header, operator greeting, compact attention metrics, and admin-only signup approval only when pending requests exist
 - protected `/admin` admin-only access-request approval panel for pending signup requests
 - protected `/admin/reviews` review queue with active-state defaults, search, filters, sort, and pagination
 - protected `/admin/reviews/:reviewTaskId` review detail route with field-selectable evidence trace, model-run context, action history, a dedicated approved-product-name input for safer rename corrections, and approve/reject/defer/edit-approve controls; already-approved and already-edited tasks now reopen into `Edit & approve` for follow-up operator corrections

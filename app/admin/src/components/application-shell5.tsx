@@ -126,7 +126,7 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       observability: "Observability",
     },
     items: {
-      overview: { label: "Overview", description: "Current triage entrypoint" },
+      overview: { label: "Dashboard", description: "Current triage entrypoint" },
       reviews: { label: "Review Queue", description: "Queue, validation, and decision intake" },
       traceViewer: { label: "Trace Viewer", description: "Evidence inspection and field provenance" },
       runs: { label: "Runs", description: "Execution diagnostics and failure context" },
@@ -157,7 +157,7 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       observability: "관찰",
     },
     items: {
-      overview: { label: "개요", description: "현재 분류 시작점" },
+      overview: { label: "Dashboard", description: "현재 분류 시작점" },
       reviews: { label: "검토 대기열", description: "대기, 검증, 결정 접수" },
       traceViewer: { label: "추적 뷰어", description: "증거 검사와 필드 출처 확인" },
       runs: { label: "실행", description: "실행 진단과 실패 맥락" },
@@ -188,7 +188,7 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       observability: "監視",
     },
     items: {
-      overview: { label: "概要", description: "現在のトリアージ入口" },
+      overview: { label: "Dashboard", description: "現在のトリアージ入口" },
       reviews: { label: "審査キュー", description: "キュー、検証、判断の受付" },
       traceViewer: { label: "トレースビューア", description: "証跡確認とフィールド由来の追跡" },
       runs: { label: "実行", description: "実行診断と失敗文脈" },

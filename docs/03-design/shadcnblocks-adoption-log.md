@@ -171,6 +171,21 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: this was a correctness fix, not a new visual variant; it removes the misleading always-on highlight behavior from both nav rows and the footer avatar trigger because they share the same menu-button primitive
 
+## 2026-04-24 - Admin Dashboard Label and Body Cleanup
+
+- Surface or Area: `app/admin` protected shell and `/admin` dashboard body
+- Vendor Asset: existing `@shadcnblocks/application-shell5`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct label edit to the existing shell block plus route-owned dashboard body cleanup
+- Files Added or Changed: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/page.tsx`, `app/admin/README.md`
+- FPDS Wrappers or Overrides: kept the existing shell and route contract while renaming the sidebar `/admin` item to `Dashboard` and removing nonessential quick-link/session sections from the route-owned body
+- Direct Vendor Edits: yes; the vendor-derived shell copy now labels the `/admin` nav item as `Dashboard` while preserving the broader `Overview` navigation group
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: no new vendor block was imported and no new metric was added; the dashboard now relies on the existing live triage signals
+
 ---
 
 ## 5. Change History

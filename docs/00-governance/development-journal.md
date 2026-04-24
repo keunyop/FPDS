@@ -62,6 +62,40 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-24 - Admin Dashboard Follow-up Cleanup
+
+- WBS: `4.x`, `5.12`, `5.14`
+- Status: `done`
+- Goal: apply the Product Owner follow-up on the admin dashboard by renaming the sidebar `/admin` item to `Dashboard` and removing nonessential dashboard body sections
+- Why now: after the overview body simplification, the Product Owner wanted the sidebar wording and first-screen content tightened one more step
+- Outcome: changed the Application Shell sidebar item label for `/admin` from `Overview` to `Dashboard`, kept the breadcrumb path as `Overview > Dashboard`, removed the `Quick links` and `Session` sections from the dashboard body, and left only the compact attention metrics plus the pending signup approval panel when there are pending requests
+- Not done: no new dashboard metric was added because the currently available review, run, dashboard-health, and signup signals already cover the useful live triage data without adding speculative or duplicated widgets
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/page.tsx`, `app/admin/README.md`, `docs/03-design/shadcnblocks-adoption-log.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept this as a narrow UI cleanup rather than adding another data call or expanding dashboard scope; retained `Overview > Dashboard` in the page breadcrumb because that was the previously requested path structure
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: the broader admin shell locale resources still contain pre-existing corrupted KO/JA strings outside this cleanup slice
+- Next step: include this final compact dashboard body in the next responsive/browser QA pass
+
+## 2026-04-24 - Admin Overview Body Simplification
+
+- WBS: `4.x`, `5.12`, `5.14`
+- Status: `done`
+- Goal: simplify the protected admin overview body so the first screen starts with an `Overview > Dashboard` breadcrumb, a direct operator greeting, and only the operational information needed for triage
+- Why now: the Product Owner called out that the Application Shell body had become dominated by large card regions and explanatory copy instead of a compact dashboard surface
+- Outcome: removed the long overview hero, slice-boundary banner, route-design explainer cards, and implementation timeline from `/admin`; added a breadcrumb-led header, greeting, compact metrics backed by review queue/run/dashboard-health/signup APIs, quick links, and a small session summary; kept the signup approval panel only when pending requests exist
+- Not done: this slice did not redesign the deeper review, runs, health, bank, or source surfaces; it only simplified the overview entry body
+- Key files: `app/admin/src/app/admin/page.tsx`, `app/admin/README.md`
+- Decisions: kept the existing `application-shell5` shell and route navigation intact, avoided importing another vendor block, and treated KPI tiles plus the pending signup form as the only card-like elements worth keeping on the overview
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: the broader admin locale resources still contain pre-existing corrupted KO/JA strings outside this overview body slice
+- Next step: include `/admin` in the next responsive/browser QA pass to confirm the new compact body scans well on desktop and mobile
+
 ## 2026-04-24 - Admin Shell Navbar and Sidebar Polish
 
 - WBS: `4.x`, `5.12`, `5.14`
