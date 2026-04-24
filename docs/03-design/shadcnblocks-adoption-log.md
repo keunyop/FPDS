@@ -126,6 +126,51 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: route-level search remains on the owning surfaces such as review queue and usage, but the shared admin shell chrome is now intentionally lighter
 
+## 2026-04-24 - Admin Shell Trigger and Footer Menu Polish
+
+- Surface or Area: `app/admin` protected shell used by overview, review, operations, and observability routes
+- Vendor Asset: existing `@shadcnblocks/application-shell5`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct edits to the existing shell block plus a small logout-button extension
+- Files Added or Changed: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/LogoutButton.tsx`, `app/admin/README.md`
+- FPDS Wrappers or Overrides: kept the existing protected-route shell API and adjusted only the shell-local interaction layer so the desktop collapse control sits in the sidebar, the footer dropdown can show a placeholder account action, and sign-out can carry an explicit icon
+- Direct Vendor Edits: yes; the vendor-derived shell was tuned to match the requested `application-shell5` interaction more closely without changing the broader route layout contract
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: the new `Account` row is intentionally presentational for now because there is no approved account-management route yet
+
+## 2026-04-24 - Admin Shell Header Row and Menu-State Follow-up
+
+- Surface or Area: `app/admin` protected shell used by overview, review, operations, and observability routes
+- Vendor Asset: existing `@shadcnblocks/application-shell5`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; follow-up direct edits to the existing shell block plus the shared sidebar menu-button styling
+- Files Added or Changed: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/ui/sidebar.tsx`, `app/admin/README.md`
+- FPDS Wrappers or Overrides: kept the same route-shell contract and adjusted only the interaction layer so the active section title now lives beside the desktop collapse control and the user menu presents only the profile header plus left-aligned actions
+- Direct Vendor Edits: yes; the vendor-derived shell and shared sidebar primitive were tuned again to remove lingering always-on fills and to match the requested shell header composition more closely
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: the env/role row is now visually removed from the footer dropdown; the `Account` row remains a disabled placeholder until a real account-management route is approved
+
+## 2026-04-24 - Sidebar Active-State Root Cause Fix
+
+- Surface or Area: `app/admin` protected shell used by overview, review, operations, and observability routes
+- Vendor Asset: existing `@shadcnblocks/application-shell5` plus the shared shadcn sidebar primitive it composes
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct follow-up edits to the shared sidebar primitive and a one-line shell typography adjustment
+- Files Added or Changed: `app/admin/src/components/ui/sidebar.tsx`, `app/admin/src/components/application-shell5.tsx`
+- FPDS Wrappers or Overrides: kept the same route-shell contract and corrected the shared interaction primitive so idle rows stay visually neutral without additional per-route overrides
+- Direct Vendor Edits: yes; the vendor-derived sidebar primitive now uses `data-[active=true]` selectors because React still renders `data-active="false"` on inactive rows and the upstream presence-based selectors treated that as active
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: this was a correctness fix, not a new visual variant; it removes the misleading always-on highlight behavior from both nav rows and the footer avatar trigger because they share the same menu-button primitive
+
 ---
 
 ## 5. Change History

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ComponentType } from "react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,11 @@ const LOGOUT_COPY: Record<AdminLocale, { idle: string; pending: string }> = {
 type LogoutButtonProps = {
   apiOrigin: string;
   className?: string;
+  icon?: ComponentType<ComponentProps<"svg">>;
   variant?: ComponentProps<typeof Button>["variant"];
 };
 
-export function LogoutButton({ apiOrigin, className, variant = "outline" }: LogoutButtonProps) {
+export function LogoutButton({ apiOrigin, className, icon: Icon, variant = "outline" }: LogoutButtonProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const locale = normalizeAdminLocale(searchParams.get("locale"));
@@ -43,6 +44,7 @@ export function LogoutButton({ apiOrigin, className, variant = "outline" }: Logo
 
   return (
     <Button className={className} disabled={pending} onClick={handleLogout} type="button" variant={variant}>
+      {Icon ? <Icon /> : null}
       {pending ? copy.pending : copy.idle}
     </Button>
   );

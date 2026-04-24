@@ -7,15 +7,16 @@ import {
   Activity,
   ArrowUpRight,
   BookOpenText,
-  ChevronsUpDown,
   FileClock,
   Gauge,
   LayoutDashboard,
+  LogOut,
   Search,
   ScrollText,
   ShieldCheck,
   Sparkles,
   UploadCloud,
+  UserRound,
 } from "lucide-react";
 
 import { LogoutButton } from "@/app/admin/LogoutButton";
@@ -24,6 +25,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -35,7 +37,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
@@ -197,6 +199,12 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       dashboardHealth: { label: "ダッシュボード健全性", description: "提供鮮度と完全性" },
     },
   },
+};
+
+const accountMenuLabelByLocale: Record<AdminLocale, string> = {
+  en: "Account",
+  ko: "Account",
+  ja: "Account",
 };
 
 function getNavGroups(locale: AdminLocale): NavGroup[] {
@@ -415,7 +423,6 @@ function MobileBottomNav({
 
 function AppSidebar({
   activeGroupIndex,
-  environmentLabel,
   locale,
   logoutApiOrigin,
   navGroups,
@@ -423,7 +430,6 @@ function AppSidebar({
   user,
 }: {
   activeGroupIndex: number;
-  environmentLabel: string;
   locale: AdminLocale;
   logoutApiOrigin: string;
   navGroups: NavGroup[];
@@ -431,14 +437,22 @@ function AppSidebar({
   user: ShellUser;
 }) {
   const activeGroup = navGroups[activeGroupIndex];
+  const accountMenuLabel = accountMenuLabelByLocale[locale];
   const userInitial = user.loginId.trim().charAt(0).toUpperCase() || "U";
 
   return (
     <Sidebar className="top-14 h-[calc(100svh-3.5rem)]! border-r bg-sidebar" collapsible="icon">
+      <SidebarHeader className="px-2 py-2">
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate px-2 text-sm font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
+            {activeGroup.title}
+          </p>
+          <SidebarTrigger className="hidden md:inline-flex" />
+        </div>
+      </SidebarHeader>
       <SidebarContent className="overflow-hidden">
         <ScrollArea className="min-h-0 flex-1">
           <SidebarGroup className="px-2 py-3">
-            <SidebarGroupLabel>{activeGroup.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
                 {activeGroup.items
@@ -449,7 +463,7 @@ function AppSidebar({
 
                   return (
                     <SidebarMenuItem key={item.label}>
-                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                      <SidebarMenuButton asChild className="bg-transparent" isActive={isActive} tooltip={item.label}>
                         <Link href={buildAdminHref(item.href!, new URLSearchParams(), locale)}>
                           <Icon className="h-4 w-4" />
                           <span>{item.label}</span>
@@ -470,7 +484,7 @@ function AppSidebar({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
-                  className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="h-12 w-full justify-start bg-transparent data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   size="lg"
                 >
                   <Avatar className="h-8 w-8">
@@ -480,7 +494,6 @@ function AppSidebar({
                     <span className="truncate font-medium">{user.name}</span>
                     <span className="truncate text-xs text-muted-foreground">{user.loginId}</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 min-w-64" side="top">
@@ -495,15 +508,24 @@ function AppSidebar({
                     </div>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="px-1 py-1 text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">{environmentLabel}</span>
+                <DropdownMenuSeparator className="hidden" />
+                <div className="hidden px-1 py-1 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground" />
                   {" · "}
-                  {user.role}
+                  {null}
                 </div>
                 <DropdownMenuSeparator />
                 <div className="p-1">
-                  <LogoutButton apiOrigin={logoutApiOrigin} className="w-full justify-start" variant="ghost" />
+                  <DropdownMenuItem className="justify-start gap-2 text-left" disabled>
+                    <UserRound className="h-4 w-4" />
+                    <span>{accountMenuLabel}</span>
+                  </DropdownMenuItem>
+                  <LogoutButton
+                    apiOrigin={logoutApiOrigin}
+                    className="w-full justify-start px-1.5 text-left"
+                    icon={LogOut}
+                    variant="ghost"
+                  />
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -536,12 +558,12 @@ const ApplicationShell5 = ({
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-            <SidebarTrigger />
+            <SidebarTrigger className="md:hidden" />
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 <ShieldCheck className="h-4 w-4" />
               </div>
-              <p className="text-sm font-semibold text-foreground">{copy.brand}</p>
+              <p className="text-base font-semibold tracking-tight text-foreground">{copy.brand}</p>
             </div>
 
             <ModuleTabs activeGroupIndex={activeGroupIndex} groups={navGroups} onChange={setActiveGroupIndex} />
@@ -560,7 +582,6 @@ const ApplicationShell5 = ({
         <div className="flex flex-1">
           <AppSidebar
             activeGroupIndex={activeGroupIndex}
-            environmentLabel={environmentLabel}
             locale={locale}
             logoutApiOrigin={logoutApiOrigin}
             navGroups={navGroups}

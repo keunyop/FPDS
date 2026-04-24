@@ -62,6 +62,40 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-24 - Admin Shell Navbar and Sidebar Polish
+
+- WBS: `4.x`, `5.12`, `5.14`
+- Status: `done`
+- Goal: tighten the FPDS Admin shell chrome so the brand and section headings read more clearly, the desktop collapse control sits in the sidebar instead of the navbar, and the footer user menu matches the requested `application-shell5` behavior more closely
+- Why now: the Product Owner asked for a small visual polish pass on the live admin shell rather than a wider route redesign
+- Outcome: increased the navbar `FPDS Admin` title emphasis, increased sidebar group-label emphasis, moved the desktop collapse trigger into the sidebar header while keeping the navbar trigger on mobile only, removed persistent sidebar-button fills so highlight color appears only on hover/open/active states, removed the footer chevron, added a placeholder `Account` menu row, and added a logout icon to the existing sign-out action
+- Not done: no account-management route or interaction was added; the new `Account` row is intentionally disabled until that scope is approved
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/LogoutButton.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`, `docs/03-design/shadcnblocks-adoption-log.md`
+- Decisions: kept the current `application-shell5` base and adjusted only shell-local composition and menu behavior instead of importing another vendor block or adding a new route; kept the mobile navbar trigger because the off-canvas sidebar still needs an entrypoint on small screens
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: the shell locale copy file still contains pre-existing corrupted KO/JA strings outside this narrow polish slice
+- Next step: include this updated shell behavior in the next responsive QA browser pass so desktop collapsed state and mobile drawer entry remain aligned
+
+## 2026-04-24 - Admin Shell Header Row and Footer Menu Cleanup
+
+- WBS: `4.x`, `5.12`, `5.14`
+- Status: `done`
+- Goal: finish the requested follow-up shell cleanup by moving the active sidebar section title into the sidebar header row, removing the visible footer env/role line, and tightening menu highlight behavior plus footer action alignment
+- Why now: the Product Owner reviewed the previous shell polish and called out remaining layout and background-state mismatches
+- Outcome: moved the active section heading into the same sidebar-header row as the desktop collapse trigger, removed the visible divider-under-header treatment, hid the footer env/role row from the user dropdown, left-aligned both `Account` and `Sign out`, and made the shared sidebar menu button explicitly transparent until hover or active state so the highlight fill only appears when intended
+- Not done: the `Account` row is still placeholder-only and the shell file still carries older corrupted KO/JA copy outside this narrow interaction pass
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/ui/sidebar.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`, `docs/03-design/shadcnblocks-adoption-log.md`
+- Decisions: kept the fix inside the existing shell and shared sidebar primitive instead of importing another vendor block or widening the scope into a broader locale-copy cleanup
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: this slice removes the visible footer env/role line, but it does not add any new account-management route or profile flow
+- Next step: include the refined shell in the next responsive/browser QA pass and only reopen the shell if another concrete mismatch appears
+
 ## 2026-04-22 - Admin Shell Simplification and Collapse Alignment
 
 - WBS: `4.x`, `5.12`
@@ -384,6 +418,23 @@ Read before coding:
   - pending
 - Known issues: older admin locale resources outside the new signup flow still carry some legacy wording and encoding noise
 - Next step: apply migration `0011_admin_signup_requests.sql`, create the first bootstrap admin with `--login-id`, then verify signup request creation and approval against a live local database
+
+## 2026-04-24 - Admin Shell Active-State Fix Follow-up
+
+- WBS: `5.12`
+- Status: `done`
+- Goal: reduce the shell brand weight slightly and remove the always-highlighted sidebar and footer-avatar fills so only hover or the current route shows emphasis
+- Why now: the Product Owner reported that the navbar title still felt too bold and the sidebar menu plus avatar trigger continued to look active even when idle
+- Outcome: reduced the `FPDS Admin` navbar title from `font-bold` to `font-semibold`, and fixed the sidebar primitives so active styling now applies only when `data-active=true` instead of whenever a `data-active` attribute exists
+- Not done: no new account-management route or footer-menu behavior change was added in this slice
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/ui/sidebar.tsx`
+- Decisions: corrected the root cause in the shared sidebar primitive instead of stacking more local `bg-transparent` overrides onto each shell row
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: the dropdown still contains a hidden env/role placeholder block from the earlier shell edit, but it is not visible and does not affect interaction state
+- Next step: if the Product Owner wants, clean the hidden footer-menu residue in a separate low-risk markup pass after the visible behavior is confirmed
 
 ---
 
