@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type {
@@ -148,25 +149,19 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-4xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Review detail</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              {approvedDisplayProductName}
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This surface now keeps field selection, trace drilldown, and review actions together so operators can
-              verify evidence before making a decision.
-            </p>
-            {showingApprovedName ? (
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Source-derived candidate name: <span className="font-medium text-foreground">{sourceDerivedProductName}</span>
-              </p>
-            ) : null}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/admin/reviews">Back to queue</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/admin/runs/${detail.review_task.run_id}`}>Open producing run</Link>
+            </Button>
+          </>
+        }
+        badges={
+          <>
             <span className={cn("rounded-full px-3 py-1 text-xs font-medium", stateBadgeClasses(detail.review_task.review_state))}>
               {toTitleCase(detail.review_task.review_state)}
             </span>
@@ -176,17 +171,22 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
               {detail.candidate.bank_name} {toTitleCase(detail.candidate.product_type)}
             </span>
-          </div>
-        </div>
+          </>
+        }
+        description={showingApprovedName ? `Source-derived candidate name: ${sourceDerivedProductName}` : undefined}
+        path={["Review", "Review Queue", "Review Detail"]}
+        title={approvedDisplayProductName}
+      />
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-4">
+      <article className="rounded-lg border border-border/80 bg-background p-4">
+        <div className="grid gap-3 lg:grid-cols-4">
           <SummaryStat label="Review task" value={detail.review_task.review_task_id} />
           <SummaryStat label="Run" value={detail.review_task.run_id} />
           <SummaryStat label="Confidence" value={formatConfidence(detail.candidate.source_confidence)} />
           <SummaryStat label="Evidence fields" value={String(detail.evidence_summary.field_count)} />
         </div>
 
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <SummaryStat label="Created" value={formatTimestamp(detail.review_task.created_at)} />
           <SummaryStat label="Updated" value={formatTimestamp(detail.review_task.updated_at)} />
           <SummaryStat label="Fetched" value={formatTimestamp(detail.source_context.fetched_at)} />
@@ -194,13 +194,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
           <SummaryStat label="Displayed name" value={approvedDisplayProductName} />
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <Link href="/admin/reviews">Back to queue</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/admin/runs/${detail.review_task.run_id}`}>Open producing run</Link>
-          </Button>
+        <div className="mt-4 flex flex-wrap gap-3">
           {detail.current_product ? (
             <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
               Canonical {detail.current_product.product_id} v{detail.current_product.current_version_no}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Banner1 } from "@/components/banner1";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { LlmUsageDashboardResponse } from "@/lib/admin-api";
@@ -47,66 +47,40 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
     {
       label: "Usage records",
       value: formatCount(readNumber(totals, ["usage_record_count", "record_count", "count"])),
-      note: "Protected usage rows define the current dashboard window.",
+      note: "Current window.",
       tone: "info" as const,
     },
     {
       label: "Total tokens",
       value: formatTokens(totalTokens),
-      note: "Prompt and completion volume stay visible at the top of the route.",
+      note: "Prompt + completion.",
       tone: "success" as const,
     },
     {
       label: "Estimated cost",
       value: formatCost(totalCost),
-      note: "Cost interpretation stays on the usage route without turning this into billing workflow.",
+      note: "Estimated spend.",
       tone: "warning" as const,
     },
     {
       label: "Anomaly candidates",
       value: formatCount(readNumber(totals, ["anomaly_candidate_count", "anomaly_count"]), anomalyRows.length),
-      note: "Outlier rows remain easy to inspect before they become weekly cost drift.",
+      note: "Outliers.",
       tone: "neutral" as const,
     },
   ];
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">LLM usage dashboard</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Token, cost, trend, and anomaly triage now live in one operator-facing observability surface.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This route stays separate from public metrics and billing workflow. It keeps time-window scope, model and
-              agent concentration, run-linked spend, trend movement, and anomaly drilldown readable from the same admin
-              dashboard.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center rounded-full bg-success-soft px-3 py-1 text-xs font-medium text-success">
-            Usage v1
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Banner1
-            defaultVisible={true}
-            description="The page is still read-only and observability-first. Quota controls, budget caps, and alert governance remain separate follow-on operational slices."
-            dismissible={false}
-            title="Slice boundary"
-            tone="info"
-          />
-        </div>
-      </article>
+      <AdminPageHeader
+        description="Token volume, cost, concentration, trend, and anomalies."
+        path={["Observability", "Usage"]}
+        title="Usage"
+      />
 
       <Stats5
-        className="bg-card/95"
-        description="The header now summarizes actual scope coverage, volume, and drift signal instead of only exposing the raw route."
         items={statItems}
-        title="Filtered usage snapshot"
+        title="Usage Snapshot"
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.04fr)_minmax(20rem,0.96fr)]">
@@ -198,11 +172,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and scope</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Diagnostic controls</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Search by usage id, run id, request id, product, bank, or review task. Narrow further by provider or
-              stage when a drift signal looks concentrated in a specific part of the orchestration chain.
-            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Usage Controls</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

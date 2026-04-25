@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { SourceDetailSurface } from "@/components/fpds/admin/source-detail-surface";
 import { fetchAdminSession, fetchSourceRegistryDetail, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
@@ -33,18 +34,7 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
   }
 
   if (!session || apiUnavailable) {
-    return (
-      <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-4 py-8 md:px-6">
-        <section className="w-full rounded-[1.75rem] border border-destructive/20 bg-card/95 p-6 shadow-sm md:p-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-destructive">Admin API unavailable</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-              Source detail could not load because the admin API is not reachable.
-            </h1>
-          </div>
-        </section>
-      </main>
-    );
+    return <AdminApiUnavailable title="Source detail could not load." />;
   }
 
   if (!detail) {

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
@@ -44,7 +45,9 @@ export function BankRegistrySurface({
   productTypes,
 }: BankRegistrySurfaceProps) {
   const router = useRouter();
-  const detailModalOpen = Boolean(activeBankCode && activeBankDetail);
+  const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
+  const [bankDialogOpen, setBankDialogOpen] = useState(Boolean(activeBankCode && activeBankDetail));
+  const [bankDialogDetail, setBankDialogDetail] = useState<BankDetailResponse | null>(activeBankDetail);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
   const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
   const [selectedBankCodes, setSelectedBankCodes] = useState<string[]>([]);
@@ -60,32 +63,70 @@ export function BankRegistrySurface({
   );
   const selectedCoverageCount = selectedCatalogItems.length;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
+  const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
 
-  function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
+  useEffect(() => {
+    setAddDialogOpen(addModalOpen);
+  }, [addModalOpen]);
+
+  useEffect(() => {
+    setBankDialogOpen(Boolean(activeBankCode && activeBankDetail));
+    setBankDialogDetail(activeBankDetail);
+  }, [activeBankCode, activeBankDetail]);
+
+  function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/banks", params, locale);
     if (options?.replace) {
-      router.replace(href, { scroll: false });
+      window.history.replaceState(null, "", href);
       return;
     }
-    router.push(href, { scroll: false });
+    window.history.pushState(null, "", href);
   }
 
   function openAddModal() {
     const params = new URLSearchParams(baseSearchParams);
     params.set("modal", "add");
     params.delete("bank");
-    navigateWithParams(params);
+    setAddDialogOpen(true);
+    setBankDialogOpen(false);
+    syncUrlWithParams(params);
   }
 
   function openBankModal(bankCode: string) {
     const params = new URLSearchParams(baseSearchParams);
     params.set("bank", bankCode);
     params.delete("modal");
-    navigateWithParams(params);
+    const bank = banks.items.find((item) => item.bank_code === bankCode);
+    setAddDialogOpen(false);
+    setBankDialogOpen(true);
+    setBankDialogDetail(bank ? buildPreviewBankDetail(bank) : null);
+    syncUrlWithParams(params);
+    void hydrateBankDetail(bankCode);
   }
 
   function closeModal() {
-    navigateWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+    setAddDialogOpen(false);
+    setBankDialogOpen(false);
+    syncUrlWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+  }
+
+  async function hydrateBankDetail(bankCode: string) {
+    try {
+      const response = await fetch(`/admin/banks/${encodeURIComponent(bankCode)}/detail`, {
+        cache: "no-store",
+      });
+      const payload = (await response.json()) as {
+        data?: BankDetailResponse;
+        error?: { message?: string };
+      };
+      if (!response.ok || !payload.data) {
+        setError(payload.error?.message ?? "Bank detail could not be loaded.");
+        return;
+      }
+      setBankDialogDetail(payload.data);
+    } catch {
+      setError("Bank detail could not be loaded. Check the admin API and try again.");
+    }
   }
 
   function handleAddDialogChange(open: boolean) {
@@ -178,30 +219,23 @@ export function BankRegistrySurface({
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Banks</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Manage bank profiles and coverage from one place.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Operators enter the bank homepage once, then add product coverage inside the bank modal. FPDS generates
-              the actual source URLs later during collection.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
               Add bank
             </button>
-          </div>
-        </div>
-      </article>
+          </>
+        }
+        description="Bank profiles, coverage, and collection launch."
+        path={["Operations", "Banks"]}
+        title="Banks"
+      />
 
       <article className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Banks" note="Current list scope" value={String(banks.summary.total_items)} />
-        <StatCard label="Active" note="Available for catalog coverage" value={String(banks.summary.status_counts.active ?? 0)} />
-        <StatCard label="Managed" note="Created or edited from admin" value={String(banks.items.filter((item) => item.managed_flag).length)} />
+        <StatCard label="Banks" value={String(banks.summary.total_items)} />
+        <StatCard label="Active" value={String(banks.summary.status_counts.active ?? 0)} />
+        <StatCard label="Managed" value={String(banks.items.filter((item) => item.managed_flag).length)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -226,10 +260,6 @@ export function BankRegistrySurface({
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Bank list</p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Review the current bank registry under the active search filter, then open add or detail work in a modal
-              without leaving this page.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
@@ -328,14 +358,8 @@ export function BankRegistrySurface({
       </article>
 
       <OfferModal4
-        description="Add a bank profile without leaving the current bank list."
-        footer={
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            Bank code is generated automatically after save, and coverage can be added right after from the same bank modal.
-          </p>
-        }
         onOpenChange={handleAddDialogChange}
-        open={addModalOpen}
+        open={addDialogOpen}
         showPanel={false}
         title="Add bank"
       >
@@ -343,27 +367,16 @@ export function BankRegistrySurface({
       </OfferModal4>
 
       <OfferModal4
-        description={
-          activeBankDetail
-            ? "Review and update the public bank profile while keeping search and list context anchored on /admin/banks."
-            : undefined
-        }
-        footer={
-          activeBankDetail ? (
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              Edit the bank profile and manage product coverage together without leaving the bank list.
-            </p>
-          ) : undefined
-        }
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
-        title={activeBankDetail ? activeBankDetail.bank.bank_name : "Bank detail"}
+        title={bankDialogDetail ? bankDialogDetail.bank.bank_name : "Bank detail"}
       >
-        {activeBankDetail ? (
+        {bankDialogDetail ? (
           <BankDetailDialogContent
             csrfToken={csrfToken}
-            detail={activeBankDetail}
+            detail={bankDialogDetail}
+            key={bankDialogDetail.bank.bank_code}
             locale={locale}
             productTypes={productTypes}
           />
@@ -422,12 +435,11 @@ function buildBulkCollectMessage({
     .join(" ");
 }
 
-function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-      <p className="mt-2 text-sm text-muted-foreground">{note}</p>
+    <article className="rounded-lg border border-border/80 bg-background p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
   );
 }
@@ -467,6 +479,27 @@ function buildRegistrySearchParams(filters: BankRegistryPageFilters) {
     params.set("status", filters.status);
   }
   return params;
+}
+
+function buildPreviewBankDetail(bank: BankItem): BankDetailResponse {
+  return {
+    bank,
+    catalog_items: bank.catalog_items.map((item) => ({
+      catalog_item_id: item.catalog_item_id,
+      bank_code: bank.bank_code,
+      bank_name: bank.bank_name,
+      country_code: bank.country_code,
+      product_type: item.product_type,
+      status: item.status,
+      homepage_url: bank.homepage_url,
+      normalized_homepage_url: bank.normalized_homepage_url,
+      source_language: bank.source_language,
+      generated_source_count: item.generated_source_count,
+      change_reason: null,
+      created_at: null,
+      updated_at: null,
+    })),
+  };
 }
 
 function formatProductTypeList(productTypes: string[], labelMap?: Record<string, string>) {

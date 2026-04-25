@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { SourceCatalogCreateDialogContent } from "@/components/fpds/admin/source-catalog-create-dialog-content";
 import { SourceCatalogDetailDialogContent } from "@/components/fpds/admin/source-catalog-detail-dialog-content";
@@ -42,38 +43,78 @@ export function SourceCatalogSurface({
   addModalOpen,
 }: SourceCatalogSurfaceProps) {
   const router = useRouter();
+  const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
+  const [catalogDialogOpen, setCatalogDialogOpen] = useState(Boolean(activeCatalogItemId && activeCatalogDetail));
+  const [catalogDialogDetail, setCatalogDialogDetail] = useState<SourceCatalogDetailResponse | null>(activeCatalogDetail);
   const [selectedCatalogItemIds, setSelectedCatalogItemIds] = useState<string[]>([]);
   const [collectPending, setCollectPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const detailModalOpen = Boolean(activeCatalogItemId && activeCatalogDetail);
   const baseSearchParams = useMemo(() => buildCatalogSearchParams(filters), [filters]);
+  const detailModalOpen = catalogDialogOpen && Boolean(catalogDialogDetail);
 
-  function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
+  useEffect(() => {
+    setAddDialogOpen(addModalOpen);
+  }, [addModalOpen]);
+
+  useEffect(() => {
+    setCatalogDialogOpen(Boolean(activeCatalogItemId && activeCatalogDetail));
+    setCatalogDialogDetail(activeCatalogDetail);
+  }, [activeCatalogItemId, activeCatalogDetail]);
+
+  function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/source-catalog", params, locale);
     if (options?.replace) {
-      router.replace(href, { scroll: false });
+      window.history.replaceState(null, "", href);
       return;
     }
-    router.push(href, { scroll: false });
+    window.history.pushState(null, "", href);
   }
 
   function openAddModal() {
     const params = new URLSearchParams(baseSearchParams);
     params.set("modal", "add");
     params.delete("catalog");
-    navigateWithParams(params);
+    setAddDialogOpen(true);
+    setCatalogDialogOpen(false);
+    syncUrlWithParams(params);
   }
 
   function openDetailModal(catalogItemId: string) {
     const params = new URLSearchParams(baseSearchParams);
     params.set("catalog", catalogItemId);
     params.delete("modal");
-    navigateWithParams(params);
+    const item = catalog.items.find((catalogItem) => catalogItem.catalog_item_id === catalogItemId);
+    setAddDialogOpen(false);
+    setCatalogDialogOpen(true);
+    setCatalogDialogDetail(item ? buildPreviewSourceCatalogDetail(item) : null);
+    syncUrlWithParams(params);
+    void hydrateCatalogDetail(catalogItemId);
   }
 
   function closeModal() {
-    navigateWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+    setAddDialogOpen(false);
+    setCatalogDialogOpen(false);
+    syncUrlWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+  }
+
+  async function hydrateCatalogDetail(catalogItemId: string) {
+    try {
+      const response = await fetch(`/admin/source-catalog/${encodeURIComponent(catalogItemId)}/detail`, {
+        cache: "no-store",
+      });
+      const payload = (await response.json()) as {
+        data?: SourceCatalogDetailResponse;
+        error?: { message?: string };
+      };
+      if (!response.ok || !payload.data) {
+        setError(payload.error?.message ?? "Source catalog detail could not be loaded.");
+        return;
+      }
+      setCatalogDialogDetail(payload.data);
+    } catch {
+      setError("Source catalog detail could not be loaded. Check the admin API and try again.");
+    }
   }
 
   function handleAddDialogChange(open: boolean) {
@@ -142,34 +183,27 @@ export function SourceCatalogSurface({
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Source catalog</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Choose the bank and product type, then let collection generate source detail.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This is the only place operators add or edit product coverage. Bank and product type stay controlled,
-              and generated source rows remain read-only afterwards.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
               Add coverage
             </button>
             <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
               View generated sources
             </Link>
-          </div>
-        </div>
-      </article>
+          </>
+        }
+        description="Coverage setup and collection launch."
+        path={["Operations", "Source Catalog"]}
+        title="Source Catalog"
+      />
 
       <article className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Catalog items" note="Current list scope" value={String(catalog.summary.total_items)} />
-        <StatCard label="Generated sources" note="Already materialized" value={String(catalog.summary.generated_source_count)} />
-        <StatCard label="Active" note="Ready for collection" value={String(catalog.summary.status_counts.active ?? 0)} />
-        <StatCard label="Selected" note="Ready to collect" value={String(selectedCatalogItemIds.length)} />
+        <StatCard label="Catalog items" value={String(catalog.summary.total_items)} />
+        <StatCard label="Generated sources" value={String(catalog.summary.generated_source_count)} />
+        <StatCard label="Active" value={String(catalog.summary.status_counts.active ?? 0)} />
+        <StatCard label="Selected" value={String(selectedCatalogItemIds.length)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -196,9 +230,6 @@ export function SourceCatalogSurface({
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Coverage list</p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Review the current source-catalog coverage under the active filter set, then open add or detail work in a modal without leaving this page.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
@@ -265,16 +296,9 @@ export function SourceCatalogSurface({
       </article>
 
       <OfferModal4
-        description="Add source-catalog coverage without leaving the current filtered list."
-        footer={
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            Collection stays on the list surface, and generated source rows remain read-only afterwards.
-          </p>
-        }
         onOpenChange={handleAddDialogChange}
-        open={addModalOpen}
+        open={addDialogOpen}
         panelBadge="Coverage setup"
-        panelDescription="Pick an existing bank and an approved product type, then let collection generate the source detail automatically."
         panelStats={[
           { label: "Current scope", value: `${catalog.summary.total_items} catalog items` },
           { label: "Generated sources", value: `${catalog.summary.generated_source_count}` },
@@ -286,23 +310,22 @@ export function SourceCatalogSurface({
       </OfferModal4>
 
       <OfferModal4
-        description={activeCatalogDetail ? "Review and update bank-plus-product coverage while keeping the filtered source-catalog list anchored in place." : undefined}
-        footer={
-          activeCatalogDetail ? (
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              Generated source rows stay read-only. Use collection and generated sources for the next step.
-            </p>
-          ) : undefined
-        }
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
-        panelBadge={activeCatalogDetail?.catalog_item.status === "active" ? "Active coverage" : "Inactive coverage"}
-        panelDescription={activeCatalogDetail ? "Adjust the bank-product coverage in place, then jump straight to generated sources or recent run history." : "Coverage detail is loading."}
-        panelStats={activeCatalogDetail ? [{ label: "Generated sources", value: `${activeCatalogDetail.catalog_item.generated_source_count}` }, { label: "Recent runs", value: `${activeCatalogDetail.recent_runs.length}` }] : []}
-        panelTitle={activeCatalogDetail ? `${activeCatalogDetail.catalog_item.bank_name} ${activeCatalogDetail.catalog_item.product_type}` : "Coverage detail"}
-        title={activeCatalogDetail ? `${activeCatalogDetail.catalog_item.bank_name} ${activeCatalogDetail.catalog_item.product_type}` : "Coverage detail"}
+        panelBadge={catalogDialogDetail?.catalog_item.status === "active" ? "Active coverage" : "Inactive coverage"}
+        panelStats={catalogDialogDetail ? [{ label: "Generated sources", value: `${catalogDialogDetail.catalog_item.generated_source_count}` }, { label: "Recent runs", value: `${catalogDialogDetail.recent_runs.length}` }] : []}
+        panelTitle={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : "Coverage detail"}
+        title={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : "Coverage detail"}
       >
-        {activeCatalogDetail ? <SourceCatalogDetailDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} detail={activeCatalogDetail} locale={locale} /> : null}
+        {catalogDialogDetail ? (
+          <SourceCatalogDetailDialogContent
+            bankOptions={catalog.facets.bank_options}
+            csrfToken={csrfToken}
+            detail={catalogDialogDetail}
+            key={catalogDialogDetail.catalog_item.catalog_item_id}
+            locale={locale}
+          />
+        ) : null}
       </OfferModal4>
     </section>
   );
@@ -352,12 +375,11 @@ function buildCatalogCollectMessage(
     .join(" ");
 }
 
-function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-      <p className="mt-2 text-sm text-muted-foreground">{note}</p>
+    <article className="rounded-lg border border-border/80 bg-background p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
   );
 }
@@ -429,4 +451,12 @@ function buildCatalogSearchParams(filters: SourceCatalogPageFilters) {
     params.set("status", filters.status);
   }
   return params;
+}
+
+function buildPreviewSourceCatalogDetail(item: SourceCatalogItem): SourceCatalogDetailResponse {
+  return {
+    catalog_item: item,
+    sample_source_ids: [],
+    recent_runs: [],
+  };
 }

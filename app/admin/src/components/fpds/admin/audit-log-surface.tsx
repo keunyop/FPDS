@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Banner1 } from "@/components/banner1";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { AuditLogListResponse } from "@/lib/admin-api";
@@ -35,77 +35,47 @@ export function AuditLogSurface({ auditLog, filters }: AuditLogSurfaceProps) {
     {
       label: "Visible events",
       value: String(auditLog.summary.total_items),
-      note: "The filtered audit set stays append-only and page oriented.",
+      note: "Current filters.",
       tone: "info" as const,
     },
     {
       label: "Review events",
       value: String(categoryCounts.review ?? 0),
-      note: "Decision, defer, and trace-access history stay queryable in one route.",
+      note: "Review actions.",
       tone: "success" as const,
     },
     {
       label: "Auth events",
       value: String(categoryCounts.auth ?? 0),
-      note: "Login success, failure, and logout activity stay visible beside workflow history.",
+      note: "Login activity.",
       tone: "warning" as const,
     },
     {
       label: "User actors",
       value: String(auditLog.summary.user_actor_items),
-      note: "Human operator activity remains distinct from system and scheduler events.",
+      note: "Human activity.",
       tone: "neutral" as const,
     },
   ];
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Audit log</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Append-only audit history now has its own protected route inside the FPDS admin shell.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This surface keeps review, auth, run, publish, config, and usage audit events queryable without
-              overloading change history. It is built for chronology, actor visibility, and drilldown back into the
-              run or review routes that already own the underlying work.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center rounded-full bg-success-soft px-3 py-1 text-xs font-medium text-success">
-            Live route
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Banner1
-            defaultVisible={true}
-            description="This baseline focuses on audit chronology, actor and target context, request metadata, and review or run drilldowns. Publish actions, usage analytics, and privilege-management screens remain separate follow-on surfaces."
-            dismissible={false}
-            title="Slice boundary"
-            tone="info"
-          />
-        </div>
-      </article>
+      <AdminPageHeader
+        description="Append-only events by actor, target, request, and linked workflow."
+        path={["Operations", "Audit Log"]}
+        title="Audit Log"
+      />
 
       <Stats5
-        className="bg-card/95"
-        description="Audit metrics stay compact and operational. They summarize the current filtered event set instead of replacing the dedicated log."
         items={statItems}
-        title="Filtered audit snapshot"
+        title="Audit Snapshot"
       />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and sort</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Chronology-first controls</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Search by audit id, event type, request id, actor, product, run, or review task. Exact event type and
-              target type filters keep this route useful even before publish and usage flows widen.
-            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Audit Controls</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

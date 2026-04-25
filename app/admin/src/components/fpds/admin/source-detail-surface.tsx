@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import type { SourceRegistryDetailResponse } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -18,33 +19,27 @@ export function SourceDetailSurface({ detail, locale }: SourceDetailSurfaceProps
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Source detail</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              {detail.source.source_id}
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This page is read-only. Generated source metadata is filled automatically after collection from the bank
-              and source catalog configuration.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
+              Back to sources
+            </Link>
+            <a className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" href={detail.source.source_url} rel="noreferrer" target="_blank">
+              Open source URL
+            </a>
+          </>
+        }
+        badges={
+          <>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{detail.source.discovery_role}</span>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{detail.source.status}</span>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
-            Back to sources
-          </Link>
-          <a className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" href={detail.source.source_url} rel="noreferrer" target="_blank">
-            Open source URL
-          </a>
-        </div>
-      </article>
+          </>
+        }
+        description="Read-only generated source metadata."
+        path={["Operations", "Sources", "Source Detail"]}
+        title={detail.source.source_id}
+      />
 
       <article className="grid gap-4 lg:grid-cols-2">
         <ReadonlyField label="Bank" value={detail.source.bank_code} />
@@ -73,8 +68,7 @@ export function SourceDetailSurface({ detail, locale }: SourceDetailSurfaceProps
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Discovery explainability</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Why this source was promoted</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Generated source rows now keep bounded discovery scoring so operators can inspect whether a page was
-              promoted by heuristic scoring, AI parallel scoring, and page-level evidence.
+              Bounded discovery scoring and selection signals.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

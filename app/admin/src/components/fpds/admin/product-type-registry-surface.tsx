@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { ProductTypeCreateDialogContent } from "@/components/fpds/admin/product-type-create-dialog-content";
 import { ProductTypeDetailDialogContent } from "@/components/fpds/admin/product-type-detail-dialog-content";
@@ -34,35 +34,64 @@ export function ProductTypeRegistrySurface({
   activeProductTypeCode,
   activeProductType,
 }: ProductTypeRegistrySurfaceProps) {
-  const router = useRouter();
-  const detailModalOpen = Boolean(activeProductTypeCode && activeProductType);
+  const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
+  const [selectedProductTypeCode, setSelectedProductTypeCode] = useState(activeProductTypeCode);
+  const [selectedProductTypeOverride, setSelectedProductTypeOverride] = useState<ProductTypeItem | null>(activeProductType);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
+  const selectedProductType = useMemo(() => {
+    if (!selectedProductTypeCode) {
+      return null;
+    }
+    return (
+      productTypes.items.find((item) => item.product_type_code === selectedProductTypeCode) ??
+      (selectedProductTypeOverride?.product_type_code === selectedProductTypeCode ? selectedProductTypeOverride : null)
+    );
+  }, [productTypes.items, selectedProductTypeCode, selectedProductTypeOverride]);
+  const detailModalOpen = Boolean(selectedProductTypeCode && selectedProductType);
 
-  function navigateWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
+  useEffect(() => {
+    setAddDialogOpen(addModalOpen);
+  }, [addModalOpen]);
+
+  useEffect(() => {
+    setSelectedProductTypeCode(activeProductTypeCode);
+    setSelectedProductTypeOverride(activeProductType);
+  }, [activeProductTypeCode, activeProductType]);
+
+  function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/product-types", params, locale);
     if (options?.replace) {
-      router.replace(href, { scroll: false });
+      window.history.replaceState(null, "", href);
       return;
     }
-    router.push(href, { scroll: false });
+    window.history.pushState(null, "", href);
   }
 
   function openAddModal() {
     const params = new URLSearchParams(baseSearchParams);
     params.set("modal", "add");
     params.delete("productType");
-    navigateWithParams(params);
+    setAddDialogOpen(true);
+    setSelectedProductTypeCode(null);
+    setSelectedProductTypeOverride(null);
+    syncUrlWithParams(params);
   }
 
-  function openProductTypeModal(productTypeCode: string) {
+  function openProductTypeModal(productTypeCode: string, productType?: ProductTypeItem) {
     const params = new URLSearchParams(baseSearchParams);
     params.set("productType", productTypeCode);
     params.delete("modal");
-    navigateWithParams(params);
+    setAddDialogOpen(false);
+    setSelectedProductTypeCode(productTypeCode);
+    setSelectedProductTypeOverride(productType ?? productTypes.items.find((item) => item.product_type_code === productTypeCode) ?? null);
+    syncUrlWithParams(params);
   }
 
   function closeModal() {
-    navigateWithParams(new URLSearchParams(baseSearchParams), { replace: true });
+    setAddDialogOpen(false);
+    setSelectedProductTypeCode(null);
+    setSelectedProductTypeOverride(null);
+    syncUrlWithParams(new URLSearchParams(baseSearchParams), { replace: true });
   }
 
   function handleAddDialogChange(open: boolean) {
@@ -79,7 +108,7 @@ export function ProductTypeRegistrySurface({
 
   function handleProductTypeCreated(productType: ProductTypeItem | null) {
     if (productType?.product_type_code) {
-      openProductTypeModal(productType.product_type_code);
+      openProductTypeModal(productType.product_type_code, productType);
       return;
     }
     closeModal();
@@ -87,19 +116,9 @@ export function ProductTypeRegistrySurface({
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Product Types</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Manage dynamic product type onboarding rules from one list.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Operators define product types once, then reuse them in bank coverage search, homepage-first discovery,
-              and the generic AI fallback path for dynamic deposit products.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
             <button
               className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               onClick={openAddModal}
@@ -107,14 +126,17 @@ export function ProductTypeRegistrySurface({
             >
               Add product type
             </button>
-          </div>
-        </div>
-      </article>
+          </>
+        }
+        description="Operator-managed product type definitions."
+        path={["Operations", "Product Types"]}
+        title="Product Types"
+      />
 
       <article className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Product types" note="Current list scope" value={String(productTypes.summary.total_items)} />
-        <StatCard label="Active" note="Available for bank coverage" value={String(productTypes.summary.status_counts.active ?? 0)} />
-        <StatCard label="Inactive" note="Hidden from new coverage setup" value={String(productTypes.summary.status_counts.inactive ?? 0)} />
+        <StatCard label="Product types" value={String(productTypes.summary.total_items)} />
+        <StatCard label="Active" value={String(productTypes.summary.status_counts.active ?? 0)} />
+        <StatCard label="Inactive" value={String(productTypes.summary.status_counts.inactive ?? 0)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -148,10 +170,6 @@ export function ProductTypeRegistrySurface({
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Product type list</p>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Review the current registry under the active search filter, then open create or detail work in a modal
-              without leaving this page.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -210,14 +228,8 @@ export function ProductTypeRegistrySurface({
       </article>
 
       <OfferModal4
-        description="Add a product type without leaving the current registry list."
-        footer={
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            New dynamic types feed homepage-first discovery and stay review-first downstream.
-          </p>
-        }
         onOpenChange={handleAddDialogChange}
-        open={addModalOpen}
+        open={addDialogOpen}
         showPanel={false}
         title="Add product type"
       >
@@ -225,25 +237,18 @@ export function ProductTypeRegistrySurface({
       </OfferModal4>
 
       <OfferModal4
-        description={
-          activeProductType
-            ? "Review and update the product type definition while keeping search and list context anchored on /admin/product-types."
-            : undefined
-        }
-        footer={
-          activeProductType ? (
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">
-              Product type definitions stay operator-managed from this modal and feed bank coverage plus discovery.
-            </p>
-          ) : undefined
-        }
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
-        title={activeProductType ? activeProductType.display_name : "Product type detail"}
+        title={selectedProductType ? selectedProductType.display_name : "Product type detail"}
       >
-        {activeProductType ? (
-          <ProductTypeDetailDialogContent csrfToken={csrfToken} locale={locale} productType={activeProductType} />
+        {selectedProductType ? (
+          <ProductTypeDetailDialogContent
+            csrfToken={csrfToken}
+            key={selectedProductType.product_type_code}
+            locale={locale}
+            productType={selectedProductType}
+          />
         ) : null}
       </OfferModal4>
     </section>
@@ -261,12 +266,11 @@ function buildRegistrySearchParams(filters: ProductTypePageFilters) {
   return params;
 }
 
-function StatCard({ label, note, value }: { label: string; note: string; value: string }) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{note}</p>
+    <article className="rounded-lg border border-border/80 bg-background p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
   );
 }

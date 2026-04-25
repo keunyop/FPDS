@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Banner1 } from "@/components/banner1";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { ReviewQueueResponse } from "@/lib/admin-api";
@@ -38,77 +38,47 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
     {
       label: "Visible tasks",
       value: String(queue.summary.total_items),
-      note: "The current filter set drives the table, state counts, and pagination.",
+      note: "Current filters.",
       tone: "info" as const,
     },
     {
       label: "Queued",
       value: String(stateCounts.queued ?? 0),
-      note: "Ready for reviewer intake right now.",
+      note: "Needs review.",
       tone: "warning" as const,
     },
     {
       label: "Deferred",
       value: String(stateCounts.deferred ?? 0),
-      note: "Parked tasks stay visible without mixing into terminal history.",
+      note: "Parked work.",
       tone: "neutral" as const,
     },
     {
       label: "Warnings + Errors",
       value: String((validationCounts.warning ?? 0) + (validationCounts.error ?? 0)),
-      note: "Validation pressure stays visible even before detail and trace actions land.",
+      note: "Needs attention.",
       tone: "success" as const,
     },
   ];
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Review queue</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Active candidate review work now has its own protected queue surface.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This route keeps reviewer intake table-first, searchable, and filterable inside the FPDS admin shell.
-              Review decisions and evidence trace stay reserved for the next slices, but queue triage is now live on top
-              of real `review_task` data.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center rounded-full bg-success-soft px-3 py-1 text-xs font-medium text-success">
-            Live route
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Banner1
-            defaultVisible={true}
-            description="Default load stays focused on active work by showing queued and deferred tasks first. Detail, approve, reject, defer, and trace controls remain intentionally out of this slice."
-            dismissible={false}
-            title="Slice boundary"
-            tone="info"
-          />
-        </div>
-      </article>
+      <AdminPageHeader
+        description="Active review work, filters, and queue drill-in."
+        path={["Review", "Review Queue"]}
+        title="Review Queue"
+      />
 
       <Stats5
-        className="bg-card/95"
-        description="Queue metrics stay compact and operational. They summarize the filtered result set instead of pretending to replace the dedicated detail, run, and publish surfaces."
         items={statItems}
-        title="Filtered queue snapshot"
+        title="Queue Snapshot"
       />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and sort</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Queue-first controls</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Search by task, candidate, run, bank, or product name. State defaults stay active-first unless you
-              explicitly widen the queue.
-            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Queue Controls</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

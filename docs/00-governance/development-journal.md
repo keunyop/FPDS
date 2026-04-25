@@ -62,6 +62,23 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-25 - Admin Route Body Simplification
+
+- WBS: `4.x`, `5.12`, `5.14`
+- Status: `done`
+- Goal: apply the compact overview-dashboard body pattern across protected admin menu surfaces
+- Why now: the Product Owner reported that Application Shell menu bodies still used oversized card regions and too much explanatory copy outside the simplified overview dashboard
+- Outcome: added a shared breadcrumb-led `AdminPageHeader`, added a compact `AdminApiUnavailable` fallback, replaced large route-introduction cards across review, run, change, audit, usage, health, bank, product type, source catalog, source, and detail surfaces, removed production `Slice boundary`/`Live route` explainer banners from those surfaces, and tightened the edited `stats5` metric block into a smaller operational summary
+- Not done: this slice did not redesign every inner detail record into definition lists; cards remain where they group metrics, filters, tables, forms, or trace/detail records
+- Key files: `app/admin/src/components/fpds/admin/admin-page-header.tsx`, `app/admin/src/components/fpds/admin/admin-api-unavailable.tsx`, `app/admin/src/components/stats5.tsx`, `app/admin/src/components/fpds/admin/*-surface.tsx`, protected admin route pages under `app/admin/src/app/admin/`, `app/admin/README.md`, `docs/03-design/shadcnblocks-adoption-log.md`, `docs/03-design/ui-override-register.md`
+- Decisions: used one small FPDS-owned header helper instead of importing another vendor block; kept cards for real data groupings and actions, but removed cards whose only job was route explanation
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: `app/admin/next-env.d.ts` was already modified before this slice and was not touched; broader admin KO/JA mojibake remains outside this layout cleanup
+- Next step: run browser/responsive QA against the compact admin menu bodies and adjust only concrete overflow or scanability issues
+
 ## 2026-04-24 - Vector-Assisted Evidence Retrieval Bootstrap
 
 - WBS: `3.4`, `5.17`
@@ -490,6 +507,23 @@ Read before coding:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Known issues: the dropdown still contains a hidden env/role placeholder block from the earlier shell edit, but it is not visible and does not affect interaction state
 - Next step: if the Product Owner wants, clean the hidden footer-menu residue in a separate low-risk markup pass after the visible behavior is confirmed
+
+## 2026-04-25 - Admin Registry Modal Responsiveness
+
+- WBS: `5.13`, admin UI polish
+- Status: `done`
+- Goal: make bank, source-catalog, and product-type registry modals feel immediate, remove redundant modal branding/copy, and keep the close affordance clear inside rounded dialog corners
+- Why now: the Product Owner reported slow modal open/close behavior, redundant `FPDS Admin` modal labels, unnecessary explanatory modal copy, and a clipped close icon
+- Outcome: modal open/close now uses local component state plus native history URL sync instead of forcing `router.push` or `router.replace` for routine toggles; product-type detail opens from already-loaded list data; bank and source-catalog detail open immediately from list preview data and hydrate richer detail through narrow JSON proxy routes. The shared `offer-modal4` removed redundant `FPDS Admin` pills and moved the close button inward.
+- Not done: no new modal design system abstraction was introduced; this stays scoped to the current Shadcnblocks-derived modal and the three affected registry surfaces
+- Key files: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/app/admin/banks/[bankCode]/detail/route.ts`, `app/admin/src/app/admin/source-catalog/[catalogItemId]/detail/route.ts`
+- Decisions: kept URL sharing for modal state, but stopped using App Router navigation as the default modal state mechanism because it was causing unnecessary route refresh and backend refetch work on open and close
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Known issues: delete actions inside detail modals still intentionally use router navigation because they change the underlying resource and route state
+- Next step: if more modal-heavy admin surfaces are added, extract the native-history modal URL sync into a small shared helper instead of copying it across surfaces
 
 ---
 

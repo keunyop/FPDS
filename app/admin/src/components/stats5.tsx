@@ -34,42 +34,38 @@ const toneClassMap = {
 
 const Stats5 = ({
   title = "Admin shell readiness",
-  description = "The live admin surface now starts from Shadcnblocks-based layout primitives and keeps FPDS workflow meaning on top.",
+  description,
   items,
   className
 }: Stats5Props) => {
   return (
-    <section className={cn("rounded-[1.75rem] border border-border/80 bg-card/90 p-6 shadow-sm", className)}>
-      <div className="flex flex-col gap-3 border-b border-border/80 pb-6 md:flex-row md:items-end md:justify-between">
+    <section className={cn("rounded-lg border border-border/80 bg-background p-4", className)}>
+      <div className="flex flex-col gap-2 border-b border-border/80 pb-4 md:flex-row md:items-end md:justify-between">
         <div className="max-w-3xl">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Overview metrics</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-        </div>
-        <div className="rounded-full border border-border/80 bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-          Compact, route-oriented, evidence aware
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+          {description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p> : null}
         </div>
       </div>
 
-      <div className="grid gap-4 pt-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 pt-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => {
           const Icon = toneIconMap[item.tone];
 
           return (
-            <article className="rounded-2xl border border-border/80 bg-background px-4 py-5" key={item.label}>
+            <article className="rounded-lg border border-border/80 bg-card px-4 py-4" key={item.label}>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
                 <div
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-2xl bg-muted/70",
+                    "flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70",
                     toneClassMap[item.tone]
                   )}
                 >
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{item.value}</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.note}</p>
+              <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
             </article>
           );
         })}

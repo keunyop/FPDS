@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Banner1 } from "@/components/banner1";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
@@ -37,77 +37,47 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
     {
       label: "Visible runs",
       value: String(runs.summary.total_items),
-      note: "The current filter set drives the table, counts, and paging.",
+      note: "Current filters.",
       tone: "info" as const,
     },
     {
       label: "Failed",
       value: String(stateCounts.failed ?? 0),
-      note: "Fatal run-level failures stay separate from completed partial runs.",
+      note: "Failed runs.",
       tone: "warning" as const,
     },
     {
       label: "Partial",
       value: String(runs.summary.partial_items),
-      note: "Completed runs with degraded source or stage outcomes stay explicit.",
+      note: "Degraded runs.",
       tone: "neutral" as const,
     },
     {
       label: "In progress",
       value: String(stateCounts.started ?? 0),
-      note: "Started runs remain visible until they reach a terminal state.",
+      note: "Still running.",
       tone: "success" as const,
     },
   ];
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Run diagnostics</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Ingestion runs now have a dedicated diagnostic surface inside the FPDS admin shell.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This route keeps run status table-first, surfaces partial completion separately from fatal failure, and
-              gives operators a stable path into run-level diagnosis when review trace points to broader execution
-              issues.
-            </p>
-          </div>
-
-          <div className="inline-flex items-center rounded-full bg-success-soft px-3 py-1 text-xs font-medium text-success">
-            Live route
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Banner1
-            defaultVisible={true}
-            description="The current slice focuses on run list, run detail, source processing summary, error summary, related review tasks, and usage summary. Retry controls, audit history, and publish drilldown remain separate follow-on surfaces."
-            dismissible={false}
-            title="Slice boundary"
-            tone="info"
-          />
-        </div>
-      </article>
+      <AdminPageHeader
+        description="Run state, partial completion, and execution diagnostics."
+        path={["Operations", "Runs"]}
+        title="Runs"
+      />
 
       <Stats5
-        className="bg-card/95"
-        description="Run metrics stay compact and operational. They summarize the filtered run set instead of replacing the dedicated detail surface."
         items={statItems}
-        title="Filtered run snapshot"
+        title="Run Snapshot"
       />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and sort</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Triage-first controls</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Search by run id, trigger, or correlation id. Partial completion and retried history stay queryable
-              without taking over the default view.
-            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Run Controls</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import type { RunRetryResponse, RunStatusDetailResponse } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
@@ -47,20 +48,31 @@ export function RunDetailSurface({ csrfToken, detail }: RunDetailSurfaceProps) {
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-4xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Run detail</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              {detail.run.run_id}
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              This surface explains run-level execution outcome, source processing impact, related review workload, and
-              model usage without mixing run diagnosis into review or publish actions.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/admin/runs">Back to runs</Link>
+            </Button>
+            {detail.run.retry_action.available ? (
+              <Button disabled={retryPending} onClick={handleRetry} type="button">
+                {retryPending ? "Retrying..." : "Retry run"}
+              </Button>
+            ) : null}
+            {detail.run.retry_of_run_id ? (
+              <Button asChild variant="outline">
+                <Link href={`/admin/runs/${detail.run.retry_of_run_id}`}>Previous attempt</Link>
+              </Button>
+            ) : null}
+            {detail.run.retried_by_run_id ? (
+              <Button asChild variant="outline">
+                <Link href={`/admin/runs/${detail.run.retried_by_run_id}`}>Next attempt</Link>
+              </Button>
+            ) : null}
+          </>
+        }
+        badges={
+          <>
             <span className={cn("rounded-full px-3 py-1 text-xs font-medium", runStateBadgeClasses(detail.run.run_status))}>
               {toTitleCase(detail.run.run_status)}
             </span>
@@ -70,43 +82,28 @@ export function RunDetailSurface({ csrfToken, detail }: RunDetailSurfaceProps) {
             {detail.run.partial_completion_flag ? (
               <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-medium text-warning">Partial completion</span>
             ) : null}
-          </div>
-        </div>
+          </>
+        }
+        description="Execution outcome, source impact, related reviews, and usage."
+        path={["Operations", "Runs", "Run Detail"]}
+        title={detail.run.run_id}
+      />
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-4">
+      <article className="rounded-lg border border-border/80 bg-background p-4">
+        <div className="grid gap-3 lg:grid-cols-4">
           <SummaryStat label="Source items" value={String(detail.run.source_item_count)} />
           <SummaryStat label="Candidates" value={String(detail.run.candidate_count)} />
           <SummaryStat label="Review queued" value={String(detail.run.review_queued_count)} />
           <SummaryStat label="Correlation" value={detail.run.correlation_id ?? "n/a"} />
         </div>
 
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <SummaryStat label="Started" value={formatTimestamp(detail.run.started_at)} />
           <SummaryStat label="Completed" value={formatTimestamp(detail.run.completed_at)} />
           <SummaryStat label="Trigger" value={toTitleCase(detail.run.trigger_type)} />
           <SummaryStat label="Actor" value={detail.run.triggered_by ?? "n/a"} />
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <Link href="/admin/runs">Back to runs</Link>
-          </Button>
-          {detail.run.retry_action.available ? (
-            <Button disabled={retryPending} onClick={handleRetry} type="button">
-              {retryPending ? "Retrying..." : "Retry run"}
-            </Button>
-          ) : null}
-          {detail.run.retry_of_run_id ? (
-            <Button asChild variant="outline">
-              <Link href={`/admin/runs/${detail.run.retry_of_run_id}`}>Previous attempt</Link>
-            </Button>
-          ) : null}
-          {detail.run.retried_by_run_id ? (
-            <Button asChild variant="outline">
-              <Link href={`/admin/runs/${detail.run.retried_by_run_id}`}>Next attempt</Link>
-            </Button>
-          ) : null}
-        </div>
         {retryMessage ? (
           <p className="mt-4 rounded-2xl border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
             {retryMessage}

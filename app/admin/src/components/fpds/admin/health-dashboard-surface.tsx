@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Banner1 } from "@/components/banner1";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import type {
   DashboardHealthDomain,
@@ -63,78 +63,57 @@ export function HealthDashboardSurface({ csrfToken, health }: HealthDashboardSur
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-4xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Dashboard health</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Public aggregate freshness, serving fallback, and operator retry now live in one health surface.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Approve and edit-approve now queue aggregate refresh work automatically. This route shows whether the
-              public site is serving the latest successful snapshot, waiting on queued work, or holding a stale or
-              failed refresh boundary.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={cn("rounded-full px-3 py-1 text-xs font-medium", healthStatusClasses(domain.status))}>
-              {toTitleCase(domain.status)}
-            </span>
+      <AdminPageHeader
+        actions={
+          <>
             <Button asChild variant="outline">
               <Link href="/admin/runs">Open runs</Link>
             </Button>
             <Button disabled={retryPending || !domain.retry_action.available} onClick={handleRetry} type="button">
               {retryPending ? "Retrying..." : "Retry refresh"}
             </Button>
-          </div>
-        </div>
+          </>
+        }
+        badges={
+          <span className={cn("rounded-full px-3 py-1 text-xs font-medium", healthStatusClasses(domain.status))}>
+            {toTitleCase(domain.status)}
+          </span>
+        }
+        description="Public aggregate freshness, fallback status, and retry state."
+        path={["Observability", "Dashboard Health"]}
+        title="Dashboard Health"
+      />
 
-        <div className="mt-6">
-          <Banner1
-            defaultVisible={true}
-            description="Public responses keep serving the latest successful aggregate snapshot. Failures and pending refresh requests should be visible here instead of silently flattening the public grid to zero products."
-            dismissible={false}
-            title="Serving contract"
-            tone={bannerTone(domain.status)}
-          />
-        </div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <SummaryStat label="Serving snapshot" value={domain.serving_snapshot_id ?? "none"} />
+        <SummaryStat label="Canonical active" value={formatCount(domain.active_product_count)} />
+        <SummaryStat label="Projected active" value={formatCount(domain.projected_active_product_count)} />
+        <SummaryStat label="Pending requests" value={formatCount(domain.queued_request_count + domain.in_progress_request_count)} />
+        <SummaryStat label="Latest success" value={formatTimestamp(domain.latest_success_at)} />
+        <SummaryStat label="Latest failure" value={formatTimestamp(domain.latest_failure_at)} />
+        <SummaryStat label="Latest canonical change" value={formatTimestamp(domain.latest_canonical_change_at)} />
+        <SummaryStat label="Missing data ratio" value={formatPercent(domain.missing_data_ratio)} />
+      </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Serving snapshot" value={domain.serving_snapshot_id ?? "none"} />
-          <SummaryStat label="Canonical active" value={formatCount(domain.active_product_count)} />
-          <SummaryStat label="Projected active" value={formatCount(domain.projected_active_product_count)} />
-          <SummaryStat label="Pending requests" value={formatCount(domain.queued_request_count + domain.in_progress_request_count)} />
-        </div>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryStat label="Latest success" value={formatTimestamp(domain.latest_success_at)} />
-          <SummaryStat label="Latest failure" value={formatTimestamp(domain.latest_failure_at)} />
-          <SummaryStat label="Latest canonical change" value={formatTimestamp(domain.latest_canonical_change_at)} />
-          <SummaryStat label="Missing data ratio" value={formatPercent(domain.missing_data_ratio)} />
-        </div>
-
-        {retryMessage ? (
-          <p className="mt-4 rounded-2xl border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
-            {retryMessage}
-          </p>
-        ) : null}
-        {retryError ? (
-          <p className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
-            {retryError}
-          </p>
-        ) : null}
-        {!domain.retry_action.available && domain.retry_action.reason ? (
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">{domain.retry_action.reason}</p>
-        ) : null}
-      </article>
+      {retryMessage ? (
+        <p className="rounded-lg border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
+          {retryMessage}
+        </p>
+      ) : null}
+      {retryError ? (
+        <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+          {retryError}
+        </p>
+      ) : null}
+      {!domain.retry_action.available && domain.retry_action.reason ? (
+        <p className="text-sm leading-6 text-muted-foreground">{domain.retry_action.reason}</p>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
         <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <SectionHeading
             eyebrow="Serving state"
             title="What the public site is serving"
-            description="The public product grid and insights keep reading the latest successful aggregate snapshot even when a newer refresh is still pending or has failed."
           />
           <div className="mt-6 grid gap-4">
             <SignalRow label="Serving note" value={domain.serving_note} />
@@ -152,7 +131,6 @@ export function HealthDashboardSurface({ csrfToken, health }: HealthDashboardSur
           <SectionHeading
             eyebrow="Queue"
             title="Refresh queue visibility"
-            description="Pending and in-progress refresh work stays visible here so approvals can be separated from public serving without becoming invisible."
           />
           <div className="mt-6 grid gap-4">
             <SignalRow label="Queued requests" value={formatCount(domain.queued_request_count)} />
@@ -172,7 +150,6 @@ export function HealthDashboardSurface({ csrfToken, health }: HealthDashboardSur
           <SectionHeading
             eyebrow="Latest attempt"
             title="Newest aggregate execution"
-            description="The latest refresh attempt may be newer than the serving snapshot. This is where failed or incomplete attempts are surfaced."
           />
           <div className="mt-6 grid gap-4">
             <SignalRow label="Attempt status" value={toTitleCase(domain.latest_attempt_status ?? "unknown")} />
@@ -188,9 +165,8 @@ export function HealthDashboardSurface({ csrfToken, health }: HealthDashboardSur
 
         <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <SectionHeading
-            eyebrow="Methodology"
-            title="How to interpret health"
-            description="Status distinguishes between pending work, stale serving, failed execution, and healthy serving so operators can decide whether to wait, retry, or inspect upstream changes."
+            eyebrow="Status"
+            title="Health interpretation"
           />
           <div className="mt-6 grid gap-3 text-sm leading-6 text-muted-foreground">
             <p>
@@ -218,7 +194,7 @@ export function HealthDashboardSurface({ csrfToken, health }: HealthDashboardSur
 
 function SummaryStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-background p-4">
+    <div className="rounded-lg border border-border/80 bg-background p-4">
       <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
       <p className="mt-2 text-sm font-semibold text-foreground">{value}</p>
     </div>
@@ -232,13 +208,13 @@ function SectionHeading({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
 }) {
   return (
     <div className="max-w-3xl">
       <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      {description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p> : null}
     </div>
   );
 }
@@ -282,16 +258,6 @@ function healthStatusClasses(status: DashboardHealthDomain["status"]) {
     return "bg-amber-100 text-amber-700";
   }
   return "bg-muted text-muted-foreground";
-}
-
-function bannerTone(status: DashboardHealthDomain["status"]): "info" | "warning" | "success" {
-  if (status === "healthy") {
-    return "success";
-  }
-  if (status === "empty") {
-    return "info";
-  }
-  return "warning";
 }
 
 function formatTimestamp(value: string | null) {

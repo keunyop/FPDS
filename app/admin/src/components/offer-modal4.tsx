@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ShieldCheck, Sparkles, X } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -55,11 +55,11 @@ function OfferModal4({
             : "sm:max-w-[min(74rem,calc(100vw-2.5rem))] lg:max-w-[min(78rem,calc(100vw-4rem))]",
         )}
       >
-        <div className="absolute -end-px -top-px">
+        <div className="absolute right-4 top-4 z-20">
           <DialogClose asChild>
             <Button
               size="icon-sm"
-              className="origin-top-right rounded-bl-2xl rounded-tr-[1.7rem] border border-border/70 bg-background/95 text-foreground shadow-sm transition-all duration-300 hover:bg-muted lg:scale-85 lg:opacity-0 lg:group-hover:scale-100 lg:group-hover:opacity-100 [@media(hover:none)]:scale-100 [@media(hover:none)]:opacity-100"
+              className="rounded-full border border-border/70 bg-background/95 text-foreground shadow-sm transition-all duration-200 hover:bg-muted"
             >
               <X />
             </Button>
@@ -74,11 +74,7 @@ function OfferModal4({
             <div className="absolute bottom-8 right-8 h-32 w-32 rounded-full bg-sky-300/20 blur-2xl" />
           </div>
 
-          <div className="relative flex items-center justify-between">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-              <Building2 className="size-3.5" />
-              FPDS Admin
-            </div>
+          <div className="relative flex items-center justify-end">
             {panelBadge ? (
               <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-medium text-emerald-100">
                 <ShieldCheck className="size-3.5" />
@@ -95,12 +91,16 @@ function OfferModal4({
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-white/70">
                 FPDS Workspace
               </p>
-              <h3 className="text-3xl font-semibold tracking-tight text-white">
-                {panelTitle}
-              </h3>
-              <p className="text-sm leading-7 text-white/72">
-                {panelDescription}
-              </p>
+              {panelTitle ? (
+                <h3 className="text-3xl font-semibold tracking-tight text-white">
+                  {panelTitle}
+                </h3>
+              ) : null}
+              {panelDescription ? (
+                <p className="text-sm leading-7 text-white/72">
+                  {panelDescription}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -131,10 +131,6 @@ function OfferModal4({
             )}
           >
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                <Building2 className="size-3.5" />
-                FPDS Admin
-              </div>
               <DialogTitle className="text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl lg:text-left">
               {title}
               </DialogTitle>

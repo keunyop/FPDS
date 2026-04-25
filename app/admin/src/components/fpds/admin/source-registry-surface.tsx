@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import type { SourceRegistryListResponse } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -23,31 +24,24 @@ type SourceRegistrySurfaceProps = {
 export function SourceRegistrySurface({ filters, registry, locale }: SourceRegistrySurfaceProps) {
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Source registry</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Generated source detail is view-only.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Operators now manage banks and product coverage from dedicated menus. Detailed source rows are generated
-              after collection and are available here for inspection only.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
             <Link className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
-              Manage banks and coverage
+              Manage banks
             </Link>
-          </div>
-        </div>
-      </article>
+          </>
+        }
+        description="Generated source rows for inspection."
+        path={["Operations", "Sources"]}
+        title="Sources"
+      />
 
       <article className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Visible sources" note="Current filter set" value={String(registry.summary.total_items)} />
-        <StatCard label="Candidate-producing" note="Detail scope rows" value={String(registry.summary.candidate_producing_items)} />
-        <StatCard label="Active" note="Rows available to collection" value={String(registry.summary.status_counts.active ?? 0)} />
-        <StatCard label="Detail role" note="Most important source kind" value={String(registry.summary.role_counts.detail ?? 0)} />
+        <StatCard label="Visible sources" value={String(registry.summary.total_items)} />
+        <StatCard label="Candidate-producing" value={String(registry.summary.candidate_producing_items)} />
+        <StatCard label="Active" value={String(registry.summary.status_counts.active ?? 0)} />
+        <StatCard label="Detail role" value={String(registry.summary.role_counts.detail ?? 0)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -75,10 +69,6 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="border-b border-border/80 px-6 py-5">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Generated source detail</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            If this table is empty, no collection has materialized source rows yet for the current banks and product
-            coverage.
-          </p>
         </div>
 
         <div className="overflow-x-auto px-6 py-5">
@@ -159,12 +149,11 @@ function FilterSelect({
   );
 }
 
-function StatCard({ label, value, note }: { label: string; value: string; note: string }) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-      <p className="mt-2 text-sm text-muted-foreground">{note}</p>
+    <article className="rounded-lg border border-border/80 bg-background p-4">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
   );
 }

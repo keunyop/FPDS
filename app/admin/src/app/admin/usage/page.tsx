@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { LlmUsageSurface, type LlmUsagePageFilters } from "@/components/fpds/admin/llm-usage-surface";
 import { fetchAdminSession, fetchLlmUsage, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
@@ -37,22 +38,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   }
 
   if (!session || !usage || apiUnavailable) {
-    return (
-      <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-4 py-8 md:px-6">
-        <section className="w-full rounded-[1.75rem] border border-destructive/20 bg-card/95 p-6 shadow-sm md:p-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-destructive">Admin API unavailable</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-              LLM usage visibility could not load because the admin API is not reachable.
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              Start the FastAPI service and refresh this page. The usage route depends on the protected session
-              contract and the `/api/admin/llm-usage` endpoint.
-            </p>
-          </div>
-        </section>
-      </main>
-    );
+    return <AdminApiUnavailable title="LLM usage visibility could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

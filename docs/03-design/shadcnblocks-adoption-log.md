@@ -186,6 +186,36 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: no new vendor block was imported and no new metric was added; the dashboard now relies on the existing live triage signals
 
+## 2026-04-25 - Admin Route Body Simplification
+
+- Surface or Area: `app/admin` protected admin menu bodies
+- Vendor Asset: existing `@shadcnblocks/application-shell5`, `stats5`, and route-owned FPDS admin surfaces
+- Source: previously installed authenticated `@shadcnblocks` registry assets reused in the admin runtime
+- Install Method: no new vendor install; route composition cleanup plus shared FPDS admin header/error helpers
+- Files Added or Changed: `app/admin/src/components/fpds/admin/admin-page-header.tsx`, `app/admin/src/components/fpds/admin/admin-api-unavailable.tsx`, protected admin route pages under `app/admin/src/app/admin/*`, FPDS admin surface components under `app/admin/src/components/fpds/admin/*`, `app/admin/src/components/stats5.tsx`
+- FPDS Wrappers or Overrides: added a shared breadcrumb-led page header and compact API-unavailable state so live menu bodies match the overview dashboard structure without repeating large introduction cards
+- Direct Vendor Edits: yes; `stats5` was tightened so metric groups render as compact operational summaries instead of a large explanatory card
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: the change intentionally removes route-introduction and slice-boundary explainer copy from production admin surfaces while keeping cards for actual metrics, filters, tables, grouped detail records, and actionable forms
+
+## 2026-04-25 - Admin Modal Responsiveness and Copy Cleanup
+
+- Surface or Area: `app/admin` bank, source-catalog, and product-type registry modals
+- Vendor Asset: existing Shadcnblocks-derived `offer-modal4`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct modal block edit plus route-owned registry-surface interaction cleanup
+- Files Added or Changed: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/app/admin/banks/[bankCode]/detail/route.ts`, `app/admin/src/app/admin/source-catalog/[catalogItemId]/detail/route.ts`
+- FPDS Wrappers or Overrides: registry surfaces now keep open/close modal state locally and update URL state with native history so routine modal toggles do not force a full App Router refresh
+- Direct Vendor Edits: yes; `offer-modal4` no longer renders the redundant `FPDS Admin` pills and the close button is inset from the rounded corner to avoid clipping
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: bank and source-catalog detail modals open immediately from list data, then hydrate richer detail through narrow JSON proxy routes
+
 ---
 
 ## 5. Change History

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import type { BankItem, SourceCatalogDetailResponse } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -59,33 +60,27 @@ export function SourceCatalogDetailSurface({ bankOptions, detail, locale, csrfTo
 
   return (
     <section className="grid gap-6">
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Source catalog detail</p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              {detail.catalog_item.bank_name} {detail.catalog_item.product_type}
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground md:text-base">
-              Operators only control bank selection and product type here. Detailed source rows remain read-only and
-              are refreshed by collection.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <AdminPageHeader
+        actions={
+          <>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
+              Back to source catalog
+            </Link>
+            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(`bank_code=${detail.catalog_item.bank_code}&product_type=${detail.catalog_item.product_type}`), locale)}>
+              View generated sources
+            </Link>
+          </>
+        }
+        badges={
+          <>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{detail.catalog_item.catalog_item_id}</span>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{detail.catalog_item.status}</span>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
-            Back to source catalog
-          </Link>
-          <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(`bank_code=${detail.catalog_item.bank_code}&product_type=${detail.catalog_item.product_type}`), locale)}>
-            View generated sources
-          </Link>
-        </div>
-      </article>
+          </>
+        }
+        description="Coverage detail and recent collection history."
+        path={["Operations", "Source Catalog", "Coverage Detail"]}
+        title={`${detail.catalog_item.bank_name} ${detail.catalog_item.product_type}`}
+      />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         {message ? <p className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
