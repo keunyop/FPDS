@@ -4,7 +4,7 @@ Use this area for ingestion pipeline stages after discovery.
 
 Current scope:
 - `fpds_parse_chunk/` implements `WBS 3.3` parsed text generation, chunk creation, parsed artifact storage, and DB persistence
-- `fpds_evidence_retrieval/` implements `WBS 3.4` metadata-only candidate chunk retrieval with field-aware scoring, DB reads, and vector-assisted fallback behavior
+- `fpds_evidence_retrieval/` implements `WBS 3.4` metadata-only candidate chunk retrieval with field-aware scoring, DB reads, and pgvector-assisted candidate ranking when `evidence_chunk_embedding` rows are available
 - `fpds_extraction/` implements `WBS 3.5` sparse extracted draft generation, extracted artifact storage, `model_execution` persistence, and zero-token heuristic usage records
 - `fpds_normalization/` implements `WBS 3.6` canonical candidate mapping, `normalized_candidate` persistence, `field_evidence_link` persistence, and normalized artifact storage
 - `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
@@ -41,6 +41,19 @@ python -m worker.pipeline.fpds_evidence_retrieval `
   --field-name monthly_fee `
   --field-name fee_waiver_condition
 ```
+
+Run vector-assisted evidence retrieval when `db/migrations/0012_evidence_chunk_embeddings.sql` has been applied and parsed chunks have embedding rows:
+
+```powershell
+python -m worker.pipeline.fpds_evidence_retrieval `
+  --env-file .env.dev `
+  --run-id run_20260410_3401 `
+  --source-id TD-SAV-007 `
+  --field-name monthly_fee `
+  --retrieval-mode vector-assisted
+```
+
+If the pgvector table or embedding rows are unavailable, the worker reports a runtime note and falls back to `metadata-only`.
 
 Run extraction against stored parsed documents in dev:
 

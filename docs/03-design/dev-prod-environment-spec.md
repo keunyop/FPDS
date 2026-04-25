@@ -87,6 +87,8 @@ Rules:
 | `FPDS_DATABASE_SCHEMA` | default relational schema name |
 | `FPDS_VECTOR_BACKEND` | retrieval/vector backend label |
 | `FPDS_VECTOR_NAMESPACE` | environment-separated vector namespace |
+| `FPDS_VECTOR_EMBEDDING_MODEL` | evidence chunk embedding model/config label |
+| `FPDS_VECTOR_EMBEDDING_DIMENSIONS` | evidence chunk vector dimension for the active vector schema |
 | `FPDS_OBJECT_STORAGE_DRIVER` | logical object storage driver |
 | `FPDS_OBJECT_STORAGE_ENDPOINT` | object storage endpoint |
 | `FPDS_OBJECT_STORAGE_REGION` | object storage region or logical location |
@@ -105,6 +107,7 @@ Rules:
 
 Rules:
 - `dev` and `prod` must never share DB credentials, storage buckets, or vector namespaces
+- vector embedding model and dimensions must match the applied vector migration for that environment
 - object storage layout must preserve the `{env}/...` separation model
 - object storage access stays `private` and signed access stays internal-only by default
 - exact lifecycle rules, encryption settings, and retention days stay out of this baseline

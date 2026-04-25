@@ -10,7 +10,7 @@ from worker.env import load_env_file, resolve_default_env_file
 
 from .models import EvidenceRetrievalRequest, MetadataFilters
 from .persistence import PsqlEvidenceRetrievalRepository, RetrievalDatabaseConfig
-from .service import EvidenceRetrievalService
+from .service import EvidenceRetrievalService, build_field_query_text
 
 
 def main() -> int:
@@ -104,9 +104,21 @@ def main() -> int:
     )
 
     service = EvidenceRetrievalService()
+    vector_candidates_by_field = None
+    if args.retrieval_mode.strip().lower() == "vector-assisted":
+        vector_candidates_by_field = {
+            field_name: repository.load_vector_chunk_candidates(
+                parsed_document_id=parsed_document_id,
+                field_query_text=build_field_query_text(field_name),
+                metadata_filters=filters,
+                max_matches=args.max_matches_per_field,
+            )
+            for field_name in args.field_name
+        }
     result = service.retrieve(
         request=request,
         candidates=repository.load_chunk_candidates(parsed_document_id=parsed_document_id),
+        vector_candidates_by_field=vector_candidates_by_field,
     )
     output = result.to_dict()
     output["runtime"] = {
@@ -114,6 +126,7 @@ def main() -> int:
         "loaded_env_key_count": len(loaded_env_keys),
         "database_schema": repository.active_schema,
         "vector_backend": os.getenv("FPDS_VECTOR_BACKEND", "pgvector"),
+        "vector_index_available": repository.vector_index_available(),
     }
     print(json.dumps(output, indent=2, ensure_ascii=True))
     return 0

@@ -1,8 +1,8 @@
-﻿# FPDS Retrieval and Vector Starting Point
+# FPDS Retrieval and Vector Starting Point
 
-Version: 1.0  
-Date: 2026-04-01  
-Status: Approved Baseline for WBS 1.4.4  
+Version: 1.0
+Date: 2026-04-01
+Status: Approved Baseline for WBS 1.4.4
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -173,3 +173,81 @@ FPDS의 Phase 1 retrieval/vector starting point는 아래로 결정한다.
 | Date | Change |
 |---|---|
 | 2026-04-01 | Initial retrieval/vector starting point decision created for WBS 1.4.4 |
+| 2026-04-24 | Added implementation addendum for pgvector-backed evidence chunk embeddings and metadata-first vector-assisted retrieval |
+
+---
+
+## 12. Implementation Addendum - Evidence Chunk Vector Bootstrap
+
+Status: Approved implementation direction for the first vector-assisted retrieval slice.
+
+### 12.1 Scope
+
+The first implementation slice uses `Postgres + pgvector` only as an evidence retrieval aid.
+
+Included:
+- `evidence_chunk` remains the system of record.
+- vector storage is a side table keyed by `evidence_chunk_id`.
+- vector-assisted retrieval applies deterministic metadata filters before vector ranking.
+- vector output still returns `evidence_chunk_id`, excerpt, source references, and anchor metadata.
+- if pgvector, the side table, or embedding rows are missing, retrieval falls back to `metadata-only`.
+
+Excluded:
+- public semantic product search
+- recommendation or personalization
+- canonical product embedding
+- full parsed-document embedding
+- separate vector service
+- public exposure of evidence trace or vector metadata
+
+### 12.2 Physical Storage
+
+The implementation adds `evidence_chunk_embedding` through a follow-on migration.
+
+Required fields:
+- `evidence_chunk_embedding_id`
+- `evidence_chunk_id`
+- `vector_namespace`
+- `embedding_model_id`
+- `embedding_dimensions`
+- `embedding_source`
+- `embedding_source_text_hash`
+- `embedding`
+- `embedding_metadata`
+- timestamps
+
+The first committed vector shape is `vector(64)` for a deterministic lexical bootstrap embedding. This is intentionally small and local so worker tests and dev runs do not require a live embedding provider. A later production semantic embedding model may replace the model id and dimensions through a new migration and config update.
+
+### 12.3 Retrieval Behavior
+
+`retrieval_mode=vector-assisted` behaves as follows:
+
+1. Resolve field-specific query text from the canonical field name and retrieval hints.
+2. Apply metadata filters for parsed document, bank, country, language, source type, source document, and anchor type.
+3. Use pgvector cosine distance to rank candidate chunks within the filtered set.
+4. Blend vector score with existing lexical field scoring.
+5. Return the same match contract used by metadata-only retrieval.
+
+Fallback rule:
+- If vector rows are unavailable, the worker returns `applied_retrieval_mode=metadata-only` with a runtime note.
+- Fallback is not a failure because reviewability and evidence trace remain intact.
+
+### 12.4 Efficiency Target
+
+The expected benefit is not broad database speed alone. The target is higher-quality evidence selection before extraction:
+
+- fewer irrelevant chunks sent to extraction
+- better recall when banks use different wording for the same field
+- lower noisy long-text carryover into normalized candidates
+- fewer manual review cases caused by weak evidence linkage
+- less per-bank keyword-rule expansion pressure as Big 5 coverage grows
+
+### 12.5 Follow-Up Decision Points
+
+The following remain explicit future decisions:
+
+- production embedding provider and model id
+- production embedding dimension and replacement migration
+- embedding refresh policy when parsed chunks change
+- quality thresholds for vector score vs lexical score
+- whether admin trace search needs a separate operator-facing semantic lookup

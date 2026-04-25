@@ -40,6 +40,7 @@ class EvidenceChunkCandidate:
     bank_code: str
     country_code: str
     source_type: str
+    vector_score: float | None = None
 
 
 @dataclass(frozen=True)

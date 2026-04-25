@@ -589,6 +589,17 @@ source registry는 candidate-producing scope를 제어할 수 있어야 한다. 
 
 ---
 
+### FR-DATA-012 Vector-Assisted Evidence Retrieval
+Phase 1 retrieval must support a vector-assisted path for `evidence_chunk` only. The vector path must improve field-level evidence recall while preserving the same traceable `evidence_chunk_id`, excerpt, source, and anchor output used by metadata-only retrieval.
+
+Minimum requirements:
+- initial vector backend is Postgres `pgvector`
+- vector scope is limited to `evidence_chunk` embeddings and retrieval metadata
+- metadata filters must run before vector ranking
+- missing pgvector infrastructure or missing embedding rows must fall back to metadata-only retrieval
+- public APIs must not expose vector metadata or raw evidence
+- production semantic embedding provider/model selection remains a separate follow-up decision
+
 ## 8.4 AI / Agent Workflow Requirements
 
 ### FR-AI-001 Orchestrated Workflow

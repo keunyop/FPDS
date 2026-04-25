@@ -792,6 +792,12 @@ match baseline:
 - `source_snapshot_id`
 - `model_execution_id`
 
+Vector-assisted rules:
+- `vector-assisted` must apply metadata filters before vector ranking.
+- `score` may blend lexical and vector signals, but the response must remain traceable to an `evidence_chunk_id`.
+- vector-specific detail may appear in internal `match_metadata`, but public APIs must not expose vector metadata.
+- if pgvector infrastructure or embedding rows are unavailable, the worker must return `applied_retrieval_mode=metadata-only` with a runtime note instead of failing extraction.
+
 ### 6.5 Schema Lookup and Normalization Interface
 
 schema lookup request baseline:

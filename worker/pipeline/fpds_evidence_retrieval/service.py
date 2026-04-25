@@ -54,12 +54,20 @@ class EvidenceRetrievalService:
         *,
         request: EvidenceRetrievalRequest,
         candidates: list[EvidenceChunkCandidate],
+        vector_candidates_by_field: dict[str, list[EvidenceChunkCandidate]] | None = None,
     ) -> EvidenceRetrievalResult:
-        applied_mode, runtime_notes = _resolve_retrieval_mode(request.retrieval_mode)
+        applied_mode, runtime_notes = _resolve_retrieval_mode(
+            request.retrieval_mode,
+            vector_candidates_by_field=vector_candidates_by_field,
+        )
         filtered_candidates = [candidate for candidate in candidates if _matches_metadata_filters(candidate, request)]
 
         matches: list[EvidenceMatch] = []
         for field_name in request.field_names:
+            field_candidates = filtered_candidates
+            if applied_mode == "vector-assisted":
+                vector_candidates = vector_candidates_by_field or {}
+                field_candidates = vector_candidates.get(field_name, [])
             ranked = sorted(
                 (
                     _build_match(
@@ -67,7 +75,7 @@ class EvidenceRetrievalService:
                         candidate=candidate,
                         retrieval_mode=applied_mode,
                     )
-                    for candidate in filtered_candidates
+                    for candidate in field_candidates
                 ),
                 key=lambda item: (-item.score, item.chunk_index, item.evidence_chunk_id),
             )
@@ -104,7 +112,20 @@ def _build_match(
     anchor_hits = [keyword for keyword in keywords if keyword in anchor_text]
     anchor_score = min(0.1, len(anchor_hits) * 0.05)
     lexical_signal_bonus = _field_signal_bonus(field_name=field_name, excerpt_text=excerpt_text)
-    score = round(min(0.99, overlap_score + phrase_score + anchor_score + lexical_signal_bonus), 4)
+    lexical_score = min(0.99, overlap_score + phrase_score + anchor_score + lexical_signal_bonus)
+    vector_score = candidate.vector_score
+    if retrieval_mode == "vector-assisted" and vector_score is not None:
+        score = round(min(0.99, (lexical_score * 0.55) + (max(0.0, min(0.99, vector_score)) * 0.45)), 4)
+    else:
+        score = round(lexical_score, 4)
+
+    match_metadata: dict[str, object] = {
+        "matched_keywords": sorted(set([*phrase_hits, *anchor_hits, *overlap_tokens])),
+        "source_type": candidate.source_type,
+        "source_language": candidate.source_language,
+    }
+    if vector_score is not None:
+        match_metadata["vector_score"] = vector_score
 
     return EvidenceMatch(
         evidence_chunk_id=candidate.evidence_chunk_id,
@@ -120,11 +141,7 @@ def _build_match(
         anchor_value=candidate.anchor_value,
         page_no=candidate.page_no,
         chunk_index=candidate.chunk_index,
-        match_metadata={
-            "matched_keywords": sorted(set([*phrase_hits, *anchor_hits, *overlap_tokens])),
-            "source_type": candidate.source_type,
-            "source_language": candidate.source_language,
-        },
+        match_metadata=match_metadata,
     )
 
 
@@ -156,16 +173,25 @@ def _matches_metadata_filters(candidate: EvidenceChunkCandidate, request: Eviden
     return True
 
 
-def _resolve_retrieval_mode(requested_mode: str) -> tuple[str, list[str]]:
+def _resolve_retrieval_mode(
+    requested_mode: str,
+    *,
+    vector_candidates_by_field: dict[str, list[EvidenceChunkCandidate]] | None = None,
+) -> tuple[str, list[str]]:
     normalized = requested_mode.strip().lower() or "metadata-only"
     if normalized == "metadata-only":
         return "metadata-only", []
 
     if normalized == "vector-assisted":
         backend = os.getenv("FPDS_VECTOR_BACKEND", "pgvector")
+        if backend == "pgvector" and vector_candidates_by_field and any(vector_candidates_by_field.values()):
+            return (
+                "vector-assisted",
+                ["Vector-assisted retrieval used pgvector-ranked candidate chunks after metadata filtering."],
+            )
         return (
             "metadata-only",
-            [f"Vector-assisted retrieval requested but not implemented in the current worker; falling back to metadata-only while `FPDS_VECTOR_BACKEND={backend}` remains a future extension point."],
+            [f"Vector-assisted retrieval requested but no pgvector-ranked candidates were available; falling back to metadata-only while `FPDS_VECTOR_BACKEND={backend}`."],
         )
 
     return "metadata-only", [f"Unsupported retrieval_mode `{requested_mode}` requested; falling back to metadata-only."]
@@ -211,3 +237,7 @@ def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
 
 def _tokenize(value: str) -> list[str]:
     return _TOKEN_RE.findall(value.lower())
+
+
+def build_field_query_text(field_name: str) -> str:
+    return " ".join(_build_keywords(field_name))

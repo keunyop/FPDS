@@ -31,7 +31,7 @@ Goals:
 2. The migration format is plain SQL, stored in-repo, so work is not blocked on a framework choice.
 3. Primary keys remain application-generated `text` ids for now.
 4. Core query fields stay relational, while rapidly changing canonical and candidate payload details stay in `jsonb`.
-5. `pgvector` is not part of the first migration because `dev` is allowed to run in metadata-only retrieval mode.
+5. `pgvector` is not part of the first migration because `dev` is allowed to run in metadata-only retrieval mode; it is introduced by a later additive migration for vector-assisted evidence retrieval.
 6. Auth-vendor-specific tables, session tables, and dashboard aggregate tables are deferred to follow-on WBS items.
 
 ---
@@ -84,7 +84,7 @@ The first migration seeds:
 ## 4. Deferred from This Baseline
 
 The following are intentionally not in `0001`:
-- `pgvector` extension and embedding side table
+- `pgvector` extension and embedding side table in `0001`; these are now owned by the later `0012_evidence_chunk_embeddings.sql` migration
 - auth vendor tables and session persistence schema
 - translation resources
 - dashboard metric and ranking snapshot tables
@@ -92,7 +92,7 @@ The following are intentionally not in `0001`:
 - framework-specific migration runner code
 
 Reasons:
-- `pgvector` is allowed to lag in early `dev`
+- `pgvector` is allowed to lag in early `dev`, and the worker must fall back to metadata-only retrieval when `0012` has not been applied or embedding rows are missing
 - auth implementation is owned by `WBS 2.5`
 - dashboard persistence is not needed for the prototype-ready minimum
 - BX-PF exact payload detail belongs to later publish work
@@ -117,6 +117,7 @@ Current strategy:
 - `db/migrations/0001_initial_baseline.sql` creates the core schema and seed data
 - later migrations should stay additive whenever possible
 - extension-specific or vendor-specific steps should land in later numbered files
+- `db/migrations/0012_evidence_chunk_embeddings.sql` adds the first pgvector side table for `evidence_chunk` embeddings and leaves existing metadata-only retrieval compatible
 
 Current limitation:
 - the workspace does not currently include `psql`, so the migration was prepared but not executed locally

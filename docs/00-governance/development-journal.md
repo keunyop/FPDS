@@ -62,6 +62,27 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-24 - Vector-Assisted Evidence Retrieval Bootstrap
+
+- WBS: `3.4`, `5.17`
+- Status: `done`
+- Goal: document and implement the recommended narrow vector DB adoption path for evidence retrieval without widening into public semantic search or recommendations
+- Why now: the Product Owner asked whether vector DB would help and then approved the recommended pgvector-first evidence retrieval implementation
+- Outcome: added a pgvector `evidence_chunk_embedding` side table migration, deterministic local 64-dimensional evidence chunk embeddings for dev/test, parse/chunk-side embedding row preparation, vector-assisted retrieval loading with metadata filters pushed into SQL, blended vector/lexical scoring, and metadata-only fallback when vector infrastructure or rows are unavailable
+- Not done: no external semantic embedding provider was wired in; production embedding model, dimensions, refresh policy, and score thresholds remain explicit follow-up decisions
+- Key files: `db/migrations/0012_evidence_chunk_embeddings.sql`, `worker/pipeline/fpds_vector_embedding.py`, `worker/pipeline/fpds_parse_chunk/persistence.py`, `worker/pipeline/fpds_evidence_retrieval/persistence.py`, `worker/pipeline/fpds_evidence_retrieval/service.py`, `worker/pipeline/tests/test_evidence_retrieval.py`, `worker/pipeline/tests/regression/test_vector_assisted_retrieval.py`, `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`, `docs/03-design/retrieval-vector-starting-point.md`
+- Decisions: kept vector scope limited to `evidence_chunk`; used a side table rather than changing the canonical evidence row; kept metadata filtering before vector ranking; used a deterministic bootstrap embedding so dev/test do not require network calls or live embedding credentials
+- Verification:
+  - `python -m compileall worker/pipeline/fpds_evidence_retrieval worker/pipeline/fpds_parse_chunk worker/pipeline/fpds_vector_embedding.py`
+  - `python -m unittest worker.pipeline.tests.test_evidence_retrieval worker.pipeline.tests.regression.test_vector_assisted_retrieval`
+  - `python -m unittest discover -s worker/pipeline/tests -p "test_*.py"`
+  - `python -m unittest discover -s worker -t .`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`
+- Known issues: `0012` requires a Postgres target with the `vector` extension available; existing parsed chunks need a parse/chunk rerun or equivalent backfill to create embedding rows
+- Next step: apply `0012` in dev, rerun parse/chunk for representative Big 5 sources to populate `evidence_chunk_embedding`, then compare vector-assisted retrieval against metadata-only on evidence recall and review noise
+
 ## 2026-04-24 - Admin Dashboard Follow-up Cleanup
 
 - WBS: `4.x`, `5.12`, `5.14`

@@ -7,6 +7,13 @@ from dataclasses import dataclass
 from typing import Callable, Sequence
 
 from worker.psql_cli import run_psql_command
+from worker.pipeline.fpds_vector_embedding import (
+    VectorEmbeddingConfig,
+    build_embedding_source_hash,
+    build_evidence_chunk_embedding_id,
+    build_retrieval_embedding,
+    format_pgvector_literal,
+)
 
 from .models import ExistingParsedDocumentRecord, ParseChunkResult, ParseSourceSnapshot
 
@@ -252,6 +259,11 @@ FROM (
             for item in parse_result.source_results
             for chunk in item.evidence_chunk_records
         ]
+        embedding_config = VectorEmbeddingConfig.from_env()
+        evidence_chunk_embeddings = [
+            _build_embedding_record(chunk=chunk, config=embedding_config)
+            for chunk in evidence_chunks
+        ]
         run_source_items = [item.run_source_item_record for item in parse_result.source_results]
         source_failure_count = sum(1 for item in parse_result.source_results if item.parse_action == "failed")
         source_success_count = len(parse_result.source_results) - source_failure_count
@@ -270,6 +282,7 @@ FROM (
         }
         parsed_documents_json_literal = _json_sql_literal(parsed_documents)
         evidence_chunks_json_literal = _json_sql_literal(evidence_chunks)
+        evidence_chunk_embeddings_json_literal = _json_sql_literal(evidence_chunk_embeddings)
         run_source_items_json_literal = _json_sql_literal(run_source_items)
         run_metadata_json_literal = _json_sql_literal(run_metadata)
 
@@ -355,6 +368,58 @@ SELECT
     retrieval_metadata
 FROM evidence_chunk_payload
 ON CONFLICT (evidence_chunk_id) DO NOTHING;
+
+DO $fpds_vector$
+BEGIN
+    IF to_regclass('evidence_chunk_embedding') IS NOT NULL THEN
+        EXECUTE $fpds_sql$
+            WITH embedding_payload AS (
+                SELECT *
+                FROM jsonb_to_recordset({evidence_chunk_embeddings_json_literal}::jsonb) AS payload(
+                    evidence_chunk_embedding_id text,
+                    evidence_chunk_id text,
+                    vector_namespace text,
+                    embedding_model_id text,
+                    embedding_dimensions integer,
+                    embedding_source text,
+                    embedding_source_text_hash text,
+                    embedding text,
+                    embedding_metadata jsonb
+                )
+            )
+            INSERT INTO evidence_chunk_embedding (
+                evidence_chunk_embedding_id,
+                evidence_chunk_id,
+                vector_namespace,
+                embedding_model_id,
+                embedding_dimensions,
+                embedding_source,
+                embedding_source_text_hash,
+                embedding,
+                embedding_metadata
+            )
+            SELECT
+                evidence_chunk_embedding_id,
+                evidence_chunk_id,
+                vector_namespace,
+                embedding_model_id,
+                embedding_dimensions,
+                embedding_source,
+                embedding_source_text_hash,
+                embedding::vector(64),
+                embedding_metadata
+            FROM embedding_payload
+            ON CONFLICT (evidence_chunk_id, vector_namespace, embedding_model_id) DO UPDATE SET
+                embedding_dimensions = EXCLUDED.embedding_dimensions,
+                embedding_source = EXCLUDED.embedding_source,
+                embedding_source_text_hash = EXCLUDED.embedding_source_text_hash,
+                embedding = EXCLUDED.embedding,
+                embedding_metadata = EXCLUDED.embedding_metadata,
+                updated_at = now();
+        $fpds_sql$;
+    END IF;
+END
+$fpds_vector$;
 
 WITH run_source_item_payload AS (
     SELECT *
@@ -503,3 +568,28 @@ def _json_sql_literal(value: object) -> str:
     while tag in payload:
         tag = f"{tag}_x$"
     return f"{tag}{payload}{tag}"
+
+
+def _build_embedding_record(*, chunk: dict[str, object], config: VectorEmbeddingConfig) -> dict[str, object]:
+    evidence_excerpt = str(chunk.get("evidence_excerpt") or "")
+    evidence_chunk_id = str(chunk["evidence_chunk_id"])
+    vector = build_retrieval_embedding(evidence_excerpt, dimensions=config.dimensions)
+    return {
+        "evidence_chunk_embedding_id": build_evidence_chunk_embedding_id(
+            evidence_chunk_id=evidence_chunk_id,
+            namespace=config.namespace,
+            model_id=config.model_id,
+        ),
+        "evidence_chunk_id": evidence_chunk_id,
+        "vector_namespace": config.namespace,
+        "embedding_model_id": config.model_id,
+        "embedding_dimensions": config.dimensions,
+        "embedding_source": config.source,
+        "embedding_source_text_hash": build_embedding_source_hash(evidence_excerpt),
+        "embedding": format_pgvector_literal(vector),
+        "embedding_metadata": {
+            "source": config.source,
+            "chunk_index": chunk.get("chunk_index"),
+            "source_language": chunk.get("source_language"),
+        },
+    }

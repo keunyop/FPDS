@@ -7,8 +7,13 @@ from dataclasses import dataclass
 from typing import Callable, Sequence
 
 from worker.psql_cli import run_psql_command
+from worker.pipeline.fpds_vector_embedding import (
+    VectorEmbeddingConfig,
+    build_retrieval_embedding,
+    format_pgvector_literal,
+)
 
-from .models import EvidenceChunkCandidate, ParsedDocumentLookup
+from .models import EvidenceChunkCandidate, MetadataFilters, ParsedDocumentLookup
 
 _SCHEMA_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -117,6 +122,117 @@ FROM (
         output = self._execute(sql, variables={"parsed_document_id": parsed_document_id})
         payload = json.loads(output or "[]")
         return [EvidenceChunkCandidate(**item) for item in payload]
+
+    def load_vector_chunk_candidates(
+        self,
+        *,
+        parsed_document_id: str,
+        field_query_text: str,
+        metadata_filters: MetadataFilters,
+        max_matches: int,
+        embedding_config: VectorEmbeddingConfig | None = None,
+    ) -> list[EvidenceChunkCandidate]:
+        if not self.vector_index_available():
+            return []
+
+        config = embedding_config or VectorEmbeddingConfig.from_env()
+        query_vector = format_pgvector_literal(
+            build_retrieval_embedding(field_query_text, dimensions=config.dimensions)
+        )
+        schema = self.active_schema
+        sql = f"""
+SET search_path TO {schema};
+
+SELECT COALESCE(json_agg(row_to_json(candidate_rows)), '[]'::json)::text
+FROM (
+    SELECT
+        ec.evidence_chunk_id,
+        ec.parsed_document_id,
+        ec.chunk_index,
+        ec.anchor_type,
+        ec.anchor_value,
+        ec.page_no,
+        ec.source_language,
+        ec.evidence_excerpt,
+        ec.retrieval_metadata,
+        ss.source_document_id,
+        ss.snapshot_id AS source_snapshot_id,
+        sd.bank_code,
+        sd.country_code,
+        sd.source_type,
+        GREATEST(0, LEAST(0.99, 1 - (ece.embedding <=> :'query_vector'::vector)))::float AS vector_score
+    FROM evidence_chunk AS ec
+    JOIN evidence_chunk_embedding AS ece
+      ON ece.evidence_chunk_id = ec.evidence_chunk_id
+    JOIN parsed_document AS pd
+      ON pd.parsed_document_id = ec.parsed_document_id
+    JOIN source_snapshot AS ss
+      ON ss.snapshot_id = pd.snapshot_id
+    JOIN source_document AS sd
+      ON sd.source_document_id = ss.source_document_id
+    WHERE ec.parsed_document_id = :'parsed_document_id'
+      AND ece.vector_namespace = :'vector_namespace'
+      AND ece.embedding_model_id = :'embedding_model_id'
+      AND (:'bank_code' = '' OR sd.bank_code = :'bank_code')
+      AND (:'country_code' = '' OR sd.country_code = :'country_code')
+      AND (:'source_language' = '' OR ec.source_language = :'source_language')
+      AND (
+          :'source_types_json'::jsonb = '[]'::jsonb
+          OR sd.source_type IN (SELECT jsonb_array_elements_text(:'source_types_json'::jsonb))
+      )
+      AND (
+          :'source_document_ids_json'::jsonb = '[]'::jsonb
+          OR sd.source_document_id IN (SELECT jsonb_array_elements_text(:'source_document_ids_json'::jsonb))
+      )
+      AND (
+          :'anchor_types_json'::jsonb = '[]'::jsonb
+          OR ec.anchor_type IN (SELECT jsonb_array_elements_text(:'anchor_types_json'::jsonb))
+      )
+    ORDER BY ece.embedding <=> :'query_vector'::vector, ec.chunk_index, ec.evidence_chunk_id
+    LIMIT :'max_matches'::integer
+) AS candidate_rows;
+"""
+        try:
+            output = self._execute(
+                sql,
+                variables={
+                    "parsed_document_id": parsed_document_id,
+                    "query_vector": query_vector,
+                    "vector_namespace": config.namespace,
+                    "embedding_model_id": config.model_id,
+                    "bank_code": metadata_filters.bank_code or "",
+                    "country_code": metadata_filters.country_code or "",
+                    "source_language": metadata_filters.source_language or "",
+                    "source_types_json": json.dumps(list(metadata_filters.source_types), ensure_ascii=True),
+                    "source_document_ids_json": json.dumps(
+                        list(metadata_filters.source_document_ids),
+                        ensure_ascii=True,
+                    ),
+                    "anchor_types_json": json.dumps(list(metadata_filters.anchor_types), ensure_ascii=True),
+                    "max_matches": str(max_matches),
+                },
+            )
+        except RuntimeError:
+            return []
+        payload = json.loads(output or "[]")
+        return [EvidenceChunkCandidate(**item) for item in payload]
+
+    def vector_index_available(self) -> bool:
+        schema = self.active_schema
+        sql = """
+SELECT COALESCE((
+    SELECT 'true'
+    FROM pg_tables
+    WHERE schemaname = :'schema'
+      AND tablename = 'evidence_chunk_embedding'
+    LIMIT 1
+), 'false');
+"""
+        try:
+            output = self._execute(sql, variables={"schema": schema})
+        except RuntimeError:
+            return False
+        return output.strip().lower() == "true"
 
     def _resolve_active_schema(self) -> str:
         preferred = self.config.schema

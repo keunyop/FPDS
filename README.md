@@ -45,6 +45,7 @@ As of `2026-04-15`:
 - `WBS 5.12` locale rollout is now complete with EN/KO/JA query-param locale support across the public Product Grid and Insight Dashboard plus the protected admin shell and login surfaces
 - `WBS 5.13` freshness/metric note wording is now complete with locale-aware public methodology/freshness note cards on `/products`, richer dashboard methodology wording on `/dashboard`, and clarified snapshot/metric/exclusion messaging for the public surface
 - `WBS 5.15` source registry admin MVP is now complete with DB-backed bank and source-catalog management, source-detail generation during collection, a bank-centered `/admin/banks` workflow for bank setup plus initial coverage and bulk collection, compatibility redirects for `/admin/source-catalog`, and read-only `/admin/sources` operator routes
+- the first vector-assisted retrieval bootstrap is now implemented with a pgvector `evidence_chunk_embedding` side table, deterministic local evidence-chunk embeddings for dev/test, metadata-first vector ranking, and metadata-only fallback when vector rows are unavailable
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
 
 ## What This Repo Contains Today
@@ -54,6 +55,7 @@ As of `2026-04-15`:
 - shared design-system baseline artifacts and template-adoption guidance for future public and admin UI implementation
 - a minimal Python worker project baseline in `pyproject.toml`
 - working prototype ingestion code for discovery, preflight drift checks, scheduled registry refresh artifacts, snapshot capture, parse/chunk, and evidence retrieval stages
+- a pgvector-ready evidence retrieval bootstrap that keeps vector scope limited to `evidence_chunk` and preserves metadata-only fallback
 - working prototype extraction code that turns retrieval matches into sparse extracted drafts with evidence-link drafts
 - working prototype normalization code that maps extracted drafts into canonical candidate rows and candidate-level evidence links
 - working prototype validation/routing code that recomputes candidate validation, updates candidate state, and creates prototype review tasks
