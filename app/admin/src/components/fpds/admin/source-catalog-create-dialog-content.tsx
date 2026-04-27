@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
 import type { SourceCatalogItem } from "@/lib/admin-api";
+import type { AdminLocale } from "@/lib/admin-i18n";
 
 type SourceCatalogCreateDialogContentProps = {
   bankOptions: Array<{ bank_code: string; bank_name: string }>;
   csrfToken: string | null | undefined;
+  locale: AdminLocale;
   onCreated: (item: SourceCatalogItem | null) => void;
 };
 
@@ -33,11 +35,55 @@ const STATUS_OPTIONS = [
   { label: "inactive", value: "inactive" },
 ] as const;
 
+const CREATE_CATALOG_COPY = {
+  en: {
+    bank: "Bank",
+    productType: "Product type",
+    status: "Status",
+    changeReason: "Change reason",
+    placeholder: "Why is this coverage being added?",
+    adding: "Adding...",
+    addCoverage: "Add coverage",
+    createFailed: "Source catalog item could not be created.",
+    createApiFailed: "Source catalog item could not be created. Check the admin API and try again.",
+    active: "Active",
+    inactive: "Inactive",
+  },
+  ko: {
+    bank: "은행",
+    productType: "상품 유형",
+    status: "상태",
+    changeReason: "변경 사유",
+    placeholder: "이 coverage를 추가하는 이유",
+    adding: "추가 중...",
+    addCoverage: "Coverage 추가",
+    createFailed: "Source catalog 항목을 생성할 수 없습니다.",
+    createApiFailed: "Source catalog 항목을 생성할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    active: "활성",
+    inactive: "비활성",
+  },
+  ja: {
+    bank: "銀行",
+    productType: "商品タイプ",
+    status: "状態",
+    changeReason: "変更理由",
+    placeholder: "この coverage を追加する理由",
+    adding: "追加中...",
+    addCoverage: "Coverage を追加",
+    createFailed: "Source catalog 項目を作成できません。",
+    createApiFailed: "Source catalog 項目を作成できません。Admin APIを確認してから再試行してください。",
+    active: "有効",
+    inactive: "無効",
+  },
+} as const;
+
 export function SourceCatalogCreateDialogContent({
   bankOptions,
   csrfToken,
+  locale,
   onCreated,
 }: SourceCatalogCreateDialogContentProps) {
+  const copy = CREATE_CATALOG_COPY[locale];
   const router = useRouter();
   const [form, setForm] = useState<CreateCatalogFormState>({
     bank_code: bankOptions[0]?.bank_code ?? "",
@@ -67,14 +113,14 @@ export function SourceCatalogCreateDialogContent({
         error?: { message?: string };
       };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Source catalog item could not be created.");
+        setError(payload.error?.message ?? copy.createFailed);
         return;
       }
 
       onCreated(payload.data?.catalog_item ?? null);
       router.refresh();
     } catch {
-      setError("Source catalog item could not be created. Check the admin API and try again.");
+      setError(copy.createApiFailed);
     } finally {
       setPending(false);
     }
@@ -87,27 +133,27 @@ export function SourceCatalogCreateDialogContent({
       <form className="space-y-4" onSubmit={handleCreate}>
         <div className="grid gap-4 lg:grid-cols-3">
           <SelectField
-            label="Bank"
+            label={copy.bank}
             options={bankOptions.map((option) => ({ label: option.bank_name, value: option.bank_code }))}
             value={form.bank_code}
             onChange={(value) => setForm((current) => ({ ...current, bank_code: value }))}
           />
           <SelectField
-            label="Product type"
+            label={copy.productType}
             options={PRODUCT_TYPE_OPTIONS}
             value={form.product_type}
             onChange={(value) => setForm((current) => ({ ...current, product_type: value }))}
           />
           <SelectField
-            label="Status"
-            options={STATUS_OPTIONS}
+            label={copy.status}
+            options={STATUS_OPTIONS.map((option) => ({ ...option, label: formatStatus(locale, option.value) }))}
             value={form.status}
             onChange={(value) => setForm((current) => ({ ...current, status: value }))}
           />
         </div>
 
         <Field data-invalid={Boolean(error)}>
-          <FieldLabel>Change reason</FieldLabel>
+          <FieldLabel>{copy.changeReason}</FieldLabel>
           <InputGroup className="min-h-24 items-start">
             <InputGroupAddon align="block-start">
               <FileText className="size-4" />
@@ -120,7 +166,7 @@ export function SourceCatalogCreateDialogContent({
                   change_reason: event.target.value,
                 }))
               }
-              placeholder="Why is this coverage being added?"
+              placeholder={copy.placeholder}
               rows={3}
               value={form.change_reason}
             />
@@ -130,12 +176,22 @@ export function SourceCatalogCreateDialogContent({
 
         <div className="flex justify-end">
           <Button disabled={pending || !form.bank_code} type="submit">
-            {pending ? "Adding..." : "Add coverage"}
+            {pending ? copy.adding : copy.addCoverage}
           </Button>
         </div>
       </form>
     </div>
   );
+}
+
+function formatStatus(locale: AdminLocale, value: string) {
+  if (value === "active") {
+    return CREATE_CATALOG_COPY[locale].active;
+  }
+  if (value === "inactive") {
+    return CREATE_CATALOG_COPY[locale].inactive;
+  }
+  return value;
 }
 
 function SelectField({

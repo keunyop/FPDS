@@ -33,6 +33,157 @@ type SourceCatalogSurfaceProps = {
   addModalOpen: boolean;
 };
 
+const CATALOG_COPY = {
+  en: {
+    addCoverage: "Add coverage",
+    viewGeneratedSources: "View generated sources",
+    description: "Coverage setup and collection launch.",
+    path: ["Operations", "Source Catalog"],
+    title: "Source Catalog",
+    catalogItems: "Catalog items",
+    generatedSources: "Generated sources",
+    active: "Active",
+    selected: "Selected",
+    search: "Search",
+    searchPlaceholder: "bank or catalog item id",
+    bank: "Bank",
+    productType: "Product type",
+    status: "Status",
+    apply: "Apply",
+    reset: "Reset",
+    coverageList: "Coverage list",
+    launching: "Launching...",
+    collectSelected: (count: number) => `Collect selected (${count})`,
+    select: "Select",
+    homepage: "Homepage",
+    noRows: "No source catalog items matched the current filter set.",
+    missing: "n/a",
+    coverageSetup: "Coverage setup",
+    currentScope: "Current scope",
+    catalogItemCount: (count: number) => `${count} catalog items`,
+    sourceCatalogWorkflow: "Source catalog workflow",
+    activeCoverage: "Active coverage",
+    inactiveCoverage: "Inactive coverage",
+    recentRuns: "Recent runs",
+    coverageDetail: "Coverage detail",
+    detailLoadFailed: "Source catalog detail could not be loaded.",
+    detailLoadApiFailed: "Source catalog detail could not be loaded. Check the admin API and try again.",
+    selectFirst: "Select at least one source catalog item before starting collection.",
+    collectFailed: "Collection could not be launched.",
+    collectApiFailed: "Collection could not be launched. Check the admin API and try again.",
+    queued: (count: number) => `Queued collection for ${count} catalog item(s).`,
+    queuedDetail: (count: number) =>
+      `${count} run(s) were created immediately, and homepage discovery plus source collection will continue on the server in the background.`,
+    openRuns:
+      "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
+    noDetail: (count: number) =>
+      `Homepage discovery completed for ${count} catalog item(s), but no detail sources were identified for collection.`,
+    materialized: (count: number) => `Materialized ${count} source row(s).`,
+    launched: (count: number) => `Collection launched for ${count} catalog item(s).`,
+    produced: (ready: number, noDetail: number) =>
+      `${ready} catalog item(s) produced detail sources${noDetail > 0 ? ` and ${noDetail} did not` : ""}.`,
+    all: "All",
+  },
+  ko: {
+    addCoverage: "Coverage 추가",
+    viewGeneratedSources: "생성 소스 보기",
+    description: "Coverage 설정과 collection 실행.",
+    path: ["운영", "Source Catalog"],
+    title: "Source Catalog",
+    catalogItems: "Catalog 항목",
+    generatedSources: "생성된 소스",
+    active: "활성",
+    selected: "선택됨",
+    search: "검색",
+    searchPlaceholder: "은행 또는 catalog item id",
+    bank: "은행",
+    productType: "상품 유형",
+    status: "상태",
+    apply: "적용",
+    reset: "초기화",
+    coverageList: "Coverage 목록",
+    launching: "실행 중...",
+    collectSelected: (count: number) => `선택 항목 Collect (${count})`,
+    select: "선택",
+    homepage: "홈페이지",
+    noRows: "현재 필터에 맞는 source catalog 항목이 없습니다.",
+    missing: "없음",
+    coverageSetup: "Coverage 설정",
+    currentScope: "현재 범위",
+    catalogItemCount: (count: number) => `catalog 항목 ${count}개`,
+    sourceCatalogWorkflow: "Source catalog workflow",
+    activeCoverage: "활성 coverage",
+    inactiveCoverage: "비활성 coverage",
+    recentRuns: "최근 runs",
+    coverageDetail: "Coverage 상세",
+    detailLoadFailed: "Source catalog 상세를 불러올 수 없습니다.",
+    detailLoadApiFailed: "Source catalog 상세를 불러올 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    selectFirst: "Collection을 시작하기 전에 source catalog 항목을 하나 이상 선택하세요.",
+    collectFailed: "Collection을 실행할 수 없습니다.",
+    collectApiFailed: "Collection을 실행할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    queued: (count: number) => `catalog 항목 ${count}개의 collection이 대기열에 등록되었습니다.`,
+    queuedDetail: (count: number) =>
+      `run ${count}개가 즉시 생성되었고, homepage discovery와 source collection은 서버 백그라운드에서 계속됩니다.`,
+    openRuns: "잠시 후 Runs에서 no-detail, timeout, collection 결과를 확인하세요.",
+    noDetail: (count: number) =>
+      `catalog 항목 ${count}개의 homepage discovery가 완료되었지만 collection할 detail source를 찾지 못했습니다.`,
+    materialized: (count: number) => `Source row ${count}개를 생성했습니다.`,
+    launched: (count: number) => `catalog 항목 ${count}개의 collection이 실행되었습니다.`,
+    produced: (ready: number, noDetail: number) =>
+      `catalog 항목 ${ready}개가 detail source를 생성했습니다${noDetail > 0 ? `, ${noDetail}개는 생성하지 못했습니다` : ""}.`,
+    all: "전체",
+  },
+  ja: {
+    addCoverage: "Coverage を追加",
+    viewGeneratedSources: "生成ソースを見る",
+    description: "Coverage 設定と collection 実行。",
+    path: ["運用", "Source Catalog"],
+    title: "Source Catalog",
+    catalogItems: "Catalog 項目",
+    generatedSources: "生成済みソース",
+    active: "有効",
+    selected: "選択中",
+    search: "検索",
+    searchPlaceholder: "銀行または catalog item id",
+    bank: "銀行",
+    productType: "商品タイプ",
+    status: "状態",
+    apply: "適用",
+    reset: "リセット",
+    coverageList: "Coverage 一覧",
+    launching: "実行中...",
+    collectSelected: (count: number) => `選択項目を Collect (${count})`,
+    select: "選択",
+    homepage: "ホームページ",
+    noRows: "現在のフィルターに該当する source catalog 項目はありません。",
+    missing: "なし",
+    coverageSetup: "Coverage 設定",
+    currentScope: "現在の範囲",
+    catalogItemCount: (count: number) => `catalog 項目 ${count} 件`,
+    sourceCatalogWorkflow: "Source catalog workflow",
+    activeCoverage: "有効 coverage",
+    inactiveCoverage: "無効 coverage",
+    recentRuns: "最近の runs",
+    coverageDetail: "Coverage 詳細",
+    detailLoadFailed: "Source catalog 詳細を読み込めません。",
+    detailLoadApiFailed: "Source catalog 詳細を読み込めません。Admin APIを確認してから再試行してください。",
+    selectFirst: "Collection を開始する前に source catalog 項目を1件以上選択してください。",
+    collectFailed: "Collection を実行できません。",
+    collectApiFailed: "Collection を実行できません。Admin APIを確認してから再試行してください。",
+    queued: (count: number) => `${count} 件の catalog 項目の collection をキューに追加しました。`,
+    queuedDetail: (count: number) =>
+      `${count} 件の run が即時作成され、homepage discovery と source collection はサーバー上で継続します。`,
+    openRuns: "少し待ってから Runs で no-detail、timeout、collection の結果を確認してください。",
+    noDetail: (count: number) =>
+      `${count} 件の catalog 項目で homepage discovery は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
+    materialized: (count: number) => `${count} 件の source row を生成しました。`,
+    launched: (count: number) => `${count} 件の catalog 項目の collection を実行しました。`,
+    produced: (ready: number, noDetail: number) =>
+      `${ready} 件の catalog 項目が detail source を生成しました${noDetail > 0 ? `。${noDetail} 件は生成できませんでした` : ""}。`,
+    all: "すべて",
+  },
+} as const;
+
 export function SourceCatalogSurface({
   catalog,
   filters,
@@ -42,6 +193,7 @@ export function SourceCatalogSurface({
   activeCatalogDetail,
   addModalOpen,
 }: SourceCatalogSurfaceProps) {
+  const copy = CATALOG_COPY[locale];
   const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
   const [catalogDialogOpen, setCatalogDialogOpen] = useState(Boolean(activeCatalogItemId && activeCatalogDetail));
@@ -108,12 +260,12 @@ export function SourceCatalogSurface({
         error?: { message?: string };
       };
       if (!response.ok || !payload.data) {
-        setError(payload.error?.message ?? "Source catalog detail could not be loaded.");
+        setError(payload.error?.message ?? copy.detailLoadFailed);
         return;
       }
       setCatalogDialogDetail(payload.data);
     } catch {
-      setError("Source catalog detail could not be loaded. Check the admin API and try again.");
+      setError(copy.detailLoadApiFailed);
     }
   }
 
@@ -139,7 +291,7 @@ export function SourceCatalogSurface({
 
   async function handleCollect() {
     if (selectedCatalogItemIds.length === 0) {
-      setError("Select at least one source catalog item before starting collection.");
+      setError(copy.selectFirst);
       setMessage(null);
       return;
     }
@@ -159,14 +311,14 @@ export function SourceCatalogSurface({
       });
       const payload = (await response.json()) as { data?: SourceCatalogCollectionLaunchResponse; error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Collection could not be launched.");
+        setError(payload.error?.message ?? copy.collectFailed);
         return;
       }
-      setMessage(buildCatalogCollectMessage(payload.data, selectedCatalogItemIds.length));
+      setMessage(buildCatalogCollectMessage(locale, payload.data, selectedCatalogItemIds.length));
       setSelectedCatalogItemIds([]);
       router.refresh();
     } catch {
-      setError("Collection could not be launched. Check the admin API and try again.");
+      setError(copy.collectApiFailed);
     } finally {
       setCollectPending(false);
     }
@@ -187,40 +339,40 @@ export function SourceCatalogSurface({
         actions={
           <>
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
-              Add coverage
+              {copy.addCoverage}
             </button>
             <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
-              View generated sources
+              {copy.viewGeneratedSources}
             </Link>
           </>
         }
-        description="Coverage setup and collection launch."
-        path={["Operations", "Source Catalog"]}
-        title="Source Catalog"
+        description={copy.description}
+        path={copy.path}
+        title={copy.title}
       />
 
       <article className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Catalog items" value={String(catalog.summary.total_items)} />
-        <StatCard label="Generated sources" value={String(catalog.summary.generated_source_count)} />
-        <StatCard label="Active" value={String(catalog.summary.status_counts.active ?? 0)} />
-        <StatCard label="Selected" value={String(selectedCatalogItemIds.length)} />
+        <StatCard label={copy.catalogItems} value={String(catalog.summary.total_items)} />
+        <StatCard label={copy.generatedSources} value={String(catalog.summary.generated_source_count)} />
+        <StatCard label={copy.active} value={String(catalog.summary.status_counts.active ?? 0)} />
+        <StatCard label={copy.selected} value={String(selectedCatalogItemIds.length)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <form action={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))_auto]">
           <label className="grid gap-2 text-sm">
-            <span className="font-medium text-foreground">Search</span>
-            <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder="bank or catalog item id" type="search" />
+            <span className="font-medium text-foreground">{copy.search}</span>
+            <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
-          <BankSelect defaultValue={filters.bankCode} label="Bank" name="bank_code" options={catalog.facets.bank_options} />
-          <SelectField label="Product type" options={catalog.facets.product_types} defaultValue={filters.productType} name="product_type" />
-          <SelectField label="Status" options={catalog.facets.statuses} defaultValue={filters.status} name="status" />
+          <BankSelect allLabel={copy.all} defaultValue={filters.bankCode} label={copy.bank} name="bank_code" options={catalog.facets.bank_options} />
+          <SelectField allLabel={copy.all} label={copy.productType} options={catalog.facets.product_types} defaultValue={filters.productType} name="product_type" />
+          <SelectField allLabel={copy.all} label={copy.status} options={catalog.facets.statuses} defaultValue={filters.status} name="status" />
           <div className="flex items-end gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" type="submit">
-              Apply
+              {copy.apply}
             </button>
             <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
-              Reset
+              {copy.reset}
             </Link>
           </div>
         </form>
@@ -229,14 +381,14 @@ export function SourceCatalogSurface({
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Coverage list</p>
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.coverageList}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
-              Add coverage
+              {copy.addCoverage}
             </button>
             <button className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-70" disabled={collectPending || selectedCatalogItemIds.length === 0} onClick={handleCollect} type="button">
-              {collectPending ? "Launching..." : `Collect selected (${selectedCatalogItemIds.length})`}
+              {collectPending ? copy.launching : copy.collectSelected(selectedCatalogItemIds.length)}
             </button>
           </div>
         </div>
@@ -248,19 +400,19 @@ export function SourceCatalogSurface({
           <table className="min-w-[940px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                <th className="border-b border-border px-3 py-3 font-medium">Select</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Bank</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Product type</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Status</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Homepage</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Generated sources</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.select}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.productType}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.homepage}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.generatedSources}</th>
               </tr>
             </thead>
             <tbody>
               {catalog.items.length === 0 ? (
                 <tr>
                   <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
-                    No source catalog items matched the current filter set.
+                    {copy.noRows}
                   </td>
                 </tr>
               ) : (
@@ -283,7 +435,7 @@ export function SourceCatalogSurface({
                           {item.homepage_url}
                         </a>
                       ) : (
-                        <span className="text-muted-foreground">n/a</span>
+                        <span className="text-muted-foreground">{copy.missing}</span>
                       )}
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
@@ -298,24 +450,24 @@ export function SourceCatalogSurface({
       <OfferModal4
         onOpenChange={handleAddDialogChange}
         open={addDialogOpen}
-        panelBadge="Coverage setup"
+        panelBadge={copy.coverageSetup}
         panelStats={[
-          { label: "Current scope", value: `${catalog.summary.total_items} catalog items` },
-          { label: "Generated sources", value: `${catalog.summary.generated_source_count}` },
+          { label: copy.currentScope, value: copy.catalogItemCount(catalog.summary.total_items) },
+          { label: copy.generatedSources, value: `${catalog.summary.generated_source_count}` },
         ]}
-        panelTitle="Source catalog workflow"
-        title="Add coverage"
+        panelTitle={copy.sourceCatalogWorkflow}
+        title={copy.addCoverage}
       >
-        <SourceCatalogCreateDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} onCreated={handleCatalogItemCreated} />
+        <SourceCatalogCreateDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} locale={locale} onCreated={handleCatalogItemCreated} />
       </OfferModal4>
 
       <OfferModal4
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
-        panelBadge={catalogDialogDetail?.catalog_item.status === "active" ? "Active coverage" : "Inactive coverage"}
-        panelStats={catalogDialogDetail ? [{ label: "Generated sources", value: `${catalogDialogDetail.catalog_item.generated_source_count}` }, { label: "Recent runs", value: `${catalogDialogDetail.recent_runs.length}` }] : []}
-        panelTitle={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : "Coverage detail"}
-        title={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : "Coverage detail"}
+        panelBadge={catalogDialogDetail?.catalog_item.status === "active" ? copy.activeCoverage : copy.inactiveCoverage}
+        panelStats={catalogDialogDetail ? [{ label: copy.generatedSources, value: `${catalogDialogDetail.catalog_item.generated_source_count}` }, { label: copy.recentRuns, value: `${catalogDialogDetail.recent_runs.length}` }] : []}
+        panelTitle={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : copy.coverageDetail}
+        title={catalogDialogDetail ? `${catalogDialogDetail.catalog_item.bank_name} ${catalogDialogDetail.catalog_item.product_type}` : copy.coverageDetail}
       >
         {catalogDialogDetail ? (
           <SourceCatalogDetailDialogContent
@@ -332,14 +484,16 @@ export function SourceCatalogSurface({
 }
 
 function buildCatalogCollectMessage(
+  locale: AdminLocale,
   payload: SourceCatalogCollectionLaunchResponse | undefined,
   selectedCatalogItemCount: number,
 ) {
+  const copy = CATALOG_COPY[locale];
   if (payload?.workflow_state === "queued") {
     return [
-      `Queued collection for ${selectedCatalogItemCount} catalog item(s).`,
-      `${payload.run_ids.length} run(s) were created immediately, and homepage discovery plus source collection will continue on the server in the background.`,
-      "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
+      copy.queued(selectedCatalogItemCount),
+      copy.queuedDetail(payload.run_ids.length),
+      copy.openRuns,
     ].join(" ");
   }
 
@@ -357,8 +511,8 @@ function buildCatalogCollectMessage(
 
   if (!payload?.run_ids?.length || readyCount === 0) {
     return [
-      `Homepage discovery completed for ${selectedCatalogItemCount} catalog item(s), but no detail sources were identified for collection.`,
-      `Materialized ${generatedSourceCount} source row(s).`,
+      copy.noDetail(selectedCatalogItemCount),
+      copy.materialized(generatedSourceCount),
       firstNote,
     ]
       .filter(Boolean)
@@ -366,9 +520,9 @@ function buildCatalogCollectMessage(
   }
 
   return [
-    `Collection launched for ${selectedCatalogItemCount} catalog item(s).`,
-    `${readyCount} catalog item(s) produced detail sources${noDetailCount > 0 ? ` and ${noDetailCount} did not` : ""}.`,
-    `Materialized ${generatedSourceCount} source row(s).`,
+    copy.launched(selectedCatalogItemCount),
+    copy.produced(readyCount, noDetailCount),
+    copy.materialized(generatedSourceCount),
     firstNote,
   ]
     .filter(Boolean)
@@ -385,11 +539,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function BankSelect({
+  allLabel,
   defaultValue,
   label,
   name,
   options,
 }: {
+  allLabel: string;
   defaultValue: string;
   label: string;
   name: string;
@@ -399,7 +555,7 @@ function BankSelect({
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
       <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
-        <option value="">All</option>
+        <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option.bank_code} value={option.bank_code}>
             {option.bank_name}
@@ -411,11 +567,13 @@ function BankSelect({
 }
 
 function SelectField({
+  allLabel,
   label,
   options,
   defaultValue,
   name,
 }: {
+  allLabel: string;
   label: string;
   options: string[];
   defaultValue: string;
@@ -425,7 +583,7 @@ function SelectField({
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
       <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
-        <option value="">All</option>
+        <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}

@@ -38,7 +38,7 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
   }
 
   if (!session || !registry || apiUnavailable) {
-    return <AdminApiUnavailable title="Source registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Source registry could not load." />;
   }
 
   return (

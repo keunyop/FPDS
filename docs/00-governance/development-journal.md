@@ -62,6 +62,93 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-26 - Bank Detail Modal Simplification
+
+- WBS: `5.15`, admin UI polish
+- Status: `done`
+- Goal: remove unnecessary Bank detail information, make coverage counts read as product types, and remove the visible Bank profile Change reason field
+- Why now: the Product Owner wanted the Bank detail modal to be simpler and corrected the coverage unit from generic items to product types
+- Outcome: the Bank detail summary now shows only Bank code and Coverage, with coverage rendered as product type counts in EN/KO/JA. The Bank profile card no longer shows the explanatory homepage/discovery paragraph, and the profile form no longer renders a Change reason input while preserving the existing hidden `change_reason` payload default for API compatibility.
+- Not done: no browser visual QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept this as an FPDS wrapper/content simplification instead of changing shared modal primitives or backend update contracts
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: the worktree already contained unrelated modified admin/API/i18n files before this slice; this slice did not normalize those broader changes
+- Next step: browser-check `/admin/banks` to confirm the reduced Bank detail summary and profile form density against live data
+
+## 2026-04-26 - Bank and Product Type Registry Density Follow-up
+
+- WBS: `5.15`, `5.16`, admin UI polish
+- Status: `done`
+- Goal: reduce duplicated top-level add actions, make bank add/detail modals slightly narrower, and remove the visible Change reason field from Add bank
+- Why now: the Product Owner wanted the Banks and Product Types screens to rely on list-local add actions and asked for a simpler Add bank modal
+- Outcome: Banks and Product Types no longer pass add buttons into the shared page header; their add buttons remain in the list toolbar. `offer-modal4` now has a `width="medium"` option, and Bank add/detail modals use it while Product Type modals keep `width="narrow"` and source-catalog modals keep the default width. Add bank no longer renders a Change reason input, while the create payload still sends the existing empty `change_reason` default.
+- Not done: no browser visual QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/README.md`, `docs/03-design/shadcnblocks-adoption-log.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept Add bank's `change_reason` form state as an empty backend-compatible field instead of changing the API contract; kept source-catalog modals at the wider default because their detail views remain denser
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: the worktree already contained unrelated modified admin/API/i18n files before this slice; this slice did not normalize those broader changes
+- Next step: browser-check `/admin/banks` and `/admin/product-types` for modal width, toolbar action placement, and mobile wrapping
+
+## 2026-04-26 - Product Type Modal Delete Polish
+
+- WBS: `5.16`, admin UI polish
+- Status: `done`
+- Goal: simplify the Product Type delete confirmation, close the Product Type detail modal automatically after successful delete, and make Product Type add/detail dialogs slightly narrower
+- Why now: the Product Owner reported that the delete prompt felt too complex, deletion left the detail modal open, and the Product Type modals had more horizontal space than needed
+- Outcome: the shared destructive confirmation dialog now renders a compact title, description, and action row; Product Type delete success now clears the parent detail modal state before refreshing the list; `offer-modal4` has a scoped `width="narrow"` option used by Product Type add/detail only, leaving bank and source-catalog dialog widths unchanged
+- Not done: no browser visual QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/destructive-confirm-dialog.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/README.md`, `docs/03-design/shadcnblocks-adoption-log.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the modal-width change scoped through an explicit prop instead of shrinking all registry modals; kept delete failure behavior inside the detail modal so blocked deletes can still show the API error near the action
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: the worktree already contained unrelated modified admin/API/i18n files before this slice; this slice did not normalize those broader changes
+- Next step: run browser QA for `/admin/product-types` to confirm the narrower dialog width and post-delete close behavior against a live admin API
+
+## 2026-04-26 - Product Type Discovery Keyword AI Generation
+
+- WBS: `5.16`
+- Status: `done`
+- Goal: improve operator-created Product Type `Discovery keywords` so they are generated for source discovery quality instead of raw description-token extraction
+- Why now: the Product Owner showed a chequing-style description producing low-value keywords such as `designed`, `for`, `such`, and `and`
+- Outcome: Product Type create now regenerates discovery keywords through the configured OpenAI provider when available, using display name, full description, and the discovery purpose; persisted keywords are sanitized to short useful discovery terms or phrases. Product Type update regenerates keywords when the display name or description is supplied, while status-only API updates preserve existing keywords. If AI is unavailable, creation still succeeds with a conservative finance-domain fallback that filters filler words.
+- Not done: no live OpenAI request was executed in verification; unit tests mock the AI generator. LLM usage rows are not emitted for this admin configuration helper, matching the current homepage-discovery scorer behavior.
+- Key files: `api/service/api_service/product_types.py`, `api/service/tests/test_product_types.py`, `docs/03-design/homepage-discovery-scoring-enhancement.md`, `app/admin/README.md`
+- Decisions: used the existing `FPDS_LLM_PROVIDER`, `FPDS_LLM_API_KEY`, and `FPDS_LLM_MODEL` environment contract instead of adding a new provider setting; kept AI failures fail-open so missing credentials do not block registry administration
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_product_types` in `api/service`
+  - `.venv\Scripts\python.exe -m compileall api_service` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest tests.test_product_types tests.test_source_catalog` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: actual AI generation requires `FPDS_LLM_PROVIDER=openai` and `FPDS_LLM_API_KEY`; without those settings the deterministic fallback is used
+- Next step: verify one live Product Type creation against a configured dev API key and inspect the generated keywords before launching coverage collection
+
+## 2026-04-26 - Admin Locale Copy Polish
+
+- WBS: `5.12`, admin UI polish
+- Status: `done`
+- Goal: improve EN/KO/JA admin locale wording without translating source-derived or user-entered data
+- Why now: the Product Owner asked for a broad admin locale pass while allowing English to remain where it is clearer for operators
+- Outcome: tightened protected admin shell navigation copy for banks/product types/sources and account menu labels, localized the overview dashboard metrics and API-unavailable fallback, added KO/JA copy for the pending signup approval panel, made review queue and run status list controls/table/status/date labels locale-aware, localized Product Types list/create/detail/delete chrome, expanded the same locale-copy pattern to Banks, bank coverage, generated Sources, Source Catalog list/create/detail, Change History, Audit Log, Dashboard Health, and Run Detail, and added missing shared KO/JA `admin_operations.audit` resource entries
+- Not done: the very large `/admin/usage` and `/admin/reviews/:reviewTaskId` diagnostic-detail bodies still contain English operator copy and should be handled as a separate focused copy pass; source-derived product names, URLs, evidence excerpts, issue codes, ids, and user-entered registry values remain untranslated by design
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/app/admin/page.tsx`, `app/admin/src/components/fpds/admin/signup-request-review-panel.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/components/fpds/admin/run-detail-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/source-catalog-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/change-history-surface.tsx`, `app/admin/src/components/fpds/admin/audit-log-surface.tsx`, `app/admin/src/components/fpds/admin/health-dashboard-surface.tsx`, `shared/i18n/locales/ko.json`, `shared/i18n/locales/ja.json`, `app/admin/README.md`
+- Decisions: kept terms such as `Dashboard`, `Admin API`, `FastAPI`, `source detail`, `trace`, `fallback`, `Discovery keywords`, `coverage`, `collection`, ids, URLs, source values, and operator-entered registry values in English/source form where that preserves operator clarity; treated Usage and Review Detail as follow-on detail-copy inventory rather than rushing a high-risk large edit into this slice
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: `/admin/usage` and `/admin/reviews/:reviewTaskId` still need a dedicated EN/KO/JA diagnostic-detail copy pass; this slice intentionally avoids translating source-derived data and user-entered values
+- Next step: perform browser QA for `/admin?locale=ko`, `/admin/product-types?locale=ko|ja`, `/admin/banks?locale=ko|ja`, `/admin/sources?locale=ko|ja`, `/admin/source-catalog?locale=ko|ja`, `/admin/changes?locale=ko|ja`, `/admin/audit?locale=ko|ja`, `/admin/runs/:runId?locale=ko|ja`, and `/admin/health/dashboard?locale=ko|ja` to catch wrapping or readability issues
+
 ## 2026-04-25 - Admin Route Body Simplification
 
 - WBS: `4.x`, `5.12`, `5.14`

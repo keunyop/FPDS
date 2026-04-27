@@ -18,6 +18,7 @@ type OfferModal4Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
+  width?: "default" | "medium" | "narrow";
   description?: string;
   panelTitle?: string;
   panelDescription?: string;
@@ -35,6 +36,7 @@ function OfferModal4({
   open,
   onOpenChange,
   title,
+  width = "default",
   description,
   panelTitle,
   panelDescription,
@@ -52,7 +54,11 @@ function OfferModal4({
           "group grid max-h-[calc(100dvh-2rem)] w-[calc(100vw-1.5rem)] gap-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-background p-0 shadow-2xl shadow-slate-950/12 data-[state=closed]:slide-out-to-bottom-30 data-[state=open]:slide-in-from-bottom-30 sm:w-[calc(100vw-2.5rem)] lg:max-h-[calc(100dvh-3rem)]",
           showPanel
             ? "sm:max-w-[min(68rem,calc(100vw-2.5rem))] lg:max-w-[min(72rem,calc(100vw-4rem))]"
-            : "sm:max-w-[min(74rem,calc(100vw-2.5rem))] lg:max-w-[min(78rem,calc(100vw-4rem))]",
+            : width === "narrow"
+              ? "sm:max-w-[min(54rem,calc(100vw-2.5rem))] lg:max-w-[min(58rem,calc(100vw-4rem))]"
+              : width === "medium"
+                ? "sm:max-w-[min(64rem,calc(100vw-2.5rem))] lg:max-w-[min(68rem,calc(100vw-4rem))]"
+              : "sm:max-w-[min(74rem,calc(100vw-2.5rem))] lg:max-w-[min(78rem,calc(100vw-4rem))]",
         )}
       >
         <div className="absolute right-4 top-4 z-20">

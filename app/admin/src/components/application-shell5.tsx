@@ -97,6 +97,9 @@ type ShellCopy = {
     reviews: { label: string; description: string };
     traceViewer: { label: string; description: string };
     runs: { label: string; description: string };
+    banks: { label: string; description: string };
+    productTypes: { label: string; description: string };
+    sources: { label: string; description: string };
     changes: { label: string; description: string };
     auditLog: { label: string; description: string };
     publish: { label: string; description: string };
@@ -130,6 +133,9 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       reviews: { label: "Review Queue", description: "Queue, validation, and decision intake" },
       traceViewer: { label: "Trace Viewer", description: "Evidence inspection and field provenance" },
       runs: { label: "Runs", description: "Execution diagnostics and failure context" },
+      banks: { label: "Banks", description: "Bank list, homepage setup, and coverage" },
+      productTypes: { label: "Product Types", description: "Registry, descriptions, and AI fallback metadata" },
+      sources: { label: "Sources", description: "Generated source detail, read-only" },
       changes: { label: "Changes", description: "Canonical chronology and override context" },
       auditLog: { label: "Audit Log", description: "Append-only workflow and auth trail" },
       publish: { label: "Publish", description: "Retry, pending, and reconciliation monitor" },
@@ -157,10 +163,13 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       observability: "관찰",
     },
     items: {
-      overview: { label: "Dashboard", description: "현재 분류 시작점" },
+      overview: { label: "Dashboard", description: "현재 triage 시작점" },
       reviews: { label: "검토 대기열", description: "대기, 검증, 결정 접수" },
       traceViewer: { label: "추적 뷰어", description: "증거 검사와 필드 출처 확인" },
       runs: { label: "실행", description: "실행 진단과 실패 맥락" },
+      banks: { label: "은행", description: "은행 목록, 홈페이지 설정, coverage" },
+      productTypes: { label: "상품 유형", description: "Registry, 설명, AI fallback 메타데이터" },
+      sources: { label: "소스", description: "생성된 source detail, 읽기 전용" },
       changes: { label: "변경 이력", description: "정규화된 이력과 재정의 맥락" },
       auditLog: { label: "감사 로그", description: "추적 가능한 작업 및 인증 이력" },
       publish: { label: "게시", description: "재시도, 대기, 조정 모니터" },
@@ -192,6 +201,9 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
       reviews: { label: "審査キュー", description: "キュー、検証、判断の受付" },
       traceViewer: { label: "トレースビューア", description: "証跡確認とフィールド由来の追跡" },
       runs: { label: "実行", description: "実行診断と失敗文脈" },
+      banks: { label: "銀行", description: "銀行一覧、ホームページ設定、カバレッジ" },
+      productTypes: { label: "商品タイプ", description: "Registry、説明、AI fallback メタデータ" },
+      sources: { label: "ソース", description: "生成された source detail、読み取り専用" },
       changes: { label: "変更履歴", description: "正規化された履歴と上書き文脈" },
       auditLog: { label: "監査ログ", description: "追記型の作業・認証履歴" },
       publish: { label: "公開", description: "再試行、保留、照合作業の監視" },
@@ -203,8 +215,8 @@ const shellCopyByLocale: Record<AdminLocale, ShellCopy> = {
 
 const accountMenuLabelByLocale: Record<AdminLocale, string> = {
   en: "Account",
-  ko: "Account",
-  ja: "Account",
+  ko: "계정",
+  ja: "アカウント",
 };
 
 function getNavGroups(locale: AdminLocale): NavGroup[] {
@@ -245,22 +257,22 @@ function getNavGroups(locale: AdminLocale): NavGroup[] {
       title: copy.groups.operations,
       items: [
         {
-          label: "Banks",
-          description: "Bank list, homepage setup, and coverage",
+          label: copy.items.banks.label,
+          description: copy.items.banks.description,
           href: "/admin/banks",
           status: copy.status.live,
           icon: Search,
         },
         {
-          label: "Product Types",
-          description: "Registry, descriptions, and AI fallback metadata",
+          label: copy.items.productTypes.label,
+          description: copy.items.productTypes.description,
           href: "/admin/product-types",
           status: copy.status.live,
           icon: Sparkles,
         },
         {
-          label: "Sources",
-          description: "Generated source detail, read-only",
+          label: copy.items.sources.label,
+          description: copy.items.sources.description,
           href: "/admin/sources",
           status: copy.status.live,
           icon: BookOpenText,

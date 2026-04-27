@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import json
 import unittest
 from unittest.mock import patch
 
 from api_service.product_types import (
     create_product_type_definition,
     delete_product_type_definition,
+    _merge_keywords,
     load_product_type_list,
     normalize_product_type_filters,
     require_product_type_definition,
@@ -82,6 +84,10 @@ class ProductTypeRegistryTests(unittest.TestCase):
         with (
             patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row()),
             patch("api_service.product_types.new_id", return_value="audit-001"),
+            patch(
+                "api_service.product_types._generate_ai_discovery_keywords",
+                return_value=["tfsa", "tax free savings account", "registered savings", "interest rate"],
+            ),
         ):
             result = create_product_type_definition(
                 connection,
@@ -98,7 +104,8 @@ class ProductTypeRegistryTests(unittest.TestCase):
         insert_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO product_type_registry" in sql]
         self.assertEqual(len(insert_calls), 1)
         self.assertEqual(insert_calls[0][1]["fallback_policy"], "generic_ai_review")
-        self.assertIn("tfsa", insert_calls[0][1]["discovery_keywords"])
+        discovery_keywords = json.loads(insert_calls[0][1]["discovery_keywords"])
+        self.assertEqual(discovery_keywords[:3], ["tfsa", "tax free savings account", "registered savings"])
         self.assertTrue(any("INSERT INTO taxonomy_registry" in sql for sql, _ in connection.calls))
         audit_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO audit_event" in sql]
         self.assertEqual(len(audit_calls), 1)
@@ -132,6 +139,30 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(update_calls[0][1]["status"], "inactive")
         self.assertTrue(any("INSERT INTO taxonomy_registry" in sql for sql, _ in connection.calls))
         self.assertTrue(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
+
+    def test_update_product_type_status_only_preserves_keywords(self) -> None:
+        connection = _QueuedConnection([None, None, None])
+        existing = _dynamic_product_row(status="active")
+        existing["discovery_keywords"] = ["existing keyword", "tfsa"]
+        updated = dict(existing)
+        updated["status"] = "inactive"
+
+        with (
+            patch("api_service.product_types.load_product_type_definition", side_effect=[existing, updated]),
+            patch("api_service.product_types.new_id", return_value="audit-002"),
+            patch("api_service.product_types._generate_ai_discovery_keywords") as ai_generator,
+        ):
+            update_product_type_definition(
+                connection,
+                product_type_code="tfsa-savings",
+                payload={"status": "inactive"},
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        update_calls = [(sql, params) for sql, params in connection.calls if "UPDATE product_type_registry" in sql]
+        self.assertEqual(json.loads(update_calls[0][1]["discovery_keywords"]), ["existing keyword", "tfsa"])
+        ai_generator.assert_not_called()
 
     def test_delete_product_type_definition_removes_registry_and_taxonomy_when_unused(self) -> None:
         connection = _QueuedConnection(
@@ -185,6 +216,42 @@ class ProductTypeRegistryTests(unittest.TestCase):
                 require_product_type_definition(object(), product_type_code="tfsa-savings", active_only=True)
 
         self.assertEqual(captured.exception.code, "product_type_inactive")
+
+    def test_merge_keywords_uses_ai_result_when_available(self) -> None:
+        with patch(
+            "api_service.product_types._generate_ai_discovery_keywords",
+            return_value=["chequing", "everyday banking", "debit card", "bill payments", "transfers"],
+        ):
+            keywords = _merge_keywords(
+                display_name="Chequing",
+                description="A bank account designed for everyday transactions.",
+                provided=[],
+                regenerate=True,
+            )
+
+        self.assertEqual(keywords[:5], ["chequing", "everyday banking", "debit card", "bill payments", "transfers"])
+
+    def test_merge_keywords_fallback_filters_description_filler_words(self) -> None:
+        with patch("api_service.product_types._generate_ai_discovery_keywords", return_value=[]):
+            keywords = _merge_keywords(
+                display_name="Chequing",
+                description=(
+                    "A bank account designed for everyday transactions such as deposits, withdrawals, "
+                    "debit card payments, bill payments, and transfers. It usually offers easy access "
+                    "to funds but little or no interest."
+                ),
+                provided=[],
+                regenerate=True,
+            )
+
+        self.assertIn("chequing", keywords)
+        self.assertIn("everyday banking", keywords)
+        self.assertIn("debit card", keywords)
+        self.assertIn("bill payments", keywords)
+        self.assertNotIn("designed", keywords)
+        self.assertNotIn("for", keywords)
+        self.assertNotIn("such", keywords)
+        self.assertNotIn("and", keywords)
 
 
 if __name__ == "__main__":

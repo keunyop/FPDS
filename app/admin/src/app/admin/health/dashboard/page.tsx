@@ -36,7 +36,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
   }
 
   if (!session || !health || apiUnavailable) {
-    return <AdminApiUnavailable title="Dashboard health could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Dashboard health could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
@@ -52,7 +52,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
         role: session.user.role,
       }}
     >
-      <HealthDashboardSurface csrfToken={session.csrf_token} health={health} />
+      <HealthDashboardSurface csrfToken={session.csrf_token} health={health} locale={locale} />
     </ApplicationShell5>
   );
 }

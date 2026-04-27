@@ -8,12 +8,11 @@ import { useState, type FormEvent } from "react";
 import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
 import { DestructiveConfirmDialog } from "@/components/fpds/admin/destructive-confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-  InputGroupTextarea,
 } from "@/components/ui/input-group";
 import type { BankDetailResponse, ProductTypeItem } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
@@ -36,12 +35,94 @@ const STATUS_OPTIONS = [
   { label: "inactive", value: "inactive" },
 ] as const;
 
+const BANK_DETAIL_COPY = {
+  en: {
+    bankCode: "Bank code",
+    coverage: "Coverage",
+    productTypeCount: (count: number) => `${count} product type(s)`,
+    bankProfile: "Bank profile",
+    profileTitle: "Operator-supplied bank information",
+    bankName: "Bank name",
+    homepageUrl: "Homepage URL",
+    language: "Language",
+    status: "Status",
+    active: "active",
+    inactive: "inactive",
+    deleting: "Deleting...",
+    deleteBank: "Delete bank",
+    saving: "Saving...",
+    saveBank: "Save bank",
+    keepBank: "Keep bank",
+    updateSuccess: "Bank profile was updated.",
+    updateFailed: "Bank could not be updated.",
+    updateApiFailed: "Bank could not be updated. Check the admin API and try again.",
+    deleteFailed: "Bank could not be deleted.",
+    deleteApiFailed: "Bank could not be deleted. Check the admin API and try again.",
+    deleteDescription: (name: string) =>
+      `Delete ${name} from the bank registry. Admin-managed coverage and generated source rows will be removed, but collected runtime data or published history will block this action.`,
+    deleteTitle: (name: string) => `Delete ${name}?`,
+  },
+  ko: {
+    bankCode: "은행 코드",
+    coverage: "Coverage",
+    productTypeCount: (count: number) => `${count}개 상품 유형`,
+    bankProfile: "은행 프로필",
+    profileTitle: "운영자가 입력한 은행 정보",
+    bankName: "은행명",
+    homepageUrl: "홈페이지 URL",
+    language: "언어",
+    status: "상태",
+    active: "활성",
+    inactive: "비활성",
+    deleting: "삭제 중...",
+    deleteBank: "은행 삭제",
+    saving: "저장 중...",
+    saveBank: "은행 저장",
+    keepBank: "은행 유지",
+    updateSuccess: "은행 프로필이 수정되었습니다.",
+    updateFailed: "은행을 수정할 수 없습니다.",
+    updateApiFailed: "은행을 수정할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    deleteFailed: "은행을 삭제할 수 없습니다.",
+    deleteApiFailed: "은행을 삭제할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    deleteDescription: (name: string) =>
+      `${name}을(를) bank registry에서 삭제합니다. Admin 관리 coverage와 generated source row는 제거되지만, 수집된 runtime data 또는 publish history가 있으면 작업이 차단됩니다.`,
+    deleteTitle: (name: string) => `${name}을(를) 삭제할까요?`,
+  },
+  ja: {
+    bankCode: "銀行コード",
+    coverage: "Coverage",
+    productTypeCount: (count: number) => `${count}件の商品タイプ`,
+    bankProfile: "銀行プロファイル",
+    profileTitle: "運用者が入力した銀行情報",
+    bankName: "銀行名",
+    homepageUrl: "ホームページURL",
+    language: "言語",
+    status: "状態",
+    active: "有効",
+    inactive: "無効",
+    deleting: "削除中...",
+    deleteBank: "銀行を削除",
+    saving: "保存中...",
+    saveBank: "銀行を保存",
+    keepBank: "銀行を保持",
+    updateSuccess: "銀行プロファイルを更新しました。",
+    updateFailed: "銀行を更新できません。",
+    updateApiFailed: "銀行を更新できません。Admin APIを確認してから再試行してください。",
+    deleteFailed: "銀行を削除できません。",
+    deleteApiFailed: "銀行を削除できません。Admin APIを確認してから再試行してください。",
+    deleteDescription: (name: string) =>
+      `${name}を bank registry から削除します。Admin 管理の coverage と generated source row は削除されますが、収集済み runtime data または publish history がある場合はブロックされます。`,
+    deleteTitle: (name: string) => `${name}を削除しますか？`,
+  },
+} as const;
+
 export function BankDetailDialogContent({
   detail,
   locale,
   csrfToken,
   productTypes,
 }: BankDetailDialogContentProps) {
+  const copy = BANK_DETAIL_COPY[locale];
   const router = useRouter();
   const [form, setForm] = useState({
     bank_name: detail.bank.bank_name,
@@ -73,13 +154,13 @@ export function BankDetailDialogContent({
       });
       const payload = (await response.json()) as { error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Bank could not be updated.");
+        setError(payload.error?.message ?? copy.updateFailed);
         return;
       }
-      setMessage("Bank profile was updated.");
+      setMessage(copy.updateSuccess);
       router.refresh();
     } catch {
-      setError("Bank could not be updated. Check the admin API and try again.");
+      setError(copy.updateApiFailed);
     } finally {
       setPendingSave(false);
     }
@@ -99,7 +180,7 @@ export function BankDetailDialogContent({
       });
       const payload = (await response.json()) as { error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Bank could not be deleted.");
+        setError(payload.error?.message ?? copy.deleteFailed);
         setDeleteDialogOpen(false);
         return;
       }
@@ -107,7 +188,7 @@ export function BankDetailDialogContent({
       router.push(buildAdminHref("/admin/banks", new URLSearchParams(), locale), { scroll: false });
       router.refresh();
     } catch {
-      setError("Bank could not be deleted. Check the admin API and try again.");
+      setError(copy.deleteApiFailed);
       setDeleteDialogOpen(false);
     } finally {
       setPendingDelete(false);
@@ -116,16 +197,11 @@ export function BankDetailDialogContent({
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <ReadonlySummary label="Bank code" value={detail.bank.bank_code} />
-        <ReadonlySummary label="Country" value={detail.bank.country_code} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ReadonlySummary label={copy.bankCode} value={detail.bank.bank_code} />
         <ReadonlySummary
-          label="Coverage"
-          value={`${detail.catalog_items.length} item(s)`}
-        />
-        <ReadonlySummary
-          label="Generated sources"
-          value={String(detail.bank.generated_source_count)}
+          label={copy.coverage}
+          value={copy.productTypeCount(detail.catalog_items.length)}
         />
       </div>
 
@@ -144,22 +220,18 @@ export function BankDetailDialogContent({
         <section className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-              Bank profile
+              {copy.bankProfile}
             </p>
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Operator-supplied bank information
+              {copy.profileTitle}
             </h2>
-            <p className="text-sm leading-6 text-muted-foreground">
-              This is the only URL operators enter manually. FPDS uses this homepage as the
-              discovery starting point for all coverage below.
-            </p>
           </div>
 
           <form className="mt-5 space-y-4" onSubmit={handleSave}>
             <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
               <InputField
                 icon={<Landmark className="size-4" />}
-                label="Bank name"
+                label={copy.bankName}
                 onChange={(value) =>
                   setForm((current) => ({ ...current, bank_name: value }))
                 }
@@ -167,7 +239,7 @@ export function BankDetailDialogContent({
               />
               <InputField
                 icon={<Globe className="size-4" />}
-                label="Homepage URL"
+                label={copy.homepageUrl}
                 onChange={(value) =>
                   setForm((current) => ({ ...current, homepage_url: value }))
                 }
@@ -178,7 +250,7 @@ export function BankDetailDialogContent({
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
                 icon={<Languages className="size-4" />}
-                label="Language"
+                label={copy.language}
                 onChange={(value) =>
                   setForm((current) => ({ ...current, source_language: value }))
                 }
@@ -187,7 +259,8 @@ export function BankDetailDialogContent({
               />
               <SelectField
                 icon={<ShieldCheck className="size-4" />}
-                label="Status"
+                label={copy.status}
+                locale={locale}
                 onChange={(value) =>
                   setForm((current) => ({ ...current, status: value }))
                 }
@@ -196,32 +269,13 @@ export function BankDetailDialogContent({
               />
             </div>
 
-            <Field data-invalid={Boolean(error)}>
-              <FieldLabel>Change reason</FieldLabel>
-              <InputGroup className="min-h-20 items-start">
-                <InputGroupTextarea
-                  aria-invalid={Boolean(error)}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      change_reason: event.target.value,
-                    }))
-                  }
-                  placeholder="Why was this bank profile updated?"
-                  rows={2}
-                  value={form.change_reason}
-                />
-              </InputGroup>
-              {error ? <FieldError>{error}</FieldError> : null}
-            </Field>
-
             <div className="flex justify-between gap-3">
               <Button disabled={pendingDelete} onClick={() => setDeleteDialogOpen(true)} type="button" variant="destructive">
                 <Trash2 className="size-4" />
-                {pendingDelete ? "Deleting..." : "Delete bank"}
+                {pendingDelete ? copy.deleting : copy.deleteBank}
               </Button>
               <Button disabled={pendingSave} type="submit">
-                {pendingSave ? "Saving..." : "Save bank"}
+                {pendingSave ? copy.saving : copy.saveBank}
               </Button>
             </div>
           </form>
@@ -237,14 +291,15 @@ export function BankDetailDialogContent({
       </div>
 
       <DestructiveConfirmDialog
-        cancelLabel="Keep bank"
-        confirmLabel="Delete bank"
-        description={`Delete ${detail.bank.bank_name} from the bank registry. Admin-managed coverage and generated source rows will be removed, but collected runtime data or published history will block this action.`}
+        cancelLabel={copy.keepBank}
+        confirmLabel={copy.deleteBank}
+        description={copy.deleteDescription(detail.bank.bank_name)}
         onConfirm={handleDelete}
         onOpenChange={setDeleteDialogOpen}
         open={deleteDialogOpen}
         pending={pendingDelete}
-        title={`Delete ${detail.bank.bank_name}?`}
+        pendingLabel={copy.deleting}
+        title={copy.deleteTitle(detail.bank.bank_name)}
       />
     </div>
   );
@@ -292,12 +347,14 @@ function SelectField({
   value,
   onChange,
   icon,
+  locale,
 }: {
   label: string;
   options: ReadonlyArray<{ label: string; value: string }>;
   value: string;
   onChange: (value: string) => void;
   icon: ReactNode;
+  locale?: AdminLocale;
 }) {
   return (
     <label className="grid gap-2 text-sm">
@@ -311,7 +368,7 @@ function SelectField({
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {locale && (option.value === "active" || option.value === "inactive") ? BANK_DETAIL_COPY[locale][option.value] : option.label}
             </option>
           ))}
         </select>

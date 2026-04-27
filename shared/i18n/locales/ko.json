@@ -26,6 +26,7 @@
       "runs": "실행 이력",
       "run_detail": "실행 상세",
       "changes": "변경 이력",
+      "audit": "감사 로그",
       "publish": "배포 모니터",
       "usage": "LLM 사용량",
       "health_dashboard": "대시보드 상태",

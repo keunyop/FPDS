@@ -36,7 +36,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
   }
 
   if (!session || apiUnavailable) {
-    return <AdminApiUnavailable title="Run detail could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Run detail could not load." />;
   }
 
   if (!detail) {
@@ -55,7 +55,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
         role: session.user.role,
       }}
     >
-      <RunDetailSurface csrfToken={session.csrf_token} detail={detail} />
+      <RunDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
     </ApplicationShell5>
   );
 }

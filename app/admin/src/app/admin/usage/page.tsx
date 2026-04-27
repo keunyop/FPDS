@@ -38,7 +38,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   }
 
   if (!session || !usage || apiUnavailable) {
-    return <AdminApiUnavailable title="LLM usage visibility could not load." />;
+    return <AdminApiUnavailable locale={locale} title="LLM usage visibility could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

@@ -216,6 +216,36 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: bank and source-catalog detail modals open immediately from list data, then hydrate richer detail through narrow JSON proxy routes
 
+## 2026-04-26 - Product Type Modal Polish
+
+- Surface or Area: `app/admin` protected `/admin/product-types` add/detail/delete modal workflow
+- Vendor Asset: existing Shadcnblocks-derived `offer-modal4`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct modal block edit plus product-type registry composition updates
+- Files Added or Changed: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/destructive-confirm-dialog.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`
+- FPDS Wrappers or Overrides: product type add/detail modals now opt into a narrower no-panel width, and the product type detail modal closes immediately after a successful delete before refreshing the list
+- Direct Vendor Edits: yes; `offer-modal4` now exposes a narrow width variant while keeping the default wide registry modal behavior for bank and source-catalog workflows
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: the shared destructive confirmation dialog was simplified to a title, short description, and action row so delete prompts stay compact
+
+## 2026-04-26 - Bank Registry Modal Density Follow-up
+
+- Surface or Area: `app/admin` protected `/admin/banks` and `/admin/product-types` registry list workflows
+- Vendor Asset: existing Shadcnblocks-derived `offer-modal4`
+- Source: previously installed authenticated `@shadcnblocks` registry asset reused in the admin runtime
+- Install Method: no new vendor install; direct modal block width variant extension plus route-owned registry composition cleanup
+- Files Added or Changed: `app/admin/src/components/offer-modal4.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`
+- FPDS Wrappers or Overrides: bank add/detail modals now use a medium no-panel width, Add bank no longer asks for a visible change reason, and Banks/Product Types keep add actions inside the list toolbar instead of duplicating them in the page header
+- Direct Vendor Edits: yes; `offer-modal4` now exposes a medium width variant while preserving existing narrow and default variants
+- Verification:
+  - `cmd /c npm run typecheck`
+  - `cmd /c npm run build`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+- Notes: source-catalog modals still use the default wide no-panel width because their detail payload is denser
+
 ---
 
 ## 5. Change History

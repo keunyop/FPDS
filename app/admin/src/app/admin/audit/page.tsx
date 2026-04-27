@@ -38,7 +38,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
   }
 
   if (!session || !auditLog || apiUnavailable) {
-    return <AdminApiUnavailable title="Audit history could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Audit history could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
@@ -53,7 +53,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
         role: session.user.role,
       }}
     >
-      <AuditLogSurface auditLog={auditLog} filters={filters} />
+      <AuditLogSurface auditLog={auditLog} filters={filters} locale={locale} />
     </ApplicationShell5>
   );
 }

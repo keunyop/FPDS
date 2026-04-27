@@ -43,7 +43,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
   }
 
   if (!session || !productTypes || apiUnavailable) {
-    return <AdminApiUnavailable title="Product type registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Product type registry could not load." />;
   }
 
   return (

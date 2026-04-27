@@ -42,7 +42,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   }
 
   if (!session || !banks || !productTypes || apiUnavailable) {
-    return <AdminApiUnavailable title="Bank registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Bank registry could not load." />;
   }
 
   return (

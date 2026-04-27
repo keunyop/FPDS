@@ -40,7 +40,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   }
 
   if (!session || !queue || apiUnavailable) {
-    return <AdminApiUnavailable title="Review queue could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Review queue could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

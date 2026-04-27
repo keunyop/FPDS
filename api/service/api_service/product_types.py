@@ -3,8 +3,11 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 import json
+import os
 import re
 from typing import TYPE_CHECKING, Any
+import urllib.error
+import urllib.request
 
 from api_service.errors import SourceRegistryError
 from api_service.security import new_id, utc_now
@@ -28,22 +31,58 @@ _GENERIC_EXPECTED_FIELDS = (
 )
 _TAXONOMY_SEEDED_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 _STOPWORDS = {
+    "able",
     "account",
     "accounts",
+    "and",
+    "are",
     "bank",
     "banking",
     "canada",
+    "card",
     "deposit",
     "deposits",
+    "designed",
+    "easy",
+    "for",
+    "fund",
+    "funds",
+    "has",
+    "have",
+    "into",
+    "little",
+    "more",
+    "most",
+    "not",
+    "offer",
+    "offered",
+    "offers",
+    "often",
+    "or",
     "product",
     "products",
     "rate",
     "rates",
+    "such",
     "with",
     "from",
     "that",
     "this",
+    "usually",
     "your",
+}
+_DISCOVERY_KEYWORD_LIMIT = 12
+_DISCOVERY_KEYWORD_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "summary": {"type": "string"},
+        "keywords": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+    },
+    "required": ["summary", "keywords"],
 }
 
 
@@ -242,6 +281,7 @@ def create_product_type_definition(
         display_name=display_name,
         description=description,
         provided=list(payload.get("discovery_keywords") or []),
+        regenerate=True,
     )
     expected_fields = _normalize_string_list(payload.get("expected_fields") or _GENERIC_EXPECTED_FIELDS)
     fallback_policy = "generic_ai_review"
@@ -322,10 +362,13 @@ def update_product_type_definition(
     if status not in {"active", "inactive"}:
         raise SourceRegistryError(status_code=422, code="invalid_product_type_status", message="status must be active or inactive.")
 
+    definition_supplied = "display_name" in payload or "description" in payload
+    explicit_keywords = "discovery_keywords" in payload
     discovery_keywords = _merge_keywords(
         display_name=display_name,
         description=description,
-        provided=list(payload.get("discovery_keywords") or existing["discovery_keywords"]),
+        provided=list(payload.get("discovery_keywords") or ([] if definition_supplied else existing["discovery_keywords"])),
+        regenerate=explicit_keywords or definition_supplied,
     )
     expected_fields = _normalize_string_list(payload.get("expected_fields") or existing["expected_fields"] or _GENERIC_EXPECTED_FIELDS)
     now = utc_now()
@@ -609,35 +652,195 @@ def _slugify_product_type_code(value: str) -> str:
     return normalized[:50]
 
 
-def _merge_keywords(*, display_name: str, description: str, provided: list[str]) -> list[str]:
-    keywords = _normalize_string_list(provided)
-    seeded = [_normalize_keyword(item) for item in keywords]
-    merged = [item for item in seeded if item]
+def _merge_keywords(*, display_name: str, description: str, provided: list[str], regenerate: bool) -> list[str]:
+    if not regenerate:
+        return _normalize_existing_keywords(provided)
 
-    display_terms = re.findall(r"[a-z0-9]{3,}", display_name.lower())
-    description_terms = re.findall(r"[a-z0-9]{3,}", description.lower())
-    phrase_candidates = [
-        display_name.lower().strip(),
-        display_name.lower().replace("&", "and"),
+    candidates = [*_normalize_string_list(provided)]
+    ai_keywords = _generate_ai_discovery_keywords(display_name=display_name, description=description, provided=candidates)
+    if ai_keywords:
+        candidates.extend(ai_keywords)
+    else:
+        candidates.extend(_generate_heuristic_discovery_keywords(display_name=display_name, description=description))
+    return _sanitize_discovery_keywords(candidates, display_name=display_name)
+
+
+def _generate_ai_discovery_keywords(*, display_name: str, description: str, provided: list[str]) -> list[str]:
+    provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
+    api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
+    if provider != "openai" or not api_key:
+        return []
+
+    payload = {
+        "country_code": "CA",
+        "product_family": "deposit",
+        "display_name": display_name,
+        "description": description,
+        "operator_seed_keywords": provided,
+        "keyword_purpose": (
+            "Keywords are used to find and score official public bank pages from URLs, link text, "
+            "page titles, headings, and short body excerpts during source discovery."
+        ),
+    }
+    request_body = {
+        "model": os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
+        "instructions": (
+            "You generate high-quality discovery keywords for FPDS Canadian deposit product types. "
+            "Use the product type description plus your financial-domain knowledge. "
+            "Return 6 to 12 short keywords or phrases that are likely to appear on official bank pages. "
+            "Prefer product-category terms, URL or heading phrases, and useful attribute terms. "
+            "Avoid filler words, generic words by themselves, sentence fragments, bank names, and invented product names."
+        ),
+        "input": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_text",
+                        "text": json.dumps(payload, ensure_ascii=True),
+                    }
+                ],
+            }
+        ],
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "product_type_discovery_keywords",
+                "strict": True,
+                "schema": _DISCOVERY_KEYWORD_SCHEMA,
+            }
+        },
+    }
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps(request_body, ensure_ascii=True).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            response_payload = json.loads(response.read().decode("utf-8"))
+        response_text = _extract_response_output_text(response_payload)
+        parsed = json.loads(response_text)
+    except (OSError, RuntimeError, json.JSONDecodeError, urllib.error.HTTPError):
+        return []
+    return [str(item) for item in parsed.get("keywords", []) if str(item).strip()]
+
+
+def _generate_heuristic_discovery_keywords(*, display_name: str, description: str) -> list[str]:
+    text = f"{display_name} {description}".lower()
+    candidates: list[str] = [display_name]
+    rule_groups: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+        (
+            ("chequing", "checking", "everyday transaction", "debit card", "bill payment", "withdrawal", "transfer"),
+            (
+                "chequing",
+                "checking account",
+                "everyday banking",
+                "day-to-day banking",
+                "transactions",
+                "debit card",
+                "bill payments",
+                "transfers",
+                "withdrawals",
+                "monthly fee",
+            ),
+        ),
+        (
+            ("savings", "save", "interest", "tier", "withdrawal", "high interest"),
+            ("savings account", "high interest savings", "interest rate", "tiered interest", "balance", "withdrawals"),
+        ),
+        (
+            ("gic", "term deposit", "guaranteed investment", "maturity", "redeemable", "non-redeemable"),
+            ("gic", "guaranteed investment certificate", "term deposit", "maturity", "redeemable", "minimum deposit"),
+        ),
+        (
+            ("tfsa", "tax free", "tax-free"),
+            ("tfsa", "tax free savings account", "registered savings"),
+        ),
+        (
+            ("rrsp", "retirement"),
+            ("rrsp", "retirement savings", "registered retirement savings"),
+        ),
+    )
+    for triggers, terms in rule_groups:
+        if any(trigger in text for trigger in triggers):
+            candidates.extend(terms)
+
+    tokens = [
+        token
+        for token in re.findall(r"[a-z0-9]+", text)
+        if token not in _STOPWORDS and len(token) >= 3
     ]
-    for token in [*display_terms, *description_terms]:
-        if token in _STOPWORDS:
+    for size in (3, 2):
+        for index in range(0, max(0, len(tokens) - size + 1)):
+            candidates.append(" ".join(tokens[index : index + size]))
+    candidates.extend(tokens)
+    return candidates
+
+
+def _sanitize_discovery_keywords(values: list[str], *, display_name: str) -> list[str]:
+    merged: list[str] = []
+    for item in [*values, display_name]:
+        normalized = _normalize_keyword(item)
+        if not normalized or not _is_useful_discovery_keyword(normalized):
             continue
-        normalized = _normalize_keyword(token)
-        if normalized and normalized not in merged:
+        if normalized not in merged:
             merged.append(normalized)
-    for phrase in phrase_candidates:
-        normalized = _normalize_keyword(phrase)
-        if normalized and normalized not in merged:
-            merged.append(normalized)
-    return merged[:12]
+        if len(merged) >= _DISCOVERY_KEYWORD_LIMIT:
+            break
+    return merged
+
+
+def _normalize_existing_keywords(values: list[str]) -> list[str]:
+    merged: list[str] = []
+    for item in values:
+        normalized = _normalize_keyword(item)
+        if not normalized or normalized in merged:
+            continue
+        merged.append(normalized)
+        if len(merged) >= _DISCOVERY_KEYWORD_LIMIT:
+            break
+    return merged
+
+
+def _is_useful_discovery_keyword(value: str) -> bool:
+    if len(value) < 3 or len(value) > 64:
+        return False
+    if not re.search(r"[a-z0-9]", value):
+        return False
+    tokens = re.findall(r"[a-z0-9]+", value)
+    if not tokens or len(tokens) > 5:
+        return False
+    if all(token in _STOPWORDS for token in tokens):
+        return False
+    if len(tokens) == 1 and tokens[0] in _STOPWORDS:
+        return False
+    return True
 
 
 def _normalize_keyword(value: str | None) -> str | None:
     if not value:
         return None
-    normalized = re.sub(r"\s+", " ", value.strip().lower())
+    normalized = re.sub(r"[^a-z0-9&' -]+", " ", value.strip().lower())
+    normalized = re.sub(r"\s+", " ", normalized).strip(" -")
     return normalized or None
+
+
+def _extract_response_output_text(response_payload: dict[str, Any]) -> str:
+    for item in response_payload.get("output", []):
+        if str(item.get("type")) != "message":
+            continue
+        for content in item.get("content", []):
+            content_type = str(content.get("type") or "")
+            if content_type == "refusal":
+                raise RuntimeError(str(content.get("refusal") or "OpenAI refused the product type keyword request."))
+            if content_type == "output_text" and content.get("text"):
+                return str(content["text"])
+    raise RuntimeError("OpenAI product type keyword generator returned no text output.")
 
 
 def _serialize_datetime(value: Any) -> str | None:

@@ -26,6 +26,7 @@ const OVERVIEW_COPY = {
     greetingPrefix: "Hello",
     subtitle: "Review the items that need attention, then jump to the owning surface.",
     sessionVerified: "Session verified",
+    blocked: "Blocked",
     reviewQueue: "Review queue",
     reviewQueueHint: "Queued or deferred",
     runAttention: "Run attention",
@@ -46,49 +47,51 @@ const OVERVIEW_COPY = {
     apiUnavailableBody:
       "FastAPI service를 시작한 뒤 페이지를 새로고침해주세요. 보호된 admin shell은 `/api/admin/auth/session`에 의존합니다.",
     apiUnavailableBlocked: "보호된 navigation, operator context, 인증된 workflow 화면.",
-    breadcrumb: ["Overview", "Dashboard"],
-    greetingFallback: "there",
+    breadcrumb: ["개요", "Dashboard"],
+    greetingFallback: "운영자",
     greetingPrefix: "안녕하세요",
     subtitle: "주의가 필요한 항목만 확인하고 담당 화면으로 이동하세요.",
-    sessionVerified: "Session verified",
-    reviewQueue: "Review queue",
-    reviewQueueHint: "Queued or deferred",
-    runAttention: "Run attention",
-    runAttentionHint: "Failed or partial",
-    dashboardHealth: "Dashboard health",
-    dashboardHealthHint: "Stale, failed, or empty",
-    signupRequests: "Signup requests",
-    signupRequestsHint: "Pending approval",
-    role: "Role",
-    roleHint: "Current access",
-    unavailable: "n/a",
-    healthy: "Healthy",
-    needsAttention: "Needs attention",
+    sessionVerified: "Session 확인됨",
+    blocked: "차단됨",
+    reviewQueue: "검토 대기열",
+    reviewQueueHint: "대기 또는 보류",
+    runAttention: "실행 확인 필요",
+    runAttentionHint: "실패 또는 부분 완료",
+    dashboardHealth: "Dashboard 상태",
+    dashboardHealthHint: "오래됨, 실패, 또는 비어 있음",
+    signupRequests: "가입 요청",
+    signupRequestsHint: "승인 대기",
+    role: "권한",
+    roleHint: "현재 접근 권한",
+    unavailable: "없음",
+    healthy: "정상",
+    needsAttention: "확인 필요",
   },
   ja: {
     apiUnavailableTitle: "Admin API unavailable",
-    apiUnavailableHeading: "Admin web shell is up, but the auth service is not reachable.",
+    apiUnavailableHeading: "Admin web shell は開いていますが、auth service に接続できません。",
     apiUnavailableBody:
-      "Start the FastAPI service and refresh this page. The protected admin shell depends on `/api/admin/auth/session`.",
-    apiUnavailableBlocked: "Protected navigation, operator context, and authenticated workflow surfaces.",
-    breadcrumb: ["Overview", "Dashboard"],
-    greetingFallback: "there",
-    greetingPrefix: "Hello",
-    subtitle: "Review the items that need attention, then jump to the owning surface.",
-    sessionVerified: "Session verified",
-    reviewQueue: "Review queue",
-    reviewQueueHint: "Queued or deferred",
-    runAttention: "Run attention",
-    runAttentionHint: "Failed or partial",
-    dashboardHealth: "Dashboard health",
-    dashboardHealthHint: "Stale, failed, or empty",
-    signupRequests: "Signup requests",
-    signupRequestsHint: "Pending approval",
-    role: "Role",
-    roleHint: "Current access",
-    unavailable: "n/a",
-    healthy: "Healthy",
-    needsAttention: "Needs attention",
+      "FastAPI service を起動してからページを更新してください。保護された admin shell は `/api/admin/auth/session` に依存します。",
+    apiUnavailableBlocked: "保護された navigation、operator context、認証済み workflow 画面。",
+    breadcrumb: ["概要", "Dashboard"],
+    greetingFallback: "operator",
+    greetingPrefix: "こんにちは",
+    subtitle: "対応が必要な項目を確認し、担当画面へ移動してください。",
+    sessionVerified: "Session 確認済み",
+    blocked: "ブロック中",
+    reviewQueue: "審査キュー",
+    reviewQueueHint: "待機または保留",
+    runAttention: "実行の確認",
+    runAttentionHint: "失敗または部分完了",
+    dashboardHealth: "Dashboard 健全性",
+    dashboardHealthHint: "古い、失敗、または空",
+    signupRequests: "登録申請",
+    signupRequestsHint: "承認待ち",
+    role: "ロール",
+    roleHint: "現在のアクセス権",
+    unavailable: "なし",
+    healthy: "正常",
+    needsAttention: "確認が必要",
   },
 } as const satisfies Record<
   AdminLocale,
@@ -102,6 +105,7 @@ const OVERVIEW_COPY = {
     greetingPrefix: string;
     subtitle: string;
     sessionVerified: string;
+    blocked: string;
     reviewQueue: string;
     reviewQueueHint: string;
     runAttention: string;
@@ -150,7 +154,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
             <p className="mt-3 text-sm leading-7 text-muted-foreground">{copy.apiUnavailableBody}</p>
           </div>
           <div className="mt-6 rounded-lg border border-destructive/20 bg-critical-soft px-4 py-3 text-sm text-destructive">
-            <strong className="block font-medium">Blocked</strong>
+            <strong className="block font-medium">{copy.blocked}</strong>
             <span className="mt-1 block leading-6">{copy.apiUnavailableBlocked}</span>
           </div>
         </section>

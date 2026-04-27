@@ -204,6 +204,13 @@ The current system already stores product-type `display_name`, `description`, an
 
 The follow-on design requires stronger use of `description` itself.
 
+Current runtime rule:
+- when an operator creates a product type, FPDS generates `discovery_keywords` from the display name and full description through the configured AI provider when available
+- the generator should use financial-domain knowledge to produce discovery-oriented terms and short phrases, not raw description tokens
+- generated keywords should favor page-discovery signals such as product-category terms, URL or heading phrases, and product attributes that help find official bank pages
+- filler words, generic single words, bank-specific product names, and sentence fragments should be filtered before persistence
+- if the AI provider is unavailable, product type creation should still succeed using a conservative deterministic fallback, because missing AI credentials should not block registry administration
+
 The description should explicitly inform:
 - what makes a page a true detail page for this product type
 - which fields or page signals should be present
@@ -364,3 +371,4 @@ Future implementation should be considered aligned to this design when:
 |---|---|
 | 2026-04-18 | Added the homepage-first discovery quality-improvement baseline centered on AI parallel scoring, stronger product-type description usage, and page-level evidence scoring |
 | 2026-04-18 | Recorded the first implementation slice: bounded AI parallel scorer, page-level evidence gating, generated-source discovery metadata persistence, and source-detail explainability |
+| 2026-04-26 | Recorded the runtime rule that product type `discovery_keywords` are AI-generated from display name and description when the provider is configured, with deterministic fallback only for provider-unavailable cases |

@@ -41,7 +41,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
   }
 
   if (!session || !changes || apiUnavailable) {
-    return <AdminApiUnavailable title="Change history could not load." />;
+    return <AdminApiUnavailable locale={locale} title="Change history could not load." />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
@@ -56,7 +56,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
         role: session.user.role,
       }}
     >
-      <ChangeHistorySurface changes={changes} filters={filters} />
+      <ChangeHistorySurface changes={changes} filters={filters} locale={locale} />
     </ApplicationShell5>
   );
 }

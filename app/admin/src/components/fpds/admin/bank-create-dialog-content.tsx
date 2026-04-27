@@ -1,23 +1,24 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { FileText, Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
+import { Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-  InputGroupTextarea,
 } from "@/components/ui/input-group";
 import type { BankItem, ProductTypeItem } from "@/lib/admin-api";
+import type { AdminLocale } from "@/lib/admin-i18n";
 import { buildAdminProductTypeOptions, formatAdminProductType } from "@/lib/admin-product-types";
 
 type BankCreateDialogContentProps = {
   csrfToken: string | null | undefined;
+  locale: AdminLocale;
   productTypes: ProductTypeItem[];
   onCreated: (bank: BankItem | null) => void;
 };
@@ -42,6 +43,57 @@ const STATUS_OPTIONS = [
   { label: "inactive", value: "inactive" },
 ] as const;
 
+const CREATE_BANK_COPY = {
+  en: {
+    bankName: "Bank name",
+    homepageUrl: "Homepage URL",
+    language: "Language",
+    status: "Status",
+    active: "active",
+    inactive: "inactive",
+    initialCoverage: "Initial coverage",
+    coverageHelp: "Search and pick any product families you already want this bank to cover. You can add more later in the bank detail modal.",
+    searchProductTypes: "Search product types",
+    noProductTypes: "No product types matched the current search.",
+    adding: "Adding...",
+    addBank: "Add bank",
+    createFailed: "Bank could not be created.",
+    createApiFailed: "Bank could not be created. Check the admin API and try again.",
+  },
+  ko: {
+    bankName: "은행명",
+    homepageUrl: "홈페이지 URL",
+    language: "언어",
+    status: "상태",
+    active: "활성",
+    inactive: "비활성",
+    initialCoverage: "초기 coverage",
+    coverageHelp: "이 은행에서 바로 cover할 상품군을 검색해 선택하세요. 나중에 은행 상세 modal에서 더 추가할 수 있습니다.",
+    searchProductTypes: "상품 유형 검색",
+    noProductTypes: "현재 검색에 맞는 상품 유형이 없습니다.",
+    adding: "추가 중...",
+    addBank: "은행 추가",
+    createFailed: "은행을 생성할 수 없습니다.",
+    createApiFailed: "은행을 생성할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+  },
+  ja: {
+    bankName: "銀行名",
+    homepageUrl: "ホームページURL",
+    language: "言語",
+    status: "状態",
+    active: "有効",
+    inactive: "無効",
+    initialCoverage: "初期 coverage",
+    coverageHelp: "この銀行で最初に cover する商品群を検索して選択してください。後から銀行詳細 modal で追加できます。",
+    searchProductTypes: "商品タイプを検索",
+    noProductTypes: "現在の検索に該当する商品タイプはありません。",
+    adding: "追加中...",
+    addBank: "銀行を追加",
+    createFailed: "銀行を作成できません。",
+    createApiFailed: "銀行を作成できません。Admin APIを確認してから再試行してください。",
+  },
+} as const;
+
 const DEFAULT_CREATE_FORM: CreateBankFormState = {
   bank_name: "",
   homepage_url: "",
@@ -51,7 +103,8 @@ const DEFAULT_CREATE_FORM: CreateBankFormState = {
   initial_coverage_product_types: [],
 };
 
-export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: BankCreateDialogContentProps) {
+export function BankCreateDialogContent({ csrfToken, locale, productTypes, onCreated }: BankCreateDialogContentProps) {
+  const copy = CREATE_BANK_COPY[locale];
   const router = useRouter();
   const [createForm, setCreateForm] = useState<CreateBankFormState>(DEFAULT_CREATE_FORM);
   const [coverageSearch, setCoverageSearch] = useState("");
@@ -88,7 +141,7 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
       });
       const payload = (await response.json()) as { data?: { bank?: BankItem }; error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Bank could not be created.");
+        setError(payload.error?.message ?? copy.createFailed);
         return;
       }
 
@@ -97,7 +150,7 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
       onCreated(createdBank);
       router.refresh();
     } catch {
-      setError("Bank could not be created. Check the admin API and try again.");
+      setError(copy.createApiFailed);
     } finally {
       setPending(false);
     }
@@ -111,7 +164,7 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
         <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
           <InputField
             icon={<Landmark className="size-4" />}
-            label="Bank name"
+            label={copy.bankName}
             onChange={(value) =>
               setCreateForm((current) => ({ ...current, bank_name: value }))
             }
@@ -119,7 +172,7 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
           />
           <InputField
             icon={<Globe className="size-4" />}
-            label="Homepage URL"
+            label={copy.homepageUrl}
             onChange={(value) =>
               setCreateForm((current) => ({ ...current, homepage_url: value }))
             }
@@ -129,7 +182,7 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField
             icon={<Languages className="size-4" />}
-            label="Language"
+            label={copy.language}
             options={LANGUAGE_OPTIONS}
             value={createForm.source_language}
             onChange={(value) =>
@@ -141,7 +194,8 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
           />
           <SelectField
             icon={<ShieldCheck className="size-4" />}
-            label="Status"
+            label={copy.status}
+            locale={locale}
             options={STATUS_OPTIONS}
             value={createForm.status}
             onChange={(value) =>
@@ -150,15 +204,15 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
           />
         </div>
         <Field>
-          <FieldLabel>Initial coverage</FieldLabel>
+          <FieldLabel>{copy.initialCoverage}</FieldLabel>
           <div className="grid gap-3 rounded-2xl border border-border/80 bg-muted/20 p-4">
             <p className="text-sm leading-6 text-muted-foreground">
-              Search and pick any product families you already want this bank to cover. You can add more later in the bank detail modal.
+              {copy.coverageHelp}
             </p>
             <input
               className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
               onChange={(event) => setCoverageSearch(event.target.value)}
-              placeholder="Search product types"
+              placeholder={copy.searchProductTypes}
               type="search"
               value={coverageSearch}
             />
@@ -189,34 +243,13 @@ export function BankCreateDialogContent({ csrfToken, productTypes, onCreated }: 
               })}
             </div>
             {filteredOptions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No product types matched the current search.</p>
+              <p className="text-sm text-muted-foreground">{copy.noProductTypes}</p>
             ) : null}
           </div>
         </Field>
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel>Change reason</FieldLabel>
-          <InputGroup className="min-h-24 items-start">
-            <InputGroupAddon align="block-start">
-              <FileText className="size-4" />
-            </InputGroupAddon>
-            <InputGroupTextarea
-              aria-invalid={Boolean(error)}
-              onChange={(event) =>
-                setCreateForm((current) => ({
-                  ...current,
-                  change_reason: event.target.value,
-                }))
-              }
-              placeholder="Why is this bank being added?"
-              rows={3}
-              value={createForm.change_reason}
-            />
-          </InputGroup>
-          {error ? <FieldError>{error}</FieldError> : null}
-        </Field>
         <div className="flex justify-end">
           <Button disabled={pending} type="submit">
-            {pending ? "Adding..." : "Add bank"}
+            {pending ? copy.adding : copy.addBank}
           </Button>
         </div>
       </form>
@@ -255,12 +288,14 @@ function SelectField({
   value,
   onChange,
   icon,
+  locale,
 }: {
   label: string;
   options: ReadonlyArray<{ label: string; value: string }>;
   value: string;
   onChange: (value: string) => void;
   icon: ReactNode;
+  locale?: AdminLocale;
 }) {
   return (
     <label className="grid gap-2 text-sm">
@@ -274,7 +309,7 @@ function SelectField({
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label}
+              {locale && (option.value === "active" || option.value === "inactive") ? CREATE_BANK_COPY[locale][option.value] : option.label}
             </option>
           ))}
         </select>

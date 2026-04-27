@@ -26,6 +26,7 @@
       "runs": "実行履歴",
       "run_detail": "実行詳細",
       "changes": "変更履歴",
+      "audit": "監査ログ",
       "publish": "公開モニター",
       "usage": "LLM利用量",
       "health_dashboard": "ダッシュボード健全性",

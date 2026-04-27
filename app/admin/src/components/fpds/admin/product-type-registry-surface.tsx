@@ -8,7 +8,7 @@ import { OfferModal4 } from "@/components/offer-modal4";
 import { ProductTypeCreateDialogContent } from "@/components/fpds/admin/product-type-create-dialog-content";
 import { ProductTypeDetailDialogContent } from "@/components/fpds/admin/product-type-detail-dialog-content";
 import type { ProductTypeItem, ProductTypeListResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, localizedMissing, type AdminLocale } from "@/lib/admin-i18n";
 
 export type ProductTypePageFilters = {
   q: string;
@@ -25,6 +25,75 @@ type ProductTypeRegistrySurfaceProps = {
   activeProductType: ProductTypeItem | null;
 };
 
+const PRODUCT_TYPE_COPY = {
+  en: {
+    addProductType: "Add product type",
+    description: "Operator-managed product type definitions.",
+    path: ["Operations", "Product Types"],
+    title: "Product Types",
+    productTypes: "Product types",
+    active: "Active",
+    inactive: "Inactive",
+    search: "Search",
+    searchPlaceholder: "name, code, or description",
+    status: "Status",
+    all: "All",
+    apply: "Apply",
+    reset: "Reset",
+    listEyebrow: "Product type list",
+    productType: "Product type",
+    code: "Code",
+    fallbackPolicy: "Fallback policy",
+    discoveryKeywords: "Discovery keywords",
+    noMatches: "No product types matched the current filter set.",
+    detailTitleFallback: "Product type detail",
+  },
+  ko: {
+    addProductType: "상품 유형 추가",
+    description: "운영자가 관리하는 상품 유형 정의.",
+    path: ["운영", "상품 유형"],
+    title: "상품 유형",
+    productTypes: "상품 유형",
+    active: "활성",
+    inactive: "비활성",
+    search: "검색",
+    searchPlaceholder: "이름, 코드, 설명",
+    status: "상태",
+    all: "전체",
+    apply: "적용",
+    reset: "초기화",
+    listEyebrow: "상품 유형 목록",
+    productType: "상품 유형",
+    code: "코드",
+    fallbackPolicy: "Fallback policy",
+    discoveryKeywords: "Discovery keywords",
+    noMatches: "현재 필터에 맞는 상품 유형이 없습니다.",
+    detailTitleFallback: "상품 유형 상세",
+  },
+  ja: {
+    addProductType: "商品タイプを追加",
+    description: "運用者が管理する商品タイプ定義。",
+    path: ["運用", "商品タイプ"],
+    title: "商品タイプ",
+    productTypes: "商品タイプ",
+    active: "有効",
+    inactive: "無効",
+    search: "検索",
+    searchPlaceholder: "名前、コード、説明",
+    status: "状態",
+    all: "すべて",
+    apply: "適用",
+    reset: "リセット",
+    listEyebrow: "商品タイプ一覧",
+    productType: "商品タイプ",
+    code: "コード",
+    fallbackPolicy: "Fallback policy",
+    discoveryKeywords: "Discovery keywords",
+    noMatches: "現在のフィルターに該当する商品タイプはありません。",
+    detailTitleFallback: "商品タイプ詳細",
+  },
+} as const;
+
 export function ProductTypeRegistrySurface({
   productTypes,
   filters,
@@ -34,6 +103,7 @@ export function ProductTypeRegistrySurface({
   activeProductTypeCode,
   activeProductType,
 }: ProductTypeRegistrySurfaceProps) {
+  const copy = PRODUCT_TYPE_COPY[locale];
   const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
   const [selectedProductTypeCode, setSelectedProductTypeCode] = useState(activeProductTypeCode);
   const [selectedProductTypeOverride, setSelectedProductTypeOverride] = useState<ProductTypeItem | null>(activeProductType);
@@ -117,50 +187,39 @@ export function ProductTypeRegistrySurface({
   return (
     <section className="grid gap-6">
       <AdminPageHeader
-        actions={
-          <>
-            <button
-              className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
-              onClick={openAddModal}
-              type="button"
-            >
-              Add product type
-            </button>
-          </>
-        }
-        description="Operator-managed product type definitions."
-        path={["Operations", "Product Types"]}
-        title="Product Types"
+        description={copy.description}
+        path={copy.path}
+        title={copy.title}
       />
 
       <article className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Product types" value={String(productTypes.summary.total_items)} />
-        <StatCard label="Active" value={String(productTypes.summary.status_counts.active ?? 0)} />
-        <StatCard label="Inactive" value={String(productTypes.summary.status_counts.inactive ?? 0)} />
+        <StatCard label={copy.productTypes} value={String(productTypes.summary.total_items)} />
+        <StatCard label={copy.active} value={String(productTypes.summary.status_counts.active ?? 0)} />
+        <StatCard label={copy.inactive} value={String(productTypes.summary.status_counts.inactive ?? 0)} />
       </article>
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <form action={buildAdminHref("/admin/product-types", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
           <label className="grid gap-2 text-sm">
-            <span className="font-medium text-foreground">Search</span>
+            <span className="font-medium text-foreground">{copy.search}</span>
             <input
               className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
               defaultValue={filters.q}
               name="q"
-              placeholder="name, code, or description"
+              placeholder={copy.searchPlaceholder}
               type="search"
             />
           </label>
-          <FilterSelect defaultValue={filters.status} label="Status" name="status" options={productTypes.facets.statuses} />
+          <FilterSelect allLabel={copy.all} defaultValue={filters.status} label={copy.status} name="status" options={productTypes.facets.statuses} />
           <div className="flex items-end gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" type="submit">
-              Apply
+              {copy.apply}
             </button>
             <Link
               className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
               href={buildAdminHref("/admin/product-types", new URLSearchParams(), locale)}
             >
-              Reset
+              {copy.reset}
             </Link>
           </div>
         </form>
@@ -169,7 +228,7 @@ export function ProductTypeRegistrySurface({
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Product type list</p>
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.listEyebrow}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -177,7 +236,7 @@ export function ProductTypeRegistrySurface({
               onClick={openAddModal}
               type="button"
             >
-              Add product type
+              {copy.addProductType}
             </button>
           </div>
         </div>
@@ -186,18 +245,18 @@ export function ProductTypeRegistrySurface({
           <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                <th className="border-b border-border px-3 py-3 font-medium">Product type</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Code</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Status</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Fallback policy</th>
-                <th className="border-b border-border px-3 py-3 font-medium">Discovery keywords</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.productType}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.code}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.fallbackPolicy}</th>
+                <th className="border-b border-border px-3 py-3 font-medium">{copy.discoveryKeywords}</th>
               </tr>
             </thead>
             <tbody>
               {productTypes.items.length === 0 ? (
                 <tr>
                   <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={5}>
-                    No product types matched the current filter set.
+                    {copy.noMatches}
                   </td>
                 </tr>
               ) : (
@@ -214,10 +273,10 @@ export function ProductTypeRegistrySurface({
                       <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.product_type_code}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
+                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{formatStatus(locale, item.status)}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.fallback_policy}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">
-                      {item.discovery_keywords.join(", ") || "n/a"}
+                      {item.discovery_keywords.join(", ") || localizedMissing(locale)}
                     </td>
                   </tr>
                 ))
@@ -231,22 +290,25 @@ export function ProductTypeRegistrySurface({
         onOpenChange={handleAddDialogChange}
         open={addDialogOpen}
         showPanel={false}
-        title="Add product type"
+        title={copy.addProductType}
+        width="narrow"
       >
-        <ProductTypeCreateDialogContent csrfToken={csrfToken} onCreated={handleProductTypeCreated} />
+        <ProductTypeCreateDialogContent csrfToken={csrfToken} locale={locale} onCreated={handleProductTypeCreated} />
       </OfferModal4>
 
       <OfferModal4
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
-        title={selectedProductType ? selectedProductType.display_name : "Product type detail"}
+        title={selectedProductType ? selectedProductType.display_name : copy.detailTitleFallback}
+        width="narrow"
       >
         {selectedProductType ? (
           <ProductTypeDetailDialogContent
             csrfToken={csrfToken}
             key={selectedProductType.product_type_code}
             locale={locale}
+            onDeleted={closeModal}
             productType={selectedProductType}
           />
         ) : null}
@@ -276,11 +338,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function FilterSelect({
+  allLabel,
   defaultValue,
   label,
   name,
   options,
 }: {
+  allLabel: string;
   defaultValue: string;
   label: string;
   name: string;
@@ -290,7 +354,7 @@ function FilterSelect({
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
       <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={defaultValue} name={name}>
-        <option value="">All</option>
+        <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -299,4 +363,14 @@ function FilterSelect({
       </select>
     </label>
   );
+}
+
+function formatStatus(locale: AdminLocale, value: string) {
+  if (value === "active") {
+    return PRODUCT_TYPE_COPY[locale].active;
+  }
+  if (value === "inactive") {
+    return PRODUCT_TYPE_COPY[locale].inactive;
+  }
+  return value;
 }

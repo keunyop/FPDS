@@ -29,12 +29,94 @@ const STATUS_OPTIONS = [
   { label: "inactive", value: "inactive" },
 ] as const;
 
+const DETAIL_CATALOG_COPY = {
+  en: {
+    catalogItemId: "Catalog item id",
+    generatedSources: "Generated sources",
+    homepageUrl: "Homepage URL",
+    sampleSourceIds: "Sample source ids",
+    noGeneratedSources: "No generated sources yet",
+    bank: "Bank",
+    productType: "Product type",
+    status: "Status",
+    changeReason: "Change reason",
+    placeholder: "Why was this coverage updated?",
+    viewGeneratedSources: "View generated sources",
+    saving: "Saving...",
+    saveCoverage: "Save coverage",
+    recentHistory: "Recent collection history",
+    noRecentRuns: "No collection runs were linked to this coverage yet.",
+    started: "started",
+    candidates: (count: number) => `${count} candidates`,
+    showingLatest: "Showing the latest 3 runs here. Open a run detail to inspect older collection history.",
+    updateFailed: "Source catalog item could not be updated.",
+    updateApiFailed: "Source catalog item could not be updated. Check the admin API and try again.",
+    updated: "Source catalog item was updated.",
+    active: "Active",
+    inactive: "Inactive",
+    missing: "n/a",
+  },
+  ko: {
+    catalogItemId: "Catalog item id",
+    generatedSources: "생성된 소스",
+    homepageUrl: "홈페이지 URL",
+    sampleSourceIds: "샘플 source id",
+    noGeneratedSources: "아직 생성된 소스가 없습니다",
+    bank: "은행",
+    productType: "상품 유형",
+    status: "상태",
+    changeReason: "변경 사유",
+    placeholder: "이 coverage를 변경한 이유",
+    viewGeneratedSources: "생성 소스 보기",
+    saving: "저장 중...",
+    saveCoverage: "Coverage 저장",
+    recentHistory: "최근 collection 이력",
+    noRecentRuns: "아직 이 coverage와 연결된 collection run이 없습니다.",
+    started: "시작",
+    candidates: (count: number) => `candidate ${count}개`,
+    showingLatest: "여기에는 최근 3개 run만 표시합니다. 이전 collection 이력은 run 상세에서 확인하세요.",
+    updateFailed: "Source catalog 항목을 업데이트할 수 없습니다.",
+    updateApiFailed: "Source catalog 항목을 업데이트할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
+    updated: "Source catalog 항목이 업데이트되었습니다.",
+    active: "활성",
+    inactive: "비활성",
+    missing: "없음",
+  },
+  ja: {
+    catalogItemId: "Catalog item id",
+    generatedSources: "生成済みソース",
+    homepageUrl: "ホームページURL",
+    sampleSourceIds: "サンプル source id",
+    noGeneratedSources: "生成済みソースはまだありません",
+    bank: "銀行",
+    productType: "商品タイプ",
+    status: "状態",
+    changeReason: "変更理由",
+    placeholder: "この coverage を更新した理由",
+    viewGeneratedSources: "生成ソースを見る",
+    saving: "保存中...",
+    saveCoverage: "Coverage を保存",
+    recentHistory: "最近の collection 履歴",
+    noRecentRuns: "この coverage に紐づく collection run はまだありません。",
+    started: "開始",
+    candidates: (count: number) => `candidate ${count} 件`,
+    showingLatest: "ここでは最新3件の run を表示しています。以前の collection 履歴は run 詳細で確認してください。",
+    updateFailed: "Source catalog 項目を更新できません。",
+    updateApiFailed: "Source catalog 項目を更新できません。Admin APIを確認してから再試行してください。",
+    updated: "Source catalog 項目を更新しました。",
+    active: "有効",
+    inactive: "無効",
+    missing: "なし",
+  },
+} as const;
+
 export function SourceCatalogDetailDialogContent({
   bankOptions,
   detail,
   locale,
   csrfToken,
 }: SourceCatalogDetailDialogContentProps) {
+  const copy = DETAIL_CATALOG_COPY[locale];
   const router = useRouter();
   const [form, setForm] = useState({
     bank_code: detail.catalog_item.bank_code,
@@ -63,13 +145,13 @@ export function SourceCatalogDetailDialogContent({
       });
       const payload = (await response.json()) as { error?: { message?: string } };
       if (!response.ok) {
-        setError(payload.error?.message ?? "Source catalog item could not be updated.");
+        setError(payload.error?.message ?? copy.updateFailed);
         return;
       }
-      setMessage("Source catalog item was updated.");
+      setMessage(copy.updated);
       router.refresh();
     } catch {
-      setError("Source catalog item could not be updated. Check the admin API and try again.");
+      setError(copy.updateApiFailed);
     } finally {
       setPending(false);
     }
@@ -79,10 +161,10 @@ export function SourceCatalogDetailDialogContent({
     <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-5 lg:space-y-0">
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <ReadonlySummary label="Catalog item id" value={detail.catalog_item.catalog_item_id} />
-          <ReadonlySummary label="Generated sources" value={String(detail.catalog_item.generated_source_count)} />
-          <ReadonlySummary label="Homepage URL" value={detail.catalog_item.homepage_url ?? "n/a"} />
-          <ReadonlySummary label="Sample source ids" value={detail.sample_source_ids.join(", ") || "No generated sources yet"} />
+          <ReadonlySummary label={copy.catalogItemId} value={detail.catalog_item.catalog_item_id} />
+          <ReadonlySummary label={copy.generatedSources} value={String(detail.catalog_item.generated_source_count)} />
+          <ReadonlySummary label={copy.homepageUrl} value={detail.catalog_item.homepage_url ?? copy.missing} />
+          <ReadonlySummary label={copy.sampleSourceIds} value={detail.sample_source_ids.join(", ") || copy.noGeneratedSources} />
         </div>
 
         {message ? <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
@@ -91,27 +173,27 @@ export function SourceCatalogDetailDialogContent({
         <form className="space-y-4" onSubmit={handleSave}>
           <div className="grid gap-4 lg:grid-cols-3">
             <SelectField
-              label="Bank"
+              label={copy.bank}
               options={bankOptions.map((option) => ({ label: option.bank_name, value: option.bank_code }))}
               value={form.bank_code}
               onChange={(value) => setForm((current) => ({ ...current, bank_code: value }))}
             />
             <SelectField
-              label="Product type"
+              label={copy.productType}
               options={PRODUCT_TYPE_OPTIONS}
               value={form.product_type}
               onChange={(value) => setForm((current) => ({ ...current, product_type: value }))}
             />
             <SelectField
-              label="Status"
-              options={STATUS_OPTIONS}
+              label={copy.status}
+              options={STATUS_OPTIONS.map((option) => ({ ...option, label: formatStatus(locale, option.value) }))}
               value={form.status}
               onChange={(value) => setForm((current) => ({ ...current, status: value }))}
             />
           </div>
 
           <Field data-invalid={Boolean(error)}>
-            <FieldLabel>Change reason</FieldLabel>
+            <FieldLabel>{copy.changeReason}</FieldLabel>
             <InputGroup className="min-h-20 items-start">
               <InputGroupAddon align="block-start">
                 <FileText className="size-4" />
@@ -124,7 +206,7 @@ export function SourceCatalogDetailDialogContent({
                     change_reason: event.target.value,
                   }))
                 }
-                placeholder="Why was this coverage updated?"
+                placeholder={copy.placeholder}
                 rows={2}
                 value={form.change_reason}
               />
@@ -137,19 +219,19 @@ export function SourceCatalogDetailDialogContent({
               className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
               href={buildAdminHref("/admin/sources", new URLSearchParams(`bank_code=${detail.catalog_item.bank_code}&product_type=${detail.catalog_item.product_type}`), locale)}
             >
-              View generated sources
+              {copy.viewGeneratedSources}
             </Link>
             <Button disabled={pending} type="submit">
-              {pending ? "Saving..." : "Save coverage"}
+              {pending ? copy.saving : copy.saveCoverage}
             </Button>
           </div>
         </form>
       </div>
 
       <div className="space-y-3 rounded-[1.5rem] border border-border/80 bg-muted/20 p-4">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Recent collection history</p>
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{copy.recentHistory}</p>
         {detail.recent_runs.length === 0 ? (
-          <p className="text-sm leading-6 text-muted-foreground">No collection runs were linked to this coverage yet.</p>
+          <p className="text-sm leading-6 text-muted-foreground">{copy.noRecentRuns}</p>
         ) : (
           <div className="grid gap-3">
             {detail.recent_runs.slice(0, 3).map((item) => (
@@ -160,12 +242,12 @@ export function SourceCatalogDetailDialogContent({
                       {item.run_id}
                     </Link>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {item.pipeline_stage || item.trigger_type} started {item.started_at ?? "n/a"}
+                      {item.pipeline_stage || item.trigger_type} {copy.started} {item.started_at ?? copy.missing}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{item.run_status}</span>
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{item.candidate_count} candidates</span>
+                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{copy.candidates(item.candidate_count)}</span>
                   </div>
                 </div>
                 {item.error_summary ? <p className="mt-3 text-sm leading-6 text-destructive">{item.error_summary}</p> : null}
@@ -175,12 +257,22 @@ export function SourceCatalogDetailDialogContent({
         )}
         {detail.recent_runs.length > 3 ? (
           <p className="text-xs leading-5 text-muted-foreground">
-            Showing the latest 3 runs here. Open a run detail to inspect older collection history.
+            {copy.showingLatest}
           </p>
         ) : null}
       </div>
     </div>
   );
+}
+
+function formatStatus(locale: AdminLocale, value: string) {
+  if (value === "active") {
+    return DETAIL_CATALOG_COPY[locale].active;
+  }
+  if (value === "inactive") {
+    return DETAIL_CATALOG_COPY[locale].inactive;
+  }
+  return value;
 }
 
 function ReadonlySummary({ label, value }: { label: string; value: string }) {
