@@ -75,6 +75,7 @@ from api_service.review_queue import load_review_queue, normalize_review_queue_f
 from api_service.run_retry import RunRetryError, retry_failed_run
 from api_service.run_status import load_run_status_detail, load_run_status_list, normalize_run_status_filters
 from api_service.source_registry import (
+    delete_source_registry_item,
     load_source_registry_detail,
     load_source_registry_list,
     normalize_source_registry_filters,
@@ -224,7 +225,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=sorted({*settings.allowed_public_origins, *settings.allowed_admin_origins}),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
 )
 
@@ -476,6 +477,26 @@ async def patch_source_registry(
         message="Source registry rows are read-only. Update Banks or Source Catalog instead.",
         request=request,
     )
+
+
+@app.delete("/api/admin/sources/{source_id}")
+async def delete_source_registry(request: Request, source_id: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        source = delete_source_registry_item(
+            connection,
+            source_id=source_id,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"source": source}, request)
 
 
 @app.post("/api/admin/source-collections")

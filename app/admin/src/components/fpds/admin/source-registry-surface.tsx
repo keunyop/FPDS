@@ -38,7 +38,7 @@ const SOURCE_COPY = {
     productType: "Product type",
     status: "Status",
     role: "Role",
-    apply: "Apply",
+    apply: "Search",
     reset: "Reset",
     generatedSourceDetail: "Generated source detail",
     source: "Source",
@@ -66,7 +66,7 @@ const SOURCE_COPY = {
     productType: "상품 유형",
     status: "상태",
     role: "역할",
-    apply: "적용",
+    apply: "Search",
     reset: "초기화",
     generatedSourceDetail: "생성 source 상세",
     source: "소스",
@@ -94,7 +94,7 @@ const SOURCE_COPY = {
     productType: "商品タイプ",
     status: "状態",
     role: "ロール",
-    apply: "適用",
+    apply: "Search",
     reset: "リセット",
     generatedSourceDetail: "生成 source 詳細",
     source: "ソース",
@@ -113,13 +113,6 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
   return (
     <section className="grid min-w-0 gap-6">
       <AdminPageHeader
-        actions={
-          <>
-            <Link className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
-              {copy.manageBanks}
-            </Link>
-          </>
-        }
         description={copy.description}
         path={copy.path}
         title={copy.title}
@@ -199,7 +192,7 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
                         {item.source_url}
                       </a>
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">{item.updated_at ?? copy.missing}</td>
+                    <td className="border-b border-border/70 px-3 py-4 text-muted-foreground">{formatSourceDateTime(item.updated_at, copy.missing)}</td>
                   </tr>
                 ))
               )}
@@ -246,4 +239,21 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
   );
+}
+
+function formatSourceDateTime(value: string | null, missing: string) {
+  if (!value) {
+    return missing;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return [
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`,
+  ].join(" ");
 }

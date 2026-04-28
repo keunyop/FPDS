@@ -35,7 +35,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 1. The admin console is a browser-based operator surface protected by server-side session auth.
 2. Review, runs, change history, audit, publish, usage, and dashboard health remain separate operator surfaces.
 3. Source registry management is an operations surface, not a hidden settings page.
-4. The first source-registry slice is intentionally minimal: bank setup plus bank-owned coverage management, while generated source rows remain read-only.
+4. The first source-registry slice is intentionally minimal: bank setup plus bank-owned coverage management, while generated source rows are inspectable and may only be operator-removed through an audit-visible `removed` status transition.
 5. Bulk collection may start from the bank list as long as the collect action still resolves down to the existing bank-plus-product coverage items.
 6. Dynamic operator-defined product-type onboarding is a later slice because it needs explicit AI-assisted discovery, parser, and fallback contracts beyond the current canonical product set.
 5. Collection launched from the source registry means candidate-producing ingestion through `normalized_candidate`, not raw fetch only.
@@ -258,7 +258,7 @@ Purpose:
 `/admin/sources` minimum list behavior:
 - filter by bank, country, product type, status, role
 - search by source id, source name, URL, product key
-- expose read-only drill-in for generated source rows
+- expose drill-in for generated source rows, with admin-only removal for bad generated source details
 
 Minimum row fields:
 - source id
@@ -273,8 +273,9 @@ Minimum row fields:
 - updated at
 
 `/admin/sources/:sourceId` minimum detail behavior:
-- read-only source metadata
+- source metadata inspection
 - role/status visibility
+- admin-only remove action that marks the source `removed`
 - recent collection history summary
 - linked run drilldown
 
@@ -284,7 +285,7 @@ Rules:
 - `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
 - `/admin/product-types` now owns operator-managed dynamic product-type definitions and is the source of truth for bank coverage option search
 - dynamic product types use the generic AI extraction/normalization fallback path and remain review-first rather than auto-publish
-- `/admin/sources` and `/admin/sources/:sourceId` are read-only generated-source surfaces
+- `/admin/sources` and `/admin/sources/:sourceId` are generated-source inspection surfaces; destructive cleanup is limited to an admin-only soft remove that preserves audit and historical run context
 - collection means full candidate-producing ingestion through `normalized_candidate`
 - `detail` sources are candidate-producing by default
 - supporting sources may be included for evidence support, but should not create standalone primary candidates unless explicitly configured

@@ -31,7 +31,7 @@
       "source_type": "html",
       "discovery_role": "detail",
       "purpose": "BMO Practical Chequing detail source",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/practical/",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical/",
       "expected_fields": [
         "product_name",
         "monthly_fee",
@@ -46,7 +46,7 @@
       "source_type": "html",
       "discovery_role": "detail",
       "purpose": "BMO Plus Chequing detail source",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/plus/",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/plus/",
       "expected_fields": [
         "product_name",
         "monthly_fee",
@@ -76,12 +76,27 @@
       "source_type": "html",
       "discovery_role": "detail",
       "purpose": "BMO Premium Chequing detail source",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-accounts/premium/",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/premium/",
       "expected_fields": [
         "product_name",
         "monthly_fee",
         "included_transactions",
         "family_bundle_benefits"
+      ]
+    },
+    {
+      "source_id": "BMO-CHQ-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "BMO AIR MILES Chequing detail source",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/air-miles/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "rewards_benefits"
       ]
     },
     {

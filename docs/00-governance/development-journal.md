@@ -62,6 +62,61 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-28 - Source Detail Soft Remove
+
+- WBS: `5.15`, source registry admin operations
+- Status: `done`
+- Goal: add an operator-safe way to delete bad generated Source Detail rows before rerunning collection
+- Why now: the BMO chequing source audit found unrelated generated source details, and the Product Owner needs cleanup without manually editing the database
+- Outcome: added admin-only `DELETE /api/admin/sources/{source_id}` that marks a source row `removed` and writes a `source_registry_item_removed` audit event. Source Detail now shows a shared destructive confirmation action for admins, proxies the delete through Next.js with CSRF, and returns to the Sources list after success. Homepage source materialization now avoids inactivating `removed` rows and preserves `removed` status on upsert so a recollect does not silently reactivate an operator-suppressed URL.
+- Not done: no live BMO source rows were removed and no live BMO recollection was launched in this slice
+- Key files: `api/service/api_service/source_registry.py`, `api/service/api_service/main.py`, `api/service/api_service/source_catalog.py`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, `app/admin/src/app/admin/sources/[sourceId]/delete/route.ts`
+- Decisions: implemented delete as a soft remove because source evidence and collection history must remain auditable; kept bulk deletion out of scope until there is a stronger review flow and reason capture
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_registry tests.test_source_catalog` in `api/service`
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: Source Detail currently uses the English fallback copy for all locales after replacing a corrupted local copy block; broader KO/JA copy restoration should be handled as a focused localization slice
+- Next step: remove the bad BMO chequing generated rows from `/admin/sources`, then rerun BMO chequing collection from the source catalog or bank coverage action
+
+## 2026-04-28 - BMO Chequing Source Discovery Hardening
+
+- WBS: `5.15`, `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: verify the BMO chequing generated source set, remove unrelated generated sources, and restore complete current chequing product detail coverage
+- Why now: the Product Owner found a BMO chequing generated-source set containing savings pages, a corporate Modern Slavery PDF, a numeric footnote source name, and no actual chequing detail pages
+- Outcome: verified BMO's current public chequing lineup as Practical, Plus, Performance, Premium, and AIR MILES. Updated the BMO chequing seed registry to current `/en-ca/` detail URLs and added the missing AIR MILES detail source. Homepage discovery now preserves seeded supporting sources only after detail sources are promoted, filters unrelated product-family links such as savings pages from chequing support, rejects corporate/legal PDFs such as Modern Slavery statements, and prevents supporting links from being promoted to detail without AI detail confirmation or seed alignment.
+- Not done: no live admin rerun was launched in this slice; existing DB rows generated before this change still need a fresh BMO chequing collection run or operator cleanup to disappear from `/admin/sources`
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `worker/discovery/data/bmo_chequing_source_registry.json`, `worker/discovery/tests/test_registry_catalog.py`
+- Decisions: treated student, senior, newcomer, kids/teens, Indigenous, family, and defence pages as audience/program support rather than standalone chequing products because BMO's chequing navigation and product lineup list the five account plans above as the current product set
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_catalog tests.test_source_catalog_collection_runner tests.test_source_collection_runner` in `api/service`
+  - `python -m unittest worker.discovery.tests.test_registry_catalog`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: the local worktree already contains unrelated admin/readme/i18n-style modifications from prior slices; this slice did not touch or normalize them
+- Next step: rerun BMO chequing source catalog collection from the admin workflow and confirm generated rows now include the five detail sources plus seeded support, with previous unrelated rows deprecated or regenerated away
+
+## 2026-04-28 - Sources Search and Detail Density Polish
+
+- WBS: `5.15`, `5.16`, admin UI polish
+- Status: `done`
+- Goal: remove the unnecessary Sources page `Manage banks` header action, rename admin search/filter submit buttons to `Search`, format generated-source Updated timestamps as `yyyy-mm-dd hh:mm:ss`, and reduce Source Detail to operator-relevant information
+- Why now: the Product Owner asked for lower-friction Sources navigation, clearer search action wording, deterministic source-list timestamp display, and a less noisy Source Detail screen
+- Outcome: Sources no longer shows the header bank-management shortcut. Admin search/filter submit actions on reviews, runs, changes, audit, usage, banks, product types, source catalog, and generated sources now read `Search`. Generated source list Updated values use a fixed datetime format. Source Detail now emphasizes source identity, URL, role/status, verification/update timestamps, a compact discovery summary, and linked recent collection runs instead of exposing lower-level registry and scoring internals.
+- Not done: no browser/responsive QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-detail-surface.tsx`, admin list/filter surface components, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept generated source inspection read-only and did not reintroduce bank-management actions on the Sources route; retained a compact discovery explanation rather than removing discovery context entirely because operators still need to understand why a source was promoted
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: browser QA is still needed to confirm Source Detail density and button wording across EN/KO/JA locales with live data
+- Next step: browser-check `/admin/sources`, `/admin/sources/:sourceId`, and the main admin search/filter routes after the next local dev-server pass
+
 ## 2026-04-28 - Bank Coverage Copy and Sources Overflow Polish
 
 - WBS: `5.15`, `5.16`, admin UI polish

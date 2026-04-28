@@ -438,6 +438,88 @@ def update_source_registry_item(
     return detail["source"]
 
 
+def delete_source_registry_item(
+    connection: Connection,
+    *,
+    source_id: str,
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+) -> dict[str, Any]:
+    existing_row = connection.execute(
+        """
+        SELECT
+            source_id,
+            bank_code,
+            country_code,
+            product_type,
+            product_key,
+            source_name,
+            source_url,
+            normalized_url,
+            source_type,
+            discovery_role,
+            status,
+            priority,
+            source_language,
+            purpose,
+            expected_fields,
+            seed_source_flag,
+            last_verified_at,
+            last_seen_at,
+            redirect_target_url,
+            alias_urls,
+            discovery_metadata,
+            change_reason,
+            created_at,
+            updated_at
+        FROM source_registry_item
+        WHERE source_id = %(source_id)s
+        """,
+        {"source_id": source_id},
+    ).fetchone()
+    if not existing_row:
+        raise SourceRegistryError(status_code=404, code="source_registry_item_not_found", message="Source registry item was not found.")
+
+    if str(existing_row["status"]) != "removed":
+        reason_text = "removed_by_operator"
+        connection.execute(
+            """
+            UPDATE source_registry_item
+            SET
+                status = 'removed',
+                change_reason = %(change_reason)s,
+                updated_at = %(updated_at)s
+            WHERE source_id = %(source_id)s
+            """,
+            {
+                "source_id": source_id,
+                "change_reason": reason_text,
+                "updated_at": utc_now(),
+            },
+        )
+        _record_source_registry_audit_event(
+            connection,
+            event_type="source_registry_item_removed",
+            actor=actor,
+            target_id=source_id,
+            request_context=request_context,
+            previous_state=str(existing_row["status"]),
+            new_state="removed",
+            reason_text=reason_text,
+            diff_summary=f"Marked source registry item `{source_id}` as removed.",
+            payload={
+                "bank_code": existing_row["bank_code"],
+                "product_type": existing_row["product_type"],
+                "discovery_role": existing_row["discovery_role"],
+                "source_url": existing_row["source_url"],
+            },
+        )
+
+    detail = load_source_registry_detail(connection, source_id=source_id)
+    assert detail is not None
+    return detail["source"]
+
+
 def start_source_collection(
     connection: Connection,
     *,

@@ -318,7 +318,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
             </div>
 
             <div className="flex items-end gap-2">
-              <Button type="submit">Apply filters</Button>
+              <Button type="submit">Search</Button>
               <Button asChild variant="outline">
                 <Link href="/admin/usage">Clear</Link>
               </Button>

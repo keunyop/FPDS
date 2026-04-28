@@ -31,7 +31,7 @@ This is an operating-policy baseline, not an implementation approval by itself.
 ## 2. Baseline Decisions
 
 1. The operational source of truth for the active source registry will be the FPDS database.
-2. Admin operators will manage banks and source catalog coverage directly in the admin UI, while generated source rows remain read-only.
+2. Admin operators will manage banks and source catalog coverage directly in the admin UI, while generated source rows remain system-managed except for admin-only removal that marks a bad row `removed`.
 3. After the DB-backed source registry is introduced, `source_registry_catalog.json` and per-bank registry JSON files will no longer be the ongoing operational control surface.
 4. The admin `collect` action means full product collection through candidate creation, not raw fetch only.
 5. The first collection target is `normalized_candidate` plus normal validation/routing side effects such as `review_task` creation when rules require it.
@@ -137,7 +137,8 @@ The first admin-managed source registry slice should support only the following 
 4. Create and edit source catalog items using controlled bank and product-type inputs.
 5. Select one or more source catalog items and start collection.
 6. See the resulting run id and success/failure summary.
-7. Inspect generated source rows in a read-only source registry surface.
+7. Inspect generated source rows in the source registry surface.
+8. Remove a bad generated source row by marking it `removed`, preserving audit and historical run context.
 
 Current live workflow note:
 - `/admin/banks` is now the primary operator-owned surface for bank setup, bank-owned coverage management, and collection launch.
@@ -197,7 +198,7 @@ This is an operations-policy change, not a requirement to immediately delete the
 
 Current repository state:
 - the repo contains `source_registry_catalog.json` and per-bank registry JSON baselines
-- the live admin runtime now includes `/admin/banks`, `/admin/source-catalog`, and read-only `/admin/sources`
+- the live admin runtime now includes `/admin/banks`, `/admin/source-catalog`, and `/admin/sources` with generated-source inspection plus admin-only soft remove
 - operator-managed registry ownership now lives in `bank` and `source_registry_catalog_item`
 - generated source detail lives in `source_registry_item`
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
@@ -242,3 +243,4 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-04-15 | Updated the policy after the `WBS 5.15` implementation so current-state notes now reflect the live DB-backed `/admin/sources` runtime |
 | 2026-04-18 | Linked the approved homepage-discovery quality follow-on design and corrected the current-state note for live dynamic product-type onboarding |
 | 2026-04-18 | Recorded the first homepage-discovery explainability implementation slice on generated source rows and source-detail inspection |
+| 2026-04-28 | Added admin-only generated source soft removal using `removed` status so bad collected source details can be excluded from future collection without losing audit history |

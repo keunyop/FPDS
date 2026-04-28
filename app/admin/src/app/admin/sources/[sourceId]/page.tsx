@@ -52,7 +52,7 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
         role: session.user.role,
       }}
     >
-      <SourceDetailSurface detail={detail} locale={locale} />
+      <SourceDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} userRole={session.user.role} />
     </ApplicationShell5>
   );
 }

@@ -4,12 +4,14 @@ import json
 import shutil
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from api_service.source_catalog import (
     AiParallelCandidateScore,
     CatalogItemMaterializationResult,
     HomepageSourceGenerationResult,
+    PageEvidenceAssessment,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
@@ -557,6 +559,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(len(connection.calls), 1)
         sql, params = connection.calls[0]
         self.assertIn("UPDATE source_registry_item", sql)
+        self.assertIn("status <> 'removed'", sql)
         self.assertEqual(params["bank_code"], "BMO")
         self.assertEqual(params["product_type"], "chequing")
 
@@ -829,6 +832,73 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
 
+    def test_generate_sources_from_homepage_uses_bmo_seed_details_and_filters_unrelated_support(self) -> None:
+        homepage_links = [
+            SimpleNamespace(
+                normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+                resolved_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+                anchor_text="Savings Amplifier High interest rate",
+                source_type="html",
+            ),
+            SimpleNamespace(
+                normalized_url="https://www.bmo.com/pdfs/bmo_statement_against_modern_slavery_and_human_trafficking.pdf",
+                resolved_url="https://www.bmo.com/pdfs/bmo_statement_against_modern_slavery_and_human_trafficking.pdf",
+                anchor_text="Modern Slavery Act Statement",
+                source_type="pdf",
+            ),
+            SimpleNamespace(
+                normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions",
+                resolved_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions#onehundredandsix",
+                anchor_text="106",
+                source_type="html",
+            ),
+        ]
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "detail_page_layout_signal", "pricing_or_feature_signal"],
+            page_title="BMO Chequing Account",
+            primary_heading="BMO Chequing Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=homepage_links),
+            patch("api_service.source_catalog._score_candidate_links_with_ai", return_value=({}, ["AI unavailable"])),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="Bank of Montreal",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition={
+                    **_product_type_definition("chequing"),
+                    "description": "Daily transaction account with monthly fee, debit card usage, and banking-plan benefits.",
+                    "discovery_keywords": ["chequing", "daily banking", "banking plan"],
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertTrue({"BMO-CHQ-002", "BMO-CHQ-003", "BMO-CHQ-004", "BMO-CHQ-005", "BMO-CHQ-008"}.issubset(source_ids))
+        self.assertIn("BMO-CHQ-006", source_ids)
+        self.assertIn("BMO-CHQ-007", source_ids)
+        self.assertNotIn(
+            "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+            {str(item["normalized_url"]) for item in result.rows},
+        )
+        self.assertNotIn(
+            "https://www.bmo.com/pdfs/bmo_statement_against_modern_slavery_and_human_trafficking.pdf",
+            {str(item["normalized_url"]) for item in result.rows},
+        )
+        terms_row = next(item for item in result.rows if item["source_id"] == "BMO-CHQ-007")
+        self.assertEqual(terms_row["source_name"], "BMO bank account terms and conditions")
+
     def test_upsert_source_registry_rows_targets_unique_scope_and_returns_persisted_rows(self) -> None:
         connection = _QueuedConnection(
             [
@@ -886,6 +956,64 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(result[0]["source_id"], "AUTO-BMO-CHQ-existing")
         sql, _params = connection.calls[0]
         self.assertIn("ON CONFLICT (bank_code, product_type, normalized_url, source_type) DO UPDATE", sql)
+        self.assertIn("WHEN source_registry_item.status = 'removed'", sql)
+
+    def test_upsert_source_registry_rows_preserves_removed_status_on_conflict(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {
+                    "source_id": "AUTO-BMO-CHQ-removed",
+                    "bank_code": "BMO",
+                    "country_code": "CA",
+                    "product_type": "chequing",
+                    "product_key": "BMO:chequing",
+                    "source_name": "BMO chequing detail",
+                    "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/",
+                    "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "status": "removed",
+                    "priority": "P1",
+                    "source_language": "en",
+                    "purpose": "detail",
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                    "seed_source_flag": False,
+                    "redirect_target_url": None,
+                    "alias_urls": [],
+                    "change_reason": "removed_by_operator",
+                }
+            ]
+        )
+
+        result = _upsert_source_registry_rows(
+            connection,
+            [
+                {
+                    "source_id": "AUTO-BMO-CHQ-detail",
+                    "bank_code": "BMO",
+                    "country_code": "CA",
+                    "product_type": "chequing",
+                    "product_key": "BMO:chequing",
+                    "source_name": "BMO chequing detail",
+                    "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/",
+                    "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "status": "active",
+                    "priority": "P1",
+                    "source_language": "en",
+                    "purpose": "detail",
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                    "seed_source_flag": False,
+                    "redirect_target_url": None,
+                    "alias_urls": [],
+                    "change_reason": "generated_from_bank_homepage",
+                }
+            ],
+        )
+
+        self.assertEqual(result[0]["status"], "removed")
+        self.assertEqual(result[0]["change_reason"], "removed_by_operator")
 
 
 if __name__ == "__main__":

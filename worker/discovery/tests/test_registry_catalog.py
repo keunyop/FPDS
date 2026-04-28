@@ -64,6 +64,19 @@ class RegistryCatalogTests(unittest.TestCase):
             "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
         )
 
+    def test_bmo_chequing_seed_registry_covers_current_public_lineup(self) -> None:
+        resolved = resolve_sources_by_id(["BMO-CHQ-002", "BMO-CHQ-003", "BMO-CHQ-004", "BMO-CHQ-005", "BMO-CHQ-008"])
+        self.assertEqual(
+            {item.normalized_url for item in resolved.values()},
+            {
+                "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical",
+                "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/plus",
+                "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance",
+                "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/premium",
+                "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/air-miles",
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

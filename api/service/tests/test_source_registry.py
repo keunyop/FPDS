@@ -6,6 +6,7 @@ from unittest.mock import patch
 from api_service.source_registry import (
     build_source_collection_plan,
     create_source_registry_item,
+    delete_source_registry_item,
     load_source_registry_list,
     normalize_source_registry_filters,
     start_source_collection,
@@ -269,6 +270,60 @@ class SourceRegistryTests(unittest.TestCase):
         self.assertEqual(len(audit_calls), 1)
         self.assertEqual(audit_calls[0][1]["previous_state"], "inactive")
         self.assertEqual(audit_calls[0][1]["new_state"], "active")
+
+    def test_delete_source_registry_item_marks_removed_and_records_audit(self) -> None:
+        existing_row = {
+            "source_id": "SRC-001",
+            "bank_code": "BMO",
+            "country_code": "CA",
+            "product_type": "chequing",
+            "product_key": None,
+            "source_name": "BMO unrelated savings page",
+            "source_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+            "normalized_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+            "source_type": "html",
+            "discovery_role": "supporting_html",
+            "status": "active",
+            "priority": "P1",
+            "source_language": "en",
+            "purpose": "supporting source",
+            "expected_fields": ["product_name"],
+            "seed_source_flag": False,
+            "last_verified_at": None,
+            "last_seen_at": None,
+            "redirect_target_url": None,
+            "alias_urls": [],
+            "discovery_metadata": {},
+            "change_reason": "generated_from_bank_homepage",
+            "created_at": None,
+            "updated_at": None,
+        }
+        connection = _QueuedConnection(
+            [
+                existing_row,
+                None,
+                None,
+                {**existing_row, "status": "removed", "change_reason": "removed_by_operator"},
+                [],
+            ]
+        )
+
+        result = delete_source_registry_item(
+            connection,
+            source_id="SRC-001",
+            actor={"user_id": "usr-001", "role": "admin"},
+            request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+        )
+
+        self.assertEqual(result["status"], "removed")
+        update_calls = [(sql, params) for sql, params in connection.calls if "UPDATE source_registry_item" in sql]
+        self.assertEqual(len(update_calls), 1)
+        self.assertEqual(update_calls[0][1]["change_reason"], "removed_by_operator")
+        audit_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO audit_event" in sql]
+        self.assertEqual(len(audit_calls), 1)
+        self.assertEqual(audit_calls[0][1]["event_type"], "source_registry_item_removed")
+        self.assertEqual(audit_calls[0][1]["previous_state"], "active")
+        self.assertEqual(audit_calls[0][1]["new_state"], "removed")
 
     def test_start_source_collection_auto_includes_supporting_sources(self) -> None:
         detail_row = {

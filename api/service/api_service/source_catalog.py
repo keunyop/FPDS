@@ -41,10 +41,79 @@ else:  # pragma: no cover
     Connection = Any
 
 _AUTOGEN_SOURCE_PREFIX = "AUTO"
-_EXCLUDED_LINK_KEYWORDS = ("login", "sign-in", "signin", "secure", "apply", "open-account", "openaccount", "promo", "offer", "compare")
+_EXCLUDED_LINK_KEYWORDS = (
+    "login",
+    "sign-in",
+    "signin",
+    "secure",
+    "apply",
+    "open-account",
+    "openaccount",
+    "promo",
+    "offer",
+    "compare",
+    "modern-slavery",
+    "human-trafficking",
+    "privacy",
+    "accessibility",
+    "annual-report",
+    "investor-relations",
+    "modern slavery",
+    "modern_slavery",
+    "human_trafficking",
+    "slavery",
+)
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
 _HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
 _PAGE_NEGATIVE_KEYWORDS = ("compare", "apply", "open account", "sign in", "login", "legal", "terms and conditions", "promotion", "offer")
+_PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
+    "chequing": (
+        "savings-account",
+        "savings-accounts",
+        "savings account",
+        "savings accounts",
+        "savings-amplifier",
+        "premium-rate-savings",
+        "us-prem-savings",
+        "savings-builder",
+        "gic",
+        "guaranteed-investment",
+        "mortgage",
+        "credit-card",
+        "credit cards",
+        "loan",
+        "loans",
+    ),
+    "savings": (
+        "chequing-account",
+        "chequing-accounts",
+        "chequing account",
+        "chequing accounts",
+        "air-miles",
+        "gic",
+        "guaranteed-investment",
+        "mortgage",
+        "credit-card",
+        "credit cards",
+        "loan",
+        "loans",
+    ),
+    "gic": (
+        "chequing-account",
+        "chequing-accounts",
+        "chequing account",
+        "chequing accounts",
+        "savings-account",
+        "savings-accounts",
+        "savings account",
+        "savings accounts",
+        "mortgage",
+        "credit-card",
+        "credit cards",
+        "loan",
+        "loans",
+    ),
+}
 _DISCOVERY_STOPWORDS = {
     "account",
     "accounts",
@@ -1256,6 +1325,7 @@ def _materialize_sources_for_catalog_item(
                 change_reason = %(change_reason)s
             WHERE bank_code = %(bank_code)s
               AND product_type = %(product_type)s
+              AND status <> 'removed'
             """,
             {
                 "updated_at": utc_now(),
@@ -1337,7 +1407,10 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 source_name = EXCLUDED.source_name,
                 source_url = EXCLUDED.source_url,
                 discovery_role = EXCLUDED.discovery_role,
-                status = EXCLUDED.status,
+                status = CASE
+                    WHEN source_registry_item.status = 'removed' THEN source_registry_item.status
+                    ELSE EXCLUDED.status
+                END,
                 priority = EXCLUDED.priority,
                 source_language = EXCLUDED.source_language,
                 purpose = EXCLUDED.purpose,
@@ -1346,7 +1419,10 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 redirect_target_url = EXCLUDED.redirect_target_url,
                 alias_urls = EXCLUDED.alias_urls,
                 discovery_metadata = EXCLUDED.discovery_metadata,
-                change_reason = EXCLUDED.change_reason,
+                change_reason = CASE
+                    WHEN source_registry_item.status = 'removed' THEN source_registry_item.change_reason
+                    ELSE EXCLUDED.change_reason
+                END,
                 updated_at = EXCLUDED.updated_at
             RETURNING
                 source_id,
@@ -1486,6 +1562,7 @@ def _generate_sources_from_homepage(
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
     seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=product_type)
+    seed_supporting_hints = _load_seed_supporting_hints(bank_code=bank_code, product_type=product_type)
     source_rows: list[dict[str, Any]] = []
     entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
     entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
@@ -1554,69 +1631,127 @@ def _generate_sources_from_homepage(
             discovery_notes.append("Homepage discovery completed but no candidate-producing detail sources were identified.")
 
     promoted_detail_urls = {str(item["normalized_url"]) for item in detail_rows}
-    for _, link in unique_supporting_links:
-        if link.normalized_url in promoted_detail_urls:
-            continue
-        source_rows.append(
-            _build_generated_source_row(
-                bank_code=bank_code,
-                country_code=country_code,
-                product_type=product_type,
-                source_language=source_language,
-                normalized_url=link.normalized_url,
-                raw_url=link.resolved_url,
-                source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="support"),
-                discovery_role="supporting_html",
-                priority="P2",
-                purpose=f"Auto-generated supporting source for {product_type_label}",
-                expected_fields=expected_fields,
-                discovery_metadata={
-                    "selection_path": "supporting_only",
-                    "selection_confidence": "medium" if _score_product_link(
-                        product_type=product_type,
-                        product_type_definition=product_type_definition,
-                        normalized_url=link.normalized_url,
-                        anchor_text=link.anchor_text,
-                    ) > 0 else "low",
-                    "selection_reason_codes": ["supporting_keyword_match"],
-                    "candidate_origin": "homepage_or_hub_link",
-                    "heuristic_score": _score_product_link(
-                        product_type=product_type,
-                        product_type_definition=product_type_definition,
-                        normalized_url=link.normalized_url,
-                        anchor_text=link.anchor_text,
-                    ),
-                },
+    promoted_supporting_urls: set[str] = set()
+    if detail_rows:
+        for hint in seed_supporting_hints:
+            normalized_url = normalize_source_url(str(hint["source_url"]))
+            if normalized_url in promoted_detail_urls or normalized_url in promoted_supporting_urls:
+                continue
+            discovery_role = str(hint.get("discovery_role") or "supporting_html")
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=normalized_url,
+                    raw_url=str(hint["source_url"]),
+                    source_name=str(hint.get("source_name") or hint.get("purpose") or f"{bank_name} {product_type_label} support"),
+                    discovery_role=discovery_role,
+                    priority=str(hint.get("priority") or "P1"),
+                    purpose=str(hint.get("purpose") or f"Seeded supporting source for {product_type_label}"),
+                    expected_fields=[str(item) for item in (hint.get("expected_fields") or []) if str(item).strip()] or expected_fields,
+                    discovery_metadata={
+                        "selection_path": "seed_supporting_hint",
+                        "selection_confidence": "high",
+                        "selection_reason_codes": ["seed_hint_alignment", "supporting_source_seed"],
+                        "candidate_origin": "seed_supporting_hint",
+                    },
+                )
             )
-        )
-    for _, link in unique_pdf_links:
-        source_rows.append(
-            _build_generated_source_row(
-                bank_code=bank_code,
-                country_code=country_code,
+            source_rows[-1]["source_id"] = str(hint["source_id"])
+            promoted_supporting_urls.add(normalized_url)
+        for _, link in unique_supporting_links:
+            if link.normalized_url in promoted_detail_urls:
+                continue
+            if link.normalized_url in promoted_supporting_urls:
+                continue
+            if not _link_is_relevant_supporting_source(
                 product_type=product_type,
-                source_language=source_language,
+                product_type_definition=product_type_definition,
                 normalized_url=link.normalized_url,
-                raw_url=link.resolved_url,
-                source_name=_generated_link_name(bank_name, product_type_label, link.anchor_text, fallback="pdf"),
-                discovery_role="linked_pdf",
-                priority="P2",
-                purpose=f"Auto-generated linked PDF source for {product_type_label}",
-                expected_fields=expected_fields,
-                discovery_metadata={
-                    "selection_path": "linked_pdf",
-                    "selection_confidence": "medium",
-                    "selection_reason_codes": ["supporting_pdf_signal"],
-                    "candidate_origin": "homepage_or_hub_link",
-                    "heuristic_score": _score_product_link(
-                        product_type=product_type,
-                        product_type_definition=product_type_definition,
+                anchor_text=link.anchor_text,
+            ):
+                continue
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=link.normalized_url,
+                    raw_url=link.resolved_url,
+                    source_name=_generated_link_name(
+                        bank_name,
+                        product_type_label,
+                        link.anchor_text,
+                        fallback="support",
                         normalized_url=link.normalized_url,
-                        anchor_text=link.anchor_text,
                     ),
-                },
+                    discovery_role="supporting_html",
+                    priority="P2",
+                    purpose=f"Auto-generated supporting source for {product_type_label}",
+                    expected_fields=expected_fields,
+                    discovery_metadata={
+                        "selection_path": "supporting_only",
+                        "selection_confidence": "medium" if _score_product_link(
+                            product_type=product_type,
+                            product_type_definition=product_type_definition,
+                            normalized_url=link.normalized_url,
+                            anchor_text=link.anchor_text,
+                        ) > 0 else "low",
+                        "selection_reason_codes": ["supporting_keyword_match"],
+                        "candidate_origin": "homepage_or_hub_link",
+                        "heuristic_score": _score_product_link(
+                            product_type=product_type,
+                            product_type_definition=product_type_definition,
+                            normalized_url=link.normalized_url,
+                            anchor_text=link.anchor_text,
+                        ),
+                    },
+                )
             )
-        )
+        for _, link in unique_pdf_links:
+            if not _link_is_relevant_supporting_source(
+                product_type=product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                continue
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=link.normalized_url,
+                    raw_url=link.resolved_url,
+                    source_name=_generated_link_name(
+                        bank_name,
+                        product_type_label,
+                        link.anchor_text,
+                        fallback="pdf",
+                        normalized_url=link.normalized_url,
+                    ),
+                    discovery_role="linked_pdf",
+                    priority="P2",
+                    purpose=f"Auto-generated linked PDF source for {product_type_label}",
+                    expected_fields=expected_fields,
+                    discovery_metadata={
+                        "selection_path": "linked_pdf",
+                        "selection_confidence": "medium",
+                        "selection_reason_codes": ["supporting_pdf_signal"],
+                        "candidate_origin": "homepage_or_hub_link",
+                        "heuristic_score": _score_product_link(
+                            product_type=product_type,
+                            product_type_definition=product_type_definition,
+                            normalized_url=link.normalized_url,
+                            anchor_text=link.anchor_text,
+                        ),
+                    },
+                )
+            )
     detail_source_ids = [
         str(item["source_id"])
         for item in source_rows
@@ -1752,6 +1887,30 @@ def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[s
                     "source_name": str(item.get("source_name") or item.get("purpose") or item["source_id"]),
                     "source_url": str(item["source_url"]),
                     "normalized_url": str(item["normalized_url"]),
+                    "expected_fields": list(item.get("expected_fields") or []),
+                    "purpose": str(item.get("purpose") or ""),
+                    "priority": str(item.get("priority") or "P1"),
+                }
+            )
+    return hints
+
+
+def _load_seed_supporting_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+    hints: list[dict[str, Any]] = []
+    for item in load_seed_source_registry_rows():
+        if (
+            str(item["bank_code"]) == bank_code
+            and str(item["product_type"]) == product_type
+            and str(item["discovery_role"]) in {"supporting_html", "supporting_pdf", "linked_pdf"}
+        ):
+            hints.append(
+                {
+                    "source_id": str(item["source_id"]),
+                    "source_name": str(item.get("source_name") or item.get("purpose") or item["source_id"]),
+                    "source_url": str(item["source_url"]),
+                    "normalized_url": str(item["normalized_url"]),
+                    "source_type": str(item.get("source_type") or infer_source_type(str(item["source_url"]))),
+                    "discovery_role": str(item["discovery_role"]),
                     "expected_fields": list(item.get("expected_fields") or []),
                     "purpose": str(item.get("purpose") or ""),
                     "priority": str(item.get("priority") or "P1"),
@@ -2053,6 +2212,8 @@ def _candidate_promotes_to_detail(
         return False
     if candidate.seed_source_id and page_evidence.page_evidence_score >= _PAGE_EVIDENCE_MINIMUM_SCORE:
         return True
+    if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail"):
+        return False
     if ai_score is not None:
         if ai_score.predicted_role != "detail":
             return False
@@ -2402,11 +2563,72 @@ def _score_product_link(
     return score
 
 
-def _generated_link_name(bank_name: str, product_type_label: str, anchor_text: str, *, fallback: str) -> str:
+def _generated_link_name(
+    bank_name: str,
+    product_type_label: str,
+    anchor_text: str,
+    *,
+    fallback: str,
+    normalized_url: str | None = None,
+) -> str:
     cleaned = re.sub(r"\s+", " ", anchor_text.strip())
-    if cleaned:
+    if cleaned and not _looks_like_non_descriptive_anchor(cleaned):
         return cleaned[:280]
+    if normalized_url:
+        fingerprint = normalized_url.lower()
+        if "terms" in fingerprint or "conditions" in fingerprint:
+            return f"{bank_name} {product_type_label} terms and conditions"
+        if "fee" in fingerprint or "fees" in fingerprint:
+            return f"{bank_name} {product_type_label} fees"
+        if "rate" in fingerprint or "rates" in fingerprint:
+            return f"{bank_name} {product_type_label} rates"
+        if "blue" in fingerprint or "air-miles" in fingerprint:
+            return f"{bank_name} {product_type_label} rewards support"
     return f"{bank_name} {product_type_label} {fallback}"
+
+
+def _looks_like_non_descriptive_anchor(value: str) -> bool:
+    normalized = value.strip().lower()
+    if not normalized:
+        return True
+    if normalized.isdigit():
+        return True
+    if normalized in {"learn more", "more details", "details", "*"}:
+        return True
+    if normalized.startswith(".css-"):
+        return True
+    return False
+
+
+def _link_is_relevant_supporting_source(
+    *,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    normalized_url: str,
+    anchor_text: str,
+) -> bool:
+    fingerprint = f"{normalized_url} {anchor_text}".lower()
+    if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+        return False
+    if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+        return False
+    has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
+    has_product_signal = _score_product_link(
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
+    ) > 0
+    has_bank_account_terms_signal = "bank-account" in fingerprint or "bank accounts" in fingerprint
+    return has_product_signal or (has_supporting_signal and has_bank_account_terms_signal)
+
+
+def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -> bool:
+    exclusions = _PRODUCT_TYPE_EXCLUSION_KEYWORDS.get(product_type, ())
+    if not any(keyword in fingerprint for keyword in exclusions):
+        return False
+    product_terms = _product_type_keywords({"product_type_code": product_type, "display_name": product_type, "discovery_keywords": [product_type]})
+    return not any(term and term in fingerprint for term in product_terms)
 
 
 def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str) -> str:
