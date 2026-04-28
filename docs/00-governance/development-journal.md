@@ -62,6 +62,23 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-28 - Registry Summary Card White Background
+
+- WBS: `5.15`, `5.16`, admin UI polish
+- Status: `done`
+- Goal: make the Banks summary cards use white backgrounds and apply the same treatment to similar Product Types and Sources summary cards
+- Why now: the Product Owner wanted the top registry metric cards to read as white cards instead of blending into the admin canvas
+- Outcome: Banks, Product Types, generated Sources, and Source Catalog summary `StatCard` components now use explicit `bg-white` card surfaces while preserving existing borders, typography, and layout density.
+- Not done: no browser visual QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the change local to existing registry `StatCard` wrappers instead of introducing a shared metric-card abstraction for a four-line visual adjustment
+- Verification:
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `cmd /c npm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: none observed in the final diff; an initial unrelated `app/admin/next-env.d.ts` modification was not touched by this slice and is no longer present in final status
+- Next step: browser-check `/admin/banks`, `/admin/product-types`, `/admin/sources`, and `/admin/source-catalog` to confirm the white summary cards against live admin data
+
 ## 2026-04-26 - Bank Detail Modal Simplification
 
 - WBS: `5.15`, admin UI polish

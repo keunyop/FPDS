@@ -531,7 +531,7 @@ function buildCatalogCollectMessage(
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-lg border border-border/80 bg-background p-4">
+    <article className="rounded-lg border border-border/80 bg-white p-4">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
