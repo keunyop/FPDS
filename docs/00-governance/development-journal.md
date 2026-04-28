@@ -62,6 +62,23 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-28 - Bank Coverage Copy and Sources Overflow Polish
+
+- WBS: `5.15`, `5.16`, admin UI polish
+- Status: `done`
+- Goal: simplify the Bank detail coverage copy, shorten the single product-type collection queued message, and stop the generated Sources table from pushing wider than the application shell
+- Why now: the Product Owner identified one unnecessary Bank detail helper paragraph, overly long queued feedback after product-type collection, and a Sources page overflow issue
+- Outcome: Bank detail coverage no longer renders the explanatory paragraph about product-family selection and homepage-generated URLs. Single coverage queued feedback now returns only the concise queued sentence. The generated Sources route now adds `min-w-0` containment, table-card overflow clipping, URL/name wrapping, and an internal horizontal scroll boundary so wide rows stay inside the shell.
+- Not done: no browser visual QA was run in this slice; verification covered TypeScript/build and API regression tests
+- Key files: `app/admin/src/components/fpds/admin/bank-coverage-section.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the change in FPDS-owned wrapper components rather than altering shared shell or table primitives; did not remove the underlying locale copy keys that may be cleaned up during a later locale-file pass
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: browser/responsive QA is still needed to confirm the Sources table behavior against real long URLs at desktop and mobile widths
+- Next step: browser-check `/admin/banks` and `/admin/sources` with live generated-source data
+
 ## 2026-04-28 - Registry Summary Card White Background
 
 - WBS: `5.15`, `5.16`, admin UI polish

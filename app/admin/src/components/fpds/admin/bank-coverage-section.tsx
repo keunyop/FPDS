@@ -294,9 +294,6 @@ export function BankCoverageSection({
         <h2 className="text-xl font-semibold tracking-tight text-foreground">
           {copy.title}
         </h2>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {copy.description}
-        </p>
       </div>
 
       {message ? (
@@ -505,11 +502,7 @@ function buildSingleCoverageCollectMessage(
   const label = formatProductType(productType, labelMap);
 
   if (payload?.workflow_state === "queued") {
-    return [
-      copy.queued(label),
-      copy.queuedDetail,
-      copy.openRuns,
-    ].join(" ");
+    return copy.queued(label);
   }
 
   const materializedItem = payload?.materialized_items?.[0];

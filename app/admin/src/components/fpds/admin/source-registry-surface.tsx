@@ -111,7 +111,7 @@ const SOURCE_COPY = {
 export function SourceRegistrySurface({ filters, registry, locale }: SourceRegistrySurfaceProps) {
   const copy = SOURCE_COPY[locale];
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
       <AdminPageHeader
         actions={
           <>
@@ -125,18 +125,18 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
         title={copy.title}
       />
 
-      <article className="grid gap-4 md:grid-cols-4">
+      <article className="grid min-w-0 gap-4 md:grid-cols-4">
         <StatCard label={copy.visibleSources} value={String(registry.summary.total_items)} />
         <StatCard label={copy.candidateProducing} value={String(registry.summary.candidate_producing_items)} />
         <StatCard label={copy.active} value={String(registry.summary.status_counts.active ?? 0)} />
         <StatCard label={copy.detailRole} value={String(registry.summary.role_counts.detail ?? 0)} />
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))_auto]">
+      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+        <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))_auto]">
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
-            <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
+            <input className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <FilterSelect allLabel={copy.all} defaultValue={filters.bankCode} label={copy.bank} name="bank_code" options={registry.facets.bank_codes} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.countryCode} label={copy.country} name="country_code" options={["CA"]} />
@@ -154,12 +154,12 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="border-b border-border/80 px-6 py-5">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.generatedSourceDetail}</p>
         </div>
 
-        <div className="overflow-x-auto px-6 py-5">
+        <div className="max-w-full overflow-x-auto px-6 py-5">
           <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
@@ -187,7 +187,7 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
                       <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/sources/${item.source_id}`, new URLSearchParams(), locale)}>
                         {item.source_id}
                       </Link>
-                      <p className="mt-1 text-sm text-muted-foreground">{item.source_name}</p>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">{item.source_name}</p>
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.bank_code}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.product_type}</td>
@@ -195,7 +195,7 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.source_type}</td>
                     <td className="border-b border-border/70 px-3 py-4">
-                      <a className="line-clamp-2 text-primary underline-offset-4 hover:underline" href={item.source_url} rel="noreferrer" target="_blank">
+                      <a className="line-clamp-2 break-all text-primary underline-offset-4 hover:underline" href={item.source_url} rel="noreferrer" target="_blank">
                         {item.source_url}
                       </a>
                     </td>
@@ -225,9 +225,9 @@ function FilterSelect({
   options: string[];
 }) {
   return (
-    <label className="grid gap-2 text-sm">
+    <label className="grid min-w-0 gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>
@@ -241,7 +241,7 @@ function FilterSelect({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-lg border border-border/80 bg-white p-4">
+    <article className="min-w-0 rounded-lg border border-border/80 bg-white p-4">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
     </article>
