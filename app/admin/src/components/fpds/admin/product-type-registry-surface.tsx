@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { ProductTypeCreateDialogContent } from "@/components/fpds/admin/product-type-create-dialog-content";
@@ -147,14 +148,14 @@ export function ProductTypeRegistrySurface({
     syncUrlWithParams(params);
   }
 
-  function openProductTypeModal(productTypeCode: string, productType?: ProductTypeItem) {
+  function openProductTypeModal(productTypeCode: string, productType?: ProductTypeItem, options?: { replace?: boolean }) {
     const params = new URLSearchParams(baseSearchParams);
     params.set("productType", productTypeCode);
     params.delete("modal");
     setAddDialogOpen(false);
     setSelectedProductTypeCode(productTypeCode);
     setSelectedProductTypeOverride(productType ?? productTypes.items.find((item) => item.product_type_code === productTypeCode) ?? null);
-    syncUrlWithParams(params);
+    syncUrlWithParams(params, options);
   }
 
   function closeModal() {
@@ -184,8 +185,14 @@ export function ProductTypeRegistrySurface({
     closeModal();
   }
 
+  function handleProductTypeUpdated(productType: ProductTypeItem) {
+    openProductTypeModal(productType.product_type_code, productType, { replace: true });
+  }
+
   return (
     <section className="grid gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.description}
         path={copy.path}
@@ -309,6 +316,7 @@ export function ProductTypeRegistrySurface({
             key={selectedProductType.product_type_code}
             locale={locale}
             onDeleted={closeModal}
+            onUpdated={handleProductTypeUpdated}
             productType={selectedProductType}
           />
         ) : null}

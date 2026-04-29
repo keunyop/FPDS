@@ -18,6 +18,7 @@ Files:
 - `migrations/0010_aggregate_refresh_queue.sql`: aggregate refresh request queue for auto-enqueued review approvals and manual retry
 - `migrations/0011_admin_signup_requests.sql`: login-id-first admin auth updates plus approval-gated signup requests
 - `migrations/0012_evidence_chunk_embeddings.sql`: pgvector-backed `evidence_chunk_embedding` side table for vector-assisted evidence retrieval
+- `migrations/0013_operator_managed_product_types.sql`: removes the historical product-type classification flag so every product type is an operator-managed DB row
 
 How to apply when a database is available:
 
@@ -29,6 +30,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_
 psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0012_evidence_chunk_embeddings.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0013_operator_managed_product_types.sql
 ```
 
 Notes:
@@ -36,4 +38,4 @@ Notes:
 - Use the connection target from `.env.dev.example` or `.env.prod.example`.
 - Keep future migrations additive and append-only where possible.
 - Put extension-specific or vendor-specific migrations in later numbered files.
-- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` and in `0007_dynamic_product_type_onboarding.sql` for `product_type_registry`. Those are applied only when migrations are replayed on a new database; they are no longer mirrored by runtime reseed logic.
+- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only in the current migration chain; chequing, savings, GIC, and any later product types must be registered through admin/operator DB writes.

@@ -16,6 +16,7 @@ interface Stats5Props {
   description?: string;
   items: Stats5Item[];
   className?: string;
+  framed?: boolean;
 }
 
 const toneIconMap = {
@@ -36,25 +37,33 @@ const Stats5 = ({
   title = "Admin shell readiness",
   description,
   items,
-  className
+  className,
+  framed = true
 }: Stats5Props) => {
   return (
-    <section className={cn("rounded-lg border border-border/80 bg-background p-4", className)}>
-      <div className="flex flex-col gap-2 border-b border-border/80 pb-4 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-3xl">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
-          {description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p> : null}
+    <section className={cn(framed ? "rounded-lg border border-border/80 bg-background p-4" : "min-w-0", className)}>
+      {title || description ? (
+        <div
+          className={cn(
+            "flex flex-col gap-2 md:flex-row md:items-end md:justify-between",
+            framed ? "border-b border-border/80 pb-4" : "mb-3"
+          )}
+        >
+          <div className="max-w-3xl">
+            {title ? <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2> : null}
+            {description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p> : null}
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <div className="grid gap-3 pt-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className={cn("grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4", framed ? "pt-4" : "")}>
         {items.map((item) => {
           const Icon = toneIconMap[item.tone];
 
           return (
-            <article className="rounded-lg border border-border/80 bg-card px-4 py-4" key={item.label}>
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+            <article className="min-w-0 rounded-lg border border-border/80 bg-card px-4 py-4" key={item.label}>
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <p className="min-w-0 text-sm font-medium text-muted-foreground">{item.label}</p>
                 <div
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70",
@@ -64,7 +73,7 @@ const Stats5 = ({
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
+              <p className="mt-3 break-words text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
             </article>
           );

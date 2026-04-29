@@ -929,7 +929,6 @@ def _collection_source_record(row: dict[str, Any], *, product_type_definition: d
         "seed_source_flag": bool(row.get("seed_source_flag")),
         "product_type_name": str(product_type_definition.get("display_name") or row["product_type"]),
         "product_type_description": str(product_type_definition.get("description") or ""),
-        "product_type_dynamic": bool(product_type_definition.get("dynamic_onboarding_enabled")),
         "discovery_keywords": list(product_type_definition.get("discovery_keywords") or []),
         "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
         "discovery_metadata": _coerce_mapping(row.get("discovery_metadata")),

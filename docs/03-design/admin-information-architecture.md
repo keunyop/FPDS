@@ -283,8 +283,8 @@ Rules:
 - `/admin/banks` owns visible bank profile editing
 - `/admin/banks` also owns bank/product-type coverage editing and collection launch
 - `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
-- `/admin/product-types` now owns operator-managed dynamic product-type definitions and is the source of truth for bank coverage option search
-- dynamic product types use the generic AI extraction/normalization fallback path and remain review-first rather than auto-publish
+- `/admin/product-types` owns all product-type definitions as operator-managed DB rows and is the source of truth for bank coverage option search
+- product types without specialized parser support use the generic AI extraction/normalization fallback path and remain review-first rather than auto-publish
 - `/admin/sources` and `/admin/sources/:sourceId` are generated-source inspection surfaces; destructive cleanup is limited to an admin-only soft remove that preserves audit and historical run context
 - collection means full candidate-producing ingestion through `normalized_candidate`
 - `detail` sources are candidate-producing by default

@@ -8,7 +8,7 @@ type RouteContext = {
 
 export async function DELETE(request: Request, context: RouteContext) {
   const { productTypeCode } = await context.params;
-  const apiResponse = await fetch(new URL(`/api/admin/product-types/${productTypeCode}`, getAdminApiOrigin()), {
+  const apiResponse = await fetch(new URL(`/api/admin/product-types/${encodeURIComponent(productTypeCode)}`, getAdminApiOrigin()), {
     method: "DELETE",
     headers: {
       ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie") as string } : {}),

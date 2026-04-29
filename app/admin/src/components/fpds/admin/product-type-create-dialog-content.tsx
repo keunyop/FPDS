@@ -18,12 +18,14 @@ type ProductTypeCreateDialogContentProps = {
 };
 
 type ProductTypeFormState = {
+  product_type_code: string;
   display_name: string;
   description: string;
   status: string;
 };
 
 const DEFAULT_FORM: ProductTypeFormState = {
+  product_type_code: "",
   display_name: "",
   description: "",
   status: "active",
@@ -31,6 +33,7 @@ const DEFAULT_FORM: ProductTypeFormState = {
 
 const CREATE_COPY = {
   en: {
+    code: "Code",
     displayName: "Display name",
     description: "Description",
     status: "Status",
@@ -42,6 +45,7 @@ const CREATE_COPY = {
     apiFailed: "Product type could not be created. Check the admin API and try again.",
   },
   ko: {
+    code: "Code",
     displayName: "표시 이름",
     description: "설명",
     status: "상태",
@@ -53,6 +57,7 @@ const CREATE_COPY = {
     apiFailed: "상품 유형을 생성할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
   },
   ja: {
+    code: "Code",
     displayName: "表示名",
     description: "説明",
     status: "状態",
@@ -114,6 +119,12 @@ export function ProductTypeCreateDialogContent({
       {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
       <form className="space-y-4" onSubmit={handleCreate}>
+        <InputField
+          icon={<Search className="size-4" />}
+          label={copy.code}
+          onChange={(value) => setForm((current) => ({ ...current, product_type_code: value }))}
+          value={form.product_type_code}
+        />
         <InputField
           icon={<Search className="size-4" />}
           label={copy.displayName}

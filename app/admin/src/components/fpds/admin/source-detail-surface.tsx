@@ -9,7 +9,7 @@ import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { DestructiveConfirmDialog } from "@/components/fpds/admin/destructive-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import type { SourceRegistryDetailResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 
 type SourceDetailSurfaceProps = {
   detail: SourceRegistryDetailResponse;
@@ -266,18 +266,5 @@ function fieldLabel(_locale: AdminLocale, key: "lastVerified" | "lastSeen" | "up
 }
 
 function formatSourceDateTime(value: string | null, missing: string) {
-  if (!value) {
-    return missing;
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return [
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`,
-  ].join(" ");
+  return formatAdminDateTimeValue(value, missing, { seconds: true });
 }

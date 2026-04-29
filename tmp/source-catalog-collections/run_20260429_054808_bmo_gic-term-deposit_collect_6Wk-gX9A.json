@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_qZo4T3WiifklaZNV",
+  "correlation_id": "corr_LyRhcgjSD7lHDw3E",
+  "request_id": "req_ec808294da4e4a20a350d210ec3fadd2",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260429_054808_bmo_gic-term-deposit_collect_6Wk-gX9A",
+      "catalog_item_id": "catalog-ca-bmo-gic-term-deposit-_WxBVwDU",
+      "bank_code": "BMO",
+      "bank_name": "BMO",
+      "country_code": "CA",
+      "product_type": "gic-term-deposit",
+      "source_catalog_product_type": "gic-term-deposit",
+      "source_language": "en",
+      "homepage_url": "https://www.bmo.com/",
+      "normalized_homepage_url": "https://www.bmo.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

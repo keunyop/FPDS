@@ -27,7 +27,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 As of `2026-04-22`:
 - `WBS 5` is the active stage
-- public grid, dashboard, locale rollout, source registry admin MVP, and dynamic product type onboarding are already implemented
+- public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
@@ -61,6 +61,195 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-04-29 - Product Type Code Rename and Semantic Discovery Profile
+
+- WBS: `5.15`, `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: let operators correct a product type code such as `saving` to `savings` from the Product Types detail modal and prevent homepage discovery from depending only on the literal short code
+- Why now: the Product Owner confirmed `Savings` is the correct product type name and reported that saving the Product Types detail modal still returned `Product type was not found`; the previous BMO collection also showed that singular `saving` was too weak for BMO savings discovery
+- Outcome: Product Types detail and create modals now expose the product type code, update routes keep the modal on the renamed code after save, backend updates can rename `product_type_registry.product_type_code`, and the rename cascades existing source catalog, generated source, candidate, canonical product, public projection, and taxonomy references. Homepage discovery now derives a bounded semantic discovery profile from the stored display name, description, discovery keywords, and code terms, so a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals and a `gic-term-deposit` row can use `gic` seed discovery while generated rows still preserve the registered code. Follow-up runtime failures were fixed by accepting and recording the semantic discovery profile in `_score_candidate_links_with_ai`, preventing AI `irrelevant` scores from hard-vetoing curated seed detail sources before page evidence or seed fetch fallback can validate them, allowing curated seed detail sources to remain eligible when page evidence is low but not strongly negative, adding no-detail run summaries that include the first discovery note for easier diagnosis, and fixing HTML parse/chunk fallback so pages with empty `<main>` elements can still parse body/app content.
+- Not done: no live BMO collection rerun was launched from this slice.
+- Key files: `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/tests/test_product_types.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/components/fpds/admin/product-type-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-detail-dialog-content.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/lib/admin-api.ts`
+- Decisions: missing product type codes still fail clearly; FPDS does not silently alias an unregistered `savings` request to a `saving` row. The AI/semantic improvement applies after a registered product type row is found, keeping DB identity operator-owned and auditable.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_product_types api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry api.service.tests.test_source_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_product_types`
+  - `python -m unittest worker.pipeline.tests.test_parse_chunk`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m compileall api/service/api_service`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m compileall worker/pipeline/fpds_parse_chunk`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `pnpm run typecheck` from `app/admin`
+- Known issues: existing live data still needs the operator action or migration execution; update the Product Types row to code `savings` before launching a `savings` run, or launch collection against the registered `saving` row to exercise semantic discovery while preserving that code.
+- Next step: restart the running API/worker process, then rerun BMO savings and BMO GIC-term-deposit source catalog collection.
+
+## 2026-04-29 - Operator-Managed Product Type Registry Cleanup
+
+- WBS: `5.15`, `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: remove the remaining product-type alias/default behavior so chequing, savings, GIC, and later product types are all DB-registered operator-managed rows
+- Why now: BMO savings collection first produced zero sources with `product_type=saving`, then failed with `Product type was not found`; the Product Owner clarified that silently treating `chequing`, `saving`, or `gic` as predefined runtime product types is the wrong product direction
+- Outcome: removed runtime `saving -> savings` aliasing, removed in-memory product-type fallback rows, removed product-type legacy classification fields from API/admin DTOs, made collection plans and runners preserve the exact registered product type code, and changed product-type DB migration state so current fresh DBs no longer auto-insert chequing/savings/GIC rows
+- Not done: no live DB migration or live BMO collection rerun was launched from this slice
+- Key files: `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_collection_runner.py`, `db/migrations/0007_dynamic_product_type_onboarding.sql`, `db/migrations/0013_operator_managed_product_types.sql`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/lib/admin-product-types.ts`, `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/app/admin/changes/page.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/change-history-surface.tsx`
+- Decisions: superseded by the later code-rename entry above for operator correction flow; product type identity still comes from the DB row, not from aliases or runtime fallback.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_product_types api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry api.service.tests.test_source_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m compileall api/service/api_service`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `pnpm run typecheck` from `app/admin`
+  - `git diff --check` passed with existing CRLF conversion warnings only
+- Known issues: existing environments that already applied old `0007` may still have chequing/savings/GIC rows as normal data; apply `0013_operator_managed_product_types.sql` to remove the legacy classification column, then manage those rows from `/admin/product-types`
+- Next step: apply the new DB migration, confirm the intended BMO product type code exists and is active in `/admin/product-types`, then rerun BMO savings source catalog collection
+
+## 2026-04-29 - BMO Savings Product-Type Registry Diagnosis
+
+- WBS: `5.15`, `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: fix BMO savings source-catalog runs that completed with zero source items and the warning `Homepage discovery produced no detail sources eligible for collection`
+- Why now: the Product Owner reported a BMO savings run where source catalog collection used `product_type=saving`, produced no source rows, and matched the earlier BMO chequing zero-source failure pattern
+- Outcome: confirmed the failed run plan originally used singular `saving`; after API restart, the next run used `savings` but failed because the live DB had no matching `product_type_registry` row. A short-lived alias/fallback approach was rejected by the Product Owner and superseded by the operator-managed cleanup above.
+- Not done: no live BMO savings collection rerun was launched from this slice; existing DB catalog rows that already display `saving` are not force-migrated.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/api_service/product_types.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `api/service/tests/test_product_types.py`
+- Decisions: superseded by the later cleanup entry; product type identity now comes from the DB row, not from aliases or runtime fallback.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry api.service.tests.test_product_types api.service.tests.test_source_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_product_types api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry api.service.tests.test_product_types api.service.tests.test_source_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m compileall api/service/api_service`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `git diff --check` passed with existing CRLF conversion warnings only
+- Known issues: operator-visible catalog records created with `saving` must match an active `saving` DB row or be edited to the intended active product type code.
+- Next step: use the cleanup entry above as the current implementation state.
+
+## 2026-04-29 - Source Catalog AI Usage Persistence
+
+- WBS: `4.5`, `4.8`, `5.15`
+- Status: `done`
+- Goal: make Run Detail token and cost totals include the OpenAI homepage parallel scorer used during source catalog collection
+- Why now: the Product Owner reported a BMO chequing source-catalog run where usage records and model executions were counted, but token and cost totals stayed at zero even though homepage discovery used AI scoring
+- Outcome: source catalog materialization now carries the run context into homepage generation, captures OpenAI Responses API usage from the bounded homepage scorer, persists a `source_catalog_collection` `model_execution` row and linked `llm_usage_record`, and lets the existing Run Detail usage aggregation include those tokens and estimated cost. Heuristic extraction, normalization, and validation rows remain zero-token records because they do not make paid model calls.
+- Not done: already-completed historical runs are not backfilled because the stored discovery metadata does not include provider response usage; rerun collection to produce nonzero scorer usage on new runs.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_catalog_collection_runner.py`
+- Decisions: kept Run Detail aggregation unchanged because it was summing stored rows correctly; fixed the missing source-catalog AI usage writer instead of estimating tokens from saved discovery notes.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_run_status api.service.tests.test_llm_usage`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m compileall api/service/api_service`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_ops_scenario_qa api.service.tests.test_source_collection_runner api.service.tests.test_review_detail`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests -p "test_*.py"`
+- Known issues: local source-catalog AI usage will still be zero when the OpenAI provider or API key is not configured; in that case the discovery note continues to explain that the scorer was unavailable.
+- Next step: rerun the BMO chequing source catalog collection and confirm Run Detail shows an added `Source Catalog Collection` usage stage with nonzero tokens/cost when the AI scorer runs.
+
+## 2026-04-29 - Admin Operator Focus and Overflow Polish
+
+- WBS: `4.2`, `4.3`, `4.6`, `4.7`, `4.9`, `5.14`, admin responsive polish
+- Status: `done`
+- Goal: reduce Audit Log, Review Queue, Review Detail, Usage, and Dashboard Health to operator-relevant primary information; keep Audit Log, Review Queue, and Usage bodies inside the application shell; remove extra outer snapshot cards on Audit Log, Change History, Review Queue, and Usage
+- Why now: the Product Owner reported several admin pages were noisy for admin users, table-heavy bodies could exceed the shell width, and snapshot sections had an unnecessary wrapper card around their stat cards
+- Outcome: `Stats5` now supports a frameless mode used by the requested snapshot sections. Audit Log, Review Queue, and Usage now add route-level `min-w-0` containment and internal table scroll boundaries. Audit Log hides lower-level request, retention, role-snapshot, and target-id details from the main table. Review Queue hides country, updated, candidate-state, and action-helper noise from the list. Review Detail hides snapshot and parsed-document ids plus verbose section descriptions. Usage removes the top coverage/density helper panel, trims model/anomaly tables, and keeps cost/token concentration plus review/run drilldowns. Dashboard Health hides snapshot/request identifiers and the explanatory definition block while keeping freshness, queue, latest attempt, and retry controls.
+- Not done: no browser screenshot QA was run; use the running admin dev server to visually confirm the density and horizontal-scroll behavior with live data.
+- Key files: `app/admin/src/components/stats5.tsx`, `app/admin/src/components/fpds/admin/audit-log-surface.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/src/components/fpds/admin/llm-usage-surface.tsx`, `app/admin/src/components/fpds/admin/health-dashboard-surface.tsx`, `app/admin/src/components/fpds/admin/change-history-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept API payloads unchanged and treated this as presentation-only operator focus; advanced diagnostic fields can return later through a dedicated advanced drawer instead of occupying the primary table/body.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+  - existing admin dev server listener confirmed on port `3001`
+- Known issues: the worktree already contained unrelated prior source-catalog/API, admin auto-refresh, timestamp, public UI, and local `tmp/` run-artifact changes; this slice did not revert them.
+- Next step: browser-check `/admin/audit`, `/admin/reviews`, `/admin/reviews/:reviewTaskId`, `/admin/usage`, `/admin/changes`, and `/admin/health/dashboard` at desktop and mobile widths with live data.
+
+## 2026-04-29 - Runs Operator Focus and Fixed Timestamp Format
+
+- WBS: `4.5`, admin operations polish
+- Status: `done`
+- Goal: reduce Runs and Run Detail to operator-relevant information and make admin-owned date/time rendering deterministic
+- Why now: the Product Owner asked for Runs surfaces to show only information an admin user needs and for dates/times across screens to use fixed `yyyy-mm-dd`, `hh:mm`, and `hh:mm:ss` formats when seconds are shown
+- Outcome: `/admin/runs` now omits lower-value list columns for correlation, actor, and retry chain while keeping run id, type/trigger, state, time window, source counts, candidate/review counts, error summary, and detail drilldown. `/admin/runs/:runId` now keeps the main diagnostic sections but hides lower-level source document, snapshot, parsed-document, safe metadata, runtime-note, request-id, and source-id details from the primary view. Admin and public date/timestamp rendering now emits fixed `yyyy-mm-dd` or `yyyy-mm-dd hh:mm`, with explicit second precision for source-registry timestamps.
+- Not done: no browser screenshot QA was run; verify the resulting density with live run data during the next admin dev-server pass.
+- Key files: `app/admin/src/lib/admin-i18n.ts`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/components/fpds/admin/run-detail-surface.tsx`, admin date/timestamp surface components, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/admin/README.md`, `app/public/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept API payloads unchanged and reduced only UI presentation so advanced diagnostics remain available for future route-specific drilldowns if needed.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: the worktree already contained unrelated prior source-catalog/API and admin auto-refresh modifications plus local `tmp/` run artifacts; this slice did not revert them.
+- Next step: browser-check `/admin/runs`, `/admin/runs/:runId`, and timestamp-heavy admin routes against live data at desktop and mobile widths.
+
+## 2026-04-29 - Runs Shell Width and Snapshot Polish
+
+- WBS: `4.5`, `5.14`, admin responsive polish
+- Status: `done`
+- Goal: keep the Runs body inside the application shell width and simplify the Run Snapshot visual structure
+- Why now: the Product Owner observed that `/admin/runs` could push past the shell width and that the Run Snapshot did not need an extra outer card around its metric cards
+- Outcome: added `min-w-0` containment to the admin shell content lane, constrained the Runs surface/table card so wide diagnostics scroll inside the card, and replaced the Runs `Stats5` snapshot wrapper with direct white stat cards matching the registry summary-card pattern.
+- Not done: no route-specific column hiding or mobile card variant was added; the current fix keeps the table as an internally scrollable diagnostic table.
+- Key files: `app/admin/src/components/application-shell5.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: used shell-level containment for all admin pages plus a Runs-specific table boundary instead of narrowing diagnostic columns or changing shared table primitives.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: browser responsive QA was not run in this slice; verify `/admin/runs` with live data at desktop and mobile widths during the next admin dev-server pass.
+- Next step: continue responsive QA on other table-heavy admin routes if any still show horizontal page overflow after the shell containment change.
+
+## 2026-04-28 - Admin Table Auto Refresh
+
+- WBS: `4.5`, `5.15`, admin operations polish
+- Status: `done`
+- Goal: let Runs and other admin table/list screens reflect server-side status changes without requiring operators to press `Search`
+- Why now: the Product Owner observed that `/admin/runs` only showed run status changes after a manual Search action
+- Outcome: added a small FPDS-owned `AdminTableAutoRefresh` client wrapper that periodically calls `router.refresh()` only while the page is visible and no form control is being edited. Mounted it on the admin table/list surfaces for reviews, runs, changes, audit, usage, health, banks, product types, source catalog, and generated sources.
+- Not done: no resource-specific polling endpoint, websocket, or row-level live update system was added; route-level refresh is intentionally the simple implementation
+- Key files: `app/admin/src/components/fpds/admin/admin-table-auto-refresh.tsx`, `app/admin/src/components/fpds/admin/*-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the interval refresh as a client-only wrapper because existing server data fetches already use `cache: "no-store"` and `router.refresh()` can reuse the current route/search params safely
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `pnpm run build` in `app/admin`
+- Known issues: browser QA was not part of the implementation pass; responsive/live-data confirmation should happen during the next admin dev-server pass
+- Next step: verify `/admin/runs` during an active collection run and confirm the table status changes without pressing `Search`
+
+## 2026-04-28 - BMO Seed Detail Ordering Fix
+
+- WBS: `5.15`, source collection quality hardening
+- Status: `done`
+- Goal: fix the repeated BMO chequing source-catalog run outcome where no source rows were materialized after source cleanup
+- Why now: the Product Owner reran BMO chequing collection and still saw `Homepage discovery produced no detail sources eligible for collection`
+- Outcome: confirmed BMO chequing seed detail hints load from the committed registry, but homepage candidates could displace seed details from the page-evidence evaluation window and BMO detail pages were rejected because broad page text triggered negative terms. Seed detail hints now evaluate ahead of non-seed homepage candidates, curated seed detail can promote when page evidence meets the minimum score even if broad page text has negative terms, and non-seed detail promotion is suppressed when seed detail hints are present.
+- Not done: no live BMO collection run was launched from this slice
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`
+- Decisions: treated curated seed detail rows as the authoritative recovery path for BMO chequing; homepage-discovered non-seed detail candidates remain available only when there are no seed detail hints
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_catalog` in `api/service`
+  - local `_generate_sources_from_homepage` check now returns 5 BMO chequing detail source ids: `BMO-CHQ-002`, `BMO-CHQ-003`, `BMO-CHQ-004`, `BMO-CHQ-005`, `BMO-CHQ-008`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: the generated entry row can still point at the best discovered hub URL rather than the committed entry URL, but it is not candidate-producing; revisit only if source list operator clarity requires exact seed entry retention
+- Next step: rerun BMO chequing source catalog collection after this patch is on the running API/worker code path
+
+## 2026-04-28 - BMO Seed Detail Fetch Fallback
+
+- WBS: `5.15`, source collection quality hardening
+- Status: `done`
+- Goal: restore BMO chequing source materialization after deleting collected source rows and rerunning source catalog collection
+- Why now: the latest BMO chequing run completed with partial completion and no source items because homepage discovery had no existing active detail scope and dropped seed detail hints when page-evidence fetch was unavailable
+- Outcome: seed-backed detail sources now remain eligible for materialization when page evidence fetch is unavailable. The generated source row records `selection_path=seed_hint_fetch_unavailable`, keeps the fetch error in discovery metadata, and proceeds to downstream source collection where snapshot capture can succeed or fail with source-level diagnostics.
+- Not done: no live rerun was launched after this code fix
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`
+- Decisions: allowed this fallback only for curated seed detail hints; non-seed homepage candidates still require evidence validation or AI/detail signals before promotion
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_catalog` in `api/service`
+  - `cmd /c npm run typecheck` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `git diff --check`
+- Known issues: the run log under `tmp/source-catalog-collections/` is local evidence from the failed live run and was not removed
+- Next step: rerun BMO chequing source catalog collection; if snapshot fetch fails later, Run Detail should show per-source failures instead of zero source scope
 
 ## 2026-04-28 - Source Detail Soft Remove
 

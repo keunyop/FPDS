@@ -217,11 +217,17 @@ The description should explicitly inform:
 - which nearby but non-detail pages are still useful as supporting sources
 - what language should count as a semantic match even when the exact product-type label is absent from the URL
 
+Current runtime note:
+- product type identity remains the operator-managed DB code
+- discovery may compute a bounded semantic profile from the registered display name, description, and discovery keywords when the code itself is too weak or mistyped
+- this profile affects candidate generation, seed hints, page evidence, and supporting-link relevance only; persisted generated rows keep the registered product type code
+- missing or inactive product type rows still fail clearly instead of being resolved through hidden aliases
+
 Examples:
 - `chequing` should weight transactions, monthly fee, debit-card usage, and day-to-day banking language
 - `savings` should weight interest, savings growth, withdrawal or tiering language
 - `gic` should weight term, maturity, redeemability, deposit minimum, or compounding language
-- dynamic product types should inherit the same contract through their stored display name and description
+- operator-managed product types should inherit the same contract through their stored display name and description
 
 This is still not a full ontology engine.
 It is a stronger text-grounded discovery contract for both heuristic feature generation and AI scoring.
@@ -346,7 +352,7 @@ This design does not require:
 - switching to vector-first retrieval for homepage discovery
 - replacing same-domain safe-fetch rules
 - allowing AI to autonomously expand into arbitrary off-domain pages
-- auto-publishing dynamic product-type candidates
+- auto-publishing candidates for product types that require generic fallback handling
 - adding a browser-rendered crawler as the default path
 
 Push-back note:

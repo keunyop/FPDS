@@ -98,7 +98,74 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         self.assertEqual(update_call["run_id"], "run-001")
         self.assertEqual(update_call["run_state"], "completed")
         self.assertTrue(update_call["partial_completion_flag"])
-        self.assertEqual(update_call["error_summary"], "Homepage discovery produced no detail sources eligible for collection.")
+        self.assertEqual(
+            update_call["error_summary"],
+            "Homepage discovery produced no detail sources eligible for collection. Homepage discovery completed but no candidate-producing detail sources were identified.",
+        )
+
+    def test_run_group_uses_registered_product_type_code_without_aliasing(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-001",
+            "correlation_id": "corr-001",
+            "request_id": "req-001",
+            "triggered_by": "admin@example.com",
+            "actor": {"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-001",
+            "catalog_item_id": "catalog-ca-bmo-saving-legacy",
+            "bank_code": "BMO",
+            "bank_name": "BMO",
+            "country_code": "CA",
+            "product_type": "saving",
+            "source_language": "en",
+            "homepage_url": "https://www.bmo.com/",
+            "normalized_homepage_url": "https://www.bmo.com/",
+        }
+        prepared_plan = {
+            "triggered_by": "admin@example.com",
+            "groups": [{"run_id": "run-001"}],
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch(
+                "api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item",
+                return_value=CatalogItemMaterializationResult(
+                    generated_rows=[
+                        {
+                            "source_id": "BMO-SAV-002",
+                            "discovery_role": "detail",
+                            "status": "active",
+                        }
+                    ],
+                    discovery_notes=["Homepage discovery produced detail sources for registered product type `saving`."],
+                    detail_source_ids=["BMO-SAV-002"],
+                ),
+            ) as materialize,
+            patch(
+                "api_service.source_catalog_collection_runner.prepare_source_collection",
+                return_value={
+                    "collection_id": "collection-001",
+                    "correlation_id": "corr-001",
+                    "plan": prepared_plan,
+                },
+            ) as prepare_collection,
+            patch("api_service.source_catalog_collection_runner._insert_collection_run_row"),
+            patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group") as run_group,
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        self.assertEqual(materialize.call_args.kwargs["row"]["product_type"], "saving")
+        prepare_collection.assert_called_once()
+        self.assertEqual(
+            prepare_collection.call_args.kwargs["run_id_overrides"],
+            {("CA", "BMO", "saving", "en"): "run-001"},
+        )
+        run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
 
     def test_run_group_reuses_preserved_active_detail_scope_when_homepage_discovery_finds_no_replacement(self) -> None:
         connection = _Connection()
@@ -185,7 +252,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 ("CA", "TD", "savings", "en"): "run-001",
             },
         )
-        insert_run.assert_called_once()
+        self.assertEqual(insert_run.call_count, 2)
         run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
         self.assertFalse(any("run_state" in params for _sql, params in connection.calls))
 
@@ -258,7 +325,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
 
         self.assertTrue(connection.committed)
         prepare_collection.assert_called_once()
-        insert_run.assert_called_once()
+        self.assertEqual(insert_run.call_count, 2)
         run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
 
 

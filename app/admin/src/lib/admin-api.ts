@@ -869,9 +869,7 @@ export type ProductTypeItem = {
   display_name: string;
   description: string;
   status: string;
-  built_in_flag: boolean;
   managed_flag: boolean;
-  dynamic_onboarding_enabled: boolean;
   discovery_keywords: string[];
   expected_fields: string[];
   fallback_policy: string;
@@ -884,7 +882,6 @@ export type ProductTypeListResponse = {
   summary: {
     total_items: number;
     status_counts: Record<string, number>;
-    built_in_count: number;
   };
   facets: {
     statuses: string[];
@@ -991,7 +988,7 @@ export async function fetchProductTypeList(searchParams?: URLSearchParams): Prom
 }
 
 export async function fetchProductTypeDetail(productTypeCode: string): Promise<ProductTypeItem | null> {
-  const payload = await fetchAdminData<{ product_type: ProductTypeItem }>(`/api/admin/product-types/${productTypeCode}`, undefined, { allowNotFound: true });
+  const payload = await fetchAdminData<{ product_type: ProductTypeItem }>(`/api/admin/product-types/${encodeURIComponent(productTypeCode)}`, undefined, { allowNotFound: true });
   return payload?.product_type ?? null;
 }
 

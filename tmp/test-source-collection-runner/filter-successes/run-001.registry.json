@@ -1,5 +1,5 @@
 {
-  "registry_version": "2026-04-21",
+  "registry_version": "2026-04-29",
   "bank_code": "BMO",
   "country_code": "CA",
   "product_type": "chequing",
@@ -23,7 +23,6 @@
       "source_language": "en",
       "product_type_name": null,
       "product_type_description": null,
-      "product_type_dynamic": null,
       "discovery_keywords": [],
       "fallback_policy": null,
       "discovery_metadata": {}
@@ -42,7 +41,6 @@
       "source_language": "en",
       "product_type_name": null,
       "product_type_description": null,
-      "product_type_dynamic": null,
       "discovery_keywords": [],
       "fallback_policy": null,
       "discovery_metadata": {}
@@ -61,7 +59,6 @@
       "source_language": "en",
       "product_type_name": null,
       "product_type_description": null,
-      "product_type_dynamic": null,
       "discovery_keywords": [],
       "fallback_policy": null,
       "discovery_metadata": {}

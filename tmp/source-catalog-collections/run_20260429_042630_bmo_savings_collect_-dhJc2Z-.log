@@ -1,0 +1,2 @@
+[source-catalog-runner] starting run run_20260429_042630_bmo_savings_collect_-dhJc2Z- for BMO savings
+[source-catalog-runner] failed run run_20260429_042630_bmo_savings_collect_-dhJc2Z-: Product type was not found. Create it from /admin/product-types first.

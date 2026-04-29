@@ -7,7 +7,7 @@ import { useState } from "react";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import type { RunRetryResponse, RunStatusDetailResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 type RunDetailSurfaceProps = {
@@ -32,44 +32,30 @@ const RUN_DETAIL_COPY = {
     sourceItems: "Source items",
     candidates: "Candidates",
     reviewQueued: "Review queued",
-    correlation: "Correlation",
     started: "Started",
     completed: "Completed",
     trigger: "Trigger",
     actor: "Actor",
     stageSummary: "Stage summary",
     executionStageStrip: "Execution stage strip",
-    stageSummaryDescription:
-      "Stage status stays compact at the top of run detail so operators can quickly see whether the run failed, completed cleanly, or completed in a degraded way.",
     executionEntries: (count: number) => `${count} execution entries`,
     success: "Success",
     failure: "Failure",
     sourceProcessing: "Source processing",
     perSourceSummary: "Per-source summary",
-    sourceProcessingDescription:
-      "Run detail keeps source processing summary separate from error events so impact scope and processing state remain easy to scan.",
     noSourceItems: "No source-item rows were persisted for this run.",
     warning: (count: number) => `${count} warning`,
     error: (count: number) => `${count} error`,
-    sourceDoc: "Source doc",
-    snapshot: "Snapshot",
-    parsedDoc: "Parsed doc",
     fetched: "Fetched",
-    parseNote: "Parse note",
-    safeMetadata: "Safe stage metadata",
     openSourceUrl: "Open source URL",
     failureSummary: "Failure summary",
     runSourceIssues: "Run and source issues",
-    failureDescription:
-      "Error and degraded-event summaries stay together here so operators can explain what went wrong and how wide the impact was.",
     noIssues: "No run-level or source-level issues were recorded for this run.",
     runEvent: "Run event",
     sourceEvent: "Source event",
     runSummary: "Run summary",
     usageSummary: "Usage summary",
     modelTokenUsage: "Model and token usage",
-    usageDescription:
-      "Usage stays readable from the same run context so operators can connect execution cost to the exact diagnostic surface.",
     usageRecords: "Usage records",
     modelExecutions: "Model executions",
     totalTokens: "Total tokens",
@@ -81,8 +67,6 @@ const RUN_DETAIL_COPY = {
     cost: "Cost",
     relatedReviews: "Related review tasks",
     reviewWorkload: "Review workload produced by this run",
-    reviewDescription:
-      "Run detail links directly to the queue items created from this run so operators can move from execution diagnosis into task-level evidence review.",
     noReviews: "This run did not produce any related review tasks.",
     candidate: "Candidate",
     bank: "Bank",
@@ -90,9 +74,7 @@ const RUN_DETAIL_COPY = {
     created: "Created",
     runContext: "Run context",
     retryScope: "Retry and scope summary",
-    contextDescription: "Core identifiers and retry linkage stay compact on the side so the main pane remains focused on diagnosis.",
     pipelineStage: "Pipeline stage",
-    requestId: "Request ID",
     retryOf: "Retry of",
     retriedBy: "Retried by",
     missing: "n/a",
@@ -326,11 +308,12 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
       />
 
       <article className="rounded-lg border border-border/80 bg-background p-4">
-        <div className="grid gap-3 lg:grid-cols-4">
+        <div className="grid gap-3 lg:grid-cols-5">
           <SummaryStat label={copy.sourceItems} value={String(detail.run.source_item_count)} />
+          <SummaryStat label={copy.success} value={String(detail.run.success_count)} />
+          <SummaryStat label={copy.failure} value={String(detail.run.failure_count)} />
           <SummaryStat label={copy.candidates} value={String(detail.run.candidate_count)} />
           <SummaryStat label={copy.reviewQueued} value={String(detail.run.review_queued_count)} />
-          <SummaryStat label={copy.correlation} value={detail.run.correlation_id ?? copy.missing} />
         </div>
 
         <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -361,7 +344,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.stageSummary}
               title={copy.executionStageStrip}
-              description={copy.stageSummaryDescription}
             />
             <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {detail.stage_summaries.map((item) => (
@@ -390,7 +372,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.sourceProcessing}
               title={copy.perSourceSummary}
-              description={copy.sourceProcessingDescription}
             />
 
             {detail.source_items.length === 0 ? (
@@ -424,9 +405,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                     </div>
 
                     <dl className="mt-4 grid gap-2 text-sm">
-                      <MetaRow label={copy.sourceDoc} value={item.source_document_id} />
-                      <MetaRow label={copy.snapshot} value={item.snapshot_id ?? copy.missing} />
-                      <MetaRow label={copy.parsedDoc} value={item.parsed_document_id ?? copy.missing} />
                       <MetaRow label={copy.fetched} value={formatTimestamp(item.fetched_at, copy.missing)} />
                     </dl>
 
@@ -434,35 +412,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                       <p className="mt-4 rounded-2xl border border-destructive/15 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
                         {item.error_summary}
                       </p>
-                    ) : null}
-
-                    {item.parse_quality_note ? (
-                      <p className="mt-4 rounded-2xl bg-muted px-3 py-3 text-sm leading-6 text-muted-foreground">
-                        {copy.parseNote}: {item.parse_quality_note}
-                      </p>
-                    ) : null}
-
-                    {item.runtime_notes.length > 0 ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {item.runtime_notes.map((note) => (
-                          <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground" key={note}>
-                            {note}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-
-                    {Object.keys(item.safe_metadata).length > 0 ? (
-                      <div className="mt-4 rounded-2xl border border-border/70 px-3 py-3">
-                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{copy.safeMetadata}</p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {Object.entries(item.safe_metadata).map(([key, value]) => (
-                            <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info" key={`${item.source_document_id}-${key}`}>
-                              {toTitleCase(key)}: {formatValue(value)}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
                     ) : null}
 
                     {item.source_url ? (
@@ -480,7 +429,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.failureSummary}
               title={copy.runSourceIssues}
-              description={copy.failureDescription}
             />
 
             {detail.error_events.length === 0 ? (
@@ -507,15 +455,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                         {copy.error(item.error_count)}
                       </span>
                     </div>
-                    {item.runtime_notes.length > 0 ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {item.runtime_notes.map((note) => (
-                          <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground" key={note}>
-                            {note}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
                   </div>
                 ))}
               </div>
@@ -528,7 +467,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.usageSummary}
               title={copy.modelTokenUsage}
-              description={copy.usageDescription}
             />
             <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-1">
               <SummaryStat label={copy.usageRecords} value={String(detail.usage_summary.usage_record_count)} />
@@ -565,7 +503,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.relatedReviews}
               title={copy.reviewWorkload}
-              description={copy.reviewDescription}
             />
 
             {detail.related_review_tasks.length === 0 ? (
@@ -601,12 +538,10 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             <SectionHeading
               eyebrow={copy.runContext}
               title={copy.retryScope}
-              description={copy.contextDescription}
             />
             <div className="mt-6 rounded-2xl border border-border/80 bg-background p-4">
               <dl className="grid gap-3 text-sm">
                 <MetaRow label={copy.pipelineStage} value={detail.run.pipeline_stage ?? copy.missing} />
-                <MetaRow label={copy.requestId} value={detail.run.request_id ?? copy.missing} />
                 <MetaRow label={copy.retryOf} value={detail.run.retry_of_run_id ?? copy.missing} />
                 <MetaRow label={copy.retriedBy} value={detail.run.retried_by_run_id ?? copy.missing} />
               </dl>
@@ -617,15 +552,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                 </p>
               ) : null}
 
-              {detail.run.source_ids.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {detail.run.source_ids.map((item) => (
-                    <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info" key={item}>
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
             </div>
           </article>
         </div>
@@ -634,7 +560,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
   );
 }
 
-function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description?: string }) {
   return (
     <div>
       <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
@@ -663,30 +589,11 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 }
 
 function formatTimestamp(value: string | null, missing = "n/a") {
-  if (!value) {
-    return missing;
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return formatAdminDateTimeValue(value, missing);
 }
 
 function formatCost(value: number) {
   return `$${value.toFixed(6)}`;
-}
-
-function formatValue(value: unknown) {
-  if (value === null || value === undefined || value === "") {
-    return "n/a";
-  }
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value.join(", ");
-  }
-  return JSON.stringify(value);
 }
 
 function toTitleCase(value: string) {

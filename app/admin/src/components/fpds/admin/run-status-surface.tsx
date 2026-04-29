@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTime, translateRunState, type AdminLocale } from "@/lib/admin-i18n";
@@ -273,19 +273,22 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.headerDescription}
         path={copy.path}
         title={copy.title}
       />
 
-      <Stats5
-        items={statItems}
-        title={copy.snapshotTitle}
-      />
+      <article aria-label={copy.snapshotTitle} className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {statItems.map((item) => (
+          <SnapshotStatCard key={item.label} item={item} />
+        ))}
+      </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersEyebrow}</p>
@@ -303,11 +306,11 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         </div>
 
         <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
-          <div className="grid gap-4 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
-            <label className="grid gap-2 text-sm">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -315,10 +318,10 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               />
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.runType}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.runType}
                 name="run_type"
               >
@@ -331,10 +334,10 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.sortBy}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.sortBy}
                 name="sort_by"
               >
@@ -346,10 +349,10 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.order}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.sortOrder}
                 name="sort_order"
               >
@@ -358,9 +361,9 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.scope}</span>
-              <span className="flex h-10 items-center rounded-xl border border-border bg-background px-3 text-sm text-foreground">
+              <span className="flex h-10 min-w-0 items-center rounded-xl border border-border bg-background px-3 text-sm text-foreground">
                 <input
                   className="mr-2 h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
                   defaultChecked={filters.partialOnly}
@@ -373,8 +376,8 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             </label>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr_1fr_auto]">
-            <fieldset className="grid gap-2 text-sm">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[1.3fr_1fr_1fr_auto]">
+            <fieldset className="grid min-w-0 gap-2 text-sm">
               <legend className="font-medium text-foreground">{copy.runStates}</legend>
               <div className="flex flex-wrap gap-2">
                 {RUN_STATES.map((state) => (
@@ -395,20 +398,20 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </div>
             </fieldset>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.startedFrom}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.startedFrom}
                 name="started_from"
                 type="date"
               />
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.startedTo}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.startedTo}
                 name="started_to"
                 type="date"
@@ -425,7 +428,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
@@ -471,8 +474,8 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1220px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.run}</th>
@@ -482,7 +485,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.sourceSummary}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.candidateSummary}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.errorSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.retryChain}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
                   </tr>
                 </thead>
@@ -494,10 +496,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
                             {item.run_id}
                           </Link>
-                          <span className="text-xs text-muted-foreground">{copy.trigger} {toTitleCase(item.trigger_type)}</span>
-                          {item.correlation_id ? (
-                            <span className="text-xs text-muted-foreground">{copy.correlation} {item.correlation_id}</span>
-                          ) : null}
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -505,7 +503,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                             {toTitleCase(item.run_type)}
                           </span>
-                          {item.triggered_by ? <span className="text-xs text-muted-foreground">{item.triggered_by}</span> : null}
+                          <span className="text-xs text-muted-foreground">{copy.trigger} {toTitleCase(item.trigger_type)}</span>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -544,14 +542,8 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                         <p className="text-sm leading-6 text-muted-foreground">{item.error_summary ?? copy.noRunError}</p>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="text-foreground">{item.retry_of_run_id ?? copy.originalRun}</span>
-                          <span className="text-muted-foreground">{copy.next} {item.retried_by_run_id ?? "n/a"}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                          <Button asChild size="sm" variant="outline">
-                            <Link href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
                         </Button>
                       </td>
                     </tr>
@@ -590,6 +582,41 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       </article>
     </section>
   );
+}
+
+function SnapshotStatCard({
+  item,
+}: {
+  item: {
+    label: string;
+    value: string;
+    note: string;
+    tone: "info" | "warning" | "neutral" | "success";
+  };
+}) {
+  return (
+    <article className="min-w-0 rounded-lg border border-border/80 bg-white p-4">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <p className="min-w-0 text-sm font-medium text-muted-foreground">{item.label}</p>
+        <span className={cn("h-2 w-2 shrink-0 rounded-full", snapshotToneDotClasses(item.tone))} />
+      </div>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
+    </article>
+  );
+}
+
+function snapshotToneDotClasses(tone: "info" | "warning" | "neutral" | "success") {
+  switch (tone) {
+    case "info":
+      return "bg-info";
+    case "warning":
+      return "bg-warning";
+    case "success":
+      return "bg-success";
+    default:
+      return "bg-muted-foreground";
+  }
 }
 
 function buildRunHref(filters: RunStatusPageFilters, overrides: Partial<RunStatusPageFilters>, locale: AdminLocale) {

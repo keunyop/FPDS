@@ -591,7 +591,7 @@ const ApplicationShell5 = ({
           </div>
         </header>
 
-        <div className="flex flex-1">
+        <div className="flex min-w-0 flex-1">
           <AppSidebar
             activeGroupIndex={activeGroupIndex}
             locale={locale}
@@ -601,8 +601,8 @@ const ApplicationShell5 = ({
             user={user}
           />
 
-          <SidebarInset className="bg-transparent pb-20 md:pb-0">
-            <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
+          <SidebarInset className="min-w-0 bg-transparent pb-20 md:pb-0">
+            <div className="flex min-h-[calc(100vh-3.5rem)] min-w-0 flex-col">
               <div className="border-b bg-background/70 px-4 py-3 backdrop-blur md:hidden">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-foreground">{navGroups[activeGroupIndex].title}</p>
@@ -612,7 +612,7 @@ const ApplicationShell5 = ({
                 </div>
               </div>
 
-              <main className="flex-1 px-4 py-6 md:px-6 lg:px-8">{children}</main>
+              <main className="min-w-0 max-w-full flex-1 overflow-x-hidden px-4 py-6 md:px-6 lg:px-8">{children}</main>
             </div>
           </SidebarInset>
         </div>

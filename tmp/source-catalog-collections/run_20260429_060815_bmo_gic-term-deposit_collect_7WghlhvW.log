@@ -1,0 +1,398 @@
+[source-catalog-runner] starting run run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW for BMO gic-term-deposit
+[source-collection-runner] run run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW starting snapshot for 3 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+  "correlation_id": "corr_h74tEanQarQnyxnE",
+  "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 3,
+    "stored_count": 2,
+    "reused_count": 1,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-6a676a053fcc895a",
+      "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-6a676a053fcc895a/raw",
+      "checksum": "87add50b505bdf108340cfb91bd1357bf9cfcf423e3e6194debf7f18eb41aaa7",
+      "fingerprint": "e256dea8e5b2c72f46095fbc01df3e450b59af17d260402ebb3c2a8443683499",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-04-29T06:08:44.081843+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-6a676a053fcc895a",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-6a676a053fcc895a/raw",
+        "content_type": "text/html",
+        "checksum": "87add50b505bdf108340cfb91bd1357bf9cfcf423e3e6194debf7f18eb41aaa7",
+        "fingerprint": "e256dea8e5b2c72f46095fbc01df3e450b59af17d260402ebb3c2a8443683499",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "BMO-GIC-003",
+          "request_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+          "final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+          "status_code": 200,
+          "content_length": 2199830,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "must-revalidate, max-age=600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-04-29T06:08:44.081843+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8ace8538faf4fa1c",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-6a676a053fcc895a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+          "content_type": "text/html",
+          "checksum": "87add50b505bdf108340cfb91bd1357bf9cfcf423e3e6194debf7f18eb41aaa7",
+          "fingerprint": "e256dea8e5b2c72f46095fbc01df3e450b59af17d260402ebb3c2a8443683499",
+          "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-6a676a053fcc895a/raw",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "source_document_id": "src-bmo-html-75f472dc44bce8be",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-51499a4006b09a2e",
+      "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-51499a4006b09a2e/raw",
+      "checksum": "d6e71f860878eb2bc61f551a1aa581c0ae2fdca25af7a5da3ebcb5cad5be7490",
+      "fingerprint": "92796794c152c149b96eac9f51726a8f254ac634579cecc7382aa954c61a7f5a",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-04-29T06:08:44.086569+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-51499a4006b09a2e",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-51499a4006b09a2e/raw",
+        "content_type": "text/html",
+        "checksum": "d6e71f860878eb2bc61f551a1aa581c0ae2fdca25af7a5da3ebcb5cad5be7490",
+        "fingerprint": "92796794c152c149b96eac9f51726a8f254ac634579cecc7382aa954c61a7f5a",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "BMO-GIC-002",
+          "request_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+          "final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+          "status_code": 200,
+          "content_length": 2198395,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "must-revalidate, max-age=91",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-04-29T06:08:44.086569+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2902ef1c4f94a6ea",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "selected_snapshot_id": "snap-51499a4006b09a2e",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+          "content_type": "text/html",
+          "checksum": "d6e71f860878eb2bc61f551a1aa581c0ae2fdca25af7a5da3ebcb5cad5be7490",
+          "fingerprint": "92796794c152c149b96eac9f51726a8f254ac634579cecc7382aa954c61a7f5a",
+          "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-51499a4006b09a2e/raw",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-GIC-92ff5bdef5",
+      "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+      "snapshot_action": "reused",
+      "attempt_count": 1,
+      "snapshot_id": "snap-0efebea10541d042",
+      "object_storage_key": "dev/snapshots/CA/BMO/src-bmo-html-d2eedec8bb75ebe3/snap-0efebea10541d042/raw",
+      "checksum": "65b3fc5b1a5071d5c74ee2a45cbf2fa1b7317ac9b6c89ef17bd1e9cfacb00924",
+      "fingerprint": "6b6f6fa8abf4a2980e3954d841278b8528adfa886f09a54531deeccb48d5ccd3",
+      "content_type": "text/html",
+      "fetch_status": "reused",
+      "fetched_at": "2026-04-29T06:08:44.234270+00:00",
+      "error_summary": null,
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-5febd3294c3b7921",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+        "selected_snapshot_id": "snap-0efebea10541d042",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "reused",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "attempt_count": 1,
+          "existing_snapshot_id": "snap-0efebea10541d042",
+          "existing_fetched_at": "2026-04-29T05:34:25.615402+00",
+          "preflight_status": "ok",
+          "preflight_issue_codes": [],
+          "current_response_metadata": {
+            "source_id": "AUTO-BMO-GIC-92ff5bdef5",
+            "request_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions#nine",
+            "final_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+            "status_code": 200,
+            "content_length": 2372635,
+            "content_type": "text/html",
+            "redirect_count": 1,
+            "etag": null,
+            "last_modified": null,
+            "cache_control": "must-revalidate, max-age=600",
+            "attempt_count": 1
+          }
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+    "correlation_id": "corr_h74tEanQarQnyxnE",
+    "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+    "stats": {
+      "source_total": 3,
+      "ok_count": 3,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "BMO-GIC-003",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "expected_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-04-29T06:08:34.385152+00:00",
+        "final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+        "normalized_final_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "BMO-GIC-002",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "expected_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-04-29T06:08:34.809624+00:00",
+        "final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+        "normalized_final_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-BMO-GIC-92ff5bdef5",
+        "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+        "expected_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-04-29T06:08:43.700951+00:00",
+        "final_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+        "normalized_final_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 1,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+    "run_state": "completed",
+    "source_document_count": 3,
+    "stored_snapshot_count": 2,
+    "run_source_item_count": 3,
+    "source_success_count": 3,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-04-29T06:08:33.102183+00:00",
+    "completed_at": "2026-04-29T06:08:47.998344+00:00"
+  }
+}
+[source-collection-runner] run run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW continuing with 3 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+  "correlation_id": "corr_h74tEanQarQnyxnE",
+  "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+  "partial_completion_flag": true,
+  "stats": {
+    "source_total": 3,
+    "stored_count": 0,
+    "reused_count": 1,
+    "failed_count": 2
+  },
+  "source_results": [
+    {
+      "source_id": "BMO-GIC-003",
+      "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+      "snapshot_id": "snap-6a676a053fcc895a",
+      "parse_action": "failed",
+      "parsed_document_id": null,
+      "parsed_storage_key": null,
+      "metadata_storage_key": null,
+      "chunk_count": 0,
+      "parse_quality_note": null,
+      "error_summary": "HTML parser produced no usable text.",
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8ace8538faf4fa1c",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-283cc9030bf48bf7",
+        "selected_snapshot_id": "snap-6a676a053fcc895a",
+        "stage_status": "failed",
+        "warning_count": 0,
+        "error_count": 1,
+        "error_summary": "HTML parser produced no usable text.",
+        "stage_metadata": {
+          "parse_action": "failed",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+          "snapshot_id": "snap-6a676a053fcc895a",
+          "snapshot_object_key": "dev/snapshots/CA/BMO/src-bmo-html-283cc9030bf48bf7/snap-6a676a053fcc895a/raw"
+        }
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "source_document_id": "src-bmo-html-75f472dc44bce8be",
+      "snapshot_id": "snap-51499a4006b09a2e",
+      "parse_action": "failed",
+      "parsed_document_id": null,
+      "parsed_storage_key": null,
+      "metadata_storage_key": null,
+      "chunk_count": 0,
+      "parse_quality_note": null,
+      "error_summary": "HTML parser produced no usable text.",
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2902ef1c4f94a6ea",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-75f472dc44bce8be",
+        "selected_snapshot_id": "snap-51499a4006b09a2e",
+        "stage_status": "failed",
+        "warning_count": 0,
+        "error_count": 1,
+        "error_summary": "HTML parser produced no usable text.",
+        "stage_metadata": {
+          "parse_action": "failed",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e",
+          "snapshot_id": "snap-51499a4006b09a2e",
+          "snapshot_object_key": "dev/snapshots/CA/BMO/src-bmo-html-75f472dc44bce8be/snap-51499a4006b09a2e/raw"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-GIC-92ff5bdef5",
+      "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+      "snapshot_id": "snap-0efebea10541d042",
+      "parse_action": "reused",
+      "parsed_document_id": "parsed-702ebbd33d63aec6",
+      "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-d2eedec8bb75ebe3/parsed-702ebbd33d63aec6/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-d2eedec8bb75ebe3/parsed-702ebbd33d63aec6/metadata.json",
+      "chunk_count": 55,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-5febd3294c3b7921",
+        "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+        "source_document_id": "src-bmo-html-d2eedec8bb75ebe3",
+        "selected_snapshot_id": "snap-0efebea10541d042",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "reused",
+          "parsed_document_id": "parsed-702ebbd33d63aec6",
+          "parsed_storage_key": "dev/parsed/CA/BMO/src-bmo-html-d2eedec8bb75ebe3/parsed-702ebbd33d63aec6/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/BMO/src-bmo-html-d2eedec8bb75ebe3/parsed-702ebbd33d63aec6/metadata.json",
+          "chunk_count": 55,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_h74tEanQarQnyxnE",
+          "request_id": "req_92461b17e4414c648f1a562b9106bc3e"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW",
+    "run_state": "completed",
+    "parsed_document_count": 0,
+    "evidence_chunk_count": 0,
+    "run_source_item_count": 3,
+    "source_success_count": 1,
+    "source_failure_count": 2,
+    "partial_completion_flag": true,
+    "completed_at": "2026-04-29T06:08:56.615103+00:00"
+  }
+}
+[source-catalog-runner] failed run run_20260429_060815_bmo_gic-term-deposit_collect_7WghlhvW: Parse/chunk produced no target sources eligible for extraction.

@@ -7,14 +7,16 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
-import type { SourceCatalogItem } from "@/lib/admin-api";
+import type { ProductTypeItem, SourceCatalogItem } from "@/lib/admin-api";
 import type { AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminProductTypeOptions } from "@/lib/admin-product-types";
 
 type SourceCatalogCreateDialogContentProps = {
   bankOptions: Array<{ bank_code: string; bank_name: string }>;
   csrfToken: string | null | undefined;
   locale: AdminLocale;
   onCreated: (item: SourceCatalogItem | null) => void;
+  productTypes?: ProductTypeItem[];
 };
 
 type CreateCatalogFormState = {
@@ -23,12 +25,6 @@ type CreateCatalogFormState = {
   status: string;
   change_reason: string;
 };
-
-const PRODUCT_TYPE_OPTIONS = [
-  { label: "chequing", value: "chequing" },
-  { label: "savings", value: "savings" },
-  { label: "gic", value: "gic" },
-] as const;
 
 const STATUS_OPTIONS = [
   { label: "active", value: "active" },
@@ -82,12 +78,14 @@ export function SourceCatalogCreateDialogContent({
   csrfToken,
   locale,
   onCreated,
+  productTypes = [],
 }: SourceCatalogCreateDialogContentProps) {
   const copy = CREATE_CATALOG_COPY[locale];
   const router = useRouter();
+  const productTypeOptions = buildAdminProductTypeOptions(productTypes.filter((item) => item.status === "active"));
   const [form, setForm] = useState<CreateCatalogFormState>({
     bank_code: bankOptions[0]?.bank_code ?? "",
-    product_type: "savings",
+    product_type: productTypeOptions[0]?.value ?? "",
     status: "active",
     change_reason: "",
   });
@@ -140,7 +138,7 @@ export function SourceCatalogCreateDialogContent({
           />
           <SelectField
             label={copy.productType}
-            options={PRODUCT_TYPE_OPTIONS}
+            options={productTypeOptions}
             value={form.product_type}
             onChange={(value) => setForm((current) => ({ ...current, product_type: value }))}
           />
@@ -175,7 +173,7 @@ export function SourceCatalogCreateDialogContent({
         </Field>
 
         <div className="flex justify-end">
-          <Button disabled={pending || !form.bank_code} type="submit">
+          <Button disabled={pending || !form.bank_code || !form.product_type} type="submit">
             {pending ? copy.adding : copy.addCoverage}
           </Button>
         </div>

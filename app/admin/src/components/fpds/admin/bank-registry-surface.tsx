@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
@@ -323,6 +324,8 @@ export function BankRegistrySurface({
 
   return (
     <section className="grid gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.description}
         path={copy.path}

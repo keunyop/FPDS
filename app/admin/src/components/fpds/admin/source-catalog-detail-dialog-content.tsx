@@ -8,21 +8,17 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
-import type { SourceCatalogDetailResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import type { ProductTypeItem, SourceCatalogDetailResponse } from "@/lib/admin-api";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminProductTypeOptions } from "@/lib/admin-product-types";
 
 type SourceCatalogDetailDialogContentProps = {
   bankOptions: Array<{ bank_code: string; bank_name: string }>;
   detail: SourceCatalogDetailResponse;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  productTypes?: ProductTypeItem[];
 };
-
-const PRODUCT_TYPE_OPTIONS = [
-  { label: "chequing", value: "chequing" },
-  { label: "savings", value: "savings" },
-  { label: "gic", value: "gic" },
-] as const;
 
 const STATUS_OPTIONS = [
   { label: "active", value: "active" },
@@ -115,9 +111,21 @@ export function SourceCatalogDetailDialogContent({
   detail,
   locale,
   csrfToken,
+  productTypes = [],
 }: SourceCatalogDetailDialogContentProps) {
   const copy = DETAIL_CATALOG_COPY[locale];
   const router = useRouter();
+  const baseProductTypeOptions = buildAdminProductTypeOptions(productTypes);
+  const productTypeOptions = baseProductTypeOptions.some((option) => option.value === detail.catalog_item.product_type)
+    ? baseProductTypeOptions
+    : [
+        ...baseProductTypeOptions,
+        {
+          label: detail.catalog_item.product_type,
+          value: detail.catalog_item.product_type,
+          description: "",
+        },
+      ];
   const [form, setForm] = useState({
     bank_code: detail.catalog_item.bank_code,
     product_type: detail.catalog_item.product_type,
@@ -180,7 +188,7 @@ export function SourceCatalogDetailDialogContent({
             />
             <SelectField
               label={copy.productType}
-              options={PRODUCT_TYPE_OPTIONS}
+              options={productTypeOptions}
               value={form.product_type}
               onChange={(value) => setForm((current) => ({ ...current, product_type: value }))}
             />
@@ -242,7 +250,7 @@ export function SourceCatalogDetailDialogContent({
                       {item.run_id}
                     </Link>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {item.pipeline_stage || item.trigger_type} {copy.started} {item.started_at ?? copy.missing}
+                      {item.pipeline_stage || item.trigger_type} {copy.started} {formatAdminDateTimeValue(item.started_at, copy.missing)}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">

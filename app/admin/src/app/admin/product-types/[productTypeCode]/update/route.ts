@@ -8,7 +8,7 @@ type RouteContext = {
 
 export async function PATCH(request: Request, context: RouteContext) {
   const { productTypeCode } = await context.params;
-  const apiResponse = await fetch(new URL(`/api/admin/product-types/${productTypeCode}`, getAdminApiOrigin()), {
+  const apiResponse = await fetch(new URL(`/api/admin/product-types/${encodeURIComponent(productTypeCode)}`, getAdminApiOrigin()), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

@@ -1,0 +1,2 @@
+[source-catalog-runner] starting run run_20260429_052912_bmo_saving_collect_9bLwg9qv for BMO saving
+[source-catalog-runner] failed run run_20260429_052912_bmo_saving_collect_9bLwg9qv: _score_candidate_links_with_ai() got an unexpected keyword argument 'discovery_product_type'

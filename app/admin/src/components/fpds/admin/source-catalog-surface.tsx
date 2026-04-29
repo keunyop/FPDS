@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { SourceCatalogCreateDialogContent } from "@/components/fpds/admin/source-catalog-create-dialog-content";
@@ -13,6 +14,7 @@ import type {
   SourceCatalogDetailResponse,
   SourceCatalogItem,
   SourceCatalogListResponse,
+  ProductTypeItem,
 } from "@/lib/admin-api";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -31,6 +33,7 @@ type SourceCatalogSurfaceProps = {
   activeCatalogItemId: string | null;
   activeCatalogDetail: SourceCatalogDetailResponse | null;
   addModalOpen: boolean;
+  productTypes?: ProductTypeItem[];
 };
 
 const CATALOG_COPY = {
@@ -192,6 +195,7 @@ export function SourceCatalogSurface({
   activeCatalogItemId,
   activeCatalogDetail,
   addModalOpen,
+  productTypes = [],
 }: SourceCatalogSurfaceProps) {
   const copy = CATALOG_COPY[locale];
   const router = useRouter();
@@ -335,6 +339,8 @@ export function SourceCatalogSurface({
 
   return (
     <section className="grid gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         actions={
           <>
@@ -458,7 +464,7 @@ export function SourceCatalogSurface({
         panelTitle={copy.sourceCatalogWorkflow}
         title={copy.addCoverage}
       >
-        <SourceCatalogCreateDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} locale={locale} onCreated={handleCatalogItemCreated} />
+        <SourceCatalogCreateDialogContent bankOptions={catalog.facets.bank_options} csrfToken={csrfToken} locale={locale} onCreated={handleCatalogItemCreated} productTypes={productTypes} />
       </OfferModal4>
 
       <OfferModal4
@@ -476,6 +482,7 @@ export function SourceCatalogSurface({
             detail={catalogDialogDetail}
             key={catalogDialogDetail.catalog_item.catalog_item_id}
             locale={locale}
+            productTypes={productTypes}
           />
         ) : null}
       </OfferModal4>

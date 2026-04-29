@@ -1,22 +1,22 @@
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
-import type { ReviewQueueResponse } from "@/lib/admin-api";
+import type { ProductTypeItem, ReviewQueueResponse } from "@/lib/admin-api";
 import {
   buildAdminHref,
   formatAdminDateTime,
-  translateProductType,
   translateReviewState,
   translateValidationStatus,
   type AdminLocale,
 } from "@/lib/admin-i18n";
+import { buildAdminProductTypeLabelMap, buildAdminProductTypeOptions, formatAdminProductType } from "@/lib/admin-product-types";
 import { cn } from "@/lib/utils";
 
 const REVIEW_STATES = ["queued", "deferred", "approved", "edited", "rejected"] as const;
 const BANK_OPTIONS = ["TD", "RBC", "BMO", "SCOTIA", "CIBC"] as const;
-const PRODUCT_TYPE_OPTIONS = ["savings", "chequing", "gic"] as const;
 const VALIDATION_OPTIONS = ["pass", "warning", "error"] as const;
 
 const REVIEW_QUEUE_COPY = {
@@ -226,10 +226,13 @@ type ReviewQueueSurfaceProps = {
   queue: ReviewQueueResponse;
   filters: ReviewQueuePageFilters;
   locale: AdminLocale;
+  productTypes: ProductTypeItem[];
 };
 
-export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfaceProps) {
+export function ReviewQueueSurface({ queue, filters, locale, productTypes }: ReviewQueueSurfaceProps) {
   const copy = REVIEW_QUEUE_COPY[locale];
+  const productTypeOptions = buildAdminProductTypeOptions(productTypes);
+  const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
   const stateCounts = queue.summary.state_counts;
   const validationCounts = queue.summary.validation_counts;
   const statItems = [
@@ -260,7 +263,9 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.headerDescription}
         path={copy.path}
@@ -268,11 +273,12 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
       />
 
       <Stats5
+        framed={false}
         items={statItems}
         title={copy.snapshotTitle}
       />
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersEyebrow}</p>
@@ -289,12 +295,12 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
           </div>
         </div>
 
-        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
-          <div className="grid gap-4 xl:grid-cols-[1.5fr_repeat(5,minmax(0,1fr))]">
-            <label className="grid gap-2 text-sm">
+        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-6 grid min-w-0 gap-5">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.5fr_repeat(5,minmax(0,1fr))]">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -326,9 +332,9 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                 name="product_type"
               >
                 <option value="">{copy.allTypes}</option>
-                {PRODUCT_TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {translateProductType(locale, option)}
+                {productTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -430,7 +436,7 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
@@ -453,7 +459,7 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
             ) : null}
             {filters.productType ? (
               <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {translateProductType(locale, filters.productType)}
+                {formatAdminProductType(filters.productType, productTypeLabelMap)}
               </span>
             ) : null}
             {filters.validationStatus ? (
@@ -483,13 +489,12 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1120px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1040px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.task}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.country}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.product}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.issueSummary}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.confidence}</th>
@@ -522,12 +527,11 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                           <span className="text-xs text-muted-foreground">{item.bank_code}</span>
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4 text-sm text-foreground">{item.country_code}</td>
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2">
                           <span className="font-medium text-foreground">{item.product_name}</span>
                           <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                            {translateProductType(locale, item.product_type)}
+                            {formatAdminProductType(item.product_type, productTypeLabelMap)}
                           </span>
                         </div>
                       </td>
@@ -549,7 +553,6 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-1">
                           <span className="text-sm font-medium text-foreground">{formatConfidence(item.source_confidence)}</span>
-                          <span className="text-xs text-muted-foreground">{copy.sourceConfidence}</span>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -560,7 +563,6 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-1">
                           <span className="text-sm text-foreground">{formatAdminDateTime(locale, item.created_at)}</span>
-                          <span className="text-xs text-muted-foreground">{copy.updated} {formatAdminDateTime(locale, item.updated_at)}</span>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -568,7 +570,6 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                           <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", stateBadgeClasses(item.review_state))}>
                             {translateReviewState(locale, item.review_state)}
                           </span>
-                          <span className="text-xs text-muted-foreground">{copy.candidate} {item.candidate_state}</span>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -576,9 +577,6 @@ export function ReviewQueueSurface({ queue, filters, locale }: ReviewQueueSurfac
                           <Button asChild size="sm" variant="outline">
                             <Link href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
                           </Button>
-                          <span className="text-xs leading-5 text-muted-foreground">
-                            {copy.detailHint}
-                          </span>
                         </div>
                       </td>
                     </tr>

@@ -29,7 +29,6 @@ _GENERIC_EXPECTED_FIELDS = (
     "eligibility_text",
     "notes",
 )
-_TAXONOMY_SEEDED_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 _STOPWORDS = {
     "able",
     "account",
@@ -127,7 +126,6 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
             display_name,
             description,
             status,
-            built_in_flag,
             managed_flag,
             discovery_keywords,
             expected_fields,
@@ -136,7 +134,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
             updated_at
         FROM product_type_registry
         WHERE {" AND ".join(where_clauses)}
-        ORDER BY built_in_flag DESC, display_name, product_type_code
+        ORDER BY display_name, product_type_code
         """,
         params,
     ).fetchall()
@@ -147,7 +145,6 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
         "summary": {
             "total_items": len(items),
             "status_counts": dict(status_counts),
-            "built_in_count": sum(1 for item in items if item["built_in_flag"]),
         },
         "facets": {
             "statuses": sorted(status_counts),
@@ -160,6 +157,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
 
 
 def load_product_type_definition(connection: Connection, *, product_type_code: str) -> dict[str, Any] | None:
+    normalized_code = canonicalize_product_type_code(product_type_code)
     row = connection.execute(
         """
         SELECT
@@ -168,7 +166,6 @@ def load_product_type_definition(connection: Connection, *, product_type_code: s
             display_name,
             description,
             status,
-            built_in_flag,
             managed_flag,
             discovery_keywords,
             expected_fields,
@@ -177,8 +174,13 @@ def load_product_type_definition(connection: Connection, *, product_type_code: s
             updated_at
         FROM product_type_registry
         WHERE product_type_code = %(product_type_code)s
+           OR lower(product_type_code) = %(product_type_code)s
+        ORDER BY
+            CASE WHEN product_type_code = %(product_type_code)s THEN 0 ELSE 1 END,
+            product_type_code
+        LIMIT 1
         """,
-        {"product_type_code": product_type_code.lower()},
+        {"product_type_code": normalized_code},
     ).fetchone()
     return _serialize_product_type_row(row) if row else None
 
@@ -208,7 +210,6 @@ def load_product_type_definitions_map(
             display_name,
             description,
             status,
-            built_in_flag,
             managed_flag,
             discovery_keywords,
             expected_fields,
@@ -229,7 +230,7 @@ def require_product_type_definition(
     product_type_code: str,
     active_only: bool = True,
 ) -> dict[str, Any]:
-    normalized_code = _required_text(product_type_code, "product_type_code").lower()
+    normalized_code = canonicalize_product_type_code(product_type_code)
     definition = load_product_type_definition(connection, product_type_code=normalized_code)
     if definition is None:
         raise SourceRegistryError(
@@ -293,7 +294,6 @@ def create_product_type_definition(
             display_name,
             description,
             status,
-            built_in_flag,
             managed_flag,
             discovery_keywords,
             expected_fields,
@@ -307,7 +307,6 @@ def create_product_type_definition(
             %(display_name)s,
             %(description)s,
             %(status)s,
-            false,
             true,
             %(discovery_keywords)s::jsonb,
             %(expected_fields)s::jsonb,
@@ -328,7 +327,7 @@ def create_product_type_definition(
             "updated_at": now,
         },
     )
-    _sync_dynamic_taxonomy_registry(connection, product_type_code=product_type_code, status=status)
+    _sync_product_type_taxonomy_registry(connection, product_type_code=product_type_code, status=status)
     _record_product_type_audit_event(
         connection,
         actor=actor,
@@ -352,9 +351,29 @@ def update_product_type_definition(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    existing = load_product_type_definition(connection, product_type_code=product_type_code.lower())
+    existing = load_product_type_definition(connection, product_type_code=product_type_code)
     if existing is None:
         raise SourceRegistryError(status_code=404, code="product_type_not_found", message="Product type was not found.")
+
+    existing_code = str(existing["product_type_code"])
+    requested_code = _clean_text(payload.get("product_type_code"))
+    updated_code = _slugify_product_type_code(requested_code) if requested_code else canonicalize_product_type_code(existing_code)
+    if updated_code != canonicalize_product_type_code(existing_code):
+        conflict = connection.execute(
+            """
+            SELECT product_type_code
+            FROM product_type_registry
+            WHERE lower(product_type_code) = %(product_type_code)s
+              AND product_type_code <> %(existing_product_type_code)s
+            """,
+            {"product_type_code": updated_code, "existing_product_type_code": existing_code},
+        ).fetchone()
+        if conflict:
+            raise SourceRegistryError(
+                status_code=409,
+                code="product_type_exists",
+                message="A product type with this code already exists.",
+            )
 
     display_name = _required_text(payload.get("display_name", existing["display_name"]), "display_name")
     description = _required_text(payload.get("description", existing["description"]), "description")
@@ -376,16 +395,18 @@ def update_product_type_definition(
         """
         UPDATE product_type_registry
         SET
+            product_type_code = %(updated_product_type_code)s,
             display_name = %(display_name)s,
             description = %(description)s,
             status = %(status)s,
             discovery_keywords = %(discovery_keywords)s::jsonb,
             expected_fields = %(expected_fields)s::jsonb,
             updated_at = %(updated_at)s
-        WHERE product_type_code = %(product_type_code)s
+        WHERE product_type_code = %(existing_product_type_code)s
         """,
         {
-            "product_type_code": product_type_code.lower(),
+            "existing_product_type_code": existing_code,
+            "updated_product_type_code": updated_code,
             "display_name": display_name,
             "description": description,
             "status": status,
@@ -394,8 +415,10 @@ def update_product_type_definition(
             "updated_at": now,
         },
     )
-    _sync_dynamic_taxonomy_registry(connection, product_type_code=product_type_code.lower(), status=status)
-    updated = load_product_type_definition(connection, product_type_code=product_type_code.lower())
+    if updated_code != existing_code:
+        _cascade_product_type_code_update(connection, existing_code=existing_code, updated_code=updated_code)
+    _sync_product_type_taxonomy_registry(connection, product_type_code=updated_code, status=status)
+    updated = load_product_type_definition(connection, product_type_code=updated_code)
     if updated is None:
         raise SourceRegistryError(status_code=500, code="product_type_missing_after_update", message="Updated product type could not be reloaded.")
     _record_product_type_audit_event(
@@ -403,11 +426,55 @@ def update_product_type_definition(
         actor=actor,
         request_context=request_context,
         event_type="product_type_updated",
-        target_id=product_type_code.lower(),
+        target_id=updated_code,
         diff_summary=_build_product_type_diff_summary(existing, updated),
-        metadata={"product_type_code": product_type_code.lower(), "display_name": display_name},
+        metadata={"product_type_code": updated_code, "previous_product_type_code": existing_code, "display_name": display_name},
     )
     return updated
+
+
+def _cascade_product_type_code_update(connection: Connection, *, existing_code: str, updated_code: str) -> None:
+    for table_name in ("source_registry_catalog_item", "source_registry_item", "normalized_candidate", "canonical_product"):
+        connection.execute(
+            f"""
+            UPDATE {table_name}
+            SET product_type = %(updated_product_type_code)s
+            WHERE product_type = %(existing_product_type_code)s
+            """,
+            {
+                "existing_product_type_code": existing_code,
+                "updated_product_type_code": updated_code,
+            },
+        )
+    connection.execute(
+        """
+        UPDATE source_registry_item
+        SET product_key = bank_code || ':' || %(updated_product_type_code)s
+        WHERE product_key = bank_code || ':' || %(existing_product_type_code)s
+        """,
+        {
+            "existing_product_type_code": existing_code,
+            "updated_product_type_code": updated_code,
+        },
+    )
+    connection.execute(
+        """
+        UPDATE public_product_projection
+        SET product_type = %(updated_product_type_code)s
+        WHERE product_type = %(existing_product_type_code)s
+        """,
+        {
+            "existing_product_type_code": existing_code,
+            "updated_product_type_code": updated_code,
+        },
+    )
+    connection.execute(
+        """
+        DELETE FROM taxonomy_registry
+        WHERE product_type = %(existing_product_type_code)s
+        """,
+        {"existing_product_type_code": existing_code},
+    )
 
 
 def delete_product_type_definition(
@@ -417,10 +484,11 @@ def delete_product_type_definition(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
-    normalized_code = _required_text(product_type_code, "product_type_code").lower()
+    normalized_code = canonicalize_product_type_code(product_type_code)
     existing = load_product_type_definition(connection, product_type_code=normalized_code)
     if existing is None:
         raise SourceRegistryError(status_code=404, code="product_type_not_found", message="Product type was not found.")
+    existing_code = str(existing["product_type_code"])
 
     usage_counts = connection.execute(
         """
@@ -436,7 +504,7 @@ def delete_product_type_definition(
                 WHERE product_type = %(product_type_code)s
             ) AS source_count
         """,
-        {"product_type_code": normalized_code},
+        {"product_type_code": existing_code},
     ).fetchone()
     catalog_count = int((usage_counts or {}).get("catalog_count") or 0)
     source_count = int((usage_counts or {}).get("source_count") or 0)
@@ -454,30 +522,28 @@ def delete_product_type_definition(
           AND product_family = 'deposit'
           AND product_type = %(product_type_code)s
         """,
-        {"product_type_code": normalized_code},
+        {"product_type_code": existing_code},
     )
     connection.execute(
         """
         DELETE FROM product_type_registry
         WHERE product_type_code = %(product_type_code)s
         """,
-        {"product_type_code": normalized_code},
+        {"product_type_code": existing_code},
     )
     _record_product_type_audit_event(
         connection,
         actor=actor,
         request_context=request_context,
         event_type="product_type_deleted",
-        target_id=normalized_code,
-        diff_summary=f"Deleted product type `{normalized_code}`.",
-        metadata={"product_type_code": normalized_code, "display_name": existing["display_name"]},
+        target_id=existing_code,
+        diff_summary=f"Deleted product type `{existing_code}`.",
+        metadata={"product_type_code": existing_code, "display_name": existing["display_name"]},
     )
     return existing
 
 
-def _sync_dynamic_taxonomy_registry(connection: Connection, *, product_type_code: str, status: str) -> None:
-    if product_type_code in _TAXONOMY_SEEDED_PRODUCT_TYPES:
-        return
+def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type_code: str, status: str) -> None:
     now = utc_now()
     connection.execute(
         """
@@ -501,7 +567,7 @@ def _sync_dynamic_taxonomy_registry(connection: Connection, *, product_type_code
             'other',
             999,
             %(active_flag)s,
-            'dynamic_product_type_generic_fallback',
+            'operator_managed_product_type_generic_fallback',
             %(created_at)s,
             %(updated_at)s
         )
@@ -606,9 +672,7 @@ def _serialize_product_type_row(row: dict[str, Any]) -> dict[str, Any]:
         "display_name": str(row["display_name"]),
         "description": str(row["description"]),
         "status": str(row["status"]),
-        "built_in_flag": bool(row.get("built_in_flag")),
         "managed_flag": bool(row.get("managed_flag", True)),
-        "dynamic_onboarding_enabled": not bool(row.get("built_in_flag")),
         "discovery_keywords": _normalize_string_list(row.get("discovery_keywords") or []),
         "expected_fields": _normalize_string_list(row.get("expected_fields") or []),
         "fallback_policy": str(row.get("fallback_policy") or "generic_ai_review"),
@@ -650,6 +714,12 @@ def _slugify_product_type_code(value: str) -> str:
     if not normalized:
         raise SourceRegistryError(status_code=422, code="invalid_product_type_code", message="A valid product type code could not be derived.")
     return normalized[:50]
+
+
+def canonicalize_product_type_code(value: Any) -> str:
+    cleaned = _required_text(value, "product_type_code").lower()
+    normalized = re.sub(r"[\s_]+", "-", cleaned)
+    return re.sub(r"-+", "-", normalized).strip("-")
 
 
 def _merge_keywords(*, display_name: str, description: str, provided: list[str], regenerate: bool) -> list[str]:

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import type { SourceRegistryListResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 
 export type SourceRegistryPageFilters = {
   q: string;
@@ -112,6 +113,8 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
   const copy = SOURCE_COPY[locale];
   return (
     <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.description}
         path={copy.path}
@@ -242,18 +245,5 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function formatSourceDateTime(value: string | null, missing: string) {
-  if (!value) {
-    return missing;
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return [
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`,
-  ].join(" ");
+  return formatAdminDateTimeValue(value, missing, { seconds: true });
 }

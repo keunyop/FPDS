@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { AuditLogListResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_OPTIONS = ["review", "run", "publish", "auth", "config", "usage"] as const;
@@ -290,7 +291,9 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.description}
         path={copy.path}
@@ -298,11 +301,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
       />
 
       <Stats5
+        framed={false}
         items={statItems}
         title={copy.snapshot}
       />
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersSort}</p>
@@ -322,12 +326,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
           </div>
         </div>
 
-        <form action={buildAdminHref("/admin/audit", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
-          <div className="grid gap-4 xl:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
-            <label className="grid gap-2 text-sm">
+        <form action={buildAdminHref("/admin/audit", new URLSearchParams(), locale)} className="mt-6 grid min-w-0 gap-5">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -447,7 +451,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
@@ -498,8 +502,8 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1640px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1240px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.event}</th>
@@ -507,7 +511,6 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.target}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.reasonDiff}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.linkedContext}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.request}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
                   </tr>
                 </thead>
@@ -537,20 +540,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                           <span className="font-medium text-foreground">
                             {item.actor.display_name ?? item.actor.email ?? item.actor.actor_id ?? copy.systemActor}
                           </span>
-                          <span className="text-muted-foreground">
-                            {item.actor.role_snapshot
-                              ? `${copy.roleSnapshot}: ${item.actor.role_snapshot}`
-                              : copy.noRoleSnapshot}
-                          </span>
                         </div>
                       </td>
 
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2 text-sm">
                           <span className="font-medium text-foreground">{item.target.display_name ?? item.target.target_id}</span>
-                          <span className="text-muted-foreground">
-                            {toTitleCase(item.target.target_type)} / {item.target.target_id}
-                          </span>
                           {item.state_transition.previous_state || item.state_transition.new_state ? (
                             <span className="text-muted-foreground">
                               {item.state_transition.previous_state ?? copy.unknown}
@@ -567,9 +562,6 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                         <div className="grid gap-2 text-sm">
                           <span className="font-medium text-foreground">
                             {item.reason.reason_text ?? item.reason.reason_code ?? copy.noReason}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {item.diff_summary ?? copy.noDiff}
                           </span>
                           {item.source_ref ? <span className="text-muted-foreground">{copy.sourceRef}: {item.source_ref}</span> : null}
                         </div>
@@ -591,18 +583,6 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                               : item.related_context.run_id
                                 ? `${copy.run} ${item.related_context.run_id}`
                                 : copy.noLinkedContext}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2 text-sm">
-                          <span className="font-medium text-foreground">{item.request_context.request_id ?? copy.noRequestId}</span>
-                          <span className="text-muted-foreground">
-                            {item.request_context.ip_address ?? copy.noIp}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {copy.retention} {item.retention_class}
                           </span>
                         </div>
                       </td>
@@ -703,13 +683,7 @@ function buildAuditHref(locale: AdminLocale, filters: AuditLogPageFilters, overr
 }
 
 function formatTimestamp(value: string | null) {
-  if (!value) {
-    return "n/a";
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return formatAdminDateTimeValue(value);
 }
 
 function formatEventType(value: string) {

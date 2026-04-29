@@ -151,13 +151,16 @@ Still deferred from the MVP:
 - scheduler-level refresh governance UI
 - visual diffing between historical registry versions
 
-Current live dynamic onboarding note:
+Current live product-type onboarding note:
 - `/admin/product-types` now lets operators manage product type definitions with searchable name and description fields.
-- Bank coverage creation validates against that registry instead of the old hard-coded canonical list.
+- Bank coverage creation validates against that registry instead of a hard-coded canonical list.
+- Chequing, savings, GIC, and every later product type are all ordinary operator-managed DB rows. Collection must fail clearly when the requested product type row is missing or inactive.
+- Product type code is an operator-managed identity field. When a code is corrected from the Product Types detail modal, the backend renames the registry row and cascades source catalog, generated source, candidate, canonical product, public projection, and taxonomy references instead of relying on aliases.
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
+- Homepage-first discovery may infer a bounded discovery profile from the stored display name, description, and discovery keywords. For example, a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals, while generated source rows still preserve the registered product type code.
 - the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
 - generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
-- Dynamic product types continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
+- Operator-managed product types without specialized parser support continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
 
 ---
 
@@ -205,7 +208,7 @@ Current repository state:
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only the existing TD savings supporting-source merge path auto-included today
-- dynamic operator-defined product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
+- operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 
 ---
 
@@ -241,6 +244,6 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-04-15 | Replaced the JSON-first approval baseline with a DB-backed admin-managed source registry baseline and defined `collect` as candidate-producing ingestion |
 | 2026-04-15 | Refined the MVP so operators manage banks and source catalog coverage while generated source rows remain read-only |
 | 2026-04-15 | Updated the policy after the `WBS 5.15` implementation so current-state notes now reflect the live DB-backed `/admin/sources` runtime |
-| 2026-04-18 | Linked the approved homepage-discovery quality follow-on design and corrected the current-state note for live dynamic product-type onboarding |
+| 2026-04-18 | Linked the approved homepage-discovery quality follow-on design and corrected the current-state note for live operator-managed product-type onboarding |
 | 2026-04-18 | Recorded the first homepage-discovery explainability implementation slice on generated source rows and source-detail inspection |
 | 2026-04-28 | Added admin-only generated source soft removal using `removed` status so bad collected source details can be excluded from future collection without losing audit history |

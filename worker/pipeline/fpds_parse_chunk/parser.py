@@ -37,12 +37,19 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
 
-    container = soup.find("main") or soup.body or soup
-    sections = _extract_html_sections(container)
-    if not sections:
+    sections: list[_RawSegment] = []
+    fallback_text = ""
+    for container in _html_parse_containers(soup):
+        sections = _extract_html_sections(container)
         fallback_text = _normalize_text(container.get_text("\n", strip=True))
-        if fallback_text:
-            sections = [_RawSegment(anchor_type="section", anchor_value="document", page_no=None, text=fallback_text)]
+        if sections or fallback_text:
+            break
+    if not sections and fallback_text:
+        sections = [_RawSegment(anchor_type="section", anchor_value="document", page_no=None, text=fallback_text)]
+    if not sections:
+        document_title = _normalize_text((soup.title.get_text(" ", strip=True) if soup.title else ""))
+        if document_title:
+            sections = [_RawSegment(anchor_type="section", anchor_value="document", page_no=None, text=document_title)]
 
     full_text, segments = _finalize_segments(sections)
     if not full_text.strip():
@@ -62,6 +69,18 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         parser_metadata=parser_metadata,
         segments=segments,
     )
+
+
+def _html_parse_containers(soup: BeautifulSoup) -> list[BeautifulSoup]:
+    containers: list[BeautifulSoup] = []
+    main = soup.find("main")
+    if main is not None:
+        containers.append(main)
+    if soup.body is not None and soup.body not in containers:
+        containers.append(soup.body)
+    if soup not in containers:
+        containers.append(soup)
+    return containers
 
 
 def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:

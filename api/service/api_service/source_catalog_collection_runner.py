@@ -9,7 +9,7 @@ from typing import Any
 from api_service import source_collection_runner
 from api_service.config import Settings
 from api_service.db import open_connection
-from api_service.source_catalog import _materialize_sources_for_catalog_item
+from api_service.source_catalog import _canonical_product_type_code, _materialize_sources_for_catalog_item, _product_type_scope_codes
 from api_service.source_registry import _insert_collection_run_row, prepare_source_collection
 
 
@@ -54,12 +54,28 @@ def main() -> int:
 
 
 def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
+    source_catalog_product_type = str(group.get("source_catalog_product_type") or group["product_type"])
+    group = {
+        **group,
+        "product_type": _canonical_product_type_code(group["product_type"]),
+        "source_catalog_product_type": source_catalog_product_type,
+    }
     settings = Settings.from_env()
     collection_plan: dict[str, Any] | None = None
     collection_group: dict[str, Any] | None = None
     materialized_metadata: dict[str, Any] | None = None
 
     with open_connection(settings) as connection:
+        _insert_collection_run_row(
+            connection,
+            run_id=str(group["run_id"]),
+            triggered_by=str(plan.get("triggered_by", "admin")),
+            request_id=plan.get("request_id"),
+            correlation_id=str(plan["correlation_id"]),
+            collection_id=str(plan["collection_id"]),
+            group=_run_group_with_empty_collection_scope(group),
+            pipeline_stage="source_catalog_collection",
+        )
         materialized = _materialize_sources_for_catalog_item(
             connection,
             row={
@@ -72,6 +88,9 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 "normalized_homepage_url": group["normalized_homepage_url"],
                 "source_language": group["source_language"],
             },
+            run_id=str(group["run_id"]),
+            correlation_id=str(plan["correlation_id"]),
+            request_id=plan.get("request_id"),
         )
         discovery_notes = list(materialized.discovery_notes)
         generated_rows = list(materialized.generated_rows)
@@ -120,7 +139,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 run_id=str(group["run_id"]),
                 run_state="completed",
                 partial_completion_flag=True,
-                error_summary="Homepage discovery produced no detail sources eligible for collection.",
+                error_summary=_no_detail_sources_summary(discovery_notes),
                 run_metadata=materialized_metadata,
             )
             return
@@ -175,6 +194,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
 
 
 def _load_active_collection_scope(connection: Any, *, bank_code: str, product_type: str) -> dict[str, list[str]]:
+    product_type = _canonical_product_type_code(product_type)
     rows = connection.execute(
         """
         SELECT
@@ -182,13 +202,13 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
             discovery_role
         FROM source_registry_item
         WHERE bank_code = %(bank_code)s
-          AND product_type = %(product_type)s
+          AND product_type = ANY(%(product_type_scope)s)
           AND status = 'active'
         ORDER BY source_id
         """,
         {
             "bank_code": bank_code,
-            "product_type": product_type,
+            "product_type_scope": _product_type_scope_codes(product_type),
         },
     ).fetchall()
     collection_source_ids = [
@@ -204,6 +224,28 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
     return {
         "collection_source_ids": collection_source_ids,
         "target_source_ids": target_source_ids,
+    }
+
+
+def _no_detail_sources_summary(discovery_notes: list[str]) -> str:
+    base = "Homepage discovery produced no detail sources eligible for collection."
+    notable_notes = [
+        str(note).strip()
+        for note in discovery_notes
+        if str(note).strip()
+        and "Existing active detail sources were preserved" not in str(note)
+    ]
+    if not notable_notes:
+        return base
+    return f"{base} {notable_notes[0]}"
+
+
+def _run_group_with_empty_collection_scope(group: dict[str, Any]) -> dict[str, Any]:
+    return {
+        **group,
+        "selected_source_ids": list(group.get("selected_source_ids") or []),
+        "included_source_ids": list(group.get("included_source_ids") or []),
+        "target_source_ids": list(group.get("target_source_ids") or []),
     }
 
 

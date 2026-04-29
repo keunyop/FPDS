@@ -51,7 +51,6 @@ def _product_type_definitions(*codes: str) -> dict[str, dict[str, object]]:
             "product_type_code": code,
             "display_name": label,
             "description": f"{label} product type",
-            "dynamic_onboarding_enabled": code not in {"chequing", "savings", "gic"},
             "discovery_keywords": [code],
             "fallback_policy": "generic_ai_review",
         }

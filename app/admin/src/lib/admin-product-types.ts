@@ -4,7 +4,6 @@ export type AdminProductTypeOption = {
   label: string;
   value: string;
   description: string;
-  builtIn: boolean;
 };
 
 export function buildAdminProductTypeOptions(productTypes: ProductTypeItem[]): AdminProductTypeOption[] {
@@ -12,7 +11,6 @@ export function buildAdminProductTypeOptions(productTypes: ProductTypeItem[]): A
     label: item.display_name,
     value: item.product_type_code,
     description: item.description,
-    builtIn: item.built_in_flag,
   }));
 }
 

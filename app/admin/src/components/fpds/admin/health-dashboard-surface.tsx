@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import type {
@@ -11,7 +12,7 @@ import type {
   DashboardHealthResponse,
   DashboardHealthRetryResponse,
 } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 type HealthDashboardSurfaceProps = {
@@ -239,7 +240,9 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         actions={
           <>
@@ -261,14 +264,12 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         title={copy.title}
       />
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <SummaryStat label={copy.servingSnapshot} value={domain.serving_snapshot_id ?? copy.none} />
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         <SummaryStat label={copy.canonicalActive} value={formatCount(domain.active_product_count)} />
         <SummaryStat label={copy.projectedActive} value={formatCount(domain.projected_active_product_count)} />
         <SummaryStat label={copy.pendingRequests} value={formatCount(domain.queued_request_count + domain.in_progress_request_count)} />
         <SummaryStat label={copy.latestSuccess} value={formatTimestamp(domain.latest_success_at, copy.missing)} />
         <SummaryStat label={copy.latestFailure} value={formatTimestamp(domain.latest_failure_at, copy.missing)} />
-        <SummaryStat label={copy.latestCanonicalChange} value={formatTimestamp(domain.latest_canonical_change_at, copy.missing)} />
         <SummaryStat label={copy.missingDataRatio} value={formatPercent(domain.missing_data_ratio)} />
       </div>
 
@@ -286,15 +287,14 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         <p className="text-sm leading-6 text-muted-foreground">{domain.retry_action.reason}</p>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
+        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <SectionHeading
             eyebrow={copy.servingState}
             title={copy.publicServing}
           />
           <div className="mt-6 grid gap-4">
             <SignalRow label={copy.servingNote} value={domain.serving_note} />
-            <SignalRow label={copy.servingSnapshotId} value={domain.serving_snapshot_id ?? copy.noSuccessfulSnapshot} />
             <SignalRow label={copy.servingRefreshedAt} value={formatTimestamp(domain.serving_snapshot_refreshed_at, copy.missing)} />
             <SignalRow
               label={copy.freshnessGap}
@@ -304,7 +304,7 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
           </div>
         </article>
 
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <SectionHeading
             eyebrow={copy.queue}
             title={copy.queueTitle}
@@ -312,7 +312,6 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
           <div className="mt-6 grid gap-4">
             <SignalRow label={copy.queuedRequests} value={formatCount(domain.queued_request_count)} />
             <SignalRow label={copy.inProgressRequests} value={formatCount(domain.in_progress_request_count)} />
-            <SignalRow label={copy.latestRequestId} value={domain.latest_request_id ?? copy.missing} />
             <SignalRow
               label={copy.latestRequest}
               value={`${toTitleCase(domain.latest_request_status ?? copy.unknown)} / ${toTitleCase(domain.latest_request_reason ?? copy.unknown)}`}
@@ -322,42 +321,20 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         </article>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <div className="grid min-w-0 gap-6">
+        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <SectionHeading
             eyebrow={copy.latestAttempt}
             title={copy.newestExecution}
           />
           <div className="mt-6 grid gap-4">
             <SignalRow label={copy.attemptStatus} value={toTitleCase(domain.latest_attempt_status ?? copy.unknown)} />
-            <SignalRow label={copy.attemptSnapshotId} value={domain.latest_attempt_snapshot_id ?? copy.missing} />
             <SignalRow label={copy.attemptedAt} value={formatTimestamp(domain.latest_attempt_at, copy.missing)} />
             <SignalRow
               label={copy.attemptError}
               value={domain.latest_attempt_error_summary ?? copy.noAttemptError}
               tone={domain.latest_attempt_error_summary ? "danger" : "neutral"}
             />
-          </div>
-        </article>
-
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-          <SectionHeading
-            eyebrow={copy.status}
-            title={copy.interpretation}
-          />
-          <div className="mt-6 grid gap-3 text-sm leading-6 text-muted-foreground">
-            <p>
-              <strong className="font-medium text-foreground">{copy.pending}</strong> {copy.pendingDef}
-            </p>
-            <p>
-              <strong className="font-medium text-foreground">{copy.stale}</strong> {copy.staleDef}
-            </p>
-            <p>
-              <strong className="font-medium text-foreground">{copy.failed}</strong> {copy.failedDef}
-            </p>
-            <p>
-              <strong className="font-medium text-foreground">{copy.healthy}</strong> {copy.healthyDef}
-            </p>
           </div>
         </article>
       </div>
@@ -434,18 +411,7 @@ function healthStatusClasses(status: DashboardHealthDomain["status"]) {
 }
 
 function formatTimestamp(value: string | null, missing = "n/a") {
-  if (!value) {
-    return missing;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
+  return formatAdminDateTimeValue(value, missing);
 }
 
 function formatCount(value: number) {

@@ -17,9 +17,11 @@ type ProductTypeDetailDialogContentProps = {
   csrfToken: string | null | undefined;
   locale: AdminLocale;
   onDeleted?: () => void;
+  onUpdated?: (productType: ProductTypeItem) => void;
 };
 
 type ProductTypeFormState = {
+  product_type_code: string;
   display_name: string;
   description: string;
   status: string;
@@ -117,10 +119,12 @@ export function ProductTypeDetailDialogContent({
   csrfToken,
   locale,
   onDeleted,
+  onUpdated,
 }: ProductTypeDetailDialogContentProps) {
   const copy = DETAIL_COPY[locale];
   const router = useRouter();
   const [form, setForm] = useState<ProductTypeFormState>({
+    product_type_code: productType.product_type_code,
     display_name: productType.display_name,
     description: productType.description,
     status: productType.status,
@@ -138,7 +142,7 @@ export function ProductTypeDetailDialogContent({
     setError(null);
 
     try {
-      const response = await fetch(`/admin/product-types/${productType.product_type_code}/update`, {
+      const response = await fetch(`/admin/product-types/${encodeURIComponent(productType.product_type_code)}/update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -154,7 +158,11 @@ export function ProductTypeDetailDialogContent({
         setError(payload.error?.message ?? copy.updateFailed);
         return;
       }
-      setMessage(copy.updated(payload.data?.product_type?.display_name ?? productType.product_type_code));
+      const updatedProductType = payload.data?.product_type;
+      setMessage(copy.updated(updatedProductType?.display_name ?? productType.product_type_code));
+      if (updatedProductType) {
+        onUpdated?.(updatedProductType);
+      }
       router.refresh();
     } catch {
       setError(copy.updateApiFailed);
@@ -170,7 +178,7 @@ export function ProductTypeDetailDialogContent({
     let deleted = false;
 
     try {
-      const response = await fetch(`/admin/product-types/${productType.product_type_code}/delete`, {
+      const response = await fetch(`/admin/product-types/${encodeURIComponent(productType.product_type_code)}/delete`, {
         method: "DELETE",
         headers: {
           ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
@@ -220,6 +228,12 @@ export function ProductTypeDetailDialogContent({
         </div>
 
         <form className="mt-5 space-y-4" onSubmit={handleSave}>
+          <InputField
+            icon={<Search className="size-4" />}
+            label={copy.code}
+            onChange={(value) => setForm((current) => ({ ...current, product_type_code: value }))}
+            value={form.product_type_code}
+          />
           <InputField
             icon={<Search className="size-4" />}
             label={copy.displayName}

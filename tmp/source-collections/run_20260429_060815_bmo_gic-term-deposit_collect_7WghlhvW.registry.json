@@ -1,0 +1,174 @@
+{
+  "registry_version": "2026-04-29",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "gic-term-deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-GIC-003",
+  "sources": [
+    {
+      "source_id": "BMO-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct product page for a specific GIC offering; highly likely to contain rates, terms, and eligibility.",
+      "url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+      "expected_fields": [
+        "product_name",
+        "return_structure",
+        "term_options",
+        "principal_protection"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Progressive GIC Search Tool - BMO",
+        "heading_match": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "contains_gic_keyword",
+          "product_specific_detail_page",
+          "matches_term_deposit_product_type",
+          "official_banking_domain"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": null,
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct product page for a specific GIC offering; highly likely to contain rates, terms, and eligibility.",
+        "page_evidence_score": 3,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 1,
+        "selection_reason_codes": [
+          "contains_gic_keyword",
+          "product_specific_detail_page",
+          "matches_term_deposit_product_type",
+          "official_banking_domain",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO GIC rates reference page",
+      "url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+      "expected_fields": [
+        "gic_rate_table",
+        "term_options",
+        "rate_effective_date"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-GIC-92ff5bdef5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC / Term Deposit",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions#nine",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

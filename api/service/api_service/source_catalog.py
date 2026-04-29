@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `
 
 from api_service.errors import SourceRegistryError
 from api_service.product_types import (
+    canonicalize_product_type_code,
     load_product_type_definitions_map,
     require_product_type_definition,
 )
@@ -34,6 +35,7 @@ from api_service.source_registry_utils import (
 )
 from worker.discovery.fpds_discovery.discovery import extract_links
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
+from worker.pipeline.fpds_ai_runtime import estimated_cost_usd
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -143,6 +145,11 @@ _PRODUCT_TYPE_ATTRIBUTE_HINTS = {
     "savings": ("interest", "rate", "rates", "savings", "balance", "withdrawal", "tier", "tiering", "bonus"),
     "gic": ("term", "maturity", "redeemable", "non-redeemable", "minimum deposit", "compounding", "investment"),
 }
+_DISCOVERY_PROFILE_TERMS = {
+    "chequing": ("chequing", "checking", "everyday banking", "transactions", "debit card", "monthly fee"),
+    "savings": ("savings", "saving", "savings account", "high interest", "interest rate", "tiered interest", "withdrawal", "balance"),
+    "gic": ("gic", "gics", "term deposit", "guaranteed investment", "maturity", "redeemable", "minimum deposit"),
+}
 _PAGE_EVIDENCE_MINIMUM_SCORE = 4
 _AI_DISCOVERY_MAX_CANDIDATES = 12
 _PAGE_EVIDENCE_MAX_CANDIDATES = 6
@@ -167,6 +174,8 @@ class HomepageSourceGenerationResult:
     rows: list[dict[str, Any]]
     discovery_notes: list[str]
     detail_source_ids: list[str]
+    model_execution_records: tuple[dict[str, Any], ...] = ()
+    usage_records: tuple[dict[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -174,6 +183,16 @@ class CatalogItemMaterializationResult:
     generated_rows: list[dict[str, Any]]
     discovery_notes: list[str]
     detail_source_ids: list[str]
+    model_execution_records: tuple[dict[str, Any], ...] = ()
+    usage_records: tuple[dict[str, Any], ...] = ()
+
+
+@dataclass(frozen=True)
+class AiParallelScoringResult:
+    scores: dict[str, "AiParallelCandidateScore"]
+    notes: list[str]
+    model_execution_record: dict[str, Any] | None = None
+    usage_record: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -937,7 +956,7 @@ def create_source_catalog_item(
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
     bank_code = _required_text(payload.get("bank_code"), "bank_code").upper()
-    product_type = _required_text(payload.get("product_type"), "product_type").lower()
+    product_type = _canonical_product_type_code(_required_text(payload.get("product_type"), "product_type"))
     require_product_type_definition(connection, product_type_code=product_type, active_only=True)
 
     bank_row = connection.execute(
@@ -957,9 +976,13 @@ def create_source_catalog_item(
         FROM source_registry_catalog_item
         WHERE bank_code = %(bank_code)s
           AND country_code = %(country_code)s
-          AND product_type = %(product_type)s
+          AND product_type = ANY(%(product_type_scope)s)
         """,
-        {"bank_code": bank_code, "country_code": bank_row["country_code"], "product_type": product_type},
+        {
+            "bank_code": bank_code,
+            "country_code": bank_row["country_code"],
+            "product_type_scope": _product_type_scope_codes(product_type),
+        },
     ).fetchone()
     if existing:
         raise SourceRegistryError(status_code=409, code="source_catalog_exists", message="This bank and product type already exists in the source catalog.")
@@ -1036,7 +1059,7 @@ def update_source_catalog_item(
         raise SourceRegistryError(status_code=404, code="source_catalog_not_found", message="Source catalog item was not found.")
 
     bank_code = _required_text(payload.get("bank_code", existing["bank_code"]), "bank_code").upper()
-    product_type = _required_text(payload.get("product_type", existing["product_type"]), "product_type").lower()
+    product_type = _canonical_product_type_code(_required_text(payload.get("product_type", existing["product_type"]), "product_type"))
     require_product_type_definition(connection, product_type_code=product_type, active_only=True)
 
     bank_row = connection.execute(
@@ -1056,13 +1079,13 @@ def update_source_catalog_item(
         FROM source_registry_catalog_item
         WHERE bank_code = %(bank_code)s
           AND country_code = %(country_code)s
-          AND product_type = %(product_type)s
+          AND product_type = ANY(%(product_type_scope)s)
           AND catalog_item_id <> %(catalog_item_id)s
         """,
         {
             "bank_code": bank_code,
             "country_code": bank_row["country_code"],
-            "product_type": product_type,
+            "product_type_scope": _product_type_scope_codes(product_type),
             "catalog_item_id": catalog_item_id,
         },
     ).fetchone()
@@ -1202,17 +1225,20 @@ def _build_source_catalog_collection_plan(
     }
     groups: list[dict[str, Any]] = []
     for row in rows:
+        original_product_type = str(row["product_type"])
+        product_type = _canonical_product_type_code(original_product_type)
         groups.append(
             {
                 "run_id": _build_source_catalog_collection_run_id(
                     bank_code=str(row["bank_code"]),
-                    product_type=str(row["product_type"]),
+                    product_type=product_type,
                 ),
                 "catalog_item_id": str(row["catalog_item_id"]),
                 "bank_code": str(row["bank_code"]),
                 "bank_name": str(row["bank_name"]),
                 "country_code": str(row["country_code"]),
-                "product_type": str(row["product_type"]),
+                "product_type": product_type,
+                "source_catalog_product_type": original_product_type,
                 "source_language": str(row.get("source_language") or "en"),
                 "homepage_url": str(row["homepage_url"]),
                 "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
@@ -1300,9 +1326,13 @@ def _materialize_sources_for_catalog_item(
     connection: Connection,
     *,
     row: dict[str, Any],
+    run_id: str | None = None,
+    correlation_id: str | None = None,
+    request_id: str | None = None,
 ) -> CatalogItemMaterializationResult:
     bank_code = str(row["bank_code"])
-    product_type = str(row["product_type"])
+    original_product_type = str(row["product_type"])
+    product_type = _canonical_product_type_code(original_product_type)
     product_type_definition = require_product_type_definition(connection, product_type_code=product_type, active_only=False)
     generation_result = _generate_sources_from_homepage(
         bank_code=bank_code,
@@ -1312,9 +1342,14 @@ def _materialize_sources_for_catalog_item(
         product_type_definition=product_type_definition,
         homepage_url=str(row["homepage_url"]),
         source_language=str(row.get("source_language") or "en"),
+        run_id=run_id,
+        correlation_id=correlation_id,
+        request_id=request_id,
     )
     generated_rows = _dedupe_generated_source_rows(generation_result.rows)
     discovery_notes = list(generation_result.discovery_notes)
+    if product_type != original_product_type:
+        discovery_notes.append(f"Product type `{original_product_type}` was normalized to `{product_type}` for source collection.")
     if generation_result.detail_source_ids:
         connection.execute(
             """
@@ -1324,14 +1359,14 @@ def _materialize_sources_for_catalog_item(
                 updated_at = %(updated_at)s,
                 change_reason = %(change_reason)s
             WHERE bank_code = %(bank_code)s
-              AND product_type = %(product_type)s
+              AND product_type = ANY(%(product_type_scope)s)
               AND status <> 'removed'
             """,
             {
                 "updated_at": utc_now(),
                 "change_reason": "superseded_by_homepage_catalog_generation",
                 "bank_code": bank_code,
-                "product_type": product_type,
+                "product_type_scope": _product_type_scope_codes(product_type),
             },
         )
     else:
@@ -1339,10 +1374,17 @@ def _materialize_sources_for_catalog_item(
             "Existing active detail sources were preserved because homepage discovery did not produce replacement detail sources."
         )
     persisted_rows = _upsert_source_registry_rows(connection, generated_rows) if generated_rows else []
+    _persist_source_catalog_usage_records(
+        connection,
+        model_execution_records=list(generation_result.model_execution_records),
+        usage_records=list(generation_result.usage_records),
+    )
     return CatalogItemMaterializationResult(
         generated_rows=persisted_rows,
         discovery_notes=_dedupe_preserve_order([note for note in discovery_notes if note]),
         detail_source_ids=list(generation_result.detail_source_ids),
+        model_execution_records=generation_result.model_execution_records,
+        usage_records=generation_result.usage_records,
     )
 
 
@@ -1461,6 +1503,93 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
     return persisted_rows
 
 
+def _persist_source_catalog_usage_records(
+    connection: Connection,
+    *,
+    model_execution_records: list[dict[str, Any]],
+    usage_records: list[dict[str, Any]],
+) -> None:
+    for item in model_execution_records:
+        connection.execute(
+            """
+            INSERT INTO model_execution (
+                model_execution_id,
+                run_id,
+                source_document_id,
+                stage_name,
+                agent_name,
+                model_id,
+                execution_status,
+                execution_metadata,
+                started_at,
+                completed_at
+            )
+            VALUES (
+                %(model_execution_id)s,
+                %(run_id)s,
+                %(source_document_id)s,
+                %(stage_name)s,
+                %(agent_name)s,
+                %(model_id)s,
+                %(execution_status)s,
+                %(execution_metadata)s::jsonb,
+                %(started_at)s,
+                %(completed_at)s
+            )
+            ON CONFLICT (model_execution_id) DO UPDATE SET
+                model_id = EXCLUDED.model_id,
+                execution_status = EXCLUDED.execution_status,
+                execution_metadata = EXCLUDED.execution_metadata,
+                completed_at = EXCLUDED.completed_at
+            """,
+            {
+                **item,
+                "execution_metadata": json.dumps(item.get("execution_metadata") or {}, ensure_ascii=True),
+            },
+        )
+
+    for item in usage_records:
+        connection.execute(
+            """
+            INSERT INTO llm_usage_record (
+                llm_usage_id,
+                model_execution_id,
+                run_id,
+                candidate_id,
+                provider_request_id,
+                prompt_tokens,
+                completion_tokens,
+                estimated_cost,
+                usage_metadata,
+                recorded_at
+            )
+            VALUES (
+                %(llm_usage_id)s,
+                %(model_execution_id)s,
+                %(run_id)s,
+                %(candidate_id)s,
+                %(provider_request_id)s,
+                %(prompt_tokens)s,
+                %(completion_tokens)s,
+                %(estimated_cost)s,
+                %(usage_metadata)s::jsonb,
+                %(recorded_at)s
+            )
+            ON CONFLICT (llm_usage_id) DO UPDATE SET
+                provider_request_id = EXCLUDED.provider_request_id,
+                prompt_tokens = EXCLUDED.prompt_tokens,
+                completion_tokens = EXCLUDED.completion_tokens,
+                estimated_cost = EXCLUDED.estimated_cost,
+                usage_metadata = EXCLUDED.usage_metadata,
+                recorded_at = EXCLUDED.recorded_at
+            """,
+            {
+                **item,
+                "usage_metadata": json.dumps(item.get("usage_metadata") or {}, ensure_ascii=True),
+            },
+        )
+
+
 def _generate_sources_from_homepage(
     *,
     bank_code: str,
@@ -1470,7 +1599,12 @@ def _generate_sources_from_homepage(
     product_type_definition: dict[str, Any],
     homepage_url: str,
     source_language: str,
+    run_id: str | None = None,
+    correlation_id: str | None = None,
+    request_id: str | None = None,
 ) -> HomepageSourceGenerationResult:
+    product_type = _canonical_product_type_code(product_type)
+    discovery_product_type = _product_type_discovery_profile(product_type, product_type_definition)
     normalized_homepage_url = normalize_source_url(homepage_url)
     hostname = urlparse(normalized_homepage_url).hostname
     if not hostname:
@@ -1482,6 +1616,10 @@ def _generate_sources_from_homepage(
     pdf_links: list[tuple[int, Any]] = []
     hub_pages: list[tuple[int, str, str]] = []
     discovery_notes: list[str] = []
+    if discovery_product_type != product_type:
+        discovery_notes.append(
+            f"Homepage discovery used `{discovery_product_type}` discovery signals from the product type definition while preserving registered product type `{product_type}`."
+        )
     homepage_fetch_error: str | None = None
     try:
         homepage_html = fetch_text(normalized_homepage_url, fetch_policy)
@@ -1498,7 +1636,7 @@ def _generate_sources_from_homepage(
         if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
             continue
         score = _score_product_link(
-            product_type=product_type,
+            product_type=discovery_product_type,
             product_type_definition=product_type_definition,
             normalized_url=link.normalized_url,
             anchor_text=link.anchor_text,
@@ -1512,7 +1650,7 @@ def _generate_sources_from_homepage(
         elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
             supporting_links.append((1, link))
         hub_score = _score_catalog_hub_link(
-            product_type=product_type,
+            product_type=discovery_product_type,
             product_type_definition=product_type_definition,
             normalized_url=link.normalized_url,
             anchor_text=link.anchor_text,
@@ -1520,10 +1658,10 @@ def _generate_sources_from_homepage(
         if hub_score > 0:
             hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
 
-    seed_entry_url = _load_seed_entry_url(bank_code=bank_code, product_type=product_type)
+    seed_entry_url = _load_seed_entry_url(bank_code=bank_code, product_type=discovery_product_type)
     if seed_entry_url is not None:
         seed_score = _score_catalog_hub_link(
-            product_type=product_type,
+            product_type=discovery_product_type,
             product_type_definition=product_type_definition,
             normalized_url=seed_entry_url,
             anchor_text="",
@@ -1544,7 +1682,7 @@ def _generate_sources_from_homepage(
             if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
                 continue
             score = _score_product_link(
-                product_type=product_type,
+                product_type=discovery_product_type,
                 product_type_definition=product_type_definition,
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
@@ -1561,8 +1699,8 @@ def _generate_sources_from_homepage(
     unique_detail_links = _dedupe_scored_links(detail_links)[:6]
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
-    seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=product_type)
-    seed_supporting_hints = _load_seed_supporting_hints(bank_code=bank_code, product_type=product_type)
+    seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=discovery_product_type)
+    seed_supporting_hints = _load_seed_supporting_hints(bank_code=bank_code, product_type=discovery_product_type)
     source_rows: list[dict[str, Any]] = []
     entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
     entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
@@ -1570,34 +1708,40 @@ def _generate_sources_from_homepage(
     expected_fields = _product_type_expected_fields(product_type_definition)
     html_candidates = _build_html_candidates(
         product_type=product_type,
+        discovery_product_type=discovery_product_type,
         product_type_definition=product_type_definition,
         detail_links=unique_detail_links,
         supporting_links=unique_supporting_links,
         seed_detail_hints=seed_detail_hints,
     )
-    ai_scores, ai_notes = _score_candidate_links_with_ai(
+    ai_result = _score_candidate_links_with_ai(
         bank_code=bank_code,
         bank_name=bank_name,
         country_code=country_code,
         product_type=product_type,
+        discovery_product_type=discovery_product_type,
         product_type_definition=product_type_definition,
         source_language=source_language,
         homepage_url=homepage_url,
         normalized_homepage_url=normalized_homepage_url,
         homepage_fetch_error=homepage_fetch_error,
         candidates=html_candidates,
+        run_id=run_id,
+        correlation_id=correlation_id,
+        request_id=request_id,
     )
-    discovery_notes.extend(ai_notes)
+    discovery_notes.extend(ai_result.notes)
     detail_rows, detail_notes = _promote_detail_candidates(
         bank_code=bank_code,
         bank_name=bank_name,
         country_code=country_code,
         product_type=product_type,
+        discovery_product_type=discovery_product_type,
         product_type_definition=product_type_definition,
         source_language=source_language,
         fetch_policy=fetch_policy,
         candidates=html_candidates,
-        ai_scores=ai_scores,
+        ai_scores=ai_result.scores,
     )
     discovery_notes.extend(detail_notes)
 
@@ -1668,6 +1812,7 @@ def _generate_sources_from_homepage(
                 continue
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
+                discovery_product_type=discovery_product_type,
                 product_type_definition=product_type_definition,
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
@@ -1695,7 +1840,7 @@ def _generate_sources_from_homepage(
                     discovery_metadata={
                         "selection_path": "supporting_only",
                         "selection_confidence": "medium" if _score_product_link(
-                            product_type=product_type,
+                            product_type=discovery_product_type,
                             product_type_definition=product_type_definition,
                             normalized_url=link.normalized_url,
                             anchor_text=link.anchor_text,
@@ -1703,7 +1848,7 @@ def _generate_sources_from_homepage(
                         "selection_reason_codes": ["supporting_keyword_match"],
                         "candidate_origin": "homepage_or_hub_link",
                         "heuristic_score": _score_product_link(
-                            product_type=product_type,
+                            product_type=discovery_product_type,
                             product_type_definition=product_type_definition,
                             normalized_url=link.normalized_url,
                             anchor_text=link.anchor_text,
@@ -1714,6 +1859,7 @@ def _generate_sources_from_homepage(
         for _, link in unique_pdf_links:
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
+                discovery_product_type=discovery_product_type,
                 product_type_definition=product_type_definition,
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
@@ -1744,7 +1890,7 @@ def _generate_sources_from_homepage(
                         "selection_reason_codes": ["supporting_pdf_signal"],
                         "candidate_origin": "homepage_or_hub_link",
                         "heuristic_score": _score_product_link(
-                            product_type=product_type,
+                            product_type=discovery_product_type,
                             product_type_definition=product_type_definition,
                             normalized_url=link.normalized_url,
                             anchor_text=link.anchor_text,
@@ -1761,17 +1907,23 @@ def _generate_sources_from_homepage(
         rows=source_rows,
         discovery_notes=_dedupe_preserve_order([note for note in discovery_notes if note]),
         detail_source_ids=detail_source_ids,
+        model_execution_records=tuple(
+            item for item in [ai_result.model_execution_record] if item is not None
+        ),
+        usage_records=tuple(item for item in [ai_result.usage_record] if item is not None),
     )
 
 
 def _build_html_candidates(
     *,
     product_type: str,
+    discovery_product_type: str | None = None,
     product_type_definition: dict[str, Any],
     detail_links: list[tuple[int, Any]],
     supporting_links: list[tuple[int, Any]],
     seed_detail_hints: list[dict[str, Any]],
 ) -> list[HomepageCandidate]:
+    scoring_product_type = discovery_product_type or product_type
     by_url: dict[str, HomepageCandidate] = {}
     for score, link in [*detail_links, *supporting_links]:
         supporting_signal = any(keyword in f"{link.normalized_url} {link.anchor_text}".lower() for keyword in _SUPPORTING_KEYWORDS)
@@ -1799,7 +1951,7 @@ def _build_html_candidates(
             source_type=infer_source_type(normalized_url),
             origin="seed_detail_hint",
             heuristic_score=_score_product_link(
-                product_type=product_type,
+                product_type=scoring_product_type,
                 product_type_definition=product_type_definition,
                 normalized_url=normalized_url,
                 anchor_text=str(hint.get("source_name") or ""),
@@ -1863,6 +2015,7 @@ def _merge_homepage_candidate(by_url: dict[str, HomepageCandidate], candidate: H
 
 
 def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
+    product_type = _canonical_product_type_code(product_type)
     for item in load_seed_source_registry_rows():
         if (
             str(item["bank_code"]) == bank_code
@@ -1874,6 +2027,7 @@ def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
 
 
 def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+    product_type = _canonical_product_type_code(product_type)
     hints: list[dict[str, Any]] = []
     for item in load_seed_source_registry_rows():
         if (
@@ -1896,6 +2050,7 @@ def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[s
 
 
 def _load_seed_supporting_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+    product_type = _canonical_product_type_code(product_type)
     hints: list[dict[str, Any]] = []
     for item in load_seed_source_registry_rows():
         if (
@@ -1936,19 +2091,26 @@ def _score_candidate_links_with_ai(
     bank_name: str,
     country_code: str,
     product_type: str,
+    discovery_product_type: str | None = None,
     product_type_definition: dict[str, Any],
     source_language: str,
     homepage_url: str,
     normalized_homepage_url: str,
     homepage_fetch_error: str | None,
     candidates: list[HomepageCandidate],
-) -> tuple[dict[str, AiParallelCandidateScore], list[str]]:
+    run_id: str | None = None,
+    correlation_id: str | None = None,
+    request_id: str | None = None,
+) -> AiParallelScoringResult:
     if not candidates:
-        return {}, []
+        return AiParallelScoringResult(scores={}, notes=[])
     provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
     api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
     if provider != "openai" or not api_key:
-        return {}, ["AI parallel scorer was unavailable because the OpenAI provider or API key was not configured."]
+        return AiParallelScoringResult(
+            scores={},
+            notes=["AI parallel scorer was unavailable because the OpenAI provider or API key was not configured."],
+        )
 
     candidate_links = [
         {
@@ -1960,22 +2122,24 @@ def _score_candidate_links_with_ai(
         }
         for item in candidates
     ]
+    model_id = os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini"
+    started_at = datetime.now(UTC)
     try:
-        resolution = _invoke_openai_parallel_scorer(
-            model_id=os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
+        resolution, usage = _invoke_openai_parallel_scorer(
+            model_id=model_id,
             api_key=api_key,
             payload={
                 "bank_code": bank_code,
                 "bank_name": bank_name,
                 "country_code": country_code,
                 "product_type": product_type,
+                "discovery_product_type": discovery_product_type or product_type,
                 "product_type_definition": {
                     "display_name": _product_type_label(product_type_definition),
                     "description": str(product_type_definition.get("description") or ""),
                     "discovery_keywords": _product_type_keywords(product_type_definition),
                     "expected_fields": _product_type_expected_fields(product_type_definition),
                     "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
-                    "dynamic_onboarding_enabled": bool(product_type_definition.get("dynamic_onboarding_enabled")),
                 },
                 "source_language": source_language,
                 "homepage_url": homepage_url,
@@ -1985,7 +2149,8 @@ def _score_candidate_links_with_ai(
             },
         )
     except Exception as exc:
-        return {}, [f"AI parallel scorer was unavailable: {exc}"]
+        return AiParallelScoringResult(scores={}, notes=[f"AI parallel scorer was unavailable: {exc}"])
+    completed_at = datetime.now(UTC)
 
     notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
     hostname = urlparse(normalized_homepage_url).hostname or ""
@@ -2019,10 +2184,67 @@ def _score_candidate_links_with_ai(
         notes.append(f"AI parallel scorer evaluated {len(scores)} candidate link(s).")
     else:
         notes.append("AI parallel scorer returned no usable candidate scores.")
-    return scores, _dedupe_preserve_order([note for note in notes if note])
+    model_execution_record = None
+    usage_record = None
+    if run_id:
+        model_execution_id = _build_source_catalog_ai_model_execution_id(
+            run_id=run_id,
+            bank_code=bank_code,
+            product_type=product_type,
+            normalized_homepage_url=normalized_homepage_url,
+        )
+        model_execution_record = {
+            "model_execution_id": model_execution_id,
+            "run_id": run_id,
+            "source_document_id": None,
+            "stage_name": "source_catalog_collection",
+            "agent_name": "fpds-homepage-ai-parallel-scorer",
+            "model_id": str(usage.get("model_id") or model_id),
+            "execution_status": "completed",
+            "execution_metadata": {
+                "bank_code": bank_code,
+                "country_code": country_code,
+                "product_type": product_type,
+                "discovery_product_type": discovery_product_type or product_type,
+                "source_language": source_language,
+                "homepage_url": homepage_url,
+                "normalized_homepage_url": normalized_homepage_url,
+                "homepage_fetch_error": homepage_fetch_error,
+                "candidate_link_count": len(candidate_links),
+                "scored_candidate_count": len(scores),
+                "correlation_id": correlation_id,
+                "request_id": request_id,
+            },
+            "started_at": started_at.isoformat(),
+            "completed_at": completed_at.isoformat(),
+        }
+        prompt_tokens = int(usage.get("prompt_tokens") or 0)
+        completion_tokens = int(usage.get("completion_tokens") or 0)
+        usage_record = {
+            "llm_usage_id": _build_source_catalog_ai_usage_id(model_execution_id),
+            "model_execution_id": model_execution_id,
+            "run_id": run_id,
+            "candidate_id": None,
+            "provider_request_id": usage.get("provider_request_id"),
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "estimated_cost": estimated_cost_usd(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens),
+            "usage_metadata": {
+                "usage_mode": "openai-homepage-parallel-scoring",
+                "provider": "openai",
+                "model_id": str(usage.get("model_id") or model_id),
+            },
+            "recorded_at": completed_at.isoformat(),
+        }
+    return AiParallelScoringResult(
+        scores=scores,
+        notes=_dedupe_preserve_order([note for note in notes if note]),
+        model_execution_record=model_execution_record,
+        usage_record=usage_record,
+    )
 
 
-def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict[str, Any]) -> dict[str, Any]:
+def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     request_body = {
         "model": model_id,
         "instructions": (
@@ -2103,9 +2325,17 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
 
     response_text = _extract_response_output_text(response_payload)
     try:
-        return json.loads(response_text)
+        parsed = json.loads(response_text)
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"OpenAI parallel scorer returned invalid JSON: {response_text}") from exc
+    usage = response_payload.get("usage") or {}
+    return parsed, {
+        "provider": "openai",
+        "model_id": str(response_payload.get("model") or model_id),
+        "provider_request_id": response_payload.get("id"),
+        "prompt_tokens": int(usage.get("input_tokens") or 0),
+        "completion_tokens": int(usage.get("output_tokens") or 0),
+    }
 
 
 def _extract_response_output_text(response_payload: dict[str, Any]) -> str:
@@ -2127,6 +2357,7 @@ def _promote_detail_candidates(
     bank_name: str,
     country_code: str,
     product_type: str,
+    discovery_product_type: str,
     product_type_definition: dict[str, Any],
     source_language: str,
     fetch_policy: DiscoveryFetchPolicy,
@@ -2138,10 +2369,12 @@ def _promote_detail_candidates(
     notes: list[str] = []
     detail_rows: list[dict[str, Any]] = []
     promoted_count = 0
+    seed_fetch_fallback_count = 0
+    seed_low_evidence_fallback_count = 0
     evaluated = 0
-    for candidate in sorted(candidates, key=lambda item: (-_candidate_combined_score(item, ai_scores), item.normalized_url))[:_PAGE_EVIDENCE_MAX_CANDIDATES]:
+    for candidate in _ordered_detail_candidates(candidates=candidates, ai_scores=ai_scores):
         ai_score = ai_scores.get(candidate.normalized_url)
-        if ai_score and ai_score.predicted_role == "irrelevant":
+        if ai_score and ai_score.predicted_role == "irrelevant" and not candidate.seed_source_id:
             continue
         if not candidate.seed_source_id and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
             continue
@@ -2149,19 +2382,59 @@ def _promote_detail_candidates(
         page_evidence = _score_page_evidence(
             raw_url=candidate.raw_url,
             fetch_policy=fetch_policy,
-            product_type=product_type,
+            product_type=discovery_product_type,
             product_type_definition=product_type_definition,
         )
         if page_evidence.fetch_error:
             notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
-            continue
-        if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence):
-            continue
-        metadata = _build_detail_discovery_metadata(
-            candidate=candidate,
-            ai_score=ai_score,
-            page_evidence=page_evidence,
-        )
+            if not candidate.seed_source_id:
+                continue
+            metadata = {
+                "selection_path": "seed_hint_fetch_unavailable",
+                "selection_confidence": "medium",
+                "selection_reason_codes": ["seed_hint_alignment", "page_fetch_unavailable"],
+                "candidate_origin": candidate.origin,
+                "heuristic_score": candidate.heuristic_score,
+                "ai_parallel_score": ai_score.relevance_score if ai_score is not None else None,
+                "ai_predicted_role": ai_score.predicted_role if ai_score is not None else None,
+                "ai_confidence_band": ai_score.confidence_band if ai_score is not None else None,
+                "ai_reason_codes": _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else [],
+                "ai_short_rationale": ai_score.short_rationale if ai_score is not None else None,
+                "page_evidence_score": 0,
+                "page_evidence_reason_codes": ["page_fetch_unavailable"],
+                "page_title": None,
+                "primary_heading": None,
+                "heading_match": False,
+                "attribute_signal_count": 0,
+                "negative_signal_count": 0,
+                "fetch_error": page_evidence.fetch_error,
+            }
+            seed_fetch_fallback_count += 1
+        else:
+            if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence):
+                if not candidate.seed_source_id or page_evidence.negative_signal_count >= 2:
+                    continue
+                metadata = _build_detail_discovery_metadata(
+                    candidate=candidate,
+                    ai_score=ai_score,
+                    page_evidence=page_evidence,
+                )
+                metadata["selection_path"] = "seed_hint_low_page_evidence"
+                metadata["selection_confidence"] = "medium-low"
+                metadata["selection_reason_codes"] = _dedupe_preserve_order(
+                    [
+                        *list(metadata.get("selection_reason_codes") or []),
+                        "seed_hint_alignment",
+                        "page_evidence_below_threshold",
+                    ]
+                )
+                seed_low_evidence_fallback_count += 1
+            else:
+                metadata = _build_detail_discovery_metadata(
+                    candidate=candidate,
+                    ai_score=ai_score,
+                    page_evidence=page_evidence,
+                )
         row = _build_generated_source_row(
             bank_code=bank_code,
             country_code=country_code,
@@ -2185,10 +2458,27 @@ def _promote_detail_candidates(
         detail_rows.append(row)
         promoted_count += 1
     if promoted_count:
-        notes.append(f"Homepage discovery promoted {promoted_count} detail source(s) after candidate scoring and page evidence validation.")
+        fallback_parts = []
+        if seed_fetch_fallback_count:
+            fallback_parts.append(f"{seed_fetch_fallback_count} seed-backed source(s) whose page evidence fetch was unavailable")
+        if seed_low_evidence_fallback_count:
+            fallback_parts.append(f"{seed_low_evidence_fallback_count} seed-backed source(s) with low page evidence")
+        if fallback_parts:
+            notes.append(f"Homepage discovery promoted {promoted_count} detail source(s), including {', and '.join(fallback_parts)}.")
+        else:
+            notes.append(f"Homepage discovery promoted {promoted_count} detail source(s) after candidate scoring and page evidence validation.")
     elif evaluated:
         notes.append("Homepage discovery candidate validation rejected all tentative detail pages.")
     return detail_rows, _dedupe_preserve_order([note for note in notes if note])
+
+
+def _ordered_detail_candidates(*, candidates: list[HomepageCandidate], ai_scores: dict[str, AiParallelCandidateScore]) -> list[HomepageCandidate]:
+    ranked = sorted(candidates, key=lambda item: (-_candidate_combined_score(item, ai_scores), item.normalized_url))
+    seed_candidates = [item for item in ranked if item.seed_source_id]
+    if seed_candidates:
+        return seed_candidates
+    non_seed_candidates = [item for item in ranked if not item.seed_source_id]
+    return non_seed_candidates[:_PAGE_EVIDENCE_MAX_CANDIDATES]
 
 
 def _candidate_combined_score(candidate: HomepageCandidate, ai_scores: dict[str, AiParallelCandidateScore]) -> float:
@@ -2208,10 +2498,10 @@ def _candidate_promotes_to_detail(
 ) -> bool:
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return False
+    if candidate.seed_source_id:
+        return True
     if page_evidence.negative_signal_count >= 2:
         return False
-    if candidate.seed_source_id and page_evidence.page_evidence_score >= _PAGE_EVIDENCE_MINIMUM_SCORE:
-        return True
     if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail"):
         return False
     if ai_score is not None:
@@ -2554,7 +2844,7 @@ def _score_product_link(
     for keyword in _product_type_description_terms(product_type_definition):
         if keyword in fingerprint:
             score += 1
-    normalized_product_type = product_type.replace("-", " ")
+    normalized_product_type = _canonical_product_type_code(product_type).replace("-", " ")
     if normalized_product_type and normalized_product_type in fingerprint:
         score += 1
     for keyword in _SUPPORTING_KEYWORDS:
@@ -2603,18 +2893,20 @@ def _looks_like_non_descriptive_anchor(value: str) -> bool:
 def _link_is_relevant_supporting_source(
     *,
     product_type: str,
+    discovery_product_type: str | None = None,
     product_type_definition: dict[str, Any],
     normalized_url: str,
     anchor_text: str,
 ) -> bool:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
+    signal_product_type = discovery_product_type or product_type
     if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
         return False
-    if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+    if _has_unrelated_product_type_signal(product_type=signal_product_type, fingerprint=fingerprint):
         return False
     has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
     has_product_signal = _score_product_link(
-        product_type=product_type,
+        product_type=signal_product_type,
         product_type_definition=product_type_definition,
         normalized_url=normalized_url,
         anchor_text=anchor_text,
@@ -2635,6 +2927,24 @@ def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str
     timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     suffix = new_id("src").split("_", 1)[1][:8]
     return f"run_{timestamp}_{bank_code.lower()}_{product_type}_collect_{suffix}"
+
+
+def _build_source_catalog_ai_model_execution_id(
+    *,
+    run_id: str,
+    bank_code: str,
+    product_type: str,
+    normalized_homepage_url: str,
+) -> str:
+    digest = hashlib.sha256(
+        f"{run_id}|{bank_code}|{product_type}|{normalized_homepage_url}|source_catalog_ai_parallel".encode("utf-8")
+    ).hexdigest()[:16]
+    return f"modelexec-{digest}"
+
+
+def _build_source_catalog_ai_usage_id(model_execution_id: str) -> str:
+    digest = hashlib.sha256(f"{model_execution_id}|llm_usage".encode("utf-8")).hexdigest()[:16]
+    return f"usage-{digest}"
 
 
 def _product_type_keywords(product_type_definition: dict[str, Any]) -> list[str]:
@@ -2672,6 +2982,41 @@ def _product_type_attribute_keywords(product_type: str, product_type_definition:
     return hints[:16]
 
 
+def _product_type_discovery_profile(product_type: str, product_type_definition: dict[str, Any]) -> str:
+    product_type = _canonical_product_type_code(product_type)
+    if product_type in _DISCOVERY_PROFILE_TERMS:
+        return product_type
+    code_tokens = set(filter(None, product_type.replace("-", " ").split()))
+    if "gic" in code_tokens or {"term", "deposit"}.issubset(code_tokens):
+        return "gic"
+    if "savings" in code_tokens or "saving" in code_tokens:
+        return "savings"
+    if "chequing" in code_tokens or "checking" in code_tokens:
+        return "chequing"
+    fingerprint = " ".join(
+        [
+            product_type.replace("-", " "),
+            str(product_type_definition.get("display_name") or ""),
+            str(product_type_definition.get("description") or ""),
+            " ".join(str(item) for item in product_type_definition.get("discovery_keywords", []) if str(item).strip()),
+        ]
+    ).lower()
+    scored_profiles: list[tuple[int, str]] = []
+    for profile, terms in _DISCOVERY_PROFILE_TERMS.items():
+        score = sum(1 for term in terms if term in fingerprint)
+        if score:
+            scored_profiles.append((score, profile))
+    if not scored_profiles:
+        return product_type
+    scored_profiles.sort(key=lambda item: (-item[0], item[1]))
+    best_score, best_profile = scored_profiles[0]
+    if best_score < 2:
+        return product_type
+    if len(scored_profiles) > 1 and scored_profiles[1][0] == best_score:
+        return product_type
+    return best_profile
+
+
 def _product_type_expected_fields(product_type_definition: dict[str, Any]) -> list[str]:
     fields = [str(item).strip() for item in product_type_definition.get("expected_fields", []) if str(item).strip()]
     return fields or ["product_name", "description_short", "standard_rate", "monthly_fee", "notes"]
@@ -2682,12 +3027,9 @@ def _product_type_label(product_type_definition: dict[str, Any]) -> str:
 
 
 def _product_type_short_code(product_type: str) -> str:
-    built_in_codes = {"chequing": "CHQ", "savings": "SAV", "gic": "GIC"}
-    if product_type in built_in_codes:
-        return built_in_codes[product_type]
     compact = re.sub(r"[^A-Z0-9]", "", product_type.upper())
     if not compact:
-        return "GEN"
+        return "SRC"
     return compact[:3].ljust(3, "X")
 
 
@@ -2918,6 +3260,14 @@ def _clean_text(value: Any) -> str | None:
         return None
     cleaned = str(value).strip()
     return cleaned or None
+
+
+def _canonical_product_type_code(value: Any) -> str:
+    return canonicalize_product_type_code(value)
+
+
+def _product_type_scope_codes(product_type: str) -> list[str]:
+    return [_canonical_product_type_code(product_type)]
 
 
 def _required_text(value: Any, field_name: str) -> str:

@@ -1,0 +1,16 @@
+
+> fpds-admin-web@ dev D:\10 Development\10 개인프로젝트\70. Mybank\workspace\app\admin
+> next dev -p 3001
+
+⨯ Failed to start server
+Error: listen EADDRINUSE: address already in use :::3001
+    at <unknown> (Error: listen EADDRINUSE: address already in use :::3001)
+    at new Promise (<anonymous>) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[?25h
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1118,7 +1118,7 @@ Current live admin behavior:
 - bank list can multi-select banks and bulk-launch collection across all attached coverage items
 
 Later follow-on requirement:
-- operator-managed dynamic product type onboarding should exist as a separate management surface
+- operator-managed product type onboarding should exist as a separate management surface
 - that later product type registry should support searchable `name` and `description`
 - AI-assisted discovery should be able to use those product type definitions when inferring bank-site URLs from a homepage
 

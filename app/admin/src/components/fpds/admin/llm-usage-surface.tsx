@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { LlmUsageDashboardResponse } from "@/lib/admin-api";
+import { formatAdminDateTimeValue } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 export type LlmUsagePageFilters = {
@@ -35,7 +37,6 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
   const totals = usage.totals ?? {};
   const totalTokens = readNumber(totals, ["total_tokens", "token_total", "tokens"]) ?? 0;
   const totalCost = readNumber(totals, ["estimated_cost", "cost_total", "total_cost"]) ?? 0;
-  const activeFilterItems = buildActiveFilterItems(filters);
   const topModel = topUsageRow(modelRows);
   const topAgent = topUsageRow(agentRows);
   const topRun = topUsageRow(runRows);
@@ -71,7 +72,9 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description="Token volume, cost, concentration, trend, and anomalies."
         path={["Observability", "Usage"]}
@@ -79,37 +82,13 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
       />
 
       <Stats5
+        framed={false}
         items={statItems}
         title="Usage Snapshot"
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.04fr)_minmax(20rem,0.96fr)]">
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-2">
-            <SignalCard
-              label="Coverage"
-              note={`${formatCount(readNumber(totals, ["run_count"]))} runs, ${formatCount(readNumber(totals, ["model_count"]))} models, ${formatCount(readNumber(totals, ["agent_count"]))} agents in view.`}
-              value={formatCoverage(readText(totals, ["first_recorded_at"]), readText(totals, ["last_recorded_at"]))}
-            />
-            <SignalCard
-              label="Density"
-              note={`${formatCost(readNumber(totals, ["average_cost_per_record"]))} average cost per row and ${formatCost(readNumber(totals, ["estimated_cost_per_1k_tokens"]))} per 1k tokens.`}
-              value={`${formatTokens(readNumber(totals, ["average_tokens_per_record"]))} avg tokens / row`}
-            />
-            <SignalCard
-              label="Review reach"
-              note={`${formatCount(readNumber(totals, ["model_execution_count"]))} model executions and ${formatCount(readNumber(totals, ["zero_token_records"]))} zero-token rows are in view.`}
-              value={`${formatCount(readNumber(totals, ["candidate_count"]))} candidate-linked rows`}
-            />
-            <SignalCard
-              label="Active filters"
-              note={activeFilterItems.length ? activeFilterItems.join(" / ") : "No scope filters are active in the current window."}
-              value={formatCount(activeFilterItems.length)}
-            />
-          </div>
-        </article>
-
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <div className="grid min-w-0 gap-6">
+        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
           <div className="grid gap-3">
             <HotspotCard
               actionHref={topModel ? buildUsageHref(filters, { modelName: readText(topModel, ["model_name"]), runId: "", search: "" }) : ""}
@@ -168,7 +147,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         </article>
       </div>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and scope</p>
@@ -212,12 +191,12 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
           </div>
         </div>
 
-        <form action="/admin/usage" className="mt-6 grid gap-5">
-          <div className="grid gap-4 xl:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))]">
-            <label className="grid gap-2 text-sm">
+        <form action="/admin/usage" className="mt-6 grid min-w-0 gap-5">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))]">
+            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">Search</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
                 defaultValue={filters.search}
                 name="q"
                 placeholder="usage id, request id, product, review, bank"
@@ -327,15 +306,11 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Totals</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Usage totals and density</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Prompt and completion totals stay separate from density and zero-token coverage so operators can quickly
-              tell whether a cost spike is volume-driven or context-driven.
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {filters.from || filters.to ? (
@@ -358,7 +333,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         </div>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
         <SectionHeader
           eyebrow="By model"
           title="Model concentration"
@@ -371,15 +346,14 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
             copy="The current window returned no by-model aggregation. Broaden the date range or clear the model filter."
           />
         ) : (
-          <div className="overflow-x-auto px-6 py-5">
-            <table className="min-w-[1440px] table-fixed border-separate border-spacing-0">
+          <div className="max-w-full overflow-x-auto px-6 py-5">
+            <table className="min-w-[1180px] table-fixed border-separate border-spacing-0">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                   <th className="border-b border-border px-3 py-3 font-medium">Model</th>
                   <th className="border-b border-border px-3 py-3 font-medium">Scope</th>
                   <th className="border-b border-border px-3 py-3 font-medium">Tokens</th>
                   <th className="border-b border-border px-3 py-3 font-medium">Cost</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Averages</th>
                   <th className="border-b border-border px-3 py-3 font-medium">Last seen</th>
                   <th className="border-b border-border px-3 py-3 font-medium">Action</th>
                 </tr>
@@ -419,16 +393,6 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
                         value={formatCost(readNumber(row, ["estimated_cost", "cost", "total_cost"]))}
                       />
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <div className="grid gap-1 text-sm">
-                        <span className="font-medium text-foreground">
-                          {formatTokens(readNumber(row, ["average_tokens", "avg_tokens"]))} avg tokens
-                        </span>
-                        <span className="text-muted-foreground">
-                          {formatCost(readNumber(row, ["average_cost"]))} avg cost
-                        </span>
-                      </div>
-                    </td>
                     <td className="border-b border-border/70 px-3 py-4 text-sm text-muted-foreground">
                       {formatTimestamp(readText(row, ["last_seen_at", "last_recorded_at", "updated_at", "recorded_at"]))}
                     </td>
@@ -447,8 +411,8 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         )}
       </article>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
           <SectionHeader
             eyebrow="By agent"
             title="Agent concentration"
@@ -461,8 +425,8 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
               copy="There is no by-agent aggregation in the current window. Broaden the filters to recover agent context."
             />
           ) : (
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1220px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">Agent</th>
@@ -520,7 +484,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
           )}
         </article>
 
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
           <SectionHeader
             eyebrow="By run"
             title="Run-linked spend"
@@ -533,8 +497,8 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
               copy="There is no by-run aggregation in the current window. Widen the scope or clear the run filter."
             />
           ) : (
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1280px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1120px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">Run</th>
@@ -605,8 +569,8 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
         </article>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
+        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
           <SectionHeader
             eyebrow="Trend"
             title="Usage trend"
@@ -634,7 +598,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
               copy="There is no trend data for the current scope. Expand the date range to surface the usage timeline."
             />
           ) : (
-            <div className="overflow-x-auto px-6 py-5">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
               <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
@@ -718,7 +682,7 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
           )}
         </article>
 
-        <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
+        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
           <SectionHeader
             eyebrow="Anomalies"
             title="Anomaly drilldown"
@@ -731,16 +695,14 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
               copy="The current scope did not return unusual usage rows. Broaden the date range or clear the filters to inspect drift."
             />
           ) : (
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1560px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto px-6 py-5">
+              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">Signal</th>
                     <th className="border-b border-border px-3 py-3 font-medium">Context</th>
                     <th className="border-b border-border px-3 py-3 font-medium">Observed</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Baseline</th>
                     <th className="border-b border-border px-3 py-3 font-medium">Review context</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Identifiers</th>
                     <th className="border-b border-border px-3 py-3 font-medium">Action</th>
                   </tr>
                 </thead>
@@ -788,16 +750,6 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-1 text-sm">
                           <span className="font-medium text-foreground">
-                            {formatTokens(readNumber(row, ["baseline_total_tokens", "expected_total_tokens"]))}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {formatCost(readNumber(row, ["baseline_cost", "expected_cost"]))}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">
                             {rowText(row, ["review_state"], "No linked review state")}
                           </span>
                           <span className="text-muted-foreground">
@@ -806,14 +758,6 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
                           <span className="text-muted-foreground">
                             {rowText(row, ["queue_reason_code"], "No queue reason")}
                           </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">{rowText(row, ["llm_usage_id"], "Usage id")}</span>
-                          <span className="text-muted-foreground">{rowText(row, ["candidate_id"], "No candidate id")}</span>
-                          <span className="text-muted-foreground">{rowText(row, ["model_execution_id"], "No model execution id")}</span>
-                          <span className="text-muted-foreground">{rowText(row, ["provider_request_id"], "No provider request id")}</span>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -862,16 +806,6 @@ function MetricCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-border/80 bg-background px-4 py-4">
       <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
       <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function SignalCard({ label, value, note }: { label: string; value: string; note: string }) {
-  return (
-    <div className="rounded-[1.5rem] border border-border/80 bg-background p-4">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{note}</p>
     </div>
   );
 }
@@ -952,32 +886,6 @@ function EmptySection({ title, copy }: { title: string; copy: string }) {
       </div>
     </div>
   );
-}
-
-function buildActiveFilterItems(filters: LlmUsagePageFilters) {
-  const items: string[] = [];
-  if (filters.search) {
-    items.push(`Search ${filters.search}`);
-  }
-  if (filters.from || filters.to) {
-    items.push(`${filters.from || "Start"} to ${filters.to || "Now"}`);
-  }
-  if (filters.runId) {
-    items.push(`Run ${filters.runId}`);
-  }
-  if (filters.agentName) {
-    items.push(`Agent ${filters.agentName}`);
-  }
-  if (filters.modelName) {
-    items.push(`Model ${filters.modelName}`);
-  }
-  if (filters.providerName) {
-    items.push(`Provider ${filters.providerName}`);
-  }
-  if (filters.stage) {
-    items.push(`Stage ${filters.stage}`);
-  }
-  return items;
 }
 
 function buildUsageHref(filters: LlmUsagePageFilters, overrides: Partial<LlmUsagePageFilters>) {
@@ -1177,24 +1085,7 @@ function formatSignedPercent(value: number | null) {
 }
 
 function formatTimestamp(value: string) {
-  if (!value) {
-    return "n/a";
-  }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(parsed);
-}
-
-function formatCoverage(start: string, end: string) {
-  if (!start && !end) {
-    return "No recorded window";
-  }
-  return `${formatTimestamp(start)} -> ${formatTimestamp(end)}`;
+  return formatAdminDateTimeValue(value);
 }
 
 function maxTokens(...rows: UsageRow[][]) {

@@ -6,7 +6,7 @@ import {
   ChangeHistorySurface,
   type ChangeHistoryPageFilters,
 } from "@/components/fpds/admin/change-history-surface";
-import { fetchAdminSession, fetchChangeHistoryList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchChangeHistoryList, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type ChangeHistoryPageProps = {
@@ -21,12 +21,16 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let changes: Awaited<ReturnType<typeof fetchChangeHistoryList>> = null;
+  let productTypeList: Awaited<ReturnType<typeof fetchProductTypeList>> | null = null;
   let apiUnavailable = false;
 
   try {
     session = await fetchAdminSession();
     if (session) {
-      changes = await fetchChangeHistoryList(apiSearchParams);
+      [changes, productTypeList] = await Promise.all([
+        fetchChangeHistoryList(apiSearchParams),
+        fetchProductTypeList(),
+      ]);
     }
   } catch {
     apiUnavailable = true;
@@ -40,7 +44,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
     redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/changes", new URLSearchParams(), locale))}`);
   }
 
-  if (!session || !changes || apiUnavailable) {
+  if (!session || !changes || !productTypeList || apiUnavailable) {
     return <AdminApiUnavailable locale={locale} title="Change history could not load." />;
   }
 
@@ -56,7 +60,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
         role: session.user.role,
       }}
     >
-      <ChangeHistorySurface changes={changes} filters={filters} locale={locale} />
+      <ChangeHistorySurface changes={changes} filters={filters} locale={locale} productTypes={productTypeList.items} />
     </ApplicationShell5>
   );
 }

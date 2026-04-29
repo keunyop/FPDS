@@ -9,13 +9,21 @@ from unittest.mock import patch
 
 from api_service.source_catalog import (
     AiParallelCandidateScore,
+    AiParallelScoringResult,
     CatalogItemMaterializationResult,
+    HomepageCandidate,
     HomepageSourceGenerationResult,
     PageEvidenceAssessment,
+    _build_source_catalog_collection_plan,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
+    _candidate_promotes_to_detail,
+    _ordered_detail_candidates,
+    _promote_detail_candidates,
+    _product_type_discovery_profile,
     _record_catalog_audit_event,
+    _score_candidate_links_with_ai,
     _score_product_link,
     _upsert_source_registry_rows,
     create_bank_profile,
@@ -64,7 +72,6 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
         "display_name": label,
         "description": f"{label} product type",
         "status": "active",
-        "built_in_flag": product_type_code in {"chequing", "savings", "gic"},
         "managed_flag": True,
         "discovery_keywords": [product_type_code, label.lower()],
         "expected_fields": ["product_name", "notes"],
@@ -250,6 +257,58 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(insert_calls[0][1]["bank_code"], "ATL")
         self.assertEqual(insert_calls[0][1]["product_type"], "savings")
 
+    def test_create_source_catalog_item_uses_registered_product_type_code_without_aliasing(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {
+                    "bank_code": "BMO",
+                    "country_code": "CA",
+                    "bank_name": "BMO",
+                    "homepage_url": "https://www.bmo.com/",
+                    "normalized_homepage_url": "https://www.bmo.com/",
+                    "source_language": "en",
+                },
+                None,
+                None,
+            ]
+        )
+
+        with (
+            patch(
+                "api_service.source_catalog.require_product_type_definition",
+                return_value=_product_type_definition("saving"),
+            ) as require_definition,
+            patch("api_service.source_catalog.new_id", return_value="abcdef123456"),
+            patch(
+                "api_service.source_catalog.load_source_catalog_detail",
+                return_value={
+                    "catalog_item": {
+                        "catalog_item_id": "catalog-ca-bmo-saving-abcdef12",
+                        "bank_code": "BMO",
+                        "product_type": "saving",
+                    }
+                },
+            ),
+            patch("api_service.source_catalog._record_catalog_audit_event"),
+        ):
+            result = create_source_catalog_item(
+                connection,
+                payload={
+                    "bank_code": "bmo",
+                    "product_type": "saving",
+                    "status": "active",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["product_type"], "saving")
+        require_definition.assert_called_once_with(connection, product_type_code="saving", active_only=True)
+        conflict_call = next(params for sql, params in connection.calls if "FROM source_registry_catalog_item" in sql and "ANY" in sql)
+        self.assertEqual(conflict_call["product_type_scope"], ["saving"])
+        insert_call = next(params for sql, params in connection.calls if "INSERT INTO source_registry_catalog_item" in sql)
+        self.assertEqual(insert_call["product_type"], "saving")
+
     def test_load_bank_list_includes_catalog_items_for_bulk_collect(self) -> None:
         connection = _QueuedConnection(
             [
@@ -297,6 +356,31 @@ class SourceCatalogTests(unittest.TestCase):
             [item["catalog_item_id"] for item in result["items"][0]["catalog_items"]],
             ["catalog-ca-atl-savings-1", "catalog-ca-atl-gic-1"],
         )
+
+    def test_collection_plan_uses_registered_product_type_code_without_aliasing(self) -> None:
+        plan = _build_source_catalog_collection_plan(
+            rows=[
+                {
+                    "catalog_item_id": "catalog-ca-bmo-saving-legacy",
+                    "bank_code": "BMO",
+                    "bank_name": "BMO",
+                    "country_code": "CA",
+                    "product_type": "saving",
+                    "homepage_url": "https://www.bmo.com/",
+                    "normalized_homepage_url": "https://www.bmo.com/",
+                    "source_language": "en",
+                }
+            ],
+            actor={"user_id": "usr-001", "email": "admin@example.com", "display_name": "Admin", "role": "admin"},
+            request_context={"request_id": "req-001"},
+            collection_id="collection-001",
+            correlation_id="corr-001",
+        )
+
+        group = plan["groups"][0]
+        self.assertEqual(group["product_type"], "saving")
+        self.assertEqual(group["source_catalog_product_type"], "saving")
+        self.assertIn("_bmo_saving_collect_", group["run_id"])
 
     def test_delete_bank_profile_removes_catalog_and_generated_sources_when_unused_downstream(self) -> None:
         connection = _QueuedConnection(
@@ -437,6 +521,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "bank_name": "Atlas Bank",
                 "country_code": "CA",
                 "product_type": "savings",
+                "source_catalog_product_type": "savings",
                 "source_language": "en",
                 "homepage_url": "https://www.atlasbank.ca",
                 "normalized_homepage_url": "https://www.atlasbank.ca",
@@ -561,7 +646,81 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("UPDATE source_registry_item", sql)
         self.assertIn("status <> 'removed'", sql)
         self.assertEqual(params["bank_code"], "BMO")
-        self.assertEqual(params["product_type"], "chequing")
+        self.assertIn("chequing", params["product_type_scope"])
+
+    def test_materialize_sources_persists_homepage_ai_usage_for_run_detail(self) -> None:
+        connection = _QueuedConnection([None, None, None])
+
+        with (
+            patch(
+                "api_service.source_catalog.require_product_type_definition",
+                return_value=_product_type_definition("chequing"),
+            ),
+            patch(
+                "api_service.source_catalog._generate_sources_from_homepage",
+                return_value=HomepageSourceGenerationResult(
+                    rows=[],
+                    discovery_notes=["AI parallel scorer evaluated 1 candidate link(s)."],
+                    detail_source_ids=["AUTO-BMO-CHQ-001"],
+                    model_execution_records=(
+                        {
+                            "model_execution_id": "modelexec-ai-001",
+                            "run_id": "run-001",
+                            "source_document_id": None,
+                            "stage_name": "source_catalog_collection",
+                            "agent_name": "fpds-homepage-ai-parallel-scorer",
+                            "model_id": "gpt-5.4-mini",
+                            "execution_status": "completed",
+                            "execution_metadata": {"candidate_link_count": 1},
+                            "started_at": "2026-04-28T20:39:48+00:00",
+                            "completed_at": "2026-04-28T20:39:49+00:00",
+                        },
+                    ),
+                    usage_records=(
+                        {
+                            "llm_usage_id": "usage-ai-001",
+                            "model_execution_id": "modelexec-ai-001",
+                            "run_id": "run-001",
+                            "candidate_id": None,
+                            "provider_request_id": "resp-001",
+                            "prompt_tokens": 120,
+                            "completion_tokens": 30,
+                            "estimated_cost": "0.000072",
+                            "usage_metadata": {
+                                "usage_mode": "openai-homepage-parallel-scoring",
+                                "provider": "openai",
+                                "model_id": "gpt-5.4-mini",
+                            },
+                            "recorded_at": "2026-04-28T20:39:49+00:00",
+                        },
+                    ),
+                ),
+            ),
+            patch("api_service.source_catalog._upsert_source_registry_rows", return_value=[]),
+        ):
+            result = _materialize_sources_for_catalog_item(
+                connection,
+                row={
+                    "bank_code": "BMO",
+                    "bank_name": "Bank of Montreal",
+                    "country_code": "CA",
+                    "product_type": "chequing",
+                    "homepage_url": "https://www.bmo.com/en-ca/main/personal/",
+                    "source_language": "en",
+                },
+                run_id="run-001",
+                correlation_id="corr-001",
+                request_id="req-001",
+            )
+
+        self.assertEqual(len(result.model_execution_records), 1)
+        self.assertEqual(len(result.usage_records), 1)
+        model_call = next(params for sql, params in connection.calls if "INSERT INTO model_execution" in sql)
+        usage_call = next(params for sql, params in connection.calls if "INSERT INTO llm_usage_record" in sql)
+        self.assertEqual(model_call["stage_name"], "source_catalog_collection")
+        self.assertEqual(usage_call["prompt_tokens"], 120)
+        self.assertEqual(usage_call["completion_tokens"], 30)
+        self.assertIn("openai-homepage-parallel-scoring", usage_call["usage_metadata"])
 
     def test_materialize_sources_dedupes_same_scope_and_prefers_detail(self) -> None:
         connection = _QueuedConnection([None])
@@ -800,8 +959,8 @@ class SourceCatalogTests(unittest.TestCase):
             patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
             patch(
                 "api_service.source_catalog._score_candidate_links_with_ai",
-                return_value=(
-                    {
+                return_value=AiParallelScoringResult(
+                    scores={
                         "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account": AiParallelCandidateScore(
                             candidate_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance-chequing-account",
                             predicted_role="detail",
@@ -811,7 +970,7 @@ class SourceCatalogTests(unittest.TestCase):
                             short_rationale="Likely official chequing detail page.",
                         )
                     },
-                    ["AI parallel scorer evaluated 1 candidate link(s)."],
+                    notes=["AI parallel scorer evaluated 1 candidate link(s)."],
                 ),
             ),
         ):
@@ -831,6 +990,346 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
+
+    def test_seed_detail_source_is_promoted_when_page_evidence_fetch_is_unavailable(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical-chequing-account",
+            raw_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical-chequing-account/",
+            anchor_text="BMO Practical Chequing Account",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=8,
+            supporting_signal=False,
+            seed_source_id="BMO-CHQ-002",
+            source_name_hint="BMO Practical Chequing Account",
+            priority_hint="P0",
+            expected_fields_hint=["product_name", "monthly_fee", "included_transactions"],
+        )
+
+        with patch(
+            "api_service.source_catalog._score_page_evidence",
+            return_value=PageEvidenceAssessment(
+                page_evidence_score=0,
+                page_evidence_reason_codes=["page_fetch_unavailable"],
+                page_title=None,
+                primary_heading=None,
+                heading_match=False,
+                attribute_signal_count=0,
+                negative_signal_count=0,
+                fetch_error="timed out",
+            ),
+        ):
+            rows, notes = _promote_detail_candidates(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="chequing",
+                discovery_product_type="chequing",
+                product_type_definition=_product_type_definition("chequing"),
+                source_language="en",
+                fetch_policy=SimpleNamespace(),
+                candidates=[candidate],
+                ai_scores={},
+            )
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["source_id"], "BMO-CHQ-002")
+        self.assertEqual(rows[0]["discovery_role"], "detail")
+        self.assertEqual(rows[0]["discovery_metadata"]["selection_path"], "seed_hint_fetch_unavailable")
+        self.assertIn("seed-backed source", " ".join(notes))
+
+    def test_seed_detail_candidates_are_not_displaced_by_high_scoring_homepage_links(self) -> None:
+        seed_candidates = [
+            HomepageCandidate(
+                normalized_url=f"https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/seed-{index}",
+                raw_url=f"https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/seed-{index}/",
+                anchor_text=f"Seed {index}",
+                source_type="html",
+                origin="seed_detail_hint",
+                heuristic_score=0,
+                supporting_signal=False,
+                seed_source_id=f"BMO-CHQ-00{index}",
+                source_name_hint=f"BMO seed {index}",
+                priority_hint="P0",
+                expected_fields_hint=["product_name"],
+            )
+            for index in range(1, 6)
+        ]
+        homepage_candidates = [
+            HomepageCandidate(
+                normalized_url=f"https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/high-score-{index}",
+                raw_url=f"https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/high-score-{index}/",
+                anchor_text=f"High score {index}",
+                source_type="html",
+                origin="homepage_or_hub_link",
+                heuristic_score=20,
+                supporting_signal=False,
+                seed_source_id=None,
+                source_name_hint=None,
+                priority_hint=None,
+                expected_fields_hint=[],
+            )
+            for index in range(1, 8)
+        ]
+
+        ordered = _ordered_detail_candidates(candidates=[*homepage_candidates, *seed_candidates], ai_scores={})
+
+        self.assertEqual([item.seed_source_id for item in ordered[:5]], [f"BMO-CHQ-00{index}" for index in range(1, 6)])
+        self.assertEqual(len(ordered), 5)
+
+    def test_seed_detail_candidate_can_promote_despite_page_negative_terms(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical",
+            raw_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical/",
+            anchor_text="BMO Practical Chequing Account",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=0,
+            supporting_signal=False,
+            seed_source_id="BMO-CHQ-002",
+            source_name_hint="BMO Practical Chequing Account",
+            priority_hint="P0",
+            expected_fields_hint=["product_name"],
+        )
+        page_evidence = PageEvidenceAssessment(
+            page_evidence_score=5,
+            page_evidence_reason_codes=["title_semantic_match", "insufficient_evidence"],
+            page_title="Low Fee Chequing Account: Practical Chequing Account - BMO Canada",
+            primary_heading="Practical Chequing Account",
+            heading_match=True,
+            attribute_signal_count=2,
+            negative_signal_count=3,
+        )
+
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=None, page_evidence=page_evidence))
+
+    def test_generate_sources_from_homepage_uses_exact_product_type_seed_details(self) -> None:
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal"],
+            page_title="BMO Savings Account",
+            primary_heading="BMO Savings Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="savings",
+                product_type_definition={
+                    **_product_type_definition("savings"),
+                    "description": "Savings account with interest rates, balances, withdrawals, and tiering.",
+                    "discovery_keywords": ["savings", "interest rate", "balance"],
+                    "expected_fields": ["product_name", "interest_rate_summary", "monthly_fee"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertTrue({"BMO-SAV-002", "BMO-SAV-003", "BMO-SAV-004", "BMO-SAV-005"}.issubset(source_ids))
+        self.assertIn("BMO-SAV-006", source_ids)
+        self.assertIn("BMO-SAV-007", source_ids)
+        self.assertTrue(all(str(item["product_type"]) == "savings" for item in result.rows))
+
+    def test_generate_sources_from_homepage_uses_definition_semantics_for_discovery_profile(self) -> None:
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal"],
+            page_title="BMO Savings Account",
+            primary_heading="BMO Savings Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="saving",
+                product_type_definition={
+                    **_product_type_definition("saving"),
+                    "display_name": "Savings",
+                    "description": "Savings account with interest rates, balances, withdrawals, and tiering.",
+                    "discovery_keywords": ["savings", "interest rate", "balance"],
+                    "expected_fields": ["product_name", "interest_rate_summary", "monthly_fee"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertTrue({"BMO-SAV-002", "BMO-SAV-003", "BMO-SAV-004", "BMO-SAV-005"}.issubset(source_ids))
+        self.assertTrue(all(str(item["product_type"]) == "saving" for item in result.rows))
+        self.assertTrue(any("used `savings` discovery signals" in note for note in result.discovery_notes))
+
+    def test_product_type_discovery_profile_uses_code_terms_for_gic_term_deposit(self) -> None:
+        self.assertEqual(
+            _product_type_discovery_profile(
+                "gic-term-deposit",
+                {
+                    **_product_type_definition("gic-term-deposit"),
+                    "display_name": "Term Deposit",
+                    "description": "Deposit product.",
+                    "discovery_keywords": [],
+                },
+            ),
+            "gic",
+        )
+
+    def test_generate_sources_from_homepage_keeps_seed_detail_when_ai_marks_irrelevant(self) -> None:
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal"],
+            page_title="BMO Progressive GIC",
+            primary_heading="BMO Progressive GIC",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+        ai_scores = {
+            "https://www.bmo.com/main/personal/investments/gic/progressive-gic": AiParallelCandidateScore(
+                candidate_url="https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+                predicted_role="irrelevant",
+                relevance_score=0.1,
+                confidence_band="low",
+                reason_codes=["insufficient_evidence"],
+                short_rationale="AI scorer was not confident.",
+            )
+        }
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores=ai_scores, notes=["AI marked seed as irrelevant"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="gic-term-deposit",
+                product_type_definition={
+                    **_product_type_definition("gic-term-deposit"),
+                    "display_name": "GIC Term Deposit",
+                    "description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+                    "discovery_keywords": ["gic", "term deposit", "guaranteed investment certificate", "maturity"],
+                    "expected_fields": ["product_name", "term_options", "minimum_deposit"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertIn("BMO-GIC-003", source_ids)
+        detail_row = next(item for item in result.rows if item["source_id"] == "BMO-GIC-003")
+        self.assertEqual(detail_row["product_type"], "gic-term-deposit")
+        self.assertEqual(detail_row["discovery_metadata"]["ai_predicted_role"], "irrelevant")
+        self.assertTrue(any("used `gic` discovery signals" in note for note in result.discovery_notes))
+
+    def test_generate_sources_from_homepage_keeps_seed_detail_with_low_page_evidence(self) -> None:
+        low_evidence = PageEvidenceAssessment(
+            page_evidence_score=1,
+            page_evidence_reason_codes=["insufficient_evidence"],
+            page_title="BMO Progressive GIC Search Tool",
+            primary_heading="Progressive GIC Search Tool",
+            heading_match=False,
+            attribute_signal_count=0,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=low_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="gic-term-deposit",
+                product_type_definition={
+                    **_product_type_definition("gic-term-deposit"),
+                    "display_name": "GIC Term Deposit",
+                    "description": "Guaranteed investment certificate or term deposit with rate, term, redeemability, and minimum deposit details.",
+                    "discovery_keywords": ["gic", "term deposit", "guaranteed investment certificate", "maturity"],
+                    "expected_fields": ["product_name", "term_options", "minimum_deposit"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        detail_row = next(item for item in result.rows if item["source_id"] == "BMO-GIC-003")
+        self.assertEqual(detail_row["product_type"], "gic-term-deposit")
+        self.assertEqual(detail_row["discovery_metadata"]["selection_path"], "seed_hint_low_page_evidence")
+        self.assertTrue(any("low page evidence" in note for note in result.discovery_notes))
+
+    def test_ai_candidate_scorer_accepts_discovery_product_type_profile(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier",
+            raw_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+            anchor_text="Savings Amplifier",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id="BMO-SAV-002",
+            source_name_hint="BMO Savings Amplifier Account",
+            priority_hint="P0",
+            expected_fields_hint=["product_name"],
+        )
+
+        with patch("api_service.source_catalog.os.getenv", side_effect=lambda key, default="": "openai" if key == "FPDS_LLM_PROVIDER" else ""):
+            result = _score_candidate_links_with_ai(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="saving",
+                discovery_product_type="savings",
+                product_type_definition={
+                    **_product_type_definition("saving"),
+                    "display_name": "Savings",
+                    "description": "Savings account with interest rates, balances, withdrawals, and tiering.",
+                    "discovery_keywords": ["savings", "interest rate", "balance"],
+                },
+                source_language="en",
+                homepage_url="https://www.bmo.com/",
+                normalized_homepage_url="https://www.bmo.com/",
+                homepage_fetch_error=None,
+                candidates=[candidate],
+            )
+
+        self.assertEqual(result.scores, {})
+        self.assertTrue(any("provider or API key was not configured" in note for note in result.notes))
 
     def test_generate_sources_from_homepage_uses_bmo_seed_details_and_filters_unrelated_support(self) -> None:
         homepage_links = [
@@ -866,7 +1365,10 @@ class SourceCatalogTests(unittest.TestCase):
         with (
             patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
             patch("api_service.source_catalog._extract_allowed_links", return_value=homepage_links),
-            patch("api_service.source_catalog._score_candidate_links_with_ai", return_value=({}, ["AI unavailable"])),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
             patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
         ):
             result = _generate_sources_from_homepage(

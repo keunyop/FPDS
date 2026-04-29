@@ -612,19 +612,35 @@ function formatCompactDate(value: string | null, locale: string) {
   if (!value) {
     return copy.common.noDate;
   }
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  }).format(new Date(value));
+  return formatFixedDate(value);
 }
 
-function formatLongDateTime(value: string, locale: string) {
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC"
-  }).format(new Date(value));
+function formatLongDateTime(value: string, _locale: string) {
+  return formatFixedDateTime(value);
+}
+
+function formatFixedDate(value: string) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatFixedDateTime(value: string) {
+  if (!value) {
+    return "n/a";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function SurfaceNoteCard({ eyebrow, items, title }: { eyebrow: string; items: string[]; title: string }) {

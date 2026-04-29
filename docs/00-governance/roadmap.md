@@ -73,7 +73,7 @@ Completed:
 - locale rollout
 - freshness and metric wording improvements
 - source registry admin MVP
-- dynamic product type onboarding
+- operator-managed product type onboarding
 - aggregate refresh queue and dashboard health behavior
 
 ---

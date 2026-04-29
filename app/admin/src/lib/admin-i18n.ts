@@ -248,15 +248,28 @@ export function buildAdminHref(pathname: string, params: URLSearchParams, locale
   return query ? `${pathname}?${query}` : pathname;
 }
 
-export function formatAdminDateTime(locale: AdminLocale, value: string | null) {
+export function formatAdminDateTime(locale: AdminLocale, value: string | null, options?: { seconds?: boolean }) {
+  return formatAdminDateTimeValue(value, localizedMissing(locale), options);
+}
+
+export function formatAdminDateTimeValue(value: string | null, missing = "n/a", options?: { seconds?: boolean }) {
   if (!value) {
-    return localizedMissing(locale);
+    return missing;
   }
 
-  return new Intl.DateTimeFormat(getAdminIntlLocale(locale), {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const pad = (part: number) => String(part).padStart(2, "0");
+  const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}${options?.seconds ? `:${pad(date.getSeconds())}` : ""}`;
+  return `${datePart} ${timePart}`;
 }
 
 export function formatAdminNumber(locale: AdminLocale, value: number | null, options?: Intl.NumberFormatOptions) {

@@ -297,7 +297,7 @@ Based on:
 | 5.13 | Completed | freshness/metric note 표기 | methodology/freshness 노출 | Frontend, Backend | 5.8 | 2026-05-04 |
 | 5.14 | Next | responsive QA 수행 | desktop/tablet/mobile 검증 | QA | 5.9, 5.10 | 2026-05-07 |
 | 5.15 | Completed | source registry admin MVP 구현 | DB-backed bank setup + source-catalog coverage management + candidate-producing collection + read-only generated source inspection | Backend, Frontend, AI/Data | 5.1, 4.10 | 2026-05-10 |
-| 5.16 | Completed | dynamic product type onboarding 구현 | operator-managed product type registry with searchable name/description + AI-assisted homepage discovery + generic AI extraction/normalization fallback + safe manual-review routing | Backend, Frontend, AI/Data | 5.15 | 2026-05-17 |
+| 5.16 | Completed | operator-managed product type onboarding 구현 | DB-managed product type registry with searchable name/description + AI-assisted homepage discovery + generic AI extraction/normalization fallback + safe manual-review routing | Backend, Frontend, AI/Data | 5.15 | 2026-05-17 |
 | 5.17 | Completed | vector-assisted evidence retrieval bootstrap | pgvector evidence chunk embedding side table + metadata-first vector ranking + metadata-only fallback | Backend, AI/Data | 3.4, 5.16 | 2026-05-17 |
 
 ### 5.5 Scope Baseline

@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from api_service.product_types import (
+    canonicalize_product_type_code,
     create_product_type_definition,
     delete_product_type_definition,
     _merge_keywords,
@@ -45,14 +46,13 @@ class _QueuedConnection:
         return _QueuedCursor(self._responses.pop(0))
 
 
-def _dynamic_product_row(*, status: str = "active") -> dict[str, object]:
+def _product_type_row(*, status: str = "active") -> dict[str, object]:
     return {
         "product_type_code": "tfsa-savings",
         "product_family": "deposit",
         "display_name": "TFSA Savings",
         "description": "Tax-free savings deposit account for retail customers.",
         "status": status,
-        "built_in_flag": False,
         "managed_flag": True,
         "discovery_keywords": ["tfsa", "tax free savings", "savings"],
         "expected_fields": ["product_name", "minimum_deposit", "eligibility_text"],
@@ -63,10 +63,10 @@ def _dynamic_product_row(*, status: str = "active") -> dict[str, object]:
 
 
 class ProductTypeRegistryTests(unittest.TestCase):
-    def test_load_product_type_list_serializes_dynamic_flag(self) -> None:
+    def test_load_product_type_list_serializes_operator_managed_fields(self) -> None:
         connection = _QueuedConnection(
             [
-                [_dynamic_product_row()],
+                [_product_type_row()],
             ]
         )
 
@@ -74,7 +74,8 @@ class ProductTypeRegistryTests(unittest.TestCase):
 
         self.assertEqual(result["summary"]["total_items"], 1)
         self.assertEqual(result["items"][0]["product_type_code"], "tfsa-savings")
-        self.assertTrue(result["items"][0]["dynamic_onboarding_enabled"])
+        self.assertNotIn("built_in_flag", result["items"][0])
+        self.assertNotIn("dynamic_onboarding_enabled", result["items"][0])
         self.assertEqual(result["applied_filters"]["search"], "tfsa")
         self.assertEqual(result["applied_filters"]["status"], "active")
 
@@ -82,7 +83,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         connection = _QueuedConnection([None, None, None, None])
 
         with (
-            patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row()),
+            patch("api_service.product_types.load_product_type_definition", return_value=_product_type_row()),
             patch("api_service.product_types.new_id", return_value="audit-001"),
             patch(
                 "api_service.product_types._generate_ai_discovery_keywords",
@@ -114,8 +115,8 @@ class ProductTypeRegistryTests(unittest.TestCase):
 
     def test_update_product_type_definition_updates_taxonomy_and_audit(self) -> None:
         connection = _QueuedConnection([None, None, None])
-        existing = _dynamic_product_row(status="active")
-        updated = _dynamic_product_row(status="inactive")
+        existing = _product_type_row(status="active")
+        updated = _product_type_row(status="inactive")
 
         with (
             patch("api_service.product_types.load_product_type_definition", side_effect=[existing, updated]),
@@ -142,7 +143,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
 
     def test_update_product_type_status_only_preserves_keywords(self) -> None:
         connection = _QueuedConnection([None, None, None])
-        existing = _dynamic_product_row(status="active")
+        existing = _product_type_row(status="active")
         existing["discovery_keywords"] = ["existing keyword", "tfsa"]
         updated = dict(existing)
         updated["status"] = "inactive"
@@ -164,6 +165,43 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(json.loads(update_calls[0][1]["discovery_keywords"]), ["existing keyword", "tfsa"])
         ai_generator.assert_not_called()
 
+    def test_update_product_type_definition_can_rename_code_and_cascade_references(self) -> None:
+        existing = _product_type_row()
+        existing["product_type_code"] = "saving"
+        existing["display_name"] = "Saving"
+        updated = dict(existing)
+        updated["product_type_code"] = "savings"
+        updated["display_name"] = "Savings"
+        connection = _QueuedConnection([existing, *([None] * 10), updated, None])
+
+        with (
+            patch("api_service.product_types.new_id", return_value="audit-rename"),
+            patch("api_service.product_types._generate_ai_discovery_keywords", return_value=["savings", "interest rate"]),
+        ):
+            result = update_product_type_definition(
+                connection,
+                product_type_code="saving",
+                payload={
+                    "product_type_code": "savings",
+                    "display_name": "Savings",
+                    "description": "Savings deposit account focused on interest, rates, balances, and withdrawals.",
+                    "status": "active",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["product_type_code"], "savings")
+        registry_update = next(params for sql, params in connection.calls if "UPDATE product_type_registry" in sql)
+        self.assertEqual(registry_update["existing_product_type_code"], "saving")
+        self.assertEqual(registry_update["updated_product_type_code"], "savings")
+        cascade_tables = {
+            sql.split("UPDATE ", 1)[1].split()[0]
+            for sql, _ in connection.calls
+            if "SET product_type = %(updated_product_type_code)s" in sql
+        }
+        self.assertTrue({"source_registry_catalog_item", "source_registry_item", "normalized_candidate", "canonical_product", "public_product_projection"}.issubset(cascade_tables))
+
     def test_delete_product_type_definition_removes_registry_and_taxonomy_when_unused(self) -> None:
         connection = _QueuedConnection(
             [
@@ -173,7 +211,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
                 None,
             ]
         )
-        existing = _dynamic_product_row(status="inactive")
+        existing = _product_type_row(status="inactive")
 
         with (
             patch("api_service.product_types.load_product_type_definition", return_value=existing),
@@ -198,7 +236,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
             ]
         )
         with (
-            patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row()),
+            patch("api_service.product_types.load_product_type_definition", return_value=_product_type_row()),
         ):
             with self.assertRaises(SourceRegistryError) as captured:
                 delete_product_type_definition(
@@ -211,11 +249,29 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(captured.exception.code, "product_type_in_use")
 
     def test_require_product_type_definition_rejects_inactive_product_type(self) -> None:
-        with patch("api_service.product_types.load_product_type_definition", return_value=_dynamic_product_row(status="inactive")):
+        with patch("api_service.product_types.load_product_type_definition", return_value=_product_type_row(status="inactive")):
             with self.assertRaises(SourceRegistryError) as captured:
                 require_product_type_definition(object(), product_type_code="tfsa-savings", active_only=True)
 
         self.assertEqual(captured.exception.code, "product_type_inactive")
+
+    def test_require_product_type_definition_uses_registered_code_without_aliasing(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with self.assertRaises(SourceRegistryError) as captured:
+            require_product_type_definition(connection, product_type_code="saving", active_only=True)
+
+        self.assertEqual(captured.exception.code, "product_type_not_found")
+        self.assertEqual(connection.calls[0][1]["product_type_code"], "saving")
+        self.assertEqual(canonicalize_product_type_code("saving accounts"), "saving-accounts")
+
+    def test_require_product_type_definition_fails_when_registered_row_is_missing(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with self.assertRaises(SourceRegistryError) as captured:
+            require_product_type_definition(connection, product_type_code="savings", active_only=True)
+
+        self.assertEqual(captured.exception.code, "product_type_not_found")
 
     def test_merge_keywords_uses_ai_result_when_available(self) -> None:
         with patch(

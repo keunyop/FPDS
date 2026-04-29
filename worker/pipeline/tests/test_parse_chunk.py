@@ -77,6 +77,61 @@ class ParseChunkServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_html_snapshot_falls_back_to_body_when_main_is_empty(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("parse-chunk-empty-main")
+        try:
+            snapshot = ParseSourceSnapshot(
+                source_id="BMO-GIC-003",
+                snapshot_id="snap-html-empty-main",
+                source_document_id="src-html-empty-main",
+                object_storage_key="dev/snapshots/CA/BMO/src-html-empty-main/snap-html-empty-main/raw",
+                content_type="text/html",
+                source_language="en",
+                bank_code="BMO",
+                country_code="CA",
+            )
+            _write_object(
+                temp_path,
+                snapshot.object_storage_key,
+                b"""
+                <html>
+                  <head><title>BMO Progressive GIC</title></head>
+                  <body>
+                    <main id="content"></main>
+                    <div id="app">
+                      <h1>BMO Progressive GIC</h1>
+                      <p>Principal protected guaranteed investment certificate.</p>
+                      <p>Choose a term and review current rates.</p>
+                    </div>
+                  </body>
+                </html>
+                """,
+            )
+            storage_config = ParseChunkStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                snapshot_object_prefix="snapshots",
+                parsed_object_prefix="parsed",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ParseChunkService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+                chunk_max_chars=120,
+                chunk_overlap_chars=20,
+            )
+
+            result = service.parse_snapshots(run_id="run_20260410_empty_main", snapshots=[snapshot])
+
+            self.assertFalse(result.partial_completion_flag)
+            item = result.source_results[0]
+            self.assertEqual(item.parse_action, "stored")
+            self.assertGreaterEqual(item.chunk_count, 1)
+            self.assertIn("BMO Progressive GIC", item.evidence_chunk_records[0]["evidence_excerpt"])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_pdf_snapshot_parses_and_chunks_with_page_anchor(self) -> None:
         temp_path = _prepare_workspace_temp_dir("parse-chunk-pdf")
         try:

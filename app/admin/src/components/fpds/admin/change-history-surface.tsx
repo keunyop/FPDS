@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
-import type { ChangeHistoryListResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import type { ChangeHistoryListResponse, ProductTypeItem } from "@/lib/admin-api";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminProductTypeLabelMap, buildAdminProductTypeOptions, formatAdminProductType } from "@/lib/admin-product-types";
 import { cn } from "@/lib/utils";
 
 const BANK_OPTIONS = ["TD", "RBC", "BMO", "SCOTIA", "CIBC"] as const;
-const PRODUCT_TYPE_OPTIONS = ["savings", "chequing", "gic"] as const;
 const CHANGE_TYPE_OPTIONS = ["New", "Updated", "Discontinued", "Reclassified", "ManualOverride"] as const;
 
 export type ChangeHistoryPageFilters = {
@@ -29,6 +30,7 @@ type ChangeHistorySurfaceProps = {
   filters: ChangeHistoryPageFilters;
   changes: ChangeHistoryListResponse;
   locale: AdminLocale;
+  productTypes: ProductTypeItem[];
 };
 
 const CHANGE_COPY = {
@@ -259,8 +261,10 @@ const CHANGE_COPY = {
   },
 } as const;
 
-export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistorySurfaceProps) {
+export function ChangeHistorySurface({ filters, changes, locale, productTypes }: ChangeHistorySurfaceProps) {
   const copy = CHANGE_COPY[locale];
+  const productTypeOptions = buildAdminProductTypeOptions(productTypes);
+  const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
   const changeTypeCounts = changes.summary.change_type_counts;
   const statItems = [
     {
@@ -290,7 +294,9 @@ export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistory
   ];
 
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
+      <AdminTableAutoRefresh />
+
       <AdminPageHeader
         description={copy.description}
         path={copy.path}
@@ -298,6 +304,7 @@ export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistory
       />
 
       <Stats5
+        framed={false}
         items={statItems}
         title={copy.snapshot}
       />
@@ -356,9 +363,9 @@ export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistory
                 name="product_type"
               >
                 <option value="">{copy.allTypes}</option>
-                {PRODUCT_TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {toTitleCase(option)}
+                {productTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -456,7 +463,7 @@ export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistory
             ) : null}
             {filters.productType ? (
               <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {toTitleCase(filters.productType)}
+                {formatAdminProductType(filters.productType, productTypeLabelMap)}
               </span>
             ) : null}
             {filters.changeType ? (
@@ -521,7 +528,7 @@ export function ChangeHistorySurface({ filters, changes, locale }: ChangeHistory
                         <div className="grid gap-1">
                           <p className="font-medium text-foreground">{item.product_name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {item.bank_name} · {toTitleCase(item.product_type)}
+                            {item.bank_name} · {formatAdminProductType(item.product_type, productTypeLabelMap)}
                             {item.subtype_code ? ` · ${item.subtype_code}` : ""}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -713,13 +720,7 @@ function buildChangeHref(locale: AdminLocale, filters: ChangeHistoryPageFilters,
 }
 
 function formatTimestamp(value: string | null) {
-  if (!value) {
-    return "n/a";
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return formatAdminDateTimeValue(value);
 }
 
 function toTitleCase(value: string) {

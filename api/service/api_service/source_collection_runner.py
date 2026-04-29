@@ -232,7 +232,6 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
                 "source_language": item["source_language"],
                 "product_type_name": item.get("product_type_name"),
                 "product_type_description": item.get("product_type_description"),
-                "product_type_dynamic": item.get("product_type_dynamic"),
                 "discovery_keywords": item.get("discovery_keywords", []),
                 "fallback_policy": item.get("fallback_policy"),
                 "discovery_metadata": item.get("discovery_metadata", {}),

@@ -13,6 +13,7 @@ import type {
   ReviewModelExecution,
   ReviewTaskDetailResponse,
 } from "@/lib/admin-api";
+import { formatAdminDateTimeValue } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 type ReviewDetailSurfaceProps = {
@@ -186,12 +187,9 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
           <SummaryStat label="Evidence fields" value={String(detail.evidence_summary.field_count)} />
         </div>
 
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           <SummaryStat label="Created" value={formatTimestamp(detail.review_task.created_at)} />
-          <SummaryStat label="Updated" value={formatTimestamp(detail.review_task.updated_at)} />
-          <SummaryStat label="Fetched" value={formatTimestamp(detail.source_context.fetched_at)} />
           <SummaryStat label="Focused field" value={activeField?.label ?? "n/a"} />
-          <SummaryStat label="Displayed name" value={approvedDisplayProductName} />
         </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -213,7 +211,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Candidate summary"
               title="Normalized fields with trace focus"
-              description="Select a field to move the trace pane to the most relevant evidence links, mapping metadata, and model-run references."
             />
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {detail.field_trace_groups.map((item) => (
@@ -258,7 +255,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Validation"
               title="Issue summary and source context"
-              description="Current validation findings stay visible in the main pane while the trace pane concentrates on the selected field."
             />
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <div className="rounded-2xl border border-border/80 bg-background p-4">
@@ -284,8 +280,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
                 <dl className="mt-4 grid gap-3 text-sm">
                   <MetaRow label="Source ID" value={detail.source_context.source_id ?? "n/a"} />
                   <MetaRow label="Source type" value={detail.source_context.source_type ?? "n/a"} />
-                  <MetaRow label="Snapshot" value={detail.source_context.snapshot_id ?? "n/a"} />
-                  <MetaRow label="Parsed doc" value={detail.source_context.parsed_document_id ?? "n/a"} />
                   <MetaRow label="Fetched" value={formatTimestamp(detail.source_context.fetched_at)} />
                   <MetaRow label="Stage status" value={detail.source_context.stage_status ?? "n/a"} />
                 </dl>
@@ -321,7 +315,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="History"
               title="Decision history"
-              description="Current queue state and append-only decision history stay separate so operators can see what changed without losing the present task status."
             />
             {detail.decision_history.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">No review decisions have been recorded on this task yet.</p>
@@ -352,7 +345,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Trace viewer"
               title={activeField ? `${activeField.label} trace` : "Field trace"}
-              description="The trace pane prioritizes the selected normalized field and keeps evidence, mapping, and model context together without exposing private object paths."
             />
 
             {!activeField ? (
@@ -404,7 +396,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Model runs"
               title="Relevant execution references"
-              description="Extraction, normalization, and validation references stay visible here so the selected field trace can be tied back to the producing run stages."
             />
             {detail.model_executions.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">No model execution references were available for this task.</p>
@@ -421,7 +412,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Decision form"
               title="Approve, reject, defer, or edit"
-              description="The action area stays beside the trace pane so operators can decide with the selected field evidence still in view."
             />
 
             {detail.available_actions.length === 0 ? (
@@ -531,7 +521,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Override preview"
               title="Candidate-to-approved diff"
-              description="Previewed changes are computed against the current normalized candidate payload before edit approval is submitted."
             />
             {diffPreview.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">
@@ -556,7 +545,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             <SectionHeading
               eyebrow="Canonical continuity"
               title="Current approved product snapshot"
-              description="Approval reuses the existing canonical continuity record when a product match already exists, otherwise it creates a new one."
             />
             {detail.current_product ? (
               <div className="mt-6 rounded-2xl border border-border/80 bg-background p-4">
@@ -598,8 +586,6 @@ function TraceEvidenceCard({ item }: { item: ReviewEvidenceLink }) {
       <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.evidence_excerpt ?? "No excerpt captured."}</p>
       <dl className="mt-4 grid gap-2 text-sm">
         <MetaRow label="Chunk" value={item.evidence_chunk_id} />
-        <MetaRow label="Snapshot" value={item.source_snapshot_id ?? "n/a"} />
-        <MetaRow label="Parsed doc" value={item.parsed_document_id ?? "n/a"} />
         <MetaRow label="Source type" value={item.source_type ?? "n/a"} />
         <MetaRow label="Model run" value={item.model_execution_id ?? "n/a"} />
       </dl>
@@ -637,10 +623,8 @@ function ModelExecutionCard({ item }: { item: ReviewModelExecution }) {
         </span>
       </div>
       <dl className="mt-4 grid gap-2 text-sm">
-        <MetaRow label="Execution" value={item.model_execution_id} />
         <MetaRow label="Started" value={formatTimestamp(item.started_at)} />
         <MetaRow label="Completed" value={formatTimestamp(item.completed_at)} />
-        <MetaRow label="Usage mode" value={item.usage.usage_mode ?? "n/a"} />
         <MetaRow label="Tokens" value={tokenSummary} />
         <MetaRow label="Cost" value={formatCost(item.usage.estimated_cost)} />
       </dl>
@@ -664,7 +648,7 @@ function SectionHeading({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
 }) {
   return (
     <div>
@@ -685,13 +669,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 }
 
 function formatTimestamp(value: string | null) {
-  if (!value) {
-    return "n/a";
-  }
-  return new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return formatAdminDateTimeValue(value);
 }
 
 function formatConfidence(value: number | null) {

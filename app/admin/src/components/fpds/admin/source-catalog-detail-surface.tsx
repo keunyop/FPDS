@@ -5,20 +5,31 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import type { BankItem, SourceCatalogDetailResponse } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
-
-const PRODUCT_TYPE_OPTIONS = ["chequing", "savings", "gic"];
+import type { BankItem, ProductTypeItem, SourceCatalogDetailResponse } from "@/lib/admin-api";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminProductTypeOptions } from "@/lib/admin-product-types";
 
 type SourceCatalogDetailSurfaceProps = {
   bankOptions: BankItem[];
   detail: SourceCatalogDetailResponse;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
+  productTypes?: ProductTypeItem[];
 };
 
-export function SourceCatalogDetailSurface({ bankOptions, detail, locale, csrfToken }: SourceCatalogDetailSurfaceProps) {
+export function SourceCatalogDetailSurface({ bankOptions, detail, locale, csrfToken, productTypes = [] }: SourceCatalogDetailSurfaceProps) {
   const router = useRouter();
+  const baseProductTypeOptions = buildAdminProductTypeOptions(productTypes);
+  const productTypeOptions = baseProductTypeOptions.some((option) => option.value === detail.catalog_item.product_type)
+    ? baseProductTypeOptions
+    : [
+        ...baseProductTypeOptions,
+        {
+          label: detail.catalog_item.product_type,
+          value: detail.catalog_item.product_type,
+          description: "",
+        },
+      ];
   const [form, setForm] = useState({
     bank_code: detail.catalog_item.bank_code,
     product_type: detail.catalog_item.product_type,
@@ -100,9 +111,9 @@ export function SourceCatalogDetailSurface({ bankOptions, detail, locale, csrfTo
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">Product type</span>
               <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => setForm((current) => ({ ...current, product_type: event.target.value }))} value={form.product_type}>
-                {PRODUCT_TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {productTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -147,7 +158,7 @@ export function SourceCatalogDetailSurface({ bankOptions, detail, locale, csrfTo
                       {item.run_id}
                     </Link>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {item.pipeline_stage || item.trigger_type} started {item.started_at ?? "n/a"}
+                      {item.pipeline_stage || item.trigger_type} started {formatAdminDateTimeValue(item.started_at)}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
