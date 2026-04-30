@@ -117,6 +117,9 @@ Current boundary:
 - this stage produces source-level sparse drafts, not `normalized_candidate`
 - `field_evidence_link` rows are still deferred because they require `candidate_id` or `product_version_id`
 - the extraction baseline now includes product-type-specific canonical fields for `chequing`, `savings`, and `gic`, including transaction bundle signals, savings tiering or withdrawal text, and GIC term, redeemability, compounding, payout, and registered-plan support fields
+- for canonical product types, source-registry `expected_fields` now stay bounded to extractable canonical fields so source-management hints such as rebates or discovery summaries do not become arbitrary candidate payload fields
+- BMO chequing fee-waiver wording such as `$17.95 OR $0/month with min. $4,000 balance` now maps to monthly fee, public display fee, minimum balance, and fee waiver condition instead of treating `$0` as the base fee
+- chequing extraction now keeps cheque text concise and treats student/newcomer flags as account-specific signals rather than generic cross-product navigation mentions
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -125,7 +128,7 @@ What `WBS 3.6` stores today:
 - `field_evidence_link` rows tied to `candidate_id`
 - `model_execution` and zero-token `llm_usage_record` rows for normalization
 - updated `run_source_item.stage_metadata` for candidate id and normalization results
-- for the TD Savings prototype, missing rate fields can now be supplemented from a product-matched `TD-SAV-005` current-rates extraction artifact when that supporting artifact exists
+- for selected savings products, missing rate fields can now be supplemented from product-matched supporting rate-page artifacts when available: `TD-SAV-005`, `BMO-SAV-006`, and `SCOTIA-SAV-006`
 - for the TD Savings prototype, noisy `interest_calculation_method` fields can now be replaced with stronger `TD-SAV-008` governing-PDF wording when the detail-page extraction only captured PDF link text
 - for the TD Savings prototype, `TD-SAV-007` fee-governing evidence can now suppress misleading `fee_waiver_condition` values for zero-monthly-fee savings products instead of persisting raw fee-table text
 - `TD Growth` qualification text is now split more deliberately into `eligibility_text`, `boosted_rate_eligibility`, and `promotional_period_text`
@@ -135,7 +138,7 @@ What `WBS 3.6` stores today:
 
 Current boundary:
 - normalization now persists `normalized_candidate` and candidate-level evidence links
-- supporting-source merge is still narrow and prototype-specific; it currently covers TD Savings current-rate supplementation, selective `TD-SAV-008` interest-rule replacement, and `TD-SAV-007`-based suppression of misleading zero-fee waiver text rather than general multi-source product merge
+- supporting-source merge is still narrow and explicit; it currently covers selected TD, BMO, and Scotia savings rate supplementation, selective `TD-SAV-008` interest-rule replacement, and `TD-SAV-007`-based suppression of misleading zero-fee waiver text rather than a general multi-source product merge
 - canonical upsert, change assessment, and publish preparation still belong to later stages
 
 What `WBS 3.7` stores today:

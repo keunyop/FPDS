@@ -62,6 +62,76 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-30 - BMO Performance Chequing Review Hardening
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose `review-649b89d6cf9ac573` for BMO Performance Chequing and reduce repeat noisy candidates when BMO comparison-table text is used as evidence.
+- Why now: the Product Owner reported a queued BMO Performance review with `invalid_taxonomy_code`, low confidence, `monthly_fee=0`, `minimum_balance=17.95`, cross-product student/newcomer/register flags, and a noisy `cheque_book_info` field.
+- Outcome: confirmed the taxonomy error is primarily the same FPDS registry-sync issue as the earlier BMO Plus case: `chequing/premium` and `chequing/package` are approved taxonomy rows, but an operator-managed product-type reset can leave the active DB registry incomplete until the subtype sync/backfill is applied. Added Performance-specific extraction hardening so BMO fee-waiver table text like `$17.95 OR $0/month with min. $4,000 balance` maps to `monthly_fee=17.95`, `public_display_fee=17.95`, `minimum_balance=4000.00`, and an explicit waiver condition. Canonical product-type extraction now ignores noncanonical source-registry hints such as `credit_card_rebate` as candidate fields, trims cheque evidence to concise text, treats student/newcomer flags as account-specific only, and avoids classifying Performance as `premium` solely because the comparison table also mentions the separate BMO Premium account.
+- Not done: no live DB migration, live BMO chequing rerun, or review decision mutation was executed from code; the existing queued review still reflects the old run artifact.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: recommend deferring the current BMO Performance review. The source/product is valid, but this candidate should not be approved because the old artifact contains wrong fee/balance values and cross-product noise; rejecting would also be wrong because the source is not bad.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+- Known issues: apply `0014_canonical_deposit_taxonomy_backfill.sql` to the target DB and rerun BMO chequing collection before approving the product.
+- Next step: after migration and rerun, approve only if `BMO-CHQ-004` has no `invalid_taxonomy_code`, fee/minimum-balance fields are evidence-backed, and student/newcomer/registered noise is absent.
+
+## 2026-04-30 - BMO Plus Chequing Validation Taxonomy Hardening
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose `review-7cf8304776725c25` for BMO Plus Chequing, decide whether the validation error was source quality or FPDS behavior, and harden repeat runs where possible.
+- Why now: the Product Owner reported a queued BMO chequing review with `invalid_taxonomy_code`, noisy chequing fields, and asked whether to approve, reject, or defer.
+- Outcome: confirmed `chequing/package` is valid in the approved canonical taxonomy, so the validation error was primarily an FPDS registry-sync gap rather than bad source content. Operator-managed product type sync now restores the full approved subtype set for canonical `chequing`, `savings`, and `gic` product types instead of inserting only `other`; a DB migration backfills missing canonical subtype rows. BMO Plus fee wording is now parsed as monthly fee `12.95`, minimum balance `3000.00`, and an explicit waiver condition from `$12.95 per month or $0 with a $3,000 minimum balance`; chequing default extraction no longer requests savings/GIC interest or tier fields unless explicitly requested.
+- Not done: no live DB migration or fresh BMO chequing rerun was executed from code; the existing queued review still reflects the old run artifact.
+- Key files: `api/service/api_service/product_types.py`, `api/service/tests/test_product_types.py`, `db/migrations/0014_canonical_deposit_taxonomy_backfill.sql`, `db/README.md`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_validation_routing.py`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- Decisions: recommend deferring the current BMO Plus review, not approving or rejecting it. The product/source is valid, but the existing candidate carries old-run taxonomy and field-quality defects.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_product_types`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_product_types api.service.tests.test_source_registry`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+- Known issues: apply `0014_canonical_deposit_taxonomy_backfill.sql` to the target DB and rerun BMO chequing collection before approving the product.
+- Next step: after migration and rerun, approve only if `BMO-CHQ-003` no longer has `invalid_taxonomy_code` and fee/minimum-balance fields are evidence-backed.
+
+## 2026-04-30 - BMO Savings Review Validation Hardening
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose queued BMO savings validation-error reviews including `review-5ee5343cbd145beb` for Savings Amplifier and `review-4f286c375f7835ee` for Savings Builder, and reduce repeat validation-error routing when detail pages lack numeric rate evidence.
+- Why now: the Product Owner asked whether the BMO savings validation error came from weak source quality or a system gap, and requested improvements if FPDS could make the run more reviewable.
+- Outcome: confirmed the BMO detail page evidence was weak for canonical rate fields, but FPDS also had hardening gaps: `BMO-SAV-006` was available as a rates supporting source, collection planning did not explicitly auto-include it for BMO savings detail reruns, and the Builder-specific merge path lacked direct test coverage. Added BMO supporting-rate merge, auto-included `BMO-SAV-006` for `BMO-SAV-002` and `BMO-SAV-003` collection plans, added Savings Builder merge coverage, scoped default extraction fields by product type so savings pages no longer request chequing-only `cheque_book_info`, stopped cross-product FAQ text from changing Savings Amplifier currency to USD, and fixed `$0 minimum opening deposit` extraction when later transaction-fee text contains `$5`.
+- Not done: no live BMO savings rerun or review decision was executed from code; the existing queued review still reflects the old run artifact until collection/normalization is rerun.
+- Key files: `api/service/api_service/source_registry.py`, `api/service/tests/test_source_registry.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- Decisions: recommend deferring the current review instead of approving noisy/missing-rate data or rejecting a valid product/source; approve can be reconsidered after rerun if `BMO-SAV-006` supplies evidence-backed `standard_rate` and `public_display_rate`.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_source_registry`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: BMO supporting merge depends on the rates source parsing successfully; the earlier parser fallback fix should help, but the operator still needs a fresh BMO savings run to replace the queued candidate.
+- Next step: rerun BMO savings collection/normalization, then approve only if the new candidate has evidence-backed rate fields and no cross-product noise in canonical fields.
+
+## 2026-04-30 - Admin Snapshot Label and Review Queue Polish
+
+- WBS: `4.2`, `4.5`, `4.6`, `4.7`, `4.9`, admin UI polish
+- Status: `done`
+- Goal: remove visible Snapshot-section labels, make Snapshot card icons consistent across admin routes, and simplify Review Queue controls and results.
+- Why now: the Product Owner reported that labels such as `Queue Snapshot` still appeared above Snapshot cards, Snapshot card icon patterns were inconsistent between routes, and Review Queue still showed quick state buttons plus an Action column that added noise.
+- Outcome: `Stats5` now defaults to no section title and accepts card-specific icons so Snapshot stat cards share one visual structure while using different symbols for queue, run, audit, change, usage, bank, product-type, and source semantics. Review Queue, Audit Log, Change History, Usage, and Runs no longer render visible Snapshot titles; Runs now uses the shared `Stats5` card pattern instead of a route-local dot-card implementation. Banks, Product Types, and Sources now use the same icon-led Snapshot card pattern. Review Queue no longer shows the `Active queue` or `All states` quick buttons in Queue Controls, and its Results table no longer has an Action column.
+- Not done: no browser screenshot QA was run in this slice.
+- Key files: `app/admin/src/components/stats5.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/run-status-surface.tsx`, `app/admin/src/components/fpds/admin/audit-log-surface.tsx`, `app/admin/src/components/fpds/admin/change-history-surface.tsx`, `app/admin/src/components/fpds/admin/llm-usage-surface.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/product-type-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-registry-surface.tsx`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the Review Queue row id link as the drill-in path after removing the Action column; kept API payloads unchanged because this is presentation-only operator focus.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+- Known issues: existing Korean/Japanese copy mojibake in older admin locale objects remains outside this slice.
+- Next step: visually check `/admin/reviews`, `/admin/runs`, `/admin/audit`, `/admin/changes`, and `/admin/usage` at desktop and mobile widths with live data.
+
 ## 2026-04-29 - Product Type Code Rename and Semantic Discovery Profile
 
 - WBS: `5.15`, `5.16`, source collection quality hardening

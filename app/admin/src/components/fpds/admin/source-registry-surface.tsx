@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { CircleCheck, FileSearch, FileText, Target } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
+import { Stats5 } from "@/components/stats5";
 import type { SourceRegistryListResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -111,6 +113,37 @@ const SOURCE_COPY = {
 
 export function SourceRegistrySurface({ filters, registry, locale }: SourceRegistrySurfaceProps) {
   const copy = SOURCE_COPY[locale];
+  const statItems = [
+    {
+      label: copy.visibleSources,
+      value: String(registry.summary.total_items),
+      note: "Current filter.",
+      tone: "info" as const,
+      icon: FileSearch,
+    },
+    {
+      label: copy.candidateProducing,
+      value: String(registry.summary.candidate_producing_items),
+      note: "Primary candidate sources.",
+      tone: "success" as const,
+      icon: Target,
+    },
+    {
+      label: copy.active,
+      value: String(registry.summary.status_counts.active ?? 0),
+      note: "Enabled source rows.",
+      tone: "warning" as const,
+      icon: CircleCheck,
+    },
+    {
+      label: copy.detailRole,
+      value: String(registry.summary.role_counts.detail ?? 0),
+      note: "Detail-page rows.",
+      tone: "neutral" as const,
+      icon: FileText,
+    },
+  ];
+
   return (
     <section className="grid min-w-0 gap-6">
       <AdminTableAutoRefresh />
@@ -121,12 +154,10 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
         title={copy.title}
       />
 
-      <article className="grid min-w-0 gap-4 md:grid-cols-4">
-        <StatCard label={copy.visibleSources} value={String(registry.summary.total_items)} />
-        <StatCard label={copy.candidateProducing} value={String(registry.summary.candidate_producing_items)} />
-        <StatCard label={copy.active} value={String(registry.summary.status_counts.active ?? 0)} />
-        <StatCard label={copy.detailRole} value={String(registry.summary.role_counts.detail ?? 0)} />
-      </article>
+      <Stats5
+        framed={false}
+        items={statItems}
+      />
 
       <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))_auto]">
@@ -232,15 +263,6 @@ function FilterSelect({
         ))}
       </select>
     </label>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="min-w-0 rounded-lg border border-border/80 bg-white p-4">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
-    </article>
   );
 }
 

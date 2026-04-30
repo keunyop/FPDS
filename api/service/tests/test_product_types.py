@@ -80,7 +80,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(result["applied_filters"]["status"], "active")
 
     def test_create_product_type_definition_inserts_registry_and_taxonomy_entries(self) -> None:
-        connection = _QueuedConnection([None, None, None, None])
+        connection = _QueuedConnection([None, None, None, None, None])
 
         with (
             patch("api_service.product_types.load_product_type_definition", return_value=_product_type_row()),
@@ -113,8 +113,39 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertNotIn("actor_display", audit_calls[0][0])
         self.assertEqual(audit_calls[0][1]["actor_role_snapshot"], "admin")
 
+    def test_create_canonical_chequing_syncs_all_supported_subtypes(self) -> None:
+        connection = _QueuedConnection([None, None, None, None, None])
+        chequing_row = {
+            **_product_type_row(),
+            "product_type_code": "chequing",
+            "display_name": "Chequing",
+            "description": "Everyday transaction account.",
+        }
+
+        with (
+            patch("api_service.product_types.load_product_type_definition", return_value=chequing_row),
+            patch("api_service.product_types.new_id", return_value="audit-chequing"),
+            patch("api_service.product_types._generate_ai_discovery_keywords", return_value=["chequing", "everyday banking"]),
+        ):
+            create_product_type_definition(
+                connection,
+                payload={
+                    "product_type_code": "chequing",
+                    "display_name": "Chequing",
+                    "description": "A bank account designed for everyday transactions.",
+                    "status": "active",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        taxonomy_params = next(params for sql, params in connection.calls if "INSERT INTO taxonomy_registry" in sql)
+        subtype_codes = {item["subtype_code"] for item in json.loads(str(taxonomy_params["subtype_rows"]))}
+        self.assertEqual(subtype_codes, {"standard", "package", "interest_bearing", "premium", "other"})
+        self.assertTrue(taxonomy_params["active_flag"])
+
     def test_update_product_type_definition_updates_taxonomy_and_audit(self) -> None:
-        connection = _QueuedConnection([None, None, None])
+        connection = _QueuedConnection([None, None, None, None])
         existing = _product_type_row(status="active")
         updated = _product_type_row(status="inactive")
 
@@ -142,7 +173,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertTrue(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
 
     def test_update_product_type_status_only_preserves_keywords(self) -> None:
-        connection = _QueuedConnection([None, None, None])
+        connection = _QueuedConnection([None, None, None, None])
         existing = _product_type_row(status="active")
         existing["discovery_keywords"] = ["existing keyword", "tfsa"]
         updated = dict(existing)
@@ -172,7 +203,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         updated = dict(existing)
         updated["product_type_code"] = "savings"
         updated["display_name"] = "Savings"
-        connection = _QueuedConnection([existing, *([None] * 10), updated, None])
+        connection = _QueuedConnection([existing, *([None] * 11), updated, None])
 
         with (
             patch("api_service.product_types.new_id", return_value="audit-rename"),

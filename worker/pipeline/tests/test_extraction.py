@@ -238,6 +238,238 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_bmo_plus_chequing_fee_waiver_phrase_maps_fee_and_balance(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-bmo-plus-chequing")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="BMO-CHQ-003",
+                parsed_document_id="parsed-bmo-chq-plus",
+                source_document_id="src-bmo-chq-plus",
+                snapshot_id="snap-bmo-chq-plus",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "chequing",
+                    "expected_fields": [
+                        "monthly_fee",
+                        "public_display_fee",
+                        "minimum_balance",
+                        "fee_waiver_condition",
+                        "included_transactions",
+                        "interac_e_transfer_included",
+                    ],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-plus-title",
+                    parsed_document_id="parsed-bmo-chq-plus",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="plus-chequing-account",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Plus Chequing Account\nGet budget-friendly flexible banking.",
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-plus",
+                    source_snapshot_id="snap-bmo-chq-plus",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-plus-fee",
+                    parsed_document_id="parsed-bmo-chq-plus",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Plus $12.95 per month or $0 with a $3,000 minimum balance. "
+                        "Enjoy up to 25 everyday banking transactions and INTERAC e-Transfer transactions per month."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-plus",
+                    source_snapshot_id="snap-bmo-chq-plus",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-plus-savings-benefit",
+                    parsed_document_id="parsed-bmo-chq-plus",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="canadian-and-u-s-dollar-savings-account",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Canadian and U.S. dollar Savings Account at no additional cost. "
+                        "Interest is calculated on savings balances and paid monthly."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-plus",
+                    source_snapshot_id="snap-bmo-chq-plus",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-bmo-plus-chq",
+                correlation_id="corr-bmo-plus-chq",
+                request_id="req-bmo-plus-chq",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "Plus Chequing Account")
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "12.95")
+            self.assertEqual(extracted_by_field["public_display_fee"].candidate_value, "12.95")
+            self.assertEqual(extracted_by_field["minimum_balance"].candidate_value, "3000.00")
+            self.assertIn("3000.00 minimum balance", extracted_by_field["fee_waiver_condition"].candidate_value)
+            self.assertEqual(extracted_by_field["included_transactions"].candidate_value, 25)
+            self.assertTrue(extracted_by_field["interac_e_transfer_included"].candidate_value)
+            self.assertNotIn("interest_payment_frequency", extracted_by_field)
+            self.assertNotIn("interest_calculation_method", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_bmo_performance_chequing_comparison_fee_phrase_maps_fee_and_balance(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-bmo-performance-chequing")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="BMO-CHQ-004",
+                parsed_document_id="parsed-bmo-chq-performance",
+                source_document_id="src-bmo-chq-performance",
+                snapshot_id="snap-bmo-chq-performance",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "chequing",
+                    "expected_fields": [
+                        "monthly_fee",
+                        "public_display_fee",
+                        "minimum_balance",
+                        "fee_waiver_condition",
+                        "included_transactions",
+                        "interac_e_transfer_included",
+                        "credit_card_rebate",
+                    ],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-performance-title",
+                    parsed_document_id="parsed-bmo-chq-performance",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="performance-chequing-account",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Performance Chequing Account\n"
+                        "Our everyday chequing account for all your banking needs."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-performance",
+                    source_snapshot_id="snap-bmo-chq-performance",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-performance-fees",
+                    parsed_document_id="parsed-bmo-chq-performance",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="explore-the-bonuses-features-and-fees-for-our-chequing-accounts",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Fees Monthly plan fee *4 $17.95 OR $0/month with min. $4,000 balance. "
+                        "Unlimited transactions and INTERAC e-Transfer transactions. "
+                        "Additional features - No fee for select Cheques *54 No fee for Stop Payments. "
+                        "Premium $30.95 OR $0/month with min. $6,000 balance."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-performance",
+                    source_snapshot_id="snap-bmo-chq-performance",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-performance-nav",
+                    parsed_document_id="parsed-bmo-chq-performance",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="other-products",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Explore student banking, newcomer offers, savings accounts, and registered plans."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-performance",
+                    source_snapshot_id="snap-bmo-chq-performance",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-bmo-performance-chq",
+                correlation_id="corr-bmo-performance-chq",
+                request_id="req-bmo-performance-chq",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "Performance Chequing Account")
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "17.95")
+            self.assertEqual(extracted_by_field["public_display_fee"].candidate_value, "17.95")
+            self.assertEqual(extracted_by_field["minimum_balance"].candidate_value, "4000.00")
+            self.assertIn("4000.00 minimum balance", extracted_by_field["fee_waiver_condition"].candidate_value)
+            self.assertTrue(extracted_by_field["unlimited_transactions_flag"].candidate_value)
+            self.assertTrue(extracted_by_field["interac_e_transfer_included"].candidate_value)
+            self.assertEqual(extracted_by_field["cheque_book_info"].candidate_value, "No fee for select Cheques.")
+            self.assertNotIn("credit_card_rebate", extracted_by_field)
+            self.assertNotIn("student_plan_flag", extracted_by_field)
+            self.assertNotIn("newcomer_plan_flag", extracted_by_field)
+            self.assertNotIn("registered_flag", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_extracts_savings_specific_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-savings-service")
         try:
@@ -364,6 +596,101 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertIn("Tiered interest rates apply", extracted_by_field["tier_definition_text"].candidate_value)
             self.assertIn("withdrawals cost $5 each", extracted_by_field["withdrawal_limit_text"].candidate_value)
             self.assertTrue(extracted_by_field["registered_flag"].candidate_value)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_savings_defaults_ignore_chequing_noise_and_cross_product_usd(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-bmo-savings-noise")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="BMO-SAV-002",
+                parsed_document_id="parsed-bmo-sav-noise",
+                source_document_id="src-bmo-sav-noise",
+                snapshot_id="snap-bmo-sav-noise",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "product_name": "Savings Amplifier Account",
+                    "expected_fields": ["minimum_deposit"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-noise-001",
+                    parsed_document_id="parsed-bmo-sav-noise",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Savings Amplifier Account\n"
+                        "Monthly fee $0. $0 minimum opening deposit. "
+                        "A $5 fee applies to selected assisted transactions."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-noise",
+                    source_snapshot_id="snap-bmo-sav-noise",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-noise-002",
+                    parsed_document_id="parsed-bmo-sav-noise",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="important-banking-info",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Important banking info Report a lost or stolen card Interest rates Banking services Banking agreements Cross border banking",
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-noise",
+                    source_snapshot_id="snap-bmo-sav-noise",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-noise-003",
+                    parsed_document_id="parsed-bmo-sav-noise",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="faq",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="BMO also offers a U.S. Dollar Premium Rate Savings account for customers who save in U.S. dollars.",
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-sav-noise",
+                    source_snapshot_id="snap-bmo-sav-noise",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-bmo-sav-noise",
+                correlation_id="corr-bmo-sav-noise",
+                request_id="req-bmo-sav-noise",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["currency"].candidate_value, "CAD")
+            self.assertEqual(extracted_by_field["minimum_deposit"].candidate_value, "0.00")
+            self.assertNotIn("cheque_book_info", extracted_by_field)
         finally:
             rmtree(temp_path, ignore_errors=True)
 

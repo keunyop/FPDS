@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { Activity, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ type Stats5Item = {
   value: string;
   note: string;
   tone: Stats5Tone;
+  icon?: LucideIcon;
 };
 
 interface Stats5Props {
@@ -19,13 +20,6 @@ interface Stats5Props {
   framed?: boolean;
 }
 
-const toneIconMap = {
-  success: ShieldCheck,
-  info: Sparkles,
-  warning: ArrowRight,
-  neutral: Activity
-} satisfies Record<Stats5Tone, typeof Activity>;
-
 const toneClassMap = {
   success: "text-success",
   info: "text-info",
@@ -34,7 +28,7 @@ const toneClassMap = {
 } satisfies Record<Stats5Tone, string>;
 
 const Stats5 = ({
-  title = "Admin shell readiness",
+  title,
   description,
   items,
   className,
@@ -58,7 +52,7 @@ const Stats5 = ({
 
       <div className={cn("grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4", framed ? "pt-4" : "")}>
         {items.map((item) => {
-          const Icon = toneIconMap[item.tone];
+          const Icon = item.icon ?? Activity;
 
           return (
             <article className="min-w-0 rounded-lg border border-border/80 bg-card px-4 py-4" key={item.label}>

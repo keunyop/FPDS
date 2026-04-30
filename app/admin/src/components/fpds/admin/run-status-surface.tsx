@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Activity, CircleX, LoaderCircle, Split } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
+import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTime, translateRunState, type AdminLocale } from "@/lib/admin-i18n";
@@ -251,24 +253,28 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       value: String(runs.summary.total_items),
       note: copy.currentFilters,
       tone: "info" as const,
+      icon: Activity,
     },
     {
       label: copy.failed,
       value: String(stateCounts.failed ?? 0),
       note: copy.failedNote,
       tone: "warning" as const,
+      icon: CircleX,
     },
     {
       label: copy.partial,
       value: String(runs.summary.partial_items),
       note: copy.partialNote,
       tone: "neutral" as const,
+      icon: Split,
     },
     {
       label: copy.inProgress,
       value: String(stateCounts.started ?? 0),
       note: copy.inProgressNote,
       tone: "success" as const,
+      icon: LoaderCircle,
     },
   ];
 
@@ -282,11 +288,11 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         title={copy.title}
       />
 
-      <article aria-label={copy.snapshotTitle} className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statItems.map((item) => (
-          <SnapshotStatCard key={item.label} item={item} />
-        ))}
-      </article>
+      <Stats5
+        className="[&>div]:md:grid-cols-2 [&>div]:xl:grid-cols-4"
+        framed={false}
+        items={statItems}
+      />
 
       <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
@@ -582,41 +588,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       </article>
     </section>
   );
-}
-
-function SnapshotStatCard({
-  item,
-}: {
-  item: {
-    label: string;
-    value: string;
-    note: string;
-    tone: "info" | "warning" | "neutral" | "success";
-  };
-}) {
-  return (
-    <article className="min-w-0 rounded-lg border border-border/80 bg-white p-4">
-      <div className="flex min-w-0 items-start justify-between gap-3">
-        <p className="min-w-0 text-sm font-medium text-muted-foreground">{item.label}</p>
-        <span className={cn("h-2 w-2 shrink-0 rounded-full", snapshotToneDotClasses(item.tone))} />
-      </div>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
-      <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
-    </article>
-  );
-}
-
-function snapshotToneDotClasses(tone: "info" | "warning" | "neutral" | "success") {
-  switch (tone) {
-    case "info":
-      return "bg-info";
-    case "warning":
-      return "bg-warning";
-    case "success":
-      return "bg-success";
-    default:
-      return "bg-muted-foreground";
-  }
 }
 
 function buildRunHref(filters: RunStatusPageFilters, overrides: Partial<RunStatusPageFilters>, locale: AdminLocale) {

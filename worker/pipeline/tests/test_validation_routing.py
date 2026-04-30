@@ -114,6 +114,41 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_chequing_package_subtype_passes_when_registry_contains_package(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-chequing-package")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_chequing_input()
+
+            result = service.validate_and_route_inputs(
+                run_id="run-chq-001",
+                inputs=[input_item],
+                taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "pass")
+            self.assertNotIn("invalid_taxonomy_code", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_action, "auto_validated")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_gic_cross_field_issue_stays_error_and_queues_reason(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-gic-error")
         try:
@@ -395,6 +430,65 @@ def _build_gic_input() -> ValidationInput:
             _evidence("term_length_days", "365", "chunk-gic-rate"),
             _evidence("redeemable_flag", "true", "chunk-gic-flags"),
             _evidence("non_redeemable_flag", "true", "chunk-gic-flags"),
+        ],
+        runtime_notes=[],
+    )
+
+
+def _build_chequing_input() -> ValidationInput:
+    candidate_record = {
+        "candidate_id": "cand-chq-001",
+        "run_id": "run-chq-3603",
+        "source_document_id": "src-chq-001",
+        "model_execution_id": "modelexec-normalize-chq-001",
+        "candidate_state": "draft",
+        "validation_status": "pass",
+        "source_confidence": 0.86,
+        "review_reason_code": None,
+        "country_code": "CA",
+        "bank_code": "BMO",
+        "product_family": "deposit",
+        "product_type": "chequing",
+        "subtype_code": "package",
+        "product_name": "Plus Chequing Account",
+        "source_language": "en",
+        "currency": "CAD",
+        "validation_issue_codes": [],
+        "candidate_payload": {
+            "status": "active",
+            "last_verified_at": "2026-04-28T20:42:48+00:00",
+            "bank_name": "BMO",
+            "product_name": "Plus Chequing Account",
+            "monthly_fee": 12.95,
+            "public_display_fee": 12.95,
+            "minimum_balance": 3000.0,
+            "fee_waiver_condition": "Monthly fee 12.95 is waived to 0.00 with a 3000.00 minimum balance.",
+            "included_transactions": 25,
+            "interac_e_transfer_included": True,
+        },
+        "field_mapping_metadata": {},
+    }
+    return ValidationInput(
+        source_id="BMO-CHQ-003",
+        source_document_id="src-chq-001",
+        snapshot_id="snap-chq-001",
+        parsed_document_id="parsed-chq-001",
+        candidate_id="cand-chq-001",
+        candidate_run_id="run-chq-3603",
+        normalization_model_execution_id="modelexec-normalize-chq-001",
+        normalized_storage_key="dev/normalized/CA/BMO/src-chq-001/cand-chq-001/normalized.json",
+        metadata_storage_key="dev/normalized/CA/BMO/src-chq-001/cand-chq-001/metadata.json",
+        bank_code="BMO",
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": "chequing"},
+        normalized_candidate_record=candidate_record,
+        field_evidence_links=[
+            _evidence("monthly_fee", "12.95", "chunk-chq-fee"),
+            _evidence("minimum_balance", "3000.0", "chunk-chq-fee"),
+            _evidence("included_transactions", "25", "chunk-chq-fee"),
+            _evidence("interac_e_transfer_included", "true", "chunk-chq-benefits"),
         ],
         runtime_notes=[],
     )

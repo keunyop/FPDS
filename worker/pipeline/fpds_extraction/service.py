@@ -66,6 +66,58 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "newcomer_plan_flag",
     "notes",
 )
+_COMMON_DEFAULT_FIELDS = {
+    "product_name",
+    "description_short",
+    "monthly_fee",
+    "public_display_fee",
+    "fee_waiver_condition",
+    "minimum_balance",
+    "minimum_deposit",
+    "eligibility_text",
+    "notes",
+}
+_PRODUCT_TYPE_DEFAULT_FIELDS = {
+    "savings": _COMMON_DEFAULT_FIELDS
+    | {
+        "standard_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "withdrawal_limit_text",
+        "registered_flag",
+    },
+    "chequing": _COMMON_DEFAULT_FIELDS
+    | {
+        "included_transactions",
+        "unlimited_transactions_flag",
+        "interac_e_transfer_included",
+        "overdraft_available",
+        "cheque_book_info",
+        "student_plan_flag",
+        "newcomer_plan_flag",
+    },
+    "gic": _COMMON_DEFAULT_FIELDS
+    | {
+        "standard_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "term_length_text",
+        "term_length_days",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+    },
+}
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _MONEY_RE = re.compile(r"\$\s?([0-9][0-9,]*(?:\.\d{1,2})?)")
 _TERM_RE = re.compile(
@@ -473,12 +525,18 @@ def _resolve_field_names(
     if override_field_names:
         return sorted(dict.fromkeys(item.strip() for item in override_field_names if item.strip()))
 
+    product_type = _infer_product_type(context)
+    product_default_fields = _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type)
     fields: list[str] = []
     for field_name in default_fields:
+        if product_default_fields is not None and field_name not in product_default_fields:
+            continue
         if field_name not in fields:
             fields.append(field_name)
     for field_name in context.source_metadata.get("expected_fields", []):
         normalized = str(field_name).strip()
+        if product_type in _CANONICAL_PRODUCT_TYPES and normalized not in default_fields:
+            continue
         if normalized and normalized not in fields:
             fields.append(normalized)
     return fields
@@ -502,7 +560,7 @@ def _extract_fields(
             candidate_value=context.source_language or "und",
             value_type="string",
         ),
-        _build_derived_field(context=context, field_name="currency", candidate_value=_infer_currency(candidates), value_type="string"),
+        _build_derived_field(context=context, field_name="currency", candidate_value=_infer_currency(context=context), value_type="string"),
     ]
 
     if "product_name" in requested_fields:
@@ -653,7 +711,7 @@ def _extract_candidate_value(
         return _extract_boolean_flag(field_name=field_name, lowered=lowered, anchor_value=anchor_value), "boolean", "heuristic_flag", {}
 
     if field_name == "cheque_book_info":
-        return _normalize_text(_find_sentence(text, ("cheque", "check", "cheque book")) or text)[:280], "string", "heuristic_text", {}
+        return _extract_cheque_book_info(text), "string", "heuristic_text", {}
 
     if field_name in {
         "fee_waiver_condition",
@@ -663,6 +721,10 @@ def _extract_candidate_value(
         "notes",
         "promotional_period_text",
     }:
+        if field_name == "fee_waiver_condition":
+            waiver_condition = _extract_fee_waiver_condition(text)
+            if waiver_condition:
+                return waiver_condition, "string", "heuristic_fee_waiver", {}
         text_value = _normalize_text(_find_sentence(text, ("eligible", "waive", "tier", "limit", "promo", "offer")) or text)
         return text_value[:280], "string", "heuristic_text", {}
 
@@ -996,16 +1058,32 @@ def _coerce_ai_candidate_value(*, value: str, value_type: str) -> object | None:
     return _normalize_text(normalized)[:280]
 
 
-def _infer_currency(candidates: list[EvidenceChunkCandidate]) -> str:
-    for candidate in candidates:
-        lowered = candidate.evidence_excerpt.lower()
-        if " usd" in lowered or "u.s. dollar" in lowered or "us$" in lowered:
-            return "USD"
+def _infer_currency(*, context: ExtractionDocumentContext) -> str:
+    raw_currency = str(context.source_metadata.get("currency", "")).strip().upper()
+    if raw_currency in {"CAD", "USD"}:
+        return raw_currency
+
+    context_text = " ".join(
+        str(item or "")
+        for item in (
+            context.source_metadata.get("product_name"),
+            context.source_metadata.get("source_name"),
+            context.source_metadata.get("source_title"),
+            context.source_metadata.get("url"),
+            context.source_metadata.get("source_url"),
+            context.source_id,
+        )
+    ).lower()
+    if any(token in context_text for token in ("u.s. dollar", "us dollar", "usd", "us-prem-savings", "us premium savings", " us ")):
+        return "USD"
     return "CAD"
 
 
 def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | None:
     if field_name in {"monthly_fee", "public_display_fee"}:
+        monthly_fee = _extract_monthly_fee_with_minimum_balance_waiver(text)
+        if monthly_fee is not None:
+            return monthly_fee
         if any(token in lowered for token in ("no monthly fee", "no monthly plan fee", "monthly fee: $0", "monthly fee\n$0")):
             return "0.00"
         if _matches_zero_money_label(
@@ -1025,6 +1103,9 @@ def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | N
         )
 
     if field_name == "minimum_balance":
+        waiver_balance = _extract_minimum_balance_for_fee_waiver(text)
+        if waiver_balance is not None:
+            return waiver_balance
         if any(token in lowered for token in ("no minimum balance", "no minimum daily balance")):
             return "0.00"
         return _extract_money_near_labels(
@@ -1037,6 +1118,16 @@ def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | N
 
     if field_name == "minimum_deposit":
         if any(token in lowered for token in ("no minimum deposit", "no minimum opening deposit")):
+            return "0.00"
+        if _matches_zero_money_label(
+            text=text,
+            label_patterns=(
+                r"minimum\s+opening\s+deposit",
+                r"minimum\s+deposit",
+                r"opening\s+deposit",
+                r"initial\s+deposit",
+            ),
+        ):
             return "0.00"
         return _extract_money_near_labels(
             text=text,
@@ -1051,10 +1142,51 @@ def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | N
     return None
 
 
+def _extract_monthly_fee_with_minimum_balance_waiver(text: str) -> str | None:
+    match = _fee_waiver_pattern().search(text)
+    if match is None:
+        return None
+    return _normalize_decimal(match.group("fee"))
+
+
+def _extract_minimum_balance_for_fee_waiver(text: str) -> str | None:
+    match = _fee_waiver_pattern().search(text)
+    if match is None:
+        return None
+    balance = match.group("balance_after_label") or match.group("balance_before_label")
+    return _normalize_decimal(balance)
+
+
+def _extract_fee_waiver_condition(text: str) -> str | None:
+    match = _fee_waiver_pattern().search(text)
+    if match is None:
+        return None
+    fee = _normalize_decimal(match.group("fee"))
+    balance = _normalize_decimal(match.group("balance_after_label") or match.group("balance_before_label"))
+    return f"Monthly fee {fee} is waived to 0.00 with a {balance} minimum balance."
+
+
+def _fee_waiver_pattern() -> re.Pattern[str]:
+    return re.compile(
+        r"\$\s?(?P<fee>[0-9][0-9,]*(?:\.\d{1,2})?)\s*"
+        r"(?:(?:per\s+month|monthly)\s+)?or\s+\$0(?:\.00)?(?:\s*/\s*month|\s+per\s+month)?"
+        r"\s+with\s+(?:a\s+)?(?:(?:min\.?|minimum)\s+(?:daily\s+)?\$\s?(?P<balance_after_label>[0-9][0-9,]*(?:\.\d{1,2})?)"
+        r"(?:\s+balance)?|\$\s?(?P<balance_before_label>[0-9][0-9,]*(?:\.\d{1,2})?)\s+"
+        r"(?:minimum\s+(?:daily\s+)?balance|balance))",
+        flags=re.IGNORECASE,
+    )
+
+
 def _matches_zero_money_label(*, text: str, label_patterns: tuple[str, ...]) -> bool:
     for label_pattern in label_patterns:
         if re.search(
             rf"{label_pattern}[\s\S]{{0,32}}?(?:free|waived|included|no fee|\$0(?:\.00)?)",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            return True
+        if re.search(
+            rf"(?:free|waived|included|no fee|\$0(?:\.00)?)[\s\S]{{0,48}}?{label_pattern}",
             text,
             flags=re.IGNORECASE,
         ):
@@ -1079,6 +1211,29 @@ def _extract_money_near_labels(*, text: str, label_patterns: tuple[str, ...]) ->
         )
         if before_match is not None:
             return _normalize_decimal(before_match.group(1))
+    return None
+
+
+def _extract_cheque_book_info(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    patterns = (
+        r"no fee for select cheques?",
+        r"select cheques?.{0,36}?no fee",
+        r"(?:one|first).{0,36}?cheque book",
+        r"cheque book.{0,48}?(?:free|included|no fee)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, normalized, flags=re.IGNORECASE)
+        if match is None:
+            continue
+        phrase = _normalize_text(match.group(0).strip(" -;,."))
+        if phrase:
+            return f"{phrase}."
+    sentence = _find_sentence(normalized, ("cheque book", "select cheque", "select cheques"))
+    if sentence:
+        return _normalize_text(sentence)[:160]
     return None
 
 
@@ -1125,7 +1280,7 @@ def _extract_boolean_flag(*, field_name: str, lowered: str, anchor_value: str | 
         return None
     if field_name == "interac_e_transfer_included":
         if any(token in lowered for token in ("interac e-transfer", "interac e transfer", "e-transfer", "etransfer")) and any(
-            token in lowered for token in ("included", "free", "unlimited", "no fee", "waived")
+            token in lowered for token in ("included", "free", "unlimited", "no fee", "waived", "enjoy", "per month")
         ):
             return True
         return None
@@ -1134,16 +1289,40 @@ def _extract_boolean_flag(*, field_name: str, lowered: str, anchor_value: str | 
             return True
         return None
     if field_name == "student_plan_flag":
-        if any(token in lowered for token in ("student", "youth")) or any(token in anchor for token in ("student", "youth")):
+        if _has_student_plan_context(lowered=lowered, anchor=anchor):
             return True
         return None
     if field_name == "newcomer_plan_flag":
-        if any(token in lowered for token in ("newcomer", "new to canada")) or any(
-            token in anchor for token in ("newcomer", "new-to-canada")
-        ):
+        if _has_newcomer_plan_context(lowered=lowered, anchor=anchor):
             return True
         return None
     return None
+
+
+def _has_student_plan_context(*, lowered: str, anchor: str) -> bool:
+    if any(token in anchor for token in ("student", "youth")):
+        return True
+    return any(
+        re.search(pattern, lowered)
+        for pattern in (
+            r"\bstudent(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
+            r"\byouth(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
+            r"\b(?:for|designed for|available to)\s+[^.]{0,60}\bstudents?\b",
+        )
+    )
+
+
+def _has_newcomer_plan_context(*, lowered: str, anchor: str) -> bool:
+    if any(token in anchor for token in ("newcomer", "new-to-canada")):
+        return True
+    return any(
+        re.search(pattern, lowered)
+        for pattern in (
+            r"\bnewcomer(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
+            r"\bnew to canada\s+[^.]{0,80}\b(?:banking|chequing|checking|account|package|plan)\b",
+            r"\b(?:for|designed for|available to)\s+[^.]{0,80}\bnewcomers?\b",
+        )
+    )
 
 
 def _detect_frequency(lowered: str) -> str | None:
@@ -1227,6 +1406,7 @@ def _extract_included_transactions(text: str) -> int | None:
         r"(?:includes?|included)\s+(\d{1,3})\s+(?:free\s+)?(?:transactions?|debits?|withdrawals?)",
         r"(\d{1,3})\s+(?:free\s+)?(?:transactions?|debits?|withdrawals?)\s+(?:included|per month|a month)",
         r"(\d{1,3})\s+(?:transactions?|debits?)\s+included",
+        r"up\s+to\s+(\d{1,3})\s+[\w\s-]{0,80}?(?:transactions?|debits?|withdrawals?)",
     )
     for pattern in patterns:
         match = re.search(pattern, lowered)

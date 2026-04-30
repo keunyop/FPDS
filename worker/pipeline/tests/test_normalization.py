@@ -108,6 +108,80 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_normalizes_performance_chequing_as_package_despite_comparison_table_premium_text(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-performance-chequing")
+        try:
+            item = NormalizationInput(
+                source_id="BMO-CHQ-004",
+                source_document_id="src-bmo-chq-performance",
+                snapshot_id="snap-bmo-chq-performance",
+                parsed_document_id="parsed-bmo-chq-performance",
+                extraction_model_execution_id="modelexec-extract-bmo-performance",
+                extracted_storage_key="dev/extracted/CA/BMO/src-bmo-chq-performance/parsed-bmo-chq-performance/extracted.json",
+                metadata_storage_key="dev/extracted/CA/BMO/src-bmo-chq-performance/parsed-bmo-chq-performance/metadata.json",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "chequing"},
+                schema_context={"product_family": "deposit", "product_type": "chequing"},
+                extracted_fields=[
+                    _field("product_family", "deposit", "string", 0.99),
+                    _field("product_type", "chequing", "string", 0.99),
+                    _field("country_code", "CA", "string", 0.99),
+                    _field("bank_code", "BMO", "string", 0.99),
+                    _field("source_language", "en", "string", 0.99),
+                    _field("currency", "CAD", "string", 0.99),
+                    _field("product_name", "Performance Chequing Account", "string", 0.88),
+                    _field("description_short", "Our everyday chequing account for all your banking needs.", "string", 0.7),
+                    _field("monthly_fee", "17.95", "decimal", 0.86, evidence_chunk_id="chunk-fee"),
+                    _field("public_display_fee", "17.95", "decimal", 0.86, evidence_chunk_id="chunk-fee"),
+                    _field("minimum_balance", "4000.00", "decimal", 0.86, evidence_chunk_id="chunk-fee"),
+                    _field("fee_waiver_condition", "Monthly fee 17.95 is waived to 0.00 with a 4000.00 minimum balance.", "string", 0.86, evidence_chunk_id="chunk-fee"),
+                    _field("unlimited_transactions_flag", True, "boolean", 0.81, evidence_chunk_id="chunk-fee"),
+                    _field("interac_e_transfer_included", True, "boolean", 0.81, evidence_chunk_id="chunk-fee"),
+                    _field("cheque_book_info", "No fee for select Cheques.", "string", 0.77, evidence_chunk_id="chunk-fee"),
+                    _field("notes", "Premium $30.95 OR $0/month with min. $6,000 balance.", "string", 0.7, evidence_chunk_id="chunk-fee"),
+                ],
+                evidence_links=[
+                    _evidence("monthly_fee", "17.95", "chunk-fee"),
+                    _evidence("public_display_fee", "17.95", "chunk-fee"),
+                    _evidence("minimum_balance", "4000.00", "chunk-fee"),
+                    _evidence("fee_waiver_condition", "Monthly fee 17.95 is waived to 0.00 with a 4000.00 minimum balance.", "chunk-fee"),
+                    _evidence("unlimited_transactions_flag", "true", "chunk-fee"),
+                    _evidence("interac_e_transfer_included", "true", "chunk-fee"),
+                    _evidence("cheque_book_info", "No fee for select Cheques.", "chunk-fee"),
+                ],
+                runtime_notes=[],
+            )
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.normalize_inputs(
+                run_id="run-bmo-performance-chq",
+                correlation_id="corr-bmo-performance-chq",
+                request_id="req-bmo-performance-chq",
+                inputs=[item],
+            )
+
+            candidate = result.source_results[0].normalized_candidate_record
+            self.assertEqual(candidate["subtype_code"], "package")
+            self.assertEqual(candidate["validation_status"], "pass")
+            self.assertEqual(candidate["candidate_payload"]["monthly_fee"], 17.95)
+            self.assertEqual(candidate["candidate_payload"]["minimum_balance"], 4000.0)
+            self.assertEqual(candidate["candidate_payload"]["target_customer_tags"], [])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_savings_specific_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-savings-detail")
         try:
@@ -438,6 +512,8 @@ class NormalizationServiceTests(unittest.TestCase):
 
 class SupportingMergeTests(unittest.TestCase):
     def test_supporting_source_ids_for_td_targets(self) -> None:
+        self.assertEqual(supporting_source_ids_for_target("BMO-SAV-002"), ("BMO-SAV-006",))
+        self.assertEqual(supporting_source_ids_for_target("BMO-SAV-003"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-002"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-003"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-004"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
@@ -483,6 +559,89 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertIn("Supplemented missing savings rate fields", " ".join(merged["runtime_notes"]))
+
+    def test_merge_supports_bmo_savings_amplifier_rates_from_rate_page(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "Savings Amplifier Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="savings-amplifier-account",
+                        excerpt=(
+                            "Savings Amplifier Account\n"
+                            "Balance Interest Rate\n"
+                            "$0 and over\n"
+                            "0.500%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="BMO-SAV-002",
+            base_artifact=base_artifact,
+            supporting_artifacts={"BMO-SAV-006": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.50")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.50")
+        self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "BMO-SAV-006")
+        self.assertIn("BMO-SAV-006", " ".join(merged["runtime_notes"]))
+
+    def test_merge_supports_bmo_savings_builder_rates_from_rate_page(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "Savings Builder Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+                _field_dict(
+                    "bonus_interest_rule",
+                    "Get a bonus interest rate for adding $200 each month.",
+                    "string",
+                    0.55,
+                    evidence_chunk_id="chunk-builder-bonus",
+                ),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="savings-builder-account",
+                        excerpt=(
+                            "Savings Builder Account\n"
+                            "Balance Interest Rate\n"
+                            "$0 and over\n"
+                            "0.500%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="BMO-SAV-003",
+            base_artifact=base_artifact,
+            supporting_artifacts={"BMO-SAV-006": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.50")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.50")
+        self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "BMO-SAV-006")
+        self.assertEqual(fields_by_name["bonus_interest_rule"]["candidate_value"], "Get a bonus interest rate for adding $200 each month.")
 
     def test_merge_supports_growth_rate_fields_from_current_rates(self) -> None:
         base_artifact = {

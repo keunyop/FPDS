@@ -772,6 +772,13 @@ def _infer_subtype_code(
         )
     ).lower()
     product_name = _coalesce_string(candidate_payload.get("product_name"))
+    headline_text = " ".join(
+        str(candidate_payload.get(field_name, ""))
+        for field_name in (
+            "product_name",
+            "description_short",
+        )
+    ).lower()
     if product_type == "savings":
         if currency and currency != "CAD":
             return "foreign_currency", None
@@ -783,7 +790,7 @@ def _infer_subtype_code(
     if product_type == "chequing":
         if _has_positive_rate(candidate_payload):
             return "interest_bearing", None
-        if any(token in text for token in ("premium", "vip", "ultimate", "signature", "all-inclusive", "all inclusive")):
+        if any(token in headline_text for token in ("premium", "vip", "ultimate", "signature", "all-inclusive", "all inclusive")):
             return "premium", None
         included_transactions = _as_int(candidate_payload.get("included_transactions"))
         if (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClipboardList, ListChecks, CirclePause, TriangleAlert } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -241,24 +242,28 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
       value: String(queue.summary.total_items),
       note: copy.currentFilters,
       tone: "info" as const,
+      icon: ListChecks,
     },
     {
       label: translateReviewState(locale, "queued"),
       value: String(stateCounts.queued ?? 0),
       note: copy.queuedNote,
       tone: "warning" as const,
+      icon: ClipboardList,
     },
     {
       label: translateReviewState(locale, "deferred"),
       value: String(stateCounts.deferred ?? 0),
       note: copy.deferredNote,
       tone: "neutral" as const,
+      icon: CirclePause,
     },
     {
       label: copy.warningsErrors,
       value: String((validationCounts.warning ?? 0) + (validationCounts.error ?? 0)),
       note: copy.needsAttention,
       tone: "success" as const,
+      icon: TriangleAlert,
     },
   ];
 
@@ -275,7 +280,6 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
       <Stats5
         framed={false}
         items={statItems}
-        title={copy.snapshotTitle}
       />
 
       <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -285,14 +289,6 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.controlsTitle}</h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="outline">
-              <Link href={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)}>{copy.activeQueue}</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link href={buildQueueHref(filters, { states: [...REVIEW_STATES], page: 1 }, locale)}>{copy.allStates}</Link>
-            </Button>
-          </div>
         </div>
 
         <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-6 grid min-w-0 gap-5">
@@ -490,7 +486,7 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
         ) : (
           <>
             <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1040px] table-fixed border-separate border-spacing-0">
+              <table className="min-w-[940px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.task}</th>
@@ -501,7 +497,6 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.validation}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.created}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -570,13 +565,6 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
                           <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", stateBadgeClasses(item.review_state))}>
                             {translateReviewState(locale, item.review_state)}
                           </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <Button asChild size="sm" variant="outline">
-                            <Link href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
-                          </Button>
                         </div>
                       </td>
                     </tr>

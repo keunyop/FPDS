@@ -29,9 +29,12 @@ _ROLE_PRIORITY = {
     "linked_pdf": 3,
 }
 _AUTO_SUPPORT_SOURCE_IDS = {
+    "BMO-SAV-002": ("BMO-SAV-006",),
+    "BMO-SAV-003": ("BMO-SAV-006",),
     "TD-SAV-002": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-003": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-004": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
+    "SCOTIA-SAV-004": ("SCOTIA-SAV-006",),
 }
 
 

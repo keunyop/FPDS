@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CircleCheck, CircleOff, Shapes } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { ProductTypeCreateDialogContent } from "@/components/fpds/admin/product-type-create-dialog-content";
 import { ProductTypeDetailDialogContent } from "@/components/fpds/admin/product-type-detail-dialog-content";
+import { Stats5 } from "@/components/stats5";
 import type { ProductTypeItem, ProductTypeListResponse } from "@/lib/admin-api";
 import { buildAdminHref, localizedMissing, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -119,6 +121,29 @@ export function ProductTypeRegistrySurface({
     );
   }, [productTypes.items, selectedProductTypeCode, selectedProductTypeOverride]);
   const detailModalOpen = Boolean(selectedProductTypeCode && selectedProductType);
+  const statItems = [
+    {
+      label: copy.productTypes,
+      value: String(productTypes.summary.total_items),
+      note: "Current filter.",
+      tone: "info" as const,
+      icon: Shapes,
+    },
+    {
+      label: copy.active,
+      value: String(productTypes.summary.status_counts.active ?? 0),
+      note: "Enabled definitions.",
+      tone: "success" as const,
+      icon: CircleCheck,
+    },
+    {
+      label: copy.inactive,
+      value: String(productTypes.summary.status_counts.inactive ?? 0),
+      note: "Paused definitions.",
+      tone: "neutral" as const,
+      icon: CircleOff,
+    },
+  ];
 
   useEffect(() => {
     setAddDialogOpen(addModalOpen);
@@ -199,11 +224,11 @@ export function ProductTypeRegistrySurface({
         title={copy.title}
       />
 
-      <article className="grid gap-4 md:grid-cols-3">
-        <StatCard label={copy.productTypes} value={String(productTypes.summary.total_items)} />
-        <StatCard label={copy.active} value={String(productTypes.summary.status_counts.active ?? 0)} />
-        <StatCard label={copy.inactive} value={String(productTypes.summary.status_counts.inactive ?? 0)} />
-      </article>
+      <Stats5
+        className="[&>div]:md:grid-cols-3 [&>div]:xl:grid-cols-3"
+        framed={false}
+        items={statItems}
+      />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <form action={buildAdminHref("/admin/product-types", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
@@ -334,15 +359,6 @@ function buildRegistrySearchParams(filters: ProductTypePageFilters) {
     params.set("status", filters.status);
   }
   return params;
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="rounded-lg border border-border/80 bg-white p-4">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
-    </article>
-  );
 }
 
 function FilterSelect({

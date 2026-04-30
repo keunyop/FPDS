@@ -19,6 +19,7 @@ Files:
 - `migrations/0011_admin_signup_requests.sql`: login-id-first admin auth updates plus approval-gated signup requests
 - `migrations/0012_evidence_chunk_embeddings.sql`: pgvector-backed `evidence_chunk_embedding` side table for vector-assisted evidence retrieval
 - `migrations/0013_operator_managed_product_types.sql`: removes the historical product-type classification flag so every product type is an operator-managed DB row
+- `migrations/0014_canonical_deposit_taxonomy_backfill.sql`: restores canonical chequing, savings, and GIC subtype taxonomy rows when operator-managed product types have been reset or recreated
 
 How to apply when a database is available:
 
@@ -31,6 +32,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0012_evidence_chunk_embeddings.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0013_operator_managed_product_types.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0014_canonical_deposit_taxonomy_backfill.sql
 ```
 
 Notes:

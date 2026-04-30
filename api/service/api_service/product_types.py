@@ -71,6 +71,28 @@ _STOPWORDS = {
     "your",
 }
 _DISCOVERY_KEYWORD_LIMIT = 12
+_CANONICAL_DEPOSIT_SUBTYPES: dict[str, tuple[tuple[str, int, str], ...]] = {
+    "chequing": (
+        ("standard", 10, "Canada deposit taxonomy v1"),
+        ("package", 20, "Canada deposit taxonomy v1"),
+        ("interest_bearing", 30, "Canada deposit taxonomy v1"),
+        ("premium", 40, "Canada deposit taxonomy v1"),
+        ("other", 99, "Canada deposit taxonomy v1"),
+    ),
+    "savings": (
+        ("standard", 10, "Canada deposit taxonomy v1"),
+        ("high_interest", 20, "Canada deposit taxonomy v1"),
+        ("youth", 30, "Canada deposit taxonomy v1"),
+        ("foreign_currency", 40, "Canada deposit taxonomy v1"),
+        ("other", 99, "Canada deposit taxonomy v1"),
+    ),
+    "gic": (
+        ("redeemable", 10, "Canada deposit taxonomy v1"),
+        ("non_redeemable", 20, "Canada deposit taxonomy v1"),
+        ("market_linked", 30, "Canada deposit taxonomy v1"),
+        ("other", 99, "Canada deposit taxonomy v1"),
+    ),
+}
 _DISCOVERY_KEYWORD_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -545,8 +567,26 @@ def delete_product_type_definition(
 
 def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type_code: str, status: str) -> None:
     now = utc_now()
+    subtype_rows = [
+        {
+            "taxonomy_id": _taxonomy_id(product_type_code=product_type_code, subtype_code=subtype_code),
+            "subtype_code": subtype_code,
+            "display_order": display_order,
+            "notes": notes,
+        }
+        for subtype_code, display_order, notes in _taxonomy_subtypes_for_product_type(product_type_code)
+    ]
     connection.execute(
         """
+        WITH subtype_payload AS (
+            SELECT *
+            FROM jsonb_to_recordset(%(subtype_rows)s::jsonb) AS payload(
+                taxonomy_id text,
+                subtype_code text,
+                display_order integer,
+                notes text
+            )
+        )
         INSERT INTO taxonomy_registry (
             taxonomy_id,
             country_code,
@@ -559,31 +599,61 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
             created_at,
             updated_at
         )
-        VALUES (
-            %(taxonomy_id)s,
+        SELECT
+            taxonomy_id,
             'CA',
             'deposit',
             %(product_type)s,
-            'other',
-            999,
+            subtype_code,
+            display_order,
             %(active_flag)s,
-            'operator_managed_product_type_generic_fallback',
+            notes,
             %(created_at)s,
             %(updated_at)s
-        )
+        FROM subtype_payload
         ON CONFLICT (country_code, product_family, product_type, subtype_code) DO UPDATE SET
             active_flag = EXCLUDED.active_flag,
             updated_at = EXCLUDED.updated_at,
             notes = EXCLUDED.notes
         """,
         {
-            "taxonomy_id": f"tax-{product_type_code}-other",
             "product_type": product_type_code,
             "active_flag": status == "active",
+            "subtype_rows": json.dumps(subtype_rows, ensure_ascii=True),
             "created_at": now,
             "updated_at": now,
         },
     )
+    connection.execute(
+        """
+        UPDATE taxonomy_registry
+        SET
+            active_flag = %(active_flag)s,
+            updated_at = %(updated_at)s
+        WHERE country_code = 'CA'
+          AND product_family = 'deposit'
+          AND product_type = %(product_type)s
+        """,
+        {
+            "product_type": product_type_code,
+            "active_flag": status == "active",
+            "updated_at": now,
+        },
+    )
+
+
+def _taxonomy_subtypes_for_product_type(product_type_code: str) -> tuple[tuple[str, int, str], ...]:
+    return _CANONICAL_DEPOSIT_SUBTYPES.get(
+        product_type_code,
+        (("other", 999, "operator_managed_product_type_generic_fallback"),),
+    )
+
+
+def _taxonomy_id(*, product_type_code: str, subtype_code: str) -> str:
+    normalized_subtype = subtype_code.replace("_", "-")
+    if product_type_code in _CANONICAL_DEPOSIT_SUBTYPES:
+        return f"tax-ca-deposit-{product_type_code}-{normalized_subtype}"
+    return f"tax-{product_type_code}-{normalized_subtype}"
 
 
 def _record_product_type_audit_event(

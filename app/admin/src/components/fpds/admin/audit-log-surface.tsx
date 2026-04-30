@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ClipboardCheck, KeyRound, ScrollText, UserRound } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -269,24 +270,28 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
       value: String(auditLog.summary.total_items),
       note: copy.currentFilters,
       tone: "info" as const,
+      icon: ScrollText,
     },
     {
       label: copy.reviewEvents,
       value: String(categoryCounts.review ?? 0),
       note: copy.reviewActions,
       tone: "success" as const,
+      icon: ClipboardCheck,
     },
     {
       label: copy.authEvents,
       value: String(categoryCounts.auth ?? 0),
       note: copy.loginActivity,
       tone: "warning" as const,
+      icon: KeyRound,
     },
     {
       label: copy.userActors,
       value: String(auditLog.summary.user_actor_items),
       note: copy.humanActivity,
       tone: "neutral" as const,
+      icon: UserRound,
     },
   ];
 
@@ -303,7 +308,6 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
       <Stats5
         framed={false}
         items={statItems}
-        title={copy.snapshot}
       />
 
       <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">

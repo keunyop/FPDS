@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Coins, Database, Gauge, TriangleAlert } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -50,24 +51,28 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
       value: formatCount(readNumber(totals, ["usage_record_count", "record_count", "count"])),
       note: "Current window.",
       tone: "info" as const,
+      icon: Database,
     },
     {
       label: "Total tokens",
       value: formatTokens(totalTokens),
       note: "Prompt + completion.",
       tone: "success" as const,
+      icon: Gauge,
     },
     {
       label: "Estimated cost",
       value: formatCost(totalCost),
       note: "Estimated spend.",
       tone: "warning" as const,
+      icon: Coins,
     },
     {
       label: "Anomaly candidates",
       value: formatCount(readNumber(totals, ["anomaly_candidate_count", "anomaly_count"]), anomalyRows.length),
       note: "Outliers.",
       tone: "neutral" as const,
+      icon: TriangleAlert,
     },
   ];
 
@@ -84,7 +89,6 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
       <Stats5
         framed={false}
         items={statItems}
-        title="Usage Snapshot"
       />
 
       <div className="grid min-w-0 gap-6">

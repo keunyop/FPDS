@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { GitCompareArrows, History, PackageCheck, PencilLine } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -272,24 +273,28 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
       value: String(changes.summary.total_items),
       note: copy.currentFilters,
       tone: "info" as const,
+      icon: History,
     },
     {
       label: copy.affectedProducts,
       value: String(changes.summary.affected_product_count),
       note: copy.inThisView,
       tone: "success" as const,
+      icon: PackageCheck,
     },
     {
       label: copy.manualOverrides,
       value: String(changes.summary.manual_override_items),
       note: copy.operatorEdits,
       tone: "warning" as const,
+      icon: PencilLine,
     },
     {
       label: copy.reclassified,
       value: String(changeTypeCounts.Reclassified ?? 0),
       note: copy.taxonomyChanges,
       tone: "neutral" as const,
+      icon: GitCompareArrows,
     },
   ];
 
@@ -306,7 +311,6 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
       <Stats5
         framed={false}
         items={statItems}
-        title={copy.snapshot}
       />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">

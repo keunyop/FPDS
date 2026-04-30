@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { CircleCheck, Landmark, Settings2 } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { OfferModal4 } from "@/components/offer-modal4";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
+import { Stats5 } from "@/components/stats5";
 import type {
   BankDetailResponse,
   BankItem,
@@ -168,6 +170,29 @@ export function BankRegistrySurface({
   const selectedCoverageCount = selectedCatalogItems.length;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
   const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
+  const statItems = [
+    {
+      label: copy.banks,
+      value: String(banks.summary.total_items),
+      note: "Current filter.",
+      tone: "info" as const,
+      icon: Landmark,
+    },
+    {
+      label: copy.active,
+      value: String(banks.summary.status_counts.active ?? 0),
+      note: "Enabled banks.",
+      tone: "success" as const,
+      icon: CircleCheck,
+    },
+    {
+      label: copy.managed,
+      value: String(banks.items.filter((item) => item.managed_flag).length),
+      note: "Configured banks.",
+      tone: "neutral" as const,
+      icon: Settings2,
+    },
+  ];
 
   useEffect(() => {
     setAddDialogOpen(addModalOpen);
@@ -332,11 +357,11 @@ export function BankRegistrySurface({
         title={copy.title}
       />
 
-      <article className="grid gap-4 md:grid-cols-3">
-        <StatCard label={copy.banks} value={String(banks.summary.total_items)} />
-        <StatCard label={copy.active} value={String(banks.summary.status_counts.active ?? 0)} />
-        <StatCard label={copy.managed} value={String(banks.items.filter((item) => item.managed_flag).length)} />
-      </article>
+      <Stats5
+        className="[&>div]:md:grid-cols-3 [&>div]:xl:grid-cols-3"
+        framed={false}
+        items={statItems}
+      />
 
       <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
         <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
@@ -589,15 +614,6 @@ function buildBulkCollectMessage({
   ]
     .filter(Boolean)
     .join(" ");
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="rounded-lg border border-border/80 bg-white p-4">
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
-    </article>
-  );
 }
 
 function FilterSelect({
