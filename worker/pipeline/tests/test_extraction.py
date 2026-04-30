@@ -470,6 +470,129 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_bmo_practical_chequing_suppresses_cross_product_fee_and_field_noise(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-bmo-practical-chequing")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="BMO-CHQ-002",
+                parsed_document_id="parsed-bmo-chq-practical",
+                source_document_id="src-bmo-chq-practical",
+                snapshot_id="snap-bmo-chq-practical",
+                bank_code="BMO",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "chequing",
+                    "expected_fields": [
+                        "monthly_fee",
+                        "public_display_fee",
+                        "minimum_balance",
+                        "fee_waiver_condition",
+                        "cheque_book_info",
+                        "interest_calculation_method",
+                        "registered_flag",
+                        "student_plan_flag",
+                        "newcomer_plan_flag",
+                    ],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-practical-title",
+                    parsed_document_id="parsed-bmo-chq-practical",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="practical-chequing-account",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Practical Chequing Account\n"
+                        "A low-fee option for your everyday banking needs."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-practical",
+                    source_snapshot_id="snap-bmo-chq-practical",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-practical-fees",
+                    parsed_document_id="parsed-bmo-chq-practical",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="explore-the-bonuses-features-and-fees-for-our-chequing-accounts",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Explore the bonuses, features, and fees for our chequing accounts. "
+                        "Practical $4 per month. "
+                        "Plus $12.95 per month or $0 with a $3,000 minimum balance. "
+                        "Performance $17.95 OR $0/month with min. $4,000 balance. "
+                        "Students, newcomers, registered savings plans, and bonus interest are described elsewhere."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-practical",
+                    source_snapshot_id="snap-bmo-chq-practical",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-bmo-practical-funding",
+                    parsed_document_id="parsed-bmo-chq-practical",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="how-do-i-open-a-low-fee-chequing-account-at-bmo",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "How do I add money to my BMO Practical Chequing Account? "
+                        "At a branch or ATM: Visit your nearest branch or ATM to deposit cash and cheques. "
+                        "Mobile deposit: Use the BMO Mobile Banking App to deposit cheques instantly."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-bmo-chq-practical",
+                    source_snapshot_id="snap-bmo-chq-practical",
+                    bank_code="BMO",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-bmo-practical-chq",
+                correlation_id="corr-bmo-practical-chq",
+                request_id="req-bmo-practical-chq",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "Practical Chequing Account")
+            self.assertEqual(extracted_by_field["monthly_fee"].candidate_value, "4.00")
+            self.assertEqual(extracted_by_field["public_display_fee"].candidate_value, "4.00")
+            self.assertNotIn("minimum_balance", extracted_by_field)
+            self.assertNotIn("fee_waiver_condition", extracted_by_field)
+            self.assertNotIn("cheque_book_info", extracted_by_field)
+            self.assertNotIn("interest_calculation_method", extracted_by_field)
+            self.assertNotIn("registered_flag", extracted_by_field)
+            self.assertNotIn("student_plan_flag", extracted_by_field)
+            self.assertNotIn("newcomer_plan_flag", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_extracts_savings_specific_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-savings-service")
         try:

@@ -62,6 +62,23 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-04-30 - BMO Practical Chequing Review Hardening
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose `review-7c6db9a1adaa18f4` for BMO Practical Chequing and reduce repeat noisy candidates when BMO comparison-table and FAQ text is used as evidence.
+- Why now: the Product Owner reported a queued Practical Chequing review with `invalid_taxonomy_code`, low confidence, a noisy `cheque_book_info`, wrong `minimum_balance`, cross-product student/newcomer/registered and interest fields, and asked whether to approve, reject, or defer.
+- Outcome: confirmed the taxonomy error is the same active-registry synchronization issue as the BMO Plus/Performance reviews: `chequing/package` is valid in the approved taxonomy, but the target DB can still lack active subtype rows until `0014_canonical_deposit_taxonomy_backfill.sql` is applied. Added Practical-specific extraction hardening so BMO comparison-table text keeps Practical's `$4` monthly fee product-scoped, suppresses Plus/Performance waiver balances from `minimum_balance` and `fee_waiver_condition`, avoids treating generic cheque-deposit FAQ wording as `cheque_book_info`, and prevents canonical chequing runs from re-adding cross-product expected fields such as savings interest or registered-plan flags.
+- Not done: no live DB migration, fresh BMO chequing rerun, or review decision mutation was executed from code; the existing queued review still reflects the old run artifact.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: recommend deferring the current BMO Practical review. The source/product is valid, but the existing candidate should not be approved because it carries old-run taxonomy and cross-product field noise; rejecting would incorrectly blame a valid source.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+- Known issues: apply `0014_canonical_deposit_taxonomy_backfill.sql` to the target DB and rerun BMO chequing collection before approving the product.
+- Next step: after migration and rerun, approve only if `BMO-CHQ-002` has no `invalid_taxonomy_code`, `monthly_fee/public_display_fee=4.00` are evidence-backed, and no Plus/Performance waiver balance or student/newcomer/registered/interest noise is present.
+
 ## 2026-04-30 - BMO Performance Chequing Review Hardening
 
 - WBS: `5.16`, source collection quality hardening

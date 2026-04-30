@@ -120,6 +120,7 @@ Current boundary:
 - for canonical product types, source-registry `expected_fields` now stay bounded to extractable canonical fields so source-management hints such as rebates or discovery summaries do not become arbitrary candidate payload fields
 - BMO chequing fee-waiver wording such as `$17.95 OR $0/month with min. $4,000 balance` now maps to monthly fee, public display fee, minimum balance, and fee waiver condition instead of treating `$0` as the base fee
 - chequing extraction now keeps cheque text concise and treats student/newcomer flags as account-specific signals rather than generic cross-product navigation mentions
+- BMO Practical Chequing extraction now keeps the `$4` monthly fee product-scoped and suppresses comparison-table waiver balances from Plus/Performance rows, generic cheque-deposit wording, and cross-product expected fields
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage

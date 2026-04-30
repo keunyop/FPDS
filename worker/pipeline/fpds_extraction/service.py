@@ -537,6 +537,8 @@ def _resolve_field_names(
         normalized = str(field_name).strip()
         if product_type in _CANONICAL_PRODUCT_TYPES and normalized not in default_fields:
             continue
+        if product_default_fields is not None and normalized not in product_default_fields:
+            continue
         if normalized and normalized not in fields:
             fields.append(normalized)
     return fields
@@ -630,6 +632,7 @@ def _extract_from_matches(
         if match.evidence_chunk_id not in candidate_map:
             continue
         candidate_value, value_type, extraction_method, field_metadata = _extract_candidate_value(
+            context=context,
             field_name=field_name,
             excerpt=match.evidence_text_excerpt,
             anchor_value=match.anchor_value,
@@ -662,6 +665,7 @@ def _extract_from_matches(
 
 def _extract_candidate_value(
     *,
+    context: ExtractionDocumentContext,
     field_name: str,
     excerpt: str,
     anchor_value: str | None,
@@ -670,7 +674,7 @@ def _extract_candidate_value(
     lowered = text.lower()
 
     if field_name in {"monthly_fee", "public_display_fee", "minimum_balance", "minimum_deposit"}:
-        money_value = _extract_money_value(field_name=field_name, text=text, lowered=lowered)
+        money_value = _extract_money_value(context=context, field_name=field_name, text=text, lowered=lowered)
         return money_value, "decimal", "heuristic_money", {}
 
     if field_name in {"standard_rate", "public_display_rate", "promotional_rate"}:
@@ -722,9 +726,10 @@ def _extract_candidate_value(
         "promotional_period_text",
     }:
         if field_name == "fee_waiver_condition":
-            waiver_condition = _extract_fee_waiver_condition(text)
+            waiver_condition = _extract_fee_waiver_condition(context=context, text=text)
             if waiver_condition:
                 return waiver_condition, "string", "heuristic_fee_waiver", {}
+            return None, "string", "heuristic_fee_waiver", {}
         text_value = _normalize_text(_find_sentence(text, ("eligible", "waive", "tier", "limit", "promo", "offer")) or text)
         return text_value[:280], "string", "heuristic_text", {}
 
@@ -1079,8 +1084,17 @@ def _infer_currency(*, context: ExtractionDocumentContext) -> str:
     return "CAD"
 
 
-def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | None:
+def _extract_money_value(
+    *,
+    context: ExtractionDocumentContext,
+    field_name: str,
+    text: str,
+    lowered: str,
+) -> str | None:
     if field_name in {"monthly_fee", "public_display_fee"}:
+        product_monthly_fee = _extract_bmo_chequing_product_monthly_fee(context=context, text=text)
+        if product_monthly_fee is not None:
+            return product_monthly_fee
         monthly_fee = _extract_monthly_fee_with_minimum_balance_waiver(text)
         if monthly_fee is not None:
             return monthly_fee
@@ -1103,9 +1117,11 @@ def _extract_money_value(*, field_name: str, text: str, lowered: str) -> str | N
         )
 
     if field_name == "minimum_balance":
-        waiver_balance = _extract_minimum_balance_for_fee_waiver(text)
+        waiver_balance = _extract_minimum_balance_for_fee_waiver(context=context, text=text)
         if waiver_balance is not None:
             return waiver_balance
+        if _has_bmo_chequing_other_product_fee_waiver(context=context, text=text):
+            return None
         if any(token in lowered for token in ("no minimum balance", "no minimum daily balance")):
             return "0.00"
         return _extract_money_near_labels(
@@ -1149,21 +1165,83 @@ def _extract_monthly_fee_with_minimum_balance_waiver(text: str) -> str | None:
     return _normalize_decimal(match.group("fee"))
 
 
-def _extract_minimum_balance_for_fee_waiver(text: str) -> str | None:
+def _extract_minimum_balance_for_fee_waiver(*, context: ExtractionDocumentContext, text: str) -> str | None:
     match = _fee_waiver_pattern().search(text)
     if match is None:
+        return None
+    if _is_bmo_chequing_other_product_fee_waiver(context=context, text=text, match=match):
         return None
     balance = match.group("balance_after_label") or match.group("balance_before_label")
     return _normalize_decimal(balance)
 
 
-def _extract_fee_waiver_condition(text: str) -> str | None:
+def _extract_fee_waiver_condition(*, context: ExtractionDocumentContext, text: str) -> str | None:
     match = _fee_waiver_pattern().search(text)
     if match is None:
+        return None
+    if _is_bmo_chequing_other_product_fee_waiver(context=context, text=text, match=match):
         return None
     fee = _normalize_decimal(match.group("fee"))
     balance = _normalize_decimal(match.group("balance_after_label") or match.group("balance_before_label"))
     return f"Monthly fee {fee} is waived to 0.00 with a {balance} minimum balance."
+
+
+def _extract_bmo_chequing_product_monthly_fee(*, context: ExtractionDocumentContext, text: str) -> str | None:
+    source_hint_by_id = {
+        "BMO-CHQ-002": "practical",
+        "BMO-CHQ-003": "plus",
+        "BMO-CHQ-004": "performance",
+        "BMO-CHQ-005": "premium",
+        "BMO-CHQ-008": "air miles",
+    }
+    product_hint = source_hint_by_id.get(context.source_id)
+    if product_hint is None:
+        return None
+    match = re.search(
+        rf"\b{re.escape(product_hint)}\b[\s\S]{{0,80}}?\$\s?([0-9][0-9,]*(?:\.\d{{1,2}})?)\s*(?:per\s+month|/month|monthly)?",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return _normalize_decimal(match.group(1))
+
+
+def _is_bmo_chequing_other_product_fee_waiver(
+    *,
+    context: ExtractionDocumentContext,
+    text: str,
+    match: re.Match[str],
+) -> bool:
+    source_hint_by_id = {
+        "BMO-CHQ-002": "practical",
+        "BMO-CHQ-003": "plus",
+        "BMO-CHQ-004": "performance",
+        "BMO-CHQ-005": "premium",
+        "BMO-CHQ-008": "air miles",
+    }
+    current_product_hint = source_hint_by_id.get(context.source_id)
+    if current_product_hint is None:
+        return False
+    before_window = text[max(0, match.start() - 64) : match.start()].lower()
+    other_product_hints = {item for item in source_hint_by_id.values() if item != current_product_hint}
+    nearest_hint = None
+    nearest_position = -1
+    for hint in {current_product_hint, *other_product_hints}:
+        position = before_window.rfind(hint)
+        if position > nearest_position:
+            nearest_hint = hint
+            nearest_position = position
+    if nearest_hint is None or nearest_hint == current_product_hint:
+        return False
+    return nearest_hint in other_product_hints
+
+
+def _has_bmo_chequing_other_product_fee_waiver(*, context: ExtractionDocumentContext, text: str) -> bool:
+    return any(
+        _is_bmo_chequing_other_product_fee_waiver(context=context, text=text, match=match)
+        for match in _fee_waiver_pattern().finditer(text)
+    )
 
 
 def _fee_waiver_pattern() -> re.Pattern[str]:
@@ -1231,9 +1309,9 @@ def _extract_cheque_book_info(text: str) -> str | None:
         phrase = _normalize_text(match.group(0).strip(" -;,."))
         if phrase:
             return f"{phrase}."
-    sentence = _find_sentence(normalized, ("cheque book", "select cheque", "select cheques"))
-    if sentence:
-        return _normalize_text(sentence)[:160]
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        if any(keyword in raw_sentence.lower() for keyword in ("cheque book", "select cheque", "select cheques")):
+            return _normalize_text(raw_sentence)[:160]
     return None
 
 
