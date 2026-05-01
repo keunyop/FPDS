@@ -356,6 +356,42 @@ def record_evidence_trace_viewed(
     )
 
 
+def record_evidence_trace_viewed_best_effort(
+    connection: Connection,
+    *,
+    actor: dict[str, Any],
+    review_task_id: str,
+    run_id: str,
+    candidate_id: str,
+    product_id: str | None,
+    request_id: str,
+    ip_address: str | None,
+    user_agent: str | None,
+    field_count: int,
+    evidence_item_count: int,
+    statement_timeout_ms: int = 3000,
+) -> None:
+    try:
+        connection.execute(f"SET LOCAL statement_timeout = '{int(statement_timeout_ms)}ms'", {})
+        record_evidence_trace_viewed(
+            connection,
+            actor=actor,
+            review_task_id=review_task_id,
+            run_id=run_id,
+            candidate_id=candidate_id,
+            product_id=product_id,
+            request_id=request_id,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            field_count=field_count,
+            evidence_item_count=evidence_item_count,
+        )
+    except Exception:
+        rollback = getattr(connection, "rollback", None)
+        if callable(rollback):
+            rollback()
+
+
 def apply_review_decision(
     connection: Connection,
     *,

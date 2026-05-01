@@ -13,6 +13,7 @@ from api_service.review_detail import (
     _normalize_override_payload,
     _serialize_field_mapping,
     record_evidence_trace_viewed,
+    record_evidence_trace_viewed_best_effort,
 )
 
 
@@ -22,6 +23,20 @@ class _RecordingConnection:
 
     def execute(self, sql: str, params: dict[str, object]) -> None:
         self.calls.append((sql, params))
+
+
+class _FailingAuditConnection:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, object]]] = []
+        self.rollback_called = False
+
+    def execute(self, sql: str, params: dict[str, object]) -> None:
+        self.calls.append((sql, params))
+        if not sql.strip().upper().startswith("SET LOCAL"):
+            raise TimeoutError("audit insert timed out")
+
+    def rollback(self) -> None:
+        self.rollback_called = True
 
 
 class ReviewDetailTests(unittest.TestCase):
@@ -179,6 +194,28 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(params["target_id"], "rt-001")
         self.assertEqual(params["actor_role_snapshot"], "reviewer")
         self.assertIn('"field_count": 3', str(params["event_payload"]))
+
+    def test_record_evidence_trace_viewed_best_effort_rolls_back_audit_timeout(self) -> None:
+        connection = _FailingAuditConnection()
+
+        record_evidence_trace_viewed_best_effort(
+            connection,
+            actor={"user_id": "usr-001", "role": "reviewer"},
+            review_task_id="rt-001",
+            run_id="run-001",
+            candidate_id="cand-001",
+            product_id=None,
+            request_id="req-001",
+            ip_address="127.0.0.1",
+            user_agent="unit-test",
+            field_count=3,
+            evidence_item_count=5,
+            statement_timeout_ms=100,
+        )
+
+        self.assertEqual(len(connection.calls), 2)
+        self.assertIn("SET LOCAL statement_timeout", connection.calls[0][0])
+        self.assertTrue(connection.rollback_called)
 
 
 if __name__ == "__main__":

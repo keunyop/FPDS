@@ -2412,7 +2412,7 @@ def _promote_detail_candidates(
             seed_fetch_fallback_count += 1
         else:
             if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence):
-                if not candidate.seed_source_id or page_evidence.negative_signal_count >= 2:
+                if not candidate.seed_source_id or page_evidence.negative_signal_count > 0:
                     continue
                 metadata = _build_detail_discovery_metadata(
                     candidate=candidate,

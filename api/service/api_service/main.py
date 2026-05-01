@@ -6,7 +6,7 @@ from typing import Any
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import FastAPI, Query, Request, Response
+from fastapi import BackgroundTasks, FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -69,7 +69,7 @@ from api_service.review_detail import (
     ReviewTaskError,
     apply_review_decision,
     load_review_task_detail,
-    record_evidence_trace_viewed,
+    record_evidence_trace_viewed_best_effort,
 )
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.run_retry import RunRetryError, retry_failed_run
@@ -1026,28 +1026,99 @@ async def review_tasks(
 
 
 @app.get("/api/admin/review-tasks/{review_task_id}")
-async def review_task_detail(request: Request, review_task_id: str) -> JSONResponse:
+async def review_task_detail(request: Request, review_task_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
     actor, _session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         payload = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
-        if payload:
-            record_evidence_trace_viewed(
+    if not payload:
+        return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
+    _schedule_evidence_trace_viewed_audit(
+        background_tasks,
+        settings=settings,
+        actor=actor,
+        review_task_id=review_task_id,
+        run_id=payload["review_task"]["run_id"],
+        candidate_id=payload["review_task"]["candidate_id"],
+        product_id=payload["review_task"]["product_id"],
+        request_id=request.state.request_id,
+        ip_address=_request_ip(request),
+        user_agent=request.headers.get("user-agent"),
+        field_count=int(payload["evidence_summary"]["field_count"]),
+        evidence_item_count=int(payload["evidence_summary"]["item_count"]),
+    )
+    return _success(payload, request)
+
+
+def _schedule_evidence_trace_viewed_audit(
+    background_tasks: BackgroundTasks,
+    *,
+    settings: Settings,
+    actor: dict[str, Any],
+    review_task_id: str,
+    run_id: str,
+    candidate_id: str,
+    product_id: str | None,
+    request_id: str,
+    ip_address: str | None,
+    user_agent: str | None,
+    field_count: int,
+    evidence_item_count: int,
+) -> None:
+    background_tasks.add_task(
+        _record_evidence_trace_viewed_background,
+        settings=settings,
+        actor={
+            "user_id": actor.get("user_id"),
+            "role": actor.get("role"),
+        },
+        review_task_id=review_task_id,
+        run_id=run_id,
+        candidate_id=candidate_id,
+        product_id=product_id,
+        request_id=request_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        field_count=field_count,
+        evidence_item_count=evidence_item_count,
+    )
+
+
+def _record_evidence_trace_viewed_background(
+    *,
+    settings: Settings,
+    actor: dict[str, Any],
+    review_task_id: str,
+    run_id: str,
+    candidate_id: str,
+    product_id: str | None,
+    request_id: str,
+    ip_address: str | None,
+    user_agent: str | None,
+    field_count: int,
+    evidence_item_count: int,
+) -> None:
+    try:
+        from psycopg import connect
+        from psycopg.rows import dict_row
+
+        with connect(settings.database_url, row_factory=dict_row, connect_timeout=3) as connection:
+            record_evidence_trace_viewed_best_effort(
                 connection,
                 actor=actor,
                 review_task_id=review_task_id,
-                run_id=payload["review_task"]["run_id"],
-                candidate_id=payload["review_task"]["candidate_id"],
-                product_id=payload["review_task"]["product_id"],
-                request_id=request.state.request_id,
-                ip_address=_request_ip(request),
-                user_agent=request.headers.get("user-agent"),
-                field_count=int(payload["evidence_summary"]["field_count"]),
-                evidence_item_count=int(payload["evidence_summary"]["item_count"]),
+                run_id=run_id,
+                candidate_id=candidate_id,
+                product_id=product_id,
+                request_id=request_id,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                field_count=field_count,
+                evidence_item_count=evidence_item_count,
+                statement_timeout_ms=500,
             )
-    if not payload:
-        return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
-    return _success(payload, request)
+    except Exception:
+        return
 
 
 @app.get("/api/admin/runs")
@@ -1294,13 +1365,11 @@ async def _handle_review_decision(
                 action_type=action_type,
                 change_event_types=[str(item) for item in result.get("change_event_types", [])],
             )
-        detail = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
     if aggregate_refresh_request:
         aggregate_refresh_request["launch"] = launch_aggregate_refresh_runner()
     return _success(
         {
             "result": result,
-            "review_task": detail,
             "aggregate_refresh": aggregate_refresh_request,
         },
         request,

@@ -449,6 +449,68 @@ class SourceRegistryTests(unittest.TestCase):
         self.assertEqual(result["auto_included_source_ids"], ["BMO-SAV-006"])
         launch_runner.assert_called_once()
 
+    def test_start_source_collection_auto_includes_bmo_premium_rate_savings_rate_source(self) -> None:
+        detail_row = {
+            "source_id": "BMO-SAV-004",
+            "bank_code": "BMO",
+            "country_code": "CA",
+            "product_type": "savings",
+            "product_key": None,
+            "source_name": "BMO Premium Rate Savings Account",
+            "source_url": "https://www.bmo.com/premium-rate-savings",
+            "normalized_url": "https://www.bmo.com/premium-rate-savings",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "status": "active",
+            "priority": "P0",
+            "source_language": "en",
+            "purpose": "detail",
+            "expected_fields": ["product_name", "interest_rate_summary"],
+            "seed_source_flag": False,
+            "last_verified_at": None,
+            "last_seen_at": None,
+            "redirect_target_url": None,
+            "alias_urls": [],
+            "change_reason": None,
+            "created_at": None,
+            "updated_at": None,
+        }
+        support_row = {
+            **detail_row,
+            "source_id": "BMO-SAV-006",
+            "source_name": "BMO savings rates page",
+            "source_url": "https://www.bmo.com/rates",
+            "normalized_url": "https://www.bmo.com/rates",
+            "discovery_role": "supporting_html",
+            "expected_fields": ["savings_account_rates"],
+        }
+        connection = _QueuedConnection(
+            [
+                [detail_row],
+                [support_row],
+                None,
+                None,
+            ]
+        )
+
+        with (
+            patch(
+                "api_service.source_registry.load_product_type_definitions_map",
+                return_value=_product_type_definitions("savings"),
+            ),
+            patch("api_service.source_registry._launch_source_collection_runner") as launch_runner,
+        ):
+            result = start_source_collection(
+                connection,
+                source_ids=["BMO-SAV-004"],
+                actor={"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["selected_source_ids"], ["BMO-SAV-004"])
+        self.assertEqual(result["auto_included_source_ids"], ["BMO-SAV-006"])
+        launch_runner.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

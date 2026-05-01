@@ -45,6 +45,12 @@ _SUMMARY_MESSAGES = {
     "low_confidence": "The overall source confidence was below the routing threshold.",
     "validation_error": "Validation produced one or more error-level issues.",
     "manual_sampling_review": "Prototype routing keeps all candidates in review.",
+    "taxonomy_registry_sync_missing": "The candidate taxonomy is part of the approved canonical deposit baseline but is missing from the active DB registry.",
+}
+_CANONICAL_DEPOSIT_SUBTYPE_REGISTRY = {
+    "chequing": {"standard", "package", "interest_bearing", "premium", "other"},
+    "savings": {"standard", "high_interest", "youth", "foreign_currency", "other"},
+    "gic": {"redeemable", "non_redeemable", "market_linked", "other"},
 }
 
 
@@ -113,16 +119,18 @@ class ValidationRoutingService:
             candidate_before = dict(item.normalized_candidate_record)
             candidate_payload = dict(candidate_before.get("candidate_payload", {}))
 
+            dynamic_product_type = _uses_dynamic_product_type(
+                product_type=_string_or_none(candidate_before.get("product_type")),
+                source_metadata=item.source_metadata,
+            )
+
             validation_issue_codes = _compute_validation_issue_codes(
                 candidate_record=candidate_before,
                 candidate_payload=candidate_payload,
                 field_evidence_links=item.field_evidence_links,
                 runtime_notes=item.runtime_notes,
                 taxonomy_registry=taxonomy_registry,
-                dynamic_product_type=_uses_dynamic_product_type(
-                    product_type=_string_or_none(candidate_before.get("product_type")),
-                    source_metadata=item.source_metadata,
-                ),
+                dynamic_product_type=dynamic_product_type,
             )
             validation_status = _resolve_validation_status(validation_issue_codes)
             source_confidence = _compute_source_confidence(
@@ -132,25 +140,22 @@ class ValidationRoutingService:
                 validation_status=validation_status,
                 validation_issue_codes=validation_issue_codes,
                 runtime_notes=item.runtime_notes,
-                dynamic_product_type=_uses_dynamic_product_type(
-                    product_type=_string_or_none(candidate_before.get("product_type")),
-                    source_metadata=item.source_metadata,
-                ),
+                dynamic_product_type=dynamic_product_type,
             )
             route_decision = _route_candidate(
                 validation_status=validation_status,
                 validation_issue_codes=validation_issue_codes,
                 source_confidence=source_confidence,
                 routing_config=routing_config,
-                dynamic_product_type=_uses_dynamic_product_type(
-                    product_type=_string_or_none(candidate_before.get("product_type")),
-                    source_metadata=item.source_metadata,
-                ),
+                dynamic_product_type=dynamic_product_type,
             )
             review_task_id = _build_review_task_id(item.candidate_id) if route_decision["review_required"] else None
             issue_summary = _build_issue_summary(
                 validation_issue_codes=validation_issue_codes,
                 queue_reason_codes=route_decision["queue_reason_codes"],
+                candidate_record=candidate_before,
+                taxonomy_registry=taxonomy_registry,
+                dynamic_product_type=dynamic_product_type,
             )
 
             updated_candidate_record = {
@@ -175,6 +180,13 @@ class ValidationRoutingService:
                 candidate_id=item.candidate_id,
             )
             runtime_notes = list(item.runtime_notes)
+            taxonomy_sync_note = _build_taxonomy_registry_sync_note(
+                candidate_record=candidate_before,
+                taxonomy_registry=taxonomy_registry,
+                dynamic_product_type=dynamic_product_type,
+            )
+            if taxonomy_sync_note is not None:
+                runtime_notes.append(taxonomy_sync_note)
             if route_decision["review_required"]:
                 runtime_notes.append(
                     f"Candidate routed to review in `{routing_config.routing_mode}` mode with primary reason `{route_decision['review_reason_code']}`."
@@ -466,7 +478,7 @@ def _compute_validation_issue_codes(
         non_core_values = [
             value
             for field_name, value in candidate_payload.items()
-            if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label"}
+            if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label", "subtype_code"}
         ]
         if not any(_has_meaningful_value(value) for value in non_core_values):
             issues.add("required_field_missing")
@@ -478,7 +490,17 @@ def _compute_validation_issue_codes(
         issues.add("conflicting_evidence")
 
     lowered_notes = " ".join(note.lower() for note in runtime_notes)
-    if any(token in lowered_notes for token in ("partial", "source failure", "no evidence-linked")):
+    if any(
+        token in lowered_notes
+        for token in (
+            "partial",
+            "source failure",
+            "no evidence-linked",
+            "no grounded",
+            "insufficient grounded",
+            "without any specific product",
+        )
+    ):
         issues.add("partial_source_failure")
 
     return sorted(issues)
@@ -623,6 +645,9 @@ def _build_issue_summary(
     *,
     validation_issue_codes: list[str],
     queue_reason_codes: list[str],
+    candidate_record: dict[str, object] | None = None,
+    taxonomy_registry: dict[str, set[str]] | None = None,
+    dynamic_product_type: bool = False,
 ) -> list[dict[str, object]]:
     items: list[dict[str, object]] = []
     seen: set[str] = set()
@@ -637,7 +662,49 @@ def _build_issue_summary(
                 "summary": _SUMMARY_MESSAGES.get(code, code.replace("_", " ")),
             }
         )
+    if (
+        "invalid_taxonomy_code" in validation_issue_codes
+        and candidate_record is not None
+        and taxonomy_registry is not None
+        and _build_taxonomy_registry_sync_note(
+            candidate_record=candidate_record,
+            taxonomy_registry=taxonomy_registry,
+            dynamic_product_type=dynamic_product_type,
+        )
+        is not None
+        and "taxonomy_registry_sync_missing" not in seen
+    ):
+        items.append(
+            {
+                "code": "taxonomy_registry_sync_missing",
+                "severity": "warning",
+                "summary": _SUMMARY_MESSAGES["taxonomy_registry_sync_missing"],
+            }
+        )
     return items
+
+
+def _build_taxonomy_registry_sync_note(
+    *,
+    candidate_record: dict[str, object],
+    taxonomy_registry: dict[str, set[str]],
+    dynamic_product_type: bool,
+) -> str | None:
+    if dynamic_product_type:
+        return None
+    product_type = _string_or_none(candidate_record.get("product_type"))
+    subtype_code = _string_or_none(candidate_record.get("subtype_code"))
+    if product_type not in _CANONICAL_DEPOSIT_SUBTYPE_REGISTRY:
+        return None
+    if subtype_code is None or subtype_code not in _CANONICAL_DEPOSIT_SUBTYPE_REGISTRY[product_type]:
+        return None
+    active_subtypes = taxonomy_registry.get(product_type, set())
+    if subtype_code in active_subtypes:
+        return None
+    return (
+        f"Active taxonomy registry is missing approved canonical deposit subtype "
+        f"`{product_type}/{subtype_code}`. Apply or sync the canonical deposit taxonomy before approving a rerun."
+    )
 
 
 def _build_validation_artifact_payload(

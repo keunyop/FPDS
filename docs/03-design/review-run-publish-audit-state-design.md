@@ -1,8 +1,8 @@
-﻿# FPDS Review, Run, Publish, and Audit State Design
+# FPDS Review, Run, Publish, and Audit State Design
 
-Version: 1.0  
-Date: 2026-04-01  
-Status: Approved Baseline for WBS 1.3.2 - 1.3.5  
+Version: 1.0
+Date: 2026-04-01
+Status: Approved Baseline for WBS 1.3.2 - 1.3.5
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -391,6 +391,7 @@ Every audit event must support at least the following fields.
 - Audit events are append-only.
 - Audit events must never store secret values or full credentials.
 - State-changing actions in review, publish, and auth flows must emit audit events in the same logical transaction boundary as the business action or must fail visibly if audit persistence fails.
+- Non-mutating trace-view audit, such as opening a review detail evidence trace, may use a short best-effort timeout so audit storage contention does not block reviewer access to the task. If this best-effort write fails, the read-only detail payload may still be returned.
 - `ManualOverride` must create both change history and audit trail records.
 - Audit taxonomy must be stable enough for admin filtering by actor, date, category, target, and reason code.
 

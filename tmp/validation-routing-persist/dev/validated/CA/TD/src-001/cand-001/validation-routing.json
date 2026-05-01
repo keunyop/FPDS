@@ -10,7 +10,7 @@
   "candidate_run_id": "run-3603",
   "normalization_model_execution_id": "modelexec-normalize-001",
   "validation_model_execution_id": "modelexec-3172f4c93249d4af",
-  "started_at": "2026-04-30T05:23:27.477514+00:00",
+  "started_at": "2026-05-01T07:24:31.346415+00:00",
   "routing_config": {
     "routing_mode": "prototype",
     "auto_approve_min_confidence": 1.0,

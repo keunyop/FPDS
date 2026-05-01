@@ -1,0 +1,544 @@
+{
+  "registry_version": "2026-04-30",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-CHQ-002",
+  "sources": [
+    {
+      "source_id": "BMO-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Specific chequing product page on BMO\u2019s site; likely a detail page.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Low Fee Chequing Account: Practical Chequing Account - BMO Canada",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Practical Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Specific chequing product page on BMO\u2019s site; likely a detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 9,
+        "selection_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Specific chequing product page path; very likely a public detail page.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/plus/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_savings_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Low Fee Chequing Account: Plus Chequing Account - BMO Canada",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Plus Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Specific chequing product page path; very likely a public detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 7,
+        "selection_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated chequing product URL on BMO\u2019s official domain; strong detail-page candidate.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/performance/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Performance Chequing Account - Unlimited Transactions - BMO Canada",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "likely_pricing_and_features_page"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Performance Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated chequing product URL on BMO\u2019s official domain; strong detail-page candidate.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 8,
+        "selection_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "likely_pricing_and_features_page",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated chequing product URL, likely showing features, fees, and eligibility.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/premium/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "family_bundle_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Premium Chequing Account - Unlimited Transactions - BMO Canada",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Premium Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated chequing product URL, likely showing features, fees, and eligibility.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 8,
+        "selection_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-008",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Looks like a dedicated BMO chequing product page for AIR MILES, very likely an official detail source.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/air-miles/",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "rewards_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "AIR MILES Chequing Account - Earn Miles Daily - BMO Canada",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "likely_pricing_and_features_page"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "AIR MILES \u00ae\u2020 Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Looks like a dedicated BMO chequing product page for AIR MILES, very likely an official detail source.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 7,
+        "selection_reason_codes": [
+          "product_specific_slug",
+          "chequing_account",
+          "official_bank_domain",
+          "likely_pricing_and_features_page",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO chequing and savings interest rates page",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+      "expected_fields": [
+        "account_interest_rates",
+        "chequing_account_list",
+        "savings_account_list"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-CHQ-007",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO bank account terms and conditions",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+      "expected_fields": [
+        "terms_version",
+        "service_fee_terms",
+        "account_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-CHQ-5928789571",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.bmo.com/pdf/everydaybankingbluerewards.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-CHQ-b211398e29",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.bmo.com/assets/pdfs/edb-chequing-terms-and-conditions-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

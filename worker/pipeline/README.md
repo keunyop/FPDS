@@ -121,6 +121,10 @@ Current boundary:
 - BMO chequing fee-waiver wording such as `$17.95 OR $0/month with min. $4,000 balance` now maps to monthly fee, public display fee, minimum balance, and fee waiver condition instead of treating `$0` as the base fee
 - chequing extraction now keeps cheque text concise and treats student/newcomer flags as account-specific signals rather than generic cross-product navigation mentions
 - BMO Practical Chequing extraction now keeps the `$4` monthly fee product-scoped and suppresses comparison-table waiver balances from Plus/Performance rows, generic cheque-deposit wording, and cross-product expected fields
+- BMO Premium Chequing extraction is covered against comparison-table noise so `$30.95` monthly fee, `$6,000` minimum-balance waiver text, unlimited transaction signals, and concise cheque-book evidence stay product-scoped while savings/tier/withdrawal/student/newcomer/family-bundle noise is excluded
+- BMO AIR MILES Chequing extraction now keeps AIR MILES comparison-table fee and minimum-balance text product-scoped, avoids using the generic word `plus` as a Plus-account boundary, and suppresses nav-only cheque/student/newcomer/interest noise
+- generic BMO footer/navigation text such as `Important banking info` is suppressed before it can populate canonical fields such as notes or interest calculation method
+- dynamic product extraction now suppresses obvious cross-product navigation chunks before deriving product titles or long-text fields, so `gic-term-deposit` candidates do not promote chequing or card menu text as product evidence
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -129,13 +133,14 @@ What `WBS 3.6` stores today:
 - `field_evidence_link` rows tied to `candidate_id`
 - `model_execution` and zero-token `llm_usage_record` rows for normalization
 - updated `run_source_item.stage_metadata` for candidate id and normalization results
-- for selected savings products, missing rate fields can now be supplemented from product-matched supporting rate-page artifacts when available: `TD-SAV-005`, `BMO-SAV-006`, and `SCOTIA-SAV-006`
+- for selected savings products, missing rate fields can now be supplemented from product-matched supporting rate-page artifacts when available: `TD-SAV-005`, `BMO-SAV-006` for BMO Savings Amplifier, Savings Builder, and Premium Rate Savings, and `SCOTIA-SAV-006`
 - for the TD Savings prototype, noisy `interest_calculation_method` fields can now be replaced with stronger `TD-SAV-008` governing-PDF wording when the detail-page extraction only captured PDF link text
 - for the TD Savings prototype, `TD-SAV-007` fee-governing evidence can now suppress misleading `fee_waiver_condition` values for zero-monthly-fee savings products instead of persisting raw fee-table text
 - `TD Growth` qualification text is now split more deliberately into `eligibility_text`, `boosted_rate_eligibility`, and `promotional_period_text`
 - clearly noisy long-text fields such as generic notes, marketing promo copy, and fee-at-a-glance snippets can now be suppressed before canonical candidate persistence
 - chequing subtype inference now aligns to the approved taxonomy: `standard`, `package`, `interest_bearing`, `premium`, `other`
 - normalization and validation now also align GIC term and redeemability rules at candidate creation time so missing deposit or term values, invalid term lengths, and conflicting redeemability flags are surfaced before review routing
+- extraction overlays selected registry metadata onto persisted source-document metadata so shared support URLs, such as BMO savings and chequing rate pages, keep the current run's product type and expected fields
 
 Current boundary:
 - normalization now persists `normalized_candidate` and candidate-level evidence links
@@ -146,6 +151,7 @@ What `WBS 3.7` stores today:
 - validation/routing JSON artifact per source candidate in object storage
 - metadata JSON artifact with candidate state, review reason, and review task id
 - updated `normalized_candidate` validation fields and `candidate_state`
+- validation routing treats dynamic-product runtime notes such as "no grounded product details" as `partial_source_failure`, preventing weak source captures from appearing as clean `pass` review tasks
 - `review_task` row per prototype candidate with `queued` review state
 - `model_execution` and zero-token `llm_usage_record` rows for validation/routing
 - updated `run_source_item.stage_metadata` for review queue linkage

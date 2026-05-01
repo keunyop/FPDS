@@ -143,11 +143,10 @@ def _load_contexts(
             source_document_id = selected_sources_by_id[source_id].source_document_id
             context = context_by_source_document_id[source_document_id]
             contexts.append(
-                ExtractionDocumentContext(
-                    **{
-                        **context.__dict__,
-                        "source_id": source_id,
-                    }
+                _context_with_registry_metadata(
+                    context=context,
+                    registry_source=selected_sources_by_id[source_id],
+                    source_id=source_id,
                 )
             )
         return contexts
@@ -174,6 +173,25 @@ def _load_contexts(
             + ", ".join(missing_parsed_document_ids)
         )
     return contexts
+
+
+def _context_with_registry_metadata(
+    *,
+    context: ExtractionDocumentContext,
+    registry_source,
+    source_id: str,
+) -> ExtractionDocumentContext:
+    registry_metadata = dict(registry_source.to_source_document_record().get("source_metadata") or {})
+    return ExtractionDocumentContext(
+        **{
+            **context.__dict__,
+            "source_id": source_id,
+            "source_metadata": {
+                **context.source_metadata,
+                **registry_metadata,
+            },
+        }
+    )
 
 
 def _utc_now_iso() -> str:

@@ -514,6 +514,7 @@ class SupportingMergeTests(unittest.TestCase):
     def test_supporting_source_ids_for_td_targets(self) -> None:
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-002"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-003"), ("BMO-SAV-006",))
+        self.assertEqual(supporting_source_ids_for_target("BMO-SAV-004"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-002"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-003"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-004"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
@@ -642,6 +643,81 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.50")
         self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "BMO-SAV-006")
         self.assertEqual(fields_by_name["bonus_interest_rule"]["candidate_value"], "Get a bonus interest rate for adding $200 each month.")
+
+    def test_bmo_supporting_rate_page_missing_numeric_rate_adds_operator_note(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "Savings Amplifier Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="savings-amplifier-account",
+                        excerpt="Savings Amplifier Account\nBalance Interest Rate\nThe current interest rate is not displayed.",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="BMO-SAV-002",
+            base_artifact=base_artifact,
+            supporting_artifacts={"BMO-SAV-006": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertIn("did not contain a numeric percentage", " ".join(merged["runtime_notes"]))
+
+    def test_merge_supports_bmo_premium_rate_savings_rates_from_rate_page(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "Premium Rate Savings Account", "string", 0.88),
+                _field_dict(
+                    "withdrawal_limit_text",
+                    "Transaction limits are shared with the linked BMO chequing plan.",
+                    "string",
+                    0.75,
+                    evidence_chunk_id="chunk-detail-transactions",
+                ),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="premium-rate-savings-account",
+                        excerpt=(
+                            "Premium Rate Savings Account\n"
+                            "Balance Interest Rate\n"
+                            "$0 and over\n"
+                            "0.010%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="BMO-SAV-004",
+            base_artifact=base_artifact,
+            supporting_artifacts={"BMO-SAV-006": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
+        self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "BMO-SAV-006")
+        self.assertIn("BMO-SAV-006", " ".join(merged["runtime_notes"]))
 
     def test_merge_supports_growth_rate_fields_from_current_rates(self) -> None:
         base_artifact = {

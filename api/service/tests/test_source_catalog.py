@@ -1038,6 +1038,69 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(rows[0]["discovery_metadata"]["selection_path"], "seed_hint_fetch_unavailable")
         self.assertIn("seed-backed source", " ".join(notes))
 
+    def test_seed_detail_low_page_evidence_with_negative_signal_is_not_promoted(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+            raw_url="https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+            anchor_text="BMO Progressive GIC",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id="BMO-GIC-003",
+            source_name_hint="BMO Progressive GIC detail source",
+            priority_hint="P0",
+            expected_fields_hint=["product_name", "term_options", "minimum_deposit"],
+        )
+        ai_scores = {
+            candidate.normalized_url: AiParallelCandidateScore(
+                candidate_url=candidate.normalized_url,
+                predicted_role="detail",
+                relevance_score=0.98,
+                confidence_band="high",
+                reason_codes=["contains_gic_keyword", "product_specific_slug"],
+                short_rationale="Likely an official product detail page, but page evidence is weak.",
+            )
+        }
+
+        with patch(
+            "api_service.source_catalog._score_page_evidence",
+            return_value=PageEvidenceAssessment(
+                page_evidence_score=3,
+                page_evidence_reason_codes=[
+                    "title_semantic_match",
+                    "product_type_semantic_match",
+                    "pricing_or_feature_signal",
+                    "insufficient_evidence",
+                ],
+                page_title="Progressive GIC Search Tool - BMO",
+                primary_heading=None,
+                heading_match=False,
+                attribute_signal_count=1,
+                negative_signal_count=1,
+            ),
+        ):
+            rows, notes = _promote_detail_candidates(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="gic-term-deposit",
+                discovery_product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic-term-deposit"),
+                    "display_name": "GIC Term Deposit",
+                    "description": "Guaranteed investment certificate or term deposit.",
+                    "expected_fields": ["product_name", "term_options", "minimum_deposit"],
+                },
+                source_language="en",
+                fetch_policy=SimpleNamespace(),
+                candidates=[candidate],
+                ai_scores=ai_scores,
+            )
+
+        self.assertEqual(rows, [])
+        self.assertIn("rejected all tentative detail pages", " ".join(notes))
+
     def test_seed_detail_candidates_are_not_displaced_by_high_scoring_homepage_links(self) -> None:
         seed_candidates = [
             HomepageCandidate(

@@ -140,6 +140,10 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
       }
 
       setMessage(actionLabel(action));
+      if (action === "defer" || action === "reject") {
+        router.replace("/admin/reviews");
+        return;
+      }
       router.refresh();
     } catch {
       setError("The review action could not be submitted. Check the admin API and try again.");

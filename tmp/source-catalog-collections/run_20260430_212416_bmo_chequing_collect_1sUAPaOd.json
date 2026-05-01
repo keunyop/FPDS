@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_q-JypISGItktMggA",
+  "correlation_id": "corr_xg2bornuhUqzvFW8",
+  "request_id": "req_6efd61f31e484255bd1f99a84beb4a64",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260430_212416_bmo_chequing_collect_1sUAPaOd",
+      "catalog_item_id": "catalog-ca-bmo-chequing-_CsgidYs",
+      "bank_code": "BMO",
+      "bank_name": "BMO",
+      "country_code": "CA",
+      "product_type": "chequing",
+      "source_catalog_product_type": "chequing",
+      "source_language": "en",
+      "homepage_url": "https://www.bmo.com/",
+      "normalized_homepage_url": "https://www.bmo.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

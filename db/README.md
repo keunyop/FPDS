@@ -20,6 +20,7 @@ Files:
 - `migrations/0012_evidence_chunk_embeddings.sql`: pgvector-backed `evidence_chunk_embedding` side table for vector-assisted evidence retrieval
 - `migrations/0013_operator_managed_product_types.sql`: removes the historical product-type classification flag so every product type is an operator-managed DB row
 - `migrations/0014_canonical_deposit_taxonomy_backfill.sql`: restores canonical chequing, savings, and GIC subtype taxonomy rows when operator-managed product types have been reset or recreated
+- `migrations/0015_phase1_review_confidence_policy.sql`: lowers the Phase 1 auto-approve confidence policy to `0.82` while preserving validation-error and force-review gates
 
 How to apply when a database is available:
 
@@ -33,6 +34,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0012_evidence_chunk_embeddings.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0013_operator_managed_product_types.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0014_canonical_deposit_taxonomy_backfill.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0015_phase1_review_confidence_policy.sql
 ```
 
 Notes:

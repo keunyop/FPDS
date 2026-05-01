@@ -20,6 +20,8 @@ _FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "standard_rate": ("standard rate", "interest rate", "regular rate", "annual rate"),
     "promotional_rate": ("promotional rate", "bonus rate", "promo rate", "special rate"),
     "public_display_rate": ("interest rate", "rate", "earn", "%"),
+    "interest_rate_summary": ("interest rate", "savings account rates", "rate", "%"),
+    "savings_account_rates": ("savings account rates", "interest rate", "savings amplifier", "savings builder", "premium rate savings", "%"),
     "promotional_period_text": ("promo period", "offer ends", "promotional period", "for the first"),
     "introductory_rate_flag": ("introductory", "promotional", "bonus"),
     "eligibility_text": ("eligible", "eligibility", "qualify", "who can apply"),

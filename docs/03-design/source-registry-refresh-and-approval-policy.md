@@ -182,6 +182,7 @@ Important rules:
 - `detail` sources are the default candidate-producing scope
 - supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
 - supporting sources should not create primary standalone candidates unless the registry explicitly marks them as candidate-producing
+- seed-backed detail hints with low page evidence remain eligible only when page validation has no negative signal; low-evidence pages with negative signals should not become candidate-producing detail sources and should rely on later rerun/source correction instead
 
 ---
 
@@ -208,7 +209,7 @@ Current repository state:
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
-- candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO, and Scotia savings rate sources
+- candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 
 ---
@@ -228,7 +229,7 @@ The following are intentionally out of scope for the first source-registry admin
 ## 10. Follow-On Work Remaining
 
 - explicit DB import/export tooling for source-registry administration beyond first-boot seeding
-- broader supporting-source auto-inclusion rules beyond the existing TD savings path
+- broader supporting-source auto-inclusion rules beyond the existing explicit TD, BMO, and Scotia savings paths
 - dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
 - optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
 - operator-managed product type registry with searchable `name` and `description`

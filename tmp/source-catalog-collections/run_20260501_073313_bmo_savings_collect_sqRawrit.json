@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_rb9jRYq0FZX22aw1",
+  "correlation_id": "corr_DCr80W5vQCjndLJH",
+  "request_id": "req_990282a23d904d649412f15be4c1b3a9",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260501_073313_bmo_savings_collect_sqRawrit",
+      "catalog_item_id": "catalog-ca-bmo-saving-_oHjfvlb",
+      "bank_code": "BMO",
+      "bank_name": "BMO",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_catalog_product_type": "savings",
+      "source_language": "en",
+      "homepage_url": "https://www.bmo.com/",
+      "normalized_homepage_url": "https://www.bmo.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

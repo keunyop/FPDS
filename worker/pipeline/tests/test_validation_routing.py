@@ -149,6 +149,43 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_canonical_subtype_missing_from_active_registry_adds_operator_sync_context(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-chequing-package-missing-registry")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_chequing_input()
+
+            result = service.validate_and_route_inputs(
+                run_id="run-chq-001",
+                inputs=[input_item],
+                taxonomy_registry={"chequing": {"standard", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.95,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("invalid_taxonomy_code", source_result.validation_issue_codes)
+            self.assertIn("chequing/package", " ".join(source_result.runtime_notes))
+            issue_codes = {item["code"] for item in source_result.review_task_record["issue_summary"]}
+            self.assertIn("taxonomy_registry_sync_missing", issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_gic_cross_field_issue_stays_error_and_queues_reason(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-gic-error")
         try:
@@ -232,6 +269,73 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             self.assertEqual(source_result.candidate_state, "in_review")
             self.assertEqual(source_result.review_reason_code, "manual_sampling_review")
             self.assertIn("manual_sampling_review", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_dynamic_product_type_no_grounded_detail_routes_as_partial_source_failure(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-no-grounded-detail")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            dynamic_candidate = dict(input_item.normalized_candidate_record)
+            dynamic_candidate["product_type"] = "gic-term-deposit"
+            dynamic_candidate["subtype_code"] = "other"
+            dynamic_candidate["product_name"] = "Progressive GIC Search Tool - BMO"
+            dynamic_payload = {
+                "status": "active",
+                "last_verified_at": "2026-04-29T06:15:11+00:00",
+                "bank_name": "BMO",
+                "product_name": "Progressive GIC Search Tool - BMO",
+                "source_subtype_label": "Progressive GIC Search Tool - BMO",
+                "subtype_code": "other",
+            }
+            dynamic_candidate["candidate_payload"] = dynamic_payload
+            dynamic_candidate["validation_issue_codes"] = []
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "BMO-GIC-003",
+                    "source_metadata": {
+                        "product_type": "gic-term-deposit",
+                        "product_type_dynamic": True,
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "normalized_candidate_record": dynamic_candidate,
+                    "field_evidence_links": [],
+                    "runtime_notes": ["No grounded GIC product details were present in the evidence chunks."],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-bmo-gic-dynamic",
+                inputs=[input_item],
+                taxonomy_registry={},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence", "partial_source_failure"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+            self.assertIn("partial_source_failure", source_result.validation_issue_codes)
+            self.assertIn("required_field_missing", source_result.queue_reason_codes)
+            self.assertIn("partial_source_failure", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 

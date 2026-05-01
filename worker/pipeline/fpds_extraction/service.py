@@ -151,6 +151,30 @@ _TERM_CONTEXT_BLOCKLIST = (
     "promotional period",
     "introductory",
 )
+_BMO_CHEQUING_SOURCE_HINTS = {
+    "BMO-CHQ-002": "practical",
+    "BMO-CHQ-003": "plus",
+    "BMO-CHQ-004": "performance",
+    "BMO-CHQ-005": "premium",
+    "BMO-CHQ-008": "air miles",
+}
+_BMO_SAVINGS_PRODUCT_TERMS = {
+    "BMO-SAV-002": ("savings amplifier account", "savings amplifier"),
+    "BMO-SAV-003": ("savings builder account", "savings builder"),
+    "BMO-SAV-004": ("premium rate savings account", "premium rate savings"),
+    "BMO-SAV-005": (
+        "u.s. dollar premium rate savings account",
+        "u.s. dollar premium rate savings",
+        "u.s dollar premium rate savings account",
+        "u.s dollar premium rate savings",
+    ),
+}
+_BMO_SAVINGS_SOURCE_TITLES = {
+    "BMO-SAV-002": "Savings Amplifier Account",
+    "BMO-SAV-003": "Savings Builder Account",
+    "BMO-SAV-004": "Premium Rate Savings Account",
+    "BMO-SAV-005": "U.S. Dollar Premium Rate Savings Account",
+}
 _GENERIC_TITLE_LINES = {
     "document",
     "benefits",
@@ -168,6 +192,8 @@ _GENERIC_TITLE_LINES = {
     "open account",
     "more details",
     "learn more",
+    "include in any bank plan",
+    "add to any bank plan",
 }
 _GENERIC_TITLE_PREFIXES = (
     "what ",
@@ -188,7 +214,14 @@ _GENERIC_TITLE_PREFIXES = (
     "manage ",
     "pay ",
     "earn ",
+    "include ",
+    "add to ",
 )
+_SUPPORTING_EXTRACTABLE_FIELDS = {
+    "interest_rate_summary",
+    "savings_account_rates",
+    "rate_tiers",
+}
 _PRODUCT_TITLE_KEYWORDS = (
     "account",
     "accounts",
@@ -205,6 +238,56 @@ _PRODUCT_TITLE_KEYWORDS = (
     "cashable",
     "redeemable",
 )
+_NAVIGATION_NOISE_MARKERS = (
+    "all chequing accounts",
+    "all savings accounts",
+    "credit cards overview",
+    "mortgages overview",
+    "loans overview",
+    "banking fees and agreements",
+    "book an appointment",
+)
+_GENERIC_BANKING_INFO_MARKERS = (
+    "important banking info",
+    "report a lost or stolen card",
+    "banking services",
+    "banking agreements",
+    "cross border banking",
+)
+_PRODUCT_PROFILE_CONFLICT_KEYWORDS = {
+    "gic": (
+        "chequing",
+        "checking",
+        "savings account",
+        "savings accounts",
+        "credit card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "loan",
+        "loans",
+    ),
+    "savings": (
+        "chequing",
+        "checking",
+        "credit card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "gic",
+        "term deposit",
+    ),
+    "chequing": (
+        "savings account",
+        "savings accounts",
+        "credit card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "gic",
+        "term deposit",
+    ),
+}
 
 
 class ExtractionService:
@@ -535,9 +618,9 @@ def _resolve_field_names(
             fields.append(field_name)
     for field_name in context.source_metadata.get("expected_fields", []):
         normalized = str(field_name).strip()
-        if product_type in _CANONICAL_PRODUCT_TYPES and normalized not in default_fields:
+        if product_type in _CANONICAL_PRODUCT_TYPES and normalized not in default_fields and normalized not in _SUPPORTING_EXTRACTABLE_FIELDS:
             continue
-        if product_default_fields is not None and normalized not in product_default_fields:
+        if product_default_fields is not None and normalized not in product_default_fields and normalized not in _SUPPORTING_EXTRACTABLE_FIELDS:
             continue
         if normalized and normalized not in fields:
             fields.append(normalized)
@@ -672,10 +755,17 @@ def _extract_candidate_value(
 ) -> tuple[object | None, str, str, dict[str, object]]:
     text = excerpt.strip()
     lowered = text.lower()
+    if _is_generic_banking_info_text(text):
+        return None, "string", "heuristic_noise_filter", {"suppressed_reason": "generic_banking_info_navigation"}
+    if _is_noise_for_product_context(context=context, text=text):
+        return None, "string", "heuristic_noise_filter", {"suppressed_reason": "cross_product_navigation_noise"}
 
     if field_name in {"monthly_fee", "public_display_fee", "minimum_balance", "minimum_deposit"}:
         money_value = _extract_money_value(context=context, field_name=field_name, text=text, lowered=lowered)
         return money_value, "decimal", "heuristic_money", {}
+
+    if field_name == "promotional_rate" and not _has_product_promotional_context(context=context, text=text):
+        return None, "decimal", "heuristic_percent", {}
 
     if field_name in {"standard_rate", "public_display_rate", "promotional_rate"}:
         percent = _extract_percent_value(text)
@@ -688,7 +778,7 @@ def _extract_candidate_value(
         return _detect_frequency(lowered), "string", "heuristic_frequency", {}
 
     if field_name == "interest_calculation_method":
-        return _find_sentence(text, ("calculated", "daily closing balance", "calculation")), "string", "heuristic_sentence", {}
+        return _extract_interest_calculation_method(text), "string", "heuristic_sentence", {}
 
     if field_name == "term_length_text":
         return _extract_term_length_text(text), "string", "heuristic_term_text", {}
@@ -712,7 +802,13 @@ def _extract_candidate_value(
         "student_plan_flag",
         "newcomer_plan_flag",
     }:
-        return _extract_boolean_flag(field_name=field_name, lowered=lowered, anchor_value=anchor_value), "boolean", "heuristic_flag", {}
+        return _extract_boolean_flag(
+            context=context,
+            field_name=field_name,
+            text=text,
+            lowered=lowered,
+            anchor_value=anchor_value,
+        ), "boolean", "heuristic_flag", {}
 
     if field_name == "cheque_book_info":
         return _extract_cheque_book_info(text), "string", "heuristic_text", {}
@@ -730,6 +826,17 @@ def _extract_candidate_value(
             if waiver_condition:
                 return waiver_condition, "string", "heuristic_fee_waiver", {}
             return None, "string", "heuristic_fee_waiver", {}
+        if field_name == "eligibility_text":
+            eligibility_text = _extract_eligibility_text(text)
+            return eligibility_text, "string", "heuristic_eligibility_text", {}
+        if field_name == "tier_definition_text":
+            return _extract_tier_definition_text(text), "string", "heuristic_text", {}
+        if field_name == "withdrawal_limit_text":
+            return _extract_withdrawal_limit_text(context=context, text=text), "string", "heuristic_text", {}
+        if field_name == "notes":
+            return _extract_notes_text(text), "string", "heuristic_text", {}
+        if field_name == "promotional_period_text" and not _has_product_promotional_context(context=context, text=text):
+            return None, "string", "heuristic_text", {}
         text_value = _normalize_text(_find_sentence(text, ("eligible", "waive", "tier", "limit", "promo", "offer")) or text)
         return text_value[:280], "string", "heuristic_text", {}
 
@@ -771,14 +878,32 @@ def _extract_document_title(
     ranked_titles: list[tuple[float, int, int, str]] = []
     seen_titles: set[str] = set()
 
+    for metadata_title in _source_metadata_title_candidates(context):
+        cleaned_title = _clean_title_candidate(metadata_title)
+        if not cleaned_title:
+            continue
+        lowered_title = cleaned_title.lower()
+        if lowered_title in seen_titles or _title_conflicts_with_product_context(context=context, title=cleaned_title):
+            continue
+        seen_titles.add(lowered_title)
+        score = _score_title_candidate(
+            text=cleaned_title,
+            bank_code=context.bank_code,
+            chunk_index=0,
+            line_index=0,
+        ) + 0.25
+        ranked_titles.append((score, 0, 0, cleaned_title))
+
     for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
+        if _is_noise_for_product_context(context=context, text=candidate.evidence_excerpt):
+            continue
         lines = [line for line in candidate.evidence_excerpt.splitlines() if line.strip()]
         for line_index, line in enumerate(lines[:6]):
             normalized = _clean_title_candidate(line)
             if not normalized:
                 continue
             lowered = normalized.lower()
-            if lowered in seen_titles:
+            if lowered in seen_titles or _title_conflicts_with_product_context(context=context, title=normalized):
                 continue
             seen_titles.add(lowered)
             score = _score_title_candidate(
@@ -864,7 +989,8 @@ def _anchor_value_to_title(anchor_value: str | None) -> str | None:
     normalized = _normalize_text(anchor_value.replace("-", " ").replace("_", " "))
     if not normalized or normalized.startswith("page "):
         return None
-    return " ".join(part.capitalize() if part.islower() else part for part in normalized.split())
+    title = " ".join(part.capitalize() if part.islower() else part for part in normalized.split())
+    return _restore_us_dollar_text(title)
 
 
 def _clean_title_candidate(value: str) -> str:
@@ -872,7 +998,7 @@ def _clean_title_candidate(value: str) -> str:
     if not normalized:
         return ""
 
-    cleaned = normalized
+    cleaned = _restore_us_dollar_text(normalized)
     compacted = re.sub(r"[^a-z0-9]+", "", cleaned.lower())
     if compacted in _GENERIC_TITLE_LINES:
         return cleaned
@@ -881,7 +1007,7 @@ def _clean_title_candidate(value: str) -> str:
         r"^benefits of (?:the )?(.+?)(?:\.)?$",
         r"^about (?:the )?(.+?)(?:\.)?$",
         r"^what (?:is|are) (?:the )?(.+?)(?:\?)?$",
-        r"^explore the features of (?:the )?(.+)$",
+        r"^explore the (?:features|fees) (?:of|for) (?:the )?(.+)$",
         r"^full disclosure for (?:the )?(.+?)(?:\.)?$",
         r"^(.+?)\s+faqs$",
     )
@@ -891,12 +1017,14 @@ def _clean_title_candidate(value: str) -> str:
             continue
         candidate = _normalize_text(match.group(1))
         if candidate:
-            return candidate
+            return _restore_us_dollar_text(candidate)
     return cleaned
 
 
 def _extract_description(candidates: list[EvidenceChunkCandidate]) -> str | None:
     for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
+        if _is_cross_product_navigation_noise(candidate.evidence_excerpt):
+            continue
         lines = [line.strip() for line in candidate.evidence_excerpt.splitlines() if line.strip()]
         if len(lines) >= 2:
             return _normalize_text(lines[1])[:240]
@@ -916,6 +1044,109 @@ def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
     if product_type in _CANONICAL_PRODUCT_TYPES:
         return False
     return bool(context.source_metadata.get("product_type_dynamic", True))
+
+
+def _source_metadata_title_candidates(context: ExtractionDocumentContext) -> list[str]:
+    candidates: list[str] = []
+    if context.source_id in _BMO_SAVINGS_SOURCE_TITLES:
+        candidates.append(_BMO_SAVINGS_SOURCE_TITLES[context.source_id])
+    for key in ("product_name", "source_name", "source_title", "page_title", "primary_heading"):
+        value = str(context.source_metadata.get(key) or "").strip()
+        if value:
+            candidates.append(value)
+    discovery_metadata = context.source_metadata.get("discovery_metadata")
+    if isinstance(discovery_metadata, dict):
+        for key in ("primary_heading", "page_title"):
+            value = str(discovery_metadata.get(key) or "").strip()
+            if value:
+                candidates.append(value)
+    return candidates
+
+
+def _is_noise_for_product_context(*, context: ExtractionDocumentContext, text: str) -> bool:
+    if not _is_cross_product_navigation_noise(text):
+        return False
+    profile = _semantic_product_profile(context)
+    if profile is None:
+        return False
+    lowered = text.lower()
+    conflict_hits = sum(1 for token in _PRODUCT_PROFILE_CONFLICT_KEYWORDS.get(profile, ()) if token in lowered)
+    if conflict_hits >= 2:
+        return True
+    profile_hits = _profile_keyword_hits(profile=profile, text=lowered)
+    return conflict_hits > profile_hits
+
+
+def _is_cross_product_navigation_noise(text: str) -> bool:
+    lowered = text.lower()
+    marker_hits = sum(1 for marker in _NAVIGATION_NOISE_MARKERS if marker in lowered)
+    product_category_hits = sum(
+        1
+        for category in ("chequing", "savings", "credit cards", "mortgages", "loans", "investing")
+        if category in lowered
+    )
+    return marker_hits >= 2 and product_category_hits >= 3
+
+
+def _is_generic_banking_info_text(text: str) -> bool:
+    normalized = _normalize_text(text)
+    lowered = normalized.lower()
+    marker_hits = sum(1 for marker in _GENERIC_BANKING_INFO_MARKERS if marker in lowered)
+    if lowered.startswith("important banking info"):
+        return True
+    has_product_signal = any(
+        token in lowered
+        for token in (
+            "$",
+            "%",
+            "monthly fee",
+            "minimum balance",
+            "unlimited transactions",
+            "interac",
+            "chequing account",
+            "savings account",
+        )
+    )
+    return marker_hits >= 2 and not has_product_signal
+
+
+def _title_conflicts_with_product_context(*, context: ExtractionDocumentContext, title: str) -> bool:
+    profile = _semantic_product_profile(context)
+    if profile is None:
+        return False
+    lowered = title.lower()
+    if _profile_keyword_hits(profile=profile, text=lowered):
+        return False
+    return any(token in lowered for token in _PRODUCT_PROFILE_CONFLICT_KEYWORDS.get(profile, ()))
+
+
+def _semantic_product_profile(context: ExtractionDocumentContext) -> str | None:
+    merged = " ".join(
+        str(item or "")
+        for item in (
+            context.source_metadata.get("product_type"),
+            context.source_metadata.get("product_type_name"),
+            context.source_metadata.get("product_type_description"),
+            " ".join(str(keyword) for keyword in context.source_metadata.get("discovery_keywords", []) or []),
+        )
+    ).lower()
+    if any(token in merged for token in ("gic", "term deposit", "guaranteed investment certificate")):
+        return "gic"
+    if any(token in merged for token in ("savings", "saving account", "interest savings")):
+        return "savings"
+    if any(token in merged for token in ("chequing", "checking", "bank account", "transaction account")):
+        return "chequing"
+    return None
+
+
+def _profile_keyword_hits(*, profile: str, text: str) -> int:
+    if profile == "gic":
+        return sum(1 for token in ("gic", "term deposit", "guaranteed investment certificate") if token in text)
+    if profile == "savings":
+        return sum(1 for token in ("savings", "saving account", "interest rate") if token in text)
+    if profile == "chequing":
+        return sum(1 for token in ("chequing", "checking", "transaction") if token in text)
+    return 0
 
 
 def _merge_extracted_fields(
@@ -1079,7 +1310,10 @@ def _infer_currency(*, context: ExtractionDocumentContext) -> str:
             context.source_id,
         )
     ).lower()
-    if any(token in context_text for token in ("u.s. dollar", "us dollar", "usd", "us-prem-savings", "us premium savings", " us ")):
+    if any(
+        token in context_text
+        for token in ("u.s. dollar", "u s dollar", "us dollar", "usd", "us-prem-savings", "us premium savings", "bmo-sav-005", " us ")
+    ):
         return "USD"
     return "CAD"
 
@@ -1120,10 +1354,13 @@ def _extract_money_value(
         waiver_balance = _extract_minimum_balance_for_fee_waiver(context=context, text=text)
         if waiver_balance is not None:
             return waiver_balance
-        if _has_bmo_chequing_other_product_fee_waiver(context=context, text=text):
-            return None
         if any(token in lowered for token in ("no minimum balance", "no minimum daily balance")):
             return "0.00"
+        product_minimum_balance = _extract_bmo_chequing_product_minimum_balance(context=context, text=text)
+        if product_minimum_balance is not None:
+            return product_minimum_balance
+        if _has_bmo_chequing_other_product_fee_waiver(context=context, text=text):
+            return None
         return _extract_money_near_labels(
             text=text,
             label_patterns=(
@@ -1187,24 +1424,63 @@ def _extract_fee_waiver_condition(*, context: ExtractionDocumentContext, text: s
 
 
 def _extract_bmo_chequing_product_monthly_fee(*, context: ExtractionDocumentContext, text: str) -> str | None:
-    source_hint_by_id = {
-        "BMO-CHQ-002": "practical",
-        "BMO-CHQ-003": "plus",
-        "BMO-CHQ-004": "performance",
-        "BMO-CHQ-005": "premium",
-        "BMO-CHQ-008": "air miles",
-    }
-    product_hint = source_hint_by_id.get(context.source_id)
-    if product_hint is None:
+    product_hint = _BMO_CHEQUING_SOURCE_HINTS.get(context.source_id)
+    segment = _extract_bmo_chequing_product_segment(context=context, text=text)
+    if product_hint is None or segment is None:
         return None
     match = re.search(
         rf"\b{re.escape(product_hint)}\b[\s\S]{{0,80}}?\$\s?([0-9][0-9,]*(?:\.\d{{1,2}})?)\s*(?:per\s+month|/month|monthly)?",
-        text,
+        segment,
         flags=re.IGNORECASE,
     )
     if match is None:
         return None
     return _normalize_decimal(match.group(1))
+
+
+def _extract_bmo_chequing_product_minimum_balance(*, context: ExtractionDocumentContext, text: str) -> str | None:
+    segment = _extract_bmo_chequing_product_segment(context=context, text=text)
+    if segment is None:
+        return None
+    for match in re.finditer(
+        r"\$\s?(?P<balance>[0-9][0-9,]*(?:\.\d{1,2})?)[^$]{0,80}?"
+        r"(?:minimum\s+daily\s+balance|minimum\s+balance)",
+        segment,
+        flags=re.IGNORECASE,
+    ):
+        return _normalize_decimal(match.group("balance"))
+    match = re.search(
+        r"(?:minimum\s+daily\s+balance|minimum\s+balance)[\s\S]{0,80}?"
+        r"\$\s?(?P<balance>[0-9][0-9,]*(?:\.\d{1,2})?)",
+        segment,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return _normalize_decimal(match.group("balance"))
+
+
+def _extract_bmo_chequing_product_segment(*, context: ExtractionDocumentContext, text: str) -> str | None:
+    current_hint = _BMO_CHEQUING_SOURCE_HINTS.get(context.source_id)
+    if current_hint is None:
+        return None
+    current_match = _find_bmo_chequing_product_hint(text=text, hint=current_hint)
+    if current_match is None:
+        return None
+    segment_end = len(text)
+    for hint in set(_BMO_CHEQUING_SOURCE_HINTS.values()) - {current_hint}:
+        other_match = _find_bmo_chequing_product_hint(text=text[current_match.end() :], hint=hint)
+        if other_match is not None:
+            segment_end = min(segment_end, current_match.end() + other_match.start())
+    return text[current_match.start() : segment_end]
+
+
+def _find_bmo_chequing_product_hint(*, text: str, hint: str) -> re.Match[str] | None:
+    return re.search(
+        rf"\b{re.escape(hint)}\b(?=\s*(?:chequing|account|\$))",
+        text,
+        flags=re.IGNORECASE,
+    )
 
 
 def _is_bmo_chequing_other_product_fee_waiver(
@@ -1213,18 +1489,11 @@ def _is_bmo_chequing_other_product_fee_waiver(
     text: str,
     match: re.Match[str],
 ) -> bool:
-    source_hint_by_id = {
-        "BMO-CHQ-002": "practical",
-        "BMO-CHQ-003": "plus",
-        "BMO-CHQ-004": "performance",
-        "BMO-CHQ-005": "premium",
-        "BMO-CHQ-008": "air miles",
-    }
-    current_product_hint = source_hint_by_id.get(context.source_id)
+    current_product_hint = _BMO_CHEQUING_SOURCE_HINTS.get(context.source_id)
     if current_product_hint is None:
         return False
     before_window = text[max(0, match.start() - 64) : match.start()].lower()
-    other_product_hints = {item for item in source_hint_by_id.values() if item != current_product_hint}
+    other_product_hints = {item for item in _BMO_CHEQUING_SOURCE_HINTS.values() if item != current_product_hint}
     nearest_hint = None
     nearest_position = -1
     for hint in {current_product_hint, *other_product_hints}:
@@ -1282,13 +1551,13 @@ def _extract_money_near_labels(*, text: str, label_patterns: tuple[str, ...]) ->
         if after_match is not None:
             return _normalize_decimal(after_match.group(1))
 
-        before_match = re.search(
-            rf"\$\s?([0-9][0-9,]*(?:\.\d{{1,2}})?)[\s\S]{{0,60}}?{label_pattern}",
-            text,
-            flags=re.IGNORECASE,
-        )
-        if before_match is not None:
-            return _normalize_decimal(before_match.group(1))
+        label_match = re.search(label_pattern, text, flags=re.IGNORECASE)
+        if label_match is None:
+            continue
+        before_window = text[max(0, label_match.start() - 80) : label_match.start()]
+        money_matches = list(_MONEY_RE.finditer(before_window))
+        if money_matches:
+            return _normalize_decimal(money_matches[-1].group(1))
     return None
 
 
@@ -1322,10 +1591,17 @@ def _extract_percent_value(text: str) -> str | None:
     return _normalize_decimal(match.group(1))
 
 
-def _extract_boolean_flag(*, field_name: str, lowered: str, anchor_value: str | None) -> bool | None:
+def _extract_boolean_flag(
+    *,
+    context: ExtractionDocumentContext,
+    field_name: str,
+    text: str,
+    lowered: str,
+    anchor_value: str | None,
+) -> bool | None:
     anchor = (anchor_value or "").lower()
     if field_name == "introductory_rate_flag":
-        if any(token in lowered for token in ("promo", "promotional", "bonus", "introductory")):
+        if _has_product_promotional_context(context=context, text=text):
             return True
         return None
     if field_name == "tiered_rate_flag":
@@ -1378,10 +1654,9 @@ def _extract_boolean_flag(*, field_name: str, lowered: str, anchor_value: str | 
 
 
 def _has_student_plan_context(*, lowered: str, anchor: str) -> bool:
-    if any(token in anchor for token in ("student", "youth")):
-        return True
+    combined_text = f"{anchor} {lowered}"
     return any(
-        re.search(pattern, lowered)
+        re.search(pattern, combined_text)
         for pattern in (
             r"\bstudent(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
             r"\byouth(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
@@ -1391,10 +1666,9 @@ def _has_student_plan_context(*, lowered: str, anchor: str) -> bool:
 
 
 def _has_newcomer_plan_context(*, lowered: str, anchor: str) -> bool:
-    if any(token in anchor for token in ("newcomer", "new-to-canada")):
-        return True
+    combined_text = f"{anchor} {lowered}"
     return any(
-        re.search(pattern, lowered)
+        re.search(pattern, combined_text)
         for pattern in (
             r"\bnewcomer(?:\s+\w+){0,2}\s+(?:chequing|checking|account|package|plan)\b",
             r"\bnew to canada\s+[^.]{0,80}\b(?:banking|chequing|checking|account|package|plan)\b",
@@ -1404,7 +1678,7 @@ def _has_newcomer_plan_context(*, lowered: str, anchor: str) -> bool:
 
 
 def _detect_frequency(lowered: str) -> str | None:
-    if "paid monthly" in lowered or "monthly" in lowered:
+    if "paid monthly" in lowered or "interest is paid monthly" in lowered or "monthly interest" in lowered:
         return "monthly"
     if "paid quarterly" in lowered or "quarterly" in lowered:
         return "quarterly"
@@ -1414,9 +1688,77 @@ def _detect_frequency(lowered: str) -> str | None:
         return "annually"
     if "semi-annually" in lowered:
         return "semi-annually"
-    if "daily" in lowered:
+    if "paid daily" in lowered or "daily payment" in lowered:
         return "daily"
     return None
+
+
+def _is_promotional_rate_context(lowered: str) -> bool:
+    return any(
+        token in lowered
+        for token in (
+            "introductory rate",
+            "introductory interest",
+            "promotional rate",
+            "promotional interest",
+            "bonus rate",
+            "bonus interest",
+            "special rate",
+            "limited time",
+        )
+    )
+
+
+def _has_product_promotional_context(*, context: ExtractionDocumentContext, text: str) -> bool:
+    lowered = text.lower()
+    if not _is_promotional_rate_context(lowered):
+        return False
+    current_terms = _source_product_terms(context)
+    other_terms = [
+        term
+        for source_id, terms in _BMO_SAVINGS_PRODUCT_TERMS.items()
+        if source_id != context.source_id
+        for term in terms
+    ]
+    if not current_terms:
+        return True
+
+    found_current_promo = False
+    found_other_only_promo = False
+    normalized = _normalize_text(text).lower()
+    promo_patterns = (
+        "introductory rate",
+        "introductory interest",
+        "promotional rate",
+        "promotional interest",
+        "bonus rate",
+        "bonus interest",
+        "special rate",
+        "limited time",
+    )
+    for promo_pattern in promo_patterns:
+        for match in re.finditer(re.escape(promo_pattern), normalized):
+            window = normalized[max(0, match.start() - 80) : min(len(normalized), match.end() + 80)]
+            has_current_term = any(term in window for term in current_terms)
+            has_other_term = any(term in window for term in other_terms)
+            if has_current_term:
+                found_current_promo = True
+            elif has_other_term:
+                found_other_only_promo = True
+    if found_current_promo:
+        return True
+    if found_other_only_promo:
+        return False
+    return True
+
+
+def _source_product_terms(context: ExtractionDocumentContext) -> tuple[str, ...]:
+    terms = list(_BMO_SAVINGS_PRODUCT_TERMS.get(context.source_id, ()))
+    for key in ("product_name", "source_name", "source_title", "page_title", "primary_heading"):
+        value = _normalize_text(str(context.source_metadata.get(key) or "")).lower()
+        if value and value not in terms:
+            terms.append(value)
+    return tuple(terms)
 
 
 def _extract_term_length_text(text: str) -> str | None:
@@ -1474,6 +1816,173 @@ def _find_sentence(text: str, keywords: tuple[str, ...]) -> str | None:
         if any(keyword in lowered for keyword in keywords):
             return raw_sentence
     return normalized if normalized else None
+
+
+def _restore_us_dollar_text(value: str) -> str:
+    return re.sub(r"\bU\s*S\s+Dollar\b", "U.S. Dollar", value, flags=re.IGNORECASE)
+
+
+def _extract_interest_calculation_method(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        sentence = raw_sentence.strip()
+        lowered = sentence.lower()
+        if any(token in lowered for token in ("calculated", "daily closing balance", "calculation", "daily interest")):
+            daily_interest_match = re.search(r"earn\s+daily\s+interest\s+on\s+every\s+dollar", sentence, flags=re.IGNORECASE)
+            if daily_interest_match is not None:
+                return _normalize_text(daily_interest_match.group(0))
+            return _normalize_text(sentence)[:280]
+    return None
+
+
+def _extract_eligibility_text(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+
+    table_match = re.search(
+        r"eligibility\s+with\s+plans?(?:\s*\*\d+)?\s+(?P<value>can\s+be\s+included\s+in\s+any\s+bank\s+plan)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if table_match is not None:
+        return _normalize_text(table_match.group("value")).capitalize()
+
+    best: tuple[int, int, str] | None = None
+    for index, raw_sentence in enumerate(re.split(r"(?<=[.!?])\s+", normalized)):
+        sentence = raw_sentence.strip()
+        if not sentence:
+            continue
+        lowered = sentence.lower()
+        score = 0
+        if any(token in lowered for token in ("eligible", "eligibility", "qualify", "qualified")):
+            score += 4
+        if any(token in lowered for token in ("resident", "residents", "aged ", "years or older", "age of")):
+            score += 3
+        if any(token in lowered for token in ("must ", "required", "requirement", "need ", "do not need", "don't need")):
+            score += 3
+        if any(token in lowered for token in ("to apply", "can apply", "apply online", "to open", "can open")):
+            score += 2
+        if any(
+            token in lowered
+            for token in (
+                "terms and conditions",
+                "offers or promotions",
+                "bonus miles",
+                "points you earn",
+                "earn per transaction",
+            )
+        ):
+            score -= 5
+        if score <= 0:
+            continue
+        candidate = _normalize_text(sentence).strip(" .")
+        ranked = (score, -index, candidate[:280])
+        if best is None or ranked > best:
+            best = ranked
+    if best is None:
+        return None
+    return best[2]
+
+
+def _extract_tier_definition_text(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        sentence = raw_sentence.strip()
+        lowered = sentence.lower()
+        if "tier" in lowered and any(token in lowered for token in ("rate", "balance", "earn")):
+            return _normalize_text(sentence)[:280]
+        if re.search(r"\$\s?[0-9][^.;]{0,80}?\bearn(?:s)?\b[^.;]{0,80}?%", sentence, flags=re.IGNORECASE):
+            return _normalize_text(sentence)[:280]
+    return None
+
+
+def _extract_withdrawal_limit_text(*, context: ExtractionDocumentContext, text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    table_match = re.search(
+        r"number\s+of\s+transactions\s+per\s+month\s+(?P<value>transactions\s+based\s+on\s+plan\s+limits)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if table_match is not None:
+        return f"Number of transactions per month: {_normalize_text(table_match.group('value'))}."
+    best: tuple[int, int, str] | None = None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        sentence = raw_sentence.strip()
+        lowered = sentence.lower()
+        if not sentence or "?" in sentence or lowered.startswith(("what are ", "how do ", "can i ")):
+            continue
+        if _sentence_mentions_other_product_only(context=context, lowered_sentence=lowered):
+            continue
+        has_withdrawal_signal = any(
+            token in lowered
+            for token in (
+                "withdrawal",
+                "withdrawals",
+                "transactions per month",
+                "transaction limit",
+                "debit transaction",
+                "additional transactions",
+                "transfers out",
+                "transfer out",
+            )
+        )
+        if not has_withdrawal_signal:
+            continue
+        score = 0
+        if any(token in lowered for token in ("withdrawal", "withdrawals")):
+            score += 4
+        if any(token in lowered for token in ("cost", "costs", "fee", "fees", "additional")):
+            score += 3
+        if any(token in lowered for token in ("transaction limit", "transactions per month")):
+            score += 2
+        if "debit transaction" in lowered:
+            score += 1
+        if score <= 0:
+            continue
+        candidate = _normalize_text(sentence)[:280]
+        ranked = (score, -len(candidate), candidate)
+        if best is None or ranked > best:
+            best = ranked
+    if best is None:
+        return None
+    return best[2]
+
+
+def _sentence_mentions_other_product_only(*, context: ExtractionDocumentContext, lowered_sentence: str) -> bool:
+    current_terms = _source_product_terms(context)
+    if not current_terms:
+        return False
+    other_terms = [
+        term
+        for source_id, terms in _BMO_SAVINGS_PRODUCT_TERMS.items()
+        if source_id != context.source_id
+        for term in terms
+    ]
+    return any(term in lowered_sentence for term in other_terms) and not any(term in lowered_sentence for term in current_terms)
+
+
+def _extract_notes_text(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    lowered = normalized.lower()
+    if lowered.startswith("what are ") or lowered.startswith("how do "):
+        return None
+    if "features details" in lowered and any(token in lowered for token in ("monthly account fee", "interest rate", "eligibility with plans")):
+        return None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        sentence = raw_sentence.strip()
+        sentence_lowered = sentence.lower()
+        if any(token in sentence_lowered for token in ("note", "disclosure", "important")):
+            return _normalize_text(sentence)[:280]
+    return None
 
 
 def _extract_included_transactions(text: str) -> int | None:
