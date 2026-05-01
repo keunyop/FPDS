@@ -1207,6 +1207,108 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("BMO-SAV-007", source_ids)
         self.assertTrue(all(str(item["product_type"]) == "savings" for item in result.rows))
 
+    def test_generate_sources_from_homepage_promotes_cibc_seed_details_when_ai_is_unavailable(self) -> None:
+        weak_but_official_seed_evidence = PageEvidenceAssessment(
+            page_evidence_score=3,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal", "insufficient_evidence"],
+            page_title="CIBC Smart Account",
+            primary_heading="CIBC Smart Account",
+            heading_match=True,
+            attribute_signal_count=1,
+            negative_signal_count=1,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={},
+                    notes=[
+                        "AI parallel scorer was unavailable: OpenAI Responses API request failed with status 429: insufficient_quota",
+                        "Deterministic homepage discovery fallback will evaluate bounded candidates.",
+                    ],
+                    ai_unavailable=True,
+                ),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=weak_but_official_seed_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="CIBC",
+                bank_name="CIBC",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition={
+                    **_product_type_definition("chequing"),
+                    "description": "Chequing accounts for everyday banking with monthly fees, debit transactions, Interac, and overdraft.",
+                    "discovery_keywords": ["chequing", "chequing account", "monthly fee", "transactions"],
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                },
+                homepage_url="https://www.cibc.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertTrue({"CIBC-CHQ-002", "CIBC-CHQ-003"}.issubset(source_ids))
+        detail_rows = [item for item in result.rows if item["source_id"] in {"CIBC-CHQ-002", "CIBC-CHQ-003"}]
+        self.assertTrue(all(item["discovery_metadata"]["selection_path"] == "seed_hint_ai_unavailable_low_page_evidence" for item in detail_rows))
+        self.assertTrue(all(item["discovery_metadata"]["ai_unavailable"] for item in detail_rows))
+        self.assertTrue(any("Deterministic homepage discovery fallback" in note for note in result.discovery_notes))
+
+    def test_generate_sources_from_homepage_keeps_cibc_seed_details_when_ai_scores_but_page_evidence_is_weak(self) -> None:
+        weak_but_official_seed_evidence = PageEvidenceAssessment(
+            page_evidence_score=3,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal", "insufficient_evidence"],
+            page_title="CIBC Smart Account",
+            primary_heading="CIBC Smart Account",
+            heading_match=True,
+            attribute_signal_count=1,
+            negative_signal_count=1,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html": AiParallelCandidateScore(
+                            candidate_url="https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+                            predicted_role="supporting_html",
+                            relevance_score=3.0,
+                            confidence_band="medium",
+                            reason_codes=["pricing_or_feature_signal"],
+                            short_rationale="Useful chequing account page but scorer was uncertain.",
+                        )
+                    },
+                    notes=["Scored CIBC candidate links for chequing-account homepage-first discovery."],
+                ),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=weak_but_official_seed_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="CIBC",
+                bank_name="CIBC",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition={
+                    **_product_type_definition("chequing"),
+                    "description": "Chequing accounts for everyday banking with monthly fees, debit transactions, Interac, and overdraft.",
+                    "discovery_keywords": ["chequing", "chequing account", "monthly fee", "transactions"],
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                },
+                homepage_url="https://www.cibc.com/",
+                source_language="en",
+            )
+
+        source_ids = {str(item["source_id"]) for item in result.rows}
+        self.assertTrue({"CIBC-CHQ-002", "CIBC-CHQ-003"}.issubset(source_ids))
+        detail_row = next(item for item in result.rows if item["source_id"] == "CIBC-CHQ-002")
+        self.assertEqual(detail_row["discovery_metadata"]["selection_path"], "seed_hint_low_page_evidence")
+        self.assertEqual(detail_row["discovery_metadata"]["ai_predicted_role"], "supporting_html")
+
     def test_generate_sources_from_homepage_uses_definition_semantics_for_discovery_profile(self) -> None:
         detail_evidence = PageEvidenceAssessment(
             page_evidence_score=7,
@@ -1393,6 +1495,63 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertEqual(result.scores, {})
         self.assertTrue(any("provider or API key was not configured" in note for note in result.notes))
+        self.assertTrue(result.ai_unavailable)
+
+    def test_ai_candidate_scorer_records_failed_execution_when_openai_quota_is_exceeded(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+            raw_url="https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+            anchor_text="CIBC Smart Account",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=8,
+            supporting_signal=False,
+            seed_source_id="CIBC-CHQ-002",
+            source_name_hint="CIBC Smart Account detail source",
+            priority_hint="P0",
+            expected_fields_hint=["product_name", "monthly_fee"],
+        )
+
+        def fake_getenv(key: str, default: str = "") -> str:
+            values = {
+                "FPDS_LLM_PROVIDER": "openai",
+                "FPDS_LLM_API_KEY": "test-key",
+                "FPDS_LLM_MODEL": "gpt-test",
+            }
+            return values.get(key, default)
+
+        with (
+            patch("api_service.source_catalog.os.getenv", side_effect=fake_getenv),
+            patch(
+                "api_service.source_catalog._invoke_openai_parallel_scorer",
+                side_effect=RuntimeError("OpenAI Responses API request failed with status 429: insufficient_quota"),
+            ),
+        ):
+            result = _score_candidate_links_with_ai(
+                bank_code="CIBC",
+                bank_name="CIBC",
+                country_code="CA",
+                product_type="chequing",
+                discovery_product_type="chequing",
+                product_type_definition=_product_type_definition("chequing"),
+                source_language="en",
+                homepage_url="https://www.cibc.com/",
+                normalized_homepage_url="https://www.cibc.com/",
+                homepage_fetch_error=None,
+                candidates=[candidate],
+                run_id="run-cibc-chequing",
+                correlation_id="corr-001",
+                request_id="req-001",
+            )
+
+        self.assertEqual(result.scores, {})
+        self.assertTrue(result.ai_unavailable)
+        self.assertIsNotNone(result.model_execution_record)
+        assert result.model_execution_record is not None
+        self.assertEqual(result.model_execution_record["execution_status"], "failed")
+        self.assertEqual(result.model_execution_record["execution_metadata"]["fallback_mode"], "deterministic")
+        self.assertIn("429", result.model_execution_record["execution_metadata"]["error_summary"])
+        self.assertTrue(any("Deterministic homepage discovery fallback" in note for note in result.notes))
 
     def test_generate_sources_from_homepage_uses_bmo_seed_details_and_filters_unrelated_support(self) -> None:
         homepage_links = [

@@ -1,0 +1,143 @@
+{
+  "registry_version": "2026-05-01",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "gic-term-deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-GIC-002",
+  "sources": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Auto-generated GIC / Term Deposit detail source from bank homepage",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "interest_payment_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Flexible GIC | CIBC",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_page_evidence",
+        "ai_reason_codes": [],
+        "heuristic_score": 3,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. CIBC Flexible GIC\u00ae",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": null,
+        "ai_predicted_role": null,
+        "ai_confidence_band": null,
+        "ai_short_rationale": null,
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Auto-generated GIC / Term Deposit detail source from bank homepage",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "rate_structure"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Bonus Rate GIC | CIBC",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_page_evidence",
+        "ai_reason_codes": [],
+        "heuristic_score": 3,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. CIBC Bonus Rate GIC",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": null,
+        "ai_predicted_role": null,
+        "ai_confidence_band": null,
+        "ai_short_rationale": null,
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 4,
+        "selection_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

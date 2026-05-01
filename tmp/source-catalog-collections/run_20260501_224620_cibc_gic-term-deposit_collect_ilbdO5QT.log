@@ -1,0 +1,2217 @@
+[source-catalog-runner] starting run run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT for CIBC gic-term-deposit
+[source-collection-runner] run run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT starting snapshot for 2 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-6cce7ef9068fd7aa",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ef2928fb6b80206c/snap-6cce7ef9068fd7aa/raw",
+      "checksum": "ae112b29176405009ab63b069bc828c4bf710c45cf47c59160a9dd6c2c52d501",
+      "fingerprint": "9d1fadda1071049760ad09ac9f1b7a58a0295440ac689e87fa2844d8ae4da373",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:38.386892+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-6cce7ef9068fd7aa",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ef2928fb6b80206c/snap-6cce7ef9068fd7aa/raw",
+        "content_type": "text/html",
+        "checksum": "ae112b29176405009ab63b069bc828c4bf710c45cf47c59160a9dd6c2c52d501",
+        "fingerprint": "9d1fadda1071049760ad09ac9f1b7a58a0295440ac689e87fa2844d8ae4da373",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-GIC-002",
+          "request_url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+          "status_code": 200,
+          "content_length": 429874,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"68089-650c71066a2fc-gzip\"",
+          "last_modified": "Fri, 01 May 2026 20:02:44 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:38.386892+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8228e0a663651a52",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "selected_snapshot_id": "snap-6cce7ef9068fd7aa",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "ae112b29176405009ab63b069bc828c4bf710c45cf47c59160a9dd6c2c52d501",
+          "fingerprint": "9d1fadda1071049760ad09ac9f1b7a58a0295440ac689e87fa2844d8ae4da373",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ef2928fb6b80206c/snap-6cce7ef9068fd7aa/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "source_document_id": "src-cibc-html-f1c8cef54c499606",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-4ed2422eaab346f0",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-f1c8cef54c499606/snap-4ed2422eaab346f0/raw",
+      "checksum": "1124bcbaa06cd73be3d9f0a3d17b3fa23cc9be16d6c36f4feab2ec33552f1315",
+      "fingerprint": "9a191c0f793cca318e0350c8a0b54b0e01426d5d371053847ae8d12958ed4ce0",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:38.566547+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-4ed2422eaab346f0",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-f1c8cef54c499606/snap-4ed2422eaab346f0/raw",
+        "content_type": "text/html",
+        "checksum": "1124bcbaa06cd73be3d9f0a3d17b3fa23cc9be16d6c36f4feab2ec33552f1315",
+        "fingerprint": "9a191c0f793cca318e0350c8a0b54b0e01426d5d371053847ae8d12958ed4ce0",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-GIC-003",
+          "request_url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+          "status_code": 200,
+          "content_length": 573718,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"8b26d-650c707e07b69-gzip\"",
+          "last_modified": "Fri, 01 May 2026 20:00:21 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:38.566547+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fc82b1d919a33afc",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "selected_snapshot_id": "snap-4ed2422eaab346f0",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "1124bcbaa06cd73be3d9f0a3d17b3fa23cc9be16d6c36f4feab2ec33552f1315",
+          "fingerprint": "9a191c0f793cca318e0350c8a0b54b0e01426d5d371053847ae8d12958ed4ce0",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-f1c8cef54c499606/snap-4ed2422eaab346f0/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "correlation_id": "corr_MNtQp3N1XfbErhgn",
+    "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+    "stats": {
+      "source_total": 2,
+      "ok_count": 2,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "CIBC-GIC-002",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "expected_url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:37.165439+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-GIC-003",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "expected_url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:37.884419+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "run_state": "completed",
+    "source_document_count": 2,
+    "stored_snapshot_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-05-01T22:46:35.435116+00:00",
+    "completed_at": "2026-05-01T22:46:51.106557+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT continuing with 2 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+      "snapshot_id": "snap-6cce7ef9068fd7aa",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-6837312849f28ff6",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/metadata.json",
+      "chunk_count": 30,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8228e0a663651a52",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "selected_snapshot_id": "snap-6cce7ef9068fd7aa",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-6837312849f28ff6",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/metadata.json",
+          "chunk_count": 30,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "source_document_id": "src-cibc-html-f1c8cef54c499606",
+      "snapshot_id": "snap-4ed2422eaab346f0",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-737a86200ae509bd",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/metadata.json",
+      "chunk_count": 56,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fc82b1d919a33afc",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "selected_snapshot_id": "snap-4ed2422eaab346f0",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-737a86200ae509bd",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/metadata.json",
+          "chunk_count": 56,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "run_state": "completed",
+    "parsed_document_count": 2,
+    "evidence_chunk_count": 86,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:47:16.862761+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "extracted_field_count": 49,
+    "evidence_link_count": 36
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+      "snapshot_id": "snap-6cce7ef9068fd7aa",
+      "parsed_document_id": "parsed-6837312849f28ff6",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-5aef2197658479a2",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/metadata.json",
+      "runtime_notes": [
+        "Extracted grounded fields for CIBC Flexible GIC / Term Deposit. The product is identified as a cashable 1-year GIC with fixed rate, no fees, minimum investment amounts shown for different contexts, and registered account availability.",
+        "Dynamic product extraction AI supplemented 4 field candidate(s)."
+      ],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic-term-deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Flexible GIC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-00e18bba162e4861",
+          "evidence_text_excerpt": "CIBC Flexible GIC\u00ae\nPromotional rate",
+          "anchor_type": "section",
+          "anchor_value": "cibc-flexible-gic",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Learn About CIBC Mutual Fund Account Conversion",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "What you need to know Type Cashable Access Access your money at any time",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Otherwise, you have to cash out the full balance Interest Simple interest is calculated and paid at maturity If you cash out in the first 29 days, you're not paid interest If you cash out after 29 days, you're paid full interest up to the day you withdraw your money Fees You'll p",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-bd76ebea12080431",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time\nIf you cash out early, you need to withdraw a minimum of $500\nIf you withdraw some of your money, you need to keep at least $500 in your GIC. Otherwise, you have to cash out the full balance\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nYou'll pay a $100 fee if you transfer all or part of your RRSP funds to another financial institution\nRenewal\nWe automatically renew your GIC at maturity \u24d8 , unless you give us other instructions before the end of the term and we will repay you based on those instructions",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Depending on how much you invest, there's a minimum withdrawal amount if you cash out early Interest Simple interest is calculated and paid at maturity If you cash out in the first 29 days, you're not paid interest If you cash out after 29 days, you're paid full interest up to th",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "withdrawal"
+            ]
+          }
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-027fd0808cc63e8a",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "registered",
+              "rrsp"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 year",
+          "value_type": "string",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_term_text",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-0e1e71e55b931e4e",
+          "evidence_text_excerpt": "Term and rate\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8\n1 year\nRDS%rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\nFor posted rates, go to GIC rates .",
+          "anchor_type": "section",
+          "anchor_value": "term-and-rate",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "days",
+              "term",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": 365,
+          "value_type": "integer",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_term_days",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-0e1e71e55b931e4e",
+          "evidence_text_excerpt": "Term and rate\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8\n1 year\nRDS%rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\nFor posted rates, go to GIC rates .",
+          "anchor_type": "section",
+          "anchor_value": "term-and-rate",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "days",
+              "term",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cashable",
+              "early"
+            ]
+          }
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": false,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cashable"
+            ]
+          }
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_payout_option",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "at",
+              "at maturity",
+              "interest",
+              "maturity",
+              "paid"
+            ]
+          }
+        },
+        {
+          "field_name": "registered_plan_supported",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.64,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-027fd0808cc63e8a",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "plan",
+              "registered",
+              "rrsp"
+            ]
+          }
+        },
+        {
+          "field_name": "cashability",
+          "candidate_value": "Cashable",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "1 year",
+          "value_type": "string",
+          "confidence": 0.93,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-edae05512d2d198e",
+          "evidence_text_excerpt": "Why choose a CIBC Flexible GIC?\nThis 1-year GIC is right for you if you're saving for a short-term goal or want a place to park your money while you explore your long-term investment options.",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-flexible-gic",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "interest_payment_rules",
+          "candidate_value": "Simple interest is calculated and paid at maturity; if you cash out in the first 29 days, you're not paid interest; if you cash out after 29 days, you're paid full interest up to the day you withdraw your money.",
+          "value_type": "string",
+          "confidence": 0.98,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Flexible GIC",
+          "evidence_chunk_id": "chunk-00e18bba162e4861",
+          "evidence_text_excerpt": "CIBC Flexible GIC\u00ae\nPromotional rate",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "cibc-flexible-gic",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "What you need to know Type Cashable Access Access your money at any time",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Otherwise, you have to cash out the full balance Interest Simple interest is calculated and paid at maturity If you cash out in the first 29 days, you're not paid interest If you cash out after 29 days, you're paid full interest up to the day you withdraw your money Fees You'll p",
+          "evidence_chunk_id": "chunk-bd76ebea12080431",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time\nIf you cash out early, you need to withdraw a minimum of $500\nIf you withdraw some of your money, you need to keep at least $500 in your GIC. Otherwise, you have to cash out the full balance\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nYou'll pay a $100 fee if you transfer all or part of your RRSP funds to another financial institution\nRenewal\nWe automatically renew your GIC at maturity \u24d8 , unless you give us other instructions before the end of the term and we will repay you based on those instructions",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Depending on how much you invest, there's a minimum withdrawal amount if you cash out early Interest Simple interest is calculated and paid at maturity If you cash out in the first 29 days, you're not paid interest If you cash out after 29 days, you're paid full interest up to th",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-027fd0808cc63e8a",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 year",
+          "evidence_chunk_id": "chunk-0e1e71e55b931e4e",
+          "evidence_text_excerpt": "Term and rate\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8\n1 year\nRDS%rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\nFor posted rates, go to GIC rates .",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "term-and-rate",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": "365",
+          "evidence_chunk_id": "chunk-0e1e71e55b931e4e",
+          "evidence_text_excerpt": "Term and rate\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8\n1 year\nRDS%rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].FLGIC.Published(365_-_375_Days_D,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\nFor posted rates, go to GIC rates .",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "term-and-rate",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": "false",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "at_maturity",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "registered_plan_supported",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-027fd0808cc63e8a",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.64,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "cashability",
+          "candidate_value": "Cashable",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "1 year",
+          "evidence_chunk_id": "chunk-edae05512d2d198e",
+          "evidence_text_excerpt": "Why choose a CIBC Flexible GIC?\nThis 1-year GIC is right for you if you're saving for a short-term goal or want a place to park your money while you explore your long-term investment options.",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.93,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-flexible-gic",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "interest_payment_rules",
+          "candidate_value": "Simple interest is calculated and paid at maturity; if you cash out in the first 29 days, you're not paid interest; if you cash out after 29 days, you're paid full interest up to the day you withdraw your money.",
+          "evidence_chunk_id": "chunk-8b9312fdd08a7586",
+          "evidence_text_excerpt": "What you need to know\nType\nCashable\nAccess\nAccess your money at any time. Depending on how much you invest, there's a minimum withdrawal amount if you cash out early\nInterest\nSimple interest is calculated and paid at maturity\nIf you cash out in the first 29 days, you're not paid interest\nIf you cash out after 29 days, you're paid full interest up to the day you withdraw your money\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+          "source_snapshot_id": "snap-6cce7ef9068fd7aa",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 9
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8228e0a663651a52",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "selected_snapshot_id": "snap-6cce7ef9068fd7aa",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-6837312849f28ff6",
+          "model_execution_id": "modelexec-5aef2197658479a2",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ef2928fb6b80206c/parsed-6837312849f28ff6/metadata.json",
+          "extracted_field_count": 21,
+          "evidence_link_count": 14,
+          "runtime_notes": [
+            "Extracted grounded fields for CIBC Flexible GIC / Term Deposit. The product is identified as a cashable 1-year GIC with fixed rate, no fees, minimum investment amounts shown for different contexts, and registered account availability.",
+            "Dynamic product extraction AI supplemented 4 field candidate(s)."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "source_document_id": "src-cibc-html-f1c8cef54c499606",
+      "snapshot_id": "snap-4ed2422eaab346f0",
+      "parsed_document_id": "parsed-737a86200ae509bd",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-bc63783ec1f076ff",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/metadata.json",
+      "runtime_notes": [
+        "Extracted grounded fields for CIBC Bonus Rate GIC. The product is non-redeemable, accessible only at maturity, has no fees, offers fixed-rate guaranteed returns, and supports registered and non-registered accounts. Minimum investment is $1,000, with popular terms from 1 to 5 years. Interest options for terms of one year or more include simple interest paid monthly, semi-annually, or annually, or compound interest calculated annually and paid at maturity.",
+        "Dynamic product extraction AI supplemented 16 field candidate(s)."
+      ],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic-term-deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Bonus Rate GIC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-070fc40a7cc50c92",
+          "evidence_text_excerpt": "CIBC Bonus Rate GIC\nPromotional rate",
+          "anchor_type": "section",
+          "anchor_value": "cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "This GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "value_type": "string",
+          "confidence": 0.93,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-b8bf8155a9ebd387",
+          "evidence_text_excerpt": "Why choose a CIBC Bonus Rate GIC?\nThis GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "5000.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-18110a930eeb9b68",
+          "evidence_text_excerpt": "Terms and rates\nMinimum investment of $500\nTo open a CIBC RRIF account, you need a minimum balance of $5,000\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BONUSGIC.Published(1_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(1_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\n2 year\nRDS%rate[4].BONUSGIC.Published(2_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(2_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\n5 year\nRDS%rate[4].BONUSGIC.Published(5_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(5_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\nFor other terms and posted rates, go to GIC rates .",
+          "anchor_type": "section",
+          "anchor_value": "terms-and-rates",
+          "page_no": null,
+          "chunk_index": 19,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Why choose a CIBC Bonus Rate GIC? This GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-b8bf8155a9ebd387",
+          "evidence_text_excerpt": "Why choose a CIBC Bonus Rate GIC?\nThis GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "for",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-070fc40a7cc50c92",
+          "evidence_text_excerpt": "CIBC Bonus Rate GIC\nPromotional rate",
+          "anchor_type": "section",
+          "anchor_value": "cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "promotional",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": 365,
+          "value_type": "integer",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_term_days",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "term",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": false,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "redeemable"
+            ]
+          }
+        },
+        {
+          "field_name": "registered_plan_supported",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.64,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-025bd8bd413e7720",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 11,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "plan",
+              "registered",
+              "rrsp"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "$1,000",
+          "value_type": "string",
+          "confidence": 0.98,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "rate_structure",
+          "candidate_value": "fixed rate",
+          "value_type": "string",
+          "confidence": 0.94,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-bd283a1445204192",
+          "evidence_text_excerpt": "Guaranteed returns\nKnow exactly how much interest you'll earn with a fixed rate.",
+          "anchor_type": "section",
+          "anchor_value": "guaranteed-returns",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The CIBC Bonus Rate GIC is available in non-registered and registered accounts.",
+          "value_type": "string",
+          "confidence": 0.97,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-89c822b5a61c13b0",
+          "evidence_text_excerpt": "Find a GIC account that's right for you\nThe CIBC Bonus Rate GIC is available in non-registered and registered accounts. If you're saving for a long-term goal, such as retirement, consider a registered account for the tax benefits.\nNew to GICs? Check out our glossary opens in a new window.",
+          "anchor_type": "section",
+          "anchor_value": "find-a-gic-account-that-s-right-for-you",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.95,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-89c822b5a61c13b0",
+          "evidence_text_excerpt": "Find a GIC account that's right for you\nThe CIBC Bonus Rate GIC is available in non-registered and registered accounts. If you're saving for a long-term goal, such as retirement, consider a registered account for the tax benefits.\nNew to GICs? Check out our glossary opens in a new window.",
+          "anchor_type": "section",
+          "anchor_value": "find-a-gic-account-that-s-right-for-you",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "cashability",
+          "candidate_value": "Only at maturity",
+          "value_type": "string",
+          "confidence": 0.98,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "1 year, 18 months, 2 year, 3 year, 4 year, 5 year",
+          "value_type": "string",
+          "confidence": 0.96,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 year, 18 months, 2 year, 3 year, 4 year, 5 year",
+          "value_type": "string",
+          "confidence": 0.96,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.98,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "simple interest or compound interest",
+          "value_type": "string",
+          "confidence": 0.92,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly, semi-annually, annually, or at maturity",
+          "value_type": "string",
+          "confidence": 0.92,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "deposit your principal and interest into your bank account",
+          "value_type": "string",
+          "confidence": 0.82,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "compounding_frequency",
+          "candidate_value": "annually",
+          "value_type": "string",
+          "confidence": 0.95,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "No fees",
+          "value_type": "string",
+          "confidence": 0.97,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "No fees",
+          "value_type": "string",
+          "confidence": 0.97,
+          "extraction_method": "openai_dynamic_extractor",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "dynamic_product_type": true
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Bonus Rate GIC",
+          "evidence_chunk_id": "chunk-070fc40a7cc50c92",
+          "evidence_text_excerpt": "CIBC Bonus Rate GIC\nPromotional rate",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "This GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "evidence_chunk_id": "chunk-b8bf8155a9ebd387",
+          "evidence_text_excerpt": "Why choose a CIBC Bonus Rate GIC?\nThis GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.93,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "5000.00",
+          "evidence_chunk_id": "chunk-18110a930eeb9b68",
+          "evidence_text_excerpt": "Terms and rates\nMinimum investment of $500\nTo open a CIBC RRIF account, you need a minimum balance of $5,000\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BONUSGIC.Published(1_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(1_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\n2 year\nRDS%rate[4].BONUSGIC.Published(2_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(2_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\n5 year\nRDS%rate[4].BONUSGIC.Published(5_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,21,1)(#O2#)% + %rate[4].BONUSGIC.Published(5_null_null_Year_T,500.0_-_9.99999999E8_CAD_Balance,17,1)(#O2#)%\nFor other terms and posted rates, go to GIC rates .",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "terms-and-rates",
+          "page_no": null,
+          "chunk_index": 19
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "Why choose a CIBC Bonus Rate GIC? This GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "evidence_chunk_id": "chunk-b8bf8155a9ebd387",
+          "evidence_text_excerpt": "Why choose a CIBC Bonus Rate GIC?\nThis GIC is right for you if you want predictable earnings and don't need access to your money before the end of the term.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "why-choose-a-cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-070fc40a7cc50c92",
+          "evidence_text_excerpt": "CIBC Bonus Rate GIC\nPromotional rate",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "cibc-bonus-rate-gic",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": "365",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": "false",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "registered_plan_supported",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-025bd8bd413e7720",
+          "evidence_text_excerpt": "RRSP (Registered Retirement Savings Plan)\nYou pay no taxes while your money is in your RRSP, so you can maximize your retirement savings.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.64,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "rrsp-registered-retirement-savings-plan",
+          "page_no": null,
+          "chunk_index": 11
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "$1,000",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "rate_structure",
+          "candidate_value": "fixed rate",
+          "evidence_chunk_id": "chunk-bd283a1445204192",
+          "evidence_text_excerpt": "Guaranteed returns\nKnow exactly how much interest you'll earn with a fixed rate.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.94,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "guaranteed-returns",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The CIBC Bonus Rate GIC is available in non-registered and registered accounts.",
+          "evidence_chunk_id": "chunk-89c822b5a61c13b0",
+          "evidence_text_excerpt": "Find a GIC account that's right for you\nThe CIBC Bonus Rate GIC is available in non-registered and registered accounts. If you're saving for a long-term goal, such as retirement, consider a registered account for the tax benefits.\nNew to GICs? Check out our glossary opens in a new window.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.97,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "find-a-gic-account-that-s-right-for-you",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-89c822b5a61c13b0",
+          "evidence_text_excerpt": "Find a GIC account that's right for you\nThe CIBC Bonus Rate GIC is available in non-registered and registered accounts. If you're saving for a long-term goal, such as retirement, consider a registered account for the tax benefits.\nNew to GICs? Check out our glossary opens in a new window.",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.95,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "find-a-gic-account-that-s-right-for-you",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "cashability",
+          "candidate_value": "Only at maturity",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "term_options",
+          "candidate_value": "1 year, 18 months, 2 year, 3 year, 4 year, 5 year",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.96,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 year, 18 months, 2 year, 3 year, 4 year, 5 year",
+          "evidence_chunk_id": "chunk-e9dc72ba8ee30579",
+          "evidence_text_excerpt": "Our most popular terms\nMinimum investment of $1,000 \u24d8\nTerm\nRate \u24d8 , \u24d8\n1 year\nRDS%rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(12_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n18 months\nRDS%rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(18_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n2\u00a0year\nRDS%rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(24_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n3 year\nRDS%rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,21,1)(#O2#)% + %rate[4].BBLT.Published(36_null_null_Months_T,1000.0_-_4999.99_CAD_Balance,17,1)(#O2#)%\n4 year",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.96,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "our-most-popular-terms",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "simple interest or compound interest",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.92,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly, semi-annually, annually, or at maturity",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.92,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "payout_option",
+          "candidate_value": "deposit your principal and interest into your bank account",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.82,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "compounding_frequency",
+          "candidate_value": "annually",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.95,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "No fees",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.97,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "No fees",
+          "evidence_chunk_id": "chunk-6cb9d5a8547d0651",
+          "evidence_text_excerpt": "What you need to know\nType\nNon-redeemable\nAccess\nOnly at maturity\nInterest\nFor terms of one year or more, you can choose simple interest, which is calculated and paid monthly, semi-annually or annually. Or you can choose compound interest, which is calculated annually and paid at maturity\nFees\nNo fees\nRenewal\nYou can automatically renew your GIC when it matures \u24d8 or deposit your principal and interest into your bank account",
+          "source_document_id": "src-cibc-html-f1c8cef54c499606",
+          "source_snapshot_id": "snap-4ed2422eaab346f0",
+          "citation_confidence": 0.97,
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "anchor_type": "section",
+          "anchor_value": "what-you-need-to-know",
+          "page_no": null,
+          "chunk_index": 10
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fc82b1d919a33afc",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "selected_snapshot_id": "snap-4ed2422eaab346f0",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-737a86200ae509bd",
+          "model_execution_id": "modelexec-bc63783ec1f076ff",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-f1c8cef54c499606/parsed-737a86200ae509bd/metadata.json",
+          "extracted_field_count": 28,
+          "evidence_link_count": 22,
+          "runtime_notes": [
+            "Extracted grounded fields for CIBC Bonus Rate GIC. The product is non-redeemable, accessible only at maturity, has no fees, offers fixed-rate guaranteed returns, and supports registered and non-registered accounts. Minimum investment is $1,000, with popular terms from 1 to 5 years. Interest options for terms of one year or more include simple interest paid monthly, semi-annually, or annually, or compound interest calculated annually and paid at maturity.",
+            "Dynamic product extraction AI supplemented 16 field candidate(s)."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "run_state": "completed",
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "extracted_draft_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:47:44.205736+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "candidate_count": 2,
+    "field_evidence_link_count": 36
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+      "snapshot_id": "snap-6cce7ef9068fd7aa",
+      "parsed_document_id": "parsed-6837312849f28ff6",
+      "extraction_model_execution_id": "modelexec-5aef2197658479a2",
+      "normalization_action": "stored",
+      "candidate_id": "cand-9226fa10f559fe60",
+      "normalization_model_execution_id": "modelexec-9141bd97ca15f3cc",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.74,
+      "runtime_notes": [
+        "Conservatively normalized the deposit product using only grounded extracted evidence. Kept the obvious subtype as a flexible/cashable GIC term deposit, and retained core terms and payout/interest facts. No unsupported inference added beyond what is explicitly stated.",
+        "Dynamic product normalization AI mapped 18 canonical field(s).",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+      ],
+      "error_summary": null,
+      "field_evidence_link_count": 14,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8228e0a663651a52",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "selected_snapshot_id": "snap-6cce7ef9068fd7aa",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-9226fa10f559fe60",
+          "normalization_model_execution_id": "modelexec-9141bd97ca15f3cc",
+          "extraction_model_execution_id": "modelexec-5aef2197658479a2",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.74,
+          "field_evidence_link_count": 14,
+          "runtime_notes": [
+            "Conservatively normalized the deposit product using only grounded extracted evidence. Kept the obvious subtype as a flexible/cashable GIC term deposit, and retained core terms and payout/interest facts. No unsupported inference added beyond what is explicitly stated.",
+            "Dynamic product normalization AI mapped 18 canonical field(s).",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "source_document_id": "src-cibc-html-f1c8cef54c499606",
+      "snapshot_id": "snap-4ed2422eaab346f0",
+      "parsed_document_id": "parsed-737a86200ae509bd",
+      "extraction_model_execution_id": "modelexec-bc63783ec1f076ff",
+      "normalization_action": "stored",
+      "candidate_id": "cand-8ccbf8709227450f",
+      "normalization_model_execution_id": "modelexec-64f34c252e8ce4f9",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "invalid_numeric_range"
+      ],
+      "source_confidence": 0.6,
+      "runtime_notes": [
+        "Normalized conservative candidate payload for CIBC Bonus Rate GIC using only grounded extracted fields. Kept subtype as other because the specific GIC subtype is not explicit enough to map beyond the generic term-deposit category.",
+        "Dynamic product normalization AI mapped 27 canonical field(s).",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+      ],
+      "error_summary": null,
+      "field_evidence_link_count": 22,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fc82b1d919a33afc",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "selected_snapshot_id": "snap-4ed2422eaab346f0",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-8ccbf8709227450f",
+          "normalization_model_execution_id": "modelexec-64f34c252e8ce4f9",
+          "extraction_model_execution_id": "modelexec-bc63783ec1f076ff",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "invalid_numeric_range"
+          ],
+          "source_confidence": 0.6,
+          "field_evidence_link_count": 22,
+          "runtime_notes": [
+            "Normalized conservative candidate payload for CIBC Bonus Rate GIC using only grounded extracted fields. Kept subtype as other because the specific GIC subtype is not explicit enough to map beyond the generic term-deposit category.",
+            "Dynamic product normalization AI mapped 27 canonical field(s).",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "field_evidence_link_count": 36,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:14.621862+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "queued_count": 2,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 2
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+      "snapshot_id": "snap-6cce7ef9068fd7aa",
+      "parsed_document_id": "parsed-6837312849f28ff6",
+      "candidate_id": "cand-9226fa10f559fe60",
+      "candidate_run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-9ab128ef175ff513",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/metadata.json",
+      "review_task_id": "review-6cd2778260180548",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.72,
+      "candidate_state": "in_review",
+      "review_reason_code": "manual_sampling_review",
+      "queue_reason_codes": [
+        "manual_sampling_review"
+      ],
+      "runtime_notes": [
+        "Conservatively normalized the deposit product using only grounded extracted evidence. Kept the obvious subtype as a flexible/cashable GIC term deposit, and retained core terms and payout/interest facts. No unsupported inference added beyond what is explicitly stated.",
+        "Dynamic product normalization AI mapped 18 canonical field(s).",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+        "Candidate routed to review in `phase1` mode with primary reason `manual_sampling_review`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8228e0a663651a52",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-ef2928fb6b80206c",
+        "selected_snapshot_id": "snap-6cce7ef9068fd7aa",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-9226fa10f559fe60",
+          "candidate_run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+          "validation_model_execution_id": "modelexec-9ab128ef175ff513",
+          "normalization_model_execution_id": "modelexec-9141bd97ca15f3cc",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ef2928fb6b80206c/cand-9226fa10f559fe60/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.72,
+          "candidate_state": "in_review",
+          "review_reason_code": "manual_sampling_review",
+          "queue_reason_codes": [
+            "manual_sampling_review"
+          ],
+          "review_task_id": "review-6cd2778260180548",
+          "runtime_notes": [
+            "Conservatively normalized the deposit product using only grounded extracted evidence. Kept the obvious subtype as a flexible/cashable GIC term deposit, and retained core terms and payout/interest facts. No unsupported inference added beyond what is explicitly stated.",
+            "Dynamic product normalization AI mapped 18 canonical field(s).",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+            "Candidate routed to review in `phase1` mode with primary reason `manual_sampling_review`."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "source_document_id": "src-cibc-html-f1c8cef54c499606",
+      "snapshot_id": "snap-4ed2422eaab346f0",
+      "parsed_document_id": "parsed-737a86200ae509bd",
+      "candidate_id": "cand-8ccbf8709227450f",
+      "candidate_run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-da7c64a81f409e01",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/metadata.json",
+      "review_task_id": "review-307e2d94c79731d7",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "invalid_numeric_range"
+      ],
+      "source_confidence": 0.6443,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "manual_sampling_review"
+      ],
+      "runtime_notes": [
+        "Normalized conservative candidate payload for CIBC Bonus Rate GIC using only grounded extracted fields. Kept subtype as other because the specific GIC subtype is not explicit enough to map beyond the generic term-deposit category.",
+        "Dynamic product normalization AI mapped 27 canonical field(s).",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fc82b1d919a33afc",
+        "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+        "source_document_id": "src-cibc-html-f1c8cef54c499606",
+        "selected_snapshot_id": "snap-4ed2422eaab346f0",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-8ccbf8709227450f",
+          "candidate_run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+          "validation_model_execution_id": "modelexec-da7c64a81f409e01",
+          "normalization_model_execution_id": "modelexec-64f34c252e8ce4f9",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-f1c8cef54c499606/cand-8ccbf8709227450f/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "invalid_numeric_range"
+          ],
+          "source_confidence": 0.6443,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "manual_sampling_review"
+          ],
+          "review_task_id": "review-307e2d94c79731d7",
+          "runtime_notes": [
+            "Normalized conservative candidate payload for CIBC Bonus Rate GIC using only grounded extracted fields. Kept subtype as other because the specific GIC subtype is not explicit enough to map beyond the generic term-deposit category.",
+            "Dynamic product normalization AI mapped 27 canonical field(s).",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "review_task_count": 2,
+    "review_queued_count": 2,
+    "auto_validated_count": 0,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:38.182593+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT completed downstream stages
+[source-catalog-runner] finished run run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT

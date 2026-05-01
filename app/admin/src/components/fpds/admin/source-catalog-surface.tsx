@@ -74,9 +74,9 @@ const CATALOG_COPY = {
     selectFirst: "Select at least one source catalog item before starting collection.",
     collectFailed: "Collection could not be launched.",
     collectApiFailed: "Collection could not be launched. Check the admin API and try again.",
-    queued: (count: number) => `Queued collection for ${count} catalog item(s).`,
+    queued: (_count: number) => "Collection queued.",
     queuedDetail: (count: number) =>
-      `${count} run(s) were created immediately, and homepage discovery plus source collection will continue on the server in the background.`,
+      `${count} ${count === 1 ? "run" : "runs"} created.`,
     openRuns:
       "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
     noDetail: (count: number) =>
@@ -124,9 +124,9 @@ const CATALOG_COPY = {
     selectFirst: "Collection을 시작하기 전에 source catalog 항목을 하나 이상 선택하세요.",
     collectFailed: "Collection을 실행할 수 없습니다.",
     collectApiFailed: "Collection을 실행할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
-    queued: (count: number) => `catalog 항목 ${count}개의 collection이 대기열에 등록되었습니다.`,
+    queued: (_count: number) => "Collection이 대기열에 등록되었습니다.",
     queuedDetail: (count: number) =>
-      `run ${count}개가 즉시 생성되었고, homepage discovery와 source collection은 서버 백그라운드에서 계속됩니다.`,
+      `${count}개 run이 생성되었습니다.`,
     openRuns: "잠시 후 Runs에서 no-detail, timeout, collection 결과를 확인하세요.",
     noDetail: (count: number) =>
       `catalog 항목 ${count}개의 homepage discovery가 완료되었지만 collection할 detail source를 찾지 못했습니다.`,
@@ -173,9 +173,9 @@ const CATALOG_COPY = {
     selectFirst: "Collection を開始する前に source catalog 項目を1件以上選択してください。",
     collectFailed: "Collection を実行できません。",
     collectApiFailed: "Collection を実行できません。Admin APIを確認してから再試行してください。",
-    queued: (count: number) => `${count} 件の catalog 項目の collection をキューに追加しました。`,
+    queued: (_count: number) => "Collection をキューに追加しました。",
     queuedDetail: (count: number) =>
-      `${count} 件の run が即時作成され、homepage discovery と source collection はサーバー上で継続します。`,
+      `${count} 件の run を作成しました。`,
     openRuns: "少し待ってから Runs で no-detail、timeout、collection の結果を確認してください。",
     noDetail: (count: number) =>
       `${count} 件の catalog 項目で homepage discovery は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
@@ -500,7 +500,6 @@ function buildCatalogCollectMessage(
     return [
       copy.queued(selectedCatalogItemCount),
       copy.queuedDetail(payload.run_ids.length),
-      copy.openRuns,
     ].join(" ");
   }
 

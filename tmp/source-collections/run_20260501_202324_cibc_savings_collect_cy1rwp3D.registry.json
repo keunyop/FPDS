@@ -1,0 +1,262 @@
+{
+  "registry_version": "2026-05-01",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-SAV-002",
+  "sources": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Auto-generated Savings detail source from bank homepage",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "regular_interest_rate",
+        "smart_interest_rate",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "eAdvantage Savings Account \u2014 High Interest Savings | CIBC",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_page_evidence",
+        "ai_reason_codes": [],
+        "heuristic_score": 8,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. CIBC eAdvantage\u00ae Savings Account \u2014 High Interest Savings",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": null,
+        "ai_predicted_role": null,
+        "ai_confidence_band": null,
+        "ai_short_rationale": null,
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 8,
+        "selection_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC personal bank account rates page",
+      "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "personal_account_rate_tables"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC eAdvantage interest rate terms page",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+      "expected_fields": [
+        "special_rate_rules",
+        "regular_interest_rules",
+        "bonus_interest_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Auto-generated Savings detail source from bank homepage",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "regular_interest_rate",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "US$ Personal Account for Canadians | CIBC",
+        "heading_match": true,
+        "selection_path": "seed_hint_plus_page_evidence",
+        "ai_reason_codes": [],
+        "heuristic_score": 5,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. Open a US$ Personal Account for Canadians Deposit, withdraw and save your U.S. dollars.",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": null,
+        "ai_predicted_role": null,
+        "ai_confidence_band": null,
+        "ai_short_rationale": null,
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
+        "selection_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-e790a18681",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

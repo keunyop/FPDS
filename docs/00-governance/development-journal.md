@@ -62,6 +62,44 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-01 - Admin Bank Collect Queued Message Simplification
+
+- WBS: `5.15`, admin source registry UI polish
+- Status: `done`
+- Goal: shorten the success message shown after selecting bank rows and starting collection.
+- Why now: the Product Owner reported that the queued collection success toast was too long because it explained background homepage discovery, source collection, and Runs inspection details in one message.
+- Outcome: reduced the bank-list bulk collect queued message to a concise two-part status: collection queued plus created run count. Matched the same queued wording pattern on the source-catalog compatibility collect path so the older route does not keep the verbose copy.
+- Not done: no broader admin copy audit or locale-resource cleanup was included.
+- Key files: `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/source-catalog-surface.tsx`
+- Decisions: keep detailed no-detail, timeout, and collection outcome inspection in the Runs surface instead of repeating it in the success toast.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+- Known issues: existing unrelated API/source-catalog worktree changes and temporary run artifacts were already present before this slice and were left untouched.
+- Next step: verify the shorter toast in-browser during the next admin collect run.
+
+## 2026-05-01 - CIBC Chequing Discovery AI-Unavailable Fallback
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: prevent CIBC chequing homepage-first source collection from producing zero detail sources solely because the AI parallel scorer hit OpenAI quota failure.
+- Why now: the Product Owner ran CIBC collection on `2026-05-01`; savings and GIC produced reviewable candidates, but chequing ended as partial completion with `0 source items` and an OpenAI `429 insufficient_quota` discovery note.
+- Outcome: made AI scorer unavailability explicit through an `ai_unavailable` result flag, added failed `model_execution` persistence for OpenAI scorer exceptions when a run id is available, and added deterministic fallback metadata for AI-unavailable discovery. Seed-backed detail hints such as CIBC Smart Account and Smart Plus can now promote through a reviewable `seed_hint_ai_unavailable_low_page_evidence` path when AI is unavailable and page evidence is weak but not hard-negative. A follow-up CIBC rerun showed AI scoring could be available but still leave zero detail rows when official seed pages carried weak evidence plus a generic negative signal; seed detail rejection now requires a hard negative signal such as a search tool, comparison, calculator, login, or sign-in page, while non-seed AI-unavailable candidates still require stricter deterministic page evidence before promotion.
+- Not done: no live CIBC rerun or DB mutation was executed from code. The reported `run_20260501_202324_cibc_chequing_collect_VP9FPknW` remains a historical partial-completion run artifact.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`
+- Decisions: keep OpenAI parallel scoring as a quality signal, not a run blocker. Preserve operator-removal semantics and hard-negative rejection for clearly non-detail seed pages, while allowing approved seed detail hints to keep collection moving when provider quota is unavailable.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog.SourceCatalogTests.test_generate_sources_from_homepage_promotes_cibc_seed_details_when_ai_is_unavailable api.service.tests.test_source_catalog.SourceCatalogTests.test_ai_candidate_scorer_records_failed_execution_when_openai_quota_is_exceeded api.service.tests.test_source_catalog.SourceCatalogTests.test_ai_candidate_scorer_accepts_discovery_product_type_profile`
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog.SourceCatalogTests.test_generate_sources_from_homepage_keeps_cibc_seed_details_when_ai_scores_but_page_evidence_is_weak api.service.tests.test_source_catalog.SourceCatalogTests.test_generate_sources_from_homepage_promotes_cibc_seed_details_when_ai_is_unavailable api.service.tests.test_source_catalog.SourceCatalogTests.test_seed_detail_low_page_evidence_with_negative_signal_is_not_promoted`
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_registry api.service.tests.test_source_collection_runner`
+  - `python -m compileall api\service\api_service`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `git diff --check -- api/service/api_service/source_catalog.py api/service/tests/test_source_catalog.py`
+- Known issues: system Python could not run API regression tests because `pydantic` is not installed there; the API `.venv` regression run passed. CIBC chequing should be rerun to create fresh generated sources and candidates after restarting the relevant runtime.
+- Next step: rerun CIBC chequing collection and verify generated `CIBC-CHQ-002`/`CIBC-CHQ-003` detail sources enter source collection even if the OpenAI scorer is quota-limited.
+
 ## 2026-05-01 - Review Detail And Decision Response Isolation
 
 - WBS: `4.4`, `4.7`, admin runtime hardening

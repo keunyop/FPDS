@@ -1,0 +1,2407 @@
+[source-catalog-runner] starting run run_20260501_224620_cibc_chequing_collect_Gx8ajUG4 for CIBC chequing
+[source-collection-runner] run run_20260501_224620_cibc_chequing_collect_Gx8ajUG4 starting snapshot for 4 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 4,
+    "stored_count": 4,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-41b10b36a3073771",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/snap-41b10b36a3073771/raw",
+      "checksum": "285cc85abd44357717a0b2d1aa2f2e9e36c3bd58ffff78fdf6513921ac964688",
+      "fingerprint": "f62768da5b64ca9451312ae5ffa37a7257d9f0d5f5b6f72eb2c3a1553cdf56c3",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:41.057716+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-41b10b36a3073771",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/snap-41b10b36a3073771/raw",
+        "content_type": "text/html",
+        "checksum": "285cc85abd44357717a0b2d1aa2f2e9e36c3bd58ffff78fdf6513921ac964688",
+        "fingerprint": "f62768da5b64ca9451312ae5ffa37a7257d9f0d5f5b6f72eb2c3a1553cdf56c3",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-CHQ-002",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+          "status_code": 200,
+          "content_length": 380094,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"5be17-650bc4be77acc-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:11:57 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:41.057716+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b25467b8d8ae45d3",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "selected_snapshot_id": "snap-41b10b36a3073771",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "285cc85abd44357717a0b2d1aa2f2e9e36c3bd58ffff78fdf6513921ac964688",
+          "fingerprint": "f62768da5b64ca9451312ae5ffa37a7257d9f0d5f5b6f72eb2c3a1553cdf56c3",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/snap-41b10b36a3073771/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-ec6206cec87bbea5",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/snap-ec6206cec87bbea5/raw",
+      "checksum": "6460a6074cde943ed3b9ac281089208aaf58ff434f559d4085bd3915d241aa93",
+      "fingerprint": "cba426cda24c3bebbb6e8de5756d10439ea87c18c8eaa68146dd35c925896727",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:41.330836+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-ec6206cec87bbea5",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/snap-ec6206cec87bbea5/raw",
+        "content_type": "text/html",
+        "checksum": "6460a6074cde943ed3b9ac281089208aaf58ff434f559d4085bd3915d241aa93",
+        "fingerprint": "cba426cda24c3bebbb6e8de5756d10439ea87c18c8eaa68146dd35c925896727",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-CHQ-003",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-plus-account.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+          "status_code": 200,
+          "content_length": 380094,
+          "content_type": "text/html",
+          "redirect_count": 1,
+          "etag": "\"5be17-650bc4be77acc-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:11:57 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:41.330836+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-369b3981783ff35a",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "selected_snapshot_id": "snap-ec6206cec87bbea5",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "6460a6074cde943ed3b9ac281089208aaf58ff434f559d4085bd3915d241aa93",
+          "fingerprint": "cba426cda24c3bebbb6e8de5756d10439ea87c18c8eaa68146dd35c925896727",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/snap-ec6206cec87bbea5/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "warning",
+          "preflight_issue_codes": [
+            "final_url_changed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-947907a76c3b178f",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-947907a76c3b178f/raw",
+      "checksum": "40a3e2617559ab43ff63473d53e4e05f463b1196ff74e15272e1940909e473fc",
+      "fingerprint": "f183d9b11c2a38a1929e1e25c2dad8f7d679d9014d96faaccf03f6005e646e59",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:41.330170+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-947907a76c3b178f",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-947907a76c3b178f/raw",
+        "content_type": "text/html",
+        "checksum": "40a3e2617559ab43ff63473d53e4e05f463b1196ff74e15272e1940909e473fc",
+        "fingerprint": "f183d9b11c2a38a1929e1e25c2dad8f7d679d9014d96faaccf03f6005e646e59",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-CHQ-004",
+          "request_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+          "final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+          "status_code": 200,
+          "content_length": 205797,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"3153b-650bc40490a99-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:08:42 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:41.330170+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-bf2cc882ff1caf91",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-947907a76c3b178f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "40a3e2617559ab43ff63473d53e4e05f463b1196ff74e15272e1940909e473fc",
+          "fingerprint": "f183d9b11c2a38a1929e1e25c2dad8f7d679d9014d96faaccf03f6005e646e59",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-947907a76c3b178f/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-005",
+      "source_document_id": "src-cibc-html-9f1a023d031ba878",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-c38044333d18e7b2",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-9f1a023d031ba878/snap-c38044333d18e7b2/raw",
+      "checksum": "d4608097e5573577dc789740ff17f039b76d4dbf190ff95a001d8cbd9f9854ad",
+      "fingerprint": "6e5014b48f700c51596a3cc4a8c73caac3d9b3ad240ef06162269d723314e2a2",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:41.527580+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-c38044333d18e7b2",
+        "source_document_id": "src-cibc-html-9f1a023d031ba878",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-9f1a023d031ba878/snap-c38044333d18e7b2/raw",
+        "content_type": "text/html",
+        "checksum": "d4608097e5573577dc789740ff17f039b76d4dbf190ff95a001d8cbd9f9854ad",
+        "fingerprint": "6e5014b48f700c51596a3cc4a8c73caac3d9b3ad240ef06162269d723314e2a2",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-CHQ-005",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+          "status_code": 200,
+          "content_length": 303150,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"49184-650bd2af396c4-gzip\"",
+          "last_modified": "Fri, 01 May 2026 08:14:19 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:41.527580+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8ae44887df6b312f",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-9f1a023d031ba878",
+        "selected_snapshot_id": "snap-c38044333d18e7b2",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "d4608097e5573577dc789740ff17f039b76d4dbf190ff95a001d8cbd9f9854ad",
+          "fingerprint": "6e5014b48f700c51596a3cc4a8c73caac3d9b3ad240ef06162269d723314e2a2",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-9f1a023d031ba878/snap-c38044333d18e7b2/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "correlation_id": "corr_MNtQp3N1XfbErhgn",
+    "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+    "stats": {
+      "source_total": 4,
+      "ok_count": 3,
+      "warning_count": 1,
+      "error_count": 0,
+      "issue_total": 1
+    },
+    "source_checks": [
+      {
+        "source_id": "CIBC-CHQ-002",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:38.473916+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-CHQ-003",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-plus-account.html",
+        "expected_source_type": "html",
+        "status": "warning",
+        "fetched_at": "2026-05-01T22:46:39.183422+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 1,
+        "error_summary": null,
+        "issues": [
+          {
+            "source_id": "CIBC-CHQ-003",
+            "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+            "issue_code": "final_url_changed",
+            "severity": "warning",
+            "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-plus-account.html",
+            "detected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+            "expected_source_type": "html",
+            "detected_content_type": "text/html",
+            "message": "Final fetched URL differs from the approved active registry URL."
+          }
+        ]
+      },
+      {
+        "source_id": "CIBC-CHQ-004",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "expected_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:39.531528+00:00",
+        "final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "normalized_final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-CHQ-005",
+        "source_document_id": "src-cibc-html-9f1a023d031ba878",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:39.903207+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "run_state": "completed",
+    "source_document_count": 4,
+    "stored_snapshot_count": 4,
+    "run_source_item_count": 4,
+    "source_success_count": 4,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-05-01T22:46:36.847970+00:00",
+    "completed_at": "2026-05-01T22:46:53.002833+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_chequing_collect_Gx8ajUG4 continuing with 4 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 4,
+    "stored_count": 4,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+      "snapshot_id": "snap-41b10b36a3073771",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-47e44b6815a50489",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/metadata.json",
+      "chunk_count": 21,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b25467b8d8ae45d3",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "selected_snapshot_id": "snap-41b10b36a3073771",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-47e44b6815a50489",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/metadata.json",
+          "chunk_count": 21,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+      "snapshot_id": "snap-ec6206cec87bbea5",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-cd851b13f6b56fae",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/metadata.json",
+      "chunk_count": 21,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-369b3981783ff35a",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "selected_snapshot_id": "snap-ec6206cec87bbea5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-cd851b13f6b56fae",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/metadata.json",
+          "chunk_count": 21,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_id": "snap-947907a76c3b178f",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-466e9b21f5155b21",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+      "chunk_count": 7,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-bf2cc882ff1caf91",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-947907a76c3b178f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-466e9b21f5155b21",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+          "chunk_count": 7,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-005",
+      "source_document_id": "src-cibc-html-9f1a023d031ba878",
+      "snapshot_id": "snap-c38044333d18e7b2",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-e7a1618730e2fa6e",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/metadata.json",
+      "chunk_count": 22,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8ae44887df6b312f",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-9f1a023d031ba878",
+        "selected_snapshot_id": "snap-c38044333d18e7b2",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-e7a1618730e2fa6e",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/metadata.json",
+          "chunk_count": 22,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "run_state": "completed",
+    "parsed_document_count": 4,
+    "evidence_chunk_count": 71,
+    "run_source_item_count": 4,
+    "source_success_count": 4,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:47:37.023607+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 4,
+    "stored_count": 4,
+    "failed_count": 0,
+    "extracted_field_count": 54,
+    "evidence_link_count": 22
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+      "snapshot_id": "snap-41b10b36a3073771",
+      "parsed_document_id": "parsed-47e44b6815a50489",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-dfea907cf182a128",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Smart Account | CIBC",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Chequing accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.9,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee",
+              "service"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Qualifying actions apply",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-9545722eb54f898b",
+          "evidence_text_excerpt": "CIBC Smart\u00ae Account\nSpecial offer\nBundle to earn up to $850 \u24d8 , \u24d8 then add the CIBC Dividend\u00ae Visa Infinite* Card. Qualifying actions apply. \u2020, \u2021\nLearn more about the special offer for the CIBC Smart Account.\nOverview\nFees and details",
+          "anchor_type": "section",
+          "anchor_value": "cibc-smart-account",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-c5c0bc024a3845bd",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "transactions",
+              "unlimited",
+              "unlimited transactions"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.71,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-c5c0bc024a3845bd",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-bb9cad97cca3f820",
+          "evidence_text_excerpt": "Get extra perks with your everyday banking\nSend money internationally with no transfer fee \u24d8 with CIBC Global Money Transfer\u2122\nProtect yourself from temporary cash shortfalls with CIBC Overdraft Protection Service\nGet exclusive offers with our partners including Skip , Journie Rewards and Paymi",
+          "anchor_type": "section",
+          "anchor_value": "get-extra-perks-with-your-everyday-banking",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-0d9b5c0000543258",
+          "evidence_text_excerpt": "Students age 25 and up\nUnlimited banking for full-time university, college and CEGEP students graduating at age 25 and up \u24d8 .",
+          "anchor_type": "section",
+          "anchor_value": "students-age-25-and-up",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "student"
+            ]
+          }
+        },
+        {
+          "field_name": "newcomer_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "evidence_chunk_id": "chunk-86a5e558a412701d",
+          "evidence_text_excerpt": "New to Canada\nStart banking in Canada with the account designed for your new life and pay no monthly fee for 2 years \u24d8 .",
+          "anchor_type": "section",
+          "anchor_value": "new-to-canada",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "new",
+              "new to canada",
+              "to"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.9,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-55759357a26e19f8",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Qualifying actions apply",
+          "evidence_chunk_id": "chunk-9545722eb54f898b",
+          "evidence_text_excerpt": "CIBC Smart\u00ae Account\nSpecial offer\nBundle to earn up to $850 \u24d8 , \u24d8 then add the CIBC Dividend\u00ae Visa Infinite* Card. Qualifying actions apply. \u2020, \u2021\nLearn more about the special offer for the CIBC Smart Account.\nOverview\nFees and details",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "cibc-smart-account",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-c5c0bc024a3845bd",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-c5c0bc024a3845bd",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.71,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-bb9cad97cca3f820",
+          "evidence_text_excerpt": "Get extra perks with your everyday banking\nSend money internationally with no transfer fee \u24d8 with CIBC Global Money Transfer\u2122\nProtect yourself from temporary cash shortfalls with CIBC Overdraft Protection Service\nGet exclusive offers with our partners including Skip , Journie Rewards and Paymi",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "get-extra-perks-with-your-everyday-banking",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-0d9b5c0000543258",
+          "evidence_text_excerpt": "Students age 25 and up\nUnlimited banking for full-time university, college and CEGEP students graduating at age 25 and up \u24d8 .",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "students-age-25-and-up",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "newcomer_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-86a5e558a412701d",
+          "evidence_text_excerpt": "New to Canada\nStart banking in Canada with the account designed for your new life and pay no monthly fee for 2 years \u24d8 .",
+          "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+          "source_snapshot_id": "snap-41b10b36a3073771",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "anchor_type": "section",
+          "anchor_value": "new-to-canada",
+          "page_no": null,
+          "chunk_index": 13
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b25467b8d8ae45d3",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "selected_snapshot_id": "snap-41b10b36a3073771",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-47e44b6815a50489",
+          "model_execution_id": "modelexec-dfea907cf182a128",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/parsed-47e44b6815a50489/metadata.json",
+          "extracted_field_count": 17,
+          "evidence_link_count": 9,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+      "snapshot_id": "snap-ec6206cec87bbea5",
+      "parsed_document_id": "parsed-cd851b13f6b56fae",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-0a5a019bbf48eff0",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC Smart Account | CIBC",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Chequing accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.9,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee",
+              "service"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Qualifying actions apply",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-4a243605b26840ee",
+          "evidence_text_excerpt": "CIBC Smart\u00ae Account\nSpecial offer\nBundle to earn up to $850 \u24d8 , \u24d8 then add the CIBC Dividend\u00ae Visa Infinite* Card. Qualifying actions apply. \u2020, \u2021\nLearn more about the special offer for the CIBC Smart Account.\nOverview\nFees and details",
+          "anchor_type": "section",
+          "anchor_value": "cibc-smart-account",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-1085d814d8524794",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "transactions",
+              "unlimited",
+              "unlimited transactions"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.71,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-1085d814d8524794",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-731e461e46bd4dfa",
+          "evidence_text_excerpt": "Get extra perks with your everyday banking\nSend money internationally with no transfer fee \u24d8 with CIBC Global Money Transfer\u2122\nProtect yourself from temporary cash shortfalls with CIBC Overdraft Protection Service\nGet exclusive offers with our partners including Skip , Journie Rewards and Paymi",
+          "anchor_type": "section",
+          "anchor_value": "get-extra-perks-with-your-everyday-banking",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-057d18d30d3e485a",
+          "evidence_text_excerpt": "Students age 25 and up\nUnlimited banking for full-time university, college and CEGEP students graduating at age 25 and up \u24d8 .",
+          "anchor_type": "section",
+          "anchor_value": "students-age-25-and-up",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "student"
+            ]
+          }
+        },
+        {
+          "field_name": "newcomer_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "evidence_chunk_id": "chunk-e442c115080bcbaa",
+          "evidence_text_excerpt": "New to Canada\nStart banking in Canada with the account designed for your new life and pay no monthly fee for 2 years \u24d8 .",
+          "anchor_type": "section",
+          "anchor_value": "new-to-canada",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "new",
+              "new to canada",
+              "to"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.9,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-94622b96aff53325",
+          "evidence_text_excerpt": "Tier 3\n$100,000 or more in average monthly\u00a0eligible balances Learn about eligible balances. Opens in a dialog.\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $0\nTransactions \u24d8 : Unlimited, including Interac e-Transfer transactions \u24d8\nATM fees : Fees for unlimited non-CIBC ATM withdrawals in Canada, the U.S. and internationally are rebated each month \u24d8\nCredit card annual fee rebate : Up to\u00a0$139\u00a0for the primary cardholder; up to $50 each for up to 3 authorized users \u24d8\nCIBC Overdraft Protection Service : Monthly Fixed\u00a0Fee \u24d8 is not applied on up to 3 CIBC Smart Accounts \u24d8\nNo monthly account fee for youth and students under 25 \u24d8 , students age 25 and up \u24d8 , seniors \u24d8 , newcomers \u24d8 , foreign workers \u24d8 ,\u00a0RDSP beneficiaries and recipients of the Disability Tax Credit. Applies to all CIBC Smart Accounts, no minimum balance required. \u24d8",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "tier-3",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Qualifying actions apply",
+          "evidence_chunk_id": "chunk-4a243605b26840ee",
+          "evidence_text_excerpt": "CIBC Smart\u00ae Account\nSpecial offer\nBundle to earn up to $850 \u24d8 , \u24d8 then add the CIBC Dividend\u00ae Visa Infinite* Card. Qualifying actions apply. \u2020, \u2021\nLearn more about the special offer for the CIBC Smart Account.\nOverview\nFees and details",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "cibc-smart-account",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-1085d814d8524794",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-1085d814d8524794",
+          "evidence_text_excerpt": "Discover ways to save with your chequing account\nMonthly fee for up to 3 accounts \u24d8 , \u24d8 : $16.95 or $0 , monthly fee rebated with an end-of-day account balance of $4,000 each day for that month in one CIBC Smart Account\nOpportunities for annual fee rebates on an active \u24d8 eligible \u24d8 credit card\nUnlimited transactions \u24d8 , including Interac e-Transfer transactions \u24d8",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.71,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "discover-ways-to-save-with-your-chequing-account",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-731e461e46bd4dfa",
+          "evidence_text_excerpt": "Get extra perks with your everyday banking\nSend money internationally with no transfer fee \u24d8 with CIBC Global Money Transfer\u2122\nProtect yourself from temporary cash shortfalls with CIBC Overdraft Protection Service\nGet exclusive offers with our partners including Skip , Journie Rewards and Paymi",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "get-extra-perks-with-your-everyday-banking",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-057d18d30d3e485a",
+          "evidence_text_excerpt": "Students age 25 and up\nUnlimited banking for full-time university, college and CEGEP students graduating at age 25 and up \u24d8 .",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "students-age-25-and-up",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "newcomer_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-e442c115080bcbaa",
+          "evidence_text_excerpt": "New to Canada\nStart banking in Canada with the account designed for your new life and pay no monthly fee for 2 years \u24d8 .",
+          "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+          "source_snapshot_id": "snap-ec6206cec87bbea5",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "anchor_type": "section",
+          "anchor_value": "new-to-canada",
+          "page_no": null,
+          "chunk_index": 13
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-369b3981783ff35a",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "selected_snapshot_id": "snap-ec6206cec87bbea5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-cd851b13f6b56fae",
+          "model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/parsed-cd851b13f6b56fae/metadata.json",
+          "extracted_field_count": 17,
+          "evidence_link_count": 9,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_id": "snap-947907a76c3b178f",
+      "parsed_document_id": "parsed-466e9b21f5155b21",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-f1484d85c16b6604",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Maximize your savings with a high interest account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "CIBC current prime rate RDS%rate[1].PRIME.rate(null,null,null,null)(#O2#)% as of RDS%SYSTEM_DATE(#M# #d#, #Y#)%",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": "chunk-ecad7a00ed751c91",
+          "evidence_text_excerpt": "ly. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nNew Account Special Interest Rate Offer\nOpen your first CIBC eAdvantage Savings Account and get a special interest rate for 3 months. No minimum balance required.\nAccount Open Date\nSpecial Interest Rate \u24d8\nNovember 3, 2025 to present\nRDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)%\nCIBC US$ Personal Account\nA convenient way to manage your U.S. dollars.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $2,999.99\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)%\nBalance $3,000 to $9,999.99\nRDS%rate[3].CUPA.rate(null,3000.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "daily",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-ecad7a00ed751c91",
+          "evidence_text_excerpt": "ly. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nNew Account Special Interest Rate Offer\nOpen your first CIBC eAdvantage Savings Account and get a special interest rate for 3 months. No minimum balance required.\nAccount Open Date\nSpecial Interest Rate \u24d8\nNovember 3, 2025 to present\nRDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)%\nCIBC US$ Personal Account\nA convenient way to manage your U.S. dollars.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $2,999.99\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)%\nBalance $3,000 to $9,999.99\nRDS%rate[3].CUPA.rate(null,3000.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-f1484d85c16b6604",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 3
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-bf2cc882ff1caf91",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-947907a76c3b178f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-466e9b21f5155b21",
+          "model_execution_id": "modelexec-f1484d85c16b6604",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+          "extracted_field_count": 9,
+          "evidence_link_count": 1,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-005",
+      "source_document_id": "src-cibc-html-9f1a023d031ba878",
+      "snapshot_id": "snap-c38044333d18e7b2",
+      "parsed_document_id": "parsed-e7a1618730e2fa6e",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-e102812f7fb58e37",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Personal",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.88,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": "chunk-4d73a02b274ccacf",
+          "evidence_text_excerpt": "Interac e-Transfer\u00ae, in addition to any applicable transaction fee\nServices\nFee Per Item\nSending an Interac e - Transfer Sending a Request for Money (fee charged per request only upon receipt of requested money)\nSending an Interac e - Transfer\nSending a Request for Money (fee charged per request only upon receipt of requested money)\n$1.50* The Interac e-Transfer fee is waived on CIBC Smart Accounts, CIBC Everyday Chequing Accounts and for clients who are enrolled in CIBC Smart Start, CIBC Advantage for Youth, CIBC Smart for Students and CIBC Advantage for Students (on the CIBC Everyday Chequing Account). Clients 65 years of age and older do not pay the Interac e-Transfer fee on any CIBC chequing account.\nReceiving an Interac e - Transfer Fulfilling a Request for Money\nReceiving an Interac e - Transfer\nFulfilling a Request for Money\nFree 4",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-in-addition-to-any-applicable-transaction-fee",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "free",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": "chunk-4d73a02b274ccacf",
+          "evidence_text_excerpt": "Interac e-Transfer\u00ae, in addition to any applicable transaction fee\nServices\nFee Per Item\nSending an Interac e - Transfer Sending a Request for Money (fee charged per request only upon receipt of requested money)\nSending an Interac e - Transfer\nSending a Request for Money (fee charged per request only upon receipt of requested money)\n$1.50* The Interac e-Transfer fee is waived on CIBC Smart Accounts, CIBC Everyday Chequing Accounts and for clients who are enrolled in CIBC Smart Start, CIBC Advantage for Youth, CIBC Smart for Students and CIBC Advantage for Students (on the CIBC Everyday Chequing Account). Clients 65 years of age and older do not pay the Interac e-Transfer fee on any CIBC chequing account.\nReceiving an Interac e - Transfer Fulfilling a Request for Money\nReceiving an Interac e - Transfer\nFulfilling a Request for Money\nFree 4",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-in-addition-to-any-applicable-transaction-fee",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "youth"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Request for Replacement of Bank Draft or Money Order Note: Some conditions apply.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "evidence_chunk_id": "chunk-60a9569334024b3c",
+          "evidence_text_excerpt": "Request for Replacement of Bank Draft or Money Order\nNote: Some conditions apply. Please ask a CIBC advisor for details.\nServices\nFee Per Item\nDrawn in Canadian currency\nNo fee\nDrawn in US currency or other foreign currency\n$25.00",
+          "anchor_type": "section",
+          "anchor_value": "request-for-replacement-of-bank-draft-or-money-order",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply",
+              "conditions",
+              "conditions apply",
+              "note"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-4d73a02b274ccacf",
+          "evidence_text_excerpt": "Interac e-Transfer\u00ae, in addition to any applicable transaction fee\nServices\nFee Per Item\nSending an Interac e - Transfer Sending a Request for Money (fee charged per request only upon receipt of requested money)\nSending an Interac e - Transfer\nSending a Request for Money (fee charged per request only upon receipt of requested money)\n$1.50* The Interac e-Transfer fee is waived on CIBC Smart Accounts, CIBC Everyday Chequing Accounts and for clients who are enrolled in CIBC Smart Start, CIBC Advantage for Youth, CIBC Smart for Students and CIBC Advantage for Students (on the CIBC Everyday Chequing Account). Clients 65 years of age and older do not pay the Interac e-Transfer fee on any CIBC chequing account.\nReceiving an Interac e - Transfer Fulfilling a Request for Money\nReceiving an Interac e - Transfer\nFulfilling a Request for Money\nFree 4",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "citation_confidence": 0.88,
+          "model_execution_id": "modelexec-e102812f7fb58e37",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-in-addition-to-any-applicable-transaction-fee",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-4d73a02b274ccacf",
+          "evidence_text_excerpt": "Interac e-Transfer\u00ae, in addition to any applicable transaction fee\nServices\nFee Per Item\nSending an Interac e - Transfer Sending a Request for Money (fee charged per request only upon receipt of requested money)\nSending an Interac e - Transfer\nSending a Request for Money (fee charged per request only upon receipt of requested money)\n$1.50* The Interac e-Transfer fee is waived on CIBC Smart Accounts, CIBC Everyday Chequing Accounts and for clients who are enrolled in CIBC Smart Start, CIBC Advantage for Youth, CIBC Smart for Students and CIBC Advantage for Students (on the CIBC Everyday Chequing Account). Clients 65 years of age and older do not pay the Interac e-Transfer fee on any CIBC chequing account.\nReceiving an Interac e - Transfer Fulfilling a Request for Money\nReceiving an Interac e - Transfer\nFulfilling a Request for Money\nFree 4",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-e102812f7fb58e37",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-in-addition-to-any-applicable-transaction-fee",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Request for Replacement of Bank Draft or Money Order Note: Some conditions apply.",
+          "evidence_chunk_id": "chunk-60a9569334024b3c",
+          "evidence_text_excerpt": "Request for Replacement of Bank Draft or Money Order\nNote: Some conditions apply. Please ask a CIBC advisor for details.\nServices\nFee Per Item\nDrawn in Canadian currency\nNo fee\nDrawn in US currency or other foreign currency\n$25.00",
+          "source_document_id": "src-cibc-html-9f1a023d031ba878",
+          "source_snapshot_id": "snap-c38044333d18e7b2",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-e102812f7fb58e37",
+          "anchor_type": "section",
+          "anchor_value": "request-for-replacement-of-bank-draft-or-money-order",
+          "page_no": null,
+          "chunk_index": 10
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-8ae44887df6b312f",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-9f1a023d031ba878",
+        "selected_snapshot_id": "snap-c38044333d18e7b2",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-e7a1618730e2fa6e",
+          "model_execution_id": "modelexec-e102812f7fb58e37",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-9f1a023d031ba878/parsed-e7a1618730e2fa6e/metadata.json",
+          "extracted_field_count": 11,
+          "evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "run_state": "completed",
+    "model_execution_count": 4,
+    "usage_record_count": 4,
+    "run_source_item_count": 4,
+    "extracted_draft_count": 4,
+    "source_success_count": 4,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:07.140619+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "candidate_count": 2,
+    "field_evidence_link_count": 18
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+      "snapshot_id": "snap-41b10b36a3073771",
+      "parsed_document_id": "parsed-47e44b6815a50489",
+      "extraction_model_execution_id": "modelexec-dfea907cf182a128",
+      "normalization_action": "stored",
+      "candidate_id": "cand-0755512703e0d123",
+      "normalization_model_execution_id": "modelexec-733849209c4b6e7b",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.84,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 9,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b25467b8d8ae45d3",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "selected_snapshot_id": "snap-41b10b36a3073771",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-0755512703e0d123",
+          "normalization_model_execution_id": "modelexec-733849209c4b6e7b",
+          "extraction_model_execution_id": "modelexec-dfea907cf182a128",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.84,
+          "field_evidence_link_count": 9,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+      "snapshot_id": "snap-ec6206cec87bbea5",
+      "parsed_document_id": "parsed-cd851b13f6b56fae",
+      "extraction_model_execution_id": "modelexec-0a5a019bbf48eff0",
+      "normalization_action": "stored",
+      "candidate_id": "cand-6ef4e505fb8e0409",
+      "normalization_model_execution_id": "modelexec-77f8349dea488198",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.84,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 9,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-369b3981783ff35a",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "selected_snapshot_id": "snap-ec6206cec87bbea5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-6ef4e505fb8e0409",
+          "normalization_model_execution_id": "modelexec-77f8349dea488198",
+          "extraction_model_execution_id": "modelexec-0a5a019bbf48eff0",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.84,
+          "field_evidence_link_count": 9,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "field_evidence_link_count": 18,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:30.178038+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "queued_count": 0,
+    "auto_validated_count": 2,
+    "failed_count": 0,
+    "review_task_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+      "snapshot_id": "snap-41b10b36a3073771",
+      "parsed_document_id": "parsed-47e44b6815a50489",
+      "candidate_id": "cand-0755512703e0d123",
+      "candidate_run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+      "validation_action": "auto_validated",
+      "validation_model_execution_id": "modelexec-78873561b4cd5442",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/metadata.json",
+      "review_task_id": null,
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8822,
+      "candidate_state": "auto_validated",
+      "review_reason_code": null,
+      "queue_reason_codes": [],
+      "runtime_notes": [
+        "Candidate met auto-validation policy and did not create a review task."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b25467b8d8ae45d3",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-fa33de70f49aa9ed",
+        "selected_snapshot_id": "snap-41b10b36a3073771",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "auto_validated",
+          "candidate_id": "cand-0755512703e0d123",
+          "candidate_run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+          "validation_model_execution_id": "modelexec-78873561b4cd5442",
+          "normalization_model_execution_id": "modelexec-733849209c4b6e7b",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-fa33de70f49aa9ed/cand-0755512703e0d123/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8822,
+          "candidate_state": "auto_validated",
+          "review_reason_code": null,
+          "queue_reason_codes": [],
+          "review_task_id": null,
+          "runtime_notes": [
+            "Candidate met auto-validation policy and did not create a review task."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+      "snapshot_id": "snap-ec6206cec87bbea5",
+      "parsed_document_id": "parsed-cd851b13f6b56fae",
+      "candidate_id": "cand-6ef4e505fb8e0409",
+      "candidate_run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+      "validation_action": "auto_validated",
+      "validation_model_execution_id": "modelexec-e2dcedc73450b81b",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/metadata.json",
+      "review_task_id": null,
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8822,
+      "candidate_state": "auto_validated",
+      "review_reason_code": null,
+      "queue_reason_codes": [],
+      "runtime_notes": [
+        "Candidate met auto-validation policy and did not create a review task."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-369b3981783ff35a",
+        "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+        "source_document_id": "src-cibc-html-ab89c2cc7732cdcf",
+        "selected_snapshot_id": "snap-ec6206cec87bbea5",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "auto_validated",
+          "candidate_id": "cand-6ef4e505fb8e0409",
+          "candidate_run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+          "validation_model_execution_id": "modelexec-e2dcedc73450b81b",
+          "normalization_model_execution_id": "modelexec-77f8349dea488198",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-ab89c2cc7732cdcf/cand-6ef4e505fb8e0409/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8822,
+          "candidate_state": "auto_validated",
+          "review_reason_code": null,
+          "queue_reason_codes": [],
+          "review_task_id": null,
+          "runtime_notes": [
+            "Candidate met auto-validation policy and did not create a review task."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_chequing_collect_Gx8ajUG4",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "review_task_count": 0,
+    "review_queued_count": 0,
+    "auto_validated_count": 2,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:51.320518+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_chequing_collect_Gx8ajUG4 completed downstream stages
+[source-catalog-runner] finished run run_20260501_224620_cibc_chequing_collect_Gx8ajUG4

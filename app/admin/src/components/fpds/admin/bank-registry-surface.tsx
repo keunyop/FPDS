@@ -526,24 +526,12 @@ function buildBulkCollectMessage({
 }) {
   if (payload?.workflow_state === "queued") {
     if (locale === "ko") {
-      return [
-        `${selectedBankCount}개 은행, ${selectedCoverageCount}개 coverage item에 대한 collection을 대기열에 넣었습니다.`,
-        `${payload.run_ids.length}개 run이 생성되었고 homepage discovery와 source collection은 서버 background에서 계속됩니다.`,
-        "잠시 후 Runs 화면에서 no-detail, timeout, collection 결과를 확인하세요.",
-      ].join(" ");
+      return `Collection이 대기열에 등록되었습니다. ${payload.run_ids.length}개 run이 생성되었습니다.`;
     }
     if (locale === "ja") {
-      return [
-        `${selectedBankCount}件の銀行、${selectedCoverageCount}件の coverage item の collection をキューに登録しました。`,
-        `${payload.run_ids.length}件の run が作成され、homepage discovery と source collection はサーバーの background で続行されます。`,
-        "少し待ってから Runs 画面で no-detail、timeout、collection 結果を確認してください。",
-      ].join(" ");
+      return `Collection をキューに登録しました。${payload.run_ids.length}件の run を作成しました。`;
     }
-    return [
-      `Queued collection for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s).`,
-      `${payload.run_ids.length} run(s) were created immediately, and homepage discovery plus source collection will continue on the server in the background.`,
-      "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
-    ].join(" ");
+    return `Collection queued. ${payload.run_ids.length} ${payload.run_ids.length === 1 ? "run" : "runs"} created.`;
   }
 
   const materializedItems = payload?.materialized_items ?? [];

@@ -1,0 +1,233 @@
+{
+  "registry_version": "2026-05-01",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "CIBC-CHQ-002",
+  "sources": [
+    {
+      "source_id": "CIBC-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct chequing-account detail page for a named CIBC checking product.",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "tiered_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Smart Account | CIBC",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "contains_product_type",
+          "likely_primary_product_page",
+          "detail_slug"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. CIBC Smart\u00ae Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct chequing-account detail page for a named CIBC checking product.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 4,
+        "selection_reason_codes": [
+          "contains_product_type",
+          "likely_primary_product_page",
+          "detail_slug",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct chequing-account detail page for another named CIBC chequing product.",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-plus-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "credit_card_rebate"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Smart Account | CIBC",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "contains_product_type",
+          "likely_primary_product_page",
+          "detail_slug"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Bundle to earn up to $850. Start with a CIBC Smart\u00ae Account. \u2020, \u2021 Qualifying actions apply. CIBC Smart\u00ae Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.97,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct chequing-account detail page for another named CIBC chequing product.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 4,
+        "selection_reason_codes": [
+          "contains_product_type",
+          "likely_primary_product_page",
+          "detail_slug",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC personal bank account rates page",
+      "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "personal_account_rate_tables"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "CIBC additional service fees page",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/additional-service-fees.html",
+      "expected_fields": [
+        "service_fees",
+        "overdraft_fees",
+        "ancillary_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    }
+  ]
+}

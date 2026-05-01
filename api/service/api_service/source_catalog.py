@@ -193,6 +193,7 @@ class AiParallelScoringResult:
     notes: list[str]
     model_execution_record: dict[str, Any] | None = None
     usage_record: dict[str, Any] | None = None
+    ai_unavailable: bool = False
 
 
 @dataclass(frozen=True)
@@ -1742,6 +1743,7 @@ def _generate_sources_from_homepage(
         fetch_policy=fetch_policy,
         candidates=html_candidates,
         ai_scores=ai_result.scores,
+        ai_unavailable=ai_result.ai_unavailable,
     )
     discovery_notes.extend(detail_notes)
 
@@ -2110,6 +2112,7 @@ def _score_candidate_links_with_ai(
         return AiParallelScoringResult(
             scores={},
             notes=["AI parallel scorer was unavailable because the OpenAI provider or API key was not configured."],
+            ai_unavailable=True,
         )
 
     candidate_links = [
@@ -2149,7 +2152,36 @@ def _score_candidate_links_with_ai(
             },
         )
     except Exception as exc:
-        return AiParallelScoringResult(scores={}, notes=[f"AI parallel scorer was unavailable: {exc}"])
+        completed_at = datetime.now(UTC)
+        model_execution_record = None
+        if run_id:
+            model_execution_record = _build_source_catalog_ai_model_execution_record(
+                run_id=run_id,
+                bank_code=bank_code,
+                country_code=country_code,
+                product_type=product_type,
+                discovery_product_type=discovery_product_type or product_type,
+                source_language=source_language,
+                homepage_url=homepage_url,
+                normalized_homepage_url=normalized_homepage_url,
+                homepage_fetch_error=homepage_fetch_error,
+                candidate_link_count=len(candidate_links),
+                scored_candidate_count=0,
+                correlation_id=correlation_id,
+                request_id=request_id,
+                model_id=model_id,
+                execution_status="failed",
+                started_at=started_at,
+                completed_at=completed_at,
+                error_summary=str(exc),
+                fallback_mode="deterministic",
+            )
+        return AiParallelScoringResult(
+            scores={},
+            notes=[f"AI parallel scorer was unavailable: {exc}", "Deterministic homepage discovery fallback will evaluate bounded candidates."],
+            model_execution_record=model_execution_record,
+            ai_unavailable=True,
+        )
     completed_at = datetime.now(UTC)
 
     notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
@@ -2193,31 +2225,25 @@ def _score_candidate_links_with_ai(
             product_type=product_type,
             normalized_homepage_url=normalized_homepage_url,
         )
-        model_execution_record = {
-            "model_execution_id": model_execution_id,
-            "run_id": run_id,
-            "source_document_id": None,
-            "stage_name": "source_catalog_collection",
-            "agent_name": "fpds-homepage-ai-parallel-scorer",
-            "model_id": str(usage.get("model_id") or model_id),
-            "execution_status": "completed",
-            "execution_metadata": {
-                "bank_code": bank_code,
-                "country_code": country_code,
-                "product_type": product_type,
-                "discovery_product_type": discovery_product_type or product_type,
-                "source_language": source_language,
-                "homepage_url": homepage_url,
-                "normalized_homepage_url": normalized_homepage_url,
-                "homepage_fetch_error": homepage_fetch_error,
-                "candidate_link_count": len(candidate_links),
-                "scored_candidate_count": len(scores),
-                "correlation_id": correlation_id,
-                "request_id": request_id,
-            },
-            "started_at": started_at.isoformat(),
-            "completed_at": completed_at.isoformat(),
-        }
+        model_execution_record = _build_source_catalog_ai_model_execution_record(
+            run_id=run_id,
+            bank_code=bank_code,
+            country_code=country_code,
+            product_type=product_type,
+            discovery_product_type=discovery_product_type or product_type,
+            source_language=source_language,
+            homepage_url=homepage_url,
+            normalized_homepage_url=normalized_homepage_url,
+            homepage_fetch_error=homepage_fetch_error,
+            candidate_link_count=len(candidate_links),
+            scored_candidate_count=len(scores),
+            correlation_id=correlation_id,
+            request_id=request_id,
+            model_id=str(usage.get("model_id") or model_id),
+            execution_status="completed",
+            started_at=started_at,
+            completed_at=completed_at,
+        )
         prompt_tokens = int(usage.get("prompt_tokens") or 0)
         completion_tokens = int(usage.get("completion_tokens") or 0)
         usage_record = {
@@ -2363,6 +2389,7 @@ def _promote_detail_candidates(
     fetch_policy: DiscoveryFetchPolicy,
     candidates: list[HomepageCandidate],
     ai_scores: dict[str, AiParallelCandidateScore],
+    ai_unavailable: bool = False,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
@@ -2408,24 +2435,31 @@ def _promote_detail_candidates(
                 "attribute_signal_count": 0,
                 "negative_signal_count": 0,
                 "fetch_error": page_evidence.fetch_error,
+                "ai_unavailable": ai_unavailable,
             }
             seed_fetch_fallback_count += 1
         else:
-            if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence):
-                if not candidate.seed_source_id or page_evidence.negative_signal_count > 0:
+            if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence, ai_unavailable=ai_unavailable):
+                if (
+                    not candidate.seed_source_id
+                    or (ai_unavailable and _seed_detail_has_hard_negative(page_evidence))
+                    or (_seed_detail_has_hard_negative(page_evidence) and not ai_unavailable)
+                ):
                     continue
                 metadata = _build_detail_discovery_metadata(
                     candidate=candidate,
                     ai_score=ai_score,
                     page_evidence=page_evidence,
+                    ai_unavailable=ai_unavailable,
                 )
-                metadata["selection_path"] = "seed_hint_low_page_evidence"
+                metadata["selection_path"] = "seed_hint_ai_unavailable_low_page_evidence" if ai_unavailable else "seed_hint_low_page_evidence"
                 metadata["selection_confidence"] = "medium-low"
                 metadata["selection_reason_codes"] = _dedupe_preserve_order(
                     [
                         *list(metadata.get("selection_reason_codes") or []),
                         "seed_hint_alignment",
                         "page_evidence_below_threshold",
+                        "ai_unavailable_deterministic_fallback" if ai_unavailable else "",
                     ]
                 )
                 seed_low_evidence_fallback_count += 1
@@ -2434,6 +2468,7 @@ def _promote_detail_candidates(
                     candidate=candidate,
                     ai_score=ai_score,
                     page_evidence=page_evidence,
+                    ai_unavailable=ai_unavailable,
                 )
         row = _build_generated_source_row(
             bank_code=bank_code,
@@ -2495,6 +2530,7 @@ def _candidate_promotes_to_detail(
     candidate: HomepageCandidate,
     ai_score: AiParallelCandidateScore | None,
     page_evidence: PageEvidenceAssessment,
+    ai_unavailable: bool = False,
 ) -> bool:
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return False
@@ -2508,6 +2544,13 @@ def _candidate_promotes_to_detail(
         if ai_score.predicted_role != "detail":
             return False
         return ai_score.relevance_score >= 4.0
+    if ai_unavailable:
+        return (
+            candidate.heuristic_score > 0
+            and page_evidence.page_evidence_score >= 6
+            and page_evidence.attribute_signal_count >= 2
+            and page_evidence.negative_signal_count == 0
+        )
     return candidate.heuristic_score > 0
 
 
@@ -2516,6 +2559,7 @@ def _build_detail_discovery_metadata(
     candidate: HomepageCandidate,
     ai_score: AiParallelCandidateScore | None,
     page_evidence: PageEvidenceAssessment,
+    ai_unavailable: bool = False,
 ) -> dict[str, Any]:
     combined = _candidate_combined_score(candidate, {candidate.normalized_url: ai_score} if ai_score is not None else {})
     if page_evidence.page_evidence_score >= 7 and combined >= 8:
@@ -2534,7 +2578,7 @@ def _build_detail_discovery_metadata(
         )
     )
     return {
-        "selection_path": _selection_path(candidate=candidate, ai_score=ai_score),
+        "selection_path": _selection_path(candidate=candidate, ai_score=ai_score, ai_unavailable=ai_unavailable),
         "selection_confidence": confidence,
         "selection_reason_codes": [code for code in selection_reason_codes if code],
         "candidate_origin": candidate.origin,
@@ -2551,17 +2595,35 @@ def _build_detail_discovery_metadata(
         "heading_match": page_evidence.heading_match,
         "attribute_signal_count": page_evidence.attribute_signal_count,
         "negative_signal_count": page_evidence.negative_signal_count,
+        "ai_unavailable": ai_unavailable,
     }
 
 
-def _selection_path(*, candidate: HomepageCandidate, ai_score: AiParallelCandidateScore | None) -> str:
+def _selection_path(*, candidate: HomepageCandidate, ai_score: AiParallelCandidateScore | None, ai_unavailable: bool = False) -> str:
     if ai_score is not None and candidate.seed_source_id:
         return "seed_hint_plus_ai_plus_page_evidence"
     if ai_score is not None:
         return "heuristic_plus_ai_plus_page_evidence"
+    if ai_unavailable and candidate.seed_source_id:
+        return "seed_hint_plus_page_evidence_ai_unavailable"
+    if ai_unavailable:
+        return "heuristic_plus_page_evidence_ai_unavailable"
     if candidate.seed_source_id:
         return "seed_hint_plus_page_evidence"
     return "heuristic_plus_page_evidence"
+
+
+def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> bool:
+    if page_evidence.negative_signal_count <= 0:
+        return False
+    fingerprint = " ".join(
+        [
+            str(page_evidence.page_title or ""),
+            str(page_evidence.primary_heading or ""),
+            " ".join(page_evidence.page_evidence_reason_codes),
+        ]
+    ).lower()
+    return any(term in fingerprint for term in ("search tool", "compare", "comparison", "calculator", "selector", "login", "sign in"))
 
 
 def _coerce_reason_codes(values: list[str]) -> list[str]:
@@ -2940,6 +3002,65 @@ def _build_source_catalog_ai_model_execution_id(
         f"{run_id}|{bank_code}|{product_type}|{normalized_homepage_url}|source_catalog_ai_parallel".encode("utf-8")
     ).hexdigest()[:16]
     return f"modelexec-{digest}"
+
+
+def _build_source_catalog_ai_model_execution_record(
+    *,
+    run_id: str,
+    bank_code: str,
+    country_code: str,
+    product_type: str,
+    discovery_product_type: str,
+    source_language: str,
+    homepage_url: str,
+    normalized_homepage_url: str,
+    homepage_fetch_error: str | None,
+    candidate_link_count: int,
+    scored_candidate_count: int,
+    correlation_id: str | None,
+    request_id: str | None,
+    model_id: str,
+    execution_status: str,
+    started_at: datetime,
+    completed_at: datetime,
+    error_summary: str | None = None,
+    fallback_mode: str | None = None,
+) -> dict[str, Any]:
+    metadata: dict[str, Any] = {
+        "bank_code": bank_code,
+        "country_code": country_code,
+        "product_type": product_type,
+        "discovery_product_type": discovery_product_type,
+        "source_language": source_language,
+        "homepage_url": homepage_url,
+        "normalized_homepage_url": normalized_homepage_url,
+        "homepage_fetch_error": homepage_fetch_error,
+        "candidate_link_count": candidate_link_count,
+        "scored_candidate_count": scored_candidate_count,
+        "correlation_id": correlation_id,
+        "request_id": request_id,
+    }
+    if error_summary:
+        metadata["error_summary"] = error_summary[:800]
+    if fallback_mode:
+        metadata["fallback_mode"] = fallback_mode
+    return {
+        "model_execution_id": _build_source_catalog_ai_model_execution_id(
+            run_id=run_id,
+            bank_code=bank_code,
+            product_type=product_type,
+            normalized_homepage_url=normalized_homepage_url,
+        ),
+        "run_id": run_id,
+        "source_document_id": None,
+        "stage_name": "source_catalog_collection",
+        "agent_name": "fpds-homepage-ai-parallel-scorer",
+        "model_id": model_id,
+        "execution_status": execution_status,
+        "execution_metadata": metadata,
+        "started_at": started_at.isoformat(),
+        "completed_at": completed_at.isoformat(),
+    }
 
 
 def _build_source_catalog_ai_usage_id(model_execution_id: str) -> str:

@@ -1,0 +1,2913 @@
+[source-catalog-runner] starting run run_20260501_224620_cibc_savings_collect_hBF4loV9 for CIBC savings
+[source-collection-runner] run run_20260501_224620_cibc_savings_collect_hBF4loV9 starting snapshot for 5 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 4,
+    "reused_count": 1,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "source_document_id": "src-cibc-html-1bf854423a1c228a",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-e63ed1254eaeb9bc",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-1bf854423a1c228a/snap-e63ed1254eaeb9bc/raw",
+      "checksum": "4c9148f9149f7a0fdc62ebe1a6bfbc5800cc45528cbd92293e77fc6c83b31afc",
+      "fingerprint": "7da2d1187fbd3ae0d6db8f23ab03d07b6654a504993a4240dfdbbf140c2c4340",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:39.211069+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-e63ed1254eaeb9bc",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-1bf854423a1c228a/snap-e63ed1254eaeb9bc/raw",
+        "content_type": "text/html",
+        "checksum": "4c9148f9149f7a0fdc62ebe1a6bfbc5800cc45528cbd92293e77fc6c83b31afc",
+        "fingerprint": "7da2d1187fbd3ae0d6db8f23ab03d07b6654a504993a4240dfdbbf140c2c4340",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-SAV-002",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+          "status_code": 200,
+          "content_length": 438799,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "W/\"6a366-650bcfb7625c0-gzip\"",
+          "last_modified": "Fri, 01 May 2026 08:01:03 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:39.211069+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2dbed582e8189b51",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "selected_snapshot_id": "snap-e63ed1254eaeb9bc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "4c9148f9149f7a0fdc62ebe1a6bfbc5800cc45528cbd92293e77fc6c83b31afc",
+          "fingerprint": "7da2d1187fbd3ae0d6db8f23ab03d07b6654a504993a4240dfdbbf140c2c4340",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-1bf854423a1c228a/snap-e63ed1254eaeb9bc/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-6239ba81545901f8",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-6239ba81545901f8/raw",
+      "checksum": "3d338e66d443445fb0a19a47dd80501e07bb2eb597c48810268a283cfdafe3f9",
+      "fingerprint": "0442981b356fa1a3df40ef7774cff6f86c28d113a745b76b726994a8951a423b",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:39.008973+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-6239ba81545901f8",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-6239ba81545901f8/raw",
+        "content_type": "text/html",
+        "checksum": "3d338e66d443445fb0a19a47dd80501e07bb2eb597c48810268a283cfdafe3f9",
+        "fingerprint": "0442981b356fa1a3df40ef7774cff6f86c28d113a745b76b726994a8951a423b",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-SAV-004",
+          "request_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+          "final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+          "status_code": 200,
+          "content_length": 205796,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"3153b-650bc40490a99-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:08:42 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:39.008973+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0a8d9cbc7f075153",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-6239ba81545901f8",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "3d338e66d443445fb0a19a47dd80501e07bb2eb597c48810268a283cfdafe3f9",
+          "fingerprint": "0442981b356fa1a3df40ef7774cff6f86c28d113a745b76b726994a8951a423b",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-79c557e632cf1aef/snap-6239ba81545901f8/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "source_document_id": "src-cibc-html-64f50c00c802a427",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-ed66be1daeffd253",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-64f50c00c802a427/snap-ed66be1daeffd253/raw",
+      "checksum": "82eb5b668585e2e580b8a64f1f89ce958699eafc5806870886789be3e8080087",
+      "fingerprint": "7131103a9f2389487167a8e080228565c0fb2af5ed59c4aa115af54d5716b7d5",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:38.949791+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-ed66be1daeffd253",
+        "source_document_id": "src-cibc-html-64f50c00c802a427",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-64f50c00c802a427/snap-ed66be1daeffd253/raw",
+        "content_type": "text/html",
+        "checksum": "82eb5b668585e2e580b8a64f1f89ce958699eafc5806870886789be3e8080087",
+        "fingerprint": "7131103a9f2389487167a8e080228565c0fb2af5ed59c4aa115af54d5716b7d5",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-SAV-005",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+          "status_code": 200,
+          "content_length": 57453,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "W/\"d1c4-650bc990d017a-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:33:32 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:38.949791+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1ba18ed30046a951",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-64f50c00c802a427",
+        "selected_snapshot_id": "snap-ed66be1daeffd253",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "82eb5b668585e2e580b8a64f1f89ce958699eafc5806870886789be3e8080087",
+          "fingerprint": "7131103a9f2389487167a8e080228565c0fb2af5ed59c4aa115af54d5716b7d5",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-64f50c00c802a427/snap-ed66be1daeffd253/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "source_document_id": "src-cibc-html-bbaadae413723187",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-6eb192e570624a2a",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-bbaadae413723187/snap-6eb192e570624a2a/raw",
+      "checksum": "b1362978b14d0dbbc1f4ff1440cd21dba3a1ff60231487258cf28efca3357b93",
+      "fingerprint": "a504ec71c987c86cd6d8a5f6added0fa2cc9c6919bd9ca0845c494ca663abaed",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-01T22:46:39.549004+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-6eb192e570624a2a",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-bbaadae413723187/snap-6eb192e570624a2a/raw",
+        "content_type": "text/html",
+        "checksum": "b1362978b14d0dbbc1f4ff1440cd21dba3a1ff60231487258cf28efca3357b93",
+        "fingerprint": "a504ec71c987c86cd6d8a5f6added0fa2cc9c6919bd9ca0845c494ca663abaed",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "CIBC-SAV-003",
+          "request_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+          "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+          "status_code": 200,
+          "content_length": 365131,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"583a2-650bc49602443-gzip\"",
+          "last_modified": "Fri, 01 May 2026 07:11:15 GMT",
+          "cache_control": "max-age=21600",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-01T22:46:39.549004+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a07780dcae74e739",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "selected_snapshot_id": "snap-6eb192e570624a2a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "content_type": "text/html",
+          "checksum": "b1362978b14d0dbbc1f4ff1440cd21dba3a1ff60231487258cf28efca3357b93",
+          "fingerprint": "a504ec71c987c86cd6d8a5f6added0fa2cc9c6919bd9ca0845c494ca663abaed",
+          "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-html-bbaadae413723187/snap-6eb192e570624a2a/raw",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-e790a18681",
+      "source_document_id": "src-cibc-pdf-54db02159a92c472",
+      "snapshot_action": "reused",
+      "attempt_count": 1,
+      "snapshot_id": "snap-d52392be2be2e7e7",
+      "object_storage_key": "dev/snapshots/CA/CIBC/src-cibc-pdf-54db02159a92c472/snap-d52392be2be2e7e7/raw",
+      "checksum": "b648a79dc1d6ef351121c00769c280bc920d5ee1de838b34e9f22927607b84b6",
+      "fingerprint": "176b5fa6015d30e2bfaeb1ca1fdcd7794ebbffcd5913e4bfebdbfb0f6756711c",
+      "content_type": "application/pdf",
+      "fetch_status": "reused",
+      "fetched_at": "2026-05-01T22:46:51.523133+00:00",
+      "error_summary": null,
+      "source_snapshot_record": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b3336241ca0ea513",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-pdf-54db02159a92c472",
+        "selected_snapshot_id": "snap-d52392be2be2e7e7",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "reused",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "attempt_count": 1,
+          "existing_snapshot_id": "snap-d52392be2be2e7e7",
+          "existing_fetched_at": "2026-05-01T20:23:45.669849+00",
+          "preflight_status": "ok",
+          "preflight_issue_codes": [],
+          "current_response_metadata": {
+            "source_id": "AUTO-CIBC-SAV-e790a18681",
+            "request_url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+            "final_url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+            "status_code": 200,
+            "content_length": 314830,
+            "content_type": "application/pdf",
+            "redirect_count": 0,
+            "etag": "\"4cdce-6464a8de8154a-gzip\"",
+            "last_modified": "Fri, 19 Dec 2025 09:18:02 GMT",
+            "cache_control": "max-age=44482",
+            "attempt_count": 1
+          }
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "correlation_id": "corr_MNtQp3N1XfbErhgn",
+    "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+    "stats": {
+      "source_total": 5,
+      "ok_count": 5,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "CIBC-SAV-002",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:36.887675+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-SAV-004",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "expected_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:37.233240+00:00",
+        "final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "normalized_final_url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-SAV-005",
+        "source_document_id": "src-cibc-html-64f50c00c802a427",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:37.469224+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/eadvantage-high-interest-savings-account/interest-rates-disclaimers.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "CIBC-SAV-003",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "expected_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:38.160368+00:00",
+        "final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+        "normalized_final_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts/us-personal-account.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-CIBC-SAV-e790a18681",
+        "source_document_id": "src-cibc-pdf-54db02159a92c472",
+        "expected_url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+        "expected_source_type": "pdf",
+        "status": "ok",
+        "fetched_at": "2026-05-01T22:46:38.474355+00:00",
+        "final_url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+        "normalized_final_url": "https://www.cibc.com/content/dam/personal_banking/advice_centre/tax-savings/fhsa-overview-en.pdf",
+        "status_code": 200,
+        "content_type": "application/pdf",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "run_state": "completed",
+    "source_document_count": 5,
+    "stored_snapshot_count": 4,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-05-01T22:46:34.982893+00:00",
+    "completed_at": "2026-05-01T22:46:52.269903+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_savings_collect_hBF4loV9 continuing with 5 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 4,
+    "reused_count": 1,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "source_document_id": "src-cibc-html-1bf854423a1c228a",
+      "snapshot_id": "snap-e63ed1254eaeb9bc",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-ac4010606e73c690",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/metadata.json",
+      "chunk_count": 36,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2dbed582e8189b51",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "selected_snapshot_id": "snap-e63ed1254eaeb9bc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-ac4010606e73c690",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/metadata.json",
+          "chunk_count": 36,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_id": "snap-947907a76c3b178f",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-466e9b21f5155b21",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+      "chunk_count": 7,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0a8d9cbc7f075153",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-947907a76c3b178f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-466e9b21f5155b21",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+          "chunk_count": 7,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "source_document_id": "src-cibc-html-64f50c00c802a427",
+      "snapshot_id": "snap-ed66be1daeffd253",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-3649749df71f40ed",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/metadata.json",
+      "chunk_count": 5,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1ba18ed30046a951",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-64f50c00c802a427",
+        "selected_snapshot_id": "snap-ed66be1daeffd253",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-3649749df71f40ed",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/metadata.json",
+          "chunk_count": 5,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "source_document_id": "src-cibc-html-bbaadae413723187",
+      "snapshot_id": "snap-6eb192e570624a2a",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-2aaf1d9010661a4a",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/metadata.json",
+      "chunk_count": 22,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a07780dcae74e739",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "selected_snapshot_id": "snap-6eb192e570624a2a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-2aaf1d9010661a4a",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/metadata.json",
+          "chunk_count": 22,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-e790a18681",
+      "source_document_id": "src-cibc-pdf-54db02159a92c472",
+      "snapshot_id": "snap-d52392be2be2e7e7",
+      "parse_action": "reused",
+      "parsed_document_id": "parsed-5199a1bdd7259de1",
+      "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/metadata.json",
+      "chunk_count": 16,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b3336241ca0ea513",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-pdf-54db02159a92c472",
+        "selected_snapshot_id": "snap-d52392be2be2e7e7",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "reused",
+          "parsed_document_id": "parsed-5199a1bdd7259de1",
+          "parsed_storage_key": "dev/parsed/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/metadata.json",
+          "chunk_count": 16,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "run_state": "completed",
+    "parsed_document_count": 4,
+    "evidence_chunk_count": 70,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:47:37.029455+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "failed_count": 0,
+    "extracted_field_count": 68,
+    "evidence_link_count": 28
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "source_document_id": "src-cibc-html-1bf854423a1c228a",
+      "snapshot_id": "snap-e63ed1254eaeb9bc",
+      "parsed_document_id": "parsed-ac4010606e73c690",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-55dc76115d5204c2",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC eAdvantage\u00ae Savings Account \u2014 High Interest Savings",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "SAVINGS ACCOUNTS",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-a3f6b7978dc625a0",
+          "evidence_text_excerpt": "Understanding your high interest savings account\nThe eAdvantage Savings Account comes with several features that help you save more every day. This account has a competitive interest rate with opportunities to earn more with Smart Interest.\nNo. There is no minimum balance for the eAdvantage Savings Account.\nInterest rates change from time to time. You can also earn additional interest with our Smart Interest feature.\nLearn more about our current interest rates\nYou can apply online in about 5 minutes. Apply now to get started Opens in a new window.",
+          "anchor_type": "section",
+          "anchor_value": "understanding-your-high-interest-savings-account",
+          "page_no": null,
+          "chunk_index": 29,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "If you\u2019re under the age of majority, you can apply for an account by visiting a CIBC Banking Centre Opens in a new window",
+          "value_type": "string",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-20f40710cbad18f6",
+          "evidence_text_excerpt": "How do I qualify?\nCIBC eAdvantage Savings Account:\nYou're a Canadian resident and you've reached the age of majority in your province or territory. Learn about the age of majority. Opens a popup.\nIf you\u2019re under the age of majority, you can apply for an account by visiting a CIBC Banking Centre Opens in a new window. or calling 1-800-465-2422 Opens your phone app. .",
+          "anchor_type": "section",
+          "anchor_value": "how-do-i-qualify",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply",
+              "can",
+              "qualify"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Smart Interest is calculated daily at the current Smart Interest rate on your full closing balance each day up to a maximum balance of $200,000.",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-a5773760bdf4472e",
+          "evidence_text_excerpt": "ross\u00a0all of your CIBC eAdvantage Savings Accounts\u00a0with the same accountholders. You can earn Smart Interest on balances up to $200,000. Full limitations are set out in the Terms and Conditions.\nTip: Try to avoid scheduling automatic transfers on the last day of the month. These transfers will fall on the \"next business day\" so they will not count towards your Smart Interest balance growth for the current month.\nYes. You can earn Smart Interest on your account balances up to\u00a0$200,000. This is called the \"Smart Balance Maximum.\" If you have multiple CIBC eAdvantage Savings Accounts, the Smart Balance Maximum will apply across all your accounts with the same accountholders.\nSmart Interest is calculated daily at the current Smart Interest rate on your full closing balance each day up to a maximum balance of $200,000.\u00a0Smart Interest will be paid between the first 5 to 7 business days of the",
+          "anchor_type": "section",
+          "anchor_value": "earning-smart-interest-on-your-account",
+          "page_no": null,
+          "chunk_index": 31,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate",
+              "tiered"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)% Review current interest rates Earned on all balances Tiered regular interest with rates that increase as your savings grow.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Deposits will help you get you closer to receiving Smart Interest, but withdrawals, purchases and bill payments will be subtracted from your balance.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "evidence_chunk_id": "chunk-c8b212ec9d96f540",
+          "evidence_text_excerpt": "each day up to a maximum balance of $200,000.\u00a0Smart Interest will be paid between the first 5 to 7 business days of the following month.\u00a0That means if you qualify for Smart Interest, you will earn the current Smart Interest rate on your entire account balance (up to $200,000) for the whole month.\nIf you have multiple CIBC\u00a0eAdvantage\u00a0Savings Accounts\u00a0with the same accountholders, the $200,000 limit applies across all of those accounts.\nAny money you put in or take out of the account counts towards your balance growth. We won\u2019t count any interest payments or CIBC fees when calculating balance growth.\nDeposits will help you get you closer to receiving Smart Interest, but withdrawals, purchases and bill payments will be subtracted from your balance.\u00a0Be sure to save at least $200 across your CIBC eAdvantage Savings Accounts with the same accountholders to earn Smart Interest on balances up",
+          "anchor_type": "section",
+          "anchor_value": "earning-smart-interest-on-your-account",
+          "page_no": null,
+          "chunk_index": 32,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "limit",
+              "withdrawals"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-a3f6b7978dc625a0",
+          "evidence_text_excerpt": "Understanding your high interest savings account\nThe eAdvantage Savings Account comes with several features that help you save more every day. This account has a competitive interest rate with opportunities to earn more with Smart Interest.\nNo. There is no minimum balance for the eAdvantage Savings Account.\nInterest rates change from time to time. You can also earn additional interest with our Smart Interest feature.\nLearn more about our current interest rates\nYou can apply online in about 5 minutes. Apply now to get started Opens in a new window.",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "understanding-your-high-interest-savings-account",
+          "page_no": null,
+          "chunk_index": 29
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "If you\u2019re under the age of majority, you can apply for an account by visiting a CIBC Banking Centre Opens in a new window",
+          "evidence_chunk_id": "chunk-20f40710cbad18f6",
+          "evidence_text_excerpt": "How do I qualify?\nCIBC eAdvantage Savings Account:\nYou're a Canadian resident and you've reached the age of majority in your province or territory. Learn about the age of majority. Opens a popup.\nIf you\u2019re under the age of majority, you can apply for an account by visiting a CIBC Banking Centre Opens in a new window. or calling 1-800-465-2422 Opens your phone app. .",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "how-do-i-qualify",
+          "page_no": null,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Smart Interest is calculated daily at the current Smart Interest rate on your full closing balance each day up to a maximum balance of $200,000.",
+          "evidence_chunk_id": "chunk-a5773760bdf4472e",
+          "evidence_text_excerpt": "ross\u00a0all of your CIBC eAdvantage Savings Accounts\u00a0with the same accountholders. You can earn Smart Interest on balances up to $200,000. Full limitations are set out in the Terms and Conditions.\nTip: Try to avoid scheduling automatic transfers on the last day of the month. These transfers will fall on the \"next business day\" so they will not count towards your Smart Interest balance growth for the current month.\nYes. You can earn Smart Interest on your account balances up to\u00a0$200,000. This is called the \"Smart Balance Maximum.\" If you have multiple CIBC eAdvantage Savings Accounts, the Smart Balance Maximum will apply across all your accounts with the same accountholders.\nSmart Interest is calculated daily at the current Smart Interest rate on your full closing balance each day up to a maximum balance of $200,000.\u00a0Smart Interest will be paid between the first 5 to 7 business days of the",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "earning-smart-interest-on-your-account",
+          "page_no": null,
+          "chunk_index": 31
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)% Review current interest rates Earned on all balances Tiered regular interest with rates that increase as your savings grow.",
+          "evidence_chunk_id": "chunk-baaa329c779487b8",
+          "evidence_text_excerpt": "Rates and fees\nRegular Interest \u24d8 Learn about regular interest. Opens in a dialog.\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nReview current interest rates\nEarned on all balances\nTiered regular interest with rates that increase as your savings grow.\nSmart Interest rate \u24d8\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nEarned on balances up to $200,000 when you save $200 or more in any month. Limits apply.\nMonthly fee\n$0\nTransactions \u24d8\n$5.00 each",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "rates-and-fees",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Deposits will help you get you closer to receiving Smart Interest, but withdrawals, purchases and bill payments will be subtracted from your balance.",
+          "evidence_chunk_id": "chunk-c8b212ec9d96f540",
+          "evidence_text_excerpt": "each day up to a maximum balance of $200,000.\u00a0Smart Interest will be paid between the first 5 to 7 business days of the following month.\u00a0That means if you qualify for Smart Interest, you will earn the current Smart Interest rate on your entire account balance (up to $200,000) for the whole month.\nIf you have multiple CIBC\u00a0eAdvantage\u00a0Savings Accounts\u00a0with the same accountholders, the $200,000 limit applies across all of those accounts.\nAny money you put in or take out of the account counts towards your balance growth. We won\u2019t count any interest payments or CIBC fees when calculating balance growth.\nDeposits will help you get you closer to receiving Smart Interest, but withdrawals, purchases and bill payments will be subtracted from your balance.\u00a0Be sure to save at least $200 across your CIBC eAdvantage Savings Accounts with the same accountholders to earn Smart Interest on balances up",
+          "source_document_id": "src-cibc-html-1bf854423a1c228a",
+          "source_snapshot_id": "snap-e63ed1254eaeb9bc",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "anchor_type": "section",
+          "anchor_value": "earning-smart-interest-on-your-account",
+          "page_no": null,
+          "chunk_index": 32
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2dbed582e8189b51",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "selected_snapshot_id": "snap-e63ed1254eaeb9bc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-ac4010606e73c690",
+          "model_execution_id": "modelexec-55dc76115d5204c2",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-1bf854423a1c228a/parsed-ac4010606e73c690/metadata.json",
+          "extracted_field_count": 16,
+          "evidence_link_count": 8,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-004",
+      "source_document_id": "src-cibc-html-79c557e632cf1aef",
+      "snapshot_id": "snap-947907a76c3b178f",
+      "parsed_document_id": "parsed-466e9b21f5155b21",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-0299ba0b2cdedf9b",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC eAdvantage Savings Account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "CIBC current prime rate RDS%rate[1].PRIME.rate(null,null,null,null)(#O2#)% as of RDS%SYSTEM_DATE(#M# #d#, #Y#)%",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": "chunk-ecad7a00ed751c91",
+          "evidence_text_excerpt": "ly. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nNew Account Special Interest Rate Offer\nOpen your first CIBC eAdvantage Savings Account and get a special interest rate for 3 months. No minimum balance required.\nAccount Open Date\nSpecial Interest Rate \u24d8\nNovember 3, 2025 to present\nRDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)%\nCIBC US$ Personal Account\nA convenient way to manage your U.S. dollars.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $2,999.99\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)%\nBalance $3,000 to $9,999.99\nRDS%rate[3].CUPA.rate(null,3000.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "daily",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Daily Closing Balance Regular Interest \u24d8 Rate Balance up to $9,999.99 RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% Balance $10,000 to $24,999.99 RDS%rate[3].CESA.Published(null,10000.0_-_24999.99_CAD_Balance,1,1)(#O2#)% Balance $25,000 to $99,999.99 RDS%r",
+          "value_type": "string",
+          "confidence": 0.65,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": "chunk-51fc3fbba6e66327",
+          "evidence_text_excerpt": "Featured savings accounts\nCIBC eAdvantage Savings Account\nGet Regular Interest \u24d8 on all balances.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $9,999.99\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99\nRDS%rate[3].CESA.Published(null,10000.0_-_24999.99_CAD_Balance,1,1)(#O2#)%\nBalance $25,000 to $99,999.99\nRDS%rate[3].CESA.Published(null,25000.0_-_99999.99_CAD_Balance,1,1)(#O2#)%\nBalance $100,000 to $499,999.99\nRDS%rate[3].CESA.Published(null,100000.0_-_499999.99_CAD_Balance,1,1)(#O2#)%\nBalance $500,000 and over\nRDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nGet additional Smart Interest when you save $200 or more in a month. Limits apply. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "closing",
+              "daily",
+              "daily closing balance",
+              "interest"
+            ]
+          }
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "evidence_chunk_id": "chunk-b6bc626e702e7c7c",
+          "evidence_text_excerpt": "Maximize your savings with a high interest account\nCIBC eAdvantage\u00ae\u00a0Savings Account Get a special RDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)% \u24d8 offer for 3 months when you open your first account. Limits apply.\nReview all other product rates\nMortgage rates\nLoans and lines of credit rates\nPersonal bank account rates\nBusiness bank account rates\nGIC rates\nCIBC Business GIC Rates\nTFSA rates\nRRSP rates\nRRIF and LIF rates\nMutual fund rates\nExchange Traded Fund (ETF) Rates of Return\nFHSA rates\nService fees for personal bank accounts\nThe interest that you earn on your money depends on the type of bank account and balance you have.\nRates as of RDS%SYSTEM_DATE(#M# #d#, #Y#)%",
+          "anchor_type": "section",
+          "anchor_value": "maximize-your-savings-with-a-high-interest-account",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rrsp",
+              "tfsa"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-ecad7a00ed751c91",
+          "evidence_text_excerpt": "ly. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000\nRDS%rate[3].CESA.Published(null,0.0_-_200000.0_CAD_Smart Int,1,1)(#O2#)%\nNew Account Special Interest Rate Offer\nOpen your first CIBC eAdvantage Savings Account and get a special interest rate for 3 months. No minimum balance required.\nAccount Open Date\nSpecial Interest Rate \u24d8\nNovember 3, 2025 to present\nRDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)%\nCIBC US$ Personal Account\nA convenient way to manage your U.S. dollars.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $2,999.99\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)%\nBalance $3,000 to $9,999.99\nRDS%rate[3].CUPA.rate(null,3000.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-0299ba0b2cdedf9b",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Daily Closing Balance Regular Interest \u24d8 Rate Balance up to $9,999.99 RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% Balance $10,000 to $24,999.99 RDS%rate[3].CESA.Published(null,10000.0_-_24999.99_CAD_Balance,1,1)(#O2#)% Balance $25,000 to $99,999.99 RDS%r",
+          "evidence_chunk_id": "chunk-51fc3fbba6e66327",
+          "evidence_text_excerpt": "Featured savings accounts\nCIBC eAdvantage Savings Account\nGet Regular Interest \u24d8 on all balances.\nDaily Closing Balance\nRegular Interest \u24d8 Rate\nBalance up to $9,999.99\nRDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\nBalance $10,000 to $24,999.99\nRDS%rate[3].CESA.Published(null,10000.0_-_24999.99_CAD_Balance,1,1)(#O2#)%\nBalance $25,000 to $99,999.99\nRDS%rate[3].CESA.Published(null,25000.0_-_99999.99_CAD_Balance,1,1)(#O2#)%\nBalance $100,000 to $499,999.99\nRDS%rate[3].CESA.Published(null,100000.0_-_499999.99_CAD_Balance,1,1)(#O2#)%\nBalance $500,000 and over\nRDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\nGet additional Smart Interest when you save $200 or more in a month. Limits apply. \u24d8 Learn about Smart Interest. Opens in a dialog.\nDaily Closing Balance\nSmart Interest \u24d8 Rate\nBalance up to $200,000",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "citation_confidence": 0.65,
+          "model_execution_id": "modelexec-0299ba0b2cdedf9b",
+          "anchor_type": "section",
+          "anchor_value": "featured-savings-accounts",
+          "page_no": null,
+          "chunk_index": 2
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-b6bc626e702e7c7c",
+          "evidence_text_excerpt": "Maximize your savings with a high interest account\nCIBC eAdvantage\u00ae\u00a0Savings Account Get a special RDS%rate[3].CESA.Published(null,0.0_and over_0.0_CAD_Bonus,1,1)(#O2#)% \u24d8 offer for 3 months when you open your first account. Limits apply.\nReview all other product rates\nMortgage rates\nLoans and lines of credit rates\nPersonal bank account rates\nBusiness bank account rates\nGIC rates\nCIBC Business GIC Rates\nTFSA rates\nRRSP rates\nRRIF and LIF rates\nMutual fund rates\nExchange Traded Fund (ETF) Rates of Return\nFHSA rates\nService fees for personal bank accounts\nThe interest that you earn on your money depends on the type of bank account and balance you have.\nRates as of RDS%SYSTEM_DATE(#M# #d#, #Y#)%",
+          "source_document_id": "src-cibc-html-79c557e632cf1aef",
+          "source_snapshot_id": "snap-947907a76c3b178f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-0299ba0b2cdedf9b",
+          "anchor_type": "section",
+          "anchor_value": "maximize-your-savings-with-a-high-interest-account",
+          "page_no": null,
+          "chunk_index": 1
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0a8d9cbc7f075153",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-79c557e632cf1aef",
+        "selected_snapshot_id": "snap-947907a76c3b178f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-466e9b21f5155b21",
+          "model_execution_id": "modelexec-0299ba0b2cdedf9b",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-79c557e632cf1aef/parsed-466e9b21f5155b21/metadata.json",
+          "extracted_field_count": 11,
+          "evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-005",
+      "source_document_id": "src-cibc-html-64f50c00c802a427",
+      "snapshot_id": "snap-ed66be1daeffd253",
+      "parsed_document_id": "parsed-3649749df71f40ed",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-85e2d1969db313ea",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "CIBC eAdvantage\u00ae Savings Account interest rates",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae Savings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from t",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "CIBC eAdvantage\u00ae Savings Account interest rates \u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae Savings Account (\u201c eSA \u201d).",
+          "value_type": "string",
+          "confidence": 0.6,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "first",
+              "for",
+              "offer",
+              "period",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d)",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA.",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "is",
+              "monthly",
+              "paid",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "tier"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "CIBC eAdvantage\u00ae Savings Account interest rates \u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae Savings Account (\u201c eSA \u201d).",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.6,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d)",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA.",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate.",
+          "evidence_chunk_id": "chunk-12b55207d6059ee2",
+          "evidence_text_excerpt": "CIBC eAdvantage\u00ae Savings Account interest rates\n\u24d8 This offer is only available to clients opening their first CIBC eAdvantage\u00ae\u202fSavings Account (\u201c eSA \u201d). Eligible eSAs will earn a special annual interest rate (the \u201c Special Interest Rate \u201d) on balances up to $1,000,000 for 90 days from the date the eSA is opened (\u201c Special Rate Period \u201d). The Special Interest Rate is a combination of the regular interest rate that applies to your eSA balance tier plus an additional bonus interest rate. Any change to the regular interest rate will result in a corresponding change to the bonus interest rate so that the overall Special Interest Rate will remain the same during the Special Rate Period. Regular interest is calculated daily on each day\u2019s full closing balance and paid monthly to your eSA. Bonus interest is calculated daily on each day\u2019s full closing balance up to a balance limit of $1,000,000",
+          "source_document_id": "src-cibc-html-64f50c00c802a427",
+          "source_snapshot_id": "snap-ed66be1daeffd253",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "anchor_type": "section",
+          "anchor_value": "cibc-eadvantage-savings-account-interest-rates",
+          "page_no": null,
+          "chunk_index": 0
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1ba18ed30046a951",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-64f50c00c802a427",
+        "selected_snapshot_id": "snap-ed66be1daeffd253",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-3649749df71f40ed",
+          "model_execution_id": "modelexec-85e2d1969db313ea",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-64f50c00c802a427/parsed-3649749df71f40ed/metadata.json",
+          "extracted_field_count": 15,
+          "evidence_link_count": 7,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "source_document_id": "src-cibc-html-bbaadae413723187",
+      "snapshot_id": "snap-6eb192e570624a2a",
+      "parsed_document_id": "parsed-2aaf1d9010661a4a",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-95f93a5efdaf84bd",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Cibc Us Personal Account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "SAVINGS ACCOUNTS",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": "chunk-051d854fa508ddae",
+          "evidence_text_excerpt": "Monthly\u00a0fee\n$0",
+          "anchor_type": "section",
+          "anchor_value": "monthly-fee",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": "chunk-051d854fa508ddae",
+          "evidence_text_excerpt": "Monthly\u00a0fee\n$0",
+          "anchor_type": "section",
+          "anchor_value": "monthly-fee",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Our tools and resources provide the information you need so you can travel with ease",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": "chunk-0f36adcb8448adc5",
+          "evidence_text_excerpt": "Other U.S. banking services for Canadians\nWe know there\u2019s lots to think about when you\u2019re heading south of the border. Our tools and resources provide the information you need so you can travel with ease.\nLearn more about our other U.S. cross-border banking solutions",
+          "anchor_type": "section",
+          "anchor_value": "other-u-s-banking-services-for-canadians",
+          "page_no": null,
+          "chunk_index": 14,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": "chunk-8630e7755d1ca83c",
+          "evidence_text_excerpt": "Regular Interest rate\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8\nReview current interest rates\nRegular interest rates are tiered. The rate shown in the highest tier is only earned on the portion of the daily balance that is at or above that tier.",
+          "anchor_type": "section",
+          "anchor_value": "regular-interest-rate",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate",
+              "tiered"
+            ]
+          }
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "Regular Interest rate RDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8 Review current interest rates Regular interest rates are tiered.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "evidence_chunk_id": "chunk-8630e7755d1ca83c",
+          "evidence_text_excerpt": "Regular Interest rate\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8\nReview current interest rates\nRegular interest rates are tiered. The rate shown in the highest tier is only earned on the portion of the daily balance that is at or above that tier.",
+          "anchor_type": "section",
+          "anchor_value": "regular-interest-rate",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "tier"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-051d854fa508ddae",
+          "evidence_text_excerpt": "Monthly\u00a0fee\n$0",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "anchor_type": "section",
+          "anchor_value": "monthly-fee",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-051d854fa508ddae",
+          "evidence_text_excerpt": "Monthly\u00a0fee\n$0",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "anchor_type": "section",
+          "anchor_value": "monthly-fee",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Our tools and resources provide the information you need so you can travel with ease",
+          "evidence_chunk_id": "chunk-0f36adcb8448adc5",
+          "evidence_text_excerpt": "Other U.S. banking services for Canadians\nWe know there\u2019s lots to think about when you\u2019re heading south of the border. Our tools and resources provide the information you need so you can travel with ease.\nLearn more about our other U.S. cross-border banking solutions",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "anchor_type": "section",
+          "anchor_value": "other-u-s-banking-services-for-canadians",
+          "page_no": null,
+          "chunk_index": 14
+        },
+        {
+          "field_name": "tiered_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-8630e7755d1ca83c",
+          "evidence_text_excerpt": "Regular Interest rate\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8\nReview current interest rates\nRegular interest rates are tiered. The rate shown in the highest tier is only earned on the portion of the daily balance that is at or above that tier.",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "anchor_type": "section",
+          "anchor_value": "regular-interest-rate",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "tier_definition_text",
+          "candidate_value": "Regular Interest rate RDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8 Review current interest rates Regular interest rates are tiered.",
+          "evidence_chunk_id": "chunk-8630e7755d1ca83c",
+          "evidence_text_excerpt": "Regular Interest rate\nRDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)% \u24d8\nReview current interest rates\nRegular interest rates are tiered. The rate shown in the highest tier is only earned on the portion of the daily balance that is at or above that tier.",
+          "source_document_id": "src-cibc-html-bbaadae413723187",
+          "source_snapshot_id": "snap-6eb192e570624a2a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "anchor_type": "section",
+          "anchor_value": "regular-interest-rate",
+          "page_no": null,
+          "chunk_index": 5
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a07780dcae74e739",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "selected_snapshot_id": "snap-6eb192e570624a2a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-2aaf1d9010661a4a",
+          "model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-html-bbaadae413723187/parsed-2aaf1d9010661a4a/metadata.json",
+          "extracted_field_count": 13,
+          "evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-SAV-e790a18681",
+      "source_document_id": "src-cibc-pdf-54db02159a92c472",
+      "snapshot_id": "snap-d52392be2be2e7e7",
+      "parsed_document_id": "parsed-5199a1bdd7259de1",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-ecb555cb01e25c71",
+      "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "CIBC",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Tax-free First Home Savings Accounts: An overview",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Tax-free First Home Savings Accounts: An overview",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "25.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": "chunk-c6e373f567e84930",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 4\nNon-residents of Canada\nYou can only open an FHSA if you are a resident of Canada for tax purposes.\nIf you become a non-resident of Canada after you've opened an FHSA, you can keep your FHSA in place.\nYou can continue to make contributions and may claim a tax deduction in Canada. There will be no tax in\nCanada on income earned on assets within your FHSA, but be sure to investigate how the foreign country\ntaxes an FHSA.\nIf you\u2019re a non-resident, withdrawals from your FHSA will be subject to non-resident withholding tax at a 25%\nrate since you can't make a qualifying withdrawal to build or buy a qualifying home.\nInterest deductibility, collateralization, and bankruptcy\nLike RRSPs and TFSAs, interest on money borrowed to invest in an FHSA is not tax deductible and you can't\npledge FHSA assets as collateral for a loan. In addition, FHSAs",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "25.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": "chunk-c6e373f567e84930",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 4\nNon-residents of Canada\nYou can only open an FHSA if you are a resident of Canada for tax purposes.\nIf you become a non-resident of Canada after you've opened an FHSA, you can keep your FHSA in place.\nYou can continue to make contributions and may claim a tax deduction in Canada. There will be no tax in\nCanada on income earned on assets within your FHSA, but be sure to investigate how the foreign country\ntaxes an FHSA.\nIf you\u2019re a non-resident, withdrawals from your FHSA will be subject to non-resident withholding tax at a 25%\nrate since you can't make a qualifying withdrawal to build or buy a qualifying home.\nInterest deductibility, collateralization, and bankruptcy\nLike RRSPs and TFSAs, interest on money borrowed to invest in an FHSA is not tax deductible and you can't\npledge FHSA assets as collateral for a loan. In addition, FHSAs",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "open an FHSA, you must be a resident of Canada and at least 18 years of age",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": "chunk-aab34b543995bbef",
+          "evidence_text_excerpt": "open an FHSA, you must be a resident of Canada and at least 18 years of age. In addition, you must be a\nfirst-time home buyer, meaning that you and/or your spouse or common-law partner have not owned a home in\nwhich you lived as your principal place of residence at any time during the part of the calendar year before the\naccount is opened or at any time in the preceding 4 calendar years.\nIf you make a qualifying withdrawal to buy a home, the FHSA can remain open until the end of the following\nyear; otherwise, the FHSA can remain open for up to 15 years or until the end of the year when you turn\n71 years old, whichever comes first. Any funds left in the FHSA that are not used to buy a qualifying home\nbefore closing the FHSA can be transferred on a tax-free basis to an RRSP or Registered Retirement Income\nFund (RRIF), or will be included in income. Once the 15-year period has ended, you",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "If funds are transferred to an RRSP or RRIF, they will be taxed upon ultimate withdrawal.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": "chunk-00918c21606c9090",
+          "evidence_text_excerpt": "u must also be resident in Canada throughout\nthe period from the time of the withdrawal until the time when the home is acquired.\nIf you meet the conditions, the entire balance in the FHSA can be withdrawn on a tax-free basis in a single\nwithdrawal or a series of withdrawals.\nTransfers from an FHSA\nIf you choose not to use the FHSA to buy a first home, you have the option (until age 71 or 15 years,\nwhichever comes first) of transferring funds from an FHSA to your RRSP or a RRIF on a tax-free basis.\nIf funds are transferred to an RRSP or RRIF, they will be taxed upon ultimate withdrawal. These transfers won\u2019t\naffect your RRSP contribution room or the annual FHSA limit.\nEstimating the potential tax savings and future value with an FHSA\nYou can use the Canada Revenue Agency's Tax-Free First Home Savings Account Estimators to help you\nunderstand how much you may save for your down payment",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "limit",
+              "withdrawal",
+              "withdrawals"
+            ]
+          }
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "evidence_chunk_id": "chunk-07002455d30fbb6f",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 1\nTax-free First Home Savings Accounts: An overview\nJanuary 2026\nJamie Golombek\nManaging Director, Tax and Estate Planning, CIBC Private Wealth\nThe First Home Savings Account (FHSA) is a new registered plan launched in 2023. Here\u2019s a brief summary of\nhow this registered plan works.\nThe basics\nThe FHSA gives prospective first-time home buyers the ability to save up to $40,000 on a tax-free basis\ntowards the purchase of a first home in Canada. Like a Registered Retirement Savings Plan (RRSP),\ncontributions to an FHSA are tax-deductible and withdrawals to purchase a first home, including withdrawals\nof any investment income or growth earned in the account, are non-taxable, just like Tax-Free Savings\nAccounts (TFSAs).\nTo open an FHSA, you must be a resident of Canada and at least 18 years of age. In addition, you must be a\nfirst-time home",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "registered",
+              "rrsp"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "25.00",
+          "evidence_chunk_id": "chunk-c6e373f567e84930",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 4\nNon-residents of Canada\nYou can only open an FHSA if you are a resident of Canada for tax purposes.\nIf you become a non-resident of Canada after you've opened an FHSA, you can keep your FHSA in place.\nYou can continue to make contributions and may claim a tax deduction in Canada. There will be no tax in\nCanada on income earned on assets within your FHSA, but be sure to investigate how the foreign country\ntaxes an FHSA.\nIf you\u2019re a non-resident, withdrawals from your FHSA will be subject to non-resident withholding tax at a 25%\nrate since you can't make a qualifying withdrawal to build or buy a qualifying home.\nInterest deductibility, collateralization, and bankruptcy\nLike RRSPs and TFSAs, interest on money borrowed to invest in an FHSA is not tax deductible and you can't\npledge FHSA assets as collateral for a loan. In addition, FHSAs",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "25.00",
+          "evidence_chunk_id": "chunk-c6e373f567e84930",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 4\nNon-residents of Canada\nYou can only open an FHSA if you are a resident of Canada for tax purposes.\nIf you become a non-resident of Canada after you've opened an FHSA, you can keep your FHSA in place.\nYou can continue to make contributions and may claim a tax deduction in Canada. There will be no tax in\nCanada on income earned on assets within your FHSA, but be sure to investigate how the foreign country\ntaxes an FHSA.\nIf you\u2019re a non-resident, withdrawals from your FHSA will be subject to non-resident withholding tax at a 25%\nrate since you can't make a qualifying withdrawal to build or buy a qualifying home.\nInterest deductibility, collateralization, and bankruptcy\nLike RRSPs and TFSAs, interest on money borrowed to invest in an FHSA is not tax deductible and you can't\npledge FHSA assets as collateral for a loan. In addition, FHSAs",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "anchor_type": "page",
+          "anchor_value": "page-4",
+          "page_no": 4,
+          "chunk_index": 13
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "open an FHSA, you must be a resident of Canada and at least 18 years of age",
+          "evidence_chunk_id": "chunk-aab34b543995bbef",
+          "evidence_text_excerpt": "open an FHSA, you must be a resident of Canada and at least 18 years of age. In addition, you must be a\nfirst-time home buyer, meaning that you and/or your spouse or common-law partner have not owned a home in\nwhich you lived as your principal place of residence at any time during the part of the calendar year before the\naccount is opened or at any time in the preceding 4 calendar years.\nIf you make a qualifying withdrawal to buy a home, the FHSA can remain open until the end of the following\nyear; otherwise, the FHSA can remain open for up to 15 years or until the end of the year when you turn\n71 years old, whichever comes first. Any funds left in the FHSA that are not used to buy a qualifying home\nbefore closing the FHSA can be transferred on a tax-free basis to an RRSP or Registered Retirement Income\nFund (RRIF), or will be included in income. Once the 15-year period has ended, you",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "If funds are transferred to an RRSP or RRIF, they will be taxed upon ultimate withdrawal.",
+          "evidence_chunk_id": "chunk-00918c21606c9090",
+          "evidence_text_excerpt": "u must also be resident in Canada throughout\nthe period from the time of the withdrawal until the time when the home is acquired.\nIf you meet the conditions, the entire balance in the FHSA can be withdrawn on a tax-free basis in a single\nwithdrawal or a series of withdrawals.\nTransfers from an FHSA\nIf you choose not to use the FHSA to buy a first home, you have the option (until age 71 or 15 years,\nwhichever comes first) of transferring funds from an FHSA to your RRSP or a RRIF on a tax-free basis.\nIf funds are transferred to an RRSP or RRIF, they will be taxed upon ultimate withdrawal. These transfers won\u2019t\naffect your RRSP contribution room or the annual FHSA limit.\nEstimating the potential tax savings and future value with an FHSA\nYou can use the Canada Revenue Agency's Tax-Free First Home Savings Account Estimators to help you\nunderstand how much you may save for your down payment",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "anchor_type": "page",
+          "anchor_value": "page-3",
+          "page_no": 3,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "registered_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-07002455d30fbb6f",
+          "evidence_text_excerpt": "Tax-free First Home Savings Accounts: An overview I 1\nTax-free First Home Savings Accounts: An overview\nJanuary 2026\nJamie Golombek\nManaging Director, Tax and Estate Planning, CIBC Private Wealth\nThe First Home Savings Account (FHSA) is a new registered plan launched in 2023. Here\u2019s a brief summary of\nhow this registered plan works.\nThe basics\nThe FHSA gives prospective first-time home buyers the ability to save up to $40,000 on a tax-free basis\ntowards the purchase of a first home in Canada. Like a Registered Retirement Savings Plan (RRSP),\ncontributions to an FHSA are tax-deductible and withdrawals to purchase a first home, including withdrawals\nof any investment income or growth earned in the account, are non-taxable, just like Tax-Free Savings\nAccounts (TFSAs).\nTo open an FHSA, you must be a resident of Canada and at least 18 years of age. In addition, you must be a\nfirst-time home",
+          "source_document_id": "src-cibc-pdf-54db02159a92c472",
+          "source_snapshot_id": "snap-d52392be2be2e7e7",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "anchor_type": "page",
+          "anchor_value": "page-1",
+          "page_no": 1,
+          "chunk_index": 0
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b3336241ca0ea513",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-pdf-54db02159a92c472",
+        "selected_snapshot_id": "snap-d52392be2be2e7e7",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-5199a1bdd7259de1",
+          "model_execution_id": "modelexec-ecb555cb01e25c71",
+          "extracted_storage_key": "dev/extracted/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/CIBC/src-cibc-pdf-54db02159a92c472/parsed-5199a1bdd7259de1/metadata.json",
+          "extracted_field_count": 13,
+          "evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "run_state": "completed",
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "extracted_draft_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:14.254523+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "candidate_count": 2,
+    "field_evidence_link_count": 13
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "source_document_id": "src-cibc-html-1bf854423a1c228a",
+      "snapshot_id": "snap-e63ed1254eaeb9bc",
+      "parsed_document_id": "parsed-ac4010606e73c690",
+      "extraction_model_execution_id": "modelexec-55dc76115d5204c2",
+      "normalization_action": "stored",
+      "candidate_id": "cand-246b7b9471dfb560",
+      "normalization_model_execution_id": "modelexec-b8c87e2f9cac9f04",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5813,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 8,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2dbed582e8189b51",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "selected_snapshot_id": "snap-e63ed1254eaeb9bc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-246b7b9471dfb560",
+          "normalization_model_execution_id": "modelexec-b8c87e2f9cac9f04",
+          "extraction_model_execution_id": "modelexec-55dc76115d5204c2",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5813,
+          "field_evidence_link_count": 8,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "source_document_id": "src-cibc-html-bbaadae413723187",
+      "snapshot_id": "snap-6eb192e570624a2a",
+      "parsed_document_id": "parsed-2aaf1d9010661a4a",
+      "extraction_model_execution_id": "modelexec-95f93a5efdaf84bd",
+      "normalization_action": "stored",
+      "candidate_id": "cand-6c6c8ff2eb52bed1",
+      "normalization_model_execution_id": "modelexec-3f5c599c27fe81a1",
+      "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.4761,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 5,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a07780dcae74e739",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "selected_snapshot_id": "snap-6eb192e570624a2a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-6c6c8ff2eb52bed1",
+          "normalization_model_execution_id": "modelexec-3f5c599c27fe81a1",
+          "extraction_model_execution_id": "modelexec-95f93a5efdaf84bd",
+          "normalized_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.4761,
+          "field_evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "field_evidence_link_count": 13,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:37.268871+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+  "correlation_id": "corr_MNtQp3N1XfbErhgn",
+  "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "queued_count": 2,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 2
+  },
+  "source_results": [
+    {
+      "source_id": "CIBC-SAV-002",
+      "source_document_id": "src-cibc-html-1bf854423a1c228a",
+      "snapshot_id": "snap-e63ed1254eaeb9bc",
+      "parsed_document_id": "parsed-ac4010606e73c690",
+      "candidate_id": "cand-246b7b9471dfb560",
+      "candidate_run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-fd1dfc6c6516b0c9",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/metadata.json",
+      "review_task_id": "review-1a445bda27b38c16",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6768,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-2dbed582e8189b51",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-1bf854423a1c228a",
+        "selected_snapshot_id": "snap-e63ed1254eaeb9bc",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-246b7b9471dfb560",
+          "candidate_run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+          "validation_model_execution_id": "modelexec-fd1dfc6c6516b0c9",
+          "normalization_model_execution_id": "modelexec-b8c87e2f9cac9f04",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-1bf854423a1c228a/cand-246b7b9471dfb560/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6768,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-1a445bda27b38c16",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    },
+    {
+      "source_id": "CIBC-SAV-003",
+      "source_document_id": "src-cibc-html-bbaadae413723187",
+      "snapshot_id": "snap-6eb192e570624a2a",
+      "parsed_document_id": "parsed-2aaf1d9010661a4a",
+      "candidate_id": "cand-6c6c8ff2eb52bed1",
+      "candidate_run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-bae3d02b306a9133",
+      "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/metadata.json",
+      "review_task_id": "review-990cba746b674afb",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.598,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a07780dcae74e739",
+        "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+        "source_document_id": "src-cibc-html-bbaadae413723187",
+        "selected_snapshot_id": "snap-6eb192e570624a2a",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-6c6c8ff2eb52bed1",
+          "candidate_run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+          "validation_model_execution_id": "modelexec-bae3d02b306a9133",
+          "normalization_model_execution_id": "modelexec-3f5c599c27fe81a1",
+          "validation_storage_key": "dev/validated/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/CIBC/src-cibc-html-bbaadae413723187/cand-6c6c8ff2eb52bed1/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.598,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-990cba746b674afb",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_MNtQp3N1XfbErhgn",
+          "request_id": "req_e5ea7106092349888c0cf8bc0ca2fd62"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260501_224620_cibc_savings_collect_hBF4loV9",
+    "run_state": "completed",
+    "candidate_count": 2,
+    "review_task_count": 2,
+    "review_queued_count": 2,
+    "auto_validated_count": 0,
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-01T22:48:56.488317+00:00"
+  }
+}
+[source-collection-runner] run run_20260501_224620_cibc_savings_collect_hBF4loV9 completed downstream stages
+[source-catalog-runner] finished run run_20260501_224620_cibc_savings_collect_hBF4loV9
