@@ -339,6 +339,121 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_dynamic_gic_term_deposit_requires_rate_and_minimum_deposit(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-gic-requiredness")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            dynamic_candidate = dict(input_item.normalized_candidate_record)
+            dynamic_candidate["product_type"] = "gic-term-deposit"
+            dynamic_candidate["subtype_code"] = "redeemable"
+            dynamic_candidate["product_name"] = "CIBC Flexible GIC"
+            dynamic_candidate["candidate_payload"] = {
+                "status": "active",
+                "last_verified_at": "2026-05-01T22:47:52+00:00",
+                "bank_name": "CIBC",
+                "product_name": "CIBC Flexible GIC",
+                "cashability": "Cashable",
+                "term_length_text": "1 year",
+                "term_length_days": 365,
+                "redeemable_flag": True,
+                "non_redeemable_flag": False,
+                "source_subtype_label": "Cashable GIC / Flexible GIC",
+                "subtype_code": "redeemable",
+            }
+            dynamic_candidate["validation_issue_codes"] = []
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "CIBC-GIC-002",
+                    "source_metadata": {
+                        "product_type": "gic-term-deposit",
+                        "product_type_dynamic": True,
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "normalized_candidate_record": dynamic_candidate,
+                    "field_evidence_links": [
+                        _evidence("cashability", "Cashable", "chunk-cibc-flex-access"),
+                        _evidence("term_length_text", "1 year", "chunk-cibc-flex-term"),
+                    ],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-dyn-gic-requiredness",
+                inputs=[input_item],
+                taxonomy_registry={},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+            self.assertIn("required_field_missing", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_validation_routing_accepts_display_money_strings_for_numeric_fields(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-display-money")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            candidate = dict(input_item.normalized_candidate_record)
+            payload = dict(candidate["candidate_payload"])
+            payload["minimum_deposit"] = "$1,000"
+            payload["monthly_fee"] = "No fees"
+            payload["public_display_fee"] = "No fees"
+            payload["public_display_rate"] = "4.25%"
+            payload["redeemable_flag"] = False
+            payload["non_redeemable_flag"] = True
+            candidate["candidate_payload"] = payload
+            input_item = ValidationInput(**{**input_item.__dict__, "normalized_candidate_record": candidate})
+
+            result = service.validate_and_route_inputs(
+                run_id="run-gic-display-money",
+                inputs=[input_item],
+                taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertNotIn("invalid_numeric_range", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_status, "pass")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
 
 class ValidationRoutingPersistenceTests(unittest.TestCase):
     def test_load_policies_and_persist_queue(self) -> None:

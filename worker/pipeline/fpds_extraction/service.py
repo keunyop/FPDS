@@ -175,6 +175,10 @@ _BMO_SAVINGS_SOURCE_TITLES = {
     "BMO-SAV-004": "Premium Rate Savings Account",
     "BMO-SAV-005": "U.S. Dollar Premium Rate Savings Account",
 }
+_CIBC_SAVINGS_SOURCE_TITLES = {
+    "CIBC-SAV-002": "CIBC eAdvantage Savings Account",
+    "CIBC-SAV-003": "CIBC US$ Personal Account",
+}
 _GENERIC_TITLE_LINES = {
     "document",
     "benefits",
@@ -266,6 +270,9 @@ _PRODUCT_PROFILE_CONFLICT_KEYWORDS = {
         "mortgages",
         "loan",
         "loans",
+        "mutual fund",
+        "mutual funds",
+        "account conversion",
     ),
     "savings": (
         "chequing",
@@ -662,7 +669,7 @@ def _extract_fields(
                 )
             )
     if "description_short" in requested_fields:
-        description = _extract_description(candidates)
+        description = _extract_description(context=context, candidates=candidates)
         if description:
             extracted.append(
                 _build_derived_field(
@@ -875,6 +882,9 @@ def _extract_document_title(
     context: ExtractionDocumentContext,
     candidates: list[EvidenceChunkCandidate],
 ) -> str | None:
+    if context.source_id in _CIBC_SAVINGS_SOURCE_TITLES:
+        return _CIBC_SAVINGS_SOURCE_TITLES[context.source_id]
+
     ranked_titles: list[tuple[float, int, int, str]] = []
     seen_titles: set[str] = set()
 
@@ -999,6 +1009,7 @@ def _clean_title_candidate(value: str) -> str:
         return ""
 
     cleaned = _restore_us_dollar_text(normalized)
+    cleaned = re.sub(r"\s+\|\s+CIBC$", "", cleaned, flags=re.IGNORECASE).strip()
     compacted = re.sub(r"[^a-z0-9]+", "", cleaned.lower())
     if compacted in _GENERIC_TITLE_LINES:
         return cleaned
@@ -1021,15 +1032,19 @@ def _clean_title_candidate(value: str) -> str:
     return cleaned
 
 
-def _extract_description(candidates: list[EvidenceChunkCandidate]) -> str | None:
+def _extract_description(*, context: ExtractionDocumentContext, candidates: list[EvidenceChunkCandidate]) -> str | None:
     for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
         if _is_cross_product_navigation_noise(candidate.evidence_excerpt):
             continue
+        if _is_noise_for_product_context(context=context, text=candidate.evidence_excerpt):
+            continue
         lines = [line.strip() for line in candidate.evidence_excerpt.splitlines() if line.strip()]
         if len(lines) >= 2:
-            return _normalize_text(lines[1])[:240]
+            description = _normalize_text(lines[1])
+            if not _description_conflicts_with_product_context(context=context, description=description):
+                return description[:240]
         normalized = _normalize_text(candidate.evidence_excerpt)
-        if len(normalized) > 20:
+        if len(normalized) > 20 and not _description_conflicts_with_product_context(context=context, description=normalized):
             return normalized[:240]
     return None
 
@@ -1050,6 +1065,8 @@ def _source_metadata_title_candidates(context: ExtractionDocumentContext) -> lis
     candidates: list[str] = []
     if context.source_id in _BMO_SAVINGS_SOURCE_TITLES:
         candidates.append(_BMO_SAVINGS_SOURCE_TITLES[context.source_id])
+    if context.source_id in _CIBC_SAVINGS_SOURCE_TITLES:
+        candidates.append(_CIBC_SAVINGS_SOURCE_TITLES[context.source_id])
     for key in ("product_name", "source_name", "source_title", "page_title", "primary_heading"):
         value = str(context.source_metadata.get(key) or "").strip()
         if value:
@@ -1108,6 +1125,18 @@ def _is_generic_banking_info_text(text: str) -> bool:
         )
     )
     return marker_hits >= 2 and not has_product_signal
+
+
+def _description_conflicts_with_product_context(*, context: ExtractionDocumentContext, description: str) -> bool:
+    if not description:
+        return False
+    profile = _semantic_product_profile(context)
+    if profile is None:
+        return False
+    lowered = description.lower()
+    if _profile_keyword_hits(profile=profile, text=lowered):
+        return False
+    return any(token in lowered for token in _PRODUCT_PROFILE_CONFLICT_KEYWORDS.get(profile, ()))
 
 
 def _title_conflicts_with_product_context(*, context: ExtractionDocumentContext, title: str) -> bool:
@@ -1377,6 +1406,7 @@ def _extract_money_value(
             label_patterns=(
                 r"minimum\s+opening\s+deposit",
                 r"minimum\s+deposit",
+                r"minimum\s+investment",
                 r"opening\s+deposit",
                 r"initial\s+deposit",
             ),
@@ -1387,6 +1417,7 @@ def _extract_money_value(
             label_patterns=(
                 r"minimum\s+opening\s+deposit",
                 r"minimum\s+deposit",
+                r"minimum\s+investment",
                 r"opening\s+deposit",
                 r"initial\s+deposit",
             ),
@@ -1842,6 +1873,20 @@ def _extract_eligibility_text(text: str) -> str | None:
     if not normalized:
         return None
 
+    lowered_text = normalized.lower()
+    if lowered_text.startswith("what you need to know") and "type cashable access" in lowered_text:
+        return None
+    if any(
+        marker in lowered_text
+        for marker in (
+            "heading south of the border",
+            "travel with ease",
+            "tools and resources provide the information you need",
+            "other u.s. cross-border banking solutions",
+        )
+    ):
+        return None
+
     table_match = re.search(
         r"eligibility\s+with\s+plans?(?:\s*\*\d+)?\s+(?P<value>can\s+be\s+included\s+in\s+any\s+bank\s+plan)",
         normalized,
@@ -1850,10 +1895,20 @@ def _extract_eligibility_text(text: str) -> str | None:
     if table_match is not None:
         return _normalize_text(table_match.group("value")).capitalize()
 
+    resident_age_match = re.search(
+        r"(?P<value>you(?:'|’)re\s+a\s+canadian\s+resident\s+and\s+you(?:'|’)ve\s+reached\s+the\s+age\s+of\s+majority[^.]*)(?:\.|$)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if resident_age_match is not None:
+        return _normalize_text(resident_age_match.group("value")).strip(" .")
+
     best: tuple[int, int, str] | None = None
     for index, raw_sentence in enumerate(re.split(r"(?<=[.!?])\s+", normalized)):
         sentence = raw_sentence.strip()
         if not sentence:
+            continue
+        if "?" in sentence:
             continue
         lowered = sentence.lower()
         score = 0
@@ -1861,10 +1916,14 @@ def _extract_eligibility_text(text: str) -> str | None:
             score += 4
         if any(token in lowered for token in ("resident", "residents", "aged ", "years or older", "age of")):
             score += 3
+        if "canadian resident" in lowered:
+            score += 4
         if any(token in lowered for token in ("must ", "required", "requirement", "need ", "do not need", "don't need")):
             score += 3
         if any(token in lowered for token in ("to apply", "can apply", "apply online", "to open", "can open")):
             score += 2
+        if any(token in lowered for token in ("under the age of majority", "under age", "minor")):
+            score -= 4
         if any(
             token in lowered
             for token in (
@@ -1879,6 +1938,9 @@ def _extract_eligibility_text(text: str) -> str | None:
         if score <= 0:
             continue
         candidate = _normalize_text(sentence).strip(" .")
+        prefix_split = re.match(r"^[^:]{4,80}\baccount:\s+(?P<value>.+)$", candidate, flags=re.IGNORECASE)
+        if prefix_split is not None:
+            candidate = _normalize_text(prefix_split.group("value")).strip(" .")
         ranked = (score, -index, candidate[:280])
         if best is None or ranked > best:
             best = ranked
@@ -1891,6 +1953,8 @@ def _extract_tier_definition_text(text: str) -> str | None:
     normalized = _normalize_text(text)
     if not normalized:
         return None
+    if _contains_unresolved_rate_placeholder(normalized):
+        return None
     for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
         sentence = raw_sentence.strip()
         lowered = sentence.lower()
@@ -1899,6 +1963,11 @@ def _extract_tier_definition_text(text: str) -> str | None:
         if re.search(r"\$\s?[0-9][^.;]{0,80}?\bearn(?:s)?\b[^.;]{0,80}?%", sentence, flags=re.IGNORECASE):
             return _normalize_text(sentence)[:280]
     return None
+
+
+def _contains_unresolved_rate_placeholder(text: str) -> bool:
+    lowered = text.lower()
+    return "rds%rate[" in lowered or re.search(r"\brate\[[0-9]+\]\.", lowered) is not None
 
 
 def _extract_withdrawal_limit_text(*, context: ExtractionDocumentContext, text: str) -> str | None:

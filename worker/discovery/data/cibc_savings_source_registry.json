@@ -64,6 +64,7 @@
       "url": "https://www.cibc.com/en/interest-rates/personal-bank-account-rates.html",
       "expected_fields": [
         "account_interest_rates",
+        "savings_account_rates",
         "rate_effective_date",
         "personal_account_rate_tables"
       ]

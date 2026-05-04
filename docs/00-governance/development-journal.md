@@ -62,6 +62,90 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-04 - CIBC Flexible GIC Review Triage Hardening
+
+- WBS: `5.16`, `5.5`, dynamic GIC review quality hardening
+- Status: `done`
+- Goal: diagnose `review-6cd2778260180548` for `CIBC Flexible GIC` and close system-side gaps where a `Pass` candidate still carried off-context or under-validated fields.
+- Why now: the Product Owner reported a queued CIBC Flexible GIC review with `description_short` set to unrelated mutual-fund account conversion copy, `eligibility_text` mapped from the cashability/access block, and no evidence-backed numeric rate despite the candidate passing validation.
+- Outcome: confirmed the official CIBC source has enough grounded product facts for product name, cashability, one-year term, minimum investment, no-fee/access/interest rules, and registered/non-registered availability, but the fetched personal GIC rate content still exposes unresolved `RDS%rate[...]` placeholders instead of numeric rates. Updated extraction to ignore cross-product description noise in GIC contexts, strip CIBC page-title suffixes, treat `minimum investment` as `minimum_deposit`, and suppress access blocks from `eligibility_text`. Updated normalization and validation routing so dynamic `gic-term-deposit` candidates follow GIC-like requiredness for rate, minimum deposit, and term evidence instead of passing solely because they are dynamic. Added cleanup for the stale access-derived eligibility and truncated simple-interest text.
+- Not done: no live rerun or review decision mutation was executed. The existing queued review row remains a historical artifact from `run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT`.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/discovery/data/cibc_gic_source_registry.json`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_validation_routing.py`
+- Decisions: recommend deferring the current review, not approving or rejecting it. The product/source is valid, but the current artifact has stale noisy fields and lacks evidence-backed numeric rate data. A refreshed candidate should route as validation error or remain deferred until CIBC rates are available through rendered evidence or an approved manual evidence path.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_cibc_flexible_gic_filters_cross_product_description_and_extracts_minimum_investment`
+  - `python -m unittest worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_dynamic_gic_term_deposit_cleans_off_context_fields_and_requires_rate`
+  - `python -m unittest worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_dynamic_gic_term_deposit_requires_rate_and_minimum_deposit`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing worker.pipeline.tests.test_evidence_retrieval`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall worker/pipeline/fpds_extraction worker/pipeline/fpds_normalization worker/pipeline/fpds_validation_routing`
+- Known issues: CIBC personal GIC pages can still return unresolved `RDS%rate[...]` placeholders for rate fields in fetched HTML, so the system should not invent numeric rates from those placeholders.
+- Next step: rerun CIBC GIC collection after restarting the worker/runtime, then approve Flexible GIC only if refreshed fields are grounded and numeric rate evidence is available.
+
+## 2026-05-04 - CIBC eAdvantage Savings Review Triage Hardening
+
+- WBS: `5.16`, `5.5`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose `review-1a445bda27b38c16` for `CIBC eAdvantage Savings Account` and reduce repeat review noise where the worker could safely improve.
+- Why now: the Product Owner reported a queued CIBC savings review where `eligibility_text` selected the under-age exception sentence instead of the primary Canadian-resident and age-of-majority requirement, while the candidate also failed savings required-rate validation.
+- Outcome: confirmed the official CIBC source has clear eligibility, monthly fee, minimum balance, Smart Interest, and tiering context, but the fetched rate source still exposes CIBC `RDS%rate[...]` placeholders instead of rendered numeric rates. Updated eligibility extraction to prefer the primary `Canadian resident + age of majority` requirement and down-rank under-age application exceptions. Added eAdvantage coverage that suppresses unresolved RDS tier text and records the expected operator note when supporting CIBC rate evidence is product-matched but has no numeric percentage.
+- Not done: no live rerun or review decision mutation was executed. The existing queued review row remains a historical artifact from `run_20260501_224620_cibc_savings_collect_hBF4loV9`.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`
+- Decisions: recommend deferring the current review, not approving or rejecting it. The source product is valid and the source has enough non-rate facts, but the current artifact lacks a canonical-safe numeric savings rate. A refreshed candidate should be approved only if a rendered numeric rate source or approved manual evidence path is available.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_cibc_eadvantage_prefers_primary_residency_eligibility`
+  - `python -m unittest worker.pipeline.tests.test_normalization.SupportingMergeTests.test_cibc_eadvantage_supporting_rate_page_missing_numeric_rate_adds_operator_note`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing worker.pipeline.tests.test_evidence_retrieval`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall worker/pipeline/fpds_extraction worker/pipeline/fpds_normalization worker/pipeline/fpds_validation_routing`
+  - `git diff --check`
+- Known issues: CIBC eAdvantage and supporting rates pages can still expose unresolved `RDS%rate[...]` placeholders in fetched HTML, so the system should not invent numeric rates from those placeholders.
+- Next step: rerun CIBC savings collection after restarting the worker/runtime, then approve eAdvantage only if the refreshed candidate has clean primary eligibility and evidence-backed numeric rate fields.
+
+## 2026-05-04 - CIBC Bonus Rate GIC Dynamic Numeric Hardening
+
+- WBS: `5.16`, `5.5`, dynamic product review quality hardening
+- Status: `done`
+- Goal: diagnose `review-307e2d94c79731d7` for `CIBC Bonus Rate GIC` and remove avoidable `invalid_numeric_range` routing when dynamic normalization returns display-form money values.
+- Why now: the Product Owner reported a queued validation-error review where `minimum_deposit` was `$1,000`, `monthly_fee` and `public_display_fee` were `No fees`, and validation treated those canonical numeric fields as invalid.
+- Outcome: confirmed the source has enough evidence for the core product facts, including minimum investment, no-fee non-registered GIC treatment, non-redeemable access, eligibility, and terms. Updated normalization to coerce canonical numeric fields from display strings such as `$1,000`, `No fees`, and percent strings even when the dynamic AI labels them as strings. Updated validation routing to use the same tolerant numeric parser so legacy or review-path payloads do not reintroduce the same error. Added cleanup that drops explanatory `Why choose...` copy when it is mapped into `promotional_period_text`.
+- Not done: no live rerun or review decision mutation was executed. The existing queued review row remains a historical artifact from `run_20260501_224620_cibc_gic-term-deposit_collect_ilbdO5QT`.
+- Key files: `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_validation_routing.py`
+- Decisions: recommend deferring the current review, not approving or rejecting it. The product/source is valid, but the queued artifact has validation-error state and still includes stale display-string numeric values. A rerun after this fix should be approvable if it keeps grounded GIC facts and no unresolved numeric/rate validation error remains.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_dynamic_gic_normalization_coerces_display_money_values`
+  - `python -m unittest worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_validation_routing_accepts_display_money_strings_for_numeric_fields`
+  - `python -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing worker.pipeline.tests.test_evidence_retrieval`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall worker/pipeline/fpds_extraction worker/pipeline/fpds_normalization worker/pipeline/fpds_validation_routing`
+  - `git diff --check`
+- Known issues: CIBC still exposes some rates as dynamic `RDS%rate[...]` placeholders in fetched HTML, so refreshed candidates may remain reviewable if no rendered numeric rate can be extracted.
+- Next step: rerun CIBC GIC collection and approve only a refreshed candidate with numeric-safe fee/deposit fields and grounded rate evidence.
+
+## 2026-05-04 - CIBC US Personal Account Review Triage Hardening
+
+- WBS: `5.16`, `5.5`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose `review-990cba746b674afb` for `CIBC US Personal Account` and reduce repeat review noise where the worker could safely improve.
+- Why now: the Product Owner reported a queued CIBC savings review where `eligibility_text` came from generic cross-border travel copy, `tier_definition_text` carried unresolved CIBC `RDS%rate[...]` placeholders, and the candidate failed savings required-rate validation.
+- Outcome: confirmed the current review artifact should not be approved because it lacks a usable numeric rate field and contains stale noisy mappings. Added CIBC source-title preservation for `CIBC-SAV-002` and `CIBC-SAV-003`, suppressed generic travel/resource copy from eligibility extraction, suppressed unresolved CIBC RDS rate placeholders from tier text extraction, and added CIBC savings supporting-rate merge coverage from `CIBC-SAV-004` for `CIBC-SAV-002` and `CIBC-SAV-003` when the support page exposes numeric percentages. Updated the CIBC savings registry support source to request `savings_account_rates`.
+- Not done: no live rerun or review decision mutation was executed. The existing queued review row remains a historical artifact from `run_20260501_224620_cibc_savings_collect_hBF4loV9`.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/discovery/data/cibc_savings_source_registry.json`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`
+- Decisions: recommend deferring the current review, not approving or rejecting it. The source product is valid and the CIBC page has clear eligibility and fee evidence, but the available run artifact does not have canonical-safe numeric rate evidence. If CIBC continues publishing only unresolved `RDS%rate[...]` placeholders in fetched HTML, the refreshed candidate should remain deferred until a rendered-rate source, parser enhancement, or approved manual evidence path is available.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_cibc_us_personal_extracts_title_and_eligibility_without_travel_noise`
+  - `python -m unittest worker.pipeline.tests.test_normalization.SupportingMergeTests.test_merge_supports_cibc_us_personal_rates_from_rate_page worker.pipeline.tests.test_normalization.SupportingMergeTests.test_cibc_supporting_rate_page_missing_numeric_rate_adds_operator_note worker.pipeline.tests.test_normalization.SupportingMergeTests.test_supporting_source_ids_for_td_targets`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing worker.pipeline.tests.test_evidence_retrieval`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall worker/pipeline/fpds_extraction worker/pipeline/fpds_normalization`
+- Known issues: the current CIBC rate source and detail page can expose CIBC dynamic `RDS%rate[...]` placeholders instead of rendered percentages in fetched HTML, so the system may still correctly route the refreshed candidate to review/defer for missing numeric savings rate.
+- Next step: rerun CIBC savings collection after restarting the worker/runtime, then approve only if the refreshed candidate has `CIBC US$ Personal Account`, clean Canadian-resident eligibility, no unresolved RDS placeholder fields, and evidence-backed numeric rate fields.
+
 ## 2026-05-01 - Admin Bank Collect Queued Message Simplification
 
 - WBS: `5.15`, admin source registry UI polish

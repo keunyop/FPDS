@@ -441,7 +441,7 @@ def _compute_validation_issue_codes(
         value = candidate_payload.get(field_name)
         if value in {None, ""}:
             continue
-        decimal_value = _as_decimal(value)
+        decimal_value = _as_decimal(value, field_name=field_name)
         if decimal_value is None:
             issues.add("invalid_numeric_range")
             continue
@@ -456,13 +456,15 @@ def _compute_validation_issue_codes(
         if integer_value is None or integer_value < 1:
             issues.add("invalid_term_value")
 
-    if product_type == "chequing":
+    product_type_family = _canonical_product_type_family(product_type)
+    requiredness_type = product_type_family or product_type
+    if requiredness_type == "chequing":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.add("required_field_missing")
-    if product_type == "savings":
+    if requiredness_type == "savings":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.add("required_field_missing")
-    if product_type == "gic":
+    if requiredness_type == "gic":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.add("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
@@ -472,7 +474,7 @@ def _compute_validation_issue_codes(
 
     if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
         issues.add("inconsistent_cross_field_logic")
-    if product_type == "gic" and candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
+    if requiredness_type == "gic" and candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
         issues.add("inconsistent_cross_field_logic")
     if dynamic_product_type:
         non_core_values = [
@@ -540,11 +542,13 @@ def _compute_source_confidence(
         candidate_payload.get("last_verified_at"),
     ]
     completeness = sum(1 for item in required_fields if item not in {None, ""}) / len(required_fields)
-    if product_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
+    product_type_family = _canonical_product_type_family(product_type)
+    requiredness_type = product_type_family or product_type
+    if requiredness_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
         completeness = min(1.0, completeness + 0.10)
-    if product_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+    if requiredness_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
         completeness = min(1.0, completeness + 0.10)
-    if product_type == "gic" and candidate_payload.get("minimum_deposit") not in {None, ""}:
+    if requiredness_type == "gic" and candidate_payload.get("minimum_deposit") not in {None, ""}:
         completeness = min(1.0, completeness + 0.10)
 
     evidence_average = sum(item.citation_confidence for item in field_evidence_links) / len(field_evidence_links) if field_evidence_links else 0.40
@@ -639,6 +643,19 @@ def _uses_dynamic_product_type(*, product_type: str | None, source_metadata: dic
     if product_type in {"chequing", "savings", "gic"}:
         return False
     return bool(source_metadata.get("product_type_dynamic", True))
+
+
+def _canonical_product_type_family(product_type: str | None) -> str | None:
+    normalized = str(product_type or "").strip().lower()
+    if normalized in {"chequing", "savings", "gic"}:
+        return normalized
+    if any(token in normalized for token in ("gic", "term-deposit", "term_deposit", "term deposit")):
+        return "gic"
+    if "savings" in normalized or "saving" in normalized:
+        return "savings"
+    if "chequing" in normalized or "checking" in normalized:
+        return "chequing"
+    return None
 
 
 def _build_issue_summary(
@@ -888,9 +905,24 @@ def _truthy(value: object) -> bool:
     return str(value).strip().lower() == "true"
 
 
-def _as_decimal(value: object) -> Decimal | None:
-    try:
+def _as_decimal(value: object, *, field_name: str | None = None) -> Decimal | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, int | float):
         return Decimal(str(value))
+
+    normalized = str(value).strip()
+    if field_name in _FEE_FIELDS:
+        lowered = normalized.lower()
+        if any(token in lowered for token in ("no fee", "no monthly fee", "fees no fees", "fee-free", "free")):
+            return Decimal("0")
+    normalized = normalized.replace(",", "").replace("$", "").replace("%", "").strip()
+    normalized = re.sub(r"\b(?:cad|cdn|dollars?)\b", "", normalized, flags=re.IGNORECASE).strip()
+    normalized = re.sub(r"\s+", "", normalized)
+    try:
+        return Decimal(normalized)
     except (InvalidOperation, ValueError):
         return None
 

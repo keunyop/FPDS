@@ -398,8 +398,11 @@ def _normalize_candidate(
                 "provider_request_id": dynamic_usage.get("provider_request_id"),
             }
 
+    product_type_family = _canonical_product_type_family(product_type)
+    _clean_product_context_fields(product_type_family=product_type_family, candidate_payload=candidate_payload)
+
     subtype_code, source_subtype_label = _infer_subtype_code(
-        product_type=product_type,
+        product_type=product_type_family,
         currency=currency,
         candidate_payload=candidate_payload,
     )
@@ -421,10 +424,12 @@ def _normalize_candidate(
         candidate_payload["student_plan_flag"] = True
     if _truthy(candidate_payload.get("newcomer_plan_flag")) or "newcomer" in candidate_payload["target_customer_tags"]:
         candidate_payload["newcomer_plan_flag"] = True
+    _clean_promotional_period_fields(candidate_payload)
     candidate_payload["effective_date"] = _normalize_effective_date(candidate_payload.get("effective_date"), candidate_payload.get("notes"))
 
     validation_issue_codes = _compute_validation_issue_codes(
         product_type=product_type,
+        product_type_family=product_type_family,
         subtype_code=subtype_code,
         product_name=product_name,
         country_code=country_code,
@@ -443,6 +448,7 @@ def _normalize_candidate(
         candidate_payload=candidate_payload,
         evidence_links=item.evidence_links,
         product_type=product_type,
+        product_type_family=product_type_family,
         product_name=product_name,
         currency=currency,
         dynamic_product_type=dynamic_product_type,
@@ -481,6 +487,7 @@ def _normalize_candidate(
 def _compute_validation_issue_codes(
     *,
     product_type: str | None,
+    product_type_family: str | None,
     subtype_code: str | None,
     product_name: str | None,
     country_code: str | None,
@@ -529,13 +536,14 @@ def _compute_validation_issue_codes(
         if integer_value is None or integer_value < 1:
             issues.append("invalid_term_value")
 
-    if product_type == "chequing":
+    requiredness_type = product_type_family or product_type
+    if requiredness_type == "chequing":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.append("required_field_missing")
-    if product_type == "savings":
+    if requiredness_type == "savings":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
-    if product_type == "gic":
+    if requiredness_type == "gic":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
@@ -591,18 +599,20 @@ def _compute_source_confidence(
     candidate_payload: dict[str, object],
     evidence_links: list[NormalizationEvidenceLink],
     product_type: str | None,
+    product_type_family: str | None,
     product_name: str | None,
     currency: str | None,
     dynamic_product_type: bool = False,
 ) -> float:
     required_values = [product_type, product_name, currency, candidate_payload.get("status"), candidate_payload.get("last_verified_at")]
     completeness = sum(1 for item in required_values if item not in {None, ""}) / len(required_values)
-    if product_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
+    requiredness_type = product_type_family or product_type
+    if requiredness_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
         completeness = min(1.0, completeness + 0.15)
-    if product_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+    if requiredness_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
         completeness = min(1.0, completeness + 0.15)
     if (
-        product_type == "gic"
+        requiredness_type == "gic"
         and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS)
         and candidate_payload.get("minimum_deposit") not in {None, ""}
         and any(candidate_payload.get(field_name) not in {None, ""} for field_name in ("term_length_days", "term_length_text"))
@@ -655,6 +665,64 @@ def _uses_dynamic_product_type(*, product_type: str | None, item: NormalizationI
     if product_type in _ACTIVE_PRODUCT_TYPES:
         return False
     return bool(item.source_metadata.get("product_type_dynamic", True))
+
+
+def _canonical_product_type_family(product_type: str | None) -> str | None:
+    normalized = str(product_type or "").strip().lower()
+    if normalized in _ACTIVE_PRODUCT_TYPES:
+        return normalized
+    if any(token in normalized for token in ("gic", "term-deposit", "term_deposit", "term deposit")):
+        return "gic"
+    if "savings" in normalized or "saving" in normalized:
+        return "savings"
+    if "chequing" in normalized or "checking" in normalized:
+        return "chequing"
+    return None
+
+
+def _clean_product_context_fields(*, product_type_family: str | None, candidate_payload: dict[str, object]) -> None:
+    if product_type_family == "gic":
+        description = str(candidate_payload.get("description_short") or "").strip()
+        if description and _gic_text_conflicts_with_product_context(description):
+            candidate_payload.pop("description_short", None)
+
+        eligibility = str(candidate_payload.get("eligibility_text") or "").strip()
+        lowered_eligibility = eligibility.lower()
+        if lowered_eligibility.startswith("what you need to know") and "type cashable access" in lowered_eligibility:
+            candidate_payload.pop("eligibility_text", None)
+
+        calculation_method = str(candidate_payload.get("interest_calculation_method") or "").strip()
+        if calculation_method:
+            simple_interest_match = re.search(
+                r"simple interest is calculated and paid at maturity",
+                calculation_method,
+                flags=re.IGNORECASE,
+            )
+            if simple_interest_match is not None:
+                candidate_payload["interest_calculation_method"] = _clean_text_value(simple_interest_match.group(0))
+
+
+def _gic_text_conflicts_with_product_context(text: str) -> bool:
+    lowered = text.lower()
+    if any(token in lowered for token in ("gic", "term deposit", "guaranteed investment certificate")):
+        return False
+    return any(
+        token in lowered
+        for token in (
+            "mutual fund",
+            "mutual funds",
+            "account conversion",
+            "credit card",
+            "mortgage",
+            "chequing",
+            "checking",
+            "loan",
+        )
+    )
+
+
+def _clean_text_value(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip(" ;.")
 
 
 def _normalize_dynamic_fields_with_ai(
@@ -855,6 +923,9 @@ def _normalize_effective_date(value: object, notes_value: object) -> str | None:
 def _normalize_field_value(*, field_name: str, value: object, value_type: str) -> object:
     if value in {None, ""}:
         return None
+    if field_name in _NUMERIC_FIELDS:
+        decimal_value = _parse_canonical_decimal(field_name=field_name, value=value)
+        return float(decimal_value) if decimal_value is not None else None
     if value_type == "boolean":
         if isinstance(value, bool):
             return value
@@ -866,6 +937,56 @@ def _normalize_field_value(*, field_name: str, value: object, value_type: str) -
         decimal_value = _as_decimal(value)
         return float(decimal_value) if decimal_value is not None else None
     return str(value).strip()
+
+
+def _parse_canonical_decimal(*, field_name: str, value: object) -> Decimal | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, int | float):
+        return Decimal(str(value))
+
+    normalized = str(value).strip()
+    if not normalized:
+        return None
+    lowered = normalized.lower()
+    if field_name in _FEE_FIELDS and any(token in lowered for token in ("no fee", "no monthly fee", "fees no fees", "fee-free", "free")):
+        return Decimal("0")
+
+    compact = normalized.replace(",", "").replace("$", "").replace("%", "").strip()
+    compact = re.sub(r"\b(?:cad|cdn|dollars?)\b", "", compact, flags=re.IGNORECASE).strip()
+    compact = re.sub(r"\s+", "", compact)
+    try:
+        return Decimal(compact)
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def _clean_promotional_period_fields(candidate_payload: dict[str, object]) -> None:
+    value = candidate_payload.get("promotional_period_text")
+    if value in {None, ""}:
+        return
+    text = str(value).strip()
+    lowered = text.lower()
+    period_tokens = (
+        "limited time",
+        "until ",
+        "through ",
+        "expires",
+        "expiry",
+        "for the first",
+        "for first",
+        "introductory period",
+        "promotional period",
+        "months",
+        "days",
+        "weeks",
+        "from ",
+        " to ",
+    )
+    if lowered.startswith("why choose") or not any(token in lowered for token in period_tokens):
+        candidate_payload.pop("promotional_period_text", None)
 
 
 def _field_value(extracted_by_field: dict[str, NormalizationExtractedField], field_name: str) -> object | None:

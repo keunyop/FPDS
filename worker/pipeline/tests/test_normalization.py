@@ -509,12 +509,165 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_dynamic_gic_normalization_coerces_display_money_values(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-dynamic-gic-money")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            dynamic_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "product_type":
+                    dynamic_fields.append(
+                        NormalizationExtractedField(**{**field.__dict__, "candidate_value": "gic-term-deposit"})
+                    )
+                else:
+                    dynamic_fields.append(field)
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "CIBC-GIC-003",
+                    "source_metadata": {
+                        "product_type": "gic-term-deposit",
+                        "product_type_dynamic": True,
+                        "product_type_name": "GIC / Term Deposit",
+                        "product_type_description": "A fixed-term guaranteed investment certificate.",
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "schema_context": {"product_family": "deposit", "product_type": "gic-term-deposit"},
+                    "extracted_fields": dynamic_fields,
+                }
+            )
+
+            with (
+                patch("worker.pipeline.fpds_normalization.service.llm_provider_configured", return_value=True),
+                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-5.4-mini"),
+                patch(
+                    "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
+                    return_value=(
+                        {
+                            "summary": "AI normalized CIBC Bonus Rate GIC fields.",
+                            "product_name": "CIBC Bonus Rate GIC",
+                            "subtype_code": "other",
+                            "source_subtype_label": "GIC / Term Deposit",
+                            "normalized_fields": [
+                                {"field_name": "minimum_deposit", "value_type": "string", "candidate_value": "$1,000"},
+                                {"field_name": "monthly_fee", "value_type": "string", "candidate_value": "No fees"},
+                                {"field_name": "public_display_fee", "value_type": "string", "candidate_value": "No fees"},
+                                {"field_name": "public_display_rate", "value_type": "string", "candidate_value": "4.25%"},
+                                {
+                                    "field_name": "promotional_period_text",
+                                    "value_type": "string",
+                                    "candidate_value": "Why choose a CIBC Bonus Rate GIC? Predictable earnings.",
+                                },
+                            ],
+                        },
+                        {
+                            "model_id": "gpt-5.4-mini",
+                            "prompt_tokens": 170,
+                            "completion_tokens": 55,
+                            "provider_request_id": "resp-norm-dyn-gic-001",
+                        },
+                    ),
+                ),
+            ):
+                result = service.normalize_inputs(run_id="run-dyn-gic-001", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            payload = source_result.normalized_candidate_record["candidate_payload"]
+            self.assertEqual(payload["minimum_deposit"], 1000.0)
+            self.assertEqual(payload["monthly_fee"], 0.0)
+            self.assertEqual(payload["public_display_fee"], 0.0)
+            self.assertEqual(payload["public_display_rate"], 4.25)
+            self.assertNotIn("promotional_period_text", payload)
+            self.assertNotIn("invalid_numeric_range", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_dynamic_gic_term_deposit_cleans_off_context_fields_and_requires_rate(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-dynamic-gic-requiredness")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            dynamic_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "product_type":
+                    dynamic_fields.append(NormalizationExtractedField(**{**field.__dict__, "candidate_value": "gic-term-deposit"}))
+                elif field.field_name == "standard_rate":
+                    continue
+                else:
+                    dynamic_fields.append(field)
+            dynamic_fields.extend(
+                [
+                    _field("description_short", "Learn About CIBC Mutual Fund Account Conversion", "string", 0.7),
+                    _field("eligibility_text", "What you need to know Type Cashable Access Access your money at any time", "string", 0.55),
+                    _field(
+                        "interest_calculation_method",
+                        (
+                            "Otherwise, you have to cash out the full balance Interest Simple interest is calculated and paid at maturity "
+                            "If you cash out in the first 29 days, you're not paid interest"
+                        ),
+                        "string",
+                        0.71,
+                    ),
+                ]
+            )
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "CIBC-GIC-002",
+                    "source_metadata": {
+                        "product_type": "gic-term-deposit",
+                        "product_type_dynamic": True,
+                        "product_type_name": "GIC / Term Deposit",
+                        "product_type_description": "A fixed-term guaranteed investment certificate.",
+                        "fallback_policy": "generic_ai_review",
+                    },
+                    "schema_context": {"product_family": "deposit", "product_type": "gic-term-deposit"},
+                    "extracted_fields": dynamic_fields,
+                    "evidence_links": [link for link in input_item.evidence_links if link.field_name != "standard_rate"],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-dyn-gic-requiredness", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            payload = source_result.normalized_candidate_record["candidate_payload"]
+            self.assertNotIn("description_short", payload)
+            self.assertNotIn("eligibility_text", payload)
+            self.assertEqual(payload["interest_calculation_method"], "Simple interest is calculated and paid at maturity")
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
 
 class SupportingMergeTests(unittest.TestCase):
     def test_supporting_source_ids_for_td_targets(self) -> None:
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-002"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-003"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-004"), ("BMO-SAV-006",))
+        self.assertEqual(supporting_source_ids_for_target("CIBC-SAV-002"), ("CIBC-SAV-004",))
+        self.assertEqual(supporting_source_ids_for_target("CIBC-SAV-003"), ("CIBC-SAV-004",))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-002"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-003"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-004"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
@@ -718,6 +871,130 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "BMO-SAV-006")
         self.assertIn("BMO-SAV-006", " ".join(merged["runtime_notes"]))
+
+    def test_merge_supports_cibc_us_personal_rates_from_rate_page(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "CIBC US$ Personal Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+                _field_dict(
+                    "eligibility_text",
+                    "You're a Canadian resident and you've reached the age of majority in your province or territory",
+                    "string",
+                    0.72,
+                    evidence_chunk_id="chunk-detail-eligibility",
+                ),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="cibc-us-personal-account",
+                        excerpt=(
+                            "CIBC US$ Personal Account\n"
+                            "Daily Closing Balance Regular Interest Rate\n"
+                            "Balance up to $2,999.99 0.01%\n"
+                            "Balance $3,000 to $9,999.99 0.05%\n"
+                            "On portion of balances $60,000 and over 0.10%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="CIBC-SAV-003",
+            base_artifact=base_artifact,
+            supporting_artifacts={"CIBC-SAV-004": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.10")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.10")
+        self.assertEqual(fields_by_name["standard_rate"]["field_metadata"]["supporting_source_id"], "CIBC-SAV-004")
+        self.assertIn("CIBC-SAV-004", " ".join(merged["runtime_notes"]))
+
+    def test_cibc_eadvantage_supporting_rate_page_missing_numeric_rate_adds_operator_note(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "CIBC eAdvantage Savings Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+                _field_dict(
+                    "eligibility_text",
+                    "You're a Canadian resident and you've reached the age of majority in your province or territory",
+                    "string",
+                    0.72,
+                    evidence_chunk_id="chunk-detail-eligibility",
+                ),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="cibc-eadvantage-savings-account",
+                        excerpt=(
+                            "CIBC eAdvantage Savings Account\n"
+                            "Daily Closing Balance Regular Interest Rate\n"
+                            "Balance up to $9,999.99 RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)%\n"
+                            "Balance $500,000 and over RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="CIBC-SAV-002",
+            base_artifact=base_artifact,
+            supporting_artifacts={"CIBC-SAV-004": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertIn("did not contain a numeric percentage", " ".join(merged["runtime_notes"]))
+
+    def test_cibc_supporting_rate_page_missing_numeric_rate_adds_operator_note(self) -> None:
+        base_artifact = {
+            "extracted_fields": [
+                _field_dict("product_name", "CIBC US$ Personal Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="tier_definition_text",
+                        anchor_value="cibc-us-personal-account",
+                        excerpt=(
+                            "CIBC US$ Personal Account\n"
+                            "Daily Closing Balance Regular Interest Rate\n"
+                            "Balance up to $2,999.99 RDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="CIBC-SAV-003",
+            base_artifact=base_artifact,
+            supporting_artifacts={"CIBC-SAV-004": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertIn("did not contain a numeric percentage", " ".join(merged["runtime_notes"]))
 
     def test_merge_supports_growth_rate_fields_from_current_rates(self) -> None:
         base_artifact = {

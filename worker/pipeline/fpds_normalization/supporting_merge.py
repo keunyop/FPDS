@@ -12,6 +12,8 @@ _TARGET_SUPPORT_SOURCE_IDS = {
     "BMO-SAV-002": ("BMO-SAV-006",),
     "BMO-SAV-003": ("BMO-SAV-006",),
     "BMO-SAV-004": ("BMO-SAV-006",),
+    "CIBC-SAV-002": ("CIBC-SAV-004",),
+    "CIBC-SAV-003": ("CIBC-SAV-004",),
     "TD-SAV-002": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-003": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
     "TD-SAV-004": ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"),
@@ -21,6 +23,8 @@ _TARGET_MATCH_TERMS = {
     "BMO-SAV-002": ("savings amplifier account", "savings amplifier"),
     "BMO-SAV-003": ("savings builder account", "savings builder"),
     "BMO-SAV-004": ("premium rate savings account", "premium rate savings"),
+    "CIBC-SAV-002": ("cibc eadvantage savings account", "eadvantage savings"),
+    "CIBC-SAV-003": ("cibc us$ personal account", "cibc us personal account", "us$ personal account", "us personal account"),
     "TD-SAV-002": ("td every day savings account", "every day savings"),
     "TD-SAV-003": ("td epremium savings account", "epremium savings"),
     "TD-SAV-004": ("td growth savings account", "growth savings"),
@@ -84,6 +88,12 @@ def merge_supporting_artifacts(
             )
         elif support_source_id == "BMO-SAV-006":
             supplement = _build_bmo_rate_page_supplement(
+                target_source_id=target_source_id,
+                supporting_artifact=payload,
+                existing_fields=field_records,
+            )
+        elif support_source_id == "CIBC-SAV-004":
+            supplement = _build_cibc_rate_page_supplement(
                 target_source_id=target_source_id,
                 supporting_artifact=payload,
                 existing_fields=field_records,
@@ -414,6 +424,75 @@ def _build_bmo_rate_page_supplement(
     }
 
 
+def _build_cibc_rate_page_supplement(
+    *,
+    target_source_id: str,
+    supporting_artifact: dict[str, object],
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    if target_source_id not in {"CIBC-SAV-002", "CIBC-SAV-003"}:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")):
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    terms = _TARGET_MATCH_TERMS[target_source_id]
+    matches = list(supporting_artifact.get("retrieval_result", {}).get("matches", []))
+    match = _find_product_matched_rate_table(target_source_id=target_source_id, matches=matches, terms=terms)
+    if match is None:
+        return {
+            "field_updates": {},
+            "evidence_updates": {},
+            "runtime_notes": [
+                f"CIBC savings support source `CIBC-SAV-004` was available for `{target_source_id}`, but no product-matched rate evidence was found."
+            ],
+        }
+
+    rate_values = _extract_single_rate_values(str(match.get("evidence_text_excerpt", "")))
+    if not rate_values:
+        return {
+            "field_updates": {},
+            "evidence_updates": {},
+            "runtime_notes": [
+                f"CIBC savings support source `CIBC-SAV-004` matched `{target_source_id}`, but the rate evidence did not contain a numeric percentage."
+            ],
+        }
+
+    field_updates: dict[str, dict[str, object]] = {}
+    evidence_updates: dict[str, dict[str, object]] = {}
+    for field_name, candidate_value in rate_values.items():
+        if field_name in existing_fields:
+            continue
+        field_updates[field_name] = _build_support_field(
+            field_name=field_name,
+            candidate_value=candidate_value,
+            value_type="decimal",
+            match=match,
+            extraction_method="supporting_cibc_rate_page_merge",
+            field_metadata={
+                "supporting_source_id": "CIBC-SAV-004",
+                "supporting_merge": True,
+                "match_terms": list(terms),
+            },
+        )
+        evidence_updates[field_name] = _build_support_link(
+            field_name=field_name,
+            candidate_value=candidate_value,
+            match=match,
+        )
+
+    if not field_updates:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    return {
+        "field_updates": field_updates,
+        "evidence_updates": evidence_updates,
+        "runtime_notes": [
+            f"Supplemented missing CIBC savings rate fields for `{target_source_id}` from `CIBC-SAV-004` supporting rate evidence."
+        ],
+    }
+
+
 def _find_product_matched_rate_table(
     *,
     target_source_id: str,
@@ -424,6 +503,8 @@ def _find_product_matched_rate_table(
         "BMO-SAV-002": ("standard_rate", "public_display_rate", "interest_rate_summary", "savings_account_rates"),
         "BMO-SAV-003": ("standard_rate", "public_display_rate", "interest_rate_summary", "savings_account_rates"),
         "BMO-SAV-004": ("standard_rate", "public_display_rate", "interest_rate_summary", "savings_account_rates"),
+        "CIBC-SAV-002": ("standard_rate", "public_display_rate", "interest_rate_summary", "savings_account_rates"),
+        "CIBC-SAV-003": ("standard_rate", "public_display_rate", "interest_rate_summary", "savings_account_rates", "tier_definition_text"),
         "TD-SAV-002": ("standard_rate", "public_display_rate", "rate_tiers", "tier_definition_text"),
         "TD-SAV-003": ("standard_rate", "public_display_rate", "rate_tiers", "tier_definition_text"),
         "TD-SAV-004": ("rate_tiers", "boosted_rate", "promotional_rate", "tier_definition_text"),

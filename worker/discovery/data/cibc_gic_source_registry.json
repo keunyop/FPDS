@@ -35,6 +35,8 @@
       "expected_fields": [
         "product_name",
         "cashability",
+        "minimum_deposit",
+        "standard_rate",
         "term_options",
         "interest_payment_rules"
       ]

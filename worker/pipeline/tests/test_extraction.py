@@ -1792,6 +1792,209 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_cibc_us_personal_extracts_title_and_eligibility_without_travel_noise(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-cibc-us-personal")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="CIBC-SAV-003",
+                parsed_document_id="parsed-cibc-us-personal",
+                source_document_id="src-cibc-us-personal",
+                snapshot_id="snap-cibc-us-personal",
+                bank_code="CIBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "expected_fields": ["product_name", "eligibility_text", "tier_definition_text"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-us-rate-placeholder",
+                    parsed_document_id="parsed-cibc-us-personal",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "CIBC US$ Personal Account at a glance\n"
+                        "Regular Interest rate\n"
+                        "RDS%rate[3].CUPA.rate(null,0.0_up to_2999.99_CAD_Balance,1,1)(#O2#)% to "
+                        "RDS%rate[3].CUPA.rate(null,60000.0_and over_0.0_CAD_Portion,1,1)(#O2#)%\n"
+                        "Regular interest rates are tiered."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-us-personal",
+                    source_snapshot_id="snap-cibc-us-personal",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-us-eligibility",
+                    parsed_document_id="parsed-cibc-us-personal",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="how-do-i-qualify",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "How do I qualify?\n"
+                        "CIBC US$ Personal Account:\n"
+                        "You're a Canadian resident and you've reached the age of majority in your province or territory."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-us-personal",
+                    source_snapshot_id="snap-cibc-us-personal",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-us-cross-border-noise",
+                    parsed_document_id="parsed-cibc-us-personal",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="other-u-s-banking-services-for-canadians",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Other U.S. banking services for Canadians\n"
+                        "We know there's lots to think about when you're heading south of the border. "
+                        "Our tools and resources provide the information you need so you can travel with ease."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-us-personal",
+                    source_snapshot_id="snap-cibc-us-personal",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-cibc-us-personal",
+                correlation_id="corr-cibc-us-personal",
+                request_id="req-cibc-us-personal",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "CIBC US$ Personal Account")
+            self.assertEqual(
+                extracted_by_field["eligibility_text"].candidate_value,
+                "You're a Canadian resident and you've reached the age of majority in your province or territory",
+            )
+            self.assertNotIn("tier_definition_text", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_cibc_eadvantage_prefers_primary_residency_eligibility(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-cibc-eadvantage-eligibility")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="CIBC-SAV-002",
+                parsed_document_id="parsed-cibc-eadvantage",
+                source_document_id="src-cibc-eadvantage",
+                snapshot_id="snap-cibc-eadvantage",
+                bank_code="CIBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "expected_fields": ["product_name", "eligibility_text", "tier_definition_text"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-eadvantage-rates",
+                    parsed_document_id="parsed-cibc-eadvantage",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="rates-and-fees",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "CIBC eAdvantage Savings Account at a glance\n"
+                        "Regular Interest\n"
+                        "RDS%rate[3].CESA.Published(null,0.0_-_9999.99_CAD_Balance,1,1)(#O2#)% to "
+                        "RDS%rate[3].CESA.Published(null,500000.0_and over_0.0_CAD_Balance,1,1)(#O2#)%\n"
+                        "Tiered regular interest with rates that increase as your savings grow."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-eadvantage",
+                    source_snapshot_id="snap-cibc-eadvantage",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-eadvantage-eligibility",
+                    parsed_document_id="parsed-cibc-eadvantage",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="how-do-i-qualify",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "How do I qualify?\n"
+                        "CIBC eAdvantage Savings Account:\n"
+                        "You're a Canadian resident and you've reached the age of majority in your province or territory. "
+                        "Learn about the age of majority. Opens a popup.\n"
+                        "If you're under the age of majority, you can apply for an account by visiting a CIBC Banking Centre "
+                        "Opens in a new window. or calling 1-800-465-2422 Opens your phone app."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-eadvantage",
+                    source_snapshot_id="snap-cibc-eadvantage",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-cibc-eadvantage",
+                correlation_id="corr-cibc-eadvantage",
+                request_id="req-cibc-eadvantage",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            extracted_by_field = {item.field_name: item for item in result.source_results[0].extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "CIBC eAdvantage Savings Account")
+            self.assertEqual(
+                extracted_by_field["eligibility_text"].candidate_value,
+                "You're a Canadian resident and you've reached the age of majority in your province or territory",
+            )
+            self.assertNotIn("tier_definition_text", extracted_by_field)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_money_extraction_treats_free_fee_labels_as_zero(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-money-free-labels")
         try:
@@ -2307,6 +2510,134 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertEqual(extracted_by_field["compounding_frequency"].candidate_value, "annually")
             self.assertEqual(extracted_by_field["payout_option"].candidate_value, "at_maturity")
             self.assertTrue(extracted_by_field["registered_plan_supported"].candidate_value)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_cibc_flexible_gic_filters_cross_product_description_and_extracts_minimum_investment(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-cibc-flexible-gic")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="CIBC-GIC-002",
+                parsed_document_id="parsed-cibc-flex-gic",
+                source_document_id="src-cibc-flex-gic",
+                snapshot_id="snap-cibc-flex-gic",
+                bank_code="CIBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "gic-term-deposit",
+                    "product_type_dynamic": True,
+                    "product_type_name": "GIC / Term Deposit",
+                    "product_type_description": "A guaranteed investment certificate or term deposit.",
+                    "page_title": "CIBC Flexible GIC | CIBC",
+                    "expected_fields": ["product_name", "description_short", "minimum_deposit", "eligibility_text"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-mutual-noise",
+                    parsed_document_id="parsed-cibc-flex-gic",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="learn-about-cibc-mutual-fund-account-conversion",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Learn\nLearn About CIBC Mutual Fund Account Conversion",
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-flex-gic",
+                    source_snapshot_id="snap-cibc-flex-gic",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-flex-hero",
+                    parsed_document_id="parsed-cibc-flex-gic",
+                    chunk_index=1,
+                    anchor_type="section",
+                    anchor_value="why-choose-a-cibc-flexible-gic",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "Why choose a CIBC Flexible GIC?\n"
+                        "This 1-year GIC is right for you if you're saving for a short-term goal or want a place to park your money."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-flex-gic",
+                    source_snapshot_id="snap-cibc-flex-gic",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-flex-rate",
+                    parsed_document_id="parsed-cibc-flex-gic",
+                    chunk_index=2,
+                    anchor_type="section",
+                    anchor_value="non-registered",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Non-registered\nMinimum investment of $1,000\nTerm and rate\n1 year RDS%rate[4].FLGIC.Published(...)%",
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-flex-gic",
+                    source_snapshot_id="snap-cibc-flex-gic",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cibc-flex-access",
+                    parsed_document_id="parsed-cibc-flex-gic",
+                    chunk_index=3,
+                    anchor_type="section",
+                    anchor_value="what-you-need-to-know",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "What you need to know\n"
+                        "Type\n"
+                        "Cashable\n"
+                        "Access\n"
+                        "Access your money at any time. Depending on how much you invest, there's a minimum withdrawal amount."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id="src-cibc-flex-gic",
+                    source_snapshot_id="snap-cibc-flex-gic",
+                    bank_code="CIBC",
+                    country_code="CA",
+                    source_type="html",
+                ),
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.extract_documents(
+                run_id="run-cibc-flex-gic",
+                correlation_id="corr-cibc-flex-gic",
+                request_id="req-cibc-flex-gic",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            source_result = result.source_results[0]
+            extracted_by_field = {item.field_name: item for item in source_result.extracted_fields}
+            self.assertEqual(extracted_by_field["product_name"].candidate_value, "CIBC Flexible GIC")
+            self.assertEqual(
+                extracted_by_field["description_short"].candidate_value,
+                "This 1-year GIC is right for you if you're saving for a short-term goal or want a place to park your money.",
+            )
+            self.assertNotIn("Mutual Fund Account Conversion", extracted_by_field["description_short"].candidate_value)
+            self.assertEqual(extracted_by_field["minimum_deposit"].candidate_value, "1000.00")
+            self.assertNotIn("eligibility_text", extracted_by_field)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
