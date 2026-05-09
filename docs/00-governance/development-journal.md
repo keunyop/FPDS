@@ -1358,6 +1358,25 @@ Read before coding:
 - Known issues: delete actions inside detail modals still intentionally use router navigation because they change the underlying resource and route state
 - Next step: if more modal-heavy admin surfaces are added, extract the native-history modal URL sync into a small shared helper instead of copying it across surfaces
 
+## 2026-05-09 - Generic Supporting Source Merge for Generated Review Runs
+
+- WBS: `5.5`, `5.16`, validation and review quality hardening
+- Status: `done`
+- Goal: diagnose the queued Review Detail validation errors from `run_20260509_062414_*` and improve the pipeline generically if the issue was system-side rather than bank-specific source absence
+- Why now: reviewer intake showed multiple TD, RBC, and Scotiabank savings, chequing, and GIC candidates blocked by `required_field_missing` and `validation_error` even though the collection run included supporting source registries
+- Outcome: confirmed this was partly a system gap, not simply missing source material. Generated admin source IDs such as `AUTO-*` and product aliases such as `gic-term-deposit` bypassed seed-ID-specific supporting merge and GIC field-default logic. Normalization now loads same-run generated supporting sources from the active registry, applies generic product-family-aware supporting merges for savings rates, chequing monthly fees, and GIC rates, and maps GIC `minimum_investment` / `minimum_balance` aliases to canonical `minimum_deposit` when evidence exists.
+- Not done: historical review records from the May 9 run were not mutated. They should remain deferred until a refreshed run produces passing, evidence-linked candidates.
+- Key files: `worker/pipeline/fpds_normalization/__main__.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_extraction.py`
+- Decisions: kept the fix generic across banks by using registry `discovery_role`, canonical product-family aliases, product-name matching, and existing evidence links instead of adding TD/RBC/Scotiabank-only source IDs. The generic merge stays conservative: it fills only canonical-safe fields from matched percentage or monthly-fee evidence and does not infer promotional rates from generic multi-rate excerpts.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_savings_rate_source worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_chequing_fee_source worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_gic_rate_source worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_gic_minimum_balance_alias_satisfies_minimum_deposit_requiredness`
+  - `python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_dynamic_gic_term_deposit_suppresses_cross_product_navigation_noise`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+- Known issues: current review candidates still reflect pre-fix artifacts and should not be approved as-is. A rerun after worker/API restart is needed to verify the new merge path against live generated registries.
+- Next step: rerun the affected TD, RBC, and Scotiabank review collections, then approve only candidates that pass validation with source-linked canonical fields; reject only if the refreshed run shows a product/source mismatch.
+
 ---
 
 ## 5. Change History

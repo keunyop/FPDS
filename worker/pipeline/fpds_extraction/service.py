@@ -616,7 +616,8 @@ def _resolve_field_names(
         return sorted(dict.fromkeys(item.strip() for item in override_field_names if item.strip()))
 
     product_type = _infer_product_type(context)
-    product_default_fields = _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type)
+    product_type_family = _canonical_product_type_family(product_type)
+    product_default_fields = _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type) or _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type_family or "")
     fields: list[str] = []
     for field_name in default_fields:
         if product_default_fields is not None and field_name not in product_default_fields:
@@ -627,7 +628,12 @@ def _resolve_field_names(
         normalized = str(field_name).strip()
         if product_type in _CANONICAL_PRODUCT_TYPES and normalized not in default_fields and normalized not in _SUPPORTING_EXTRACTABLE_FIELDS:
             continue
-        if product_default_fields is not None and normalized not in product_default_fields and normalized not in _SUPPORTING_EXTRACTABLE_FIELDS:
+        if (
+            product_type in _CANONICAL_PRODUCT_TYPES
+            and product_default_fields is not None
+            and normalized not in product_default_fields
+            and normalized not in _SUPPORTING_EXTRACTABLE_FIELDS
+        ):
             continue
         if normalized and normalized not in fields:
             fields.append(normalized)
@@ -1059,6 +1065,19 @@ def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
     if product_type in _CANONICAL_PRODUCT_TYPES:
         return False
     return bool(context.source_metadata.get("product_type_dynamic", True))
+
+
+def _canonical_product_type_family(product_type: str | None) -> str | None:
+    normalized = str(product_type or "").strip().lower()
+    if normalized in _CANONICAL_PRODUCT_TYPES:
+        return normalized
+    if any(token in normalized for token in ("gic", "term-deposit", "term_deposit", "term deposit")):
+        return "gic"
+    if "savings" in normalized or "saving" in normalized:
+        return "savings"
+    if "chequing" in normalized or "checking" in normalized:
+        return "chequing"
+    return None
 
 
 def _source_metadata_title_candidates(context: ExtractionDocumentContext) -> list[str]:

@@ -2383,6 +2383,12 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertNotIn("principal_protection", extracted_by_field)
             self.assertIn("No grounded GIC product details were present in the evidence chunks.", source_result.runtime_notes)
             self.assertEqual(len(source_result.evidence_links), 0)
+            requested_fields = source_result.model_execution_record["execution_metadata"]["requested_fields"]
+            self.assertIn("standard_rate", requested_fields)
+            self.assertIn("public_display_rate", requested_fields)
+            self.assertIn("minimum_deposit", requested_fields)
+            self.assertIn("term_length_text", requested_fields)
+            self.assertIn("term_length_days", requested_fields)
         finally:
             rmtree(temp_path, ignore_errors=True)
 

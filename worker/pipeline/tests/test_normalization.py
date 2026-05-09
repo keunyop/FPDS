@@ -425,6 +425,52 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_gic_minimum_balance_alias_satisfies_minimum_deposit_requiredness(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-minimum-balance-alias")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            extracted_fields = []
+            for field in input_item.extracted_fields:
+                if field.field_name == "minimum_deposit":
+                    extracted_fields.append(NormalizationExtractedField(**{**field.__dict__, "field_name": "minimum_balance"}))
+                    continue
+                extracted_fields.append(field)
+            evidence_links = []
+            for link in input_item.evidence_links:
+                if link.field_name == "minimum_deposit":
+                    evidence_links.append(NormalizationEvidenceLink(**{**link.__dict__, "field_name": "minimum_balance"}))
+                    continue
+                evidence_links.append(link)
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "extracted_fields": extracted_fields,
+                    "evidence_links": evidence_links,
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-gic-minimum-balance-alias", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertEqual(source_result.validation_status, "pass")
+            self.assertEqual(candidate["candidate_payload"]["minimum_deposit"], 500.0)
+            self.assertIn("minimum_deposit", {item["field_name"] for item in source_result.field_evidence_link_records})
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_dynamic_product_type_uses_ai_normalization_fallback(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-dynamic-service")
         try:
@@ -673,6 +719,103 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-004"), ("TD-SAV-005", "TD-SAV-007", "TD-SAV-008"))
         self.assertEqual(supporting_source_ids_for_target("SCOTIA-SAV-004"), ("SCOTIA-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("TD-SAV-999"), ())
+
+    def test_generic_supporting_merge_handles_generated_savings_rate_source(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "TD Every Day Savings Account", "string", 0.88),
+                _field_dict("monthly_fee", "0.00", "decimal", 0.83, evidence_chunk_id="chunk-detail-fee"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="rate_tiers",
+                        anchor_value="td-every-day-savings-account",
+                        excerpt="TD Every Day Savings Account Total Daily Closing Balance $0 to $999.99 0.010%",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-TB-SAV-82eb5b204c",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-TB-SAV-c528b5abb8": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
+        self.assertTrue(fields_by_name["standard_rate"]["field_metadata"]["generic_supporting_merge"])
+
+    def test_generic_supporting_merge_handles_generated_chequing_fee_source(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "chequing"},
+            "extracted_fields": [
+                _field_dict("product_name", "Basic Plus Bank Account", "string", 0.88),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="monthly_fee",
+                        anchor_value="basic-plus-bank-account",
+                        excerpt="Basic Plus Bank Account Monthly fee $11.95 Included transactions 25",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-SCOTIABANK-CHE-42deb5bffb",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-SCOTIABANK-CHE-c107b2ea47": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "11.95")
+        self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "11.95")
+
+    def test_generic_supporting_merge_handles_generated_gic_rate_source(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic-term-deposit"},
+            "extracted_fields": [
+                _field_dict("product_name", "Invest in Non-Cashable GICs", "string", 0.88),
+                _field_dict("minimum_deposit", "1000.00", "decimal", 0.82, evidence_chunk_id="chunk-deposit"),
+                _field_dict("term_length_text", "1 year", "string", 0.82, evidence_chunk_id="chunk-term"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="non_cashable_gic_rates",
+                        anchor_value="non-cashable-gic-rates",
+                        excerpt="Non-Cashable GICs 1 year 3.25%",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-TB-GIC-b04a2ca4b2",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-TB-GIC-90ec9211ac": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
 
     def test_merge_supports_everyday_rate_fields_from_current_rates(self) -> None:
         base_artifact = {

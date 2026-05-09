@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_m6Lmg15Bj157zaHa",
+  "correlation_id": "corr_lwiZ3iIp6KNWfeGl",
+  "request_id": "req_8a05d59ac50c42fcbaf731b6705763c6",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260509_062414_tb_chequing_collect_T4jUFo6Y",
+      "catalog_item_id": "catalog-ca-tb-chequing-_3O56nz5",
+      "bank_code": "TB",
+      "bank_name": "TD Bank",
+      "country_code": "CA",
+      "product_type": "chequing",
+      "source_catalog_product_type": "chequing",
+      "source_language": "en",
+      "homepage_url": "https://www.td.com/",
+      "normalized_homepage_url": "https://www.td.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

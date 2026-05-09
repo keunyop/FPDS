@@ -400,6 +400,33 @@ def _normalize_candidate(
 
     product_type_family = _canonical_product_type_family(product_type)
     _clean_product_context_fields(product_type_family=product_type_family, candidate_payload=candidate_payload)
+    alias_field = _apply_product_type_aliases(product_type_family=product_type_family, candidate_payload=candidate_payload, runtime_notes=runtime_notes)
+    evidence_links_for_output = list(item.evidence_links)
+    if alias_field is not None and candidate_payload.get("minimum_deposit") not in {None, ""}:
+        normalized_values_for_links["minimum_deposit"] = candidate_payload["minimum_deposit"]
+        field_mapping_metadata["minimum_deposit"] = {
+            "source_field_name": alias_field,
+            "normalized_value": candidate_payload["minimum_deposit"],
+            "normalization_method": "gic_minimum_deposit_alias_mapping",
+        }
+        alias_link = next((link for link in item.evidence_links if link.field_name == alias_field), None)
+        if alias_link is not None:
+            evidence_links_for_output.append(
+                NormalizationEvidenceLink(
+                    field_name="minimum_deposit",
+                    candidate_value=_stringify(candidate_payload["minimum_deposit"]),
+                    evidence_chunk_id=alias_link.evidence_chunk_id,
+                    evidence_text_excerpt=alias_link.evidence_text_excerpt,
+                    source_document_id=alias_link.source_document_id,
+                    source_snapshot_id=alias_link.source_snapshot_id,
+                    citation_confidence=alias_link.citation_confidence,
+                    model_execution_id=alias_link.model_execution_id,
+                    anchor_type=alias_link.anchor_type,
+                    anchor_value=alias_link.anchor_value,
+                    page_no=alias_link.page_no,
+                    chunk_index=alias_link.chunk_index,
+                )
+            )
 
     subtype_code, source_subtype_label = _infer_subtype_code(
         product_type=product_type_family,
@@ -479,7 +506,7 @@ def _normalize_candidate(
         candidate_id=candidate_id,
         normalized_values_for_links=normalized_values_for_links,
         source_document_id=item.source_document_id,
-        evidence_links=item.evidence_links,
+        evidence_links=evidence_links_for_output,
     )
     return candidate_record, field_evidence_link_records, runtime_notes, normalization_meta
 
@@ -700,6 +727,29 @@ def _clean_product_context_fields(*, product_type_family: str | None, candidate_
             )
             if simple_interest_match is not None:
                 candidate_payload["interest_calculation_method"] = _clean_text_value(simple_interest_match.group(0))
+
+
+def _apply_product_type_aliases(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    runtime_notes: list[str],
+) -> str | None:
+    if product_type_family != "gic" or candidate_payload.get("minimum_deposit") not in {None, ""}:
+        return None
+    for alias_field in ("minimum_investment", "minimum_balance"):
+        alias_value = candidate_payload.get(alias_field)
+        if alias_value in {None, ""}:
+            continue
+        decimal_value = _parse_canonical_decimal(field_name="minimum_deposit", value=alias_value)
+        if decimal_value is None:
+            continue
+        candidate_payload["minimum_deposit"] = float(decimal_value)
+        runtime_notes.append(
+            f"Mapped `{alias_field}` to `minimum_deposit` for GIC requiredness because the source uses investment/deposit wording."
+        )
+        return alias_field
+    return None
 
 
 def _gic_text_conflicts_with_product_context(text: str) -> bool:

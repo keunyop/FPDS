@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
+from worker.discovery.fpds_discovery.registry import RegistrySource, load_registry
 from worker.env import load_env_file, resolve_default_env_file
 
 from .models import (
@@ -59,12 +60,16 @@ def main() -> int:
 
     repository = PsqlNormalizationRepository(NormalizationDatabaseConfig.from_env())
     selected_sources_by_id = resolve_sources_by_id(args.source_id, registry_path=args.registry_path)
+    registry_sources_by_id = _load_registry_sources_by_id(args.registry_path)
     target_source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
     supporting_source_ids = sorted(
         {
             support_source_id
             for source_id in args.source_id
-            for support_source_id in supporting_source_ids_for_target(source_id)
+            for support_source_id in _supporting_source_ids_for_target(
+                source_id=source_id,
+                registry_sources_by_id=registry_sources_by_id,
+            )
         }
     )
     supporting_sources_by_id = resolve_sources_by_id(supporting_source_ids, registry_path=args.registry_path) if supporting_source_ids else {}
@@ -111,7 +116,10 @@ def main() -> int:
         source_document_id = selected_sources_by_id[source_id].source_document_id
         lookup = lookup_by_source_document_id[source_document_id]
         artifact = json.loads(object_store.get_object_bytes(object_key=lookup.extracted_storage_key).decode("utf-8"))
-        target_supporting_source_ids = supporting_source_ids_for_target(source_id)
+        target_supporting_source_ids = _supporting_source_ids_for_target(
+            source_id=source_id,
+            registry_sources_by_id=registry_sources_by_id,
+        )
         available_supporting_artifacts = {
             support_source_id: supporting_artifacts_by_source_id[support_source_id]
             for support_source_id in target_supporting_source_ids
@@ -194,6 +202,31 @@ def _build_normalization_input(
         evidence_links=[NormalizationEvidenceLink(**item) for item in artifact.get("evidence_links", [])],
         runtime_notes=list(artifact.get("runtime_notes", [])),
     )
+
+
+def _load_registry_sources_by_id(registry_path: Path | None) -> dict[str, RegistrySource]:
+    if registry_path is None:
+        return {}
+    registry = load_registry(registry_path)
+    return {source.source_id: source for source in registry.sources}
+
+
+def _supporting_source_ids_for_target(
+    *,
+    source_id: str,
+    registry_sources_by_id: dict[str, RegistrySource],
+) -> tuple[str, ...]:
+    explicit_support_ids = supporting_source_ids_for_target(source_id)
+    if not registry_sources_by_id:
+        return explicit_support_ids
+
+    registry_support_ids = tuple(
+        source.source_id
+        for source in registry_sources_by_id.values()
+        if source.source_id != source_id
+        and source.discovery_role in {"supporting_html", "supporting_pdf", "linked_pdf"}
+    )
+    return tuple(dict.fromkeys((*explicit_support_ids, *registry_support_ids)))
 
 
 def _utc_now_iso() -> str:
