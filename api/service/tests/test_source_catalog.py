@@ -19,11 +19,13 @@ from api_service.source_catalog import (
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
+    _generate_bank_code,
     _ordered_detail_candidates,
     _promote_detail_candidates,
     _product_type_discovery_profile,
     _record_catalog_audit_event,
     _score_candidate_links_with_ai,
+    _score_page_evidence,
     _score_product_link,
     _upsert_source_registry_rows,
     create_bank_profile,
@@ -205,6 +207,21 @@ class SourceCatalogTests(unittest.TestCase):
         insert_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO bank" in sql]
         self.assertEqual(insert_calls[0][1]["homepage_url"], "https://www.atlasbank.ca/")
         self.assertEqual(insert_calls[0][1]["normalized_homepage_url"], "https://www.atlasbank.ca/")
+
+    def test_generate_bank_code_prefers_known_seed_bank_codes(self) -> None:
+        td_connection = _QueuedConnection([None])
+        scotia_connection = _QueuedConnection([None])
+        rbc_connection = _QueuedConnection([None])
+
+        self.assertEqual(_generate_bank_code(td_connection, bank_name="TD Bank", normalized_homepage_url="https://www.td.com/"), "TD")
+        self.assertEqual(
+            _generate_bank_code(scotia_connection, bank_name="Scotiabank", normalized_homepage_url="https://www.scotiabank.com/"),
+            "SCOTIA",
+        )
+        self.assertEqual(
+            _generate_bank_code(rbc_connection, bank_name="Royal Bank of Canada", normalized_homepage_url="https://www.rbcroyalbank.com/"),
+            "RBC",
+        )
 
     def test_create_source_catalog_item_uses_existing_bank_and_product_type(self) -> None:
         connection = _QueuedConnection(
@@ -991,6 +1008,35 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
 
+    def test_page_evidence_does_not_treat_product_cta_copy_as_negative(self) -> None:
+        detail_html = """
+        <html>
+          <head><title>High Interest Savings Account</title></head>
+          <body>
+            <h1>High Interest Savings Account</h1>
+            <p>Earn interest on your balance with no monthly fee and flexible withdrawals.</p>
+            <a href="/apply">Apply now</a>
+            <a href="/open-account">Open account</a>
+          </body>
+        </html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/savings/high-interest",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition={
+                    **_product_type_definition("savings"),
+                    "display_name": "Savings",
+                    "description": "Savings account with interest, fee, balance, and withdrawal details.",
+                    "discovery_keywords": ["savings account", "interest", "withdrawal"],
+                },
+            )
+
+        self.assertGreaterEqual(result.page_evidence_score, 4)
+        self.assertEqual(result.negative_signal_count, 0)
+
     def test_seed_detail_source_is_promoted_when_page_evidence_fetch_is_unavailable(self) -> None:
         candidate = HomepageCandidate(
             normalized_url="https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/practical-chequing-account",
@@ -1138,7 +1184,91 @@ class SourceCatalogTests(unittest.TestCase):
         ordered = _ordered_detail_candidates(candidates=[*homepage_candidates, *seed_candidates], ai_scores={})
 
         self.assertEqual([item.seed_source_id for item in ordered[:5]], [f"BMO-CHQ-00{index}" for index in range(1, 6)])
-        self.assertEqual(len(ordered), 5)
+        self.assertEqual(len([item for item in ordered if item.seed_source_id]), 5)
+        self.assertGreater(len([item for item in ordered if not item.seed_source_id]), 0)
+
+    def test_seed_detail_rejection_does_not_block_ai_scored_homepage_detail(self) -> None:
+        seed_candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/main/personal/investments/gic/progressive-gic",
+            raw_url="https://www.bmo.com/main/personal/investments/gic/progressive-gic/",
+            anchor_text="BMO Progressive GIC",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id="BMO-GIC-003",
+            source_name_hint="BMO Progressive GIC detail source",
+            priority_hint="P0",
+            expected_fields_hint=["product_name", "term_options", "minimum_deposit"],
+        )
+        homepage_candidate = HomepageCandidate(
+            normalized_url="https://www.bmo.com/main/personal/investments/gic/special-rate-gic",
+            raw_url="https://www.bmo.com/main/personal/investments/gic/special-rate-gic/",
+            anchor_text="Special Rate GIC",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=4,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_scores = {
+            homepage_candidate.normalized_url: AiParallelCandidateScore(
+                candidate_url=homepage_candidate.normalized_url,
+                predicted_role="detail",
+                relevance_score=6.0,
+                confidence_band="high",
+                reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                short_rationale="Likely an official GIC detail page.",
+            )
+        }
+
+        def fake_page_evidence(*, raw_url: str, **_: object) -> PageEvidenceAssessment:
+            if "progressive-gic" in raw_url:
+                return PageEvidenceAssessment(
+                    page_evidence_score=3,
+                    page_evidence_reason_codes=["insufficient_evidence"],
+                    page_title="Progressive GIC Search Tool - BMO",
+                    primary_heading=None,
+                    heading_match=False,
+                    attribute_signal_count=1,
+                    negative_signal_count=1,
+                )
+            return PageEvidenceAssessment(
+                page_evidence_score=8,
+                page_evidence_reason_codes=["title_semantic_match", "detail_page_layout_signal", "pricing_or_feature_signal"],
+                page_title="Special Rate GIC",
+                primary_heading="Special Rate GIC",
+                heading_match=True,
+                attribute_signal_count=3,
+                negative_signal_count=0,
+            )
+
+        with patch("api_service.source_catalog._score_page_evidence", side_effect=fake_page_evidence):
+            rows, notes = _promote_detail_candidates(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="gic-term-deposit",
+                discovery_product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic-term-deposit"),
+                    "display_name": "GIC Term Deposit",
+                    "description": "Guaranteed investment certificate or term deposit.",
+                    "expected_fields": ["product_name", "term_options", "minimum_deposit"],
+                },
+                source_language="en",
+                fetch_policy=SimpleNamespace(),
+                candidates=[seed_candidate, homepage_candidate],
+                ai_scores=ai_scores,
+            )
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["normalized_url"], homepage_candidate.normalized_url)
+        self.assertEqual(rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
+        self.assertIn("promoted 1 detail source", " ".join(notes))
 
     def test_seed_detail_candidate_can_promote_despite_page_negative_terms(self) -> None:
         candidate = HomepageCandidate(
@@ -1206,6 +1336,47 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("BMO-SAV-006", source_ids)
         self.assertIn("BMO-SAV-007", source_ids)
         self.assertTrue(all(str(item["product_type"]) == "savings" for item in result.rows))
+
+    def test_generate_sources_from_homepage_uses_seed_hints_for_known_bank_code_aliases(self) -> None:
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal"],
+            page_title="TD ePremium Savings Account",
+            primary_heading="TD ePremium Savings Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="TB",
+                bank_name="TD Bank",
+                country_code="CA",
+                product_type="savings",
+                product_type_definition={
+                    **_product_type_definition("savings"),
+                    "description": "Savings account with interest rates, balances, withdrawals, and tiering.",
+                    "discovery_keywords": ["savings", "interest rate", "balance"],
+                    "expected_fields": ["product_name", "interest_rate_summary", "monthly_fee"],
+                },
+                homepage_url="https://www.td.com/",
+                source_language="en",
+            )
+
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertGreaterEqual(len(detail_rows), 1)
+        self.assertTrue(all(item["bank_code"] == "TB" for item in detail_rows))
+        self.assertTrue(all(str(item["source_id"]).startswith("AUTO-TB-") for item in detail_rows))
+        self.assertTrue(any("td.com" in item["normalized_url"] for item in detail_rows))
 
     def test_generate_sources_from_homepage_promotes_cibc_seed_details_when_ai_is_unavailable(self) -> None:
         weak_but_official_seed_evidence = PageEvidenceAssessment(

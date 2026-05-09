@@ -30,6 +30,7 @@ from api_service.security import new_id, utc_now
 from api_service.source_registry import _insert_collection_run_row
 from api_service.source_registry_utils import (
     infer_source_type,
+    load_seed_bank_profiles,
     load_seed_source_registry_rows,
     normalize_source_url,
 )
@@ -67,7 +68,7 @@ _EXCLUDED_LINK_KEYWORDS = (
 )
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
 _HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
-_PAGE_NEGATIVE_KEYWORDS = ("compare", "apply", "open account", "sign in", "login", "legal", "terms and conditions", "promotion", "offer")
+_PAGE_NEGATIVE_KEYWORDS = ("compare", "sign in", "login", "legal", "terms and conditions")
 _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
     "chequing": (
         "savings-account",
@@ -479,7 +480,7 @@ def create_bank_profile(
     if existing_by_homepage:
         raise SourceRegistryError(status_code=409, code="bank_homepage_exists", message="A bank with this homepage URL already exists.")
 
-    bank_code = _generate_bank_code(connection, bank_name=bank_name)
+    bank_code = _generate_bank_code(connection, bank_name=bank_name, normalized_homepage_url=normalized_homepage_url)
     now = utc_now()
     connection.execute(
         """
@@ -1700,8 +1701,18 @@ def _generate_sources_from_homepage(
     unique_detail_links = _dedupe_scored_links(detail_links)[:6]
     unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
-    seed_detail_hints = _load_seed_detail_hints(bank_code=bank_code, product_type=discovery_product_type)
-    seed_supporting_hints = _load_seed_supporting_hints(bank_code=bank_code, product_type=discovery_product_type)
+    seed_detail_hints = _load_seed_detail_hints(
+        bank_code=bank_code,
+        bank_name=bank_name,
+        normalized_homepage_url=normalized_homepage_url,
+        product_type=discovery_product_type,
+    )
+    seed_supporting_hints = _load_seed_supporting_hints(
+        bank_code=bank_code,
+        bank_name=bank_name,
+        normalized_homepage_url=normalized_homepage_url,
+        product_type=discovery_product_type,
+    )
     source_rows: list[dict[str, Any]] = []
     entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
     entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
@@ -1805,7 +1816,8 @@ def _generate_sources_from_homepage(
                     },
                 )
             )
-            source_rows[-1]["source_id"] = str(hint["source_id"])
+            if str(hint.get("source_id") or "").strip():
+                source_rows[-1]["source_id"] = str(hint["source_id"])
             promoted_supporting_urls.add(normalized_url)
         for _, link in unique_supporting_links:
             if link.normalized_url in promoted_detail_urls:
@@ -2028,18 +2040,34 @@ def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
     return None
 
 
-def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+def _load_seed_detail_hints(
+    *,
+    bank_code: str,
+    product_type: str,
+    bank_name: str | None = None,
+    normalized_homepage_url: str | None = None,
+) -> list[dict[str, Any]]:
     product_type = _canonical_product_type_code(product_type)
+    seed_bank_codes = set(
+        _seed_bank_codes_for_scope(
+            bank_code=bank_code,
+            bank_name=bank_name,
+            normalized_homepage_url=normalized_homepage_url,
+        )
+    )
     hints: list[dict[str, Any]] = []
     for item in load_seed_source_registry_rows():
         if (
-            str(item["bank_code"]) == bank_code
+            str(item["bank_code"]) in seed_bank_codes
             and str(item["product_type"]) == product_type
             and str(item["discovery_role"]) == "detail"
         ):
+            exact_bank_code_match = str(item["bank_code"]) == bank_code
             hints.append(
                 {
-                    "source_id": str(item["source_id"]),
+                    "source_id": str(item["source_id"]) if exact_bank_code_match else "",
+                    "seed_source_id": str(item["source_id"]),
+                    "seed_bank_code": str(item["bank_code"]),
                     "source_name": str(item.get("source_name") or item.get("purpose") or item["source_id"]),
                     "source_url": str(item["source_url"]),
                     "normalized_url": str(item["normalized_url"]),
@@ -2051,18 +2079,34 @@ def _load_seed_detail_hints(*, bank_code: str, product_type: str) -> list[dict[s
     return hints
 
 
-def _load_seed_supporting_hints(*, bank_code: str, product_type: str) -> list[dict[str, Any]]:
+def _load_seed_supporting_hints(
+    *,
+    bank_code: str,
+    product_type: str,
+    bank_name: str | None = None,
+    normalized_homepage_url: str | None = None,
+) -> list[dict[str, Any]]:
     product_type = _canonical_product_type_code(product_type)
+    seed_bank_codes = set(
+        _seed_bank_codes_for_scope(
+            bank_code=bank_code,
+            bank_name=bank_name,
+            normalized_homepage_url=normalized_homepage_url,
+        )
+    )
     hints: list[dict[str, Any]] = []
     for item in load_seed_source_registry_rows():
         if (
-            str(item["bank_code"]) == bank_code
+            str(item["bank_code"]) in seed_bank_codes
             and str(item["product_type"]) == product_type
             and str(item["discovery_role"]) in {"supporting_html", "supporting_pdf", "linked_pdf"}
         ):
+            exact_bank_code_match = str(item["bank_code"]) == bank_code
             hints.append(
                 {
-                    "source_id": str(item["source_id"]),
+                    "source_id": str(item["source_id"]) if exact_bank_code_match else "",
+                    "seed_source_id": str(item["source_id"]),
+                    "seed_bank_code": str(item["bank_code"]),
                     "source_name": str(item.get("source_name") or item.get("purpose") or item["source_id"]),
                     "source_url": str(item["source_url"]),
                     "normalized_url": str(item["normalized_url"]),
@@ -2074,6 +2118,14 @@ def _load_seed_supporting_hints(*, bank_code: str, product_type: str) -> list[di
                 }
             )
     return hints
+
+
+def _seed_bank_codes_for_scope(*, bank_code: str, bank_name: str | None = None, normalized_homepage_url: str | None = None) -> list[str]:
+    codes = [bank_code]
+    seed_code = _seed_bank_code_for_bank_profile(bank_name=bank_name or bank_code, normalized_homepage_url=normalized_homepage_url)
+    if seed_code and seed_code not in codes:
+        codes.append(seed_code)
+    return codes
 
 
 def _dedupe_preserve_order(items: list[str]) -> list[str]:
@@ -2401,9 +2453,9 @@ def _promote_detail_candidates(
     evaluated = 0
     for candidate in _ordered_detail_candidates(candidates=candidates, ai_scores=ai_scores):
         ai_score = ai_scores.get(candidate.normalized_url)
-        if ai_score and ai_score.predicted_role == "irrelevant" and not candidate.seed_source_id:
+        if ai_score and ai_score.predicted_role == "irrelevant" and not _candidate_is_seed_backed(candidate):
             continue
-        if not candidate.seed_source_id and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
+        if not _candidate_is_seed_backed(candidate) and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
             continue
         evaluated += 1
         page_evidence = _score_page_evidence(
@@ -2414,7 +2466,7 @@ def _promote_detail_candidates(
         )
         if page_evidence.fetch_error:
             notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
-            if not candidate.seed_source_id:
+            if not _candidate_is_seed_backed(candidate):
                 continue
             metadata = {
                 "selection_path": "seed_hint_fetch_unavailable",
@@ -2441,7 +2493,7 @@ def _promote_detail_candidates(
         else:
             if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence, ai_unavailable=ai_unavailable):
                 if (
-                    not candidate.seed_source_id
+                    not _candidate_is_seed_backed(candidate)
                     or (ai_unavailable and _seed_detail_has_hard_negative(page_evidence))
                     or (_seed_detail_has_hard_negative(page_evidence) and not ai_unavailable)
                 ):
@@ -2509,10 +2561,10 @@ def _promote_detail_candidates(
 
 def _ordered_detail_candidates(*, candidates: list[HomepageCandidate], ai_scores: dict[str, AiParallelCandidateScore]) -> list[HomepageCandidate]:
     ranked = sorted(candidates, key=lambda item: (-_candidate_combined_score(item, ai_scores), item.normalized_url))
-    seed_candidates = [item for item in ranked if item.seed_source_id]
+    seed_candidates = [item for item in ranked if _candidate_is_seed_backed(item)]
+    non_seed_candidates = [item for item in ranked if not _candidate_is_seed_backed(item)]
     if seed_candidates:
-        return seed_candidates
-    non_seed_candidates = [item for item in ranked if not item.seed_source_id]
+        return [*seed_candidates, *non_seed_candidates[:_PAGE_EVIDENCE_MAX_CANDIDATES]]
     return non_seed_candidates[:_PAGE_EVIDENCE_MAX_CANDIDATES]
 
 
@@ -2525,6 +2577,10 @@ def _candidate_combined_score(candidate: HomepageCandidate, ai_scores: dict[str,
     return total + ai_score.relevance_score + role_bonus
 
 
+def _candidate_is_seed_backed(candidate: HomepageCandidate) -> bool:
+    return bool(candidate.seed_source_id) or candidate.origin == "seed_detail_hint"
+
+
 def _candidate_promotes_to_detail(
     *,
     candidate: HomepageCandidate,
@@ -2534,7 +2590,7 @@ def _candidate_promotes_to_detail(
 ) -> bool:
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return False
-    if candidate.seed_source_id:
+    if _candidate_is_seed_backed(candidate):
         return True
     if page_evidence.negative_signal_count >= 2:
         return False
@@ -2600,15 +2656,15 @@ def _build_detail_discovery_metadata(
 
 
 def _selection_path(*, candidate: HomepageCandidate, ai_score: AiParallelCandidateScore | None, ai_unavailable: bool = False) -> str:
-    if ai_score is not None and candidate.seed_source_id:
+    if ai_score is not None and _candidate_is_seed_backed(candidate):
         return "seed_hint_plus_ai_plus_page_evidence"
     if ai_score is not None:
         return "heuristic_plus_ai_plus_page_evidence"
-    if ai_unavailable and candidate.seed_source_id:
+    if ai_unavailable and _candidate_is_seed_backed(candidate):
         return "seed_hint_plus_page_evidence_ai_unavailable"
     if ai_unavailable:
         return "heuristic_plus_page_evidence_ai_unavailable"
-    if candidate.seed_source_id:
+    if _candidate_is_seed_backed(candidate):
         return "seed_hint_plus_page_evidence"
     return "heuristic_plus_page_evidence"
 
@@ -3322,11 +3378,14 @@ def _build_catalog_diff_summary(existing_row: dict[str, Any], updated: dict[str,
     return f"Updated source catalog item `{existing_row['catalog_item_id']}`: {', '.join(changes)}."
 
 
-def _generate_bank_code(connection: Connection, *, bank_name: str) -> str:
+def _generate_bank_code(connection: Connection, *, bank_name: str, normalized_homepage_url: str | None = None) -> str:
     tokens = re.findall(r"[A-Za-z0-9]+", bank_name.upper())
     if not tokens:
         raise SourceRegistryError(status_code=422, code="bank_name_invalid", message="Bank name must contain letters or digits.")
     candidates: list[str] = []
+    seed_code = _seed_bank_code_for_bank_profile(bank_name=bank_name, normalized_homepage_url=normalized_homepage_url)
+    if seed_code:
+        candidates.append(seed_code)
     initials = "".join(token[0] for token in tokens)
     if 2 <= len(initials) <= 12:
         candidates.append(initials)
@@ -3352,6 +3411,34 @@ def _generate_bank_code(connection: Connection, *, bank_name: str) -> str:
         if not _bank_code_exists(connection, candidate):
             return candidate
         suffix += 1
+
+
+def _seed_bank_code_for_bank_profile(*, bank_name: str, normalized_homepage_url: str | None = None) -> str | None:
+    normalized_name = _normalize_bank_match_text(bank_name)
+    homepage_host = _hostname_or_none(normalized_homepage_url)
+    for profile in load_seed_bank_profiles():
+        seed_code = str(profile["bank_code"]).strip().upper()
+        seed_name = _normalize_bank_match_text(str(profile.get("bank_name") or ""))
+        seed_host = _hostname_or_none(str(profile.get("normalized_homepage_url") or profile.get("homepage_url") or ""))
+        if normalized_name and normalized_name == seed_name:
+            return seed_code
+        if homepage_host and seed_host and homepage_host == seed_host:
+            return seed_code
+    return None
+
+
+def _normalize_bank_match_text(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
+def _hostname_or_none(value: str | None) -> str | None:
+    if not value:
+        return None
+    hostname = urlparse(value).hostname
+    if not hostname:
+        return None
+    hostname = hostname.lower()
+    return hostname[4:] if hostname.startswith("www.") else hostname
 
 
 def _bank_code_exists(connection: Connection, bank_code: str) -> bool:

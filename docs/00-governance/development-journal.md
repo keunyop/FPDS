@@ -62,6 +62,26 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-09 - Homepage Discovery Detail Promotion Hardening
+
+- WBS: `5.16`, source collection quality hardening
+- Status: `done`
+- Goal: diagnose why bank/product collection runs could show AI-scored homepage candidate links but still finish with `0 source items`, `0 candidates`, and `Homepage discovery produced no detail sources eligible for collection`.
+- Why now: the Product Owner reported TD, RBC, and Scotiabank source-catalog collection runs that all ended in partial completion with no generated detail sources, despite recent BMO/CIBC hardening work.
+- Outcome: fixed the common discovery promotion path so seed-backed detail hints are preferred but no longer exclude AI-scored homepage candidates from page-evidence validation. Narrowed page-level negative terms so normal product-detail CTAs such as `Apply now` and `Open account` no longer make official detail pages look ineligible. Added known-seed bank-code preference for new Big 5 bank profiles so `TD Bank`, `Royal Bank of Canada`, and `Scotiabank` resolve to the existing canonical seed codes instead of generated aliases such as `TB`, `RBOC`, or `SCOTIABANK`. Existing alias-coded bank rows can still use known seed URL hints for collection without reusing canonical seed source IDs.
+- Not done: no live DB mutation or rerun was executed. Existing already-created alias bank rows should be corrected or recreated under canonical bank codes when the operator wants downstream bank-code consistency in candidates, aggregate data, and review surfaces.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`
+- Decisions: kept the fix in the shared homepage discovery and page-evidence path instead of adding TD/RBC/Scotia one-off exceptions. Seed hints remain useful as first-priority context, but AI/page-evidence candidates are now allowed to recover a run when stale or weak seed detail pages fail.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog.SourceCatalogTests.test_seed_detail_candidates_are_not_displaced_by_high_scoring_homepage_links api.service.tests.test_source_catalog.SourceCatalogTests.test_seed_detail_rejection_does_not_block_ai_scored_homepage_detail api.service.tests.test_source_catalog.SourceCatalogTests.test_generate_sources_from_homepage_can_use_ai_to_resolve_detail_rows api.service.tests.test_source_catalog.SourceCatalogTests.test_generate_sources_from_homepage_keeps_cibc_seed_details_when_ai_scores_but_page_evidence_is_weak`
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `python -m compileall api/service/api_service/source_catalog.py`
+  - `git diff --check`
+- Known issues: the already-reported runs remain historical partial-completion artifacts. They need fresh reruns after the API/runner is restarted with this code. Previously created non-canonical bank codes may still appear in existing DB rows until corrected operationally.
+- Next step: restart the admin API/background runner, rerun the affected bank/product collections, then inspect Runs for generated detail source counts before reviewing candidate quality.
+
 ## 2026-05-04 - CIBC Flexible GIC Review Triage Hardening
 
 - WBS: `5.16`, `5.5`, dynamic GIC review quality hardening
