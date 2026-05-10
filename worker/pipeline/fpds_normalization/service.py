@@ -331,7 +331,11 @@ def _normalize_candidate(
         str(item.source_metadata.get("product_type", "")) or None,
     )
     dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
-    product_name = _coalesce_string(_field_value(extracted_by_field, "product_name"))
+    product_name = _refine_product_name_from_source_metadata(
+        product_name=_coalesce_string(_field_value(extracted_by_field, "product_name")),
+        source_metadata=item.source_metadata,
+        runtime_notes=runtime_notes,
+    )
     source_language = _coalesce_string(_field_value(extracted_by_field, "source_language"), item.source_language, "und")
     currency = _coalesce_string(_field_value(extracted_by_field, "currency"), "CAD")
     candidate_payload: dict[str, object] = {
@@ -617,6 +621,64 @@ def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
 
 def _has_meaningful_value(value: object) -> bool:
     return value not in (None, "", [], {})
+
+
+def _refine_product_name_from_source_metadata(
+    *,
+    product_name: str | None,
+    source_metadata: dict[str, object],
+    runtime_notes: list[str],
+) -> str | None:
+    if not _looks_like_generic_product_name(product_name):
+        return product_name
+
+    discovery_metadata = source_metadata.get("discovery_metadata")
+    if not isinstance(discovery_metadata, dict):
+        return product_name
+
+    for metadata_key in ("primary_heading", "page_title"):
+        candidate = _clean_product_name_candidate(str(discovery_metadata.get(metadata_key) or ""))
+        if candidate and not _looks_like_generic_product_name(candidate):
+            runtime_notes.append(
+                f"Replaced generic product_name `{product_name}` with `{candidate}` from source discovery metadata `{metadata_key}`."
+            )
+            return candidate
+    return product_name
+
+
+def _looks_like_generic_product_name(value: object) -> bool:
+    normalized = re.sub(r"\s+", " ", str(value or "").strip().lower())
+    return normalized in {
+        "",
+        "account",
+        "accounts",
+        "bank account",
+        "bank accounts",
+        "banking",
+        "personal banking",
+        "savings",
+        "savings accounts",
+        "chequing",
+        "chequing accounts",
+        "gic",
+        "gics",
+        "gic / term deposit",
+        "term deposit",
+        "term deposits",
+    }
+
+
+def _clean_product_name_candidate(value: str) -> str | None:
+    cleaned = value.split("|", 1)[0]
+    cleaned = re.sub(r"\s+opens in\b.*$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ?.:-")
+    if not cleaned:
+        return None
+    words = cleaned.split()
+    half = len(words) // 2
+    if len(words) >= 4 and len(words) % 2 == 0 and words[:half] == words[half:]:
+        cleaned = " ".join(words[:half])
+    return cleaned
 
 
 def _compute_source_confidence(

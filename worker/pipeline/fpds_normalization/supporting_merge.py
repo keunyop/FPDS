@@ -31,7 +31,11 @@ _TARGET_MATCH_TERMS = {
     "SCOTIA-SAV-004": ("money master savings account", "money master savings"),
 }
 _SUPPORTING_ROLE_FIELDS = {
+    "account_comparison_rows",
+    "account_fee_table",
+    "account_interest_rates",
     "interest_rate_summary",
+    "savings_rate_table",
     "savings_account_rates",
     "rate_tiers",
     "standard_rate",
@@ -45,7 +49,10 @@ _SUPPORTING_ROLE_FIELDS = {
     "non_redeemable_gic_rates",
     "redeemable_gic_rates",
     "market_growth_gic_rates",
+    "gic_rates",
+    "term_deposit_rates",
     "product_variants",
+    "product_comparison_rows",
     "minimum_guaranteed_return",
     "maximum_return",
 }
@@ -211,6 +218,8 @@ def _build_generic_savings_rate_supplement(
             "public_display_rate",
             "promotional_rate",
             "savings_account_rates",
+            "account_interest_rates",
+            "savings_rate_table",
             "interest_rate_summary",
             "rate_tiers",
             "tier_definition_text",
@@ -254,7 +263,14 @@ def _build_generic_chequing_fee_supplement(
     match = _find_generic_support_match(
         matches=matches,
         terms=terms,
-        preferred_fields=("monthly_fee", "public_display_fee", "fee_waiver_condition"),
+        preferred_fields=(
+            "monthly_fee",
+            "public_display_fee",
+            "fee_waiver_condition",
+            "account_comparison_rows",
+            "account_fee_table",
+            "product_comparison_rows",
+        ),
         require_money=True,
     )
     if match is None:
@@ -303,6 +319,8 @@ def _build_generic_gic_rate_supplement(
             "non_redeemable_gic_rates",
             "redeemable_gic_rates",
             "market_growth_gic_rates",
+            "gic_rates",
+            "term_deposit_rates",
             "product_variants",
             "minimum_guaranteed_return",
             "maximum_return",
@@ -429,9 +447,12 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
     normalized = _normalize_text(product_name)
     candidates = {
         normalized,
+        _strip_bank_title_suffix(normalized),
         re.sub(r"^(?:td|rbc|bmo|cibc|scotiabank|scotia)\s+", "", normalized).strip(),
         re.sub(r"^invest(?:ing)?\s+in\s+", "", normalized).strip(),
     }
+    if "|" in product_name:
+        candidates.add(_normalize_text(product_name.split("|", 1)[0]))
     expanded: set[str] = set()
     for candidate in candidates:
         if not candidate:
@@ -455,6 +476,15 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
         for item in sorted(expanded, key=len, reverse=True)
         if len(item) >= 4 and item not in {"savings", "chequing", "checking", "gic", "gics"}
     )
+
+
+def _strip_bank_title_suffix(value: str) -> str:
+    stripped = re.sub(
+        r"(?:\s*\|\s*)?(?:scotiabank|scotia|td(?: canada trust| bank)?|rbc(?: royal bank(?: of canada)?)?|royal bank of canada|bmo|cibc)(?: canada)?$",
+        "",
+        value,
+    )
+    return _WHITESPACE_RE.sub(" ", stripped).strip()
 
 
 def _extract_generic_rate_values(excerpt: str) -> dict[str, str]:

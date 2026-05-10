@@ -1,0 +1,3109 @@
+[source-catalog-runner] starting run run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf for SCOTIABANK chequing
+[source-collection-runner] run run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf starting snapshot for 5 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+  "correlation_id": "corr_Co6tTrkzFHTukXtk",
+  "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-9958fd5cd8f352ff",
+      "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/snap-9958fd5cd8f352ff/raw",
+      "checksum": "4cd4374588010777178458c270d25d90a2e4e8e27ab1a4a08e5a6c40fad9a4a9",
+      "fingerprint": "4f600262d3d1a84bcea584a62ebab8cafba16148a3417fa056970af03ea247ae",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-10T05:23:15.925292+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-9958fd5cd8f352ff",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/snap-9958fd5cd8f352ff/raw",
+        "content_type": "text/html",
+        "checksum": "4cd4374588010777178458c270d25d90a2e4e8e27ab1a4a08e5a6c40fad9a4a9",
+        "fingerprint": "4f600262d3d1a84bcea584a62ebab8cafba16148a3417fa056970af03ea247ae",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+          "request_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+          "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+          "status_code": 200,
+          "content_length": 282094,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "W/\"44c03-651543d93a091-gzip\"",
+          "last_modified": "Fri, 08 May 2026 20:28:32 GMT",
+          "cache_control": "private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-10T05:23:15.925292+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-28c56072a5ff04d4",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "selected_snapshot_id": "snap-9958fd5cd8f352ff",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+          "content_type": "text/html",
+          "checksum": "4cd4374588010777178458c270d25d90a2e4e8e27ab1a4a08e5a6c40fad9a4a9",
+          "fingerprint": "4f600262d3d1a84bcea584a62ebab8cafba16148a3417fa056970af03ea247ae",
+          "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/snap-9958fd5cd8f352ff/raw",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-783d90e3362a7b07",
+      "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/snap-783d90e3362a7b07/raw",
+      "checksum": "4ab87d4cdf76cd24a54bc798cd95dfe95909c1df4cb027523316bf18fca45f91",
+      "fingerprint": "723f7fb462d1626707c8a261c254b593fcbaa80ea39d13ca1bc6eb4587255a77",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-10T05:23:15.930988+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-783d90e3362a7b07",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/snap-783d90e3362a7b07/raw",
+        "content_type": "text/html",
+        "checksum": "4ab87d4cdf76cd24a54bc798cd95dfe95909c1df4cb027523316bf18fca45f91",
+        "fingerprint": "723f7fb462d1626707c8a261c254b593fcbaa80ea39d13ca1bc6eb4587255a77",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+          "request_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+          "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+          "status_code": 200,
+          "content_length": 412631,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"649ec-651542b483bba-gzip\"",
+          "last_modified": "Fri, 08 May 2026 20:23:25 GMT",
+          "cache_control": "private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-10T05:23:15.930988+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cd222e7cb00f36c7",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "selected_snapshot_id": "snap-783d90e3362a7b07",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+          "content_type": "text/html",
+          "checksum": "4ab87d4cdf76cd24a54bc798cd95dfe95909c1df4cb027523316bf18fca45f91",
+          "fingerprint": "723f7fb462d1626707c8a261c254b593fcbaa80ea39d13ca1bc6eb4587255a77",
+          "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/snap-783d90e3362a7b07/raw",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-60782f0c766ef15b",
+      "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/snap-60782f0c766ef15b/raw",
+      "checksum": "eadd41b260655603e676bc3a60f447d274df4bee2968c89d1bc47841551b64d6",
+      "fingerprint": "a705478ffd3665fa24fcf3d948e9f380296fd19939028ac77d0a7dc98bc50f09",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-10T05:23:15.987138+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-60782f0c766ef15b",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/snap-60782f0c766ef15b/raw",
+        "content_type": "text/html",
+        "checksum": "eadd41b260655603e676bc3a60f447d274df4bee2968c89d1bc47841551b64d6",
+        "fingerprint": "a705478ffd3665fa24fcf3d948e9f380296fd19939028ac77d0a7dc98bc50f09",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+          "request_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+          "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+          "status_code": 200,
+          "content_length": 284287,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"45494-651544ecd45a5-gzip\"",
+          "last_modified": "Fri, 08 May 2026 20:33:21 GMT",
+          "cache_control": "private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-10T05:23:15.987138+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f1e5749e25e8830b",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "selected_snapshot_id": "snap-60782f0c766ef15b",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+          "content_type": "text/html",
+          "checksum": "eadd41b260655603e676bc3a60f447d274df4bee2968c89d1bc47841551b64d6",
+          "fingerprint": "a705478ffd3665fa24fcf3d948e9f380296fd19939028ac77d0a7dc98bc50f09",
+          "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/snap-60782f0c766ef15b/raw",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-9a33893c71166367",
+      "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/snap-9a33893c71166367/raw",
+      "checksum": "0cc7d2e9a815b3d942258eddfcbbab63732a9429d8f2d5136aeea1b4233e360d",
+      "fingerprint": "ca13057899f0393c7b3d52e480ca7f136409653d5029208127d6575770df6ac9",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-10T05:23:16.003181+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-9a33893c71166367",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/snap-9a33893c71166367/raw",
+        "content_type": "text/html",
+        "checksum": "0cc7d2e9a815b3d942258eddfcbbab63732a9429d8f2d5136aeea1b4233e360d",
+        "fingerprint": "ca13057899f0393c7b3d52e480ca7f136409653d5029208127d6575770df6ac9",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+          "request_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+          "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred.html",
+          "status_code": 200,
+          "content_length": 366123,
+          "content_type": "text/html",
+          "redirect_count": 1,
+          "etag": "\"59440-651542b36e255-gzip\"",
+          "last_modified": "Fri, 08 May 2026 20:23:24 GMT",
+          "cache_control": "private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-10T05:23:16.003181+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1a9bace72552aa95",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "selected_snapshot_id": "snap-9a33893c71166367",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+          "content_type": "text/html",
+          "checksum": "0cc7d2e9a815b3d942258eddfcbbab63732a9429d8f2d5136aeea1b4233e360d",
+          "fingerprint": "ca13057899f0393c7b3d52e480ca7f136409653d5029208127d6575770df6ac9",
+          "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/snap-9a33893c71166367/raw",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "attempt_count": 1,
+          "preflight_status": "warning",
+          "preflight_issue_codes": [
+            "final_url_changed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+      "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-47882d7539dbc5eb",
+      "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/snap-47882d7539dbc5eb/raw",
+      "checksum": "0f2c9eaf7b000c00b79c26847135bd829ebc0c07c19e624678793d7724918cdc",
+      "fingerprint": "34076b54904fd18c443379057179a6b5032bdcd49ad48ae18f60dc69435a1d42",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-05-10T05:23:46.202388+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-47882d7539dbc5eb",
+        "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+        "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/snap-47882d7539dbc5eb/raw",
+        "content_type": "text/html",
+        "checksum": "0f2c9eaf7b000c00b79c26847135bd829ebc0c07c19e624678793d7724918cdc",
+        "fingerprint": "34076b54904fd18c443379057179a6b5032bdcd49ad48ae18f60dc69435a1d42",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+          "request_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+          "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+          "status_code": 200,
+          "content_length": 324894,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": "\"4f333-65154a519dcf9-gzip\"",
+          "last_modified": "Fri, 08 May 2026 20:57:29 GMT",
+          "cache_control": "private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-05-10T05:23:46.202388+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-153cf0029a10e233",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+        "selected_snapshot_id": "snap-47882d7539dbc5eb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+          "content_type": "text/html",
+          "checksum": "0f2c9eaf7b000c00b79c26847135bd829ebc0c07c19e624678793d7724918cdc",
+          "fingerprint": "34076b54904fd18c443379057179a6b5032bdcd49ad48ae18f60dc69435a1d42",
+          "object_storage_key": "dev/snapshots/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/snap-47882d7539dbc5eb/raw",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "correlation_id": "corr_Co6tTrkzFHTukXtk",
+    "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+    "stats": {
+      "source_total": 5,
+      "ok_count": 4,
+      "warning_count": 1,
+      "error_count": 0,
+      "issue_total": 1
+    },
+    "source_checks": [
+      {
+        "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-10T05:23:14.301841+00:00",
+        "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+        "normalized_final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-10T05:23:14.630027+00:00",
+        "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+        "normalized_final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-10T05:23:14.879741+00:00",
+        "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+        "normalized_final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+        "expected_source_type": "html",
+        "status": "warning",
+        "fetched_at": "2026-05-10T05:23:15.213609+00:00",
+        "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred.html",
+        "normalized_final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 1,
+        "error_summary": null,
+        "issues": [
+          {
+            "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+            "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+            "issue_code": "final_url_changed",
+            "severity": "warning",
+            "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+            "detected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred.html",
+            "expected_source_type": "html",
+            "detected_content_type": "text/html",
+            "message": "Final fetched URL differs from the approved active registry URL."
+          }
+        ]
+      },
+      {
+        "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+        "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+        "expected_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-05-10T05:23:15.466051+00:00",
+        "final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+        "normalized_final_url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "run_state": "completed",
+    "source_document_count": 5,
+    "stored_snapshot_count": 5,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-05-10T05:23:12.164902+00:00",
+    "completed_at": "2026-05-10T05:23:57.937899+00:00"
+  }
+}
+[source-collection-runner] run run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf continuing with 5 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+  "correlation_id": "corr_Co6tTrkzFHTukXtk",
+  "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+      "snapshot_id": "snap-9958fd5cd8f352ff",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-466c9afadb593b4a",
+      "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/metadata.json",
+      "chunk_count": 14,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-28c56072a5ff04d4",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "selected_snapshot_id": "snap-9958fd5cd8f352ff",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-466c9afadb593b4a",
+          "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/metadata.json",
+          "chunk_count": 14,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+      "snapshot_id": "snap-783d90e3362a7b07",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-7711bb23e04d533d",
+      "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/metadata.json",
+      "chunk_count": 67,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cd222e7cb00f36c7",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "selected_snapshot_id": "snap-783d90e3362a7b07",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-7711bb23e04d533d",
+          "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/metadata.json",
+          "chunk_count": 67,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+      "snapshot_id": "snap-60782f0c766ef15b",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-f81982a9d397ad3c",
+      "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/metadata.json",
+      "chunk_count": 14,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f1e5749e25e8830b",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "selected_snapshot_id": "snap-60782f0c766ef15b",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-f81982a9d397ad3c",
+          "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/metadata.json",
+          "chunk_count": 14,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+      "snapshot_id": "snap-9a33893c71166367",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-dacf9e8585b24e5d",
+      "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/metadata.json",
+      "chunk_count": 54,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1a9bace72552aa95",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "selected_snapshot_id": "snap-9a33893c71166367",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-dacf9e8585b24e5d",
+          "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/metadata.json",
+          "chunk_count": 54,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+      "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+      "snapshot_id": "snap-47882d7539dbc5eb",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-5763739e6f652a34",
+      "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/metadata.json",
+      "chunk_count": 165,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-153cf0029a10e233",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+        "selected_snapshot_id": "snap-47882d7539dbc5eb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-5763739e6f652a34",
+          "parsed_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/metadata.json",
+          "chunk_count": 165,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "run_state": "completed",
+    "parsed_document_count": 5,
+    "evidence_chunk_count": 314,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-10T05:27:02.157640+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+  "correlation_id": "corr_Co6tTrkzFHTukXtk",
+  "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "failed_count": 0,
+    "extracted_field_count": 66,
+    "evidence_link_count": 26
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+      "snapshot_id": "snap-9958fd5cd8f352ff",
+      "parsed_document_id": "parsed-466c9afadb593b4a",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+      "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "SCOTIABANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Basic Bank Account | Scotiabank Canada",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "save at Shell Available now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": "chunk-382fb4de8a588fce",
+          "evidence_text_excerpt": "save at Shell\nAvailable now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell.",
+          "anchor_type": "section",
+          "anchor_value": "save-at-shell",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": "chunk-70868151ebe39f84",
+          "evidence_text_excerpt": "Legal 2\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "anchor_type": "section",
+          "anchor_value": "legal-2",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": "chunk-70868151ebe39f84",
+          "evidence_text_excerpt": "Legal 2\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "anchor_type": "section",
+          "anchor_value": "legal-2",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "included",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": "chunk-80fa658221ce5987",
+          "evidence_text_excerpt": "benefits\n18 free transactions 2 per\u00a0month\nFree Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 3",
+          "anchor_type": "section",
+          "anchor_value": "benefits",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "This account might not be right if you: Are interested in only opening a savings account that earns interest Note: For alternate solutions to help you with everyday banking, ask us or visit www.scotiabank.com.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "evidence_chunk_id": "chunk-507d0b3d931555e9",
+          "evidence_text_excerpt": "Not sure if this is right for you?\nThis account might not be right if you:\nAre interested in only opening a savings account that earns interest\nNote: For alternate solutions to help you with everyday banking, ask us or visit www.scotiabank.com.\nDiscover better options:\nHelp me choose\nSmart Money budgeting tool",
+          "anchor_type": "section",
+          "anchor_value": "not-sure-if-this-is-right-for-you",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "note"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "save at Shell Available now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell",
+          "evidence_chunk_id": "chunk-382fb4de8a588fce",
+          "evidence_text_excerpt": "save at Shell\nAvailable now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell.",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "anchor_type": "section",
+          "anchor_value": "save-at-shell",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-70868151ebe39f84",
+          "evidence_text_excerpt": "Legal 2\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "anchor_type": "section",
+          "anchor_value": "legal-2",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-70868151ebe39f84",
+          "evidence_text_excerpt": "Legal 2\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "anchor_type": "section",
+          "anchor_value": "legal-2",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-80fa658221ce5987",
+          "evidence_text_excerpt": "benefits\n18 free transactions 2 per\u00a0month\nFree Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 3",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "anchor_type": "section",
+          "anchor_value": "benefits",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "This account might not be right if you: Are interested in only opening a savings account that earns interest Note: For alternate solutions to help you with everyday banking, ask us or visit www.scotiabank.com.",
+          "evidence_chunk_id": "chunk-507d0b3d931555e9",
+          "evidence_text_excerpt": "Not sure if this is right for you?\nThis account might not be right if you:\nAre interested in only opening a savings account that earns interest\nNote: For alternate solutions to help you with everyday banking, ask us or visit www.scotiabank.com.\nDiscover better options:\nHelp me choose\nSmart Money budgeting tool",
+          "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+          "source_snapshot_id": "snap-9958fd5cd8f352ff",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "anchor_type": "section",
+          "anchor_value": "not-sure-if-this-is-right-for-you",
+          "page_no": null,
+          "chunk_index": 8
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-28c56072a5ff04d4",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "selected_snapshot_id": "snap-9958fd5cd8f352ff",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-466c9afadb593b4a",
+          "model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/parsed-466c9afadb593b4a/metadata.json",
+          "extracted_field_count": 13,
+          "evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+      "snapshot_id": "snap-783d90e3362a7b07",
+      "parsed_document_id": "parsed-7711bb23e04d533d",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-971ad0e611487363",
+      "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "SCOTIABANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Ultimate Package | Scotiabank Canada",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-ceab420aa5365ede",
+          "evidence_text_excerpt": "the Ultimate Package\nThere\u2019s\u00a0no minimum balance\u00a0required\u00a0to open a Scotiabank Ultimate Package.\nYou\u2019re responsible for having enough money in your account to cover any fees, such as your monthly account fee. If your balance is $0 or less, you may be charged additional fees, such as a non-sufficient funds (NSF) fee. Accounts with a balance of $0 or less that remain inactive may be closed.\nEven though you\u00a0don\u2019t\u00a0need to\u00a0maintain\u00a0a minimum balance, you can waive the monthly account fee by holding a minimum balance.\nYou\u2019ll\u00a0pay no monthly account fee by either:\nHolding $6,000 or more in your Ultimate Package every day for the entire month\nHolding a Total Relationship Balance 2 of $100,000 across all eligible accounts every day for the entire month\nHow we calculate your Total Relationship Balance 2\nYour Total Relationship Balance for any day is the sum of daily closing balances in your",
+          "anchor_type": "section",
+          "anchor_value": "the-ultimate-package",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "daily",
+              "maintain",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between March 3, 2026, and July 2, 2026 (the \u201cOffer Period\u201d), to individuals who open new eligible accounts",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-72ca6942c296345e",
+          "evidence_text_excerpt": "Legal 1\nThe Scotiabank Cash Bonus Bundle Offer Terms and Conditions\n1. The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between\u00a0March 3, 2026, and July 2, 2026\u00a0(the \u201cOffer Period\u201d), to individuals who open new eligible accounts. Subject to the Offer conditions, eligible clients can earn $500 when they open a new Preferred Package or Ultimate Package chequing account and complete certain qualifying transactions. Plus, clients who meet the conditions for the $500 bonus are also eligible to earn up to $200 in additional cash bonuses when they bundle their new Preferred or Ultimate Package chequing account with a new Money Master Savings Account and/or a new eligible Registered Account and complete certain qualifying transactions.\n$500 Cash Bonus for Preferred or Ultimate Package Conditions\n2. To qualify for the $500 cash bonus (the \u201c$500 Package Bonus\u201d), you must:\na. Open",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 21,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligible",
+              "qualify",
+              "who"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "free",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "evidence_chunk_id": "chunk-0a169b0bf5d1f4e6",
+          "evidence_text_excerpt": "age Bonus: Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9.\u00a0100 Savings Bundle Bonus:\u00a0 Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10.\u00a0$100 Registered Bundle Bonus:\u00a0In order to\u00a0qualify for the $100 Registered Bundle Bonus, Individuals\u00a0who\u00a0 have\u00a0held the same type of Eligible Registered Account (as that opened during the Offer Period) with Scotiabank in the six",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 27,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "plan",
+              "student",
+              "student banking"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-ceab420aa5365ede",
+          "evidence_text_excerpt": "the Ultimate Package\nThere\u2019s\u00a0no minimum balance\u00a0required\u00a0to open a Scotiabank Ultimate Package.\nYou\u2019re responsible for having enough money in your account to cover any fees, such as your monthly account fee. If your balance is $0 or less, you may be charged additional fees, such as a non-sufficient funds (NSF) fee. Accounts with a balance of $0 or less that remain inactive may be closed.\nEven though you\u00a0don\u2019t\u00a0need to\u00a0maintain\u00a0a minimum balance, you can waive the monthly account fee by holding a minimum balance.\nYou\u2019ll\u00a0pay no monthly account fee by either:\nHolding $6,000 or more in your Ultimate Package every day for the entire month\nHolding a Total Relationship Balance 2 of $100,000 across all eligible accounts every day for the entire month\nHow we calculate your Total Relationship Balance 2\nYour Total Relationship Balance for any day is the sum of daily closing balances in your",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "the-ultimate-package",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between March 3, 2026, and July 2, 2026 (the \u201cOffer Period\u201d), to individuals who open new eligible accounts",
+          "evidence_chunk_id": "chunk-72ca6942c296345e",
+          "evidence_text_excerpt": "Legal 1\nThe Scotiabank Cash Bonus Bundle Offer Terms and Conditions\n1. The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between\u00a0March 3, 2026, and July 2, 2026\u00a0(the \u201cOffer Period\u201d), to individuals who open new eligible accounts. Subject to the Offer conditions, eligible clients can earn $500 when they open a new Preferred Package or Ultimate Package chequing account and complete certain qualifying transactions. Plus, clients who meet the conditions for the $500 bonus are also eligible to earn up to $200 in additional cash bonuses when they bundle their new Preferred or Ultimate Package chequing account with a new Money Master Savings Account and/or a new eligible Registered Account and complete certain qualifying transactions.\n$500 Cash Bonus for Preferred or Ultimate Package Conditions\n2. To qualify for the $500 cash bonus (the \u201c$500 Package Bonus\u201d), you must:\na. Open",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 21
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-a7671b3a2248b08a",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit 4 and Interac e-Transfer \u2020 transactions\nOngoing annual fee\u00a0rebate\u00a0up to $150 on select credit cards 5\nNo monthly account fee on a Basic Plus Bank Account 6\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 7\nPreferred rates on eligible mortgages on\u00a0a Scotia Total Equity\u00ae Plan 8\nWaive the fee for a small safety deposit box 9\nFree personalized cheques 10 and drafts 11\nExtra 0.10% interest on your MomentumPLUS Savings Account 12\nWithdraw from any ABM for free 13\nNo fee Scotia International Money Transfers 14\nPreferred rates on select GICs 15\nLower rates on select foreign exchanges 16\n10 free equity trades at Scotia\u00a0iTRADE \u00ae in your 1st\u00a0year 17\nNo\u00a0overdraft protection fee 18\nScene+ \u2122 points 19",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-0a169b0bf5d1f4e6",
+          "evidence_text_excerpt": "age Bonus: Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9.\u00a0100 Savings Bundle Bonus:\u00a0 Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10.\u00a0$100 Registered Bundle Bonus:\u00a0In order to\u00a0qualify for the $100 Registered Bundle Bonus, Individuals\u00a0who\u00a0 have\u00a0held the same type of Eligible Registered Account (as that opened during the Offer Period) with Scotiabank in the six",
+          "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+          "source_snapshot_id": "snap-783d90e3362a7b07",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 27
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cd222e7cb00f36c7",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "selected_snapshot_id": "snap-783d90e3362a7b07",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-7711bb23e04d533d",
+          "model_execution_id": "modelexec-971ad0e611487363",
+          "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/parsed-7711bb23e04d533d/metadata.json",
+          "extracted_field_count": 14,
+          "evidence_link_count": 6,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+      "snapshot_id": "snap-60782f0c766ef15b",
+      "parsed_document_id": "parsed-f81982a9d397ad3c",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-7e85334e7281e913",
+      "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "SCOTIABANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Basic Plus Bank Account | Scotiabank Canada",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "save at Shell Available now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": "chunk-0874f7a295ff3885",
+          "evidence_text_excerpt": "save at Shell\nAvailable now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell.",
+          "anchor_type": "section",
+          "anchor_value": "save-at-shell",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": "chunk-d38d6a3437353b40",
+          "evidence_text_excerpt": "Legal 1\nAdditional\u00a0fees\u00a0apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": "chunk-d38d6a3437353b40",
+          "evidence_text_excerpt": "Legal 1\nAdditional\u00a0fees\u00a0apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "included",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "evidence_chunk_id": "chunk-4365720a98590a63",
+          "evidence_text_excerpt": "benefits\n25 free debit transactions 1 per month\nSend money globally for $1.99\u00a0with Scotia International Money Transfer 2\nFree Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 3",
+          "anchor_type": "section",
+          "anchor_value": "benefits",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "save at Shell Available now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell",
+          "evidence_chunk_id": "chunk-0874f7a295ff3885",
+          "evidence_text_excerpt": "save at Shell\nAvailable now in Alberta, and rolling out nationally on May 26, 2026, eligible Scotiabank clients can earn and save on fuel purchases at Shell.",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-7e85334e7281e913",
+          "anchor_type": "section",
+          "anchor_value": "save-at-shell",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-d38d6a3437353b40",
+          "evidence_text_excerpt": "Legal 1\nAdditional\u00a0fees\u00a0apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-7e85334e7281e913",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-d38d6a3437353b40",
+          "evidence_text_excerpt": "Legal 1\nAdditional\u00a0fees\u00a0apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-7e85334e7281e913",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-4365720a98590a63",
+          "evidence_text_excerpt": "benefits\n25 free debit transactions 1 per month\nSend money globally for $1.99\u00a0with Scotia International Money Transfer 2\nFree Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 3",
+          "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+          "source_snapshot_id": "snap-60782f0c766ef15b",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-7e85334e7281e913",
+          "anchor_type": "section",
+          "anchor_value": "benefits",
+          "page_no": null,
+          "chunk_index": 3
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f1e5749e25e8830b",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "selected_snapshot_id": "snap-60782f0c766ef15b",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-f81982a9d397ad3c",
+          "model_execution_id": "modelexec-7e85334e7281e913",
+          "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/parsed-f81982a9d397ad3c/metadata.json",
+          "extracted_field_count": 12,
+          "evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+      "snapshot_id": "snap-9a33893c71166367",
+      "parsed_document_id": "parsed-dacf9e8585b24e5d",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-35b0b322132c9a50",
+      "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "SCOTIABANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Preferred Package | Scotiabank Canada",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-ee9180200058d7a1",
+          "evidence_text_excerpt": "the Preferred Package\nThere\u2019s\u00a0no minimum balance\u00a0required\u00a0to open a Scotiabank Preferred Package.\nYou\u2019re responsible for having enough money in your account to cover any fees, such as your monthly account fee. If your balance is $0 or less, you may be charged additional fees, such as a non-sufficient funds (NSF) fee. Accounts with a balance of $0 or less that remain inactive may be closed.\nEven though you\u00a0don\u2019t\u00a0need to\u00a0maintain\u00a0a minimum balance, you can waive the monthly account fee by holding\u00a0a\u00a0 minimum\u00a0balance.\nYou\u2019ll pay no monthly account fee by holding $4,000 or more in your Preferred Package every day for the entire month.\nThe Preferred Package offers our most popular features packaged for our customers\u2019 everyday banking needs.\nPreferred Package account holders can take advantage of various fee waivers and preferred rates across other product categories. Check out our full list",
+          "anchor_type": "section",
+          "anchor_value": "the-preferred-package",
+          "page_no": null,
+          "chunk_index": 9,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "maintain",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between March 3, 2026, and July 2, 2026 (the \u201cOffer Period\u201d), to individuals who open new eligible accounts",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-d181315bc6fceb4c",
+          "evidence_text_excerpt": "Legal 1\nThe Scotiabank Cash Bonus Bundle Offer Terms and Conditions\n1. The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between\u00a0March 3, 2026, and July 2, 2026\u00a0(the \u201cOffer Period\u201d), to individuals who open new eligible accounts. Subject to the Offer conditions, eligible clients can earn $500 when they open a new Preferred Package or Ultimate Package chequing account and complete certain qualifying transactions. Plus, clients who meet the conditions for the $500 bonus are also eligible to earn up to $200 in additional cash bonuses when they bundle their new Preferred or Ultimate Package chequing account with a new Money Master Savings Account and/or a new eligible Registered Account and complete certain qualifying transactions.\n$500 Cash Bonus for Preferred or Ultimate Package Conditions\n2. To qualify for the $500 cash bonus (the \u201c$500 Package Bonus\u201d), you must:\na. Open",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 20,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligible",
+              "qualify",
+              "who"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-a7678a573c144e3d",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit transactions 3\nFirst year annual fee\u00a0rebate\u00a0up to $150 on select credit cards 4\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 5\n20 free Scotia\u00a0iTRADE stock or ETF trades in your 1st\u00a0year 6\nScene+ TM points 13\n$1.99 Scotia International Money Transfers 7\nUnlimited Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 8\nExtra 0.05% interest on your Momentum PLUS Savings Account 9\n1 free ABM withdrawal in Canada a month 10\nPreferred rates on select GICs 11",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-66b6423b45832aec",
+          "evidence_text_excerpt": "Legal 3\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "anchor_type": "section",
+          "anchor_value": "legal-3",
+          "page_no": null,
+          "chunk_index": 37,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "included",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-a7678a573c144e3d",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit transactions 3\nFirst year annual fee\u00a0rebate\u00a0up to $150 on select credit cards 4\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 5\n20 free Scotia\u00a0iTRADE stock or ETF trades in your 1st\u00a0year 6\nScene+ TM points 13\n$1.99 Scotia International Money Transfers 7\nUnlimited Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 8\nExtra 0.05% interest on your Momentum PLUS Savings Account 9\n1 free ABM withdrawal in Canada a month 10\nPreferred rates on select GICs 11",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "evidence_chunk_id": "chunk-b27ce1d6783e1539",
+          "evidence_text_excerpt": "age Bonus: Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9.\u00a0100 Savings Bundle Bonus:\u00a0 Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10.\u00a0$100 Registered Bundle Bonus:\u00a0In order to\u00a0qualify for the $100 Registered Bundle Bonus, Individuals\u00a0who\u00a0 have\u00a0held the same type of Eligible Registered Account (as that opened during the Offer Period) with Scotiabank in the six",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 26,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "plan",
+              "student",
+              "student banking"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-ee9180200058d7a1",
+          "evidence_text_excerpt": "the Preferred Package\nThere\u2019s\u00a0no minimum balance\u00a0required\u00a0to open a Scotiabank Preferred Package.\nYou\u2019re responsible for having enough money in your account to cover any fees, such as your monthly account fee. If your balance is $0 or less, you may be charged additional fees, such as a non-sufficient funds (NSF) fee. Accounts with a balance of $0 or less that remain inactive may be closed.\nEven though you\u00a0don\u2019t\u00a0need to\u00a0maintain\u00a0a minimum balance, you can waive the monthly account fee by holding\u00a0a\u00a0 minimum\u00a0balance.\nYou\u2019ll pay no monthly account fee by holding $4,000 or more in your Preferred Package every day for the entire month.\nThe Preferred Package offers our most popular features packaged for our customers\u2019 everyday banking needs.\nPreferred Package account holders can take advantage of various fee waivers and preferred rates across other product categories. Check out our full list",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "the-preferred-package",
+          "page_no": null,
+          "chunk_index": 9
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between March 3, 2026, and July 2, 2026 (the \u201cOffer Period\u201d), to individuals who open new eligible accounts",
+          "evidence_chunk_id": "chunk-d181315bc6fceb4c",
+          "evidence_text_excerpt": "Legal 1\nThe Scotiabank Cash Bonus Bundle Offer Terms and Conditions\n1. The Scotiabank Cash Bonus Bundle Offer (the \u201cOffer\u201d) is available between\u00a0March 3, 2026, and July 2, 2026\u00a0(the \u201cOffer Period\u201d), to individuals who open new eligible accounts. Subject to the Offer conditions, eligible clients can earn $500 when they open a new Preferred Package or Ultimate Package chequing account and complete certain qualifying transactions. Plus, clients who meet the conditions for the $500 bonus are also eligible to earn up to $200 in additional cash bonuses when they bundle their new Preferred or Ultimate Package chequing account with a new Money Master Savings Account and/or a new eligible Registered Account and complete certain qualifying transactions.\n$500 Cash Bonus for Preferred or Ultimate Package Conditions\n2. To qualify for the $500 cash bonus (the \u201c$500 Package Bonus\u201d), you must:\na. Open",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 20
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-a7678a573c144e3d",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit transactions 3\nFirst year annual fee\u00a0rebate\u00a0up to $150 on select credit cards 4\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 5\n20 free Scotia\u00a0iTRADE stock or ETF trades in your 1st\u00a0year 6\nScene+ TM points 13\n$1.99 Scotia International Money Transfers 7\nUnlimited Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 8\nExtra 0.05% interest on your Momentum PLUS Savings Account 9\n1 free ABM withdrawal in Canada a month 10\nPreferred rates on select GICs 11",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-66b6423b45832aec",
+          "evidence_text_excerpt": "Legal 3\nAdditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for\u00a0additional\u00a0debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "legal-3",
+          "page_no": null,
+          "chunk_index": 37
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-a7678a573c144e3d",
+          "evidence_text_excerpt": "banking package\nHighlights\nMore benefits\nUnlimited debit transactions 3\nFirst year annual fee\u00a0rebate\u00a0up to $150 on select credit cards 4\nNo monthly account fee on a Scotia\u00ae U.S. Dollar Daily Interest Account 5\n20 free Scotia\u00a0iTRADE stock or ETF trades in your 1st\u00a0year 6\nScene+ TM points 13\n$1.99 Scotia International Money Transfers 7\nUnlimited Interac\u00a0e-Transfer \u2020 transactions\nEligible for overdraft protection 8\nExtra 0.05% interest on your Momentum PLUS Savings Account 9\n1 free ABM withdrawal in Canada a month 10\nPreferred rates on select GICs 11",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "banking-package",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-b27ce1d6783e1539",
+          "evidence_text_excerpt": "age Bonus: Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9.\u00a0100 Savings Bundle Bonus:\u00a0 Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10.\u00a0$100 Registered Bundle Bonus:\u00a0In order to\u00a0qualify for the $100 Registered Bundle Bonus, Individuals\u00a0who\u00a0 have\u00a0held the same type of Eligible Registered Account (as that opened during the Offer Period) with Scotiabank in the six",
+          "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+          "source_snapshot_id": "snap-9a33893c71166367",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "anchor_type": "section",
+          "anchor_value": "legal-1",
+          "page_no": null,
+          "chunk_index": 26
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1a9bace72552aa95",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "selected_snapshot_id": "snap-9a33893c71166367",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-dacf9e8585b24e5d",
+          "model_execution_id": "modelexec-35b0b322132c9a50",
+          "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/parsed-dacf9e8585b24e5d/metadata.json",
+          "extracted_field_count": 14,
+          "evidence_link_count": 6,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+      "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+      "snapshot_id": "snap-47882d7539dbc5eb",
+      "parsed_document_id": "parsed-5763739e6f652a34",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-dbf298e9963ebaf7",
+      "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "SCOTIABANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Bank Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "To qualify for a $100 cash bonus (the \u201c$100 Savings Bundle Bonus\u201d), you must meet all of the conditions for the $500 Package Bonus, and: a",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": "chunk-af7d553abd8da388",
+          "evidence_text_excerpt": "t other financial institutions, or to payment processing firms, are not eligible for the $500 Package Bonus.\n$100 Money Master Savings Account Bundle Conditions\n4. To qualify for a $100 cash bonus (the \u201c$100 Savings Bundle Bonus\u201d), you must meet all of the conditions for the $500 Package Bonus, and:\na. During the Offer Period and within 60 days of opening your Eligible Chequing Account:\nOpen a new Money Master Savings Account (the \u201cEligible Savings Account\u201d).\nEnroll your new Eligible Savings Account in either the Pay Yourself First or the Savings Finder tool (each a \u201cSmart Savings Tool\u201d).\nb. Remain enrolled in your selected Smart Savings Tool for 90 consecutive days.\n5. Enrolment in a Smart Savings Tool is subject to certain eligibility requirements and can only be done through the Scotiabank mobile banking app. For example, enrollment in the Pay Yourself First tool will not be",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 125,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligibility",
+              "eligible",
+              "qualify"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": "chunk-2b34ffc69b122894",
+          "evidence_text_excerpt": "ditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for additional debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.\nUltimate Package Account holders who add Overdraft Protection to their account will have the Overdraft Protection fee(s) automatically waived. Interest will remain to be payable on overdrawn balances calculated daily at 21% (per annum) and charged monthly. The account must have a positive balance at least once every 30 days. A $5.00 handling fee will be charged for each item that is paid while the account is overdrawn more than the authorized limit. Subject to approval.\nIf you open an Ultimate Package",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 135,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.88,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": "chunk-8e6e90c8c18b8814",
+          "evidence_text_excerpt": "Interac e-Transfer \u2020 transactions included /mth\nUltimate Package",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-transactions-included-mth",
+          "page_no": null,
+          "chunk_index": 43,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "included",
+              "interac",
+              "interac e-transfer",
+              "transfer"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": "chunk-14d1863503f3da75",
+          "evidence_text_excerpt": "Basic Bank Account\nDebit Transactions 3 included /mth\nUnlimited\n25 ($1.25 each thereafter)\n18 ($1.25 each thereafter)\nInterac e-Transfer \u2020 transactions included /mth\nUnlimited\nFree 3\nNon-Scotiabank ABM withdrawals /mth\nNo Scotiabank fees on global non-Scotiabank ABM withdrawals 6\nFee waived on one non-Scotiabank ABM withdrawal per month in Canada 13\nFees apply\nOverdraft Protection\nNo Overdraft Protection fee 4\nMonthly Overdraft Protection Plan 29 : $5.00/month Pay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month\nPay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month Pay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month\nPay-per-use Overdraft Protection Plan 30 (Not",
+          "anchor_type": "section",
+          "anchor_value": "basic-bank-account",
+          "page_no": null,
+          "chunk_index": 15,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "available",
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "evidence_chunk_id": "chunk-1d612860c1124d29",
+          "evidence_text_excerpt": "are not included in the definition and are not eligible for the Offer.\nOffer Eligibility and Exclusions\n8. $500 Package Bonus : Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9. 100 Savings Bundle Bonus : \u00a0Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10. $100 Registered Bundle Bonus : In order to qualify for the $100 Registered Bundle Bonus, Individuals who \u00a0have",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 128,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "banking",
+              "plan",
+              "student",
+              "student banking"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "To qualify for a $100 cash bonus (the \u201c$100 Savings Bundle Bonus\u201d), you must meet all of the conditions for the $500 Package Bonus, and: a",
+          "evidence_chunk_id": "chunk-af7d553abd8da388",
+          "evidence_text_excerpt": "t other financial institutions, or to payment processing firms, are not eligible for the $500 Package Bonus.\n$100 Money Master Savings Account Bundle Conditions\n4. To qualify for a $100 cash bonus (the \u201c$100 Savings Bundle Bonus\u201d), you must meet all of the conditions for the $500 Package Bonus, and:\na. During the Offer Period and within 60 days of opening your Eligible Chequing Account:\nOpen a new Money Master Savings Account (the \u201cEligible Savings Account\u201d).\nEnroll your new Eligible Savings Account in either the Pay Yourself First or the Savings Finder tool (each a \u201cSmart Savings Tool\u201d).\nb. Remain enrolled in your selected Smart Savings Tool for 90 consecutive days.\n5. Enrolment in a Smart Savings Tool is subject to certain eligibility requirements and can only be done through the Scotiabank mobile banking app. For example, enrollment in the Pay Yourself First tool will not be",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 125
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-2b34ffc69b122894",
+          "evidence_text_excerpt": "ditional fees apply for shared ABM services, cross-border debit transactions and other banking services not included in the chequing account package. For accounts that do not provide unlimited debit transactions, a charge for additional debit transactions may apply if you perform an Interac e-Transfer transaction over and above the number of debit transactions allowed in the account.\nUltimate Package Account holders who add Overdraft Protection to their account will have the Overdraft Protection fee(s) automatically waived. Interest will remain to be payable on overdrawn balances calculated daily at 21% (per annum) and charged monthly. The account must have a positive balance at least once every 30 days. A $5.00 handling fee will be charged for each item that is paid while the account is overdrawn more than the authorized limit. Subject to approval.\nIf you open an Ultimate Package",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 135
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-8e6e90c8c18b8814",
+          "evidence_text_excerpt": "Interac e-Transfer \u2020 transactions included /mth\nUltimate Package",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "citation_confidence": 0.88,
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "anchor_type": "section",
+          "anchor_value": "interac-e-transfer-transactions-included-mth",
+          "page_no": null,
+          "chunk_index": 43
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-14d1863503f3da75",
+          "evidence_text_excerpt": "Basic Bank Account\nDebit Transactions 3 included /mth\nUnlimited\n25 ($1.25 each thereafter)\n18 ($1.25 each thereafter)\nInterac e-Transfer \u2020 transactions included /mth\nUnlimited\nFree 3\nNon-Scotiabank ABM withdrawals /mth\nNo Scotiabank fees on global non-Scotiabank ABM withdrawals 6\nFee waived on one non-Scotiabank ABM withdrawal per month in Canada 13\nFees apply\nOverdraft Protection\nNo Overdraft Protection fee 4\nMonthly Overdraft Protection Plan 29 : $5.00/month Pay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month\nPay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month Pay-per-use Overdraft Protection Plan 30 (Not available in Quebec): $5.00/use\nMonthly Overdraft Protection Plan 29 : $5.00/month\nPay-per-use Overdraft Protection Plan 30 (Not",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "anchor_type": "section",
+          "anchor_value": "basic-bank-account",
+          "page_no": null,
+          "chunk_index": 15
+        },
+        {
+          "field_name": "student_plan_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-1d612860c1124d29",
+          "evidence_text_excerpt": "are not included in the definition and are not eligible for the Offer.\nOffer Eligibility and Exclusions\n8. $500 Package Bonus : Individuals who are currently holders of, or who were previously holders within the last two (2) years, of a Scotiabank Chequing Account are not eligible for this Bonus. \u201cScotiabank Chequing Account\u201d means any of the following accounts: Ultimate Package, Preferred Package, Scotia One Account, Basic Plus Bank Account, Basic Banking Plan, Basic Bank Account, Momentum Chequing, Power Chequing, Scotia One Service, Scotia Value, Student Banking Advantage Plan.\n9. 100 Savings Bundle Bonus : \u00a0Individuals who currently hold or have held a Money Master Account with Scotiabank in the six (6) months preceding the Offer Period are not eligible for this Bonus.\n10. $100 Registered Bundle Bonus : In order to qualify for the $100 Registered Bundle Bonus, Individuals who \u00a0have",
+          "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+          "source_snapshot_id": "snap-47882d7539dbc5eb",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "anchor_type": "section",
+          "anchor_value": "banking-with-scotia-just-makes-sense",
+          "page_no": null,
+          "chunk_index": 128
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-153cf0029a10e233",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-fcf1bb6599506e2b",
+        "selected_snapshot_id": "snap-47882d7539dbc5eb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-5763739e6f652a34",
+          "model_execution_id": "modelexec-dbf298e9963ebaf7",
+          "extracted_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/SCOTIABANK/src-scotiabank-html-fcf1bb6599506e2b/parsed-5763739e6f652a34/metadata.json",
+          "extracted_field_count": 13,
+          "evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "run_state": "completed",
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "extracted_draft_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-10T05:28:55.325846+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+  "correlation_id": "corr_Co6tTrkzFHTukXtk",
+  "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 4,
+    "stored_count": 4,
+    "failed_count": 0,
+    "candidate_count": 4,
+    "field_evidence_link_count": 21
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+      "snapshot_id": "snap-9958fd5cd8f352ff",
+      "parsed_document_id": "parsed-466c9afadb593b4a",
+      "extraction_model_execution_id": "modelexec-15a28dd1a19e3ca9",
+      "normalization_action": "stored",
+      "candidate_id": "cand-35116b685647f80e",
+      "normalization_model_execution_id": "modelexec-a6cbf4291b5524f6",
+      "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.4977,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 5,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-28c56072a5ff04d4",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "selected_snapshot_id": "snap-9958fd5cd8f352ff",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-35116b685647f80e",
+          "normalization_model_execution_id": "modelexec-a6cbf4291b5524f6",
+          "extraction_model_execution_id": "modelexec-15a28dd1a19e3ca9",
+          "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.4977,
+          "field_evidence_link_count": 5,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+      "snapshot_id": "snap-783d90e3362a7b07",
+      "parsed_document_id": "parsed-7711bb23e04d533d",
+      "extraction_model_execution_id": "modelexec-971ad0e611487363",
+      "normalization_action": "stored",
+      "candidate_id": "cand-d9713ed09520d522",
+      "normalization_model_execution_id": "modelexec-5a4159548ba4be12",
+      "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5523,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 6,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cd222e7cb00f36c7",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "selected_snapshot_id": "snap-783d90e3362a7b07",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-d9713ed09520d522",
+          "normalization_model_execution_id": "modelexec-5a4159548ba4be12",
+          "extraction_model_execution_id": "modelexec-971ad0e611487363",
+          "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5523,
+          "field_evidence_link_count": 6,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+      "snapshot_id": "snap-60782f0c766ef15b",
+      "parsed_document_id": "parsed-f81982a9d397ad3c",
+      "extraction_model_execution_id": "modelexec-7e85334e7281e913",
+      "normalization_action": "stored",
+      "candidate_id": "cand-7453328344b94d9d",
+      "normalization_model_execution_id": "modelexec-09ec5f3ff06cb449",
+      "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.479,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 4,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f1e5749e25e8830b",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "selected_snapshot_id": "snap-60782f0c766ef15b",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-7453328344b94d9d",
+          "normalization_model_execution_id": "modelexec-09ec5f3ff06cb449",
+          "extraction_model_execution_id": "modelexec-7e85334e7281e913",
+          "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.479,
+          "field_evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+      "snapshot_id": "snap-9a33893c71166367",
+      "parsed_document_id": "parsed-dacf9e8585b24e5d",
+      "extraction_model_execution_id": "modelexec-35b0b322132c9a50",
+      "normalization_action": "stored",
+      "candidate_id": "cand-ee5f16360f76e5d9",
+      "normalization_model_execution_id": "modelexec-ae1c73c8e915dd42",
+      "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5433,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 6,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1a9bace72552aa95",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "selected_snapshot_id": "snap-9a33893c71166367",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-ee5f16360f76e5d9",
+          "normalization_model_execution_id": "modelexec-ae1c73c8e915dd42",
+          "extraction_model_execution_id": "modelexec-35b0b322132c9a50",
+          "normalized_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5433,
+          "field_evidence_link_count": 6,
+          "runtime_notes": [],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "run_state": "completed",
+    "candidate_count": 4,
+    "field_evidence_link_count": 21,
+    "model_execution_count": 4,
+    "usage_record_count": 4,
+    "run_source_item_count": 4,
+    "source_success_count": 4,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-10T05:30:28.534639+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+  "correlation_id": "corr_Co6tTrkzFHTukXtk",
+  "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 4,
+    "queued_count": 4,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 4
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+      "snapshot_id": "snap-9958fd5cd8f352ff",
+      "parsed_document_id": "parsed-466c9afadb593b4a",
+      "candidate_id": "cand-35116b685647f80e",
+      "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-4ea16b17f05ea9df",
+      "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/metadata.json",
+      "review_task_id": "review-4b06b6c28eedec7c",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6115,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-28c56072a5ff04d4",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-733935d66a1cf128",
+        "selected_snapshot_id": "snap-9958fd5cd8f352ff",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-35116b685647f80e",
+          "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+          "validation_model_execution_id": "modelexec-4ea16b17f05ea9df",
+          "normalization_model_execution_id": "modelexec-a6cbf4291b5524f6",
+          "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-733935d66a1cf128/cand-35116b685647f80e/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6115,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-4b06b6c28eedec7c",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+      "snapshot_id": "snap-783d90e3362a7b07",
+      "parsed_document_id": "parsed-7711bb23e04d533d",
+      "candidate_id": "cand-d9713ed09520d522",
+      "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-4e81af829d5c32d7",
+      "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/metadata.json",
+      "review_task_id": "review-9bcb6effad36b667",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6499,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cd222e7cb00f36c7",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-6d166a0c9fd16e51",
+        "selected_snapshot_id": "snap-783d90e3362a7b07",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-d9713ed09520d522",
+          "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+          "validation_model_execution_id": "modelexec-4e81af829d5c32d7",
+          "normalization_model_execution_id": "modelexec-5a4159548ba4be12",
+          "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-6d166a0c9fd16e51/cand-d9713ed09520d522/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6499,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-9bcb6effad36b667",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+      "snapshot_id": "snap-60782f0c766ef15b",
+      "parsed_document_id": "parsed-f81982a9d397ad3c",
+      "candidate_id": "cand-7453328344b94d9d",
+      "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-4b051add7a428002",
+      "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/metadata.json",
+      "review_task_id": "review-0dd0fdffc5904eff",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5954,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-f1e5749e25e8830b",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f9ee17d2983186ae",
+        "selected_snapshot_id": "snap-60782f0c766ef15b",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-7453328344b94d9d",
+          "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+          "validation_model_execution_id": "modelexec-4b051add7a428002",
+          "normalization_model_execution_id": "modelexec-09ec5f3ff06cb449",
+          "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f9ee17d2983186ae/cand-7453328344b94d9d/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5954,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-0dd0fdffc5904eff",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+      "snapshot_id": "snap-9a33893c71166367",
+      "parsed_document_id": "parsed-dacf9e8585b24e5d",
+      "candidate_id": "cand-ee5f16360f76e5d9",
+      "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-1eb3ade67a9fd379",
+      "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/metadata.json",
+      "review_task_id": "review-10aff9b97b7eee36",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.6443,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1a9bace72552aa95",
+        "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+        "source_document_id": "src-scotiabank-html-f47a536e8bb308e7",
+        "selected_snapshot_id": "snap-9a33893c71166367",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-ee5f16360f76e5d9",
+          "candidate_run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+          "validation_model_execution_id": "modelexec-1eb3ade67a9fd379",
+          "normalization_model_execution_id": "modelexec-ae1c73c8e915dd42",
+          "validation_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/SCOTIABANK/src-scotiabank-html-f47a536e8bb308e7/cand-ee5f16360f76e5d9/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.6443,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-10aff9b97b7eee36",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_Co6tTrkzFHTukXtk",
+          "request_id": "req_ec1bfebdb3914fdbba99f6bc17e4b914"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf",
+    "run_state": "completed",
+    "candidate_count": 4,
+    "review_task_count": 4,
+    "review_queued_count": 4,
+    "auto_validated_count": 0,
+    "model_execution_count": 4,
+    "usage_record_count": 4,
+    "run_source_item_count": 4,
+    "source_success_count": 4,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-05-10T05:31:15.165931+00:00"
+  }
+}
+[source-collection-runner] run run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf completed downstream stages
+[source-catalog-runner] finished run run_20260510_052249_scotiabank_chequing_collect_Y7NpaPkf

@@ -59,7 +59,13 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
         role: session.user.role,
       }}
     >
-      <ReviewQueueSurface filters={filters} locale={locale} productTypes={productTypeList.items} queue={queue} />
+      <ReviewQueueSurface
+        csrfToken={session.csrf_token}
+        filters={filters}
+        locale={locale}
+        productTypes={productTypeList.items}
+        queue={queue}
+      />
     </ApplicationShell5>
   );
 }

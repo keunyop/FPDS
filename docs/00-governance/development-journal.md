@@ -62,6 +62,43 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-10 - Review Queue Bulk Decision Controls
+
+- WBS: `4.2`, `4.3`, admin review workflow hardening
+- Status: `done`
+- Goal: let operators select multiple rows in the Review Queue reviewer intake table and apply one approve, reject, or defer action from the list view.
+- Why now: reviewer intake currently required opening each review detail for routine no-edit decisions, which slowed down triage when multiple queued results need the same decision.
+- Outcome: split the Review Queue results table into a client-side `ReviewQueueResults` component with queued/deferred row checkboxes, page-level active-row selection, a bulk action bar for approve/reject/defer, per-row sequential calls through the existing CSRF-protected decision proxy route, partial-failure status messaging, and refresh after completion. Terminal rows remain visible but are not selectable for bulk actions, and edit-approve stays on the detail/trace surface.
+- Not done: no backend atomic bulk-decision API was added. Each selected row still uses the existing audited single-review decision route, so a later backend bulk endpoint may be useful if operators need all-or-nothing behavior.
+- Key files: `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept the feature UI-scoped and reused the approved review state machine and single-decision API. Bulk selection is limited to `queued` and `deferred` because approved, edited, and rejected tasks are terminal or correction-only states.
+- Verification:
+  - `pnpm run typecheck`
+  - `pnpm run build`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+- Known issues: the list-level bulk flow uses one shared generated note per row and does not prompt for a per-row reviewer note. Reject/defer still satisfy the API reason requirement by using each row's existing queue reason code.
+- Next step: verify the interaction against a live admin session and decide later whether destructive bulk reject needs an explicit confirmation dialog or an atomic backend bulk endpoint.
+
+## 2026-05-09 - Generic Supporting Field Alias Hardening
+
+- WBS: `5.5`, `5.16`, validation and review quality hardening
+- Status: `done`
+- Goal: triage the May 10 UTC TD/RBC/Scotiabank collection rerun review queue and reduce avoidable `required_field_missing` noise without adding bank-only exceptions.
+- Why now: reviewer intake still showed generated `AUTO-*` chequing, savings, and GIC candidates in `validation_error` even though the run registries included supporting comparison, rate, and fee pages.
+- Outcome: expanded the generic supporting-source merge to recognize common generated supporting field aliases such as `account_comparison_rows`, `account_interest_rates`, `savings_rate_table`, `gic_rates`, and `term_deposit_rates`. Improved product-name matching for bank title suffixes such as `| Scotiabank Canada`, so comparison-table rows can match the actual product name instead of missing because of page-title boilerplate. Added a conservative normalization fallback that replaces generic extracted names such as `Bank Accounts` with a specific discovery `primary_heading` or `page_title` when available.
+- Not done: no historical review task or candidate row was mutated, and no live rerun was executed in this slice. Broad GIC category pages can still remain deferred when the supporting rate table does not identify a product-specific rate.
+- Key files: `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_normalization.py`
+- Decisions: kept the fix generic and conservative. Supporting evidence can fill canonical fee/rate fields only when the matched excerpt still includes target product terms and the required money or percentage value; it does not invent rates from unmatched generic tables.
+- Verification:
+  - `python -m unittest worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_savings_rate_source worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_accepts_generated_savings_rate_table_fields worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_chequing_fee_source worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_title_suffix_and_comparison_rows worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_handles_generated_gic_rate_source worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_accepts_generated_gic_rate_table_fields`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall worker/pipeline/fpds_normalization`
+- Known issues: existing review rows from `run_20260510_052249_*` are pre-fix artifacts and should be deferred rather than approved. Refreshed candidates should be reviewed after restarting/rerunning the worker with this code.
+- Next step: rerun the affected TD, RBC, and Scotiabank collections and approve only refreshed candidates that pass validation with evidence-linked rate/fee fields.
+
 ## 2026-05-09 - Homepage Discovery Detail Promotion Hardening
 
 - WBS: `5.16`, source collection quality hardening

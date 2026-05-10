@@ -3,18 +3,17 @@ import { ClipboardList, ListChecks, CirclePause, TriangleAlert } from "lucide-re
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
+import { ReviewQueueResults } from "@/components/fpds/admin/review-queue-results";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { ProductTypeItem, ReviewQueueResponse } from "@/lib/admin-api";
 import {
   buildAdminHref,
-  formatAdminDateTime,
   translateReviewState,
   translateValidationStatus,
   type AdminLocale,
 } from "@/lib/admin-i18n";
-import { buildAdminProductTypeLabelMap, buildAdminProductTypeOptions, formatAdminProductType } from "@/lib/admin-product-types";
-import { cn } from "@/lib/utils";
+import { buildAdminProductTypeOptions } from "@/lib/admin-product-types";
 
 const REVIEW_STATES = ["queued", "deferred", "approved", "edited", "rejected"] as const;
 const BANK_OPTIONS = ["TD", "RBC", "BMO", "SCOTIA", "CIBC"] as const;
@@ -228,12 +227,12 @@ type ReviewQueueSurfaceProps = {
   filters: ReviewQueuePageFilters;
   locale: AdminLocale;
   productTypes: ProductTypeItem[];
+  csrfToken: string | null | undefined;
 };
 
-export function ReviewQueueSurface({ queue, filters, locale, productTypes }: ReviewQueueSurfaceProps) {
+export function ReviewQueueSurface({ queue, filters, locale, productTypes, csrfToken }: ReviewQueueSurfaceProps) {
   const copy = REVIEW_QUEUE_COPY[locale];
   const productTypeOptions = buildAdminProductTypeOptions(productTypes);
-  const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
   const stateCounts = queue.summary.state_counts;
   const validationCounts = queue.summary.validation_counts;
   const statItems = [
@@ -432,228 +431,9 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes }: Rev
         </form>
       </article>
 
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {copy.pageSummary(queue.page, queue.total_pages, queue.total_items)}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {filters.states.map((state) => (
-              <span className={cn("rounded-full px-3 py-1 text-xs font-medium", stateBadgeClasses(state))} key={state}>
-                {translateReviewState(locale, state)}
-              </span>
-            ))}
-            {filters.bankCode ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {filters.bankCode}
-              </span>
-            ) : null}
-            {filters.productType ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {formatAdminProductType(filters.productType, productTypeLabelMap)}
-              </span>
-            ) : null}
-            {filters.validationStatus ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {translateValidationStatus(locale, filters.validationStatus)}
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        {queue.items.length === 0 ? (
-          <div className="px-6 py-10">
-            <div className="rounded-[1.5rem] border border-dashed border-border bg-background px-6 py-8">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.noMatches}</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-                {copy.emptyTitle}
-              </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                {copy.emptyBody}
-              </p>
-              <div className="mt-6">
-                <Button asChild variant="outline">
-                  <Link href={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)}>{copy.resetQueueFilters}</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[940px] table-fixed border-separate border-spacing-0">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.task}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.product}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.issueSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.confidence}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.validation}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.created}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {queue.items.map((item) => (
-                    <tr className="align-top" key={item.review_task_id}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <Link
-                            className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
-                            href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}
-                          >
-                            {item.review_task_id}
-                          </Link>
-                          <span className="text-xs text-muted-foreground">{copy.candidate} {item.candidate_id}</span>
-                          <Link className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
-                            {copy.run} {item.run_id}
-                          </Link>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <span className="font-medium text-foreground">{item.bank_name}</span>
-                          <span className="text-xs text-muted-foreground">{item.bank_code}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <span className="font-medium text-foreground">{item.product_name}</span>
-                          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                            {formatAdminProductType(item.product_type, productTypeLabelMap)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <p className="text-sm leading-6 text-foreground">{item.issue_summary}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {item.issue_summary_items.slice(0, 2).map((issue) => (
-                              <span
-                                className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", issueBadgeClasses(issue.severity))}
-                                key={`${item.review_task_id}-${issue.code}`}
-                              >
-                                {issue.code}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <span className="text-sm font-medium text-foreground">{formatConfidence(item.source_confidence)}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", validationBadgeClasses(item.validation_status))}>
-                          {formatValidationStatusLabel(locale, item.validation_status)}
-                        </span>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <span className="text-sm text-foreground">{formatAdminDateTime(locale, item.created_at)}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", stateBadgeClasses(item.review_state))}>
-                            {translateReviewState(locale, item.review_state)}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex flex-col gap-3 border-t border-border/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                {copy.showing((queue.page - 1) * queue.page_size + 1, Math.min(queue.page * queue.page_size, queue.total_items), queue.total_items)}
-              </p>
-              <div className="flex items-center gap-2">
-                {queue.page > 1 ? (
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={buildQueueHref(filters, { page: Math.max(1, queue.page - 1) }, locale)}>{copy.previous}</Link>
-                  </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.previous}
-                  </span>
-                )}
-                {queue.has_next_page ? (
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={buildQueueHref(filters, { page: queue.page + 1 }, locale)}>{copy.next}</Link>
-                  </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.next}
-                  </span>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-      </article>
+      <ReviewQueueResults csrfToken={csrfToken} filters={filters} locale={locale} productTypes={productTypes} queue={queue} />
     </section>
   );
-}
-
-function buildQueueHref(
-  filters: ReviewQueuePageFilters,
-  overrides: Partial<ReviewQueuePageFilters>,
-  locale: AdminLocale,
-) {
-  const next = {
-    ...filters,
-    ...overrides,
-  };
-  const params = new URLSearchParams();
-  if (next.q) {
-    params.set("q", next.q);
-  }
-  for (const state of next.states) {
-    params.append("state", state);
-  }
-  if (next.bankCode) {
-    params.set("bank_code", next.bankCode);
-  }
-  if (next.productType) {
-    params.set("product_type", next.productType);
-  }
-  if (next.validationStatus) {
-    params.set("validation_status", next.validationStatus);
-  }
-  if (next.createdFrom) {
-    params.set("created_from", next.createdFrom);
-  }
-  if (next.createdTo) {
-    params.set("created_to", next.createdTo);
-  }
-  if (next.sortBy) {
-    params.set("sort_by", next.sortBy);
-  }
-  if (next.sortOrder) {
-    params.set("sort_order", next.sortOrder);
-  }
-  if (next.page > 1) {
-    params.set("page", String(next.page));
-  }
-
-  return buildAdminHref("/admin/reviews", params, locale);
-}
-
-function formatConfidence(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-  return `${Math.round(value * 100)}%`;
 }
 
 function formatValidationStatusLabel(locale: AdminLocale, value: string) {
@@ -664,47 +444,4 @@ function formatValidationStatusLabel(locale: AdminLocale, value: string) {
     return locale === "ko" ? "검증 경고" : locale === "ja" ? "検証警告" : "Validation Warning";
   }
   return translateValidationStatus(locale, value);
-}
-
-function toTitleCase(value: string) {
-  return value
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function stateBadgeClasses(state: string) {
-  switch (state) {
-    case "queued":
-      return "bg-info-soft text-info";
-    case "deferred":
-      return "bg-warning-soft text-warning";
-    case "approved":
-    case "edited":
-      return "bg-success-soft text-success";
-    case "rejected":
-      return "bg-destructive/10 text-destructive";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-}
-
-function validationBadgeClasses(status: string) {
-  switch (status) {
-    case "error":
-      return "bg-destructive/10 text-destructive";
-    case "warning":
-      return "bg-warning-soft text-warning";
-    case "pass":
-      return "bg-success-soft text-success";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-}
-
-function issueBadgeClasses(severity: string) {
-  if (severity === "error") {
-    return "bg-destructive/10 text-destructive";
-  }
-  return "bg-warning-soft text-warning";
 }

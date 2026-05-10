@@ -216,6 +216,49 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_generic_product_name_uses_specific_discovery_heading(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-product-name-heading")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_savings_detail_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "discovery_metadata": {
+                            "primary_heading": "Scotia U.S. Dollar Daily Interest Account",
+                            "page_title": "Scotia U.S. Dollar Daily Interest Account | Scotiabank Canada",
+                        },
+                    },
+                    "extracted_fields": [
+                        NormalizationExtractedField(**{**field.__dict__, "candidate_value": "Bank Accounts"})
+                        if field.field_name == "product_name"
+                        else field
+                        for field in input_item.extracted_fields
+                    ],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-product-name-heading", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertEqual(candidate["product_name"], "Scotia U.S. Dollar Daily Interest Account")
+            self.assertIn("Replaced generic product_name", " ".join(source_result.runtime_notes))
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_gic_candidate_with_non_redeemable_subtype(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-gic-service")
         try:
@@ -753,6 +796,37 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertTrue(fields_by_name["standard_rate"]["field_metadata"]["generic_supporting_merge"])
 
+    def test_generic_supporting_merge_accepts_generated_savings_rate_table_fields(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "RBC Enhanced Savings account", "string", 0.88),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="account_interest_rates",
+                        anchor_value="savings-rate-table",
+                        excerpt="RBC Enhanced Savings account Interest Rate 1.600%",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-RBOC-SAV-c94424a3cd",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-RBOC-SAV-bec870fffd": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "1.60")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "1.60")
+
     def test_generic_supporting_merge_handles_generated_chequing_fee_source(self) -> None:
         base_artifact = {
             "schema_context": {"product_type": "chequing"},
@@ -784,6 +858,37 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "11.95")
         self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "11.95")
 
+    def test_generic_supporting_merge_handles_title_suffix_and_comparison_rows(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "chequing"},
+            "extracted_fields": [
+                _field_dict("product_name", "Ultimate Package | Scotiabank Canada", "string", 0.88),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="account_comparison_rows",
+                        anchor_value="chequing-account-comparison",
+                        excerpt="Ultimate Package Monthly fee $30.95 Unlimited debit transactions",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-SCOTIABANK-CHE-3540807687",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-SCOTIABANK-CHE-c107b2ea47": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "30.95")
+        self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "30.95")
+
     def test_generic_supporting_merge_handles_generated_gic_rate_source(self) -> None:
         base_artifact = {
             "schema_context": {"product_type": "gic-term-deposit"},
@@ -809,6 +914,39 @@ class SupportingMergeTests(unittest.TestCase):
 
         merged = merge_supporting_artifacts(
             target_source_id="AUTO-TB-GIC-b04a2ca4b2",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-TB-GIC-90ec9211ac": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
+
+    def test_generic_supporting_merge_accepts_generated_gic_rate_table_fields(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic-term-deposit"},
+            "extracted_fields": [
+                _field_dict("product_name", "TD Special Offer GICs", "string", 0.88),
+                _field_dict("minimum_deposit", "1000.00", "decimal", 0.82, evidence_chunk_id="chunk-deposit"),
+                _field_dict("term_length_text", "100 days", "string", 0.82, evidence_chunk_id="chunk-term"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="gic_rates",
+                        anchor_value="gic-rates-canada",
+                        excerpt="TD Special Offer GICs 100 days 3.250%",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-TB-GIC-266530658a",
             base_artifact=base_artifact,
             supporting_artifacts={"AUTO-TB-GIC-90ec9211ac": supporting_artifact},
         )
