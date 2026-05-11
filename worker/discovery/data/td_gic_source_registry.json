@@ -96,6 +96,36 @@
         "minimum_guaranteed_return",
         "maximum_return"
       ]
+    },
+    {
+      "source_id": "TD-GIC-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Cashable GIC detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/cashable-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "rate_structure",
+        "cashability"
+      ]
+    },
+    {
+      "source_id": "TD-GIC-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD U.S. Dollar GICs and Term Deposits detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/us-dollar-and-foreign-currency-term-deposits",
+      "expected_fields": [
+        "product_family",
+        "currency",
+        "term_options",
+        "cashability"
+      ]
     }
   ]
 }

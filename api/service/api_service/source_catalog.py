@@ -65,6 +65,11 @@ _EXCLUDED_LINK_KEYWORDS = (
     "modern_slavery",
     "human_trafficking",
     "slavery",
+    "investor",
+    "investors",
+    "investors-shareholders",
+    "shareholder",
+    "shareholders",
 )
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
 _HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
@@ -117,6 +122,19 @@ _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
         "loans",
     ),
 }
+_REGISTERED_PLAN_WRAPPER_KEYWORDS = (
+    "tax-free-savings",
+    "tax free savings",
+    "tfsa",
+    "rrsp",
+    "resp",
+    "fhsa",
+    "first-home-savings",
+    "first home savings",
+    "registered-retirement",
+    "registered retirement",
+    "registered education",
+)
 _DISCOVERY_STOPWORDS = {
     "account",
     "accounts",
@@ -152,8 +170,12 @@ _DISCOVERY_PROFILE_TERMS = {
     "gic": ("gic", "gics", "term deposit", "guaranteed investment", "maturity", "redeemable", "minimum deposit"),
 }
 _PAGE_EVIDENCE_MINIMUM_SCORE = 4
-_AI_DISCOVERY_MAX_CANDIDATES = 12
-_PAGE_EVIDENCE_MAX_CANDIDATES = 6
+_DISCOVERY_DETAIL_LINK_MAX = 24
+_DISCOVERY_SUPPORTING_LINK_MAX = 8
+_DISCOVERY_PDF_LINK_MAX = 8
+_DISCOVERY_HUB_PAGE_MAX = 5
+_AI_DISCOVERY_MAX_CANDIDATES = 24
+_PAGE_EVIDENCE_MAX_CANDIDATES = 16
 
 
 @dataclass(frozen=True)
@@ -1362,6 +1384,7 @@ def _materialize_sources_for_catalog_item(
                 change_reason = %(change_reason)s
             WHERE bank_code = %(bank_code)s
               AND product_type = ANY(%(product_type_scope)s)
+              AND discovery_role <> 'detail'
               AND status <> 'removed'
             """,
             {
@@ -1637,6 +1660,8 @@ def _generate_sources_from_homepage(
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
         if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
             continue
+        if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
+            continue
         score = _score_product_link(
             product_type=discovery_product_type,
             product_type_definition=product_type_definition,
@@ -1660,7 +1685,12 @@ def _generate_sources_from_homepage(
         if hub_score > 0:
             hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
 
-    seed_entry_url = _load_seed_entry_url(bank_code=bank_code, product_type=discovery_product_type)
+    seed_entry_url = _load_seed_entry_url(
+        bank_code=bank_code,
+        bank_name=bank_name,
+        normalized_homepage_url=normalized_homepage_url,
+        product_type=discovery_product_type,
+    )
     if seed_entry_url is not None:
         seed_score = _score_catalog_hub_link(
             product_type=discovery_product_type,
@@ -1668,10 +1698,10 @@ def _generate_sources_from_homepage(
             normalized_url=seed_entry_url,
             anchor_text="",
         )
-        hub_pages.append((max(seed_score, 1), seed_entry_url, seed_entry_url))
+        hub_pages.append((max(seed_score, 1) + 100, seed_entry_url, seed_entry_url))
 
     unique_hub_pages = _dedupe_page_candidates(hub_pages)
-    for _score, normalized_page_url, resolved_page_url in unique_hub_pages[:3]:
+    for _score, normalized_page_url, resolved_page_url in unique_hub_pages[:_DISCOVERY_HUB_PAGE_MAX]:
         if normalized_page_url == normalized_homepage_url:
             continue
         try:
@@ -1682,6 +1712,8 @@ def _generate_sources_from_homepage(
         for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+                continue
+            if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
                 continue
             score = _score_product_link(
                 product_type=discovery_product_type,
@@ -1698,9 +1730,9 @@ def _generate_sources_from_homepage(
             elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                 supporting_links.append((1, link))
 
-    unique_detail_links = _dedupe_scored_links(detail_links)[:6]
-    unique_supporting_links = _dedupe_scored_links(supporting_links)[:4]
-    unique_pdf_links = _dedupe_scored_links(pdf_links)[:4]
+    unique_detail_links = _dedupe_scored_links(detail_links)[:_DISCOVERY_DETAIL_LINK_MAX]
+    unique_supporting_links = _dedupe_scored_links(supporting_links)[:_DISCOVERY_SUPPORTING_LINK_MAX]
+    unique_pdf_links = _dedupe_scored_links(pdf_links)[:_DISCOVERY_PDF_LINK_MAX]
     seed_detail_hints = _load_seed_detail_hints(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -1714,8 +1746,8 @@ def _generate_sources_from_homepage(
         product_type=discovery_product_type,
     )
     source_rows: list[dict[str, Any]] = []
-    entry_url = unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url
-    entry_raw_url = unique_hub_pages[0][2] if unique_hub_pages else homepage_url
+    entry_url = seed_entry_url or (unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url)
+    entry_raw_url = seed_entry_url or (unique_hub_pages[0][2] if unique_hub_pages else homepage_url)
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
     html_candidates = _build_html_candidates(
@@ -1758,7 +1790,8 @@ def _generate_sources_from_homepage(
     )
     discovery_notes.extend(detail_notes)
 
-    if detail_rows:
+    should_emit_context_rows = bool(detail_rows) or bool(seed_entry_url)
+    if should_emit_context_rows:
         source_rows.append(
             _build_generated_source_row(
                 bank_code=bank_code,
@@ -1776,7 +1809,7 @@ def _generate_sources_from_homepage(
                     "selection_path": "entry_seed",
                     "selection_confidence": "n/a",
                     "selection_reason_codes": ["catalog_entry_context"],
-                    "candidate_origin": "hub_page" if unique_hub_pages else "homepage",
+                    "candidate_origin": "seed_entry_hint" if seed_entry_url else ("hub_page" if unique_hub_pages else "homepage"),
                 },
             )
         )
@@ -1789,7 +1822,7 @@ def _generate_sources_from_homepage(
 
     promoted_detail_urls = {str(item["normalized_url"]) for item in detail_rows}
     promoted_supporting_urls: set[str] = set()
-    if detail_rows:
+    if should_emit_context_rows:
         for hint in seed_supporting_hints:
             normalized_url = normalize_source_url(str(hint["source_url"]))
             if normalized_url in promoted_detail_urls or normalized_url in promoted_supporting_urls:
@@ -2028,11 +2061,24 @@ def _merge_homepage_candidate(by_url: dict[str, HomepageCandidate], candidate: H
     )
 
 
-def _load_seed_entry_url(*, bank_code: str, product_type: str) -> str | None:
+def _load_seed_entry_url(
+    *,
+    bank_code: str,
+    product_type: str,
+    bank_name: str | None = None,
+    normalized_homepage_url: str | None = None,
+) -> str | None:
     product_type = _canonical_product_type_code(product_type)
+    seed_bank_codes = set(
+        _seed_bank_codes_for_scope(
+            bank_code=bank_code,
+            bank_name=bank_name,
+            normalized_homepage_url=normalized_homepage_url,
+        )
+    )
     for item in load_seed_source_registry_rows():
         if (
-            str(item["bank_code"]) == bank_code
+            str(item["bank_code"]) in seed_bank_codes
             and str(item["product_type"]) == product_type
             and str(item["discovery_role"]) == "entry"
         ):
@@ -2679,7 +2725,21 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
             " ".join(page_evidence.page_evidence_reason_codes),
         ]
     ).lower()
-    return any(term in fingerprint for term in ("search tool", "compare", "comparison", "calculator", "selector", "login", "sign in"))
+    return any(
+        term in fingerprint
+        for term in (
+            "search tool",
+            "compare",
+            "comparison",
+            "calculator",
+            "selector",
+            "login",
+            "sign in",
+            "registered_plan_wrapper",
+            "other_product_type",
+            "non_product_or_investor_page",
+        )
+    )
 
 
 def _coerce_reason_codes(values: list[str]) -> list[str]:
@@ -2720,6 +2780,10 @@ def _score_page_evidence(
     body_match = _term_hits(body_text, semantic_terms)
     attribute_hits = _term_hits(body_text, attribute_terms) + _term_hits(heading_text, attribute_terms)
     negative_hits = _negative_term_hits(" ".join([title_text, heading_text, body_text]))
+    scope_exclusion_reason = _source_scope_exclusion_reason(
+        product_type=product_type,
+        fingerprint=" ".join([raw_url, title_text, primary_heading]).lower(),
+    )
 
     score = 0
     reason_codes: list[str] = []
@@ -2740,6 +2804,11 @@ def _score_page_evidence(
         reason_codes.append("pricing_or_feature_signal")
     if negative_hits:
         score -= min(4, negative_hits * 2)
+        reason_codes.append("insufficient_evidence")
+    if scope_exclusion_reason:
+        score -= 6
+        negative_hits += 2
+        reason_codes.append(scope_exclusion_reason)
         reason_codes.append("insufficient_evidence")
     if not title_match and not primary_heading_match and not body_match and attribute_hits == 0:
         reason_codes.append("insufficient_evidence")
@@ -2850,6 +2919,8 @@ def _score_catalog_hub_link(
     anchor_text: str,
 ) -> int:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint):
+        return -8
     score = _score_product_link(
         product_type=product_type,
         product_type_definition=product_type_definition,
@@ -2955,6 +3026,8 @@ def _score_product_link(
     anchor_text: str,
 ) -> int:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint):
+        return -8
     score = 0
     for keyword in _product_type_keywords(product_type_definition):
         if keyword in fingerprint:
@@ -3020,6 +3093,8 @@ def _link_is_relevant_supporting_source(
     signal_product_type = discovery_product_type or product_type
     if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
         return False
+    if _source_scope_exclusion_reason(product_type=signal_product_type, fingerprint=fingerprint):
+        return False
     if _has_unrelated_product_type_signal(product_type=signal_product_type, fingerprint=fingerprint):
         return False
     has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
@@ -3039,6 +3114,16 @@ def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -
         return False
     product_terms = _product_type_keywords({"product_type_code": product_type, "display_name": product_type, "discovery_keywords": [product_type]})
     return not any(term and term in fingerprint for term in product_terms)
+
+
+def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> str | None:
+    if any(keyword in fingerprint for keyword in ("investor", "investors", "shareholder", "shareholders")):
+        return "non_product_or_investor_page"
+    if any(keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS):
+        return "registered_plan_wrapper"
+    if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+        return "other_product_type"
+    return None
 
 
 def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str) -> str:

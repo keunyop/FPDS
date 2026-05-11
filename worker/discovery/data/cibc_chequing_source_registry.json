@@ -55,6 +55,96 @@
       ]
     },
     {
+      "source_id": "CIBC-CHQ-006",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart for Students detail source",
+      "url": "https://www.cibc.com/en/student/bank-accounts.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "student_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
+      "source_id": "CIBC-CHQ-007",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Account for Apprentices detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/skilled-trades/smart-account-apprentices.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "apprentice_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
+      "source_id": "CIBC-CHQ-008",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Account for Newcomers detail source",
+      "url": "https://www.cibc.com/en/journeys/banking-offers-for-newcomers/smart-account-for-newcomers.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "newcomer_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
+      "source_id": "CIBC-CHQ-009",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Account for Foreign Workers detail source",
+      "url": "https://www.cibc.com/en/journeys/banking-offers-for-newcomers/banking-for-foreign-workers.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "foreign_worker_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
+      "source_id": "CIBC-CHQ-010",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC Smart Start youth chequing detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts/smart-start.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "age_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
+      "source_id": "CIBC-CHQ-011",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "CIBC seniors banking chequing detail source",
+      "url": "https://www.cibc.com/en/personal-banking/bank-accounts/senior-banking-offers.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "senior_eligibility",
+        "included_transactions"
+      ]
+    },
+    {
       "source_id": "CIBC-CHQ-004",
       "priority": "P0",
       "seed_source_flag": true,

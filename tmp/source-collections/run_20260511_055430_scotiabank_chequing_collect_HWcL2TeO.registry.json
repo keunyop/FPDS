@@ -1,0 +1,598 @@
+{
+  "registry_version": "2026-05-11",
+  "bank_code": "SCOTIABANK",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+  "sources": [
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-02d7bc28a4",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct official chequing account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-bank-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "eligibility_fee_waivers"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Basic Bank Account | Scotiabank Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Basic Bank Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.97,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct official chequing account detail page.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-3540807687",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct official chequing account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/ultimate-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Ultimate Package | Scotiabank Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Ultimate Package",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct official chequing account detail page.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-42deb5bffb",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct official chequing account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/basic-plus.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "interac_etransfer_support"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Basic Plus Bank Account | Scotiabank Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Basic Plus Bank Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.97,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct official chequing account detail page.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-61896abb03",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct official chequing account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-package.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "savings_rate_boost"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Preferred Package | Scotiabank Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Preferred Package",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct official chequing account detail page.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-c107b2ea47",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank chequing comparison page",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/chequing-accounts-and-packages-comparison.html",
+      "expected_fields": [
+        "account_comparison_rows",
+        "monthly_fee",
+        "included_transactions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-277991c612",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct official chequing account detail page for a specific product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-student-youth-bank-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "student_youth_eligibility",
+        "included_transactions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Preferred package for students and youth | Scotiabank Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Preferred Package for Students and Youth",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct official chequing account detail page for a specific product.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "official_domain",
+          "chequing_path",
+          "product_specific_slug",
+          "account_offering",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-0f3ae09d96",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/account-services.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-86b2e0eae1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/account-services/direct-deposit.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-c8bc6fc327",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Chequing",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/changes-to-account-services.html?cid=S1eACT0220-001",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-CHE-8e76f45f3f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Chequing",
+      "url": "https://www.scotiabank.com/content/dam/scotiabank/canada/en/documents/chequing-&-savings/day-to-day_banking_companion_booklet.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

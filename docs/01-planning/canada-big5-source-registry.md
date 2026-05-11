@@ -150,3 +150,4 @@ WBS `5.1` verification requires:
 | Date | Change |
 |---|---|
 | 2026-04-13 | Initial Canada Big 5 source registry baseline added for WBS 5.1 |
+| 2026-05-11 | Expanded official product-list seed detail coverage for public personal deposit variants found during Big 5 source-catalog recollection: CIBC chequing segment pages, RBC U.S./foreign-currency/youth/NOMI savings and U.S. personal account, Scotiabank student/youth chequing, Savings Accelerator, Euro Savings, and Personal Redeemable GIC, plus TD Student Chequing, Cashable GIC, and U.S. Dollar GICs. Registered-plan wrappers remain excluded. |

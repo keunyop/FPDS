@@ -62,6 +62,27 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-11 - Big 5 Source Catalog Entry Repair And Official-List Recollect
+
+- WBS: `5.1`, `5.16`, source registry quality hardening
+- Status: `done`
+- Goal: remove wrong generated entry rows, recollect from official bank product-list URLs, and make future collection less likely to promote homepage, investor, wrong-product, or registered-wrapper pages as source rows.
+- Why now: the bank-list bulk collect produced active entry rows pointing at BMO chequing, CIBC savings/TFSA, RBC homepage, and Scotiabank investor pages for unrelated product scopes.
+- Outcome: soft-removed the 9 bad generated entry rows, forced known Big 5 seed entry URLs to win over homepage-discovered hubs, added scope exclusions for investor/shareholder pages, wrong product-type URLs, and registered-plan wrappers, and changed catalog collection scope merging so generated rows are collected together with existing active detail rows instead of dropping prior good detail coverage. Recollected the affected bank/product scopes using official product-list entry URLs. Active detail coverage now includes the additional official-list variants for CIBC chequing, RBC chequing/savings, Scotiabank chequing/savings/GIC, and TD chequing/GIC.
+- Not done: BMO and RBC GIC remain family/rates-page driven where the bank publishes much of the lineup as family/rate tables rather than stable standalone product-detail pages. That is consistent with the existing WBS 5.1 cutline but should be revisited when GIC parser expansion needs per-variant extraction.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/source_catalog_collection_runner.py`, `worker/discovery/data/*_source_registry.json`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_source_catalog_collection_runner.py`, `worker/discovery/tests/test_registry_catalog.py`
+- Decisions: kept registered-plan wrappers such as TFSA/RRSP/RESP/FHSA out of the active seed registry, but included official personal deposit variants such as youth/student, newcomer, foreign-currency, redeemable GIC, cashable GIC, and USD GIC pages when they are public product-list items.
+- Verification:
+  - `$env:PYTHONPATH='api/service'; python -m unittest api.service.tests.test_source_catalog api.service.tests.test_source_catalog_collection_runner worker.discovery.tests.test_registry_catalog`
+  - live recollect `collection_2eO6V_4jkQw_h676`: 8 affected runs completed, `partial_completion_flag=false`, `source_failure_count=0`
+  - live recollect `collection_lx25TX-4Pezfoo3S`: BMO GIC completed, `partial_completion_flag=false`, restored the 15th active official entry row
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+  - `$env:PYTHONPATH='api/service'; api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `python -m compileall api/service/api_service/source_catalog.py api/service/api_service/source_catalog_collection_runner.py`
+  - `git diff --check`
+- Known issues: several refreshed candidates still route to review because extraction/validation is stricter than source discovery, especially broad savings and GIC pages. That is candidate-quality review work, not source-row incompleteness.
+- Next step: use the admin Review Queue to evaluate refreshed candidates before approving public data.
+
 ## 2026-05-10 - Review Queue Bulk Decision Controls
 
 - WBS: `4.2`, `4.3`, admin review workflow hardening

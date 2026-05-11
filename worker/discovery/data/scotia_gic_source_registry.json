@@ -67,6 +67,21 @@
         "minimum_guaranteed_return",
         "maximum_return"
       ]
+    },
+    {
+      "source_id": "SCOTIA-GIC-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank personal redeemable GIC detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/personal-redeemable-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "cashability",
+        "early_redemption_rules"
+      ]
     }
   ]
 }

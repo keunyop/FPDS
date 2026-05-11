@@ -97,6 +97,21 @@
         "no_interest_accounts",
         "rate_effective_date"
       ]
+    },
+    {
+      "source_id": "RBC-CHQ-007",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC U.S. Personal Banking detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/us-personal-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "included_transactions"
+      ]
     }
   ]
 }

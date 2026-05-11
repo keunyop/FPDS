@@ -1,0 +1,390 @@
+{
+  "registry_version": "2026-05-11",
+  "bank_code": "SCOTIABANK",
+  "country_code": "CA",
+  "product_type": "gic-term-deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "AUTO-SCOTIABANK-GIC-35d7475fda",
+  "sources": [
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-35d7475fda",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names non-redeemable GICs and is the most likely official product detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/non-redeemable-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "cashability",
+        "interest_payment_options"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Non-Redeemable GICs - Get benefits from a fixed interest rate | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "official_bank_domain",
+          "contains_gic_keyword",
+          "likely_product_detail_page"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Non-Redeemable GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names non-redeemable GICs and is the most likely official product detail page.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 6,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "official_bank_domain",
+          "contains_gic_keyword",
+          "likely_product_detail_page",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-d2f1c9bd89",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "A specific GIC variant page; likely relevant as a product detail page even if market-linked rather than standard fixed-rate.",
+      "url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates/market-linked-gics.html",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotiabank Market Linked GICs: Reasons to choose one | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "gic_keyword",
+          "official_bank_domain",
+          "product_variant",
+          "likely_detail_page"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Scotiabank Market Linked GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.87,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A specific GIC variant page; likely relevant as a product detail page even if market-linked rather than standard fixed-rate.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "selection_reason_codes": [
+          "gic_keyword",
+          "official_bank_domain",
+          "product_variant",
+          "likely_detail_page",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-707674760e",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank GIC rates reference page",
+      "url": "https://www.scotiabank.com/ca/en/personal/rates-prices/gic-rates.html",
+      "expected_fields": [
+        "redeemable_gic_rates",
+        "non_redeemable_gic_rates",
+        "market_linked_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-22dee5852c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC / Term Deposit",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/tips-to-reduce-banking-fees.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-290fe9b4c2",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC / Term Deposit",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/account-services.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-72087a1972",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC / Term Deposit",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/account-services/overdraft-protection.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-GIC-8260c1f928",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC / Term Deposit",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/fees.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

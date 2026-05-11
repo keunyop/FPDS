@@ -97,6 +97,36 @@
         "rate_effective_date",
         "tier_rules"
       ]
+    },
+    {
+      "source_id": "SCOTIA-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Savings Accelerator Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/savings-accelerator-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "registered_plan_eligibility"
+      ]
+    },
+    {
+      "source_id": "SCOTIA-SAV-008",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Euro Savings Account detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/euro-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ]
     }
   ]
 }

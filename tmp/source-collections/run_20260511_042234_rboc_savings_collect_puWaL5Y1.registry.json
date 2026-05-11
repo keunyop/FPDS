@@ -1,0 +1,419 @@
+{
+  "registry_version": "2026-05-11",
+  "bank_code": "RBOC",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.rbcroyalbank.com"
+  ],
+  "entry_source_id": "AUTO-RBOC-SAV-a3f5145050",
+  "sources": [
+    {
+      "source_id": "AUTO-RBOC-SAV-a3f5145050",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Looks like a direct official detail page for a savings product.",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "High Interest Savings Account - Earn More with RBC HISA | RBC Royal Bank of Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "official_domain",
+          "product_detail_path",
+          "savings_keyword_match"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "High Interest Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.8,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Looks like a direct official detail page for a savings product.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "official_domain",
+          "product_detail_path",
+          "savings_keyword_match",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-c94424a3cd",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Likely a direct savings account detail page.",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/enhanced-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "tiered_interest_rules",
+        "transaction_limit"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "RBC Enhanced Savings Account: Tiered Interest Rates for Higher Balances | RBC Royal Bank of Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_detail_path",
+          "official_domain",
+          "savings_keyword_match"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "RBC Enhanced Savings account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.2,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely a direct savings account detail page.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "product_detail_path",
+          "official_domain",
+          "savings_keyword_match",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-e44f0b6b7e",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct detail page for a personal savings account.",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/day-to-day-savings.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "transaction_limit"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open an RBC Day to Day Savings Account & Earn Interest on Your Savings | RBC Royal Bank of Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "official_domain",
+          "product_detail_path",
+          "savings_keyword_match"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "RBC Day to Day Savings account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.4,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct detail page for a personal savings account.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "official_domain",
+          "product_detail_path",
+          "savings_keyword_match",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-905d359901",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC savings fees and options page",
+      "url": "https://www.rbcroyalbank.com/onlinebanking/servicech/disclosures/part2K.html",
+      "expected_fields": [
+        "transaction_fee",
+        "atm_fee_summary",
+        "statement_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-bec870fffd",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC personal account rates and interest support page",
+      "url": "https://www.rbcroyalbank.com/rates/persacct.html",
+      "expected_fields": [
+        "account_interest_rates",
+        "rate_effective_date",
+        "savings_rate_table"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-1735888a29",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Appears to reference a high-interest savings product detail page, though under an investments path.",
+      "url": "https://www.rbcroyalbank.com/investments/psi/hisa.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Special Rate on an RBC High Interest eSavings Account",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "savings_product_reference",
+          "likely_detail_page",
+          "official_domain"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Earn 4.60% interest for 3 Months Disclaimer 1 , Disclaimer 2",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.9,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Appears to reference a high-interest savings product detail page, though under an investments path.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 10,
+        "selection_reason_codes": [
+          "savings_product_reference",
+          "likely_detail_page",
+          "official_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBOC-SAV-17c01f5068",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/value-program.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

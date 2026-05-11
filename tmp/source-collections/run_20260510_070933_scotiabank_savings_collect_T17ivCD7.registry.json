@@ -1,0 +1,339 @@
+{
+  "registry_version": "2026-05-10",
+  "bank_code": "SCOTIABANK",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.scotiabank.com"
+  ],
+  "entry_source_id": "AUTO-SCOTIABANK-SAV-008aef175c",
+  "sources": [
+    {
+      "source_id": "AUTO-SCOTIABANK-SAV-008aef175c",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Strong match for a personal savings account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/scotia-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "eligibility_conditions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotia High Interest Savings Account | Scotiabank Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 10,
+        "primary_heading": "Scotia High Interest Savings Account Scotia High Interest Savings Account?",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Strong match for a personal savings account detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 8,
+        "selection_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-SAV-33241f1d80",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Likely a canonical savings account detail page with interest-bearing features.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/momentum-plus-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "bonus_interest_rules",
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "MomentumPLUS Savings Account | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab Previous Next Previous Next",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Momentum PLUS Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.97,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely a canonical savings account detail page with interest-bearing features.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 13,
+        "selection_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-SAV-aa3aa3fe2c",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Likely a personal savings account detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/money-master-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "smart_savings_tools",
+        "monthly_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Money Master Savings Account | Scotiabank Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Money Master Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.96,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely a personal savings account detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
+        "selection_reason_codes": [
+          "contains_savings_keyword",
+          "product_detail_slug",
+          "deposit_account_likely",
+          "official_bank_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-SAV-1ff8d90e1b",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Scotiabank savings account rates page",
+      "url": "https://www.scotiabank.com/ca/en/personal/rates-prices/savings-account-rates.html",
+      "expected_fields": [
+        "savings_account_rates",
+        "rate_effective_date",
+        "tier_rules"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIABANK-SAV-ae84524af8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official deposit account page, but it is currency-specific rather than a standard CAD savings product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts/us-dollar-interest-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotia U.S. Dollar Daily Interest Account | Scotiabank Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "deposit_account_likely",
+          "interest_account_keyword",
+          "official_bank_domain",
+          "currency_specific"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Scotia U.S. Dollar Daily Interest Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.78,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Official deposit account page, but it is currency-specific rather than a standard CAD savings product.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "selection_reason_codes": [
+          "deposit_account_likely",
+          "interest_account_keyword",
+          "official_bank_domain",
+          "currency_specific",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

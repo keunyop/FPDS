@@ -97,6 +97,21 @@
         "atm_fee_summary",
         "chequing_fee_table"
       ]
+    },
+    {
+      "source_id": "TD-CHQ-007",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "TD Student Chequing detail source",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/student-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "student_youth_eligibility",
+        "included_transactions"
+      ]
     }
   ]
 }

@@ -109,17 +109,24 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             for item in generated_rows
             if str(item["discovery_role"]) == "detail" and str(item["status"]) != "removed"
         ]
-        if target_source_ids:
+        generated_target_source_ids = list(target_source_ids)
+        active_scope = _load_active_collection_scope(
+            connection,
+            bank_code=str(group["bank_code"]),
+            product_type=str(group["product_type"]),
+        )
+        collection_source_ids = _dedupe_preserve_order(
+            [*collection_source_ids, *active_scope["collection_source_ids"]]
+        )
+        target_source_ids = _dedupe_preserve_order(
+            [*target_source_ids, *active_scope["target_source_ids"]]
+        )
+        if generated_target_source_ids:
             discovery_status = "detail_sources_ready"
         else:
-            preserved_scope = _load_active_collection_scope(
-                connection,
-                bank_code=str(group["bank_code"]),
-                product_type=str(group["product_type"]),
-            )
-            if preserved_scope["target_source_ids"]:
-                collection_source_ids = preserved_scope["collection_source_ids"]
-                target_source_ids = preserved_scope["target_source_ids"]
+            if active_scope["target_source_ids"]:
+                collection_source_ids = active_scope["collection_source_ids"]
+                target_source_ids = active_scope["target_source_ids"]
                 discovery_status = "preserved_existing_detail_scope"
             else:
                 discovery_status = "no_detail_sources_discovered"
@@ -238,6 +245,17 @@ def _no_detail_sources_summary(discovery_notes: list[str]) -> str:
     if not notable_notes:
         return base
     return f"{base} {notable_notes[0]}"
+
+
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        deduped.append(value)
+    return deduped
 
 
 def _run_group_with_empty_collection_scope(group: dict[str, Any]) -> dict[str, Any]:

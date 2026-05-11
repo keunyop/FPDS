@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection__egARhav5p_l7Y2Y",
+  "correlation_id": "corr_1FmAom2gbeg9ymQ4",
+  "request_id": "req_a8d59ac8dea447dda565ac7413948b0e",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260510_070933_rboc_gic-term-deposit_collect_noYGjOvn",
+      "catalog_item_id": "catalog-ca-rboc-gic-term-deposit-_IUc4aMx",
+      "bank_code": "RBOC",
+      "bank_name": "Royal Bank of Canada",
+      "country_code": "CA",
+      "product_type": "gic-term-deposit",
+      "source_catalog_product_type": "gic-term-deposit",
+      "source_language": "en",
+      "homepage_url": "https://www.rbcroyalbank.com/",
+      "normalized_homepage_url": "https://www.rbcroyalbank.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

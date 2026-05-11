@@ -96,6 +96,96 @@
         "atm_fee_summary",
         "statement_fee"
       ]
+    },
+    {
+      "source_id": "RBC-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC NOMI Find & Save detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/nomi-find-and-save.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "interest_rate_summary",
+        "automatic_savings_rules"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Leo's Young Savers Account detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/youth-student-banking/leo-young-savers-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "age_eligibility",
+        "transaction_limit"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-009",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC U.S. High Interest eSavings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/us-high-interest-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-010",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Euro eSavings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/euro-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-011",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC British Pound eSavings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/british-pound-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ]
+    },
+    {
+      "source_id": "RBC-SAV-012",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "RBC Hong Kong Dollar eSavings detail source",
+      "url": "https://www.rbcroyalbank.com/bank-accounts/hong-kong-dollar-savings-account.html",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "interest_rate_summary"
+      ]
     }
   ]
 }

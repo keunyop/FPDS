@@ -328,6 +328,75 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         self.assertEqual(insert_run.call_count, 2)
         run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
 
+    def test_run_group_merges_generated_rows_with_existing_active_detail_scope(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-001",
+            "correlation_id": "corr-001",
+            "request_id": "req-001",
+            "actor": {"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-001",
+            "catalog_item_id": "catalog-ca-cibc-gic-term-deposit",
+            "bank_code": "CIBC",
+            "bank_name": "CIBC",
+            "country_code": "CA",
+            "product_type": "gic-term-deposit",
+            "source_language": "en",
+            "homepage_url": "https://www.cibc.com/",
+            "normalized_homepage_url": "https://www.cibc.com/",
+        }
+        prepared_plan = {
+            "collection_id": "collection-001",
+            "correlation_id": "corr-001",
+            "request_id": "req-001",
+            "triggered_by": "admin@example.com",
+            "groups": [{"run_id": "run-001"}],
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch(
+                "api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item",
+                return_value=CatalogItemMaterializationResult(
+                    generated_rows=[
+                        {"source_id": "AUTO-CIBC-GIC-new", "discovery_role": "detail", "status": "active"},
+                        {"source_id": "AUTO-CIBC-GIC-support", "discovery_role": "supporting_html", "status": "active"},
+                    ],
+                    discovery_notes=[],
+                    detail_source_ids=["AUTO-CIBC-GIC-new"],
+                ),
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner._load_active_collection_scope",
+                return_value={
+                    "collection_source_ids": ["CIBC-GIC-002", "CIBC-GIC-003", "CIBC-GIC-004"],
+                    "target_source_ids": ["CIBC-GIC-002", "CIBC-GIC-003"],
+                },
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner.prepare_source_collection",
+                return_value={
+                    "collection_id": "collection-001",
+                    "correlation_id": "corr-001",
+                    "plan": prepared_plan,
+                },
+            ) as prepare_collection,
+            patch("api_service.source_catalog_collection_runner._insert_collection_run_row"),
+            patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group") as run_group,
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        prepare_collection.assert_called_once()
+        self.assertEqual(
+            prepare_collection.call_args.kwargs["source_ids"],
+            ["AUTO-CIBC-GIC-new", "AUTO-CIBC-GIC-support", "CIBC-GIC-002", "CIBC-GIC-003", "CIBC-GIC-004"],
+        )
+        run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
+
 
 if __name__ == "__main__":
     unittest.main()

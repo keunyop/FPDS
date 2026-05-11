@@ -97,6 +97,21 @@
         "monthly_fee",
         "included_transactions"
       ]
+    },
+    {
+      "source_id": "SCOTIA-CHQ-007",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Scotiabank Preferred Package for Students and Youth detail source",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-accounts/chequing-accounts/preferred-student-youth-bank-account.html",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "student_youth_eligibility",
+        "included_transactions"
+      ]
     }
   ]
 }

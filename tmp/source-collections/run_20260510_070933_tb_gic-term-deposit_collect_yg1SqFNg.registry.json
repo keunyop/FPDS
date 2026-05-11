@@ -1,0 +1,315 @@
+{
+  "registry_version": "2026-05-10",
+  "bank_code": "TB",
+  "country_code": "CA",
+  "product_type": "gic-term-deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "AUTO-TB-GIC-266530658a",
+  "sources": [
+    {
+      "source_id": "AUTO-TB-GIC-266530658a",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Likely a GIC promotional or special-rate detail page.",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/special-offer",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "rate_structure",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Investing in TD Special Offer GICs | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_gic_keyword",
+          "official_bank_domain",
+          "likely_rate_promo_content"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Invest in TD Special Offer GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.93,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Likely a GIC promotional or special-rate detail page.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "selection_reason_codes": [
+          "contains_gic_keyword",
+          "official_bank_domain",
+          "likely_rate_promo_content",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TB-GIC-987fcaafe8",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct product page for a GIC variant, likely containing core terms and features.",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Investing in Market Growth GICs | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_gic_keyword",
+          "specific_product_variant",
+          "official_bank_domain",
+          "matches_discovery_product_type"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Market Growth GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.97,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct product page for a GIC variant, likely containing core terms and features.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "selection_reason_codes": [
+          "contains_gic_keyword",
+          "specific_product_variant",
+          "official_bank_domain",
+          "matches_discovery_product_type",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TB-GIC-b04a2ca4b2",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Clear official detail page for a specific GIC variant.",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/non-cashable-gic",
+      "expected_fields": [
+        "product_family",
+        "term_options",
+        "interest_payment_options",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Investing in Non-Cashable GICs | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_gic_keyword",
+          "specific_product_variant",
+          "official_bank_domain",
+          "matches_discovery_product_type"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Invest in Non-Cashable GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clear official detail page for a specific GIC variant.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "selection_reason_codes": [
+          "contains_gic_keyword",
+          "specific_product_variant",
+          "official_bank_domain",
+          "matches_discovery_product_type",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TB-GIC-7b9f6da8a4",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD Market Growth GIC rates page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic-rates",
+      "expected_fields": [
+        "product_variants",
+        "minimum_guaranteed_return",
+        "maximum_return"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TB-GIC-90ec9211ac",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD GIC rates reference page",
+      "url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/gic-rates-canada",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_cashable_gic_rates",
+        "market_growth_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC / Term Deposit",
+      "product_type_description": "A deposit product where money is placed for a fixed term at a guaranteed interest rate. It usually offers higher interest than regular savings accounts, but funds may be locked in until maturity.",
+      "discovery_keywords": [
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "redeemable gic",
+        "non-redeemable gic",
+        "fixed term deposit",
+        "fixed-rate gic",
+        "cashable gic",
+        "laddered gic",
+        "short-term gic",
+        "long-term gic",
+        "interest rates"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    }
+  ]
+}

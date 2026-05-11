@@ -661,6 +661,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(len(connection.calls), 1)
         sql, params = connection.calls[0]
         self.assertIn("UPDATE source_registry_item", sql)
+        self.assertIn("discovery_role <> 'detail'", sql)
         self.assertIn("status <> 'removed'", sql)
         self.assertEqual(params["bank_code"], "BMO")
         self.assertIn("chequing", params["product_type_scope"])
@@ -1793,6 +1794,197 @@ class SourceCatalogTests(unittest.TestCase):
         )
         terms_row = next(item for item in result.rows if item["source_id"] == "BMO-CHQ-007")
         self.assertEqual(terms_row["source_name"], "BMO bank account terms and conditions")
+
+    def test_generate_sources_from_homepage_uses_seed_entry_url_for_known_bank_aliases(self) -> None:
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["title_semantic_match", "pricing_or_feature_signal"],
+            page_title="Scotiabank Savings Account",
+            primary_heading="Scotiabank Savings Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="SCOTIABANK",
+                bank_name="Scotiabank",
+                country_code="CA",
+                product_type="savings",
+                product_type_definition={
+                    **_product_type_definition("savings"),
+                    "description": "Savings account with interest rates, balances, withdrawals, and tiering.",
+                    "discovery_keywords": ["savings", "interest rate", "balance"],
+                    "expected_fields": ["product_name", "interest_rate_summary", "monthly_fee"],
+                },
+                homepage_url="https://www.scotiabank.com/",
+                source_language="en",
+            )
+
+        entry_row = next(item for item in result.rows if item["discovery_role"] == "entry")
+        self.assertEqual(
+            entry_row["normalized_url"],
+            "https://www.scotiabank.com/ca/en/personal/bank-accounts/savings-accounts.html",
+        )
+        self.assertEqual(entry_row["discovery_metadata"]["candidate_origin"], "seed_entry_hint")
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertGreaterEqual(len(detail_rows), 1)
+        self.assertTrue(all(str(item["source_id"]).startswith("AUTO-SCOTIABANK-SAV-") for item in detail_rows))
+
+    def test_generate_sources_from_homepage_keeps_seed_entry_when_detail_validation_fails(self) -> None:
+        weak_detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=0,
+            page_evidence_reason_codes=["insufficient_evidence"],
+            page_title="Search Tool",
+            primary_heading="Search Tool",
+            heading_match=False,
+            attribute_signal_count=0,
+            negative_signal_count=1,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores={}, notes=["AI unavailable"]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=weak_detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BMO",
+                bank_name="BMO",
+                country_code="CA",
+                product_type="gic-term-deposit",
+                product_type_definition={
+                    **_product_type_definition("gic-term-deposit"),
+                    "description": "Guaranteed investment certificate and term deposit product type",
+                    "discovery_keywords": ["gic", "term deposit", "guaranteed investment certificate"],
+                    "expected_fields": ["product_name", "term_options", "interest_rate_summary"],
+                },
+                homepage_url="https://www.bmo.com/",
+                source_language="en",
+            )
+
+        entry_rows = [item for item in result.rows if item["discovery_role"] == "entry"]
+        self.assertEqual(len(entry_rows), 1)
+        self.assertEqual(entry_rows[0]["normalized_url"], "https://www.bmo.com/en-ca/main/personal/investments/gic")
+        self.assertIn("BMO-GIC-002", {str(item["source_id"]) for item in result.rows})
+        self.assertNotIn("BMO-GIC-003", {str(item["source_id"]) for item in result.rows})
+
+    def test_out_of_scope_product_urls_are_not_promoted_as_detail_sources(self) -> None:
+        cases = [
+            {
+                "product_type": "gic",
+                "candidate_url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/air-miles",
+                "title": "BMO AIR MILES Chequing Account",
+                "heading": "BMO AIR MILES Chequing Account",
+                "body": "Monthly fee and included transactions for a chequing account.",
+                "reason_code": "other_product_type",
+            },
+            {
+                "product_type": "gic",
+                "candidate_url": "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts.html",
+                "title": "CIBC Savings Accounts",
+                "heading": "Savings Accounts",
+                "body": "Earn interest on your savings balance.",
+                "reason_code": "other_product_type",
+            },
+            {
+                "product_type": "savings",
+                "candidate_url": "https://www.cibc.com/en/personal-banking/investments/tax-free-savings-accounts.html",
+                "title": "Tax-Free Savings Account",
+                "heading": "Tax-Free Savings Account",
+                "body": "TFSA registered plan information and contribution details.",
+                "reason_code": "registered_plan_wrapper",
+            },
+            {
+                "product_type": "chequing",
+                "candidate_url": "https://www.scotiabank.com/ca/en/about/investors-shareholders.html",
+                "title": "Investors and Shareholders",
+                "heading": "Investors and Shareholders",
+                "body": "Investor relations and shareholder information.",
+                "reason_code": "non_product_or_investor_page",
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(case=case["candidate_url"]):
+                candidate = HomepageCandidate(
+                    normalized_url=case["candidate_url"],
+                    raw_url=case["candidate_url"],
+                    anchor_text=str(case["heading"]),
+                    source_type="html",
+                    origin="homepage_or_hub_link",
+                    heuristic_score=8,
+                    supporting_signal=False,
+                    seed_source_id=None,
+                    source_name_hint=None,
+                    priority_hint=None,
+                    expected_fields_hint=[],
+                )
+                ai_scores = {
+                    case["candidate_url"]: AiParallelCandidateScore(
+                        candidate_url=case["candidate_url"],
+                        predicted_role="detail",
+                        relevance_score=9.0,
+                        confidence_band="high",
+                        reason_codes=["product_type_semantic_match"],
+                        short_rationale="The scorer thought this was a detail page.",
+                    )
+                }
+                html = f"""
+                <html>
+                  <head><title>{case['title']}</title></head>
+                  <body>
+                    <h1>{case['heading']}</h1>
+                    <p>{case['body']}</p>
+                  </body>
+                </html>
+                """
+
+                with patch("api_service.source_catalog.fetch_text", return_value=html):
+                    rows, notes = _promote_detail_candidates(
+                        bank_code="TEST",
+                        bank_name="Test Bank",
+                        country_code="CA",
+                        product_type=str(case["product_type"]),
+                        discovery_product_type=str(case["product_type"]),
+                        product_type_definition={
+                            **_product_type_definition(str(case["product_type"])),
+                            "description": "Canadian personal deposit product with rates, fees, term, balance, or transaction details.",
+                            "discovery_keywords": [str(case["product_type"])],
+                        },
+                        source_language="en",
+                        fetch_policy=SimpleNamespace(),
+                        candidates=[candidate],
+                        ai_scores=ai_scores,
+                    )
+
+                self.assertEqual(rows, [])
+                self.assertIn("rejected all tentative detail pages", " ".join(notes))
+
+                with patch("api_service.source_catalog.fetch_text", return_value=html):
+                    evidence = _score_page_evidence(
+                        raw_url=case["candidate_url"],
+                        fetch_policy=SimpleNamespace(),
+                        product_type=str(case["product_type"]),
+                        product_type_definition={
+                            **_product_type_definition(str(case["product_type"])),
+                            "description": "Canadian personal deposit product with rates, fees, term, balance, or transaction details.",
+                            "discovery_keywords": [str(case["product_type"])],
+                        },
+                    )
+                self.assertIn(case["reason_code"], evidence.page_evidence_reason_codes)
 
     def test_upsert_source_registry_rows_targets_unique_scope_and_returns_persisted_rows(self) -> None:
         connection = _QueuedConnection(
