@@ -62,6 +62,27 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-12 - Review Queue Triage And Detail Decision Simplification
+
+- WBS: `4.2`, `4.3`, `4.4`, admin review workflow hardening
+- Status: `done`
+- Goal: clear queued review tasks and make Review Detail easier for an operator to approve, reject, defer, or edit values.
+- Why now: source collection successfully routed uncertain candidates into review, but the queued workload had grown and the detail page exposed too much trace/model metadata before the actual decision fields.
+- Outcome: triaged all 52 queued tasks through the existing review decision service path: 2 latest validation-pass Scotiabank GIC candidates were approved, 31 candidates with unresolved validation or domain-review concerns were deferred, and 19 older duplicate artifacts were rejected as superseded by newer same-source candidates. Approval side effects queued and completed 2 aggregate refresh requests. Review Detail now starts with an agent recommendation, decision facts, origin source link, issue summary, editable reviewed values next to agent-proposed values, add-missing-field correction, and diff preview; evidence trace, model runs, decision history, and canonical context moved into collapsed diagnostic sections.
+- Not done: no backend recommendation field was added; the agent recommendation is a UI-side heuristic from validation status, issue codes, confidence, and evidence coverage. Deferred validation-error candidates still need refreshed source extraction or manual evidence before approval.
+- Key files: `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/README.md`, `docs/03-design/ui-override-register.md`
+- Decisions: kept status changes on the existing `apply_review_decision` path so audit, canonical, and aggregate-refresh side effects are preserved. Rejected only stale duplicate queued artifacts; product-valid but field-incomplete candidates were deferred rather than rejected.
+- Verification:
+  - live DB review state check after triage: `queued=0`, `approved=7`, `deferred=104`, `rejected=29`
+  - live aggregate refresh request check after approvals: `completed=7`
+  - `pnpm run typecheck`
+  - `pnpm run build`
+  - `.venv\Scripts\python.exe -m unittest tests.test_review_queue tests.test_review_detail tests.test_review_detail_route tests.test_ops_scenario_qa tests.test_aggregate_refresh`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+- Known issues: Review Detail still uses text-based field editing for complex list/object values; a later typed editor may be worthwhile if operators frequently edit nested canonical fields.
+- Next step: review the deferred candidates after the next extraction/normalization hardening or source refresh, especially GIC/rate semantics and low-confidence chequing eligibility fields.
+
 ## 2026-05-11 - Big 5 Source Catalog Entry Repair And Official-List Recollect
 
 - WBS: `5.1`, `5.16`, source registry quality hardening

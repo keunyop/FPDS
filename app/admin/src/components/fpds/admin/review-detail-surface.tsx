@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Bot, Check, CirclePause, ExternalLink, Loader2, PencilLine, X } from "lucide-react";
 
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type {
   ReviewDecisionAction,
   ReviewEvidenceLink,
+  ReviewFieldTraceGroup,
   ReviewModelExecution,
   ReviewTaskDetailResponse,
 } from "@/lib/admin-api";
@@ -19,6 +22,20 @@ import { cn } from "@/lib/utils";
 type ReviewDetailSurfaceProps = {
   detail: ReviewTaskDetailResponse;
   csrfToken: string | null | undefined;
+};
+
+type Recommendation = {
+  action: "approve" | "reject" | "defer";
+  title: string;
+  tone: "success" | "warning" | "destructive";
+  reasonCode: string;
+  reasons: string[];
+};
+
+type ExtraOverride = {
+  id: string;
+  fieldName: string;
+  value: string;
 };
 
 const REASON_CODE_OPTIONS = [
@@ -35,15 +52,60 @@ const REASON_CODE_OPTIONS = [
   "manual_override",
 ] as const;
 
+const COMMON_EDITABLE_FIELDS = [
+  "product_name",
+  "description_short",
+  "source_subtype_label",
+  "subtype_code",
+  "status",
+  "currency",
+  "public_display_rate",
+  "standard_rate",
+  "promotional_rate",
+  "public_display_fee",
+  "monthly_fee",
+  "minimum_balance",
+  "minimum_deposit",
+  "term_length_text",
+  "term_length_days",
+  "term_options",
+  "cashability",
+  "redeemable_flag",
+  "non_redeemable_flag",
+  "payout_option",
+  "compounding_frequency",
+  "interest_payment_options",
+  "eligibility_text",
+  "fee_waiver_condition",
+  "target_customer_tags",
+  "registered_plan_supported",
+  "unlimited_transactions_flag",
+  "notes",
+];
+
+const READ_ONLY_FIELDS = new Set([
+  "bank_name",
+  "bank_code",
+  "country_code",
+  "product_family",
+  "product_type",
+  "source_language",
+  "last_verified_at",
+  "effective_date",
+]);
+
 export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfaceProps) {
   const router = useRouter();
   const sourceDerivedProductName = resolveCandidateProductName(detail);
   const approvedDisplayProductName = resolveApprovedDisplayProductName(detail);
   const showingApprovedName = approvedDisplayProductName !== sourceDerivedProductName;
-  const [reasonCode, setReasonCode] = useState(detail.review_task.queue_reason_code ?? "");
+  const recommendation = useMemo(() => buildRecommendation(detail), [detail]);
+  const [reasonCode, setReasonCode] = useState(detail.review_task.queue_reason_code || recommendation.reasonCode);
   const [reasonText, setReasonText] = useState("");
-  const [approvedProductName, setApprovedProductName] = useState(sourceDerivedProductName);
-  const [overrideJson, setOverrideJson] = useState("{}");
+  const [editableValues, setEditableValues] = useState(() => buildInitialEditableValues(detail, sourceDerivedProductName));
+  const [extraFieldName, setExtraFieldName] = useState("");
+  const [extraFieldValue, setExtraFieldValue] = useState("");
+  const [extraOverrides, setExtraOverrides] = useState<ExtraOverride[]>([]);
   const [pendingAction, setPendingAction] = useState<ReviewDecisionAction | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,52 +113,58 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
     detail.field_trace_groups.find((item) => item.has_evidence)?.field_name ?? detail.field_trace_groups[0]?.field_name ?? null,
   );
 
-  const parsedOverride = useMemo(() => {
-    try {
-      const parsed = JSON.parse(overrideJson || "{}") as unknown;
-      if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
-        return { value: null, error: "Override JSON must be an object." };
-      }
-      if (Object.prototype.hasOwnProperty.call(parsed, "product_name")) {
-        return { value: null, error: "Use the dedicated approved product name field instead of product_name in override JSON." };
-      }
-      return { value: parsed as Record<string, unknown>, error: null };
-    } catch {
-      return { value: null, error: "Override JSON is not valid." };
-    }
-  }, [overrideJson]);
+  const fieldOptionNames = useMemo(() => {
+    const names = new Set([...COMMON_EDITABLE_FIELDS, ...detail.field_trace_groups.map((item) => item.field_name)]);
+    return Array.from(names).sort();
+  }, [detail.field_trace_groups]);
 
   const productNameError = useMemo(() => {
-    if (approvedProductName.trim().length > 0) {
-      return null;
-    }
-    return "Approved product name cannot be empty.";
-  }, [approvedProductName]);
+    const reviewedProductName = editableValues.product_name ?? sourceDerivedProductName;
+    return reviewedProductName.trim().length > 0 ? null : "Reviewed product name cannot be empty.";
+  }, [editableValues.product_name, sourceDerivedProductName]);
 
   const approvalOverridePayload = useMemo(() => {
-    if (!parsedOverride.value || productNameError) {
+    if (productNameError) {
       return null;
     }
-    const nextPayload = { ...parsedOverride.value };
-    const normalizedApprovedProductName = approvedProductName.trim();
-    if (normalizedApprovedProductName !== sourceDerivedProductName) {
-      nextPayload.product_name = normalizedApprovedProductName;
+
+    const payload: Record<string, unknown> = {};
+    for (const [fieldName, rawValue] of Object.entries(editableValues)) {
+      if (!isReviewEditableField(fieldName)) {
+        continue;
+      }
+      const originalValue = originalValueForField(detail, fieldName, sourceDerivedProductName);
+      const parsedValue = parseReviewedValue(rawValue, originalValue);
+      if (!reviewValuesEqual(parsedValue, originalValue)) {
+        payload[fieldName] = parsedValue;
+      }
     }
-    return nextPayload;
-  }, [approvedProductName, parsedOverride.value, productNameError, sourceDerivedProductName]);
+
+    for (const item of extraOverrides) {
+      const fieldName = item.fieldName.trim();
+      if (!fieldName || !isReviewEditableField(fieldName)) {
+        continue;
+      }
+      const parsedValue = parseManualValue(item.value);
+      const originalValue = originalValueForField(detail, fieldName, sourceDerivedProductName);
+      if (!reviewValuesEqual(parsedValue, originalValue)) {
+        payload[fieldName] = parsedValue;
+      }
+    }
+
+    return payload;
+  }, [detail, editableValues, extraOverrides, productNameError, sourceDerivedProductName]);
 
   const diffPreview = useMemo(() => {
     if (!approvalOverridePayload) {
       return [];
     }
-    return Object.entries(approvalOverridePayload)
-      .filter(([fieldName, nextValue]) => detail.candidate.candidate_payload[fieldName] !== nextValue)
-      .map(([fieldName, nextValue]) => ({
-        fieldName,
-        before: detail.candidate.candidate_payload[fieldName],
-        after: nextValue,
-      }));
-  }, [approvalOverridePayload, detail.candidate.candidate_payload]);
+    return Object.entries(approvalOverridePayload).map(([fieldName, nextValue]) => ({
+      fieldName,
+      before: originalValueForField(detail, fieldName, sourceDerivedProductName),
+      after: nextValue,
+    }));
+  }, [approvalOverridePayload, detail, sourceDerivedProductName]);
 
   const activeField = useMemo(() => {
     if (detail.field_trace_groups.length === 0) {
@@ -108,6 +176,33 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
       detail.field_trace_groups[0]
     );
   }, [detail.field_trace_groups, selectedFieldName]);
+
+  const decisionDisabled = Boolean(pendingAction);
+  const editApproveDisabled =
+    decisionDisabled ||
+    !detail.available_actions.includes("edit_approve") ||
+    Boolean(productNameError) ||
+    diffPreview.length === 0;
+
+  function updateEditableField(fieldName: string, value: string) {
+    setError(null);
+    setEditableValues((current) => ({ ...current, [fieldName]: value }));
+  }
+
+  function addExtraOverride() {
+    const fieldName = extraFieldName.trim();
+    if (!fieldName || !isReviewEditableField(fieldName)) {
+      setError("Choose an editable field name before adding a correction.");
+      return;
+    }
+    setExtraOverrides((current) => [
+      ...current.filter((item) => item.fieldName !== fieldName),
+      { id: `${fieldName}-${current.length}-${Date.now()}`, fieldName, value: extraFieldValue },
+    ]);
+    setExtraFieldName("");
+    setExtraFieldValue("");
+    setError(null);
+  }
 
   async function handleDecision(action: ReviewDecisionAction) {
     if (!detail.available_actions.includes(action)) {
@@ -127,7 +222,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
         },
         body: JSON.stringify({
           action_type: action,
-          reason_code: reasonCode || null,
+          reason_code: reasonCode || defaultReasonCodeForAction(action, recommendation, detail),
           reason_text: reasonText || null,
           override_payload: action === "edit_approve" ? approvalOverridePayload ?? {} : {},
         }),
@@ -161,7 +256,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
               <Link href="/admin/reviews">Back to queue</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={`/admin/runs/${detail.review_task.run_id}`}>Open producing run</Link>
+              <Link href={`/admin/runs/${detail.review_task.run_id}`}>Open run</Link>
             </Button>
           </>
         }
@@ -178,256 +273,98 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
             </span>
           </>
         }
-        description={showingApprovedName ? `Source-derived candidate name: ${sourceDerivedProductName}` : undefined}
+        description={showingApprovedName ? `Source candidate name: ${sourceDerivedProductName}` : undefined}
         path={["Review", "Review Queue", "Review Detail"]}
         title={approvedDisplayProductName}
       />
 
-      <article className="rounded-lg border border-border/80 bg-background p-4">
-        <div className="grid gap-3 lg:grid-cols-4">
-          <SummaryStat label="Review task" value={detail.review_task.review_task_id} />
-          <SummaryStat label="Run" value={detail.review_task.run_id} />
-          <SummaryStat label="Confidence" value={formatConfidence(detail.candidate.source_confidence)} />
-          <SummaryStat label="Evidence fields" value={String(detail.evidence_summary.field_count)} />
-        </div>
+      <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr_0.9fr]">
+        <DecisionRecommendationCard recommendation={recommendation} />
+        <SourceDecisionCard detail={detail} />
+        <IssueDecisionCard detail={detail} />
+      </div>
 
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          <SummaryStat label="Created" value={formatTimestamp(detail.review_task.created_at)} />
-          <SummaryStat label="Focused field" value={activeField?.label ?? "n/a"} />
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
+        <article className="min-w-0 rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+          <SectionHeading eyebrow="Review fields" title="Agent values and reviewer corrections" />
+          <div className="mt-5 grid gap-3">
+            {detail.field_trace_groups.map((item) => (
+              <FieldReviewRow
+                editableValue={editableValues[item.field_name] ?? valueToEditableString(item.value)}
+                item={item}
+                key={item.field_name}
+                onSelectTrace={() => setSelectedFieldName(item.field_name)}
+                onValueChange={(value) => updateEditableField(item.field_name, value)}
+                selected={item.field_name === activeField?.field_name}
+              />
+            ))}
+          </div>
 
-        <div className="mt-4 flex flex-wrap gap-3">
-          {detail.current_product ? (
-            <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-              Canonical {detail.current_product.product_id} v{detail.current_product.current_version_no}
-            </span>
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">
-              New canonical product on approval
-            </span>
-          )}
-        </div>
-      </article>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_minmax(20rem,0.82fr)]">
-        <div className="grid gap-6">
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Candidate summary"
-              title="Normalized fields with trace focus"
-            />
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              {detail.field_trace_groups.map((item) => (
-                <button
-                  className={cn(
-                    "rounded-2xl border px-4 py-3 text-left transition-colors",
-                    item.field_name === activeField?.field_name
-                      ? "border-primary/40 bg-primary/5 shadow-sm"
-                      : "border-border/80 bg-background hover:border-primary/25 hover:bg-accent/35",
-                  )}
-                  key={item.field_name}
-                  onClick={() => setSelectedFieldName(item.field_name)}
-                  type="button"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
-                      <p className="mt-2 text-sm leading-6 text-foreground">{formatValue(item.value)}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={cn(
-                          "rounded-full px-2.5 py-1 text-[11px] font-medium",
-                          item.has_evidence ? "bg-success-soft text-success" : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {item.evidence_count} evidence
-                      </span>
-                      {item.mapping.normalization_method ? (
-                        <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info">
-                          {shortMethodLabel(item.mapping.normalization_method)}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </article>
-
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Validation"
-              title="Issue summary and source context"
-            />
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm font-medium text-foreground">Issue summary</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{detail.review_task.issue_summary}</p>
-                <div className="mt-4 grid gap-2">
-                  {detail.validation_issues.map((issue) => (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/70 px-3 py-3" key={`${issue.code}-${issue.summary}`}>
-                      <span className={cn("mt-0.5 rounded-full px-2.5 py-1 text-[11px] font-medium", issueBadgeClasses(issue.severity))}>
-                        {toTitleCase(issue.severity)}
-                      </span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{issue.code ? toTitleCase(issue.code) : "Validation issue"}</p>
-                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{issue.summary}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="mt-5 rounded-lg border border-dashed border-border bg-background p-4">
+            <p className="text-sm font-medium text-foreground">Add missing field</p>
+            <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_auto]">
+              <label className="grid gap-2 text-sm">
+                <span className="text-muted-foreground">Field</span>
+                <Input
+                  className="h-10 rounded-lg bg-background"
+                  list="review-editable-field-options"
+                  onChange={(event) => setExtraFieldName(event.target.value)}
+                  placeholder="standard_rate"
+                  value={extraFieldName}
+                />
+              </label>
+              <label className="grid gap-2 text-sm">
+                <span className="text-muted-foreground">Reviewed value</span>
+                <Input
+                  className="h-10 rounded-lg bg-background"
+                  onChange={(event) => setExtraFieldValue(event.target.value)}
+                  placeholder="2.75"
+                  value={extraFieldValue}
+                />
+              </label>
+              <div className="flex items-end">
+                <Button onClick={addExtraOverride} type="button" variant="outline">
+                  <PencilLine />
+                  Add
+                </Button>
               </div>
-
-              <div className="rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm font-medium text-foreground">Source context</p>
-                <dl className="mt-4 grid gap-3 text-sm">
-                  <MetaRow label="Source ID" value={detail.source_context.source_id ?? "n/a"} />
-                  <MetaRow label="Source type" value={detail.source_context.source_type ?? "n/a"} />
-                  <MetaRow label="Fetched" value={formatTimestamp(detail.source_context.fetched_at)} />
-                  <MetaRow label="Stage status" value={detail.source_context.stage_status ?? "n/a"} />
-                </dl>
-                {detail.source_context.parse_quality_note ? (
-                  <p className="mt-4 rounded-2xl bg-muted px-3 py-3 text-sm leading-6 text-muted-foreground">
-                    Parse note: {detail.source_context.parse_quality_note}
-                  </p>
-                ) : null}
-                {detail.source_context.runtime_notes.length > 0 ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {detail.source_context.runtime_notes.map((note) => (
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground" key={note}>
-                        {note}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {detail.source_context.source_url ? (
-                  <a
-                    className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
-                    href={detail.source_context.source_url}
-                    rel="noreferrer"
-                    target="_blank"
+              <datalist id="review-editable-field-options">
+                {fieldOptionNames.map((fieldName) => (
+                  <option key={fieldName} value={fieldName} />
+                ))}
+              </datalist>
+            </div>
+            {extraOverrides.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {extraOverrides.map((item) => (
+                  <button
+                    className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    key={item.id}
+                    onClick={() => setExtraOverrides((current) => current.filter((candidate) => candidate.id !== item.id))}
+                    type="button"
                   >
-                    Open source URL
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          </article>
-
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="History"
-              title="Decision history"
-            />
-            {detail.decision_history.length === 0 ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">No review decisions have been recorded on this task yet.</p>
-            ) : (
-              <div className="mt-6 grid gap-3">
-                {detail.decision_history.map((item) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.review_decision_id}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", stateBadgeClasses(decisionActionState(item.action_type)))}>
-                        {toTitleCase(item.action_type)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{formatTimestamp(item.decided_at)}</span>
-                    </div>
-                    <p className="mt-3 text-sm text-foreground">
-                      {item.actor.display_name ?? item.actor.email ?? "Unknown reviewer"}
-                    </p>
-                    {item.diff_summary ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.diff_summary}</p> : null}
-                    {item.reason_text ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.reason_text}</p> : null}
-                  </div>
+                    {item.fieldName}: {item.value}
+                  </button>
                 ))}
               </div>
-            )}
-          </article>
-        </div>
+            ) : null}
+          </div>
+        </article>
 
-        <div className="grid gap-6">
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Trace viewer"
-              title={activeField ? `${activeField.label} trace` : "Field trace"}
-            />
-
-            {!activeField ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">No field-level trace is available for this candidate yet.</p>
-            ) : (
-              <div className="mt-6 grid gap-4">
-                <div className="rounded-2xl border border-border/80 bg-background p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Selected field</p>
-                  <p className="mt-2 text-sm font-medium text-foreground">{activeField.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{formatValue(activeField.value)}</p>
-                </div>
-
-                <div className="rounded-2xl border border-border/80 bg-background p-4">
-                  <p className="text-sm font-medium text-foreground">Parsed field mapping</p>
-                  <dl className="mt-4 grid gap-3 text-sm">
-                    <MetaRow label="Source field" value={activeField.mapping.source_field_name ?? "n/a"} />
-                    <MetaRow label="Normalization" value={activeField.mapping.normalization_method ?? "n/a"} />
-                    <MetaRow label="Extraction method" value={activeField.mapping.extraction_method ?? "n/a"} />
-                    <MetaRow label="Value type" value={activeField.mapping.value_type ?? "n/a"} />
-                    <MetaRow label="Extraction confidence" value={formatConfidence(activeField.mapping.extraction_confidence)} />
-                    <MetaRow label="Mapped chunk" value={activeField.mapping.evidence_chunk_id ?? "n/a"} />
-                  </dl>
-                </div>
-
-                <div className="rounded-2xl border border-border/80 bg-background p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-foreground">Evidence links</p>
-                    <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                      {activeField.evidence_count} linked
-                    </span>
-                  </div>
-                  {activeField.evidence_links.length === 0 ? (
-                    <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                      No direct field evidence link was persisted for this field. Review can still continue with the wider task context.
-                    </p>
-                  ) : (
-                    <div className="mt-4 grid gap-3">
-                      {activeField.evidence_links.map((item) => (
-                        <TraceEvidenceCard item={item} key={`${item.field_name}-${item.evidence_chunk_id}`} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </article>
-
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Model runs"
-              title="Relevant execution references"
-            />
-            {detail.model_executions.length === 0 ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">No model execution references were available for this task.</p>
-            ) : (
-              <div className="mt-6 grid gap-3">
-                {detail.model_executions.map((item) => (
-                  <ModelExecutionCard item={item} key={item.model_execution_id} />
-                ))}
-              </div>
-            )}
-          </article>
-
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Decision form"
-              title="Approve, reject, defer, or edit"
-            />
+        <aside className="grid content-start gap-4">
+          <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+            <SectionHeading eyebrow="Decision" title="Submit review action" />
 
             {detail.available_actions.length === 0 ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">
+              <p className="mt-5 text-sm leading-6 text-muted-foreground">
                 This task is read-only from your current session or already closed.
               </p>
             ) : (
-              <div className="mt-6 grid gap-4">
+              <div className="mt-5 grid gap-4">
                 <label className="grid gap-2 text-sm">
                   <span className="font-medium text-foreground">Reason code</span>
                   <select
-                    className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                    className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
                     onChange={(event) => setReasonCode(event.target.value)}
                     value={reasonCode}
                   >
@@ -442,145 +379,330 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
 
                 <label className="grid gap-2 text-sm">
                   <span className="font-medium text-foreground">Reviewer note</span>
-                  <textarea
-                    className="min-h-28 rounded-2xl border border-border bg-background px-3 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                  <Textarea
+                    className="min-h-24 rounded-lg bg-background"
                     onChange={(event) => setReasonText(event.target.value)}
-                    placeholder="Add a short decision note when context or operator judgment should be preserved."
+                    placeholder="Short note for audit history."
                     value={reasonText}
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-foreground">Approved product name</span>
-                  <Input
-                    className="h-11 rounded-2xl border-border bg-background px-3 text-sm text-foreground"
-                    onChange={(event) => setApprovedProductName(event.target.value)}
-                    placeholder="Enter the reviewed canonical product name."
-                    value={approvedProductName}
-                  />
-                  <span className="text-xs leading-5 text-muted-foreground">
-                    This field controls the approved canonical product name. Leave the existing value in place unless
-                    the source-derived name needs a reviewer correction.
-                  </span>
-                </label>
-
                 {productNameError ? (
-                  <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {productNameError}
-                  </div>
+                  <StatusMessage tone="destructive">{productNameError}</StatusMessage>
                 ) : null}
+                {message ? <StatusMessage tone="success">Submitted action: {message}</StatusMessage> : null}
+                {error ? <StatusMessage tone="destructive">{error}</StatusMessage> : null}
 
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-foreground">Edit approval override JSON</span>
-                  <textarea
-                    className="min-h-40 rounded-2xl border border-border bg-background px-3 py-3 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                    onChange={(event) => setOverrideJson(event.target.value)}
-                    placeholder='{"monthly_fee": 0, "notes": "Reviewer confirmed no monthly fee."}'
-                    value={overrideJson}
-                  />
-                </label>
-
-                {parsedOverride.error ? (
-                  <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {parsedOverride.error}
-                  </div>
-                ) : null}
-
-                {message ? (
-                  <div className="rounded-2xl border border-success/20 bg-success-soft px-4 py-3 text-sm text-success">
-                    Submitted action: {message}
-                  </div>
-                ) : null}
-
-                {error ? (
-                  <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {error}
-                  </div>
-                ) : null}
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Button disabled={Boolean(pendingAction)} onClick={() => handleDecision("approve")} type="button">
+                <div className="grid gap-2">
+                  <Button
+                    disabled={decisionDisabled || !detail.available_actions.includes("approve")}
+                    onClick={() => handleDecision("approve")}
+                    type="button"
+                  >
+                    {pendingAction === "approve" ? <Loader2 className="animate-spin" /> : <Check />}
                     {pendingAction === "approve" ? "Approving..." : "Approve"}
                   </Button>
-                  <Button disabled={Boolean(pendingAction)} onClick={() => handleDecision("reject")} type="button" variant="outline">
-                    {pendingAction === "reject" ? "Rejecting..." : "Reject"}
-                  </Button>
                   <Button
-                    disabled={Boolean(pendingAction) || Boolean(parsedOverride.error) || Boolean(productNameError) || diffPreview.length === 0}
-                    onClick={() => handleDecision("edit_approve")}
+                    disabled={decisionDisabled || !detail.available_actions.includes("defer")}
+                    onClick={() => handleDecision("defer")}
                     type="button"
                     variant="outline"
                   >
+                    {pendingAction === "defer" ? <Loader2 className="animate-spin" /> : <CirclePause />}
+                    {pendingAction === "defer" ? "Deferring..." : "Defer"}
+                  </Button>
+                  <Button disabled={editApproveDisabled} onClick={() => handleDecision("edit_approve")} type="button" variant="outline">
+                    {pendingAction === "edit_approve" ? <Loader2 className="animate-spin" /> : <PencilLine />}
                     {pendingAction === "edit_approve" ? "Submitting edit..." : "Edit & approve"}
                   </Button>
-                  <Button disabled={Boolean(pendingAction)} onClick={() => handleDecision("defer")} type="button" variant="outline">
-                    {pendingAction === "defer" ? "Deferring..." : "Defer"}
+                  <Button
+                    disabled={decisionDisabled || !detail.available_actions.includes("reject")}
+                    onClick={() => handleDecision("reject")}
+                    type="button"
+                    variant="destructive"
+                  >
+                    {pendingAction === "reject" ? <Loader2 className="animate-spin" /> : <X />}
+                    {pendingAction === "reject" ? "Rejecting..." : "Reject"}
                   </Button>
                 </div>
               </div>
             )}
           </article>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Override preview"
-              title="Candidate-to-approved diff"
-            />
+          <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+            <SectionHeading eyebrow="Edited approval" title="Diff preview" />
             {diffPreview.length === 0 ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">
-                Add one or more changed fields in the override JSON object to preview an edited approval.
-              </p>
+              <p className="mt-5 text-sm leading-6 text-muted-foreground">No reviewed values differ from the agent values.</p>
             ) : (
-              <div className="mt-6 grid gap-3">
+              <div className="mt-5 grid gap-3">
                 {diffPreview.map((item) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.fieldName}>
+                  <div className="rounded-lg border border-border/80 bg-background p-3" key={item.fieldName}>
                     <p className="text-sm font-medium text-foreground">{toTitleCase(item.fieldName)}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted-foreground">Current</p>
-                    <p className="mt-1 text-sm leading-6 text-muted-foreground">{formatValue(item.before)}</p>
-                    <p className="mt-3 text-xs uppercase tracking-[0.14em] text-muted-foreground">Approved</p>
-                    <p className="mt-1 text-sm leading-6 text-foreground">{formatValue(item.after)}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">Agent value</p>
+                    <p className="mt-1 break-words text-sm leading-6 text-muted-foreground">{formatValue(item.before)}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">Reviewed value</p>
+                    <p className="mt-1 break-words text-sm leading-6 text-foreground">{formatValue(item.after)}</p>
                   </div>
                 ))}
               </div>
             )}
           </article>
+        </aside>
+      </div>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-            <SectionHeading
-              eyebrow="Canonical continuity"
-              title="Current approved product snapshot"
-            />
-            {detail.current_product ? (
-              <div className="mt-6 rounded-2xl border border-border/80 bg-background p-4">
-                <p className="text-sm font-medium text-foreground">{detail.current_product.product_name}</p>
-                <dl className="mt-4 grid gap-3 text-sm">
-                  <MetaRow label="Product ID" value={detail.current_product.product_id} />
-                  <MetaRow label="Version" value={String(detail.current_product.current_version_no)} />
-                  <MetaRow label="Status" value={detail.current_product.status} />
-                  <MetaRow label="Last verified" value={formatTimestamp(detail.current_product.last_verified_at)} />
-                </dl>
-              </div>
-            ) : (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">
-                No canonical product match is linked yet. A successful approval will create the first canonical record
-                for this continuity in the current prototype baseline.
-              </p>
-            )}
-          </article>
+      <EvidenceTracePanel activeField={activeField} detail={detail} onSelectField={setSelectedFieldName} />
+      <AuditContextPanel detail={detail} />
+    </section>
+  );
+}
+
+function DecisionRecommendationCard({ recommendation }: { recommendation: Recommendation }) {
+  return (
+    <article className={cn("rounded-lg border p-5 shadow-sm", recommendationCardClasses(recommendation.tone))}>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 rounded-lg bg-background/80 p-2">
+          <Bot className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium uppercase tracking-[0.16em]">Agent recommendation</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">{recommendation.title}</h2>
         </div>
       </div>
-    </section>
+      <ul className="mt-4 grid gap-2 text-sm leading-6">
+        {recommendation.reasons.map((reason) => (
+          <li key={reason}>{reason}</li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+function SourceDecisionCard({ detail }: { detail: ReviewTaskDetailResponse }) {
+  return (
+    <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Decision facts</p>
+      <dl className="mt-4 grid gap-3 text-sm">
+        <MetaRow label="Product" value={detail.candidate.product_name} />
+        <MetaRow label="Bank" value={`${detail.candidate.bank_name} (${detail.candidate.bank_code})`} />
+        <MetaRow label="Type" value={toTitleCase(detail.candidate.product_type)} />
+        <MetaRow label="Confidence" value={formatConfidence(detail.candidate.source_confidence)} />
+        <MetaRow label="Evidence fields" value={`${detail.evidence_summary.field_count} fields / ${detail.evidence_summary.item_count} links`} />
+      </dl>
+      {detail.source_context.source_url ? (
+        <Button asChild className="mt-4 w-full justify-center" variant="outline">
+          <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">
+            <ExternalLink />
+            Open origin source
+          </a>
+        </Button>
+      ) : null}
+    </article>
+  );
+}
+
+function IssueDecisionCard({ detail }: { detail: ReviewTaskDetailResponse }) {
+  const issues = detail.validation_issues.slice(0, 3);
+  return (
+    <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Check before deciding</p>
+      <p className="mt-3 text-sm leading-6 text-foreground">{detail.review_task.issue_summary}</p>
+      {issues.length > 0 ? (
+        <div className="mt-4 grid gap-2">
+          {issues.map((issue) => (
+            <div className="flex items-center gap-2 text-sm" key={`${issue.code}-${issue.summary}`}>
+              <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", issueBadgeClasses(issue.severity))}>
+                {issue.code || issue.severity}
+              </span>
+              <span className="min-w-0 text-muted-foreground">{issue.summary}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function FieldReviewRow({
+  item,
+  editableValue,
+  selected,
+  onValueChange,
+  onSelectTrace,
+}: {
+  item: ReviewFieldTraceGroup;
+  editableValue: string;
+  selected: boolean;
+  onValueChange: (value: string) => void;
+  onSelectTrace: () => void;
+}) {
+  const editable = isReviewEditableField(item.field_name);
+  const useTextarea = shouldUseTextarea(item.value, editableValue);
+  return (
+    <div className={cn("grid gap-3 rounded-lg border bg-background p-4", selected ? "border-primary/45" : "border-border/80")}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">{item.label}</p>
+          <p className="mt-1 break-words text-sm leading-6 text-muted-foreground">Agent value: {formatValue(item.value)}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", item.has_evidence ? "bg-success-soft text-success" : "bg-muted text-muted-foreground")}>
+            {item.evidence_count} evidence
+          </span>
+          {editable ? (
+            <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info">Editable</span>
+          ) : (
+            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">Read only</span>
+          )}
+        </div>
+      </div>
+
+      {editable ? (
+        <label className="grid gap-2 text-sm">
+          <span className="text-muted-foreground">Reviewed value</span>
+          {useTextarea ? (
+            <Textarea className="min-h-24 rounded-lg" onChange={(event) => onValueChange(event.target.value)} value={editableValue} />
+          ) : (
+            <Input className="h-10 rounded-lg bg-background" onChange={(event) => onValueChange(event.target.value)} value={editableValue} />
+          )}
+        </label>
+      ) : null}
+
+      <div>
+        <Button onClick={onSelectTrace} size="sm" type="button" variant="outline">
+          Evidence
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceTracePanel({
+  detail,
+  activeField,
+  onSelectField,
+}: {
+  detail: ReviewTaskDetailResponse;
+  activeField: ReviewFieldTraceGroup | null;
+  onSelectField: (fieldName: string) => void;
+}) {
+  return (
+    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+      <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">Evidence trace and source context</summary>
+      <div className="grid gap-5 border-t border-border/80 p-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <div className="grid content-start gap-2">
+          {detail.field_trace_groups.map((item) => (
+            <button
+              className={cn(
+                "rounded-lg border px-3 py-2 text-left text-sm",
+                item.field_name === activeField?.field_name ? "border-primary/45 bg-primary/5" : "border-border/80 bg-background hover:border-primary/30",
+              )}
+              key={item.field_name}
+              onClick={() => onSelectField(item.field_name)}
+              type="button"
+            >
+              <span className="font-medium text-foreground">{item.label}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{item.evidence_count} evidence</span>
+            </button>
+          ))}
+        </div>
+
+        {!activeField ? (
+          <p className="text-sm leading-6 text-muted-foreground">No field-level trace is available for this candidate.</p>
+        ) : (
+          <div className="grid gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">{activeField.label}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{formatValue(activeField.value)}</p>
+            </div>
+            <dl className="grid gap-2 text-sm md:grid-cols-2">
+              <MetaRow label="Source field" value={activeField.mapping.source_field_name ?? "n/a"} />
+              <MetaRow label="Normalization" value={activeField.mapping.normalization_method ?? "n/a"} />
+              <MetaRow label="Extraction" value={activeField.mapping.extraction_method ?? "n/a"} />
+              <MetaRow label="Confidence" value={formatConfidence(activeField.mapping.extraction_confidence)} />
+            </dl>
+            {activeField.evidence_links.length === 0 ? (
+              <p className="text-sm leading-6 text-muted-foreground">No direct evidence link was persisted for this field.</p>
+            ) : (
+              <div className="grid gap-3">
+                {activeField.evidence_links.map((item) => (
+                  <TraceEvidenceCard item={item} key={`${item.field_name}-${item.evidence_chunk_id}`} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function AuditContextPanel({ detail }: { detail: ReviewTaskDetailResponse }) {
+  return (
+    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+      <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">History, model runs, and canonical context</summary>
+      <div className="grid gap-5 border-t border-border/80 p-5 lg:grid-cols-3">
+        <div>
+          <p className="text-sm font-medium text-foreground">Decision history</p>
+          {detail.decision_history.length === 0 ? (
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">No review decisions recorded.</p>
+          ) : (
+            <div className="mt-3 grid gap-3">
+              {detail.decision_history.map((item) => (
+                <div className="rounded-lg border border-border/80 bg-background p-3" key={item.review_decision_id}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", stateBadgeClasses(decisionActionState(item.action_type)))}>
+                      {toTitleCase(item.action_type)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{formatTimestamp(item.decided_at)}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-foreground">{item.actor.display_name ?? item.actor.email ?? "Unknown reviewer"}</p>
+                  {item.diff_summary ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.diff_summary}</p> : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-foreground">Model runs</p>
+          {detail.model_executions.length === 0 ? (
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">No model execution references are available.</p>
+          ) : (
+            <div className="mt-3 grid gap-3">
+              {detail.model_executions.map((item) => (
+                <ModelExecutionCard item={item} key={item.model_execution_id} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-medium text-foreground">Canonical context</p>
+          {detail.current_product ? (
+            <dl className="mt-3 grid gap-3 text-sm">
+              <MetaRow label="Product" value={detail.current_product.product_name} />
+              <MetaRow label="Product ID" value={detail.current_product.product_id} />
+              <MetaRow label="Version" value={String(detail.current_product.current_version_no)} />
+              <MetaRow label="Status" value={detail.current_product.status} />
+              <MetaRow label="Last verified" value={formatTimestamp(detail.current_product.last_verified_at)} />
+            </dl>
+          ) : (
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">Approval will create the first canonical record for this product.</p>
+          )}
+        </div>
+      </div>
+    </details>
   );
 }
 
 function TraceEvidenceCard({ item }: { item: ReviewEvidenceLink }) {
   return (
-    <div className="rounded-2xl border border-border/70 px-4 py-3">
+    <div className="rounded-lg border border-border/80 bg-background p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-foreground">{item.label}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {item.source_id ?? item.source_document_id ?? "Unknown source"} · {item.anchor_label}
+            {item.source_id ?? item.source_document_id ?? "Unknown source"} - {item.anchor_label}
           </p>
         </div>
         <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
@@ -588,19 +710,15 @@ function TraceEvidenceCard({ item }: { item: ReviewEvidenceLink }) {
         </span>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.evidence_excerpt ?? "No excerpt captured."}</p>
-      <dl className="mt-4 grid gap-2 text-sm">
-        <MetaRow label="Chunk" value={item.evidence_chunk_id} />
-        <MetaRow label="Source type" value={item.source_type ?? "n/a"} />
-        <MetaRow label="Model run" value={item.model_execution_id ?? "n/a"} />
-      </dl>
       {item.source_url ? (
         <a
-          className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
           href={item.source_url}
           rel="noreferrer"
           target="_blank"
         >
-          Open source URL
+          <ExternalLink className="h-4 w-4" />
+          Origin source
         </a>
       ) : null}
     </div>
@@ -614,19 +732,19 @@ function ModelExecutionCard({ item }: { item: ReviewModelExecution }) {
       : "n/a";
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-background p-4">
+    <div className="rounded-lg border border-border/80 bg-background p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-foreground">{item.stage_label}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {item.agent_name} · {item.model_id}
+            {item.agent_name} - {item.model_id}
           </p>
         </div>
         <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
           {toTitleCase(item.execution_status)}
         </span>
       </div>
-      <dl className="mt-4 grid gap-2 text-sm">
+      <dl className="mt-3 grid gap-2 text-sm">
         <MetaRow label="Started" value={formatTimestamp(item.started_at)} />
         <MetaRow label="Completed" value={formatTimestamp(item.completed_at)} />
         <MetaRow label="Tokens" value={tokenSummary} />
@@ -636,40 +754,212 @@ function ModelExecutionCard({ item }: { item: ReviewModelExecution }) {
   );
 }
 
-function SummaryStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-border/80 bg-background px-4 py-3">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-}) {
+function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div>
-      <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
+      <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">{title}</h2>
     </div>
   );
 }
 
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="text-right text-foreground">{value}</dd>
+    <div className="flex min-w-0 items-start justify-between gap-4">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 break-words text-right text-foreground">{value}</dd>
     </div>
   );
+}
+
+function StatusMessage({ tone, children }: { tone: "success" | "destructive"; children: ReactNode }) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border px-4 py-3 text-sm",
+        tone === "success" ? "border-success/20 bg-success-soft text-success" : "border-destructive/20 bg-destructive/5 text-destructive",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function buildRecommendation(detail: ReviewTaskDetailResponse): Recommendation {
+  const issueCodes = new Set([
+    ...detail.candidate.validation_issue_codes,
+    ...detail.validation_issues.map((item) => item.code).filter(Boolean),
+  ]);
+  const confidence = detail.candidate.source_confidence;
+  const hasRejectSignal = Array.from(issueCodes).some((code) =>
+    ["source_mismatch", "product_mismatch", "wrong_product", "out_of_scope", "unsupported_product_type"].includes(code),
+  );
+
+  if (hasRejectSignal) {
+    return {
+      action: "reject",
+      title: "Reject",
+      tone: "destructive",
+      reasonCode: "conflicting_evidence",
+      reasons: ["The candidate appears mismatched with the source or approved product scope.", "Rejecting blocks canonical promotion for this artifact."],
+    };
+  }
+
+  if (detail.candidate.validation_status === "error") {
+    return {
+      action: "defer",
+      title: "Defer",
+      tone: "warning",
+      reasonCode: detail.review_task.queue_reason_code || "validation_error",
+      reasons: ["Validation has error-level issues.", "Resolve missing or conflicting source fields before approval."],
+    };
+  }
+
+  if (issueCodes.has("low_confidence") || (confidence !== null && confidence < 0.7)) {
+    return {
+      action: "defer",
+      title: "Defer",
+      tone: "warning",
+      reasonCode: "low_confidence",
+      reasons: ["The candidate passed validation but confidence is still a review signal.", "Check key fields and use edit approval if the source supports corrections."],
+    };
+  }
+
+  return {
+    action: "approve",
+    title: "Approve",
+    tone: "success",
+    reasonCode: detail.review_task.queue_reason_code || "manual_sampling_review",
+    reasons: ["Validation passed.", "Approve if the visible reviewed values match the origin source."],
+  };
+}
+
+function buildInitialEditableValues(detail: ReviewTaskDetailResponse, sourceDerivedProductName: string) {
+  const values: Record<string, string> = {};
+  for (const item of detail.field_trace_groups) {
+    if (isReviewEditableField(item.field_name)) {
+      values[item.field_name] = valueToEditableString(item.value);
+    }
+  }
+  if (!values.product_name) {
+    values.product_name = sourceDerivedProductName;
+  }
+  return values;
+}
+
+function isReviewEditableField(fieldName: string) {
+  if (READ_ONLY_FIELDS.has(fieldName)) {
+    return false;
+  }
+  if (fieldName.endsWith("_id")) {
+    return false;
+  }
+  return true;
+}
+
+function originalValueForField(detail: ReviewTaskDetailResponse, fieldName: string, sourceDerivedProductName: string) {
+  if (fieldName === "product_name") {
+    return detail.candidate.candidate_payload.product_name ?? sourceDerivedProductName;
+  }
+  return detail.candidate.candidate_payload[fieldName];
+}
+
+function parseReviewedValue(rawValue: string, originalValue: unknown) {
+  const trimmed = rawValue.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (typeof originalValue === "number") {
+    const parsed = Number(trimmed.replace(/,/g, ""));
+    return Number.isFinite(parsed) ? parsed : rawValue;
+  }
+  if (typeof originalValue === "boolean") {
+    if (/^(true|yes|1)$/i.test(trimmed)) {
+      return true;
+    }
+    if (/^(false|no|0)$/i.test(trimmed)) {
+      return false;
+    }
+    return rawValue;
+  }
+  if (Array.isArray(originalValue) || isPlainObject(originalValue)) {
+    try {
+      return JSON.parse(rawValue) as unknown;
+    } catch {
+      return rawValue;
+    }
+  }
+  return rawValue;
+}
+
+function parseManualValue(rawValue: string) {
+  const trimmed = rawValue.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (/^(true|false)$/i.test(trimmed)) {
+    return trimmed.toLowerCase() === "true";
+  }
+  if (/^null$/i.test(trimmed)) {
+    return null;
+  }
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    return Number(trimmed);
+  }
+  if ((trimmed.startsWith("[") && trimmed.endsWith("]")) || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
+    try {
+      return JSON.parse(trimmed) as unknown;
+    } catch {
+      return rawValue;
+    }
+  }
+  return rawValue;
+}
+
+function reviewValuesEqual(left: unknown, right: unknown) {
+  return stableStringify(left) === stableStringify(right);
+}
+
+function stableStringify(value: unknown) {
+  if (value === undefined) {
+    return "__undefined__";
+  }
+  return JSON.stringify(sortForStableStringify(value));
+}
+
+function sortForStableStringify(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => sortForStableStringify(item));
+  }
+  if (!isPlainObject(value)) {
+    return value;
+  }
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, sortForStableStringify(item)]),
+  );
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function shouldUseTextarea(value: unknown, editableValue: string) {
+  return Array.isArray(value) || isPlainObject(value) || editableValue.length > 80 || editableValue.includes("\n");
+}
+
+function valueToEditableString(value: unknown) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  return JSON.stringify(value, null, 2);
 }
 
 function formatTimestamp(value: string | null) {
@@ -738,13 +1028,6 @@ function toTitleCase(value: string) {
     .join(" ");
 }
 
-function shortMethodLabel(value: string) {
-  return value
-    .replace(/^heuristic_/, "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
 function actionLabel(action: ReviewDecisionAction) {
   switch (action) {
     case "edit_approve":
@@ -752,6 +1035,19 @@ function actionLabel(action: ReviewDecisionAction) {
     default:
       return toTitleCase(action);
   }
+}
+
+function defaultReasonCodeForAction(action: ReviewDecisionAction, recommendation: Recommendation, detail: ReviewTaskDetailResponse) {
+  if (action === recommendation.action) {
+    return recommendation.reasonCode;
+  }
+  if (action === "edit_approve") {
+    return "manual_override";
+  }
+  if (action === "reject") {
+    return "needs_domain_review";
+  }
+  return detail.review_task.queue_reason_code || "manual_sampling_review";
 }
 
 function decisionActionState(actionType: string) {
@@ -766,6 +1062,17 @@ function decisionActionState(actionType: string) {
       return "deferred";
     default:
       return "queued";
+  }
+}
+
+function recommendationCardClasses(tone: Recommendation["tone"]) {
+  switch (tone) {
+    case "success":
+      return "border-success/30 bg-success-soft text-success";
+    case "destructive":
+      return "border-destructive/30 bg-destructive/5 text-destructive";
+    default:
+      return "border-warning/30 bg-warning-soft text-warning";
   }
 }
 
