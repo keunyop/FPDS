@@ -44,6 +44,27 @@ _CORE_FIELDS = {
     "currency",
 }
 _DATE_RE = re.compile(r"([A-Z][a-z]+ \d{1,2}, \d{4})")
+_PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
+_RATE_CONTEXT_FIELDS = {
+    "account_interest_rates",
+    "cashable_gic_rates",
+    "gic_rates",
+    "interest_rate_summary",
+    "market_growth_gic_rates",
+    "maximum_return",
+    "minimum_guaranteed_return",
+    "non_cashable_gic_rates",
+    "non_redeemable_gic_rates",
+    "promotional_rate",
+    "public_display_rate",
+    "rate_tiers",
+    "redeemable_gic_rates",
+    "savings_account_rates",
+    "savings_rate_table",
+    "standard_rate",
+    "term_deposit_rates",
+    "tier_definition_text",
+}
 
 
 class NormalizationService:
@@ -432,6 +453,15 @@ def _normalize_candidate(
                 )
             )
 
+    _apply_rate_evidence_fallback(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+
     subtype_code, source_subtype_label = _infer_subtype_code(
         product_type=product_type_family,
         currency=currency,
@@ -602,6 +632,144 @@ def _compute_validation_issue_codes(
     if any(len(values) > 1 for values in conflicting_fields.values()):
         issues.append("conflicting_evidence")
     return sorted(dict.fromkeys(issues))
+
+
+def _apply_rate_evidence_fallback(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    if product_type_family not in {"savings", "gic"}:
+        return
+    if any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+        return
+
+    match = _find_rate_evidence_fallback_match(evidence_links_for_output)
+    if match is None:
+        return
+
+    percentages = _extract_rate_percentages(match.evidence_text_excerpt)
+    if not percentages:
+        return
+
+    unique_percentages = sorted(set(percentages))
+    standard_rate = unique_percentages[0]
+    public_display_rate = unique_percentages[-1]
+    if _has_rate_promotional_context(match.evidence_text_excerpt):
+        field_values = {
+            "promotional_rate": public_display_rate,
+            "public_display_rate": public_display_rate,
+        }
+    else:
+        field_values = {
+            "standard_rate": standard_rate,
+            "public_display_rate": public_display_rate,
+        }
+    if len(unique_percentages) > 1 and "promotional_rate" not in field_values:
+        field_values["promotional_rate"] = public_display_rate
+
+    for field_name, value in field_values.items():
+        normalized = float(value)
+        candidate_payload[field_name] = normalized
+        normalized_values_for_links[field_name] = normalized
+        field_mapping_metadata[field_name] = {
+            "source_field_name": match.field_name,
+            "normalized_value": normalized,
+            "normalization_method": "rate_evidence_fallback",
+            "evidence_chunk_id": match.evidence_chunk_id,
+        }
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name=field_name,
+                candidate_value=_stringify(normalized),
+                evidence_chunk_id=match.evidence_chunk_id,
+                evidence_text_excerpt=match.evidence_text_excerpt,
+                source_document_id=match.source_document_id,
+                source_snapshot_id=match.source_snapshot_id,
+                citation_confidence=min(0.85, match.citation_confidence),
+                model_execution_id=match.model_execution_id,
+                anchor_type=match.anchor_type,
+                anchor_value=match.anchor_value,
+                page_no=match.page_no,
+                chunk_index=match.chunk_index,
+            )
+        )
+
+    runtime_notes.append(
+        f"Supplemented missing rate fields from `{match.field_name}` evidence using generic rate evidence fallback."
+    )
+
+
+def _find_rate_evidence_fallback_match(
+    evidence_links: list[NormalizationEvidenceLink],
+) -> NormalizationEvidenceLink | None:
+    ranked: list[tuple[int, float, NormalizationEvidenceLink]] = []
+    for link in evidence_links:
+        percentages = _extract_rate_percentages(link.evidence_text_excerpt)
+        if not percentages:
+            continue
+        field_name = str(link.field_name or "").strip().lower()
+        anchor_value = str(link.anchor_value or "").strip().lower()
+        text = _normalize_text(link.evidence_text_excerpt).lower()
+        score = 0
+        if field_name in _RATE_CONTEXT_FIELDS:
+            score += 5
+        if "rate" in field_name:
+            score += 2
+        if any(token in anchor_value for token in ("rate", "interest", "return", "yield")):
+            score += 2
+        if any(token in text for token in ("interest rate", "annual interest", "posted rate", "return", "yield")):
+            score += 2
+        if any(token in text for token in ("principal protection", "100% reimbursed", "unauthorized transactions")):
+            score -= 6
+        if score <= 0:
+            continue
+        ranked.append((score, float(link.citation_confidence), link))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return ranked[0][2]
+
+
+def _extract_rate_percentages(text: str | None) -> list[Decimal]:
+    if not text:
+        return []
+    values: list[Decimal] = []
+    for match in _PERCENT_RE.finditer(text):
+        window_start = max(0, match.start() - 90)
+        window_end = min(len(text), match.end() + 90)
+        window = text[window_start:window_end].lower()
+        if not any(token in window for token in ("interest", "rate", "return", "yield", "bonus")):
+            continue
+        if any(token in window for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
+            continue
+        value = _as_decimal(match.group(1))
+        if value is None:
+            continue
+        values.append(value)
+    return values
+
+
+def _has_rate_promotional_context(text: str | None) -> bool:
+    lowered = str(text or "").lower()
+    return any(
+        token in lowered
+        for token in (
+            "bonus interest",
+            "for 3 months",
+            "for three months",
+            "for the first",
+            "limited-time",
+            "limited time",
+            "offer expires",
+            "promotional",
+            "special offer",
+        )
+    )
 
 
 def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
@@ -1130,6 +1298,10 @@ def _coalesce_string(*values: object) -> str | None:
         if normalized:
             return normalized
     return None
+
+
+def _normalize_text(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
 def _looks_like_language_code(value: str) -> bool:

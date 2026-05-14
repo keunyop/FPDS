@@ -145,6 +145,8 @@ The review task should support at least these reason codes.
 | review states | same state machine | same state machine |
 | reviewer burden | expected high | expected lower after stable policies |
 
+Phase 1 auto-approval is implemented as an audited system path, not as an invisible state flip. `auto_validated` pass candidates that meet confidence and force-review policy are promoted through the same canonical upsert/change-event path as human approval. Candidates that pass validation but match non-product page guards are audit-logged and rejected, while force-review policy hits are routed back into a review task.
+
 ---
 
 ## 4. Run Lifecycle
@@ -366,6 +368,8 @@ Every audit event must support at least the following fields.
 | `review_task_edited` | user | edit & approve action | include diff summary |
 | `review_task_deferred` | user | defer action | include defer reason |
 | `review_task_requeued` | user/system | deferred task resumed | include requeue reason |
+| `candidate_auto_promoted` | system | policy promotes an `auto_validated` pass candidate | include confidence policy, candidate id, product/version id, and change-event types |
+| `candidate_auto_promotion_skipped` | system | policy blocks auto-promotion for review or rejection | include skip reason, previous/new candidate state, and review task id when queued |
 | `evidence_trace_viewed` | user | reviewer opens sensitive trace context | include review task/product context |
 | `run_started` | system/user/scheduler | run initialization | include trigger metadata |
 | `run_completed` | system | run terminal completion | include summary counters |

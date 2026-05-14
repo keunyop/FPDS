@@ -10,6 +10,8 @@ import sys
 from typing import Any
 from urllib.parse import urlparse
 
+from api_service.aggregate_refresh import launch_aggregate_refresh_runner
+from api_service.candidate_auto_promotion import promote_auto_validated_candidates
 from api_service.config import Settings
 from api_service.db import open_connection
 
@@ -119,6 +121,16 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         "worker.pipeline.fpds_validation_routing",
         base_args + ["--routing-mode", "phase1"] + _source_args(normalization_successful_target_source_ids),
     )
+    promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
+    if promotion_result["promoted_count"]:
+        launch_result = launch_aggregate_refresh_runner()
+        print(
+            (
+                f"[source-collection-runner] run {run_id} auto-promoted "
+                f"{promotion_result['promoted_count']} candidate(s); aggregate refresh launch={launch_result['launched']}"
+            ),
+            flush=True,
+        )
     print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
 
 
@@ -162,6 +174,16 @@ def _build_worker_command(module_name: str, args: list[str]) -> list[str]:
     if not uv_executable:
         raise RuntimeError("`uv` is required to launch worker stages from the source collection runner.")
     return [uv_executable, "run", "--project", str(REPO_ROOT), "python", "-m", module_name, *args]
+
+
+def _promote_auto_validated_candidates_for_run(*, run_id: str, plan: dict[str, Any]) -> dict[str, Any]:
+    settings = Settings.from_env()
+    with open_connection(settings) as connection:
+        return promote_auto_validated_candidates(
+            connection,
+            run_id=run_id,
+            request_context={"request_id": plan.get("request_id")},
+        )
 
 
 def _stage_timeout_seconds_from_env() -> int:

@@ -179,6 +179,7 @@ For this policy, `collect` means:
 5. persist `normalized_candidate`
 6. run normal validation/routing behavior
 7. create `review_task` rows when the candidate is not auto-clear
+8. promote policy-clear `auto_validated` candidates through the audited canonical upsert path
 
 Important rules:
 - the run must persist which source rows were selected so the collection scope is reproducible later
@@ -211,6 +212,7 @@ Current repository state:
 - generated source detail lives in `source_registry_item`
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
+- collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; promoted candidates enqueue aggregate refresh, and non-product page-title false positives are audit-logged and rejected
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`

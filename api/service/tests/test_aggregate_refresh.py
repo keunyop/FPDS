@@ -5,6 +5,7 @@ import unittest
 
 from api_service.aggregate_refresh import (
     load_dashboard_health,
+    queue_auto_promotion_aggregate_refresh_request,
     queue_review_aggregate_refresh_request,
     request_manual_aggregate_refresh,
 )
@@ -60,6 +61,34 @@ class AggregateRefreshTests(unittest.TestCase):
         self.assertIn("INSERT INTO aggregate_refresh_request", sql)
         self.assertEqual(params["review_task_id"], "rt-001")
         self.assertEqual(params["product_id"], "prod-001")
+
+    def test_queue_auto_promotion_refresh_request_persists_system_context(self) -> None:
+        connection = _Connection()
+
+        result = queue_auto_promotion_aggregate_refresh_request(
+            connection,
+            actor={"actor_type": "system", "role": "system", "display_name": "FPDS auto-promotion policy"},
+            request_context={"request_id": "req-auto-001"},
+            promoted_count=2,
+            product_ids=["prod-001", "prod-002"],
+            candidate_ids=["cand-001", "cand-002"],
+            run_ids=["run-001"],
+            change_event_types=["New", "Updated"],
+        )
+
+        self.assertEqual(result["request_status"], "queued")
+        self.assertEqual(result["trigger_reason"], "auto_promotion")
+        self.assertIsNone(result["review_task_id"])
+        self.assertEqual(len(connection.calls), 2)
+        insert_sql, insert_params = connection.calls[0]
+        audit_sql, audit_params = connection.calls[1]
+        self.assertIn("INSERT INTO aggregate_refresh_request", insert_sql)
+        self.assertEqual(insert_params["trigger_reason"], "auto_promotion")
+        self.assertIsNone(insert_params["product_id"])
+        self.assertIn('"promoted_count": 2', str(insert_params["request_metadata"]))
+        self.assertIn("INSERT INTO audit_event", audit_sql)
+        self.assertEqual(audit_params["actor_type"], "system")
+        self.assertEqual(audit_params["new_state"], "queued")
 
     def test_manual_retry_reuses_existing_pending_request(self) -> None:
         connection = _Connection(

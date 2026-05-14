@@ -615,6 +615,7 @@ def _apply_canonical_approval(
 ) -> dict[str, Any]:
     current_product = _find_current_product(connection, review_row=review_row, approved_payload=approved_payload)
     product_id = current_product["product_id"] if current_product else new_id("prod")
+    review_task_id = _string_or_none(review_row.get("review_task_id"))
     current_payload = _coerce_mapping(current_product.get("normalized_payload")) if current_product else {}
     current_version_no = int(current_product["current_version_no"]) if current_product else 0
     base_changed_fields = _changed_field_names(before=current_payload, after=approved_payload)
@@ -688,7 +689,7 @@ def _apply_canonical_approval(
             product_id=product_id,
             product_version_id=product_version_id,
             run_id=str(review_row["run_id"]),
-            review_task_id=str(review_row["review_task_id"]),
+            review_task_id=review_task_id,
             event_type="New",
             event_reason_code=None,
             detected_at=decided_at,
@@ -766,7 +767,7 @@ def _apply_canonical_approval(
             product_id=product_id,
             product_version_id=product_version_id,
             run_id=str(review_row["run_id"]),
-            review_task_id=str(review_row["review_task_id"]),
+            review_task_id=review_task_id,
             event_type=change_event_type,
             event_reason_code=change_reason_code,
             detected_at=decided_at,
@@ -799,7 +800,7 @@ def _apply_canonical_approval(
             product_id=product_id,
             product_version_id=product_version_id,
             run_id=str(review_row["run_id"]),
-            review_task_id=str(review_row["review_task_id"]),
+            review_task_id=review_task_id,
             event_type="ManualOverride",
             event_reason_code="manual_override",
             detected_at=decided_at,
@@ -970,7 +971,7 @@ def _insert_change_event(
     product_id: str,
     product_version_id: str | None,
     run_id: str,
-    review_task_id: str,
+    review_task_id: str | None,
     event_type: str,
     event_reason_code: str | None,
     detected_at: datetime,

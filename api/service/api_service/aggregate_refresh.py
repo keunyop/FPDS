@@ -63,6 +63,64 @@ def queue_review_aggregate_refresh_request(
     return _serialize_request_row(request_row, already_pending=False)
 
 
+def queue_auto_promotion_aggregate_refresh_request(
+    connection: Any,
+    *,
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+    promoted_count: int,
+    product_ids: list[str],
+    candidate_ids: list[str],
+    run_ids: list[str],
+    change_event_types: list[str],
+    country_code: str = DEFAULT_COUNTRY_CODE,
+    refresh_scope: str = DEFAULT_REFRESH_SCOPE,
+) -> dict[str, Any]:
+    requested_at = utc_now()
+    request_row = {
+        "aggregate_refresh_request_id": new_id("aggreq"),
+        "refresh_scope": refresh_scope,
+        "country_code": country_code,
+        "request_status": "queued",
+        "trigger_reason": "auto_promotion",
+        "requested_by_user_id": actor.get("user_id"),
+        "requested_by_label": _actor_label(actor) or "system:auto-promotion",
+        "review_task_id": None,
+        "product_id": None,
+        "request_metadata": {
+            "request_id": request_context.get("request_id"),
+            "promoted_count": promoted_count,
+            "product_ids": sorted({item for item in product_ids if item}),
+            "candidate_ids": sorted({item for item in candidate_ids if item}),
+            "run_ids": sorted({item for item in run_ids if item}),
+            "change_event_types": sorted({item for item in change_event_types if item}),
+        },
+        "requested_at": requested_at,
+        "started_at": None,
+        "completed_at": None,
+        "snapshot_id": None,
+        "error_summary": None,
+    }
+    _insert_request_row(connection, request_row=request_row)
+    _record_aggregate_refresh_audit_event(
+        connection,
+        actor=actor,
+        request_context=request_context,
+        event_type="aggregate_refresh_auto_promotion_queued",
+        target_id=str(request_row["aggregate_refresh_request_id"]),
+        previous_state=None,
+        new_state="queued",
+        diff_summary=f"Queued aggregate refresh after {promoted_count} auto-promoted candidate(s).",
+        payload={
+            "aggregate_refresh_request_id": request_row["aggregate_refresh_request_id"],
+            "country_code": country_code,
+            "refresh_scope": refresh_scope,
+            "promoted_count": promoted_count,
+        },
+    )
+    return _serialize_request_row(request_row, already_pending=False)
+
+
 def request_manual_aggregate_refresh(
     connection: Any,
     *,
@@ -670,7 +728,7 @@ def _record_aggregate_refresh_audit_event(
             %(audit_event_id)s,
             'run',
             %(event_type)s,
-            'user',
+            %(actor_type)s,
             %(actor_id)s,
             %(actor_role_snapshot)s,
             'aggregate_refresh_request',
@@ -691,6 +749,7 @@ def _record_aggregate_refresh_audit_event(
         {
             "audit_event_id": new_id("audit"),
             "event_type": event_type,
+            "actor_type": _actor_type(actor),
             "actor_id": actor.get("user_id"),
             "actor_role_snapshot": actor.get("role"),
             "target_id": target_id,
@@ -713,6 +772,15 @@ def _actor_label(actor: dict[str, Any]) -> str | None:
         if value:
             return value
     return None
+
+
+def _actor_type(actor: dict[str, Any]) -> str:
+    actor_type = str(actor.get("actor_type") or "").strip().lower()
+    if actor_type in {"system", "user", "service", "scheduler"}:
+        return actor_type
+    if str(actor.get("role") or "").strip().lower() == "system":
+        return "system"
+    return "user"
 
 
 def _coerce_datetime(value: Any) -> datetime | None:

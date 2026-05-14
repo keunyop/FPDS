@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 from worker.pipeline.fpds_extraction.__main__ import _context_with_registry_metadata
-from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext, ExtractionInput
+from worker.pipeline.fpds_extraction.models import ExtractedFieldCandidate, ExtractionDocumentContext, ExtractionInput
 from worker.pipeline.fpds_extraction.persistence import ExtractionDatabaseConfig, PsqlExtractionRepository
-from worker.pipeline.fpds_extraction.service import ExtractionService
+from worker.pipeline.fpds_extraction.service import ExtractionService, _append_rate_fallback_fields
 from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, build_object_store
 
 
@@ -126,6 +126,52 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertEqual(payload["parsed_document_id"], "parsed-001")
         finally:
             rmtree(temp_path, ignore_errors=True)
+
+    def test_rate_fallback_scans_product_rate_chunk_when_field_match_missed(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-RBC-SAV-hisa",
+            parsed_document_id="parsed-rate-fallback",
+            source_document_id="src-rate-fallback",
+            snapshot_id="snap-rate-fallback",
+            bank_code="RBC",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "savings"},
+        )
+        extracted_fields = [
+            _extracted_field("product_type", "savings"),
+            _extracted_field("product_name", "High Interest Savings Account"),
+        ]
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id="chunk-rate-fallback",
+                parsed_document_id="parsed-rate-fallback",
+                chunk_index=2,
+                anchor_type="section",
+                anchor_value="earn-4-60-interest-for-3-months",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=(
+                    "Earn 4.60% interest for 3 Months when you open your first "
+                    "RBC High Interest eSavings account."
+                ),
+                retrieval_metadata={},
+                source_document_id="src-rate-fallback",
+                source_snapshot_id="snap-rate-fallback",
+                bank_code="RBC",
+                country_code="CA",
+                source_type="html",
+            )
+        ]
+
+        _append_rate_fallback_fields(context=context, candidates=candidates, extracted_fields=extracted_fields)
+
+        fields_by_name = {field.field_name: field for field in extracted_fields}
+        self.assertEqual(fields_by_name["public_display_rate"].candidate_value, "4.60")
+        self.assertEqual(fields_by_name["promotional_rate"].candidate_value, "4.60")
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertEqual(fields_by_name["public_display_rate"].extraction_method, "heuristic_rate_context_fallback")
 
     def test_extracts_chequing_specific_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-chequing-service")
@@ -2772,6 +2818,25 @@ def _prepare_workspace_temp_dir(name: str) -> Path:
     rmtree(temp_path, ignore_errors=True)
     temp_path.mkdir(parents=True, exist_ok=True)
     return temp_path.resolve()
+
+
+def _extracted_field(field_name: str, candidate_value: object) -> ExtractedFieldCandidate:
+    return ExtractedFieldCandidate(
+        field_name=field_name,
+        candidate_value=candidate_value,
+        value_type="string",
+        confidence=0.9,
+        extraction_method="test",
+        source_document_id="src-test",
+        source_snapshot_id="snap-test",
+        evidence_chunk_id=None,
+        evidence_text_excerpt=None,
+        anchor_type=None,
+        anchor_value=None,
+        page_no=None,
+        chunk_index=None,
+        field_metadata={},
+    )
 
 
 def _build_extraction_result_stub():

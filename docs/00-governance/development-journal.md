@@ -62,6 +62,20 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-14 - Audited Candidate Auto-Promotion And Canonical Identity Repair
+
+- WBS: Post-`5.16` source collection/public quality hardening
+- Status: `done`
+- Goal: make public FPDS show canonical products instead of only a small review-approved subset by repairing bank/product identity aliases, promoting safe `auto_validated` pass candidates, and re-running weak bank/product scopes.
+- Why now: public output had only a few visible products because `auto_validated` pass candidates stopped before canonical upsert, while historical alias codes such as `RBOC`, `TB`, `SCOTIABANK`, and `gic-term-deposit` fragmented source/candidate/canonical identity.
+- Outcome: added an audited `candidate_auto_promotion` path that reuses canonical approval side effects, writes audit events, queues `auto_promotion` aggregate refreshes, rejects non-product page-title false positives, and is invoked automatically after source collection. Added canonical identity migrations for bank/product aliases and source document ids. Applied them to dev, promoted 110 existing pass candidates, deactivated 8 non-product canonical false positives with audit, re-collected missing weak scopes, added generic rate-evidence fallback, and re-ran RBC savings so one additional evidence-backed RBC savings product was promoted. Latest completed public snapshot is `agg_v5WBKqCwt4Sku1rq` with 35 active public products.
+- Not done: BMO GIC, CIBC GIC/savings, RBC GIC, and TD GIC still have review-queued candidates with `required_field_missing` because official pages expose unresolved rate placeholders, broad product-family tables, or no canonical-safe numeric rate/minimum/term combination. These should not be approved without better source evidence or product-specific extraction.
+- Key files: `api/service/api_service/candidate_auto_promotion.py`, `api/service/api_service/source_collection_runner.py`, `api/service/api_service/review_detail.py`, `api/service/api_service/aggregate_refresh.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `db/migrations/0016_auto_promotion_aggregate_trigger.sql`, `db/migrations/0017_canonical_identity_alias_repair.sql`, `db/migrations/0018_canonical_source_document_identity_repair.sql`
+- Decisions: use common Canadian bank codes `RBC`, `TD`, `BMO`, `CIBC`, `SCOTIA`; normalize GIC product type to `gic`; keep the auto path generic and policy-driven, not Big-5-specific; do not approve candidates missing source-backed required rate/term/deposit fields.
+- Verification: targeted unit suites passed for candidate auto-promotion, aggregate refresh, source collection runner, extraction, and normalization. Dev DB checks show no remaining `auto_validated/pass` candidates and no mismatched canonical `source_document_id` values.
+- Known issues: some generated source ids and historical object-storage keys still carry old alias text in non-identity metadata/path strings, but DB bank/source document identity now uses canonical codes.
+- Next step: improve GIC and savings source support where official pages require dynamic rate resolution or product-variant splitting; approve only refreshed candidates that pass validation with evidence-backed required fields.
+
 ## 2026-05-12 - Review Queue Triage And Detail Decision Simplification
 
 - WBS: `4.2`, `4.3`, `4.4`, admin review workflow hardening

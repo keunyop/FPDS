@@ -714,6 +714,7 @@ def _extract_fields(
         if extracted_field is not None:
             extracted.append(extracted_field)
 
+    _append_rate_fallback_fields(context=context, candidates=candidates, extracted_fields=extracted)
     return _dedupe_fields(extracted)
 
 
@@ -757,6 +758,146 @@ def _extract_from_matches(
             },
         )
     return None
+
+
+def _append_rate_fallback_fields(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+    extracted_fields: list[ExtractedFieldCandidate],
+) -> None:
+    if any(field.field_name in {"standard_rate", "public_display_rate", "promotional_rate"} for field in extracted_fields):
+        return
+    product_type_family = _canonical_product_type_family(_infer_product_type(context))
+    if product_type_family not in {"savings", "gic"}:
+        return
+    product_name = next((str(field.candidate_value) for field in extracted_fields if field.field_name == "product_name"), "")
+    terms = _rate_fallback_product_terms(product_name=product_name, context=context)
+    match = _find_rate_fallback_candidate(candidates=candidates, terms=terms, product_type_family=product_type_family)
+    if match is None:
+        return
+    percentages = _extract_rate_context_percentages(match.evidence_excerpt)
+    if not percentages:
+        return
+
+    unique_percentages = sorted(set(percentages))
+    public_display_rate = unique_percentages[-1]
+    is_promotional = _is_promotional_rate_context(match.evidence_excerpt.lower())
+    field_values: dict[str, Decimal] = {"public_display_rate": public_display_rate}
+    if is_promotional:
+        field_values["promotional_rate"] = public_display_rate
+    else:
+        field_values["standard_rate"] = unique_percentages[0]
+        if len(unique_percentages) > 1:
+            field_values["promotional_rate"] = public_display_rate
+
+    for field_name, value in field_values.items():
+        extracted_fields.append(
+            ExtractedFieldCandidate(
+                field_name=field_name,
+                candidate_value=_normalize_decimal(str(value)),
+                value_type="decimal",
+                confidence=0.78,
+                extraction_method="heuristic_rate_context_fallback",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id=match.evidence_chunk_id,
+                evidence_text_excerpt=match.evidence_excerpt,
+                anchor_type=match.anchor_type,
+                anchor_value=match.anchor_value,
+                page_no=match.page_no,
+                chunk_index=match.chunk_index,
+                field_metadata={
+                    "rate_context_fallback": True,
+                    "product_terms": list(terms),
+                },
+            )
+        )
+
+
+def _rate_fallback_product_terms(*, product_name: str, context: ExtractionDocumentContext) -> tuple[str, ...]:
+    raw_terms = [
+        product_name,
+        str(context.source_metadata.get("product_name") or ""),
+        str(context.source_metadata.get("page_title") or ""),
+        str(context.source_metadata.get("primary_heading") or ""),
+    ]
+    terms: set[str] = set()
+    for raw_term in raw_terms:
+        normalized = _normalize_text(raw_term).lower()
+        if not normalized:
+            continue
+        normalized = normalized.replace("esavings", "savings")
+        terms.add(normalized)
+        simplified = re.sub(
+            r"\b(?:rbc|td|bmo|cibc|scotiabank|scotia|royal|bank|account|accounts|canada|trust)\b",
+            " ",
+            normalized,
+        )
+        simplified = _normalize_text(simplified)
+        if len(simplified) >= 6:
+            terms.add(simplified)
+        if " savings" in simplified:
+            prefix = simplified.split(" savings", 1)[0].strip()
+            if len(prefix) >= 6:
+                terms.add(prefix)
+        if " gic" in simplified:
+            prefix = simplified.split(" gic", 1)[0].strip()
+            if len(prefix) >= 6:
+                terms.add(prefix)
+    return tuple(sorted(terms, key=len, reverse=True))
+
+
+def _find_rate_fallback_candidate(
+    *,
+    candidates: list[EvidenceChunkCandidate],
+    terms: tuple[str, ...],
+    product_type_family: str,
+) -> EvidenceChunkCandidate | None:
+    ranked: list[tuple[int, int, EvidenceChunkCandidate]] = []
+    for candidate in candidates:
+        percentages = _extract_rate_context_percentages(candidate.evidence_excerpt)
+        if not percentages:
+            continue
+        normalized = _normalize_text(candidate.evidence_excerpt).lower().replace("esavings", "savings")
+        anchor = str(candidate.anchor_value or "").lower()
+        if any(token in normalized for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
+            continue
+        score = 0
+        if any(term and term in normalized for term in terms):
+            score += 5
+        if any(token in normalized for token in ("interest rate", "posted rate", "annual interest", "bonus interest")):
+            score += 3
+        if any(token in anchor for token in ("rate", "interest", "return", "yield")):
+            score += 2
+        if product_type_family == "gic" and "gic" in normalized:
+            score += 1
+        if product_type_family == "savings" and "savings" in normalized:
+            score += 1
+        if score < 5:
+            continue
+        ranked.append((score, -candidate.chunk_index, candidate))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return ranked[0][2]
+
+
+def _extract_rate_context_percentages(text: str) -> list[Decimal]:
+    values: list[Decimal] = []
+    for match in _PERCENT_RE.finditer(text):
+        window_start = max(0, match.start() - 90)
+        window_end = min(len(text), match.end() + 90)
+        window = text[window_start:window_end].lower()
+        if not any(token in window for token in ("interest", "rate", "return", "yield", "bonus")):
+            continue
+        if any(token in window for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
+            continue
+        try:
+            values.append(Decimal(match.group(1)))
+        except InvalidOperation:
+            continue
+    return values
 
 
 def _extract_candidate_value(
@@ -1753,8 +1894,13 @@ def _is_promotional_rate_context(lowered: str) -> bool:
             "promotional interest",
             "bonus rate",
             "bonus interest",
+            "for 3 months",
+            "for three months",
+            "for the first",
             "special rate",
             "limited time",
+            "limited-time",
+            "offer expires",
         )
     )
 

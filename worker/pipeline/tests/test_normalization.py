@@ -71,6 +71,75 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_normalizes_missing_rate_from_rate_summary_evidence(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-rate-fallback")
+        try:
+            base_input = _build_input()
+            extracted_fields = [
+                field for field in base_input.extracted_fields if field.field_name != "standard_rate"
+            ]
+            extracted_fields.append(
+                _field(
+                    "interest_rate_summary",
+                    "RBC Enhanced Savings account Interest Rate 1.600%",
+                    "string",
+                    0.82,
+                    evidence_chunk_id="chunk-rate-summary",
+                )
+            )
+            evidence_links = [
+                link for link in base_input.evidence_links if link.field_name != "standard_rate"
+            ]
+            evidence_links.append(
+                NormalizationEvidenceLink(
+                    field_name="interest_rate_summary",
+                    candidate_value="RBC Enhanced Savings account Interest Rate 1.600%",
+                    evidence_chunk_id="chunk-rate-summary",
+                    evidence_text_excerpt="RBC Enhanced Savings account Interest Rate 1.600%",
+                    source_document_id="src-001",
+                    source_snapshot_id="snap-001",
+                    citation_confidence=0.82,
+                    model_execution_id="modelexec-extract-001",
+                    anchor_type="section",
+                    anchor_value="savings-rate-table",
+                    page_no=None,
+                    chunk_index=0,
+                )
+            )
+            item = NormalizationInput(
+                **{
+                    **base_input.__dict__,
+                    "source_id": "AUTO-RBC-SAV-rate",
+                    "bank_code": "RBC",
+                    "extracted_fields": extracted_fields,
+                    "evidence_links": evidence_links,
+                }
+            )
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            result = service.normalize_inputs(run_id="run-rate-fallback", inputs=[item])
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "pass")
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            self.assertEqual(candidate["candidate_payload"]["standard_rate"], 1.6)
+            self.assertEqual(candidate["candidate_payload"]["public_display_rate"], 1.6)
+            linked_fields = {record["field_name"] for record in source_result.field_evidence_link_records}
+            self.assertIn("standard_rate", linked_fields)
+            self.assertIn("public_display_rate", linked_fields)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_chequing_candidate_with_package_subtype_and_flags(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-chequing-service")
         try:

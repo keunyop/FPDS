@@ -18,6 +18,7 @@ Current scope:
 - guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
+- audited auto-promotion for `auto_validated` pass candidates after collection, including non-product skip/reject guards
 - read-only source registry list/detail routes backed by generated `source_registry_item`
 - approve, reject, defer, and edit-approve review mutations
 - approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
@@ -116,6 +117,7 @@ cd api/service
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
 - Approve and edit-approve now queue `aggregate_refresh_request` rows inside the same review-decision transaction, then launch a background aggregate refresh runner after commit so public serving can stay on the latest successful snapshot without blocking review writes.
+- Source collection now runs the same audited canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are audit-logged and rejected before they can become public canonical products.
 - `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.
 - Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.
 - The settings loader now reads both `FPDS_ALLOWED_PUBLIC_ORIGINS` and `FPDS_ALLOWED_ADMIN_ORIGINS`, and the live CORS middleware allows the combined origin set because the same FastAPI service now fronts both public and admin browser surfaces.

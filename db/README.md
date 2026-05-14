@@ -21,6 +21,9 @@ Files:
 - `migrations/0013_operator_managed_product_types.sql`: removes the historical product-type classification flag so every product type is an operator-managed DB row
 - `migrations/0014_canonical_deposit_taxonomy_backfill.sql`: restores canonical chequing, savings, and GIC subtype taxonomy rows when operator-managed product types have been reset or recreated
 - `migrations/0015_phase1_review_confidence_policy.sql`: lowers the Phase 1 auto-approve confidence policy to `0.82` while preserving validation-error and force-review gates
+- `migrations/0016_auto_promotion_aggregate_trigger.sql`: allows aggregate refresh requests triggered by audited candidate auto-promotion
+- `migrations/0017_canonical_identity_alias_repair.sql`: repairs common bank and product-type identity aliases such as RBC/TD/SCOTIA and GIC
+- `migrations/0018_canonical_source_document_identity_repair.sql`: realigns `source_document_id` values with canonical bank/url/type identity after alias repair
 
 How to apply when a database is available:
 
@@ -35,6 +38,9 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0012_evidence_chunk_embeddings.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0013_operator_managed_product_types.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0014_canonical_deposit_taxonomy_backfill.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0015_phase1_review_confidence_policy.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0016_auto_promotion_aggregate_trigger.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0017_canonical_identity_alias_repair.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0018_canonical_source_document_identity_repair.sql
 ```
 
 Notes:

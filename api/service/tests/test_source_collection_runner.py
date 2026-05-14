@@ -106,6 +106,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
 
@@ -222,6 +223,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
 
