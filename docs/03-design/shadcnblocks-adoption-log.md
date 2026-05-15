@@ -246,6 +246,20 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: source-catalog modals still use the default wide no-panel width because their detail payload is denser
 
+## 2026-05-15 - Public Dashboard10 Revamp
+
+- Surface or Area: `app/public` public dashboard-first runtime
+- Vendor Asset: `@shadcnblocks/dashboard10` plus generated shadcn UI primitives for cards, charts, tables, inputs, select, sheet, scroll area, dropdown menu, and avatar
+- Source: authenticated `@shadcnblocks` registry in `app/public/components.json`
+- Install Method: `pnpm dlx shadcn add @shadcnblocks/dashboard10 -y -o` after loading `SHADCNBLOCKS_API_KEY` from local `.env.dev`
+- Files Added or Changed: `app/public/src/components/dashboard10.tsx`, `app/public/src/components/ui/*`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-dashboard-charts.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/app/methodology/page.tsx`, `app/public/src/app/page.tsx`, `app/public/src/app/globals.css`
+- FPDS Wrappers or Overrides: the vendor demo content was replaced by FPDS-owned public dashboard composition that uses public aggregate data, Recharts-backed chart primitives, ranking tables, and scope-preserving navigation
+- Direct Vendor Edits: yes; the generated `dashboard10.tsx` is retained only as a thin FPDS re-export so ecommerce demo content does not ship in the public app
+- Verification:
+  - `pnpm run typecheck`
+  - `pnpm run build`
+- Notes: first install attempt failed because `SHADCNBLOCKS_API_KEY` was not present in the shell; a second attempt passed after loading the local env value. `app/public/node_modules` also needed `pnpm install --config.confirmModulesPurge=false` because its virtual store was linked to `app/admin`.
+
 ---
 
 ## 5. Change History

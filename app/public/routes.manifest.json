@@ -20,6 +20,12 @@
       "route_id": "public.dashboard",
       "shell_dir": "route-shells/dashboard",
       "resource_key": "public_navigation.dashboard"
+    },
+    {
+      "route": "/methodology",
+      "route_id": "public.methodology",
+      "shell_dir": "route-shells/methodology",
+      "resource_key": "public_navigation.methodology"
     }
   ]
 }

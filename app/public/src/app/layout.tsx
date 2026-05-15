@@ -15,7 +15,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground">
         <div className="relative isolate min-h-screen">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgb(67_56_202_/_0.12),_transparent_56%)]" />
           <PublicHeader />
           {children}
         </div>

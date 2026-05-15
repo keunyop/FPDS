@@ -7,31 +7,32 @@ type PublicMessages = {
     tagline: string;
   };
   nav: {
-    products: string;
     dashboard: string;
+    products: string;
+    methodology: string;
     localeLabel: string;
   };
   common: {
-    applyFilters: string;
-    clearFilters: string;
-    clearAllFilters: string;
-    previous: string;
-    next: string;
+    active: string;
     all: string;
+    applyFilters: string;
+    clearAllFilters: string;
+    clearFilters: string;
+    changedOn: string;
     noDate: string;
+    noOptions: string;
     noRecentChange: string;
     noSuccessfulSnapshot: string;
     notDisclosed: string;
-    noOptions: string;
-    sourceLanguage: string;
-    verifiedOn: string;
-    changedOn: string;
+    open: string;
     pageLabel: string;
+    previous: string;
+    next: string;
+    verifiedOn: string;
   };
   grid: {
     pageTitle: string;
     pageDescription: string;
-    eyebrow: string;
     title: string;
     description: string;
     currentScope: string;
@@ -45,17 +46,14 @@ type PublicMessages = {
     termBucket: string;
     sortBy: string;
     direction: string;
-    filterHint: string;
     resultSummary: string;
     noActiveFilters: string;
-    noResultEyebrow: string;
     noResultTitle: string;
     noResultBody: string;
     retryTitle: string;
     retryBody: string;
     retryButton: string;
     openDashboard: string;
-    goToDashboard: string;
     metricMonthlyFee: string;
     metricMinBalance: string;
     metricMinDeposit: string;
@@ -78,51 +76,50 @@ type PublicMessages = {
   dashboard: {
     pageTitle: string;
     pageDescription: string;
-    eyebrow: string;
     title: string;
     description: string;
-    scopeSummary: string;
-    scopeTitle: string;
-    noActiveFilters: string;
-    adjustScope: string;
-    clearScope: string;
-    rankingWidgets: string;
-    rankingTitle: string;
-    rankingDescription: string;
-    insufficientData: string;
-    noRankingWidgets: string;
-    breakdownByBank: string;
-    breakdownByBankDescription: string;
-    breakdownByType: string;
-    breakdownByTypeDescription: string;
-    comparativeChart: string;
-    chartTitleFallback: string;
-    chartDescription: string;
-    interpretation: string;
-    visiblePoints: string;
-    openInGrid: string;
-    methodology: string;
-    methodologyTitle: string;
+    marketSnapshot: string;
+    kpiSubtitle: string;
+    composition: string;
+    compositionSubtitle: string;
+    productsByBank: string;
+    productsByType: string;
+    rankings: string;
+    rankingsSubtitle: string;
+    comparisonMap: string;
+    comparisonSubtitle: string;
+    coverageTable: string;
+    coverageSubtitle: string;
+    dataNotes: string;
+    dataNotesBody: string;
     freshness: string;
-    freshnessTitle: string;
-    openProductGrid: string;
-    retryDashboard: string;
+    openProducts: string;
+    clearScope: string;
+    noActiveFilters: string;
+    noRankingWidgets: string;
+    chartUnavailable: string;
+    chartSingleTypeHint: string;
+    visibleProducts: string;
+    activeProducts: string;
+    banksInScope: string;
+    peakRate: string;
+    openInProducts: string;
     apiUnavailableTitle: string;
     apiUnavailableBody: string;
+    retryDashboard: string;
     mixedMarket: string;
-    peakRate: string;
-    selectOneProductType: string;
-    singleTypeOnly: string;
-    chartInsufficient: string;
-    resetDashboardScope: string;
-    morePoints: string;
-    productsAcrossBanks: string;
-    activeProducts: string;
-    topComparisons: string;
     rankedBy: string;
     trailingDays: string;
-    noRecentChangeDate: string;
-    noProductsInScope: string;
+  };
+  methodology: {
+    pageTitle: string;
+    pageDescription: string;
+    title: string;
+    description: string;
+    sections: Array<{
+      title: string;
+      body: string;
+    }>;
   };
 };
 
@@ -131,59 +128,56 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     localeName: "English",
     shell: {
       brand: "FPDS Public",
-      tagline: "Canada deposit product catalog and comparison surface"
+      tagline: "Canada deposit products"
     },
     nav: {
+      dashboard: "Dashboard",
       products: "Products",
-      dashboard: "Insights",
+      methodology: "Methodology",
       localeLabel: "Language"
     },
     common: {
-      applyFilters: "Apply filters",
-      clearFilters: "Clear filters",
-      clearAllFilters: "Clear all filters",
+      active: "Active",
+      all: "All",
+      applyFilters: "Apply",
+      clearAllFilters: "Clear all",
+      clearFilters: "Clear",
+      changedOn: "Changed",
+      noDate: "No date",
+      noOptions: "No options",
+      noRecentChange: "No recent change",
+      noSuccessfulSnapshot: "No successful public snapshot is available yet.",
+      notDisclosed: "Not disclosed",
+      open: "Open",
+      pageLabel: "Page",
       previous: "Previous",
       next: "Next",
-      all: "All",
-      noDate: "No date",
-      noRecentChange: "No recent change timestamp",
-      noSuccessfulSnapshot: "No successful aggregate snapshot is available yet.",
-      notDisclosed: "Not disclosed",
-      noOptions: "No options available yet.",
-      sourceLanguage: "Source language",
-      verifiedOn: "Verified",
-      changedOn: "Changed",
-      pageLabel: "Page"
+      verifiedOn: "Verified"
     },
     grid: {
-      pageTitle: "FPDS Public Products",
-      pageDescription: "Locale-aware public product grid for Canada deposit products.",
-      eyebrow: "WBS 5.12 Locale Rollout",
-      title: "Compare Canada deposit products with one shared public filter vocabulary.",
-      description:
-        "Browse active chequing, savings, and GIC products from the latest successful aggregate snapshot. Product names stay source-derived, while labels, bucket filters, and freshness notes stay UI-owned.",
+      pageTitle: "FPDS Products",
+      pageDescription: "Filterable Canada deposit product catalog.",
+      title: "Product catalog",
+      description: "Filter active chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
-      primaryFilter: "Primary filter",
+      primaryFilter: "Primary",
       banks: "Banks",
       productTypes: "Product types",
-      targetTags: "Target tags",
-      feeBucket: "Fee bucket",
-      minimumBalance: "Minimum balance",
-      minimumDeposit: "Minimum deposit",
-      termBucket: "Term bucket",
-      sortBy: "Sort by",
+      targetTags: "Customer tags",
+      feeBucket: "Fee",
+      minimumBalance: "Min. balance",
+      minimumDeposit: "Min. deposit",
+      termBucket: "Term",
+      sortBy: "Sort",
       direction: "Direction",
-      filterHint: "Apply filters to refresh the grid. Pagination resets to page one when scope changes.",
-      resultSummary: "Result summary",
-      noActiveFilters: "No active filters. You are viewing the full public Canada scope.",
-      noResultEyebrow: "No result",
-      noResultTitle: "No products matched the current filter scope.",
-      noResultBody: "Clear the active chips or move to the insight dashboard if you want a higher-level market view for this slice.",
-      retryTitle: "Product Grid could not load because the public aggregate API is not reachable.",
-      retryBody: "Start the FastAPI service and refresh this page. The public Product Grid depends on `GET /api/public/products` and `GET /api/public/filters`.",
-      retryButton: "Retry Product Grid",
-      openDashboard: "Open insight dashboard",
-      goToDashboard: "Go to insight dashboard",
+      resultSummary: "Results",
+      noActiveFilters: "Full Canada public scope.",
+      noResultTitle: "No products matched this scope.",
+      noResultBody: "Clear filters or return to the dashboard for a broader market view.",
+      retryTitle: "Products could not load.",
+      retryBody: "The public API is not reachable.",
+      retryButton: "Retry products",
+      openDashboard: "Open dashboard",
       metricMonthlyFee: "Monthly fee",
       metricMinBalance: "Min. balance",
       metricMinDeposit: "Min. deposit",
@@ -194,322 +188,348 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       metricRateNote: "Rate note",
       ascending: "Ascending",
       descending: "Descending",
-      sortDefault: "Default order",
+      sortDefault: "Default",
       sortDisplayRate: "Display rate",
       sortMonthlyFee: "Monthly fee",
       sortMinimumBalance: "Minimum balance",
       sortMinimumDeposit: "Minimum deposit",
       sortLastChange: "Last change",
-      sortBankName: "Bank name",
-      sortProductName: "Product name"
+      sortBankName: "Bank",
+      sortProductName: "Product"
     },
     dashboard: {
-      pageTitle: "FPDS Insight Dashboard",
-      pageDescription: "Locale-aware public insight dashboard for Canada deposit products.",
-      eyebrow: "WBS 5.12 Locale Rollout",
-      title: "Read the Canada deposit market at a glance before diving back into product-level detail.",
-      description:
-        "The dashboard uses the same public filter vocabulary as the Product Grid, but reframes the current scope through KPI cards, composition views, ranking widgets, and a comparative chart when one product type is in focus.",
-      scopeSummary: "Scope summary",
-      scopeTitle: "Dashboarding the current public filter scope",
-      noActiveFilters: "No active filters. You are reading the full Canada public dashboard scope.",
-      adjustScope: "Adjust scope on product grid",
-      clearScope: "Clear scope",
-      rankingWidgets: "Ranking widgets",
-      rankingTitle: "Top comparisons for this scope",
-      rankingDescription:
-        "Widget order follows the approved product-type emphasis rules and only renders when enough eligible products remain. Each row can reopen the Product Grid with a narrowed matching scope.",
-      insufficientData: "Insufficient data",
-      noRankingWidgets: "No ranking widgets are eligible for the current scope.",
-      breakdownByBank: "Products by bank",
-      breakdownByBankDescription: "Composition of active products in the current scope.",
-      breakdownByType: "Products by product type",
-      breakdownByTypeDescription: "Mix of chequing, savings, and GIC exposure after filtering.",
-      comparativeChart: "Comparative chart",
-      chartTitleFallback: "Comparative chart unlocks when one product type is in focus",
-      chartDescription: "When exactly one product type is selected, the dashboard can compare trade-offs within that meaningfully similar scope.",
-      interpretation: "Interpretation",
-      visiblePoints: "Visible points",
-      openInGrid: "Open in grid",
-      methodology: "Methodology",
-      methodologyTitle: "How to read this dashboard",
+      pageTitle: "FPDS Dashboard",
+      pageDescription: "Canada deposit market dashboard.",
+      title: "Deposit market dashboard",
+      description: "Rates, fees, coverage, and recent changes from the latest public snapshot.",
+      marketSnapshot: "Market snapshot",
+      kpiSubtitle: "Current public scope",
+      composition: "Market composition",
+      compositionSubtitle: "Active product coverage by bank and product type.",
+      productsByBank: "Products by bank",
+      productsByType: "Products by type",
+      rankings: "Top comparisons",
+      rankingsSubtitle: "Eligible products ranked by the approved public metrics.",
+      comparisonMap: "Comparison map",
+      comparisonSubtitle: "Select one product type for a like-for-like chart.",
+      coverageTable: "Coverage table",
+      coverageSubtitle: "Public products currently represented in the snapshot.",
+      dataNotes: "Data notes",
+      dataNotesBody: "Metrics use public aggregate fields. Products missing required numeric values are excluded from affected comparisons.",
       freshness: "Freshness",
-      freshnessTitle: "Snapshot handling",
-      openProductGrid: "Open product grid with this scope",
-      retryDashboard: "Retry dashboard",
-      apiUnavailableTitle: "Insight Dashboard could not load because the public aggregate API is not reachable.",
-      apiUnavailableBody:
-        "Start the FastAPI service and refresh this page. The public dashboard depends on `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, `GET /api/public/dashboard-scatter`, and `GET /api/public/filters`.",
-      mixedMarket: "Mixed market",
-      peakRate: "Peak rate",
-      selectOneProductType: "Select one product type",
-      singleTypeOnly: "Comparative plotting is reserved for single-type scope.",
-      chartInsufficient: "There are not enough eligible products to render this chart.",
-      resetDashboardScope: "Reset dashboard scope",
-      morePoints: "more points in the chart.",
-      productsAcrossBanks: "active products across {banks} banks",
+      openProducts: "Open products",
+      clearScope: "Clear scope",
+      noActiveFilters: "No filters active.",
+      noRankingWidgets: "No ranking is eligible for this scope.",
+      chartUnavailable: "Not enough eligible products for this chart.",
+      chartSingleTypeHint: "Choose one product type to unlock the comparison map.",
+      visibleProducts: "Visible products",
       activeProducts: "active products",
-      topComparisons: "Top {count}",
+      banksInScope: "banks",
+      peakRate: "Peak rate",
+      openInProducts: "Open in products",
+      apiUnavailableTitle: "Dashboard could not load.",
+      apiUnavailableBody: "The public aggregate API is not reachable.",
+      retryDashboard: "Retry dashboard",
+      mixedMarket: "All product types",
       rankedBy: "Ranked by",
-      trailingDays: "over the trailing {days} days.",
-      noRecentChangeDate: "No recent change date",
-      noProductsInScope: "No products are available in the current scope."
+      trailingDays: "trailing {days} days"
+    },
+    methodology: {
+      pageTitle: "FPDS Methodology",
+      pageDescription: "Public data notes and metric boundaries.",
+      title: "Methodology",
+      description: "How FPDS prepares the public Canada deposit-product view.",
+      sections: [
+        {
+          title: "Snapshot source",
+          body: "Public pages read from the latest successful aggregate snapshot, not live bank pages."
+        },
+        {
+          title: "Metric eligibility",
+          body: "Rates, fees, balances, deposits, and terms are shown only when the canonical public field is available."
+        },
+        {
+          title: "Product text",
+          body: "Product names and source-derived conditions stay in the original source language."
+        },
+        {
+          title: "Evidence boundary",
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on FPDS Public."
+        }
+      ]
     }
   },
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "FPDS 공개 화면",
-      tagline: "캐나다 예금 상품 카탈로그 및 비교 화면"
+      brand: "FPDS Public",
+      tagline: "캐나다 예금 상품"
     },
     nav: {
+      dashboard: "대시보드",
       products: "상품",
-      dashboard: "인사이트",
+      methodology: "방법론",
       localeLabel: "언어"
     },
     common: {
-      applyFilters: "필터 적용",
-      clearFilters: "필터 초기화",
-      clearAllFilters: "모든 필터 초기화",
+      active: "활성",
+      all: "전체",
+      applyFilters: "적용",
+      clearAllFilters: "전체 해제",
+      clearFilters: "해제",
+      changedOn: "변경",
+      noDate: "날짜 없음",
+      noOptions: "옵션 없음",
+      noRecentChange: "최근 변경 없음",
+      noSuccessfulSnapshot: "아직 사용 가능한 공개 스냅샷이 없습니다.",
+      notDisclosed: "미공개",
+      open: "열기",
+      pageLabel: "페이지",
       previous: "이전",
       next: "다음",
-      all: "전체",
-      noDate: "날짜 없음",
-      noRecentChange: "최근 변경 시각 없음",
-      noSuccessfulSnapshot: "아직 성공한 집계 스냅샷이 없습니다.",
-      notDisclosed: "공개되지 않음",
-      noOptions: "아직 선택 가능한 항목이 없습니다.",
-      sourceLanguage: "원문 언어",
-      verifiedOn: "검증일",
-      changedOn: "변경일",
-      pageLabel: "페이지"
+      verifiedOn: "검증"
     },
     grid: {
-      pageTitle: "FPDS 공개 상품",
-      pageDescription: "캐나다 예금 상품을 위한 로케일 지원 공개 상품 그리드입니다.",
-      eyebrow: "WBS 5.12 Locale 적용",
-      title: "공통 공개 필터 체계로 캐나다 예금 상품을 비교하세요.",
-      description:
-        "최신 성공 집계 스냅샷을 기준으로 활성화된 입출금, 저축, GIC 상품을 탐색할 수 있습니다. 상품명은 원문을 유지하고, 라벨·버킷 필터·신선도 안내는 UI 리소스로 제공합니다.",
+      pageTitle: "FPDS 상품",
+      pageDescription: "캐나다 예금 상품 카탈로그입니다.",
+      title: "상품 카탈로그",
+      description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품을 필터링합니다.",
       currentScope: "현재 범위",
-      primaryFilter: "주요 필터",
+      primaryFilter: "주요",
       banks: "은행",
       productTypes: "상품 유형",
-      targetTags: "대상 태그",
-      feeBucket: "수수료 구간",
+      targetTags: "고객 태그",
+      feeBucket: "수수료",
       minimumBalance: "최소 잔액",
       minimumDeposit: "최소 예치금",
-      termBucket: "기간 구간",
-      sortBy: "정렬 기준",
-      direction: "정렬 방향",
-      filterHint: "필터를 적용하면 그리드가 새로고침됩니다. 범위가 바뀌면 페이지는 1로 돌아갑니다.",
-      resultSummary: "결과 요약",
-      noActiveFilters: "활성 필터가 없습니다. 캐나다 전체 공개 범위를 보고 있습니다.",
-      noResultEyebrow: "결과 없음",
-      noResultTitle: "현재 필터 범위와 일치하는 상품이 없습니다.",
-      noResultBody: "활성 칩을 지우거나 더 상위 시장 관점을 보려면 인사이트 대시보드로 이동하세요.",
-      retryTitle: "공개 집계 API에 연결할 수 없어 상품 그리드를 불러오지 못했습니다.",
-      retryBody: "FastAPI 서비스를 시작한 뒤 이 페이지를 새로고침하세요. 공개 상품 그리드는 `GET /api/public/products` 와 `GET /api/public/filters` 에 의존합니다.",
-      retryButton: "상품 그리드 다시 시도",
-      openDashboard: "인사이트 대시보드 열기",
-      goToDashboard: "인사이트 대시보드로 이동",
+      termBucket: "기간",
+      sortBy: "정렬",
+      direction: "방향",
+      resultSummary: "결과",
+      noActiveFilters: "캐나다 전체 공개 범위입니다.",
+      noResultTitle: "현재 범위에 맞는 상품이 없습니다.",
+      noResultBody: "필터를 해제하거나 대시보드에서 더 넓은 시장을 확인하세요.",
+      retryTitle: "상품을 불러오지 못했습니다.",
+      retryBody: "공개 API에 연결할 수 없습니다.",
+      retryButton: "상품 다시 불러오기",
+      openDashboard: "대시보드 열기",
       metricMonthlyFee: "월 수수료",
       metricMinBalance: "최소 잔액",
       metricMinDeposit: "최소 예치금",
       metricDisplayRate: "표시 금리",
       metricTerm: "기간",
-      metricKeyDetail: "핵심 포인트",
+      metricKeyDetail: "핵심 정보",
       metricLastChange: "최근 변경",
       metricRateNote: "금리 메모",
       ascending: "오름차순",
       descending: "내림차순",
-      sortDefault: "기본 순서",
+      sortDefault: "기본",
       sortDisplayRate: "표시 금리",
       sortMonthlyFee: "월 수수료",
       sortMinimumBalance: "최소 잔액",
       sortMinimumDeposit: "최소 예치금",
       sortLastChange: "최근 변경",
-      sortBankName: "은행명",
-      sortProductName: "상품명"
+      sortBankName: "은행",
+      sortProductName: "상품"
     },
     dashboard: {
-      pageTitle: "FPDS 인사이트 대시보드",
-      pageDescription: "캐나다 예금 상품을 위한 로케일 지원 공개 인사이트 대시보드입니다.",
-      eyebrow: "WBS 5.12 Locale 적용",
-      title: "상품 세부 비교로 돌아가기 전에 캐나다 예금 시장을 한눈에 읽어보세요.",
-      description:
-        "이 대시보드는 Product Grid와 같은 공개 필터 체계를 사용하지만, 현재 범위를 KPI 카드, 구성 비율, 랭킹 위젯, 단일 상품 유형 비교 차트로 다시 보여줍니다.",
-      scopeSummary: "범위 요약",
-      scopeTitle: "현재 공개 필터 범위 대시보드",
-      noActiveFilters: "활성 필터가 없습니다. 캐나다 전체 공개 대시보드 범위를 보고 있습니다.",
-      adjustScope: "상품 그리드에서 범위 조정",
-      clearScope: "범위 초기화",
-      rankingWidgets: "랭킹 위젯",
-      rankingTitle: "현재 범위의 상위 비교",
-      rankingDescription: "위젯 순서는 승인된 상품 유형 우선순위를 따르며, 충분한 데이터가 있을 때만 표시됩니다. 각 행은 더 좁은 범위의 Product Grid를 다시 열 수 있습니다.",
-      insufficientData: "데이터 부족",
-      noRankingWidgets: "현재 범위에서 표시 가능한 랭킹 위젯이 없습니다.",
-      breakdownByBank: "은행별 상품 수",
-      breakdownByBankDescription: "현재 범위에서 활성 상품이 은행별로 어떻게 구성되는지 보여줍니다.",
-      breakdownByType: "상품 유형별 상품 수",
-      breakdownByTypeDescription: "필터 적용 후 입출금, 저축, GIC 비중을 보여줍니다.",
-      comparativeChart: "비교 차트",
-      chartTitleFallback: "상품 유형 하나를 선택하면 비교 차트가 열립니다",
-      chartDescription: "정확히 한 개의 상품 유형을 선택했을 때만 의미가 비슷한 범위 안에서 트레이드오프를 비교할 수 있습니다.",
-      interpretation: "해석 가이드",
-      visiblePoints: "표시 중인 포인트",
-      openInGrid: "그리드에서 열기",
-      methodology: "방법론",
-      methodologyTitle: "이 대시보드 읽는 법",
-      freshness: "신선도",
-      freshnessTitle: "스냅샷 처리",
-      openProductGrid: "이 범위로 상품 그리드 열기",
-      retryDashboard: "대시보드 다시 시도",
-      apiUnavailableTitle: "공개 집계 API에 연결할 수 없어 인사이트 대시보드를 불러오지 못했습니다.",
-      apiUnavailableBody:
-        "FastAPI 서비스를 시작한 뒤 이 페이지를 새로고침하세요. 공개 대시보드는 `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, `GET /api/public/dashboard-scatter`, `GET /api/public/filters` 에 의존합니다.",
-      mixedMarket: "혼합 시장",
-      peakRate: "최고 금리",
-      selectOneProductType: "상품 유형 1개 선택",
-      singleTypeOnly: "비교 차트는 단일 상품 유형 범위에서만 제공됩니다.",
-      chartInsufficient: "이 차트를 그리기에 충분한 적격 상품이 없습니다.",
-      resetDashboardScope: "대시보드 범위 초기화",
-      morePoints: "개의 추가 포인트가 차트에 있습니다.",
-      productsAcrossBanks: "{banks}개 은행의 활성 상품",
+      pageTitle: "FPDS 대시보드",
+      pageDescription: "캐나다 예금 시장 대시보드입니다.",
+      title: "예금 시장 대시보드",
+      description: "최신 공개 스냅샷 기준 금리, 수수료, 커버리지, 최근 변경을 확인합니다.",
+      marketSnapshot: "시장 스냅샷",
+      kpiSubtitle: "현재 공개 범위",
+      composition: "시장 구성",
+      compositionSubtitle: "은행과 상품 유형별 활성 상품 커버리지입니다.",
+      productsByBank: "은행별 상품",
+      productsByType: "유형별 상품",
+      rankings: "상위 비교",
+      rankingsSubtitle: "공개 지표 기준으로 비교 가능한 상품만 정렬합니다.",
+      comparisonMap: "비교 맵",
+      comparisonSubtitle: "상품 유형 하나를 선택하면 같은 기준으로 비교합니다.",
+      coverageTable: "커버리지 표",
+      coverageSubtitle: "현재 스냅샷에 포함된 공개 상품입니다.",
+      dataNotes: "데이터 기준",
+      dataNotesBody: "지표는 공개 aggregate 필드를 사용하며, 필요한 숫자 값이 없는 상품은 해당 비교에서 제외됩니다.",
+      freshness: "최신성",
+      openProducts: "상품 열기",
+      clearScope: "범위 해제",
+      noActiveFilters: "활성 필터 없음",
+      noRankingWidgets: "현재 범위에서 표시할 순위가 없습니다.",
+      chartUnavailable: "차트를 그릴 수 있는 상품 수가 부족합니다.",
+      chartSingleTypeHint: "상품 유형 하나를 선택하면 비교 맵이 열립니다.",
+      visibleProducts: "표시 상품",
       activeProducts: "활성 상품",
-      topComparisons: "상위 {count}",
+      banksInScope: "은행",
+      peakRate: "최고 금리",
+      openInProducts: "상품에서 열기",
+      apiUnavailableTitle: "대시보드를 불러오지 못했습니다.",
+      apiUnavailableBody: "공개 aggregate API에 연결할 수 없습니다.",
+      retryDashboard: "대시보드 다시 불러오기",
+      mixedMarket: "전체 상품 유형",
       rankedBy: "정렬 기준",
-      trailingDays: "최근 {days}일 기준.",
-      noRecentChangeDate: "최근 변경일 없음",
-      noProductsInScope: "현재 범위에 표시할 상품이 없습니다."
+      trailingDays: "최근 {days}일"
+    },
+    methodology: {
+      pageTitle: "FPDS 방법론",
+      pageDescription: "공개 데이터 기준과 지표 경계입니다.",
+      title: "방법론",
+      description: "FPDS가 캐나다 예금 상품 공개 화면을 준비하는 방식입니다.",
+      sections: [
+        {
+          title: "스냅샷 기준",
+          body: "공개 화면은 은행 페이지를 실시간으로 읽지 않고 최신 성공 aggregate 스냅샷을 사용합니다."
+        },
+        {
+          title: "지표 포함 기준",
+          body: "금리, 수수료, 잔액, 예치금, 기간은 공개 canonical 필드가 있을 때만 표시합니다."
+        },
+        {
+          title: "상품 텍스트",
+          body: "상품명과 원문에서 온 조건 문구는 출처 언어를 유지합니다."
+        },
+        {
+          title: "증거 경계",
+          body: "원문 증거, 출처 발췌, 내부 검토 trace는 FPDS Public에 공개하지 않습니다."
+        }
+      ]
     }
   },
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "FPDS 公開画面",
-      tagline: "カナダ預金商品のカタログと比較画面"
+      brand: "FPDS Public",
+      tagline: "カナダ預金商品"
     },
     nav: {
+      dashboard: "ダッシュボード",
       products: "商品",
-      dashboard: "インサイト",
+      methodology: "方法",
       localeLabel: "言語"
     },
     common: {
-      applyFilters: "フィルターを適用",
-      clearFilters: "フィルターをクリア",
-      clearAllFilters: "すべてのフィルターをクリア",
+      active: "有効",
+      all: "すべて",
+      applyFilters: "適用",
+      clearAllFilters: "すべて解除",
+      clearFilters: "解除",
+      changedOn: "変更",
+      noDate: "日付なし",
+      noOptions: "選択肢なし",
+      noRecentChange: "最近の変更なし",
+      noSuccessfulSnapshot: "利用できる公開スナップショットはまだありません。",
+      notDisclosed: "非公開",
+      open: "開く",
+      pageLabel: "ページ",
       previous: "前へ",
       next: "次へ",
-      all: "すべて",
-      noDate: "日付なし",
-      noRecentChange: "最近の変更日時なし",
-      noSuccessfulSnapshot: "まだ成功した集計スナップショットがありません。",
-      notDisclosed: "未開示",
-      noOptions: "まだ選択できる項目がありません。",
-      sourceLanguage: "原文言語",
-      verifiedOn: "検証日",
-      changedOn: "変更日",
-      pageLabel: "ページ"
+      verifiedOn: "確認"
     },
     grid: {
-      pageTitle: "FPDS 公開商品",
-      pageDescription: "カナダ預金商品のロケール対応公開商品グリッドです。",
-      eyebrow: "WBS 5.12 Locale 対応",
-      title: "共通の公開フィルター語彙でカナダの預金商品を比較できます。",
-      description:
-        "最新の成功した集計スナップショットを基に、当座預金、貯蓄預金、GIC 商品を閲覧できます。商品名は原文を維持し、ラベル・バケットフィルター・鮮度メモは UI リソースとして提供します。",
+      pageTitle: "FPDS 商品",
+      pageDescription: "カナダ預金商品のカタログです。",
+      title: "商品カタログ",
+      description: "最新の公開スナップショットから chequing、savings、GIC 商品を絞り込みます。",
       currentScope: "現在の範囲",
-      primaryFilter: "主要フィルター",
+      primaryFilter: "主要",
       banks: "銀行",
       productTypes: "商品タイプ",
-      targetTags: "対象タグ",
-      feeBucket: "手数料区分",
+      targetTags: "顧客タグ",
+      feeBucket: "手数料",
       minimumBalance: "最低残高",
       minimumDeposit: "最低預入額",
-      termBucket: "期間区分",
+      termBucket: "期間",
       sortBy: "並び替え",
-      direction: "順序",
-      filterHint: "フィルターを適用するとグリッドが更新されます。範囲が変わるとページは 1 に戻ります。",
-      resultSummary: "結果サマリー",
-      noActiveFilters: "有効なフィルターはありません。カナダ全体の公開範囲を表示しています。",
-      noResultEyebrow: "結果なし",
-      noResultTitle: "現在のフィルター範囲に一致する商品がありません。",
-      noResultBody: "アクティブチップを解除するか、より高い粒度の市場ビューを見るためにインサイトダッシュボードへ移動してください。",
-      retryTitle: "公開集計 API に接続できないため Product Grid を読み込めませんでした。",
-      retryBody: "FastAPI サービスを起動してページを更新してください。公開 Product Grid は `GET /api/public/products` と `GET /api/public/filters` に依存します。",
-      retryButton: "Product Grid を再試行",
-      openDashboard: "インサイトダッシュボードを開く",
-      goToDashboard: "インサイトダッシュボードへ移動",
+      direction: "方向",
+      resultSummary: "結果",
+      noActiveFilters: "カナダ全体の公開範囲です。",
+      noResultTitle: "現在の範囲に一致する商品はありません。",
+      noResultBody: "フィルターを解除するか、ダッシュボードで広い市場を確認してください。",
+      retryTitle: "商品を読み込めませんでした。",
+      retryBody: "公開 API に接続できません。",
+      retryButton: "商品を再読み込み",
+      openDashboard: "ダッシュボードを開く",
       metricMonthlyFee: "月額手数料",
       metricMinBalance: "最低残高",
       metricMinDeposit: "最低預入額",
       metricDisplayRate: "表示金利",
       metricTerm: "期間",
-      metricKeyDetail: "主要ポイント",
+      metricKeyDetail: "要点",
       metricLastChange: "最近の変更",
       metricRateNote: "金利メモ",
       ascending: "昇順",
       descending: "降順",
-      sortDefault: "標準順",
+      sortDefault: "標準",
       sortDisplayRate: "表示金利",
       sortMonthlyFee: "月額手数料",
       sortMinimumBalance: "最低残高",
       sortMinimumDeposit: "最低預入額",
       sortLastChange: "最近の変更",
-      sortBankName: "銀行名",
-      sortProductName: "商品名"
+      sortBankName: "銀行",
+      sortProductName: "商品"
     },
     dashboard: {
-      pageTitle: "FPDS インサイトダッシュボード",
-      pageDescription: "カナダ預金商品のロケール対応公開インサイトダッシュボードです。",
-      eyebrow: "WBS 5.12 Locale 対応",
-      title: "商品詳細へ戻る前に、カナダ預金市場をひと目で把握できます。",
-      description:
-        "このダッシュボードは Product Grid と同じ公開フィルター語彙を使い、現在の範囲を KPI カード、構成比、ランキング、単一タイプ比較チャートとして再構成します。",
-      scopeSummary: "範囲サマリー",
-      scopeTitle: "現在の公開フィルター範囲をダッシュボード表示",
-      noActiveFilters: "有効なフィルターはありません。カナダ全体の公開ダッシュボード範囲を表示しています。",
-      adjustScope: "Product Grid で範囲を調整",
-      clearScope: "範囲をクリア",
-      rankingWidgets: "ランキングウィジェット",
-      rankingTitle: "この範囲の上位比較",
-      rankingDescription: "ウィジェットの順序は承認済みの商品タイプ優先ルールに従い、十分なデータがある場合のみ表示されます。各行からより絞り込んだ Product Grid を開けます。",
-      insufficientData: "データ不足",
-      noRankingWidgets: "現在の範囲では表示可能なランキングウィジェットがありません。",
-      breakdownByBank: "銀行別商品数",
-      breakdownByBankDescription: "現在の範囲にある有効商品の銀行別構成です。",
-      breakdownByType: "商品タイプ別商品数",
-      breakdownByTypeDescription: "フィルター適用後の当座、貯蓄、GIC の構成比です。",
-      comparativeChart: "比較チャート",
-      chartTitleFallback: "商品タイプを 1 つ選ぶと比較チャートが有効になります",
-      chartDescription: "商品タイプをちょうど 1 つ選択すると、意味の近い範囲の中でトレードオフを比較できます。",
-      interpretation: "読み解き",
-      visiblePoints: "表示ポイント",
-      openInGrid: "グリッドで開く",
-      methodology: "方法論",
-      methodologyTitle: "このダッシュボードの読み方",
+      pageTitle: "FPDS ダッシュボード",
+      pageDescription: "カナダ預金市場のダッシュボードです。",
+      title: "預金市場ダッシュボード",
+      description: "最新の公開スナップショットから金利、手数料、カバレッジ、最近の変更を確認します。",
+      marketSnapshot: "市場スナップショット",
+      kpiSubtitle: "現在の公開範囲",
+      composition: "市場構成",
+      compositionSubtitle: "銀行別、商品タイプ別の有効商品数です。",
+      productsByBank: "銀行別商品",
+      productsByType: "タイプ別商品",
+      rankings: "上位比較",
+      rankingsSubtitle: "公開指標で比較できる商品のみを順位付けします。",
+      comparisonMap: "比較マップ",
+      comparisonSubtitle: "商品タイプを 1 つ選ぶと同じ意味の軸で比較します。",
+      coverageTable: "カバレッジ表",
+      coverageSubtitle: "現在のスナップショットに含まれる公開商品です。",
+      dataNotes: "データ基準",
+      dataNotesBody: "指標は公開 aggregate フィールドを使います。必要な数値がない商品は該当比較から除外されます。",
       freshness: "鮮度",
-      freshnessTitle: "スナップショット処理",
-      openProductGrid: "この範囲で Product Grid を開く",
-      retryDashboard: "ダッシュボードを再試行",
-      apiUnavailableTitle: "公開集計 API に接続できないため Insight Dashboard を読み込めませんでした。",
-      apiUnavailableBody:
-        "FastAPI サービスを起動してページを更新してください。公開ダッシュボードは `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, `GET /api/public/dashboard-scatter`, `GET /api/public/filters` に依存します。",
-      mixedMarket: "混合市場",
-      peakRate: "最高金利",
-      selectOneProductType: "商品タイプを 1 つ選択",
-      singleTypeOnly: "比較チャートは単一商品タイプの範囲でのみ利用できます。",
-      chartInsufficient: "このチャートを描画するのに十分な適格商品がありません。",
-      resetDashboardScope: "ダッシュボード範囲をリセット",
-      morePoints: "件の追加ポイントがチャートにあります。",
-      productsAcrossBanks: "{banks}行の有効商品",
+      openProducts: "商品を開く",
+      clearScope: "範囲を解除",
+      noActiveFilters: "有効なフィルターなし",
+      noRankingWidgets: "現在の範囲で表示できる順位はありません。",
+      chartUnavailable: "チャートに必要な商品数が不足しています。",
+      chartSingleTypeHint: "商品タイプを 1 つ選ぶと比較マップを表示します。",
+      visibleProducts: "表示商品",
       activeProducts: "有効商品",
-      topComparisons: "上位 {count}",
-      rankedBy: "指標",
-      trailingDays: "直近 {days} 日。",
-      noRecentChangeDate: "最近の変更日なし",
-      noProductsInScope: "現在の範囲に表示できる商品がありません。"
+      banksInScope: "銀行",
+      peakRate: "最高金利",
+      openInProducts: "商品で開く",
+      apiUnavailableTitle: "ダッシュボードを読み込めませんでした。",
+      apiUnavailableBody: "公開 aggregate API に接続できません。",
+      retryDashboard: "ダッシュボードを再読み込み",
+      mixedMarket: "全商品タイプ",
+      rankedBy: "順位基準",
+      trailingDays: "直近 {days} 日"
+    },
+    methodology: {
+      pageTitle: "FPDS 方法",
+      pageDescription: "公開データの基準と指標の境界です。",
+      title: "方法",
+      description: "FPDS がカナダ預金商品の公開画面を作る方法です。",
+      sections: [
+        {
+          title: "スナップショット",
+          body: "公開画面は銀行ページをリアルタイムで読まず、最新の成功 aggregate スナップショットを使います。"
+        },
+        {
+          title: "指標の対象",
+          body: "金利、手数料、残高、預入額、期間は公開 canonical フィールドがある場合だけ表示します。"
+        },
+        {
+          title: "商品テキスト",
+          body: "商品名とソース由来の条件文は元の言語のまま表示します。"
+        },
+        {
+          title: "証拠の境界",
+          body: "原文証拠、ソース抜粋、内部レビュー trace は FPDS Public では公開しません。"
+        }
+      ]
     }
   }
 };
@@ -534,8 +554,5 @@ export function getIntlLocale(locale: string) {
 }
 
 export function formatPublicMessage(template: string, values: Record<string, string | number>) {
-  return Object.entries(values).reduce(
-    (output, [key, value]) => output.replace(`{${key}}`, String(value)),
-    template
-  );
+  return Object.entries(values).reduce((output, [key, value]) => output.replace(`{${key}}`, String(value)), template);
 }

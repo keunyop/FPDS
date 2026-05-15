@@ -9,5 +9,5 @@ type HomePageProps = {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const filters = parseProductGridPageFilters(resolvedSearchParams);
-  redirect(buildPublicHref("/products", filters));
+  redirect(buildPublicHref("/dashboard", filters));
 }

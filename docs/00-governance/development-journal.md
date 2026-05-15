@@ -62,6 +62,24 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-15 - FPDS Public Dashboard-First Revamp
+
+- WBS: `5.10`, `5.11`, `5.12`, `5.13`, public UI follow-on
+- Status: `done`
+- Goal: revamp FPDS Public so the first public screen is a simple dashboard-first market snapshot using the requested Shadcnblocks `dashboard10` baseline and Stripe-style restraint.
+- Why now: the public app still opened on `/products`, carried verbose dashboard/product copy, and had no dedicated public methodology route in the top-level menu.
+- Outcome: installed `@shadcnblocks/dashboard10` in `app/public`, retained the generated chart/table/card primitives, replaced the vendor demo dashboard with FPDS-owned aggregate-data composition, changed `/` to redirect to `/dashboard`, reordered public navigation to Dashboard -> Products -> Methodology, added `/methodology`, cleaned EN/KO/JA public locale strings, removed decorative gradient/orb backgrounds, and rebuilt the Dashboard around KPI cards, bank/type composition charts, ranking tables, comparison scatter, coverage table, freshness, and concise data-boundary notes.
+- Not done: no browser screenshot QA was added in this slice because the repo still has no public frontend e2e suite; responsive QA remains a separate WBS `5.14` follow-on.
+- Key files: `app/public/src/app/page.tsx`, `app/public/src/app/methodology/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-dashboard-charts.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/src/app/globals.css`, `app/public/routes.manifest.json`
+- Decisions: keep public evidence trace and raw source artifacts out of public pages; keep the vendor `dashboard10.tsx` path as a thin FPDS re-export instead of shipping ecommerce demo content; use `/methodology` for public data-boundary notes rather than expanding dashboard copy.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"`
+- Known issues: first Shadcnblocks install required loading `SHADCNBLOCKS_API_KEY` from local `.env.dev`, and `app/public/node_modules` had to be recreated because its pnpm virtual store was linked to `app/admin`.
+- Next step: run WBS `5.14` browser/responsive QA against the live public API and decide whether the Product Grid filters need a mobile sheet variant using the newly installed `sheet` primitive.
+
 ## 2026-05-14 - Audited Candidate Auto-Promotion And Canonical Identity Repair
 
 - WBS: Post-`5.16` source collection/public quality hardening
