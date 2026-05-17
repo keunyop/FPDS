@@ -4,7 +4,6 @@ import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 import {
   fetchPublicDashboardRankings,
-  fetchPublicDashboardScatter,
   fetchPublicDashboardSummary,
   fetchPublicFilters
 } from "@/lib/public-api";
@@ -35,21 +34,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   let summary = null;
   let rankings = null;
-  let scatter = null;
   let filterOptions = null;
   let apiUnavailable = false;
 
   try {
     const search = buildDashboardSearchParams(filters);
-    const [summaryResponse, rankingsResponse, scatterResponse, filterResponse] = await Promise.all([
+    const [summaryResponse, rankingsResponse, filterResponse] = await Promise.all([
       fetchPublicDashboardSummary(search),
       fetchPublicDashboardRankings(search),
-      fetchPublicDashboardScatter(search),
       fetchPublicFilters(buildGlobalFilterSearchParams(filters))
     ]);
     summary = summaryResponse;
     rankings = rankingsResponse;
-    scatter = scatterResponse;
     filterOptions = filterResponse;
   } catch {
     apiUnavailable = true;
@@ -61,7 +57,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       filterOptions={filterOptions}
       filters={filters}
       rankings={rankings}
-      scatter={scatter}
       summary={summary}
     />
   );

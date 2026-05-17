@@ -1,15 +1,13 @@
-import { ArrowUpRight, BarChart3, Database, Gauge, RefreshCw, Table2 } from "lucide-react";
+import { ArrowUpRight, BarChart3, Database, Gauge, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CompositionBarChart, ProductTypeBarChart, PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
 import {
   type PublicDashboardRankingsResponse,
-  type PublicDashboardScatterResponse,
   type PublicDashboardSummaryResponse,
   type PublicFilterOption,
   type PublicFiltersResponse
@@ -21,11 +19,10 @@ type DashboardSurfaceProps = {
   filterOptions: PublicFiltersResponse | null;
   filters: DashboardPageFilters;
   rankings: PublicDashboardRankingsResponse | null;
-  scatter: PublicDashboardScatterResponse | null;
   summary: PublicDashboardSummaryResponse | null;
 };
 
-export function DashboardSurface({ apiUnavailable, filterOptions, filters, rankings, scatter, summary }: DashboardSurfaceProps) {
+export function DashboardSurface({ apiUnavailable, filterOptions, filters, rankings, summary }: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const productsHref = buildPublicHref("/products", filters);
   const clearHref = buildPublicHref("/dashboard", {
@@ -40,7 +37,7 @@ export function DashboardSurface({ apiUnavailable, filterOptions, filters, ranki
     axisPreset: ""
   });
 
-  if (apiUnavailable || !filterOptions || !rankings || !scatter || !summary) {
+  if (apiUnavailable || !filterOptions || !rankings || !summary) {
     return (
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Card className="border-destructive/25">
@@ -70,19 +67,6 @@ export function DashboardSurface({ apiUnavailable, filterOptions, filters, ranki
   const activeChips = buildActiveChips(filters, filterOptions);
   const selectedProductType = filters.productTypes.length === 1 ? filters.productTypes[0] : "";
   const scopeLabel = selectedProductType ? findLabel(filterOptions.product_types, selectedProductType) : copy.dashboard.mixedMarket;
-
-  const bankComposition = summary.breakdowns.products_by_bank.map((item) => ({
-    key: item.bank_code,
-    label: item.bank_name,
-    count: item.count,
-    share_percent: item.share_percent
-  }));
-  const typeComposition = summary.breakdowns.products_by_product_type.map((item) => ({
-    key: item.product_type,
-    label: item.product_type_label,
-    count: item.count,
-    share_percent: item.share_percent
-  }));
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
@@ -126,7 +110,7 @@ export function DashboardSurface({ apiUnavailable, filterOptions, filters, ranki
           <p className="text-sm text-muted-foreground">{formatFreshnessLine(summary.freshness, filters.locale)}</p>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-label={copy.dashboard.marketSnapshot}>
+        <section className="grid gap-4 md:grid-cols-3" aria-label={copy.dashboard.marketSnapshot}>
           <MetricCard
             icon={Gauge}
             label={copy.dashboard.visibleProducts}
@@ -145,95 +129,24 @@ export function DashboardSurface({ apiUnavailable, filterOptions, filters, ranki
             value={highestRate ? formatMetricValue(highestRate.value, highestRate.unit, filters.locale) : copy.common.notDisclosed}
             detail={highestRate?.label ?? copy.dashboard.peakRate}
           />
-          <MetricCard
-            icon={RefreshCw}
-            label={copy.dashboard.freshness}
-            value={summary.freshness.status}
-            detail={summary.freshness.refreshed_at ? formatFixedDateTime(summary.freshness.refreshed_at) : copy.common.noDate}
-          />
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-2">
+        <section>
           <Card>
             <CardHeader>
-              <CardTitle>{copy.dashboard.productsByBank}</CardTitle>
-              <CardDescription>{copy.dashboard.compositionSubtitle}</CardDescription>
+              <CardTitle>{copy.dashboard.rankings}</CardTitle>
+              <CardDescription>{copy.dashboard.rankingsSubtitle}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <CompositionBarChart items={bankComposition} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{copy.dashboard.productsByType}</CardTitle>
-              <CardDescription>{copy.dashboard.compositionSubtitle}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProductTypeBarChart items={typeComposition} />
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>{scatter.title ?? copy.dashboard.comparisonMap}</CardTitle>
-              <CardDescription>{scatter.points.length ? copy.dashboard.comparisonSubtitle : getScatterFallback(copy, filters)}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {scatter.points.length ? (
-                <PublicScatterChart scatter={scatter} />
+            <CardContent className="space-y-4">
+              {rankings.widgets.length ? (
+                rankings.widgets.map((widget) => (
+                  <RankingTable key={widget.ranking_key} filters={filters} locale={filters.locale} widget={widget} />
+                ))
               ) : (
-                <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-border bg-background text-center text-sm text-muted-foreground">
-                  {scatter.insufficiency_note ?? getScatterFallback(copy, filters)}
-                </div>
+                <p className="rounded-lg border border-dashed border-border bg-background px-3 py-6 text-center text-sm text-muted-foreground">
+                  {rankings.insufficiency_note ?? copy.dashboard.noRankingWidgets}
+                </p>
               )}
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{copy.dashboard.rankings}</CardTitle>
-                <CardDescription>{copy.dashboard.rankingsSubtitle}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {rankings.widgets.length ? (
-                  rankings.widgets.map((widget) => (
-                    <RankingTable key={widget.ranking_key} filters={filters} locale={filters.locale} widget={widget} />
-                  ))
-                ) : (
-                  <p className="rounded-lg border border-dashed border-border bg-background px-3 py-6 text-center text-sm text-muted-foreground">
-                    {rankings.insufficiency_note ?? copy.dashboard.noRankingWidgets}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.55fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Table2 className="size-4 text-muted-foreground" aria-hidden="true" />
-                {copy.dashboard.coverageTable}
-              </CardTitle>
-              <CardDescription>{copy.dashboard.coverageSubtitle}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CoverageTable filters={filters} items={bankComposition} locale={filters.locale} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{copy.dashboard.dataNotes}</CardTitle>
-              <CardDescription>{copy.dashboard.dataNotesBody}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline">
-                <Link href={buildPublicHref("/methodology", filters)}>{copy.nav.methodology}</Link>
-              </Button>
             </CardContent>
           </Card>
         </section>
@@ -322,37 +235,6 @@ function RankingTable({
   );
 }
 
-function CoverageTable({ filters, items, locale }: { filters: DashboardPageFilters; items: Array<{ count: number; key: string; label: string; share_percent: number }>; locale: string }) {
-  const copy = getPublicMessages(locale);
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{copy.grid.banks}</TableHead>
-          <TableHead className="text-right">{copy.dashboard.activeProducts}</TableHead>
-          <TableHead className="text-right">Share</TableHead>
-          <TableHead className="text-right">{copy.common.open}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {items.map((item) => (
-          <TableRow key={item.key}>
-            <TableCell className="font-medium">{item.label}</TableCell>
-            <TableCell className="text-right tabular-nums">{formatCount(item.count, locale)}</TableCell>
-            <TableCell className="text-right tabular-nums">{formatSharePercent(item.share_percent, locale)}</TableCell>
-            <TableCell className="text-right">
-              <Link className="text-primary hover:underline" href={buildPublicHref("/products", { ...filters, bankCodes: [item.key], page: 1 })}>
-                {copy.dashboard.openInProducts}
-              </Link>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
 function ScopeBadge({ label }: { label: string }) {
   return <span className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground">{label}</span>;
 }
@@ -425,10 +307,6 @@ function findLabel(options: Array<{ label: string; value: string }>, value: stri
   return options.find((option) => option.value === value)?.label ?? value;
 }
 
-function getScatterFallback(copy: ReturnType<typeof getPublicMessages>, filters: DashboardPageFilters) {
-  return filters.productTypes.length === 1 ? copy.dashboard.chartUnavailable : copy.dashboard.chartSingleTypeHint;
-}
-
 function formatMetricValue(value: number | string | null, unit: string, locale: string) {
   const copy = getPublicMessages(locale);
   if (value === null || Number.isNaN(value)) {
@@ -454,14 +332,6 @@ function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(getIntlLocale(locale), {
     maximumFractionDigits: Number.isInteger(value) ? 0 : 2
   }).format(value);
-}
-
-function formatSharePercent(value: number, locale: string) {
-  return new Intl.NumberFormat(getIntlLocale(locale), {
-    maximumFractionDigits: 1,
-    minimumFractionDigits: value > 0 && value < 10 ? 1 : 0,
-    style: "percent"
-  }).format(value / 100);
 }
 
 function formatFreshnessLine(freshness: PublicDashboardSummaryResponse["freshness"], locale: string) {

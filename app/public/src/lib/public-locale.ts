@@ -10,6 +10,7 @@ type PublicMessages = {
     dashboard: string;
     products: string;
     methodology: string;
+    loan: string;
     localeLabel: string;
   };
   common: {
@@ -127,13 +128,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   en: {
     localeName: "English",
     shell: {
-      brand: "FPDS Public",
-      tagline: "Canada deposit products"
+      brand: "FPDS",
+      tagline: ""
     },
     nav: {
-      dashboard: "Dashboard",
-      products: "Products",
+      dashboard: "Home",
+      products: "Deposit",
       methodology: "Methodology",
+      loan: "Loan",
       localeLabel: "Language"
     },
     common: {
@@ -155,9 +157,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "Verified"
     },
     grid: {
-      pageTitle: "FPDS Products",
-      pageDescription: "Filterable Canada deposit product catalog.",
-      title: "Product catalog",
+      pageTitle: "FPDS Deposit",
+      pageDescription: "Filterable deposit product catalog.",
+      title: "Deposit catalog",
       description: "Filter active chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
       primaryFilter: "Primary",
@@ -177,7 +179,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       retryTitle: "Products could not load.",
       retryBody: "The public API is not reachable.",
       retryButton: "Retry products",
-      openDashboard: "Open dashboard",
+      openDashboard: "Open home",
       metricMonthlyFee: "Monthly fee",
       metricMinBalance: "Min. balance",
       metricMinDeposit: "Min. deposit",
@@ -198,18 +200,18 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortProductName: "Product"
     },
     dashboard: {
-      pageTitle: "FPDS Dashboard",
-      pageDescription: "Canada deposit market dashboard.",
-      title: "Deposit market dashboard",
-      description: "Rates, fees, coverage, and recent changes from the latest public snapshot.",
-      marketSnapshot: "Market snapshot",
-      kpiSubtitle: "Current public scope",
+      pageTitle: "FPDS Home",
+      pageDescription: "Deposit product comparison snapshot.",
+      title: "Find deposit products to compare",
+      description: "Start with active products, banks, peak rates, and ranked options from the latest public snapshot.",
+      marketSnapshot: "Deposit snapshot",
+      kpiSubtitle: "Current search scope",
       composition: "Market composition",
       compositionSubtitle: "Active product coverage by bank and product type.",
       productsByBank: "Products by bank",
       productsByType: "Products by type",
-      rankings: "Top comparisons",
-      rankingsSubtitle: "Eligible products ranked by the approved public metrics.",
+      rankings: "Top deposit comparisons",
+      rankingsSubtitle: "Products ranked by public fields available for comparison.",
       comparisonMap: "Comparison map",
       comparisonSubtitle: "Select one product type for a like-for-like chart.",
       coverageTable: "Coverage table",
@@ -217,21 +219,21 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotes: "Data notes",
       dataNotesBody: "Metrics use public aggregate fields. Products missing required numeric values are excluded from affected comparisons.",
       freshness: "Freshness",
-      openProducts: "Open products",
+      openProducts: "Search deposits",
       clearScope: "Clear scope",
       noActiveFilters: "No filters active.",
       noRankingWidgets: "No ranking is eligible for this scope.",
       chartUnavailable: "Not enough eligible products for this chart.",
       chartSingleTypeHint: "Choose one product type to unlock the comparison map.",
       visibleProducts: "Visible products",
-      activeProducts: "active products",
+      activeProducts: "active deposit products",
       banksInScope: "banks",
       peakRate: "Peak rate",
       openInProducts: "Open in products",
       apiUnavailableTitle: "Dashboard could not load.",
       apiUnavailableBody: "The public aggregate API is not reachable.",
       retryDashboard: "Retry dashboard",
-      mixedMarket: "All product types",
+      mixedMarket: "All deposits",
       rankedBy: "Ranked by",
       trailingDays: "trailing {days} days"
     },
@@ -255,7 +257,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Evidence boundary",
-          body: "Raw evidence, source excerpts, and internal review traces are not exposed on FPDS Public."
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on FPDS."
         }
       ]
     }
@@ -263,13 +265,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "FPDS Public",
-      tagline: "캐나다 예금 상품"
+      brand: "FPDS",
+      tagline: ""
     },
     nav: {
-      dashboard: "대시보드",
-      products: "상품",
+      dashboard: "홈",
+      products: "예금",
       methodology: "방법론",
+      loan: "대출",
       localeLabel: "언어"
     },
     common: {
@@ -391,7 +394,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "증거 경계",
-          body: "원문 증거, 출처 발췌, 내부 검토 trace는 FPDS Public에 공개하지 않습니다."
+          body: "원문 증거, 출처 발췌, 내부 검토 trace는 FPDS에 공개하지 않습니다."
         }
       ]
     }
@@ -399,13 +402,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "FPDS Public",
-      tagline: "カナダ預金商品"
+      brand: "FPDS",
+      tagline: ""
     },
     nav: {
-      dashboard: "ダッシュボード",
-      products: "商品",
+      dashboard: "ホーム",
+      products: "預金",
       methodology: "方法",
+      loan: "ローン",
       localeLabel: "言語"
     },
     common: {
@@ -527,7 +531,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "証拠の境界",
-          body: "原文証拠、ソース抜粋、内部レビュー trace は FPDS Public では公開しません。"
+          body: "原文証拠、ソース抜粋、内部レビュー trace は FPDS では公開しません。"
         }
       ]
     }

@@ -6,8 +6,8 @@ import { PublicHeader } from "@/components/fpds/public/public-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FPDS Public",
-  description: "FPDS public product catalog for Canada deposit products"
+  title: "FPDS",
+  description: "FPDS deposit product catalog"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

@@ -62,6 +62,24 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-16 - FPDS Public Header And Home Simplification
+
+- WBS: `5.10`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: simplify FPDS Public for general users who arrive to compare and search deposit products, starting with a lighter header and a focused Home dashboard.
+- Why now: the Product Owner asked to remove the `FP` logo mark, remove `Public` and the Canada deposit-products tagline from the header/title treatment, rename the public menu to Home/Deposit, add a disabled Loan menu item, convert language switching to a dropdown, and strip the Dashboard down to only comparison/search-relevant information.
+- Outcome: the public header now shows `FPDS` with no logo mark or tagline, the nav shows Home, Deposit, and disabled Loan, and locale switching uses a dropdown that preserves the current path/query scope. The `/dashboard` Home surface now skips composition charts, scatter, coverage table, and data-note/methodology cards, keeping scope chips, freshness, product count, bank count, peak rate, top comparison rankings, and a direct Deposit search action.
+- Not done: the `/methodology` route remains available by direct route for data-boundary transparency, but it is no longer exposed as a header menu item.
+- Key files: `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/app/dashboard/page.tsx`, `app/public/src/app/layout.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`
+- Decisions: keep the dashboard backed by existing summary/ranking APIs only; stop requesting scatter data for the simplified Home view; keep route/query locale behavior instead of adding client-only locale state.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker/pipeline/tests/regression -p "test_*.py"` from repo root
+- Known issues: root-level `tests/regression` does not exist in the current repo layout; regression suites are under the API service and worker pipeline paths above.
+- Next step: run browser/responsive QA for the simplified Home/header interaction when a live public API is available.
+
 ## 2026-05-15 - FPDS Public Dashboard-First Revamp
 
 - WBS: `5.10`, `5.11`, `5.12`, `5.13`, public UI follow-on
