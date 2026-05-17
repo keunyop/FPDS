@@ -110,6 +110,8 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - bank name
 - localized product type label
 - product name
+- product name links to `/products/[productId]` in the live public surface
+- an optional official bank product-page action is shown when a single public `product_url` is available
 
 ### 7.2 Primary Metric Strip
 
@@ -170,6 +172,7 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - shared grid/dashboard state is carried in the URL query string using the approved shared public filter vocabulary
 - sibling top navigation preserves shared scope, but does not carry Product Grid-only paging/sort state or Dashboard-only axis-preset state
 - dashboard breakdown rows, ranking rows, and scatter points may drill back into the Product Grid with a narrower bank/product-type scope
+- dashboard ranking product names may drill into `/products/[productId]`; the ranking header may still provide a Deposit/Product Grid `more` link
 - when drill-in selects exactly one product type, bucket filters hidden for that type should be pruned before opening the Product Grid
 
 The shared public aggregate vocabulary uses the following approved bucket boundaries:

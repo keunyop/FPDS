@@ -1,4 +1,4 @@
-import { ArrowUpRight, Filter, RefreshCw } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Filter, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -194,7 +194,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
         {products.items.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {products.items.map((product) => (
-              <ProductCard key={product.product_id} locale={filters.locale} product={product} />
+              <ProductCard key={product.product_id} filters={filters} locale={filters.locale} product={product} />
             ))}
           </section>
         ) : (
@@ -238,10 +238,11 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   );
 }
 
-function ProductCard({ locale, product }: { locale: string; product: PublicProduct }) {
+function ProductCard({ filters, locale, product }: { filters: ProductGridPageFilters; locale: string; product: PublicProduct }) {
   const copy = getPublicMessages(locale);
   const metrics = buildPrimaryMetrics(product, locale);
   const tags = product.target_customer_tag_labels.slice(0, 2);
+  const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
     <Card>
@@ -250,7 +251,11 @@ function ProductCard({ locale, product }: { locale: string; product: PublicProdu
           <div>
             <CardDescription>{product.bank_name}</CardDescription>
             <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">{product.product_type_label}</p>
-            <CardTitle className="mt-2 leading-snug">{product.product_name}</CardTitle>
+            <CardTitle className="mt-2 leading-snug">
+              <Link className="hover:text-primary" href={detailHref}>
+                {product.product_name}
+              </Link>
+            </CardTitle>
           </div>
           {product.product_highlight_badge_label ? <Badge>{product.product_highlight_badge_label}</Badge> : null}
         </div>
@@ -273,11 +278,21 @@ function ProductCard({ locale, product }: { locale: string; product: PublicProdu
             </div>
           ))}
         </dl>
-        <div className="mt-4 flex flex-wrap justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-          <span>{buildChangeHint(product.last_changed_at, locale)}</span>
-          <span>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-1">
+            <span>{buildChangeHint(product.last_changed_at, locale)}</span>
+            <span>
             {copy.common.verifiedOn} {formatCompactDate(product.last_verified_at, locale)}
-          </span>
+            </span>
+          </div>
+          {product.product_url ? (
+            <Button asChild variant="outline" size="xs">
+              <a href={product.product_url} target="_blank" rel="noreferrer">
+                Bank page
+                <ExternalLink className="size-3" aria-hidden="true" />
+              </a>
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>
@@ -470,6 +485,10 @@ function buildPagination(products: PublicProductsResponse, filters: ProductGridP
 
 function buildProductsHref(filters: ProductGridPageFilters, overrides: Partial<ProductGridPageFilters>) {
   return buildPublicHref("/products", { ...filters, ...overrides });
+}
+
+function buildProductDetailHref(filters: ProductGridPageFilters, productId: string) {
+  return buildPublicHref(`/products/${encodeURIComponent(productId)}`, filters);
 }
 
 function findLabel(options: Array<{ label: string; value: string }>, value: string) {

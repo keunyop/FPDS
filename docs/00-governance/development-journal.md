@@ -62,6 +62,46 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-17 - FPDS Public Home Detail And Official Link
+
+- WBS: `5.7`, `5.8`, `5.9`, `5.10`, `5.11`, public UI follow-on
+- Status: `done`
+- Goal: simplify the FPDS Public Home surface further, add ranking-to-detail navigation, and expose a user-facing official bank product-page action without exposing evidence traces.
+- Why now: the Product Owner asked to reduce the header title weight, replace the Home hero copy with a collected-market sentence, remove Home scope/filter/action clutter, rename rate wording to Interest Rate, make the highest-rate ranking more card-like, add a Deposit `more` link, link product names to detail, and provide a direct bank product-page button.
+- Outcome: `/dashboard` now shows only the market greeting, simplified KPI cards, and card-backed ranking tables. Ranking product names link to `/products/[productId]`, ranking rows include an external bank-page action when `product_url` is available, and `/products/[productId]` renders public product facts plus the same official-page action. The public header `FPDS` weight was reduced from `font-extrabold` to `font-bold`.
+- Not done: root-level `tests/regression` still does not exist in the current repo layout; available regression suites are under `api/service/tests/regression` and `worker/pipeline/tests/regression`.
+- Key files: `api/service/api_service/public_common.py`, `api/service/api_service/public_products.py`, `api/service/api_service/public_dashboard.py`, `api/service/api_service/main.py`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/app/products/[productId]/page.tsx`, `app/public/src/lib/public-api.ts`, `app/public/src/lib/public-locale.ts`, `docs/03-design/api-interface-contracts.md`
+- Decisions: implement product detail as a dedicated route (`/products/[productId]`) instead of a modal so public detail links are shareable and work consistently from Home and Deposit. Treat `product_url` as a single official/public bank page for navigation, not as a raw source URL list or evidence trace.
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest tests.test_public_products tests.test_public_dashboard` in `api/service`
+  - `python -m unittest worker.pipeline.tests.test_aggregate_refresh` from repo root
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+- Known issues: `product_url` is best-effort. New aggregate refreshes persist it from canonical payload URLs when available, and current API reads can fall back to one evidence source document URL for the product version while still excluding raw evidence/source URL lists.
+- Next step: run browser QA against a live API to inspect exact public copy and external-link availability with the current 35-product aggregate snapshot.
+
+## 2026-05-17 - FPDS Public Brand And Home Greeting
+
+- WBS: `5.10`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: make FPDS Public feel more brand-visible while further simplifying the Home comparison surface.
+- Why now: the Product Owner asked to increase the FPDS header title weight, add a simple logo, add a Home greeting that markets collected country/bank/product coverage, remove the Recently Changed list, and remove ranking heading/count copy from Home.
+- Outcome: the public header now has a simple chart-mark logo and heavier `FPDS` brand title. The `/dashboard` Home hero now renders a locale-aware market greeting using the current public product and bank counts with the Phase 1 Canada country scope. The Home ranking area no longer renders the `Top deposit comparisons` heading, its subtitle, the `Ranked by ...` sublabel, the item-count badge, or `recently_changed_30d` ranking widgets.
+- Not done: the country count is still a fixed Phase 1 public-scope value of `1` because the current public summary API is single-country Canada scoped and does not expose a country-count metric.
+- Key files: `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`
+- Decisions: keep the change UI-only and reuse existing summary/ranking API responses; filter the recently changed ranking widget in the Home surface instead of changing the backend ranking catalog.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+- Known issues: root-level `tests/regression` does not exist in the current repo layout; regression suites remain under the API service and worker pipeline paths. `next build` rewrote `app/public/next-env.d.ts` to the production route-type path during build, and the generated-only change was returned to the tracked dev route-type import.
+- Next step: run visual/browser QA against a live public API if the Product Owner wants to review exact Home spacing with real aggregate data.
+
 ## 2026-05-16 - FPDS Public Header And Home Simplification
 
 - WBS: `5.10`, `5.11`, `5.12`, public UI follow-on

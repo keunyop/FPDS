@@ -4,12 +4,10 @@ import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 import {
   fetchPublicDashboardRankings,
-  fetchPublicDashboardSummary,
-  fetchPublicFilters
+  fetchPublicDashboardSummary
 } from "@/lib/public-api";
 import {
   buildDashboardSearchParams,
-  buildGlobalFilterSearchParams,
   parseDashboardPageFilters
 } from "@/lib/public-query";
 
@@ -34,19 +32,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   let summary = null;
   let rankings = null;
-  let filterOptions = null;
   let apiUnavailable = false;
 
   try {
     const search = buildDashboardSearchParams(filters);
-    const [summaryResponse, rankingsResponse, filterResponse] = await Promise.all([
+    const [summaryResponse, rankingsResponse] = await Promise.all([
       fetchPublicDashboardSummary(search),
-      fetchPublicDashboardRankings(search),
-      fetchPublicFilters(buildGlobalFilterSearchParams(filters))
+      fetchPublicDashboardRankings(search)
     ]);
     summary = summaryResponse;
     rankings = rankingsResponse;
-    filterOptions = filterResponse;
   } catch {
     apiUnavailable = true;
   }
@@ -54,7 +49,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <DashboardSurface
       apiUnavailable={apiUnavailable}
-      filterOptions={filterOptions}
       filters={filters}
       rankings={rankings}
       summary={summary}

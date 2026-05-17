@@ -25,7 +25,7 @@ Goals:
 - define scatter dataset preset vocabulary and axis meaning
 - align aggregate snapshot, API contract, and public UI vocabulary before implementation
 
-This is a design baseline, not an implementation start signal.  
+This is a design baseline, not an implementation start signal.
 Implementation still waits for `Gate A = Pass + Product Owner explicit approval`.
 
 ---
@@ -58,7 +58,7 @@ This document does not decide:
 - exact click interaction between chart points/widgets and Product Grid state
 - localization ownership workflow and glossary governance
 
-Product-type-specific dashboard visual emphasis is closed by `docs/03-design/product-type-visualization-principles.md`.  
+Product-type-specific dashboard visual emphasis is closed by `docs/03-design/product-type-visualization-principles.md`.
 The remaining follow-on work is `5.10`, `5.11`, and localization implementation against `docs/03-design/localization-governance-and-fallback-policy.md`.
 
 ---
@@ -126,7 +126,7 @@ Phase 1 headline KPI cards are fixed to the following four metrics.
 
 ### 5.2 Composition Metrics in Summary Surface
 
-The PRD mentions `products by bank` and `products by product type`.  
+The PRD mentions `products by bank` and `products by product type`.
 These are treated as summary breakdown datasets, not extra scalar KPI cards, because they are categorical composition views.
 
 Required summary breakdowns:
@@ -178,6 +178,7 @@ Each ranking row must expose:
 - `bank_name`
 - `product_name`
 - `product_type`
+- `product_url` when a single public bank product page URL is available; this is a user navigation URL, not an evidence/source URL list
 - `metric_value`
 - `metric_unit`
 - `last_changed_at`
@@ -210,7 +211,7 @@ This closes the metric-level meaning of the Phase 1 scatter presets.
 
 ### 7.3 Visualization Boundary
 
-`1.7.2` freezes the metric meaning of the scatter presets above.  
+`1.7.2` freezes the metric meaning of the scatter presets above.
 `docs/03-design/product-type-visualization-principles.md` closes:
 - which preset is the primary default per product type or route state
 - when an alternate comparative chart is preferable to scatter because of sparse data or product semantics

@@ -263,38 +263,48 @@ def load_public_projection_rows(
     rows = connection.execute(
         """
         SELECT
-            product_id,
-            bank_code,
-            bank_name,
-            country_code,
-            product_family,
-            product_type,
-            subtype_code,
-            product_name,
-            source_language,
-            currency,
-            status,
-            public_display_rate,
-            public_display_fee,
-            monthly_fee,
-            effective_fee,
-            minimum_balance,
-            minimum_deposit,
-            term_length_days,
-            product_highlight_badge_code,
-            COALESCE(target_customer_tags, '[]'::jsonb) AS target_customer_tags,
-            fee_bucket,
-            minimum_balance_bucket,
-            minimum_deposit_bucket,
-            term_bucket,
-            last_verified_at,
-            last_changed_at,
-            COALESCE(refresh_metadata, '{}'::jsonb) AS refresh_metadata
-        FROM public_product_projection
-        WHERE snapshot_id = %(snapshot_id)s
-          AND country_code = %(country_code)s
-          AND status = 'active'
-        ORDER BY bank_name ASC, product_name ASC, product_id ASC
+            p.product_id,
+            p.bank_code,
+            p.bank_name,
+            p.country_code,
+            p.product_family,
+            p.product_type,
+            p.subtype_code,
+            p.product_name,
+            p.source_language,
+            p.currency,
+            p.status,
+            p.public_display_rate,
+            p.public_display_fee,
+            p.monthly_fee,
+            p.effective_fee,
+            p.minimum_balance,
+            p.minimum_deposit,
+            p.term_length_days,
+            p.product_highlight_badge_code,
+            COALESCE(p.target_customer_tags, '[]'::jsonb) AS target_customer_tags,
+            p.fee_bucket,
+            p.minimum_balance_bucket,
+            p.minimum_deposit_bucket,
+            p.term_bucket,
+            p.last_verified_at,
+            p.last_changed_at,
+            COALESCE(p.refresh_metadata, '{}'::jsonb) AS refresh_metadata,
+            COALESCE(p.refresh_metadata ->> 'product_url', official_source.normalized_source_url) AS product_url
+        FROM public_product_projection AS p
+        LEFT JOIN LATERAL (
+            SELECT sd.normalized_source_url
+            FROM field_evidence_link AS fel
+            JOIN source_document AS sd
+              ON sd.source_document_id = fel.source_document_id
+            WHERE fel.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
+            ORDER BY fel.created_at ASC, sd.normalized_source_url ASC
+            LIMIT 1
+        ) AS official_source ON true
+        WHERE p.snapshot_id = %(snapshot_id)s
+          AND p.country_code = %(country_code)s
+          AND p.status = 'active'
+        ORDER BY p.bank_name ASC, p.product_name ASC, p.product_id ASC
         """,
         {"snapshot_id": snapshot_id, "country_code": country_code},
     ).fetchall()

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import { usePathname, useRouter, useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -31,8 +32,11 @@ function HeaderContent() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 md:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center justify-between gap-4">
           <Link href={buildLocaleHref("/dashboard", searchParams, locale)} className="flex items-center gap-3">
-            <span>
-              <span className="block text-sm font-semibold tracking-wide text-foreground">{copy.shell.brand}</span>
+            <span className="flex size-8 items-center justify-center rounded-md border border-primary/20 bg-primary text-primary-foreground shadow-sm">
+              <ChartNoAxesColumnIncreasing className="size-4" aria-hidden="true" />
+            </span>
+            <span className="block text-lg font-bold text-foreground">
+              <span className="block leading-none">{copy.shell.brand}</span>
             </span>
           </Link>
           <LocaleSelector className="flex lg:hidden" copy={copy} locale={locale} pathname={pathname} searchParams={searchParams} />

@@ -120,6 +120,11 @@ class AggregateRefreshService:
         minimum_deposit = _coerce_float(payload.get("minimum_deposit"))
         term_length_days = _coerce_int(payload.get("term_length_days"))
         effective_fee = public_display_fee if public_display_fee is not None else monthly_fee
+        product_url = _coerce_string(
+            payload.get("product_url")
+            or payload.get("official_product_url")
+            or payload.get("source_url")
+        )
         return {
             "snapshot_id": snapshot_id,
             "product_id": canonical_row.product_id,
@@ -150,6 +155,7 @@ class AggregateRefreshService:
             "last_changed_at": canonical_row.last_changed_at,
             "refresh_metadata": {
                 "product_version_id": canonical_row.product_version_id,
+                "product_url": product_url,
             },
         }
 

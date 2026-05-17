@@ -34,6 +34,10 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         self.assertEqual(projection_by_product_id["sav-td-epremium"]["minimum_balance_bucket"], "5000_plus")
         self.assertEqual(projection_by_product_id["gic-td-short"]["minimum_deposit_bucket"], "under_500")
         self.assertEqual(projection_by_product_id["gic-bmo-1y"]["term_bucket"], "from_1y_to_3y")
+        self.assertEqual(
+            projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["product_url"],
+            "https://www.bmo.com/main/personal/investments/gic/",
+        )
         self.assertEqual(projection_by_product_id["gic-scotia-4y"]["term_bucket"], "over_3y")
 
         ranking_keys = {item["ranking_key"] for item in result.ranking_rows}
@@ -223,7 +227,12 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="non_redeemable",
             product_name="BMO 1 Year GIC",
             last_changed_at="2026-04-07T00:00:00+00:00",
-            payload={"public_display_rate": 4.5, "minimum_deposit": 500, "term_length_days": 365},
+            payload={
+                "public_display_rate": 4.5,
+                "minimum_deposit": 500,
+                "term_length_days": 365,
+                "source_url": "https://www.bmo.com/main/personal/investments/gic/",
+            },
         ),
         _row(
             product_id="gic-scotia-4y",

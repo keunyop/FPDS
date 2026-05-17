@@ -19,7 +19,7 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
-export type PublicRoutePath = "/dashboard" | "/products" | "/methodology";
+export type PublicRoutePath = "/dashboard" | "/products" | "/methodology" | `/products/${string}`;
 
 const SORT_OPTIONS = new Set([
   "default",

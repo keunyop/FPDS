@@ -79,14 +79,13 @@ type PublicMessages = {
     pageDescription: string;
     title: string;
     description: string;
+    marketGreeting: string;
     marketSnapshot: string;
     kpiSubtitle: string;
     composition: string;
     compositionSubtitle: string;
     productsByBank: string;
     productsByType: string;
-    rankings: string;
-    rankingsSubtitle: string;
     comparisonMap: string;
     comparisonSubtitle: string;
     coverageTable: string;
@@ -109,8 +108,6 @@ type PublicMessages = {
     apiUnavailableBody: string;
     retryDashboard: string;
     mixedMarket: string;
-    rankedBy: string;
-    trailingDays: string;
   };
   methodology: {
     pageTitle: string;
@@ -183,7 +180,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       metricMonthlyFee: "Monthly fee",
       metricMinBalance: "Min. balance",
       metricMinDeposit: "Min. deposit",
-      metricDisplayRate: "Display rate",
+      metricDisplayRate: "Interest rate",
       metricTerm: "Term",
       metricKeyDetail: "Key detail",
       metricLastChange: "Last change",
@@ -191,7 +188,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       ascending: "Ascending",
       descending: "Descending",
       sortDefault: "Default",
-      sortDisplayRate: "Display rate",
+      sortDisplayRate: "Interest rate",
       sortMonthlyFee: "Monthly fee",
       sortMinimumBalance: "Minimum balance",
       sortMinimumDeposit: "Minimum deposit",
@@ -202,16 +199,15 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     dashboard: {
       pageTitle: "FPDS Home",
       pageDescription: "Deposit product comparison snapshot.",
-      title: "Find deposit products to compare",
-      description: "Start with active products, banks, peak rates, and ranked options from the latest public snapshot.",
+      title: "FPDS has collected 35 deposit products from 5 banks across 1 country so you can compare the market in one place.",
+      description: "",
+      marketGreeting: "FPDS has collected {products} deposit products from {banks} banks across {countries} country so you can compare the market in one place.",
       marketSnapshot: "Deposit snapshot",
       kpiSubtitle: "Current search scope",
       composition: "Market composition",
       compositionSubtitle: "Active product coverage by bank and product type.",
       productsByBank: "Products by bank",
       productsByType: "Products by type",
-      rankings: "Top deposit comparisons",
-      rankingsSubtitle: "Products ranked by public fields available for comparison.",
       comparisonMap: "Comparison map",
       comparisonSubtitle: "Select one product type for a like-for-like chart.",
       coverageTable: "Coverage table",
@@ -219,7 +215,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotes: "Data notes",
       dataNotesBody: "Metrics use public aggregate fields. Products missing required numeric values are excluded from affected comparisons.",
       freshness: "Freshness",
-      openProducts: "Search deposits",
+      openProducts: "Deposit",
       clearScope: "Clear scope",
       noActiveFilters: "No filters active.",
       noRankingWidgets: "No ranking is eligible for this scope.",
@@ -228,14 +224,12 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       visibleProducts: "Visible products",
       activeProducts: "active deposit products",
       banksInScope: "banks",
-      peakRate: "Peak rate",
+      peakRate: "Interest rate",
       openInProducts: "Open in products",
       apiUnavailableTitle: "Dashboard could not load.",
       apiUnavailableBody: "The public aggregate API is not reachable.",
       retryDashboard: "Retry dashboard",
-      mixedMarket: "All deposits",
-      rankedBy: "Ranked by",
-      trailingDays: "trailing {days} days"
+      mixedMarket: "All deposits"
     },
     methodology: {
       pageTitle: "FPDS Methodology",
@@ -340,15 +334,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       pageTitle: "FPDS 대시보드",
       pageDescription: "캐나다 예금 시장 대시보드입니다.",
       title: "예금 시장 대시보드",
-      description: "최신 공개 스냅샷 기준 금리, 수수료, 커버리지, 최근 변경을 확인합니다.",
+      description: "최신 공개 스냅샷 기준으로 예금 상품을 빠르게 비교합니다.",
+      marketGreeting: "FPDS는 {countries}개 국가의 {banks}개 은행에서 {products}개 예금 상품을 수집해 한곳에서 비교할 수 있게 정리했습니다.",
       marketSnapshot: "시장 스냅샷",
       kpiSubtitle: "현재 공개 범위",
       composition: "시장 구성",
       compositionSubtitle: "은행과 상품 유형별 활성 상품 커버리지입니다.",
       productsByBank: "은행별 상품",
       productsByType: "유형별 상품",
-      rankings: "상위 비교",
-      rankingsSubtitle: "공개 지표 기준으로 비교 가능한 상품만 정렬합니다.",
       comparisonMap: "비교 맵",
       comparisonSubtitle: "상품 유형 하나를 선택하면 같은 기준으로 비교합니다.",
       coverageTable: "커버리지 표",
@@ -370,9 +363,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       apiUnavailableTitle: "대시보드를 불러오지 못했습니다.",
       apiUnavailableBody: "공개 aggregate API에 연결할 수 없습니다.",
       retryDashboard: "대시보드 다시 불러오기",
-      mixedMarket: "전체 상품 유형",
-      rankedBy: "정렬 기준",
-      trailingDays: "최근 {days}일"
+      mixedMarket: "전체 상품 유형"
     },
     methodology: {
       pageTitle: "FPDS 방법론",
@@ -477,15 +468,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       pageTitle: "FPDS ダッシュボード",
       pageDescription: "カナダ預金市場のダッシュボードです。",
       title: "預金市場ダッシュボード",
-      description: "最新の公開スナップショットから金利、手数料、カバレッジ、最近の変更を確認します。",
+      description: "最新の公開スナップショットをもとに預金商品をすばやく比較します。",
+      marketGreeting: "FPDS は {countries} か国、{banks} 行、{products} 件の預金商品を収集し、1 か所で比較できるように整理しています。",
       marketSnapshot: "市場スナップショット",
       kpiSubtitle: "現在の公開範囲",
       composition: "市場構成",
       compositionSubtitle: "銀行別、商品タイプ別の有効商品数です。",
       productsByBank: "銀行別商品",
       productsByType: "タイプ別商品",
-      rankings: "上位比較",
-      rankingsSubtitle: "公開指標で比較できる商品のみを順位付けします。",
       comparisonMap: "比較マップ",
       comparisonSubtitle: "商品タイプを 1 つ選ぶと同じ意味の軸で比較します。",
       coverageTable: "カバレッジ表",
@@ -507,9 +497,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       apiUnavailableTitle: "ダッシュボードを読み込めませんでした。",
       apiUnavailableBody: "公開 aggregate API に接続できません。",
       retryDashboard: "ダッシュボードを再読み込み",
-      mixedMarket: "全商品タイプ",
-      rankedBy: "順位基準",
-      trailingDays: "直近 {days} 日"
+      mixedMarket: "全商品タイプ"
     },
     methodology: {
       pageTitle: "FPDS 方法",

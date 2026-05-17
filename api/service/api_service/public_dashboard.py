@@ -35,11 +35,11 @@ SUMMARY_LABELS = {
     "en": {
         "total_active_products": "Total Active Products",
         "banks_in_scope": "Banks In Scope",
-        "highest_display_rate": "Highest Display Rate",
+        "highest_display_rate": "Highest Interest Rate",
         "recently_changed_products_30d": "Recently Changed (30d)",
         "products_by_bank": "Products by Bank",
         "products_by_product_type": "Products by Product Type",
-        "rate_scope_note": "Products without display-rate data are excluded.",
+        "rate_scope_note": "Products without interest-rate data are excluded.",
         "recent_scope_note": "The window is fixed to the trailing 30 days from the latest snapshot refresh.",
     },
     "ko": {
@@ -66,7 +66,7 @@ SUMMARY_LABELS = {
 
 RANKING_LABELS = {
     "en": {
-        "highest_display_rate": ("Highest Display Rate", "Display Rate"),
+        "highest_display_rate": ("Highest Interest Rate", "Interest Rate"),
         "lowest_monthly_fee": ("Lowest Monthly Fee", "Monthly Fee"),
         "lowest_minimum_deposit": ("Lowest Minimum Deposit", "Minimum Deposit"),
         "recently_changed_30d": ("Recently Changed", "Days Since Change"),
@@ -91,9 +91,9 @@ RANKING_LABELS = {
 SCATTER_LABELS = {
     "en": {
         "chequing_fee_vs_minimum_balance": ("Chequing Fee vs Minimum Balance", "Monthly Fee", "Minimum Balance"),
-        "savings_rate_vs_minimum_balance": ("Savings Rate vs Minimum Balance", "Minimum Balance", "Display Rate"),
-        "gic_rate_vs_minimum_deposit": ("GIC Rate vs Minimum Deposit", "Minimum Deposit", "Display Rate"),
-        "gic_term_vs_rate": ("GIC Term vs Rate", "Term Length", "Display Rate"),
+        "savings_rate_vs_minimum_balance": ("Savings Rate vs Minimum Balance", "Minimum Balance", "Interest Rate"),
+        "gic_rate_vs_minimum_deposit": ("GIC Rate vs Minimum Deposit", "Minimum Deposit", "Interest Rate"),
+        "gic_term_vs_rate": ("GIC Term vs Rate", "Term Length", "Interest Rate"),
         "mixed_scope_note": "Select exactly one product type to load a comparative scatter chart.",
         "insufficient": "At least three eligible products are required for a comparative chart.",
         "methodology": "Metrics are derived from the latest successful aggregate snapshot and exclude products missing the required numeric fields.",
@@ -467,6 +467,7 @@ def _build_ranking_widget(
                 "bank_name": str(row["bank_name"]),
                 "product_name": str(row["product_name"]),
                 "product_type": str(row["product_type"]),
+                "product_url": row.get("product_url") or None,
                 "metric_value": metric_value_builder(row),
                 "metric_unit": metric_unit,
                 "last_changed_at": serialize_datetime(row.get("last_changed_at")),

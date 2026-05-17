@@ -19,6 +19,7 @@ export type PublicProduct = {
   subtype_code: string | null;
   subtype_label: string | null;
   product_name: string;
+  product_url: string | null;
   source_language: string;
   currency: string;
   status: string;
@@ -48,6 +49,12 @@ export type PublicProductsResponse = {
   total_items: number;
   total_pages: number;
   has_next_page: boolean;
+};
+
+export type PublicProductDetailResponse = {
+  product: PublicProduct;
+  applied_filters: Record<string, unknown>;
+  freshness: PublicFreshness;
 };
 
 export type PublicFilterOption = {
@@ -110,6 +117,7 @@ export type PublicDashboardRankingRow = {
   bank_name: string;
   product_name: string;
   product_type: string;
+  product_url: string | null;
   metric_value: number | null;
   metric_unit: string;
   last_changed_at: string | null;
@@ -171,6 +179,10 @@ export function getPublicApiOrigin() {
 
 export async function fetchPublicProducts(searchParams: URLSearchParams): Promise<PublicProductsResponse> {
   return fetchPublicData<PublicProductsResponse>("/api/public/products", searchParams);
+}
+
+export async function fetchPublicProductDetail(productId: string, searchParams: URLSearchParams): Promise<PublicProductDetailResponse> {
+  return fetchPublicData<PublicProductDetailResponse>(`/api/public/products/${encodeURIComponent(productId)}`, searchParams);
 }
 
 export async function fetchPublicFilters(searchParams: URLSearchParams): Promise<PublicFiltersResponse> {

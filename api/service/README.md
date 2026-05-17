@@ -3,7 +3,7 @@
 This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.15` plus the first public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
 
 Current scope:
-- anonymous public aggregate-backed product and dashboard read APIs
+- anonymous public aggregate-backed product, product-detail, and dashboard read APIs
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - login, logout, session introspection, and approval-gated signup-request routes
@@ -30,6 +30,7 @@ Current scope:
 
 Current routes:
 - `GET /api/public/products`
+- `GET /api/public/products/:productId`
 - `GET /api/public/filters`
 - `GET /api/public/dashboard-summary`
 - `GET /api/public/dashboard-rankings`
@@ -116,6 +117,7 @@ cd api/service
 ## Notes
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- Public product list/detail and dashboard-ranking responses may expose a single `product_url` for direct navigation to the bank's public product page; raw evidence traces, source excerpts, and source URL lists remain excluded from public responses.
 - Approve and edit-approve now queue `aggregate_refresh_request` rows inside the same review-decision transaction, then launch a background aggregate refresh runner after commit so public serving can stay on the latest successful snapshot without blocking review writes.
 - Source collection now runs the same audited canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are audit-logged and rejected before they can become public canonical products.
 - `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.

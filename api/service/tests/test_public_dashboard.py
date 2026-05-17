@@ -62,6 +62,7 @@ class PublicDashboardTests(unittest.TestCase):
         payload = load_public_dashboard_summary(connection, query=query)
 
         self.assertEqual(payload["metrics"][0]["value"], 3)
+        self.assertEqual(payload["metrics"][2]["label"], "Highest Interest Rate")
         self.assertEqual(payload["metrics"][2]["value"], 4.5)
         self.assertEqual(payload["breakdowns"]["products_by_bank"][0]["bank_code"], "BMO")
         self.assertEqual(payload["freshness"]["status"], "stale")
@@ -90,6 +91,7 @@ class PublicDashboardTests(unittest.TestCase):
 
         self.assertEqual([widget["ranking_key"] for widget in payload["widgets"]], ["highest_display_rate", "lowest_minimum_deposit", "recently_changed_30d"])
         self.assertEqual(payload["widgets"][0]["items"][0]["product_id"], "gic-bmo-1y")
+        self.assertEqual(payload["widgets"][0]["items"][0]["product_url"], "https://www.bmo.com/main/personal/investments/gic/")
         self.assertEqual(payload["widgets"][1]["items"][0]["product_id"], "gic-td-short")
 
     def test_dashboard_scatter_requires_single_product_type_without_explicit_axis(self) -> None:
@@ -198,6 +200,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 10, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.rbcroyalbank.com/accounts/student-banking.html",
         },
         {
             "product_id": "sav-td-epremium",
@@ -227,6 +230,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 3, 25, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
         },
         {
             "product_id": "gic-bmo-1y",
@@ -256,6 +260,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 7, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.bmo.com/main/personal/investments/gic/",
         },
         {
             "product_id": "gic-td-short",
@@ -285,6 +290,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 3, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/cashable-gic",
         },
         {
             "product_id": "gic-scotia-4y",
@@ -314,6 +320,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 6, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.scotiabank.com/ca/en/personal/investing/guaranteed-investment-certificates.html",
         },
     ]
 

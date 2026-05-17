@@ -128,6 +128,32 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
     }
 
 
+def load_public_product_detail(connection, *, product_id: str, filters: PublicQueryFilters) -> dict[str, Any] | None:
+    snapshot = load_latest_public_snapshot(connection, country_code=filters.country_code)
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=300)
+    if not snapshot:
+        return None
+
+    rows = load_public_projection_rows(
+        connection,
+        snapshot_id=str(snapshot["snapshot_id"]),
+        country_code=filters.country_code,
+    )
+    normalized_product_id = product_id.strip()
+    product_row = next(
+        (row for row in rows if str(row.get("product_id")) == normalized_product_id),
+        None,
+    )
+    if product_row is None:
+        return None
+
+    return {
+        "product": _serialize_product_row(product_row, locale=filters.locale),
+        "applied_filters": applied_filters_payload(filters),
+        "freshness": freshness,
+    }
+
+
 def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str, Any]:
     snapshot = load_latest_public_snapshot(connection, country_code=filters.country_code)
     freshness = build_freshness_payload(snapshot, cache_ttl_sec=300)
@@ -272,6 +298,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "subtype_code": row.get("subtype_code"),
         "subtype_label": localize_subtype(str(row["subtype_code"]), locale=locale) if row.get("subtype_code") else None,
         "product_name": str(row["product_name"]),
+        "product_url": row.get("product_url") or None,
         "source_language": str(row["source_language"]),
         "currency": str(row["currency"]),
         "status": str(row["status"]),

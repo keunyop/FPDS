@@ -200,6 +200,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `subtype_code` | optional canonical subtype |
 | `subtype_label` | localized subtype label if available |
 | `product_name` | source-derived product name |
+| `product_url` | optional single official/public bank product page URL for user navigation; not a raw evidence URL list |
 | `source_language` | source language code |
 | `currency` | currency code |
 | `status` | product lifecycle status |
@@ -220,7 +221,23 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 - `sort`
 - `freshness`
 
-### 4.4 `GET /api/public/filters`
+### 4.4 `GET /api/public/products/{product_id}`
+
+목적:
+- public product detail page를 위한 단건 product fact payload를 제공한다.
+- serving baseline은 latest successful public aggregate snapshot이다.
+- public evidence trace, source excerpts, raw source URL list는 포함하지 않는다.
+- `product_url`은 사용자가 은행의 공개 상품 판매/안내 페이지로 이동하기 위한 단일 URL이다.
+
+응답 `data` baseline:
+
+| Field | Description |
+|---|---|
+| `product` | same baseline shape as `GET /api/public/products` item |
+| `applied_filters` | normalized public scope metadata |
+| `freshness` | public snapshot freshness metadata |
+
+### 4.5 `GET /api/public/filters`
 
 목적:
 - grid/dashboard 공통 filter option과 count를 제공한다.
@@ -239,7 +256,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `minimum_deposit_buckets[]` | `{ code, label, count }` |
 | `term_buckets[]` | `{ code, label, count }` |
 
-### 4.5 `GET /api/public/dashboard-summary`
+### 4.6 `GET /api/public/dashboard-summary`
 
 목적:
 - KPI cards와 freshness note를 제공한다.
@@ -264,7 +281,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `products_by_bank[]` | `{ bank_code, bank_name, count, share_percent }` |
 | `products_by_product_type[]` | `{ product_type, product_type_label, count, share_percent }` |
 
-### 4.6 `GET /api/public/dashboard-rankings`
+### 4.7 `GET /api/public/dashboard-rankings`
 
 목적:
 - ranking widget dataset을 제공한다.
@@ -289,11 +306,12 @@ ranked row baseline:
 - `bank_name`
 - `product_name`
 - `product_type`
+- `product_url`
 - `metric_value`
 - `metric_unit`
 - `last_changed_at`
 
-### 4.7 `GET /api/public/dashboard-scatter`
+### 4.8 `GET /api/public/dashboard-scatter`
 
 목적:
 - comparative scatter plot dataset을 제공한다.
@@ -328,9 +346,9 @@ point baseline:
 - `y_value`
 - `highlight_badge_code`
 
-### 4.8 Public API Explicit Exclusions
+### 4.9 Public API Explicit Exclusions
 
-- source URL raw list
+- source URL raw list; the public product/detail/ranking payload may expose only a single official product-page `product_url` for user navigation
 - snapshot object path
 - parsed full text body
 - evidence chunk excerpt

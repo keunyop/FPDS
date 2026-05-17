@@ -62,13 +62,13 @@ As of `2026-04-15`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth, session handling, and approval-gated signup requests
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, `/admin/signup`, protected `/admin`, and session-aware route gating
-- a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for the public Product Grid, and `/methodology` for public metric/data-boundary notes
+- a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for the public Product Grid, `/products/[productId]` for public product detail, and `/methodology` for public metric/data-boundary notes
 - a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
 - a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface
 - a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
-- a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
+- a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/products/:productId`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
 - a completed dashboard health surface on `/admin/health/dashboard` with aggregate freshness, queue visibility, serving fallback, stale or failed state signals, and operator retry
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection

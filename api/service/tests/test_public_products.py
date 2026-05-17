@@ -4,7 +4,12 @@ from datetime import UTC, datetime
 from decimal import Decimal
 import unittest
 
-from api_service.public_products import load_public_filters, load_public_products, normalize_public_products_query
+from api_service.public_products import (
+    load_public_filters,
+    load_public_product_detail,
+    load_public_products,
+    normalize_public_products_query,
+)
 
 
 class _FakeResult:
@@ -64,10 +69,42 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["total_items"], 4)
         self.assertEqual(len(payload["items"]), 2)
         self.assertEqual(payload["items"][0]["product_id"], "gic-bmo-1y")
+        self.assertEqual(payload["items"][0]["product_url"], "https://www.bmo.com/main/personal/investments/gic/")
         self.assertEqual(payload["items"][0]["product_type_label"], "GIC")
         self.assertEqual(payload["items"][1]["product_id"], "gic-td-short")
         self.assertEqual(payload["freshness"]["status"], "fresh")
         self.assertEqual(payload["applied_filters"]["bank_code"], ["TD", "BMO"])
+
+    def test_load_public_product_detail_returns_product_by_id(self) -> None:
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=_projection_rows(),
+        )
+        filters = normalize_public_products_query(
+            locale="en",
+            country_code="CA",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="default",
+            sort_order="desc",
+            page=1,
+            page_size=20,
+        ).filters
+
+        payload = load_public_product_detail(connection, product_id="sav-td-epremium", filters=filters)
+
+        self.assertIsNotNone(payload)
+        assert payload is not None
+        self.assertEqual(payload["product"]["bank_code"], "TD")
+        self.assertEqual(payload["product"]["product_url"], "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account")
+        self.assertEqual(payload["freshness"]["snapshot_id"], "agg-001")
 
     def test_load_public_filters_returns_localized_counts(self) -> None:
         connection = _PublicConnection(
@@ -156,6 +193,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 10, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.rbcroyalbank.com/accounts/student-banking.html",
         },
         {
             "product_id": "chq-td-everyday",
@@ -185,6 +223,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 1, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/everyday-chequing-account",
         },
         {
             "product_id": "sav-td-epremium",
@@ -214,6 +253,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 3, 25, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
         },
         {
             "product_id": "sav-bmo-standard",
@@ -243,6 +283,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 8, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/savings-builder/",
         },
         {
             "product_id": "gic-bmo-1y",
@@ -272,6 +313,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 7, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.bmo.com/main/personal/investments/gic/",
         },
         {
             "product_id": "gic-td-short",
@@ -301,6 +343,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 3, 0, 0, tzinfo=UTC),
             "refresh_metadata": {},
+            "product_url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/cashable-gic",
         },
     ]
 

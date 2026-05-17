@@ -53,6 +53,7 @@ from api_service.public_dashboard import (
 from api_service.public_products import (
     PRODUCT_SORT_OPTIONS,
     load_public_filters,
+    load_public_product_detail,
     load_public_products,
     normalize_public_products_query,
 )
@@ -852,6 +853,42 @@ async def public_products(
             "total_items": payload["total_items"],
         },
     )
+
+
+@app.get("/api/public/products/{product_id}")
+async def public_product_detail(
+    request: Request,
+    product_id: str,
+    locale: str | None = None,
+    country_code: str | None = "CA",
+) -> JSONResponse:
+    filters = normalize_public_products_query(
+        locale=locale,
+        country_code=country_code,
+        bank_codes=None,
+        product_types=None,
+        subtype_codes=None,
+        target_customer_tags=None,
+        fee_bucket=None,
+        minimum_balance_bucket=None,
+        minimum_deposit_bucket=None,
+        term_bucket=None,
+        sort_by="default",
+        sort_order="desc",
+        page=1,
+        page_size=1,
+    ).filters
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_product_detail(connection, product_id=product_id, filters=filters)
+    if payload is None:
+        return _error(
+            404,
+            "not_found",
+            "Public product was not found in the latest active snapshot.",
+            request,
+        )
+    return _success(payload, request, meta_extra={"locale": filters.locale, "product_id": product_id})
 
 
 @app.get("/api/public/filters")

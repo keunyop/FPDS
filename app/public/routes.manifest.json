@@ -16,6 +16,12 @@
       "resource_key": "public_navigation.products"
     },
     {
+      "route": "/products/[productId]",
+      "route_id": "public.product_detail",
+      "shell_dir": "route-shells/products",
+      "resource_key": "public_navigation.products"
+    },
+    {
       "route": "/dashboard",
       "route_id": "public.dashboard",
       "shell_dir": "route-shells/dashboard",
