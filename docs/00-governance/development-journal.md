@@ -62,6 +62,25 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-19 - FPDS Public Home Polish And Localized More Link
+
+- WBS: `5.10`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: polish the uploaded FPDS Public Home view, keep the collected-market sentence as supporting marketing copy, and make the ranking/table actions locale-safe.
+- Why now: the Product Owner asked to make the public header brand slightly thinner and larger, replace the long Home title with a shorter headline, update Home KPI wording, rename the highest-rate list to `Top 5 Interest Rate`, move the ranking title outside the card, and localize the hard-coded Korean `more` link.
+- Outcome: `/dashboard` now renders `Deposit choices, made clear` as the short Home headline and keeps the collected-products market sentence as supporting copy. KPI cards now use a more polished icon treatment, English `Banks`, and `Top Interest Rate`. The highest-rate ranking now uses a section header outside the card, a localized top-right `More` link, `Top 5 Interest Rate` wording for the highest-rate widget, and localized bank-page labels across public ranking, grid, and detail actions. The public header `FPDS` text is now `text-xl font-semibold`.
+- Not done: no browser screenshot QA was added in this slice; validation stayed at typecheck, production build, and available regression suites.
+- Key files: `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`
+- Decisions: keep the change UI-only and backed by existing public dashboard APIs; override only the highest-rate widget title in the Home UI so backend ranking semantics remain unchanged; keep source-derived product and bank names untranslated.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+- Known issues: root-level `tests/regression` still does not exist; the active regression suites remain under `api/service/tests/regression` and `worker/pipeline/tests/regression`.
+- Next step: run browser/responsive QA against a live public API when the Product Owner wants exact visual review with the current aggregate snapshot.
+
 ## 2026-05-17 - FPDS Public Home Detail And Official Link
 
 - WBS: `5.7`, `5.8`, `5.9`, `5.10`, `5.11`, public UI follow-on

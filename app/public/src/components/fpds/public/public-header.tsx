@@ -35,7 +35,7 @@ function HeaderContent() {
             <span className="flex size-8 items-center justify-center rounded-md border border-primary/20 bg-primary text-primary-foreground shadow-sm">
               <ChartNoAxesColumnIncreasing className="size-4" aria-hidden="true" />
             </span>
-            <span className="block text-lg font-bold text-foreground">
+            <span className="block text-xl font-semibold text-foreground">
               <span className="block leading-none">{copy.shell.brand}</span>
             </span>
           </Link>

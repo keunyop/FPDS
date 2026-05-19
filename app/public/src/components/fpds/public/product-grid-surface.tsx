@@ -288,7 +288,7 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
           {product.product_url ? (
             <Button asChild variant="outline" size="xs">
               <a href={product.product_url} target="_blank" rel="noreferrer">
-                Bank page
+                {copy.common.bankPage}
                 <ExternalLink className="size-3" aria-hidden="true" />
               </a>
             </Button>

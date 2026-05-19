@@ -25,6 +25,8 @@ type PublicMessages = {
     noRecentChange: string;
     noSuccessfulSnapshot: string;
     notDisclosed: string;
+    bankPage: string;
+    more: string;
     open: string;
     pageLabel: string;
     previous: string;
@@ -103,6 +105,7 @@ type PublicMessages = {
     activeProducts: string;
     banksInScope: string;
     peakRate: string;
+    topInterestRateTitle: string;
     openInProducts: string;
     apiUnavailableTitle: string;
     apiUnavailableBody: string;
@@ -147,6 +150,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "No recent change",
       noSuccessfulSnapshot: "No successful public snapshot is available yet.",
       notDisclosed: "Not disclosed",
+      bankPage: "Bank page",
+      more: "More",
       open: "Open",
       pageLabel: "Page",
       previous: "Previous",
@@ -199,7 +204,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     dashboard: {
       pageTitle: "FPDS Home",
       pageDescription: "Deposit product comparison snapshot.",
-      title: "FPDS has collected 35 deposit products from 5 banks across 1 country so you can compare the market in one place.",
+      title: "Deposit choices, made clear",
       description: "",
       marketGreeting: "FPDS has collected {products} deposit products from {banks} banks across {countries} country so you can compare the market in one place.",
       marketSnapshot: "Deposit snapshot",
@@ -223,8 +228,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       chartSingleTypeHint: "Choose one product type to unlock the comparison map.",
       visibleProducts: "Visible products",
       activeProducts: "active deposit products",
-      banksInScope: "banks",
-      peakRate: "Interest rate",
+      banksInScope: "Banks",
+      peakRate: "Top Interest Rate",
+      topInterestRateTitle: "Top 5 Interest Rate",
       openInProducts: "Open in products",
       apiUnavailableTitle: "Dashboard could not load.",
       apiUnavailableBody: "The public aggregate API is not reachable.",
@@ -281,6 +287,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "최근 변경 없음",
       noSuccessfulSnapshot: "아직 사용 가능한 공개 스냅샷이 없습니다.",
       notDisclosed: "미공개",
+      bankPage: "은행 페이지",
+      more: "더보기",
       open: "열기",
       pageLabel: "페이지",
       previous: "이전",
@@ -359,6 +367,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       activeProducts: "활성 상품",
       banksInScope: "은행",
       peakRate: "최고 금리",
+      topInterestRateTitle: "상위 5개 금리",
       openInProducts: "상품에서 열기",
       apiUnavailableTitle: "대시보드를 불러오지 못했습니다.",
       apiUnavailableBody: "공개 aggregate API에 연결할 수 없습니다.",
@@ -415,6 +424,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "最近の変更なし",
       noSuccessfulSnapshot: "利用できる公開スナップショットはまだありません。",
       notDisclosed: "非公開",
+      bankPage: "銀行ページ",
+      more: "もっと見る",
       open: "開く",
       pageLabel: "ページ",
       previous: "前へ",
@@ -493,6 +504,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       activeProducts: "有効商品",
       banksInScope: "銀行",
       peakRate: "最高金利",
+      topInterestRateTitle: "金利トップ5",
       openInProducts: "商品で開く",
       apiUnavailableTitle: "ダッシュボードを読み込めませんでした。",
       apiUnavailableBody: "公開 aggregate API に接続できません。",

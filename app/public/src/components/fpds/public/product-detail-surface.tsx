@@ -71,7 +71,7 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
           {product.product_url ? (
             <Button asChild>
               <a href={product.product_url} target="_blank" rel="noreferrer">
-                Bank page
+                {copy.common.bankPage}
                 <ExternalLink className="size-4" aria-hidden="true" />
               </a>
             </Button>
