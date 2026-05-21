@@ -62,6 +62,61 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-21 - FPDS Deposit Catalog UI Polish
+
+- WBS: `5.9`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: improve the uploaded public Deposit catalog screen so the filter area is easier to scan and product cards feel more polished for comparison.
+- Why now: the Product Owner uploaded the current Deposit catalog screenshots and asked for a stronger UI/UX pass after the earlier chrome cleanup and collapsible filter changes.
+- Outcome: `/products` now uses a tighter collapsible search-condition card with denser option rows and clearer selected states. Product cards now have a refined header, the official `Bank page` action remains at the top-right, and chequing/savings cards no longer use repeated `Last change` tiles as filler metrics; cards focus on fee/rate and minimum-balance comparison values.
+- Not done: no browser screenshot QA was added in this slice; validation stayed at typecheck, production build, available regression suites, and diff hygiene.
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`
+- Decisions: keep the change UI-only with no public API or aggregate contract changes; leave `last_changed_at` available for sorting/detail contexts while removing it from product-card metric filler; preserve the previously removed catalog chrome and bottom Changed/Verified footer.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+- Known issues: root-level `tests/regression` still does not exist; the active regression suites remain under `api/service/tests/regression` and `worker/pipeline/tests/regression`. `git diff --check` passed with line-ending warnings only.
+- Next step: run browser/responsive QA against a live public API if the Product Owner wants exact visual confirmation with the current aggregate snapshot.
+
+## 2026-05-21 - FPDS Deposit Catalog Collapsible Filters
+
+- WBS: `5.9`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: make the Deposit catalog search-condition card collapsible and remove the per-product Changed/Verified footer.
+- Why now: the Product Owner asked for the public Deposit catalog filter card to be collapsible and for the product-card bottom date area such as `Changed 2026-05-13` / `Verified 2026-05-13` to be removed.
+- Outcome: `/products` now uses a native collapsible search-condition card with a visible chevron affordance, keeps the existing filter/sort/apply/clear behavior inside the expanded content, and no longer renders the Changed/Verified footer on product cards. The top-right `Bank page` action remains in the card header when a public product URL is available.
+- Not done: no browser screenshot QA was added in this slice; validation stayed at typecheck, production build, and available regression suites.
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`
+- Decisions: use native `details`/`summary` for the collapse behavior to avoid adding client-side state to the server-rendered catalog surface; keep Last-change as a possible metric value because the requested removal targeted the bottom Changed/Verified footer.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+- Known issues: root-level `tests/regression` still does not exist; the active regression suites remain under `api/service/tests/regression` and `worker/pipeline/tests/regression`.
+- Next step: run browser/responsive QA against a live public API if the Product Owner wants exact visual confirmation of the collapsible filter card.
+
+## 2026-05-21 - FPDS Deposit Catalog Chrome Cleanup
+
+- WBS: `5.9`, `5.11`, `5.12`, public UI follow-on
+- Status: `done`
+- Goal: simplify the public Deposit catalog screen and move the official bank-page action into the product-card header area.
+- Why now: the Product Owner asked to remove visible catalog chrome including the blue Deposit eyebrow, catalog description, Open home button, Current scope/freshness/header controls, Primary helper labels, result title/count/full-scope copy, and Clear all action.
+- Outcome: `/products` now starts directly with the Deposit catalog title and filter card, keeps filtering/sorting/pagination behavior, only renders active filter chips when filters exist, and places the official `Bank page` action at the top-right of each product card when a public product URL is available.
+- Not done: no browser screenshot QA was added in this slice; validation stayed at typecheck, production build, and available regression suites.
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`
+- Decisions: keep the change UI-only and do not remove API freshness metadata or filter state from the data contract; keep the small per-filter `Clear` form action because the requested removal was the separate `Clear all` action.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+- Known issues: root-level `tests/regression` still does not exist; the active regression suites remain under `api/service/tests/regression` and `worker/pipeline/tests/regression`.
+- Next step: run browser/responsive QA against a live public API if the Product Owner wants exact visual confirmation of the simplified catalog spacing.
+
 ## 2026-05-19 - FPDS Public Home Polish And Localized More Link
 
 - WBS: `5.10`, `5.11`, `5.12`, public UI follow-on

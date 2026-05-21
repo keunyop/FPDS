@@ -175,6 +175,14 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - dashboard ranking product names may drill into `/products/[productId]`; the ranking header may still provide a Deposit/Product Grid `more` link
 - when drill-in selects exactly one product type, bucket filters hidden for that type should be pruned before opening the Product Grid
 
+### 10.7 Implemented Deposit Catalog Simplification
+
+- Product Owner direction on `2026-05-21` removed the visible heading eyebrow, short scope note, home action, filter-card scope/freshness header, clear-all action, primary-filter helper copy, result-summary title, result count, and full-scope empty copy from `/products`.
+- The filter form, active filter chips, sort controls, pagination, product-detail links, and locale-preserving query behavior remain in place.
+- Official bank product-page actions should appear in the top-right of each product card when a public `product_url` is available.
+- Product Owner follow-up on `2026-05-21` made the `/products` search-condition card collapsible and removed the product-card footer that showed `Changed` and `Verified` dates.
+- Product Owner follow-up on `2026-05-21` refined the same Deposit catalog screen with denser filter controls and comparison-focused product cards. Product cards now prioritize user-relevant product metrics and avoid using repeated `Last change` tiles as filler metrics.
+
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 
 - `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`

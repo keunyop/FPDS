@@ -50,6 +50,7 @@ type PublicMessages = {
     sortBy: string;
     direction: string;
     resultSummary: string;
+    searchConditions: string;
     noActiveFilters: string;
     noResultTitle: string;
     noResultBody: string;
@@ -175,6 +176,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortBy: "Sort",
       direction: "Direction",
       resultSummary: "Results",
+      searchConditions: "Search conditions",
       noActiveFilters: "Full Canada public scope.",
       noResultTitle: "No products matched this scope.",
       noResultBody: "Clear filters or return to the dashboard for a broader market view.",
@@ -312,6 +314,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortBy: "정렬",
       direction: "방향",
       resultSummary: "결과",
+      searchConditions: "검색조건",
       noActiveFilters: "캐나다 전체 공개 범위입니다.",
       noResultTitle: "현재 범위에 맞는 상품이 없습니다.",
       noResultBody: "필터를 해제하거나 대시보드에서 더 넓은 시장을 확인하세요.",
@@ -449,6 +452,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortBy: "並び替え",
       direction: "方向",
       resultSummary: "結果",
+      searchConditions: "検索条件",
       noActiveFilters: "カナダ全体の公開範囲です。",
       noResultTitle: "現在の範囲に一致する商品はありません。",
       noResultBody: "フィルターを解除するか、ダッシュボードで広い市場を確認してください。",

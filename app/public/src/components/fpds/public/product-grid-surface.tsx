@@ -1,4 +1,4 @@
-import { ArrowUpRight, ExternalLink, Filter, RefreshCw } from "lucide-react";
+import { ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -18,7 +18,6 @@ type ProductGridSurfaceProps = {
 
 export function ProductGridSurface({ apiUnavailable, filterOptions, filters, products }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
-  const dashboardHref = buildPublicHref("/dashboard", filters);
   const clearHref = buildPublicHref("/products", {
     ...filters,
     bankCodes: [],
@@ -46,9 +45,6 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
                 {copy.grid.retryButton}
               </Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href={dashboardHref}>{copy.grid.openDashboard}</Link>
-            </Button>
           </CardContent>
         </Card>
       </main>
@@ -74,122 +70,105 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   ];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
-      <div className="flex flex-col gap-6">
+    <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
+      <div className="flex flex-col gap-5">
         <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p className="text-sm font-medium text-primary">{copy.nav.products}</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.grid.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{copy.grid.description}</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.grid.title}</h1>
           </div>
-          <Button asChild variant="outline">
-            <Link href={dashboardHref}>
-              {copy.grid.openDashboard}
-              <ArrowUpRight className="size-4" aria-hidden="true" />
-            </Link>
-          </Button>
         </section>
 
-        <Card>
-          <CardHeader className="flex-row items-center justify-between gap-3">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="size-4 text-muted-foreground" aria-hidden="true" />
-                {copy.grid.currentScope}
-              </CardTitle>
-              <CardDescription>{formatFreshnessLine(products.freshness, filters.locale)}</CardDescription>
-            </div>
-            <Button asChild variant="outline">
-              <Link href={clearHref}>{copy.common.clearAllFilters}</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <form action="/products" className="grid gap-5">
-              <input name="locale" type="hidden" value={filters.locale} />
-              <div className="grid gap-5 xl:grid-cols-3">
-                <FilterGroup helper={copy.grid.primaryFilter} label={copy.grid.banks}>
-                  <OptionGrid locale={filters.locale} name="bank_code" options={filterOptions.banks} selectedValues={new Set(filters.bankCodes)} />
-                </FilterGroup>
-                <FilterGroup helper={copy.grid.primaryFilter} label={copy.grid.productTypes}>
-                  <OptionGrid locale={filters.locale} name="product_type" options={filterOptions.product_types} selectedValues={new Set(filters.productTypes)} />
-                </FilterGroup>
-                <FilterGroup helper={copy.grid.primaryFilter} label={copy.grid.targetTags}>
-                  <OptionGrid
-                    locale={filters.locale}
-                    name="target_customer_tag"
-                    options={filterOptions.target_customer_tags}
-                    selectedValues={new Set(filters.targetCustomerTags)}
-                  />
-                </FilterGroup>
-              </div>
+        <Card className="gap-0 overflow-hidden border-border/80 shadow-sm">
+          <details className="group" open>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-transparent px-4 py-3 text-sm font-medium text-foreground outline-none transition hover:bg-muted/40 hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 group-open:border-border/70 group-open:bg-muted/25 sm:px-5 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden="true" />
+                {copy.grid.searchConditions}
+              </span>
+              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <CardContent className="px-4 py-4 sm:px-5">
+              <form action="/products" className="grid gap-4">
+                <input name="locale" type="hidden" value={filters.locale} />
+                <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
+                  <FilterGroup label={copy.grid.banks}>
+                    <OptionGrid locale={filters.locale} name="bank_code" options={filterOptions.banks} selectedValues={new Set(filters.bankCodes)} />
+                  </FilterGroup>
+                  <FilterGroup label={copy.grid.productTypes}>
+                    <OptionGrid locale={filters.locale} name="product_type" options={filterOptions.product_types} selectedValues={new Set(filters.productTypes)} />
+                  </FilterGroup>
+                  <FilterGroup label={copy.grid.targetTags}>
+                    <OptionGrid
+                      locale={filters.locale}
+                      name="target_customer_tag"
+                      options={filterOptions.target_customer_tags}
+                      selectedValues={new Set(filters.targetCustomerTags)}
+                    />
+                  </FilterGroup>
+                </div>
 
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                <SelectField locale={filters.locale} label={copy.grid.feeBucket} name="fee_bucket" options={filterOptions.fee_buckets} value={filters.feeBucket} />
-                {showMinimumBalance ? (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+                  <SelectField locale={filters.locale} label={copy.grid.feeBucket} name="fee_bucket" options={filterOptions.fee_buckets} value={filters.feeBucket} />
+                  {showMinimumBalance ? (
+                    <SelectField
+                      locale={filters.locale}
+                      label={copy.grid.minimumBalance}
+                      name="minimum_balance_bucket"
+                      options={filterOptions.minimum_balance_buckets}
+                      value={filters.minimumBalanceBucket}
+                    />
+                  ) : null}
+                  {showMinimumDeposit ? (
+                    <SelectField
+                      locale={filters.locale}
+                      label={copy.grid.minimumDeposit}
+                      name="minimum_deposit_bucket"
+                      options={filterOptions.minimum_deposit_buckets}
+                      value={filters.minimumDepositBucket}
+                    />
+                  ) : null}
+                  {showTermBucket ? (
+                    <SelectField locale={filters.locale} label={copy.grid.termBucket} name="term_bucket" options={filterOptions.term_buckets} value={filters.termBucket} />
+                  ) : null}
+                  <SelectField locale={filters.locale} label={copy.grid.sortBy} name="sort_by" options={sortOptions} value={filters.sortBy} />
                   <SelectField
                     locale={filters.locale}
-                    label={copy.grid.minimumBalance}
-                    name="minimum_balance_bucket"
-                    options={filterOptions.minimum_balance_buckets}
-                    value={filters.minimumBalanceBucket}
+                    label={copy.grid.direction}
+                    name="sort_order"
+                    options={[
+                      { value: "desc", label: copy.grid.descending },
+                      { value: "asc", label: copy.grid.ascending }
+                    ]}
+                    value={filters.sortOrder}
                   />
-                ) : null}
-                {showMinimumDeposit ? (
-                  <SelectField
-                    locale={filters.locale}
-                    label={copy.grid.minimumDeposit}
-                    name="minimum_deposit_bucket"
-                    options={filterOptions.minimum_deposit_buckets}
-                    value={filters.minimumDepositBucket}
-                  />
-                ) : null}
-                {showTermBucket ? (
-                  <SelectField locale={filters.locale} label={copy.grid.termBucket} name="term_bucket" options={filterOptions.term_buckets} value={filters.termBucket} />
-                ) : null}
-                <SelectField locale={filters.locale} label={copy.grid.sortBy} name="sort_by" options={sortOptions} value={filters.sortBy} />
-                <SelectField
-                  locale={filters.locale}
-                  label={copy.grid.direction}
-                  name="sort_order"
-                  options={[
-                    { value: "desc", label: copy.grid.descending },
-                    { value: "asc", label: copy.grid.ascending }
-                  ]}
-                  value={filters.sortOrder}
-                />
-              </div>
+                </div>
 
-              <div className="flex justify-end gap-2 border-t border-border pt-4">
-                <Button type="submit">{copy.common.applyFilters}</Button>
-                <Button asChild type="button" variant="outline">
-                  <Link href={clearHref}>{copy.common.clearFilters}</Link>
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+                <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-4 sm:flex-row sm:justify-end">
+                  <Button type="submit" className="sm:min-w-20">
+                    {copy.common.applyFilters}
+                  </Button>
+                  <Button asChild type="button" variant="outline">
+                    <Link href={clearHref}>{copy.common.clearFilters}</Link>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </details>
         </Card>
 
-        <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">{copy.grid.resultSummary}</p>
-            <p className="text-sm text-muted-foreground">{buildResultTitle(products.total_items, filters.locale)}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {activeChips.length ? (
-              activeChips.map((chip) => (
-                <Link
-                  key={`${chip.group}-${chip.value}`}
-                  href={chip.href}
-                  className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  {chip.label}
-                </Link>
-              ))
-            ) : (
-              <span className="text-sm text-muted-foreground">{copy.grid.noActiveFilters}</span>
-            )}
-          </div>
-        </section>
+        {activeChips.length ? (
+          <section className="flex flex-wrap gap-2 rounded-lg border border-border bg-card px-4 py-3">
+            {activeChips.map((chip) => (
+              <Link
+                key={`${chip.group}-${chip.value}`}
+                href={chip.href}
+                className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                {chip.label}
+              </Link>
+            ))}
+          </section>
+        ) : null}
 
         {products.items.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -206,9 +185,6 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
             <CardContent className="flex flex-wrap gap-2">
               <Button asChild>
                 <Link href={clearHref}>{copy.common.clearFilters}</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href={dashboardHref}>{copy.grid.openDashboard}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -240,27 +216,39 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
 
 function ProductCard({ filters, locale, product }: { filters: ProductGridPageFilters; locale: string; product: PublicProduct }) {
   const copy = getPublicMessages(locale);
-  const metrics = buildPrimaryMetrics(product, locale);
+  const metrics = buildComparisonMetrics(product, locale);
   const tags = product.target_customer_tag_labels.slice(0, 2);
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full gap-3 overflow-hidden border-border/80 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/15">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <CardDescription>{product.bank_name}</CardDescription>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">{product.product_type_label}</p>
-            <CardTitle className="mt-2 leading-snug">
+          <div className="min-w-0">
+            <CardDescription className="text-sm">{product.bank_name}</CardDescription>
+            <p className="mt-2 inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{product.product_type_label}</p>
+            <CardTitle className="mt-3 text-lg leading-snug">
               <Link className="hover:text-primary" href={detailHref}>
                 {product.product_name}
               </Link>
             </CardTitle>
+            {product.product_highlight_badge_label ? (
+              <div className="mt-3">
+                <Badge>{product.product_highlight_badge_label}</Badge>
+              </div>
+            ) : null}
           </div>
-          {product.product_highlight_badge_label ? <Badge>{product.product_highlight_badge_label}</Badge> : null}
+          {product.product_url ? (
+            <Button asChild variant="outline" size="xs" className="shrink-0">
+              <a href={product.product_url} target="_blank" rel="noreferrer">
+                {copy.common.bankPage}
+                <ExternalLink className="size-3" aria-hidden="true" />
+              </a>
+            </Button>
+          ) : null}
         </div>
         {tags.length ? (
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-2">
             {tags.map((tag) => (
               <Badge key={tag} muted>
                 {tag}
@@ -269,31 +257,15 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
           </div>
         ) : null}
       </CardHeader>
-      <CardContent>
-        <dl className="grid gap-2 sm:grid-cols-3">
-          {metrics.map((metric) => (
-            <div key={metric.label} className="rounded-lg border border-border bg-background p-3">
+      <CardContent className="pt-0">
+        <dl className={cn("grid gap-2", metrics.length >= 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+          {metrics.map((metric, index) => (
+            <div key={metric.label} className={cn("rounded-lg border p-3", index === 0 ? "border-primary/20 bg-primary/5" : "border-border bg-muted/30")}>
               <dt className="text-xs font-medium text-muted-foreground">{metric.label}</dt>
-              <dd className="mt-1 text-base font-semibold tabular-nums text-foreground">{metric.value}</dd>
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">{metric.value}</dd>
             </div>
           ))}
         </dl>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-          <div className="flex flex-col gap-1">
-            <span>{buildChangeHint(product.last_changed_at, locale)}</span>
-            <span>
-            {copy.common.verifiedOn} {formatCompactDate(product.last_verified_at, locale)}
-            </span>
-          </div>
-          {product.product_url ? (
-            <Button asChild variant="outline" size="xs">
-              <a href={product.product_url} target="_blank" rel="noreferrer">
-                {copy.common.bankPage}
-                <ExternalLink className="size-3" aria-hidden="true" />
-              </a>
-            </Button>
-          ) : null}
-        </div>
       </CardContent>
     </Card>
   );
@@ -307,11 +279,10 @@ function Badge({ children, muted = false }: { children: ReactNode; muted?: boole
   );
 }
 
-function FilterGroup({ helper, label, children }: Readonly<{ helper: string; label: string; children: ReactNode }>) {
+function FilterGroup({ label, children }: Readonly<{ label: string; children: ReactNode }>) {
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium text-foreground">{label}</legend>
-      <p className="text-xs text-muted-foreground">{helper}</p>
+      <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</legend>
       {children}
     </fieldset>
   );
@@ -338,14 +309,14 @@ function OptionGrid({
         <label
           key={option.value}
           className={cn(
-            "flex cursor-pointer items-start gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-muted/70",
-            selectedValues.has(option.value) ? "border-primary/35 bg-secondary" : "border-border bg-background"
+            "flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm transition-colors hover:bg-muted/70",
+            selectedValues.has(option.value) ? "border-primary/40 bg-primary/5" : "border-border bg-background"
           )}
         >
-          <input className="mt-0.5 size-4 rounded border-border text-primary" defaultChecked={selectedValues.has(option.value)} name={name} type="checkbox" value={option.value} />
-          <span className="min-w-0">
-            <span className="block truncate font-medium text-foreground">{option.label}</span>
-            <span className="text-xs text-muted-foreground">{option.count}</span>
+          <input className="size-4 rounded border-border text-primary" defaultChecked={selectedValues.has(option.value)} name={name} type="checkbox" value={option.value} />
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <span className="truncate font-medium text-foreground">{option.label}</span>
+            <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">{option.count}</span>
           </span>
         </label>
       ))}
@@ -385,13 +356,12 @@ function SelectField({
   );
 }
 
-function buildPrimaryMetrics(product: PublicProduct, locale: string) {
+function buildComparisonMetrics(product: PublicProduct, locale: string) {
   const copy = getPublicMessages(locale);
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
-      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
-      { label: product.product_highlight_badge_label ? copy.grid.metricKeyDetail : copy.grid.metricLastChange, value: product.product_highlight_badge_label ?? formatCompactDate(product.last_changed_at, locale) }
+      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) }
     ];
   }
 
@@ -405,8 +375,7 @@ function buildPrimaryMetrics(product: PublicProduct, locale: string) {
 
   return [
     { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
-    { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
-    { label: product.product_highlight_badge_label ? copy.grid.metricRateNote : copy.grid.metricLastChange, value: product.product_highlight_badge_label ?? formatCompactDate(product.last_changed_at, locale) }
+    { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) }
   ];
 }
 
@@ -495,33 +464,6 @@ function findLabel(options: Array<{ label: string; value: string }>, value: stri
   return options.find((option) => option.value === value)?.label ?? value;
 }
 
-function buildResultTitle(totalItems: number, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (locale === "ko") {
-    return `${formatCount(totalItems, locale)}개 ${copy.common.active} 상품`;
-  }
-  if (locale === "ja") {
-    return `${formatCount(totalItems, locale)} 件の${copy.common.active}商品`;
-  }
-  return `${formatCount(totalItems, locale)} ${copy.common.active.toLowerCase()} products`;
-}
-
-function buildChangeHint(timestamp: string | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!timestamp) {
-    return copy.common.noRecentChange;
-  }
-  return `${copy.common.changedOn} ${formatCompactDate(timestamp, locale)}`;
-}
-
-function formatFreshnessLine(freshness: PublicProductsResponse["freshness"], locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!freshness.refreshed_at) {
-    return copy.common.noSuccessfulSnapshot;
-  }
-  return `${copy.dashboard?.freshness ?? "Freshness"}: ${formatFixedDateTime(freshness.refreshed_at)}`;
-}
-
 function formatCurrency(value: number | null, currency: string, locale: string) {
   const copy = getPublicMessages(locale);
   if (value === null || Number.isNaN(value)) {
@@ -574,39 +516,4 @@ function formatTerm(termLengthDays: number | null, locale: string) {
     return `${termLengthDays}日`;
   }
   return `${termLengthDays} days`;
-}
-
-function formatCompactDate(value: string | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!value) {
-    return copy.common.noDate;
-  }
-  return formatFixedDate(value);
-}
-
-function formatFixedDate(value: string) {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function formatFixedDateTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function formatCount(value: number, locale: string) {
-  return new Intl.NumberFormat(getIntlLocale(locale), {
-    maximumFractionDigits: Number.isInteger(value) ? 0 : 2
-  }).format(value);
 }
