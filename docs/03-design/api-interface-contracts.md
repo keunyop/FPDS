@@ -204,10 +204,18 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `source_language` | source language code |
 | `currency` | currency code |
 | `status` | product lifecycle status |
+| `standard_rate` | standard/source rate if available |
+| `base_12_month_rate` | base rate normalized for 12-month comparison if available |
 | `public_display_rate` | display rate snapshot |
 | `public_display_fee` | display fee snapshot |
 | `minimum_balance` | minimum balance if available |
 | `minimum_deposit` | minimum deposit if available |
+| `eligibility_text` | source-derived eligibility text if approved into the public projection |
+| `application_method` | source-derived signup/application method if available |
+| `post_maturity_interest_rate` | source-derived post-maturity rate note if available |
+| `tax_benefits` | source-derived tax treatment note if available |
+| `deposit_insurance` | source-derived deposit insurance note if available |
+| `term_rate_table` | optional rows of `{ term_label, term_length_days, rate, minimum_deposit, notes }` |
 | `product_highlight_badge_code` | badge code |
 | `product_highlight_badge_label` | localized badge label |
 | `target_customer_tags` | normalized tag codes |
@@ -221,6 +229,8 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 - `sort`
 - `freshness`
 
+Numeric product fields are serialized as finite JSON numbers only. Missing, invalid, `NaN`, or infinite source values are returned as `null` so public sort/render paths can remain stable.
+
 ### 4.4 `GET /api/public/products/{product_id}`
 
 목적:
@@ -228,6 +238,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 - serving baseline은 latest successful public aggregate snapshot이다.
 - public evidence trace, source excerpts, raw source URL list는 포함하지 않는다.
 - `product_url`은 사용자가 은행의 공개 상품 판매/안내 페이지로 이동하기 위한 단일 URL이다.
+- detail UI may additionally render a compact calculator, disclosure note, and term-rate table from the same `product` payload; evidence traces remain admin-only.
 
 응답 `data` baseline:
 

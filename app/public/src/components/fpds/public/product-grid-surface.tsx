@@ -1,7 +1,8 @@
-import { ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { ArrowDownUp, ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
@@ -59,14 +60,9 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   const showTermBucket = gicOnly;
   const pagination = buildPagination(products, filters);
   const sortOptions = [
-    { value: "default", label: copy.grid.sortDefault },
-    { value: "display_rate", label: copy.grid.sortDisplayRate },
-    { value: "monthly_fee", label: copy.grid.sortMonthlyFee },
-    { value: "minimum_balance", label: copy.grid.sortMinimumBalance },
-    { value: "minimum_deposit", label: copy.grid.sortMinimumDeposit },
-    { value: "last_changed_at", label: copy.grid.sortLastChange },
-    { value: "bank_name", label: copy.grid.sortBankName },
-    { value: "product_name", label: copy.grid.sortProductName }
+    { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" as const },
+    { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" as const },
+    { value: "minimum_balance", label: copy.grid.sortMinimumBalance, order: "asc" as const }
   ];
 
   return (
@@ -90,6 +86,8 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
             <CardContent className="px-4 py-4 sm:px-5">
               <form action="/products" className="grid gap-4">
                 <input name="locale" type="hidden" value={filters.locale} />
+                <input name="sort_by" type="hidden" value={filters.sortBy} />
+                <input name="sort_order" type="hidden" value={filters.sortOrder} />
                 <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
                   <FilterGroup label={copy.grid.banks}>
                     <OptionGrid locale={filters.locale} name="bank_code" options={filterOptions.banks} selectedValues={new Set(filters.bankCodes)} />
@@ -107,7 +105,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
                   </FilterGroup>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <SelectField locale={filters.locale} label={copy.grid.feeBucket} name="fee_bucket" options={filterOptions.fee_buckets} value={filters.feeBucket} />
                   {showMinimumBalance ? (
                     <SelectField
@@ -130,17 +128,6 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
                   {showTermBucket ? (
                     <SelectField locale={filters.locale} label={copy.grid.termBucket} name="term_bucket" options={filterOptions.term_buckets} value={filters.termBucket} />
                   ) : null}
-                  <SelectField locale={filters.locale} label={copy.grid.sortBy} name="sort_by" options={sortOptions} value={filters.sortBy} />
-                  <SelectField
-                    locale={filters.locale}
-                    label={copy.grid.direction}
-                    name="sort_order"
-                    options={[
-                      { value: "desc", label: copy.grid.descending },
-                      { value: "asc", label: copy.grid.ascending }
-                    ]}
-                    value={filters.sortOrder}
-                  />
                 </div>
 
                 <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-4 sm:flex-row sm:justify-end">
@@ -169,6 +156,8 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
             ))}
           </section>
         ) : null}
+
+        <SortToolbar filters={filters} locale={filters.locale} options={sortOptions} />
 
         {products.items.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -225,7 +214,10 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <CardDescription className="text-sm">{product.bank_name}</CardDescription>
+            <div className="flex min-w-0 items-center gap-2">
+              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+              <CardDescription className="truncate text-sm">{product.bank_name}</CardDescription>
+            </div>
             <p className="mt-2 inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{product.product_type_label}</p>
             <CardTitle className="mt-3 text-lg leading-snug">
               <Link className="hover:text-primary" href={detailHref}>
@@ -268,6 +260,54 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
         </dl>
       </CardContent>
     </Card>
+  );
+}
+
+function SortToolbar({
+  filters,
+  locale,
+  options
+}: {
+  filters: ProductGridPageFilters;
+  locale: string;
+  options: Array<{ label: string; order: "asc" | "desc"; value: string }>;
+}) {
+  const copy = getPublicMessages(locale);
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <ArrowDownUp className="size-4 text-muted-foreground" aria-hidden="true" />
+        {copy.grid.sortBy}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Link
+          aria-current={filters.sortBy === "default" ? "page" : undefined}
+          className={cn(
+            "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+            filters.sortBy === "default" ? "border-primary/40 bg-primary/5 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+          href={buildProductsHref(filters, { page: 1, sortBy: "default", sortOrder: "desc" })}
+        >
+          {copy.grid.sortDefault}
+        </Link>
+        {options.map((option) => {
+          const active = filters.sortBy === option.value;
+          return (
+            <Link
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                active ? "border-primary/40 bg-primary/5 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              href={buildProductsHref(filters, { page: 1, sortBy: option.value, sortOrder: option.order })}
+              key={option.value}
+            >
+              {option.label}
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -466,22 +506,28 @@ function findLabel(options: Array<{ label: string; value: string }>, value: stri
 
 function formatCurrency(value: number | null, currency: string, locale: string) {
   const copy = getPublicMessages(locale);
-  if (value === null || Number.isNaN(value)) {
+  if (value === null || !Number.isFinite(value)) {
     return copy.common.notDisclosed;
   }
+  const safeCurrency = normalizeCurrency(currency);
   return new Intl.NumberFormat(getIntlLocale(locale), {
     style: "currency",
-    currency,
+    currency: safeCurrency,
     maximumFractionDigits: Number.isInteger(value) ? 0 : 2
   }).format(value);
 }
 
 function formatRate(value: number | null, locale: string) {
   const copy = getPublicMessages(locale);
-  if (value === null || Number.isNaN(value)) {
+  if (value === null || !Number.isFinite(value)) {
     return copy.common.notDisclosed;
   }
   return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+}
+
+function normalizeCurrency(currency: string) {
+  const normalized = currency.trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(normalized) ? normalized : "CAD";
 }
 
 function formatTerm(termLengthDays: number | null, locale: string) {

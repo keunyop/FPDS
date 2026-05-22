@@ -39,11 +39,17 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "minimum_balance",
     "minimum_deposit",
     "standard_rate",
+    "base_12_month_rate",
     "public_display_rate",
     "promotional_rate",
     "promotional_period_text",
     "introductory_rate_flag",
     "eligibility_text",
+    "application_method",
+    "post_maturity_interest_rate",
+    "tax_benefits",
+    "deposit_insurance",
+    "term_rate_table",
     "interest_calculation_method",
     "interest_payment_frequency",
     "tiered_rate_flag",
@@ -75,12 +81,16 @@ _COMMON_DEFAULT_FIELDS = {
     "minimum_balance",
     "minimum_deposit",
     "eligibility_text",
+    "application_method",
+    "tax_benefits",
+    "deposit_insurance",
     "notes",
 }
 _PRODUCT_TYPE_DEFAULT_FIELDS = {
     "savings": _COMMON_DEFAULT_FIELDS
     | {
         "standard_rate",
+        "base_12_month_rate",
         "public_display_rate",
         "promotional_rate",
         "promotional_period_text",
@@ -91,6 +101,7 @@ _PRODUCT_TYPE_DEFAULT_FIELDS = {
         "tier_definition_text",
         "withdrawal_limit_text",
         "registered_flag",
+        "term_rate_table",
     },
     "chequing": _COMMON_DEFAULT_FIELDS
     | {
@@ -105,6 +116,7 @@ _PRODUCT_TYPE_DEFAULT_FIELDS = {
     "gic": _COMMON_DEFAULT_FIELDS
     | {
         "standard_rate",
+        "base_12_month_rate",
         "public_display_rate",
         "promotional_rate",
         "promotional_period_text",
@@ -116,6 +128,8 @@ _PRODUCT_TYPE_DEFAULT_FIELDS = {
         "compounding_frequency",
         "payout_option",
         "registered_plan_supported",
+        "post_maturity_interest_rate",
+        "term_rate_table",
     },
 }
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
@@ -123,6 +137,12 @@ _MONEY_RE = re.compile(r"\$\s?([0-9][0-9,]*(?:\.\d{1,2})?)")
 _TERM_RE = re.compile(
     r"(?<!\d)(\d{1,3})\s*(?:-|\s)?\s*(day|days|month|months|year|years)\b"
     r"(?:\s*(?:to|-)\s*(\d{1,3})\s*(?:-|\s)?\s*(day|days|month|months|year|years)\b)?",
+    re.IGNORECASE,
+)
+_TERM_RATE_ROW_RE = re.compile(
+    r"(?P<term>\d{1,3}\s*(?:days|months|years|day|month|year))\b"
+    r"(?P<body>[^%\n\r]{0,120}?)"
+    r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
     re.IGNORECASE,
 )
 _WHITESPACE_RE = re.compile(r"\s+")
@@ -225,6 +245,9 @@ _SUPPORTING_EXTRACTABLE_FIELDS = {
     "interest_rate_summary",
     "savings_account_rates",
     "rate_tiers",
+    "base_12_month_rate",
+    "term_rate_table",
+    "post_maturity_interest_rate",
 }
 _PRODUCT_TITLE_KEYWORDS = (
     "account",
@@ -921,9 +944,16 @@ def _extract_candidate_value(
     if field_name == "promotional_rate" and not _has_product_promotional_context(context=context, text=text):
         return None, "decimal", "heuristic_percent", {}
 
+    if field_name == "base_12_month_rate":
+        return _extract_base_12_month_rate(text), "decimal", "heuristic_12_month_percent", {}
+
     if field_name in {"standard_rate", "public_display_rate", "promotional_rate"}:
         percent = _extract_percent_value(text)
         return percent, "decimal", "heuristic_percent", {}
+
+    if field_name == "term_rate_table":
+        table_rows = _extract_term_rate_table(text)
+        return table_rows, "json", "heuristic_term_rate_table", {}
 
     if field_name == "included_transactions":
         return _extract_included_transactions(text), "integer", "heuristic_transaction_count", {}
@@ -970,6 +1000,10 @@ def _extract_candidate_value(
     if field_name in {
         "fee_waiver_condition",
         "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
         "tier_definition_text",
         "withdrawal_limit_text",
         "notes",
@@ -983,6 +1017,14 @@ def _extract_candidate_value(
         if field_name == "eligibility_text":
             eligibility_text = _extract_eligibility_text(text)
             return eligibility_text, "string", "heuristic_eligibility_text", {}
+        if field_name == "application_method":
+            return _extract_application_method(text), "string", "heuristic_application_method", {}
+        if field_name == "post_maturity_interest_rate":
+            return _extract_post_maturity_interest_rate(text), "string", "heuristic_post_maturity_interest_rate", {}
+        if field_name == "tax_benefits":
+            return _extract_tax_benefits(text), "string", "heuristic_tax_benefits", {}
+        if field_name == "deposit_insurance":
+            return _extract_deposit_insurance(text), "string", "heuristic_deposit_insurance", {}
         if field_name == "tier_definition_text":
             return _extract_tier_definition_text(text), "string", "heuristic_text", {}
         if field_name == "withdrawal_limit_text":
@@ -1382,7 +1424,7 @@ def _extract_dynamic_fields_with_ai(
                     "properties": {
                         "field_name": {"type": "string"},
                         "candidate_value": {"type": "string"},
-                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean"]},
+                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean", "json"]},
                         "evidence_chunk_id": {"type": "string"},
                         "confidence": {"type": "number"},
                     },
@@ -1480,6 +1522,11 @@ def _coerce_ai_candidate_value(*, value: str, value_type: str) -> object | None:
         if lowered in {"false", "no", "0"}:
             return False
         return None
+    if value_type == "json":
+        try:
+            return json.loads(normalized)
+        except json.JSONDecodeError:
+            return None
     return _normalize_text(normalized)[:280]
 
 
@@ -2005,6 +2052,111 @@ def _extract_payout_option(lowered: str) -> str | None:
     return None
 
 
+def _extract_base_12_month_rate(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    for row in _extract_term_rate_table(normalized) or []:
+        term_label = str(row.get("term_label") or "").lower()
+        term_length_days = row.get("term_length_days")
+        if row.get("rate") and (term_length_days in {360, 365} or "12 month" in term_label or "1 year" in term_label):
+            return str(row["rate"])
+    for match in _PERCENT_RE.finditer(normalized):
+        window_start = max(0, match.start() - 120)
+        window_end = min(len(normalized), match.end() + 120)
+        window = normalized[window_start:window_end].lower()
+        if not any(token in window for token in ("12 month", "12-month", "1 year", "1-year", "one year")):
+            continue
+        if not any(token in window for token in ("rate", "interest", "annual")):
+            continue
+        if any(token in window for token in ("bonus", "promo", "promotional", "introductory")):
+            continue
+        return _normalize_decimal(match.group(1))
+    return None
+
+
+def _extract_term_rate_table(text: str) -> list[dict[str, object]] | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    rows: list[dict[str, object]] = []
+    seen: set[tuple[str, str]] = set()
+    minimum_deposit = _extract_first_money_value(normalized)
+    for match in _TERM_RATE_ROW_RE.finditer(normalized):
+        term_label = _normalize_text(match.group("term")).lower()
+        rate = _normalize_decimal(match.group("rate"))
+        key = (term_label, rate)
+        if key in seen:
+            continue
+        seen.add(key)
+        term_length_days = _term_label_to_days(term_label)
+        rows.append(
+            {
+                "term_label": term_label,
+                "term_length_days": term_length_days,
+                "rate": rate,
+                "minimum_deposit": minimum_deposit,
+                "notes": None,
+            }
+        )
+    return rows[:24] or None
+
+
+def _extract_first_money_value(text: str) -> str | None:
+    money_match = _MONEY_RE.search(text)
+    return _normalize_decimal(money_match.group(1)) if money_match else None
+
+
+def _term_label_to_days(term_label: str) -> int | None:
+    match = _TERM_RE.search(term_label)
+    if match is None:
+        return None
+    start_value, start_unit, end_value, _ = match.groups()
+    if end_value:
+        return None
+    return _convert_term_to_days(start_value, start_unit)
+
+
+def _extract_application_method(text: str) -> str | None:
+    return _extract_limited_sentence(
+        text,
+        ("apply", "open account", "online", "branch", "mobile app", "phone", "appointment"),
+    )
+
+
+def _extract_post_maturity_interest_rate(text: str) -> str | None:
+    return _extract_limited_sentence(
+        text,
+        ("after maturity", "post-maturity", "maturity", "renewal", "renewed", "reinvest"),
+    )
+
+
+def _extract_tax_benefits(text: str) -> str | None:
+    return _extract_limited_sentence(
+        text,
+        ("tax free", "tax-free", "tax deferred", "tax-deferred", "tfsa", "rrsp", "tax benefit"),
+    )
+
+
+def _extract_deposit_insurance(text: str) -> str | None:
+    return _extract_limited_sentence(
+        text,
+        ("cdic", "deposit insurance", "insured", "canada deposit insurance corporation"),
+    )
+
+
+def _extract_limited_sentence(text: str, keywords: tuple[str, ...]) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        sentence = raw_sentence.strip()
+        lowered = sentence.lower()
+        if any(keyword in lowered for keyword in keywords):
+            return _normalize_text(sentence)[:280]
+    return None
+
+
 def _find_sentence(text: str, keywords: tuple[str, ...]) -> str | None:
     normalized = _normalize_text(text)
     for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
@@ -2441,6 +2593,8 @@ def _build_usage_id(model_execution_id: str) -> str:
 
 
 def _stringify_candidate_value(value: object) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True, sort_keys=True)
     if isinstance(value, bool):
         return "true" if value else "false"
     return str(value)

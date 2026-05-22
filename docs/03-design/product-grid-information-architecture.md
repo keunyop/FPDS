@@ -90,7 +90,7 @@ grid summary는 탐색 상태 요약, dashboard metric은 시장 비교 요약�
 
 ## 6. Sort Baseline
 
-Phase 1 sort baseline:
+Phase 1 API sort baseline:
 
 - relevance-like default aggregate order
 - `display_rate desc`
@@ -98,6 +98,15 @@ Phase 1 sort baseline:
 - `minimum_balance asc`
 - `minimum_deposit asc`
 - `last_changed_at desc`
+
+Phase 1 public Deposit catalog visible sort toolbar:
+
+- default aggregate order
+- `display_rate desc`
+- `monthly_fee asc`
+- `minimum_balance asc`
+
+Numeric sort values must tolerate null, invalid, or non-finite source values without failing the public render; unavailable numeric values sort after valid values and serialize as `null`.
 
 sort availability는 product type과 field completeness에 따라 제한될 수 있다.
 
@@ -107,6 +116,7 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 
 ### 7.1 Card Header
 
+- small locally served real bank logo with fixed dimensions
 - bank name
 - localized product type label
 - product name
@@ -182,6 +192,8 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - Official bank product-page actions should appear in the top-right of each product card when a public `product_url` is available.
 - Product Owner follow-up on `2026-05-21` made the `/products` search-condition card collapsible and removed the product-card footer that showed `Changed` and `Verified` dates.
 - Product Owner follow-up on `2026-05-21` refined the same Deposit catalog screen with denser filter controls and comparison-focused product cards. Product cards now prioritize user-relevant product metrics and avoid using repeated `Last change` tiles as filler metrics.
+- Product Owner follow-up on `2026-05-22` moved public Deposit catalog sort controls below search conditions and above the product list, focusing the visible choices on interest rate, monthly fee, and minimum balance. Product cards and product detail now show compact bank brand marks.
+- Product detail now shows a compact public disclosure note, an estimated-interest calculator, source-derived signup/application facts, and a period-by-rate table when approved aggregate metadata includes those rows.
 
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 

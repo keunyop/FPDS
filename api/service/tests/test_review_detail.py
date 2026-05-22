@@ -171,6 +171,22 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(groups[0]["value"], ["keep_balance", "new_deposit"])
         self.assertEqual(groups[0]["evidence_count"], 1)
 
+    def test_build_field_trace_groups_prioritizes_requested_deposit_review_fields(self) -> None:
+        groups = _build_field_trace_groups(
+            candidate_payload={
+                "notes": "Source note",
+                "term_rate_table": [{"term_label": "12 months", "rate": 4.5}],
+                "product_name": "BMO 1 Year GIC",
+                "application_method": "Apply online or in branch.",
+                "base_12_month_rate": 4.5,
+            },
+            field_mapping_metadata={},
+            evidence_links=[],
+        )
+
+        self.assertEqual([item["field_name"] for item in groups[:4]], ["product_name", "base_12_month_rate", "application_method", "term_rate_table"])
+        self.assertEqual(groups[1]["label"], "Base Rate, 12 Months")
+
     def test_record_evidence_trace_viewed_emits_review_audit_event(self) -> None:
         connection = _RecordingConnection()
 

@@ -61,6 +61,7 @@ const COMMON_EDITABLE_FIELDS = [
   "currency",
   "public_display_rate",
   "standard_rate",
+  "base_12_month_rate",
   "promotional_rate",
   "public_display_fee",
   "monthly_fee",
@@ -76,6 +77,11 @@ const COMMON_EDITABLE_FIELDS = [
   "compounding_frequency",
   "interest_payment_options",
   "eligibility_text",
+  "application_method",
+  "post_maturity_interest_rate",
+  "tax_benefits",
+  "deposit_insurance",
+  "term_rate_table",
   "fee_waiver_condition",
   "target_customer_tags",
   "registered_plan_supported",
@@ -284,6 +290,8 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
         <IssueDecisionCard detail={detail} />
       </div>
 
+      <ReviewDataCoverageCard detail={detail} />
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
         <article className="min-w-0 rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
           <SectionHeading eyebrow="Review fields" title="Agent values and reviewer corrections" />
@@ -454,6 +462,56 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
       <AuditContextPanel detail={detail} />
     </section>
   );
+}
+
+function ReviewDataCoverageCard({ detail }: { detail: ReviewTaskDetailResponse }) {
+  const payload = detail.candidate.candidate_payload;
+  const rows = buildReviewCoverageRows(payload);
+
+  return (
+    <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
+      <SectionHeading eyebrow="Collection coverage" title="Deposit fields for review" />
+      <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {rows.map((row) => (
+          <div className="min-w-0 rounded-lg border border-border/80 bg-background p-3" key={row.label}>
+            <dt className="text-xs font-medium text-muted-foreground">{row.label}</dt>
+            <dd className="mt-1 break-words text-sm font-medium leading-6 text-foreground">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
+function buildReviewCoverageRows(payload: Record<string, unknown>) {
+  const depositAmount = payload.minimum_deposit ?? payload.minimum_balance;
+  return [
+    { label: "Product name", value: formatValue(payload.product_name) },
+    { label: "Highest rate", value: formatRateValue(payload.public_display_rate) },
+    { label: "Base rate (12M)", value: formatRateValue(payload.base_12_month_rate ?? payload.standard_rate) },
+    { label: "Customer tags", value: formatValue(payload.target_customer_tags) },
+    { label: "Deposit amount", value: formatValue(depositAmount) },
+    { label: "Eligibility", value: formatValue(payload.eligibility_text) },
+    { label: "Application method", value: formatValue(payload.application_method) },
+    { label: "Post-maturity rate", value: formatValue(payload.post_maturity_interest_rate) },
+    { label: "Tax benefits", value: formatValue(payload.tax_benefits) },
+    { label: "Deposit insurance", value: formatValue(payload.deposit_insurance) },
+    { label: "Rates by term", value: formatTermRateTableSummary(payload.term_rate_table) },
+  ];
+}
+
+function formatRateValue(value: unknown) {
+  if (typeof value === "number") {
+    return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+  }
+  return formatValue(value);
+}
+
+function formatTermRateTableSummary(value: unknown) {
+  if (!Array.isArray(value) || value.length === 0) {
+    return "n/a";
+  }
+  return `${value.length} row${value.length === 1 ? "" : "s"} captured`;
 }
 
 function DecisionRecommendationCard({ recommendation }: { recommendation: Recommendation }) {

@@ -30,9 +30,10 @@ _SUBTYPE_REGISTRY = {
     "savings": {"standard", "high_interest", "youth", "foreign_currency", "other"},
     "gic": {"redeemable", "non_redeemable", "market_linked", "other"},
 }
-_RATE_FIELDS = {"standard_rate", "promotional_rate", "public_display_rate"}
+_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _NUMERIC_FIELDS = _RATE_FIELDS | _FEE_FIELDS | {"minimum_balance", "minimum_deposit"}
+_JSON_FIELDS = {"term_rate_table"}
 _CORE_FIELDS = {
     "country_code",
     "bank_code",
@@ -62,7 +63,9 @@ _RATE_CONTEXT_FIELDS = {
     "savings_account_rates",
     "savings_rate_table",
     "standard_rate",
+    "base_12_month_rate",
     "term_deposit_rates",
+    "term_rate_table",
     "tier_definition_text",
 }
 
@@ -1029,7 +1032,7 @@ def _normalize_dynamic_fields_with_ai(
                     "additionalProperties": False,
                     "properties": {
                         "field_name": {"type": "string"},
-                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean"]},
+                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean", "json"]},
                         "candidate_value": {"type": "string"},
                     },
                     "required": ["field_name", "value_type", "candidate_value"],
@@ -1201,8 +1204,10 @@ def _normalize_effective_date(value: object, notes_value: object) -> str | None:
 
 
 def _normalize_field_value(*, field_name: str, value: object, value_type: str) -> object:
-    if value in {None, ""}:
+    if value is None or value == "":
         return None
+    if field_name in _JSON_FIELDS:
+        return _normalize_term_rate_table(value)
     if field_name in _NUMERIC_FIELDS:
         decimal_value = _parse_canonical_decimal(field_name=field_name, value=value)
         return float(decimal_value) if decimal_value is not None else None
@@ -1216,7 +1221,67 @@ def _normalize_field_value(*, field_name: str, value: object, value_type: str) -
     if value_type == "decimal":
         decimal_value = _as_decimal(value)
         return float(decimal_value) if decimal_value is not None else None
+    if value_type == "json":
+        return _normalize_term_rate_table(value) if field_name == "term_rate_table" else value
     return str(value).strip()
+
+
+def _normalize_term_rate_table(value: object) -> list[dict[str, object]] | None:
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    else:
+        parsed = value
+    if not isinstance(parsed, list):
+        return None
+
+    rows: list[dict[str, object]] = []
+    seen: set[tuple[object, object, object]] = set()
+    for item in parsed:
+        if not isinstance(item, dict):
+            continue
+        term_label = _normalize_text(item.get("term_label")) or None
+        term_length_days = _as_int(item.get("term_length_days"))
+        if term_length_days is None and term_label:
+            term_length_days = _term_label_to_days(term_label)
+        rate_decimal = _parse_canonical_decimal(field_name="base_12_month_rate", value=item.get("rate"))
+        minimum_deposit_decimal = _parse_canonical_decimal(field_name="minimum_deposit", value=item.get("minimum_deposit"))
+        notes = _normalize_text(item.get("notes")) or None
+        if term_label is None and term_length_days is None and rate_decimal is None:
+            continue
+        key = (term_label, term_length_days, float(rate_decimal) if rate_decimal is not None else None)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "term_label": term_label,
+                "term_length_days": term_length_days,
+                "rate": float(rate_decimal) if rate_decimal is not None else None,
+                "minimum_deposit": float(minimum_deposit_decimal) if minimum_deposit_decimal is not None else None,
+                "notes": notes,
+            }
+        )
+    return rows[:24] or None
+
+
+def _term_label_to_days(term_label: str) -> int | None:
+    match = re.search(r"(?<!\d)(\d{1,3})\s*(day|days|month|months|year|years)\b", term_label, flags=re.IGNORECASE)
+    if match is None:
+        return None
+    value = _as_int(match.group(1))
+    if value is None:
+        return None
+    unit = match.group(2).lower()
+    if unit.startswith("day"):
+        return value
+    if unit.startswith("month"):
+        return value * 30
+    if unit.startswith("year"):
+        return value * 365
+    return None
 
 
 def _parse_canonical_decimal(*, field_name: str, value: object) -> Decimal | None:
@@ -1479,6 +1544,8 @@ def _build_usage_id(model_execution_id: str) -> str:
 
 
 def _stringify(value: object) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True, sort_keys=True)
     if isinstance(value, bool):
         return "true" if value else "false"
     if value is None:

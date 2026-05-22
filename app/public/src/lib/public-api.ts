@@ -8,6 +8,14 @@ export type PublicFreshness = {
   latest_error_summary?: string | null;
 };
 
+export type PublicTermRateRow = {
+  term_label: string | null;
+  term_length_days: number | null;
+  rate: number | null;
+  minimum_deposit: number | null;
+  notes: string | null;
+};
+
 export type PublicProduct = {
   product_id: string;
   bank_code: string;
@@ -23,10 +31,18 @@ export type PublicProduct = {
   source_language: string;
   currency: string;
   status: string;
+  standard_rate: number | null;
+  base_12_month_rate: number | null;
   public_display_rate: number | null;
   public_display_fee: number | null;
   minimum_balance: number | null;
   minimum_deposit: number | null;
+  eligibility_text: string | null;
+  application_method: string | null;
+  post_maturity_interest_rate: string | null;
+  tax_benefits: string | null;
+  deposit_insurance: string | null;
+  term_rate_table: PublicTermRateRow[];
   term_length_days: number | null;
   product_highlight_badge_code: string | null;
   product_highlight_badge_label: string | null;
@@ -173,6 +189,8 @@ type PublicApiEnvelope<T> = {
   data: T;
 };
 
+const PUBLIC_DATA_FETCH_TIMEOUT_MS = 8000;
+
 export function getPublicApiOrigin() {
   return process.env.FPDS_PUBLIC_API_ORIGIN ?? "http://localhost:4000";
 }
@@ -231,9 +249,13 @@ async function fetchPublicData<T>(path: string, searchParams?: URLSearchParams):
     url.search = searchParams.toString();
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PUBLIC_DATA_FETCH_TIMEOUT_MS);
+
   const response = await fetch(url, {
-    cache: "no-store"
-  });
+    cache: "no-store",
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     throw new Error(`Failed to load public data from ${path}.`);

@@ -125,6 +125,11 @@ class AggregateRefreshService:
             or payload.get("official_product_url")
             or payload.get("source_url")
         )
+        refresh_metadata = _build_product_refresh_metadata(
+            payload=payload,
+            product_version_id=canonical_row.product_version_id,
+            product_url=product_url,
+        )
         return {
             "snapshot_id": snapshot_id,
             "product_id": canonical_row.product_id,
@@ -153,10 +158,7 @@ class AggregateRefreshService:
             "term_bucket": _term_bucket(term_length_days),
             "last_verified_at": canonical_row.last_verified_at,
             "last_changed_at": canonical_row.last_changed_at,
-            "refresh_metadata": {
-                "product_version_id": canonical_row.product_version_id,
-                "product_url": product_url,
-            },
+            "refresh_metadata": refresh_metadata,
         }
 
     def _build_metric_snapshot(
@@ -378,6 +380,85 @@ def _coerce_tags(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item) for item in value if str(item).strip()]
+
+
+def _build_product_refresh_metadata(
+    *,
+    payload: dict[str, object],
+    product_version_id: str | None,
+    product_url: str | None,
+) -> dict[str, object]:
+    metadata: dict[str, object] = {
+        "product_version_id": product_version_id,
+        "product_url": product_url,
+    }
+    for field_name in (
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "effective_date",
+    ):
+        value = _coerce_string(payload.get(field_name))
+        if value is not None:
+            metadata[field_name] = value
+
+    for field_name in ("standard_rate", "base_12_month_rate"):
+        value = _coerce_float(payload.get(field_name))
+        if value is not None:
+            metadata[field_name] = value
+
+    term_rate_table = _coerce_term_rate_table(payload.get("term_rate_table"))
+    if term_rate_table:
+        metadata["term_rate_table"] = term_rate_table
+        if "base_12_month_rate" not in metadata:
+            base_rate = _rate_for_12_month_term(term_rate_table)
+            if base_rate is not None:
+                metadata["base_12_month_rate"] = base_rate
+
+    return metadata
+
+
+def _coerce_term_rate_table(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return []
+    rows: list[dict[str, object]] = []
+    seen: set[tuple[object, object, object]] = set()
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        term_label = _coerce_string(item.get("term_label"))
+        term_length_days = _coerce_int(item.get("term_length_days"))
+        rate = _coerce_float(item.get("rate"))
+        minimum_deposit = _coerce_float(item.get("minimum_deposit"))
+        notes = _coerce_string(item.get("notes"))
+        if term_label is None and term_length_days is None and rate is None:
+            continue
+        key = (term_label, term_length_days, rate)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "term_label": term_label,
+                "term_length_days": term_length_days,
+                "rate": rate,
+                "minimum_deposit": minimum_deposit,
+                "notes": notes,
+            }
+        )
+    return rows[:24]
+
+
+def _rate_for_12_month_term(rows: list[dict[str, object]]) -> float | None:
+    for row in rows:
+        if row.get("term_length_days") == 365 and row.get("rate") is not None:
+            return float(row["rate"])
+        term_label = str(row.get("term_label") or "").lower()
+        if row.get("rate") is not None and any(token in term_label for token in ("12 month", "1 year", "one year")):
+            return float(row["rate"])
+    return None
 
 
 def _coerce_string(value: object) -> str | None:

@@ -18,13 +18,19 @@ _FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "minimum_balance": ("minimum balance", "maintain balance", "minimum daily balance"),
     "minimum_deposit": ("minimum deposit", "opening deposit", "deposit amount"),
     "standard_rate": ("standard rate", "interest rate", "regular rate", "annual rate"),
+    "base_12_month_rate": ("12 month", "1 year", "one year", "annual rate", "standard rate", "interest rate"),
     "promotional_rate": ("promotional rate", "bonus rate", "promo rate", "special rate"),
     "public_display_rate": ("interest rate", "rate", "earn", "%"),
+    "term_rate_table": ("term", "rate", "interest rate", "%", "months", "years"),
     "interest_rate_summary": ("interest rate", "savings account rates", "rate", "%"),
     "savings_account_rates": ("savings account rates", "interest rate", "savings amplifier", "savings builder", "premium rate savings", "%"),
     "promotional_period_text": ("promo period", "offer ends", "promotional period", "for the first"),
     "introductory_rate_flag": ("introductory", "promotional", "bonus"),
     "eligibility_text": ("eligible", "eligibility", "qualify", "who can apply"),
+    "application_method": ("apply", "open account", "online", "branch", "mobile app", "phone"),
+    "post_maturity_interest_rate": ("after maturity", "post-maturity", "maturity", "renewal", "reinvest"),
+    "tax_benefits": ("tax free", "tax-free", "tax deferred", "tfsa", "rrsp", "tax benefit"),
+    "deposit_insurance": ("cdic", "deposit insurance", "insured", "Canada Deposit Insurance Corporation"),
     "interest_calculation_method": ("calculated daily", "daily closing balance", "interest is calculated"),
     "interest_payment_frequency": ("paid monthly", "monthly", "interest is paid", "payment frequency"),
     "tiered_rate_flag": ("tiered", "tiers", "interest rate tiers"),
@@ -207,6 +213,16 @@ def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
     if "balance" in field_name and "balance" in excerpt_text:
         return 0.18
     if "eligibility" in field_name and ("eligible" in excerpt_text or "qualify" in excerpt_text):
+        return 0.18
+    if "application_method" in field_name and any(token in excerpt_text for token in ("apply", "open account", "online", "branch", "mobile app")):
+        return 0.18
+    if "maturity" in field_name and any(token in excerpt_text for token in ("maturity", "renewal", "reinvest")):
+        return 0.18
+    if "tax" in field_name and any(token in excerpt_text for token in ("tax", "tfsa", "rrsp", "registered")):
+        return 0.18
+    if "insurance" in field_name and any(token in excerpt_text for token in ("cdic", "insured", "deposit insurance")):
+        return 0.18
+    if "term_rate_table" in field_name and "%" in excerpt_text and any(token in excerpt_text for token in ("term", "month", "year")):
         return 0.18
     if "payment_frequency" in field_name and "monthly" in excerpt_text:
         return 0.18

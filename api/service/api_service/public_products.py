@@ -261,12 +261,15 @@ def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> lis
 
 
 def _sort_numeric_rows(rows: list[dict[str, Any]], *, field_name: str, descending: bool) -> list[dict[str, Any]]:
+    def numeric_value(row: dict[str, Any]) -> float | None:
+        return serialize_decimal(row.get(field_name))
+
     if descending:
         return sorted(
             rows,
             key=lambda row: (
-                row.get(field_name) is None,
-                -(serialize_decimal(row.get(field_name)) or 0.0),
+                numeric_value(row) is None,
+                -(numeric_value(row) or 0.0),
                 str(row.get("bank_name") or ""),
                 str(row.get("product_name") or ""),
                 str(row.get("product_id") or ""),
@@ -275,8 +278,8 @@ def _sort_numeric_rows(rows: list[dict[str, Any]], *, field_name: str, descendin
     return sorted(
         rows,
         key=lambda row: (
-            row.get(field_name) is None,
-            serialize_decimal(row.get(field_name)) if row.get(field_name) is not None else float("inf"),
+            numeric_value(row) is None,
+            numeric_value(row) if numeric_value(row) is not None else float("inf"),
             str(row.get("bank_name") or ""),
             str(row.get("product_name") or ""),
             str(row.get("product_id") or ""),
@@ -285,8 +288,11 @@ def _sort_numeric_rows(rows: list[dict[str, Any]], *, field_name: str, descendin
 
 
 def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any]:
+    metadata = _coerce_metadata(row.get("refresh_metadata"))
     target_customer_tags = [str(tag).lower() for tag in coerce_string_list(row.get("target_customer_tags"))]
     badge_code = row.get("product_highlight_badge_code")
+    standard_rate = metadata.get("standard_rate")
+    base_12_month_rate = metadata.get("base_12_month_rate")
     return {
         "product_id": str(row["product_id"]),
         "bank_code": str(row["bank_code"]),
@@ -302,10 +308,18 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "source_language": str(row["source_language"]),
         "currency": str(row["currency"]),
         "status": str(row["status"]),
+        "standard_rate": serialize_decimal(standard_rate),
+        "base_12_month_rate": serialize_decimal(base_12_month_rate if base_12_month_rate is not None else standard_rate),
         "public_display_rate": serialize_decimal(row.get("public_display_rate")),
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
         "minimum_balance": serialize_decimal(row.get("minimum_balance")),
         "minimum_deposit": serialize_decimal(row.get("minimum_deposit")),
+        "eligibility_text": _string_or_none(metadata.get("eligibility_text")),
+        "application_method": _string_or_none(metadata.get("application_method")),
+        "post_maturity_interest_rate": _string_or_none(metadata.get("post_maturity_interest_rate")),
+        "tax_benefits": _string_or_none(metadata.get("tax_benefits")),
+        "deposit_insurance": _string_or_none(metadata.get("deposit_insurance")),
+        "term_rate_table": _serialize_term_rate_table(metadata.get("term_rate_table")),
         "term_length_days": int(row["term_length_days"]) if row.get("term_length_days") is not None else None,
         "product_highlight_badge_code": badge_code,
         "product_highlight_badge_label": localize_badge(str(badge_code), locale=locale) if badge_code else None,
@@ -316,6 +330,52 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "last_verified_at": serialize_datetime(row.get("last_verified_at")),
         "last_changed_at": serialize_datetime(row.get("last_changed_at")),
     }
+
+
+def _coerce_metadata(value: Any) -> dict[str, Any]:
+    return {str(key): item for key, item in value.items()} if isinstance(value, dict) else {}
+
+
+def _string_or_none(value: Any) -> str | None:
+    if value in {None, ""}:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
+
+
+def _serialize_term_rate_table(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        term_label = _string_or_none(item.get("term_label"))
+        term_length_days = _coerce_int(item.get("term_length_days"))
+        rate = serialize_decimal(item.get("rate"))
+        minimum_deposit = serialize_decimal(item.get("minimum_deposit"))
+        notes = _string_or_none(item.get("notes"))
+        if term_label is None and term_length_days is None and rate is None:
+            continue
+        rows.append(
+            {
+                "term_label": term_label,
+                "term_length_days": term_length_days,
+                "rate": rate,
+                "minimum_deposit": minimum_deposit,
+                "notes": notes,
+            }
+        )
+    return rows
+
+
+def _coerce_int(value: Any) -> int | None:
+    if value in {None, ""}:
+        return None
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
 
 
 def _count_labeled_options(

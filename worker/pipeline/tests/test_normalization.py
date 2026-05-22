@@ -367,6 +367,64 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_normalizes_deposit_detail_fields_and_term_rate_table(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-deposit-detail-fields")
+        try:
+            input_item = _build_gic_input()
+            term_rate_table = [
+                {"term_label": "6 months", "rate": "4.10", "minimum_deposit": "500.00"},
+                {"term_label": "12 months", "rate": "4.50", "minimum_deposit": "500.00"},
+            ]
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "extracted_fields": [
+                        *input_item.extracted_fields,
+                        _field("base_12_month_rate", "4.50", "decimal", 0.84, evidence_chunk_id="chunk-gic-rate"),
+                        _field("application_method", "Apply online or in branch.", "string", 0.8, evidence_chunk_id="chunk-apply"),
+                        _field("post_maturity_interest_rate", "At maturity, renewal rates may apply.", "string", 0.8, evidence_chunk_id="chunk-maturity"),
+                        _field("tax_benefits", "TFSA and RRSP options may provide tax benefits.", "string", 0.78, evidence_chunk_id="chunk-tax"),
+                        _field("deposit_insurance", "Eligible deposits are protected by CDIC limits.", "string", 0.82, evidence_chunk_id="chunk-insurance"),
+                        _field("term_rate_table", term_rate_table, "json", 0.86, evidence_chunk_id="chunk-term-table"),
+                    ],
+                    "evidence_links": [
+                        *input_item.evidence_links,
+                        _evidence("base_12_month_rate", "4.50", "chunk-gic-rate"),
+                        _evidence("application_method", "Apply online or in branch.", "chunk-apply"),
+                        _evidence("post_maturity_interest_rate", "At maturity, renewal rates may apply.", "chunk-maturity"),
+                        _evidence("tax_benefits", "TFSA and RRSP options may provide tax benefits.", "chunk-tax"),
+                        _evidence("deposit_insurance", "Eligible deposits are protected by CDIC limits.", "chunk-insurance"),
+                        _evidence("term_rate_table", json.dumps(term_rate_table), "chunk-term-table"),
+                    ],
+                }
+            )
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.normalize_inputs(run_id="run-gic-detail-fields", inputs=[input_item])
+
+            candidate = result.source_results[0].normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            payload = candidate["candidate_payload"]
+            self.assertEqual(payload["base_12_month_rate"], 4.5)
+            self.assertEqual(payload["application_method"], "Apply online or in branch.")
+            self.assertEqual(payload["post_maturity_interest_rate"], "At maturity, renewal rates may apply.")
+            self.assertEqual(payload["tax_benefits"], "TFSA and RRSP options may provide tax benefits.")
+            self.assertEqual(payload["deposit_insurance"], "Eligible deposits are protected by CDIC limits.")
+            self.assertEqual(payload["term_rate_table"][1]["term_length_days"], 360)
+            self.assertEqual(payload["term_rate_table"][1]["rate"], 4.5)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_gic_subtype_from_cashability_context_when_title_is_generic(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-gic-context-subtype")
         try:

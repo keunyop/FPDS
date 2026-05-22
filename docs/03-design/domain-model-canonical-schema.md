@@ -1,8 +1,8 @@
-﻿# FPDS Domain Model and Canonical Schema v1
+# FPDS Domain Model and Canonical Schema v1
 
-Version: 1.0  
-Date: 2026-03-30  
-Status: Approved Baseline for WBS 1.2.1 - 1.2.7  
+Version: 1.0
+Date: 2026-03-30
+Status: Approved Baseline for WBS 1.2.1 - 1.2.7
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -145,12 +145,18 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 | `minimum_deposit` | decimal | X | minimum deposit |
 | `introductory_rate_flag` | boolean | X | introductory/promo indicator |
 | `standard_rate` | decimal | X | standard rate |
+| `base_12_month_rate` | decimal | X | base rate normalized for 12-month comparison when disclosed |
 | `promotional_rate` | decimal | X | promotional rate |
 | `promotional_period_text` | string | X | promo period text |
 | `term_length_text` | string | X | term text for GIC |
 | `term_length_days` | integer | X | normalized term length if parseable |
 | `fee_waiver_condition` | text | X | fee waiver rule |
 | `eligibility_text` | text | X | eligibility text |
+| `application_method` | text | X | disclosed signup/application channels |
+| `post_maturity_interest_rate` | text | X | disclosed interest treatment after maturity |
+| `tax_benefits` | text | X | disclosed registered-plan or tax treatment notes |
+| `deposit_insurance` | text | X | disclosed deposit insurance/protection statement |
+| `term_rate_table` | JSON array | X | normalized rows for `{ term_label, term_length_days, rate, minimum_deposit, notes }` |
 | `notes` | text | X | additional notes |
 
 ### 4.4 Product-Type Specific Fields
@@ -212,6 +218,10 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 - `product_name`
 - `description_short`
 - `eligibility_text`
+- `application_method`
+- `post_maturity_interest_rate`
+- `tax_benefits`
+- `deposit_insurance`
 - `fee_waiver_condition`
 - `notes`
 - `source_subtype_label`
@@ -325,7 +335,7 @@ confidence 기준 점수는 고정 문서값이 아니라 외부 설정값으로
 - `FORCE_REVIEW_ISSUE_CODES`에 해당하는 issue가 없음
 - `conflicting_evidence` 없음
 
-위 조건을 모두 만족할 때만 auto-approve 가능하다.  
+위 조건을 모두 만족할 때만 auto-approve 가능하다.
 그 외에는 review queue로 보낸다.
 
 ### 6.4 Default Baseline Recommendation

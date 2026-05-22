@@ -38,6 +38,9 @@ class AggregateRefreshServiceTests(unittest.TestCase):
             projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["product_url"],
             "https://www.bmo.com/main/personal/investments/gic/",
         )
+        self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["base_12_month_rate"], 4.5)
+        self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["application_method"], "Apply online or in branch.")
+        self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["term_rate_table"][0]["term_label"], "12 months")
         self.assertEqual(projection_by_product_id["gic-scotia-4y"]["term_bucket"], "over_3y")
 
         ranking_keys = {item["ranking_key"] for item in result.ranking_rows}
@@ -232,6 +235,21 @@ def _build_rows() -> list[CanonicalAggregateRow]:
                 "minimum_deposit": 500,
                 "term_length_days": 365,
                 "source_url": "https://www.bmo.com/main/personal/investments/gic/",
+                "base_12_month_rate": 4.5,
+                "eligibility_text": "Canadian residents who meet BMO account opening requirements.",
+                "application_method": "Apply online or in branch.",
+                "post_maturity_interest_rate": "At maturity, renewal rates may apply.",
+                "tax_benefits": "Available in eligible registered plans where disclosed.",
+                "deposit_insurance": "Eligible deposits are protected by CDIC limits.",
+                "term_rate_table": [
+                    {
+                        "term_label": "12 months",
+                        "term_length_days": 365,
+                        "rate": 4.5,
+                        "minimum_deposit": 500,
+                        "notes": "Annual simple rate.",
+                    }
+                ],
             },
         ),
         _row(

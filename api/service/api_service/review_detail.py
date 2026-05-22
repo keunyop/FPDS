@@ -25,6 +25,35 @@ MODEL_EXECUTION_STAGE_ORDER = {
     "normalization": 1,
     "validation_routing": 2,
 }
+REVIEW_FIELD_PRIORITY = (
+    "product_name",
+    "public_display_rate",
+    "base_12_month_rate",
+    "standard_rate",
+    "target_customer_tags",
+    "minimum_deposit",
+    "minimum_balance",
+    "eligibility_text",
+    "application_method",
+    "post_maturity_interest_rate",
+    "tax_benefits",
+    "deposit_insurance",
+    "term_rate_table",
+)
+FIELD_LABELS = {
+    "application_method": "Application Method",
+    "base_12_month_rate": "Base Rate, 12 Months",
+    "deposit_insurance": "Deposit Insurance",
+    "eligibility_text": "Eligibility",
+    "minimum_balance": "Deposit Amount",
+    "minimum_deposit": "Deposit Amount",
+    "post_maturity_interest_rate": "Post-Maturity Interest Rate",
+    "public_display_rate": "Highest Rate",
+    "standard_rate": "Standard Rate",
+    "target_customer_tags": "Customer Tags",
+    "tax_benefits": "Tax Benefits",
+    "term_rate_table": "Rates By Term",
+}
 
 
 @dataclass(frozen=True)
@@ -225,10 +254,10 @@ def load_review_task_detail(
             "field_items": [
                 {
                     "field_name": field_name,
-                    "label": _titleize(field_name),
+                    "label": _field_label(field_name),
                     "value": value,
                 }
-                for field_name, value in sorted(candidate_payload.items())
+                for field_name, value in sorted(candidate_payload.items(), key=lambda item: _field_sort_key(item[0]))
                 if not _is_empty_review_value(value)
             ],
         },
@@ -1350,7 +1379,7 @@ def _serialize_evidence_row(
     source_metadata = _coerce_mapping(row.get("source_metadata"))
     return {
         "field_name": field_name,
-        "label": _titleize(field_name),
+        "label": _field_label(field_name),
         "candidate_value": str(row["candidate_value"]),
         "citation_confidence": _serialize_confidence(row.get("citation_confidence")),
         "evidence_chunk_id": str(row["evidence_chunk_id"]),
@@ -1390,14 +1419,14 @@ def _build_field_trace_groups(
         evidence_by_field.setdefault(str(item["field_name"]), []).append(item)
 
     groups: list[dict[str, Any]] = []
-    for field_name, value in sorted(candidate_payload.items()):
+    for field_name, value in sorted(candidate_payload.items(), key=lambda item: _field_sort_key(item[0])):
         if _is_empty_review_value(value):
             continue
         field_evidence = evidence_by_field.get(field_name, [])
         groups.append(
             {
                 "field_name": field_name,
-                "label": _titleize(field_name),
+                "label": _field_label(field_name),
                 "value": value,
                 "mapping": _serialize_field_mapping(field_mapping_metadata.get(field_name)),
                 "evidence_count": len(field_evidence),
@@ -1675,6 +1704,18 @@ def _build_anchor_label(*, page_no: int | None, anchor_type: Any, anchor_value: 
 
 def _titleize(value: str) -> str:
     return value.replace("_", " ").strip().title()
+
+
+def _field_label(field_name: str) -> str:
+    return FIELD_LABELS.get(field_name, _titleize(field_name))
+
+
+def _field_sort_key(field_name: str) -> tuple[int, str]:
+    try:
+        priority = REVIEW_FIELD_PRIORITY.index(field_name)
+    except ValueError:
+        priority = len(REVIEW_FIELD_PRIORITY)
+    return priority, field_name
 
 
 def _approved_product_name(*, review_row: dict[str, Any], approved_payload: dict[str, Any] | None) -> str:

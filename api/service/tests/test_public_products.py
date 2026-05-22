@@ -75,6 +75,105 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["freshness"]["status"], "fresh")
         self.assertEqual(payload["applied_filters"]["bank_code"], ["TD", "BMO"])
 
+    def test_load_public_products_visible_sort_options_are_stable(self) -> None:
+        cases = [
+            ("monthly_fee", "asc", ["chq-rbc-student", "chq-td-everyday"]),
+            ("minimum_balance", "asc", ["chq-rbc-student", "sav-bmo-standard", "chq-td-everyday"]),
+            ("minimum_deposit", "asc", ["gic-td-short", "gic-bmo-1y"]),
+        ]
+
+        for sort_by, sort_order, expected_prefix in cases:
+            with self.subTest(sort_by=sort_by):
+                connection = _PublicConnection(
+                    latest_success=_latest_success_snapshot(),
+                    latest_attempt=_latest_success_snapshot_attempt(),
+                    rows=_projection_rows(),
+                )
+                query = normalize_public_products_query(
+                    locale="en",
+                    country_code="CA",
+                    bank_codes=None,
+                    product_types=None,
+                    subtype_codes=None,
+                    target_customer_tags=None,
+                    fee_bucket=None,
+                    minimum_balance_bucket=None,
+                    minimum_deposit_bucket=None,
+                    term_bucket=None,
+                    sort_by=sort_by,
+                    sort_order=sort_order,
+                    page=1,
+                    page_size=20,
+                )
+
+                payload = load_public_products(connection, query=query)
+
+                self.assertEqual([item["product_id"] for item in payload["items"][: len(expected_prefix)]], expected_prefix)
+                self.assertEqual(payload["sort"], {"sort_by": sort_by, "sort_order": sort_order})
+
+    def test_load_public_products_handles_bad_numeric_values_in_visible_sorts(self) -> None:
+        bad_row = dict(_projection_rows()[0])
+        bad_row.update(
+            {
+                "product_id": "bad-numeric-row",
+                "bank_code": "BAD",
+                "bank_name": "Bad Numeric Bank",
+                "product_name": "Bad Numeric Deposit",
+                "public_display_rate": "not-a-number",
+                "effective_fee": "not-a-number",
+                "minimum_balance": Decimal("NaN"),
+                "minimum_deposit": "Infinity",
+                "refresh_metadata": {
+                    "standard_rate": "not-a-number",
+                    "base_12_month_rate": "Infinity",
+                    "term_rate_table": [
+                        {
+                            "term_label": "Bad rate row",
+                            "term_length_days": "365",
+                            "rate": "NaN",
+                            "minimum_deposit": "not-a-number",
+                        }
+                    ],
+                },
+            }
+        )
+
+        for sort_by in ("display_rate", "monthly_fee", "minimum_balance", "minimum_deposit"):
+            with self.subTest(sort_by=sort_by):
+                connection = _PublicConnection(
+                    latest_success=_latest_success_snapshot(),
+                    latest_attempt=_latest_success_snapshot_attempt(),
+                    rows=[*_projection_rows(), bad_row],
+                )
+                query = normalize_public_products_query(
+                    locale="en",
+                    country_code="CA",
+                    bank_codes=None,
+                    product_types=None,
+                    subtype_codes=None,
+                    target_customer_tags=None,
+                    fee_bucket=None,
+                    minimum_balance_bucket=None,
+                    minimum_deposit_bucket=None,
+                    term_bucket=None,
+                    sort_by=sort_by,
+                    sort_order="asc",
+                    page=1,
+                    page_size=20,
+                )
+
+                payload = load_public_products(connection, query=query)
+                serialized_bad_row = next(item for item in payload["items"] if item["product_id"] == "bad-numeric-row")
+
+                self.assertIsNone(serialized_bad_row["public_display_rate"])
+                self.assertIsNone(serialized_bad_row["public_display_fee"])
+                self.assertIsNone(serialized_bad_row["minimum_balance"])
+                self.assertIsNone(serialized_bad_row["minimum_deposit"])
+                self.assertIsNone(serialized_bad_row["standard_rate"])
+                self.assertIsNone(serialized_bad_row["base_12_month_rate"])
+                self.assertIsNone(serialized_bad_row["term_rate_table"][0]["rate"])
+                self.assertIsNone(serialized_bad_row["term_rate_table"][0]["minimum_deposit"])
+
     def test_load_public_product_detail_returns_product_by_id(self) -> None:
         connection = _PublicConnection(
             latest_success=_latest_success_snapshot(),
@@ -104,6 +203,14 @@ class PublicProductsTests(unittest.TestCase):
         assert payload is not None
         self.assertEqual(payload["product"]["bank_code"], "TD")
         self.assertEqual(payload["product"]["product_url"], "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account")
+        self.assertEqual(payload["product"]["standard_rate"], 3.2)
+        self.assertEqual(payload["product"]["base_12_month_rate"], 3.2)
+        self.assertEqual(payload["product"]["eligibility_text"], "Canadian residents who meet TD account opening requirements.")
+        self.assertEqual(payload["product"]["application_method"], "Apply online, in branch, or by phone.")
+        self.assertEqual(payload["product"]["post_maturity_interest_rate"], "Not applicable for this savings account.")
+        self.assertEqual(payload["product"]["tax_benefits"], "No registered-plan tax benefit is disclosed.")
+        self.assertEqual(payload["product"]["deposit_insurance"], "Eligible deposits are protected by CDIC limits.")
+        self.assertEqual(payload["product"]["term_rate_table"][0]["term_label"], "12 months")
         self.assertEqual(payload["freshness"]["snapshot_id"], "agg-001")
 
     def test_load_public_filters_returns_localized_counts(self) -> None:
@@ -252,7 +359,24 @@ def _projection_rows() -> list[dict[str, object]]:
             "term_bucket": None,
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 3, 25, 0, 0, tzinfo=UTC),
-            "refresh_metadata": {},
+            "refresh_metadata": {
+                "standard_rate": 3.2,
+                "base_12_month_rate": 3.2,
+                "eligibility_text": "Canadian residents who meet TD account opening requirements.",
+                "application_method": "Apply online, in branch, or by phone.",
+                "post_maturity_interest_rate": "Not applicable for this savings account.",
+                "tax_benefits": "No registered-plan tax benefit is disclosed.",
+                "deposit_insurance": "Eligible deposits are protected by CDIC limits.",
+                "term_rate_table": [
+                    {
+                        "term_label": "12 months",
+                        "term_length_days": 365,
+                        "rate": 3.2,
+                        "minimum_deposit": None,
+                        "notes": "Savings rate shown for comparison.",
+                    }
+                ],
+            },
             "product_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
         },
         {

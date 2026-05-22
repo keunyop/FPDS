@@ -10,11 +10,68 @@ from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidat
 from worker.pipeline.fpds_extraction.__main__ import _context_with_registry_metadata
 from worker.pipeline.fpds_extraction.models import ExtractedFieldCandidate, ExtractionDocumentContext, ExtractionInput
 from worker.pipeline.fpds_extraction.persistence import ExtractionDatabaseConfig, PsqlExtractionRepository
-from worker.pipeline.fpds_extraction.service import ExtractionService, _append_rate_fallback_fields
+from worker.pipeline.fpds_extraction.service import ExtractionService, _append_rate_fallback_fields, _extract_candidate_value
 from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, build_object_store
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_extracts_requested_deposit_detail_fields(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="BMO-GIC-001",
+            parsed_document_id="parsed-detail-fields",
+            source_document_id="src-detail-fields",
+            snapshot_id="snap-detail-fields",
+            bank_code="BMO",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic"},
+        )
+        text = (
+            "BMO GIC rates: 6 months 4.10%, 12 months 4.50%, 2 years 4.25%. "
+            "Apply online or in branch. At maturity, renewal rates may apply. "
+            "TFSA and RRSP options may provide tax benefits. Eligible deposits are protected by CDIC limits."
+        )
+
+        term_table, term_type, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="term_rate_table",
+            excerpt=text,
+            anchor_value="gic-rates",
+        )
+        base_rate, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="base_12_month_rate",
+            excerpt=text,
+            anchor_value="gic-rates",
+        )
+        application_method, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="application_method",
+            excerpt=text,
+            anchor_value="apply",
+        )
+        deposit_insurance, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="deposit_insurance",
+            excerpt=text,
+            anchor_value="insurance",
+        )
+        unrelated_application_method, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="application_method",
+            excerpt="Interest rate: 1.10%. Interest is paid monthly.",
+            anchor_value="rates",
+        )
+
+        self.assertEqual(term_type, "json")
+        self.assertEqual(term_table[1]["term_label"], "12 months")
+        self.assertEqual(term_table[1]["rate"], "4.50")
+        self.assertEqual(base_rate, "4.50")
+        self.assertEqual(application_method, "Apply online or in branch.")
+        self.assertEqual(deposit_insurance, "Eligible deposits are protected by CDIC limits.")
+        self.assertIsNone(unrelated_application_method)
+
     def test_extracts_sparse_draft_and_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-service")
         try:

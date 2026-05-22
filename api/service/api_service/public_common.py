@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+import math
 from typing import Any, Iterable, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -425,9 +426,11 @@ def localize_bucket(bucket_code: str | None, *, locale: str) -> str | None:
 def serialize_decimal(value: Any) -> float | None:
     if value is None:
         return None
-    if isinstance(value, Decimal):
-        return float(value)
-    return float(value)
+    try:
+        numeric_value = float(value) if isinstance(value, Decimal) else float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return numeric_value if math.isfinite(numeric_value) else None
 
 
 def serialize_datetime(value: Any) -> str | None:

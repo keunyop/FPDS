@@ -62,6 +62,54 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-22 - Deposit Catalog Sort Stability And Real Bank Logos
+
+- WBS: `5.6`, `5.7`, `5.9`, public UI/API hardening
+- Status: `done`
+- Goal: fix the public Deposit catalog sort interaction reported to stop the server, and replace placeholder bank marks with real bank logo assets.
+- Why now: the Product Owner reported the new sort controls caused the server to stop and clarified that bank logos must be actual bank logos.
+- Outcome: hardened public numeric serialization so invalid, `NaN`, or infinite source values become `null` instead of breaking JSON/sort/render paths; numeric sort now orders unavailable values after valid values. Public frontend currency/rate rendering now rejects non-finite numbers and falls back to `CAD` for malformed currency codes. Public API reads now have an 8s server-side timeout so slow/stuck API calls fall into the existing unavailable state instead of leaving sort navigation pending indefinitely. `BankLogo` now renders fixed-size local image assets for BMO, CIBC, RBC, Scotiabank, and TD, with all assets under 10KB.
+- Not done: hidden/background Next.js dev or start processes in this harness repeatedly exited shortly after reporting ready, so final browser smoke was limited by the execution environment. API endpoints, production build, typecheck, and regression suites passed.
+- Key files: `api/service/api_service/public_common.py`, `api/service/api_service/public_products.py`, `api/service/tests/test_public_products.py`, `app/public/src/lib/public-api.ts`, `app/public/src/components/fpds/public/bank-logo.tsx`, `app/public/public/bank-logos/`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`, `docs/03-design/api-interface-contracts.md`
+- Decisions: keep logos locally served rather than hotlinked; keep the visible catalog sort toolbar to default, interest rate, monthly fee, and minimum balance; treat malformed numeric source data as unavailable public data rather than an exception.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run build` in `app/public`
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest tests.test_public_products tests.test_public_dashboard` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest tests.test_public_products tests.test_review_detail` in `api/service`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_aggregate_refresh`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+  - direct API smoke: `GET /api/public/products?country_code=CA&sort_by=monthly_fee&sort_order=asc` and `sort_by=minimum_balance&sort_order=asc` returned `200`
+- Known issues: root-level `tests/regression` still does not exist; active regression suites remain under `api/service/tests/regression` and `worker/pipeline/tests/regression`. Local public browser smoke should be rerun from an interactive terminal if visual confirmation is required because this harness could not keep hidden Next processes alive long enough for repeated browser requests.
+- Next step: use the running API on `localhost:4000` with an interactive `pnpm run dev` session for manual public UI inspection if needed.
+
+## 2026-05-22 - Deposit Catalog Sort, Detail Calculator, And Review Data Coverage
+
+- WBS: `5.6`, `5.7`, `5.9`, admin review follow-on
+- Status: `done`
+- Goal: improve public Deposit catalog comparison UX and ensure admin collection/review carries the required deposit detail fields.
+- Why now: the Product Owner requested catalog sort placement, bank logos, product-detail trust/calculator content, and expanded deposit product data coverage before continuing public/admin UX hardening.
+- Outcome: `/products` now shows sort controls between search conditions and the product list for interest rate, monthly fee, and minimum balance; public product cards and detail show lightweight bank brand marks. Product detail now includes an estimated-interest calculator, compact disclosure note, signup/application facts, and a term-rate table when aggregate metadata provides rows. Worker extraction/normalization now supports `base_12_month_rate`, `application_method`, `post_maturity_interest_rate`, `tax_benefits`, `deposit_insurance`, and `term_rate_table`; aggregate refresh exposes these through public projection metadata; admin review detail highlights the required deposit review fields.
+- Not done: no browser screenshot QA was added in this slice; the initial lightweight brand marks were replaced in the follow-up sort-stability/logo slice with small locally served real logo assets.
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/components/fpds/public/bank-logo.tsx`, `app/public/src/components/fpds/public/interest-calculator.tsx`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_aggregate_refresh/service.py`, `api/service/api_service/public_products.py`, `api/service/api_service/review_detail.py`
+- Decisions: keep public evidence hidden and publish only approved summary metadata through `public_product_projection.refresh_metadata`; keep bank logos local and small to avoid remote image dependency in repeated product cards; keep interest calculation explicitly informational.
+- Verification:
+  - `pnpm run typecheck` in `app/public`
+  - `pnpm run typecheck` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest tests.test_public_products tests.test_review_detail` in `api/service`
+  - `python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_aggregate_refresh` from repo root
+  - `pnpm run build` in `app/public`
+  - `pnpm run build` in `app/admin`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `python -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` from repo root
+  - `git diff --check`
+- Known issues: public/detail pages still depend on the latest successful aggregate refresh to carry new metadata; legacy projections will simply omit the new optional facts.
+- Next step: run a fresh collection/normalization/aggregate refresh before manual product-detail QA so the new fields appear with live source data.
+
 ## 2026-05-21 - FPDS Deposit Catalog UI Polish
 
 - WBS: `5.9`, `5.11`, `5.12`, public UI follow-on
