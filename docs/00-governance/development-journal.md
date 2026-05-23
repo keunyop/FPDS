@@ -62,6 +62,22 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-23 - Big 5 Deposit Golden Dataset
+
+- WBS: `5.2`, `5.3`, `5.4`, admin collection QA support
+- Status: `done`
+- Goal: create a source-backed Big 5 personal deposit-product golden dataset for later FPDS admin collection testing.
+- Why now: the Product Owner requested answer-key rows for BMO, CIBC, Royal Bank of Canada, Scotiabank, and TD Bank across chequing, savings, and GIC product types.
+- Outcome: added one combined JSON fixture with 98 product rows: 29 chequing, 24 savings, and 45 GIC rows. Each row includes bank, product name, rate fields, tags, product URL, signup amount, eligibility, application method, maturity/tax/insurance notes, term/tier rates, source URLs, and capture notes.
+- Not done: no parser assertions consume this fixture yet; it is reference data for the next admin collection test slice.
+- Key files: `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json`, `docs/README.md`
+- Decisions: use only official public bank sources and the approved Big 5 source-registry boundary; keep numeric rates only when exposed in current captured official text; store `null` when the official page rendered a placeholder, rate-token, authenticated lookup, branch-only value, or market-linked/full-term return that is not a comparable annual posted rate.
+- Verification:
+  - `Get-Content -Raw worker\pipeline\tests\fixtures\golden\canada_big5_deposit_products_golden_2026-05-23.json | ConvertFrom-Json | Out-Null`
+  - checked generated counts by bank and product type
+- Known issues: several CIBC and TD GIC pages, and some RBC/CIBC savings pages, render current rates dynamically or as placeholders in fetched public HTML; those values intentionally remain `null` with row-level source URLs and capture notes.
+- Next step: wire this fixture into the FPDS admin collection test harness and define comparison tolerances for dynamic rate fields.
+
 ## 2026-05-22 - Deposit Catalog Sort Stability And Real Bank Logos
 
 - WBS: `5.6`, `5.7`, `5.9`, public UI/API hardening

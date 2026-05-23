@@ -67,6 +67,10 @@ Most commonly needed:
 - `docs/03-design/fpds-design-system.md`
 - `docs/03-design/fpds_design_system_stripe_benchmark.md`
 
+### 2.5 Golden Test Fixtures
+
+- `worker/pipeline/tests/fixtures/golden/`: source-backed reference datasets for admin collection and review testing
+
 ## 3. Status Labels
 
 Use this interpretation when deciding what to read:
