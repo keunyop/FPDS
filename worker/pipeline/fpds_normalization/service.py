@@ -22,6 +22,7 @@ from .models import (
     NormalizationResult,
     NormalizationSourceResult,
 )
+from .product_profile_expansion import expand_profile_product_inputs, should_suppress_unprofiled_profile_input
 from .storage import NormalizationStorageConfig
 
 _ACTIVE_PRODUCT_TYPES = {"chequing", "savings", "gic"}
@@ -96,15 +97,19 @@ class NormalizationService:
         partial_completion_flag = False
 
         for item in inputs:
-            result = self._normalize_single_input(
-                run_id=run_id,
-                item=item,
-                correlation_id=correlation_id,
-                request_id=request_id,
-            )
-            source_results.append(result)
-            if result.normalization_action == "failed":
-                partial_completion_flag = True
+            expanded_items = expand_profile_product_inputs(item)
+            if not expanded_items and should_suppress_unprofiled_profile_input(item):
+                continue
+            for candidate_item in expanded_items or [item]:
+                result = self._normalize_single_input(
+                    run_id=run_id,
+                    item=candidate_item,
+                    correlation_id=correlation_id,
+                    request_id=request_id,
+                )
+                source_results.append(result)
+                if result.normalization_action == "failed":
+                    partial_completion_flag = True
 
         return NormalizationResult(
             run_id=run_id,
@@ -127,12 +132,14 @@ class NormalizationService:
             run_id=run_id,
             source_document_id=item.source_document_id,
             parsed_document_id=item.parsed_document_id,
+            candidate_key=item.candidate_key,
         )
         try:
             candidate_id = _build_candidate_id(
                 run_id=run_id,
                 source_document_id=item.source_document_id,
                 parsed_document_id=item.parsed_document_id,
+                candidate_key=item.candidate_key,
             )
             normalized_candidate_record, evidence_links, runtime_notes, normalization_meta = _normalize_candidate(
                 run_id=run_id,
@@ -210,6 +217,7 @@ class NormalizationService:
                 model_id=model_id,
                 execution_metadata={
                     "candidate_id": candidate_id,
+                    "candidate_key": item.candidate_key,
                     "parsed_document_id": item.parsed_document_id,
                     "snapshot_id": item.snapshot_id,
                     "extraction_model_execution_id": item.extraction_model_execution_id,
@@ -303,6 +311,7 @@ class NormalizationService:
                     execution_metadata={
                         "parsed_document_id": item.parsed_document_id,
                         "snapshot_id": item.snapshot_id,
+                        "candidate_key": item.candidate_key,
                         "extraction_model_execution_id": item.extraction_model_execution_id,
                         "error_summary": error_summary,
                     },
@@ -372,7 +381,10 @@ def _normalize_candidate(
     normalized_values_for_links: dict[str, object] = {}
 
     for field_name, field in extracted_by_field.items():
-        normalized_value = _normalize_field_value(field_name=field_name, value=field.candidate_value, value_type=field.value_type)
+        if field.extraction_method == "source_profile_product_expansion" and field_name == "base_12_month_rate":
+            normalized_value = field.candidate_value
+        else:
+            normalized_value = _normalize_field_value(field_name=field_name, value=field.candidate_value, value_type=field.value_type)
         normalized_values_for_links[field_name] = normalized_value
         field_mapping_metadata[field_name] = {
             "source_field_name": field_name,
@@ -900,13 +912,18 @@ def _build_field_evidence_link_records(
     evidence_links: list[NormalizationEvidenceLink],
 ) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
+    seen_ids: set[str] = set()
     for link in evidence_links:
         if link.field_name not in normalized_values_for_links:
             continue
         candidate_value = normalized_values_for_links[link.field_name]
+        field_evidence_link_id = _build_field_evidence_link_id(candidate_id, link.field_name, link.evidence_chunk_id)
+        if field_evidence_link_id in seen_ids:
+            continue
+        seen_ids.add(field_evidence_link_id)
         records.append(
             {
-                "field_evidence_link_id": _build_field_evidence_link_id(candidate_id, link.field_name, link.evidence_chunk_id),
+                "field_evidence_link_id": field_evidence_link_id,
                 "candidate_id": candidate_id,
                 "product_version_id": None,
                 "evidence_chunk_id": link.evidence_chunk_id,
@@ -1342,10 +1359,7 @@ def _field_value(extracted_by_field: dict[str, NormalizationExtractedField], fie
 
 
 def _as_decimal(value: object) -> Decimal | None:
-    try:
-        return Decimal(str(value))
-    except (InvalidOperation, ValueError):
-        return None
+    return _parse_canonical_decimal(field_name="standard_rate", value=value)
 
 
 def _as_int(value: object) -> int | None:
@@ -1416,6 +1430,8 @@ def _build_normalized_artifact_payload(
         "request_id": request_id,
         "source_id": item.source_id,
         "source_document_id": item.source_document_id,
+        "normalized_source_url": item.normalized_source_url,
+        "candidate_key": item.candidate_key,
         "snapshot_id": item.snapshot_id,
         "parsed_document_id": item.parsed_document_id,
         "extraction_model_execution_id": item.extraction_model_execution_id,
@@ -1508,6 +1524,7 @@ def _build_run_source_item_record(
         "stage_metadata": {
             "normalization_action": "failed" if stage_status == "failed" else "stored",
             "candidate_id": candidate_id,
+            "candidate_key": item.candidate_key,
             "normalization_model_execution_id": normalization_model_execution_id,
             "extraction_model_execution_id": item.extraction_model_execution_id,
             "normalized_storage_key": normalized_storage_key,
@@ -1523,13 +1540,15 @@ def _build_run_source_item_record(
     }
 
 
-def _build_candidate_id(*, run_id: str, source_document_id: str, parsed_document_id: str) -> str:
-    digest = sha256(f"{run_id}|{source_document_id}|{parsed_document_id}|candidate".encode("utf-8")).hexdigest()[:16]
+def _build_candidate_id(*, run_id: str, source_document_id: str, parsed_document_id: str, candidate_key: str | None = None) -> str:
+    key = candidate_key or "default"
+    digest = sha256(f"{run_id}|{source_document_id}|{parsed_document_id}|{key}|candidate".encode("utf-8")).hexdigest()[:16]
     return f"cand-{digest}"
 
 
-def _build_model_execution_id(*, run_id: str, source_document_id: str, parsed_document_id: str) -> str:
-    digest = sha256(f"{run_id}|{source_document_id}|{parsed_document_id}|normalization".encode("utf-8")).hexdigest()[:16]
+def _build_model_execution_id(*, run_id: str, source_document_id: str, parsed_document_id: str, candidate_key: str | None = None) -> str:
+    key = candidate_key or "default"
+    digest = sha256(f"{run_id}|{source_document_id}|{parsed_document_id}|{key}|normalization".encode("utf-8")).hexdigest()[:16]
     return f"modelexec-{digest}"
 
 

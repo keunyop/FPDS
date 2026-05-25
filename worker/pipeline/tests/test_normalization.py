@@ -367,6 +367,141 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_expands_gic_rate_source_into_multiple_product_candidates(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-expansion")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "BMO-GIC-002",
+                    "bank_code": "BMO",
+                    "normalized_source_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "BMO-GIC-002",
+                        "product_type": "gic",
+                        "discovery_role": "supporting_html",
+                    },
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-bmo-gic-expansion", inputs=[input_item])
+
+            self.assertGreaterEqual(len(result.source_results), 10)
+            product_names = {
+                item.normalized_candidate_record["product_name"]
+                for item in result.source_results
+                if item.normalized_candidate_record is not None
+            }
+            self.assertIn("BMO AIR MILES GIC", product_names)
+            self.assertIn("BMO Guaranteed Investment Certificate (GIC)", product_names)
+            profile_candidate = next(
+                item.normalized_candidate_record
+                for item in result.source_results
+                if item.normalized_candidate_record is not None
+                and item.normalized_candidate_record["product_name"] == "BMO AIR MILES GIC"
+            )
+            self.assertEqual(profile_candidate["candidate_payload"]["highest_rate"], "0.250%")
+            self.assertEqual(profile_candidate["candidate_payload"]["term_rates"][0]["term"], "364 days")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_suppresses_unprofiled_admin_gic_supporting_sources(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-support-suppression")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "AUTO-BMO-CHE-069e973445",
+                    "bank_code": "BMO",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "AUTO-BMO-CHE-069e973445",
+                        "product_type": "gic",
+                        "discovery_role": "supporting_html",
+                        "expected_fields": ["fee_schedule"],
+                    },
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-bmo-gic-support-suppression", inputs=[input_item])
+
+            self.assertEqual(result.source_results, [])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_expands_chequing_source_into_multiple_profile_candidates(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-chequing-expansion")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_chequing_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "RBC-CHQ-003",
+                    "bank_code": "RBC",
+                    "normalized_source_url": "https://www.rbcroyalbank.com/bank-accounts/chequing-accounts/advantage-banking.html",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "RBC-CHQ-003",
+                        "product_type": "chequing",
+                        "discovery_role": "detail",
+                        "expected_fields": ["product_name", "monthly_fee"],
+                    },
+                    "extracted_fields": [
+                        NormalizationExtractedField(**{**field.__dict__, "candidate_value": "RBC"})
+                        if field.field_name == "bank_code"
+                        else field
+                        for field in input_item.extracted_fields
+                    ],
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-rbc-chequing-expansion", inputs=[input_item])
+
+            product_names = {
+                item.normalized_candidate_record["product_name"]
+                for item in result.source_results
+                if item.normalized_candidate_record is not None
+            }
+            self.assertEqual(product_names, {"RBC Advantage Banking", "RBC Advantage Banking for students"})
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_deposit_detail_fields_and_term_rate_table(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-deposit-detail-fields")
         try:

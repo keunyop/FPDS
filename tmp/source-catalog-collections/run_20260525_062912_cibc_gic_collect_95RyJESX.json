@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_ZXs9l6rwoTDWOGB7",
+  "correlation_id": "corr_q9imWDg5pQnQrT_o",
+  "request_id": "req_codex_big5_admin_collection_20260525_multicandidate_v3",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex",
+    "email": "codex@local",
+    "display_name": "Codex",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260525_062912_cibc_gic_collect_95RyJESX",
+      "catalog_item_id": "catalog-ca-cibc-gic-term-deposit-_IHxwKLE",
+      "bank_code": "CIBC",
+      "bank_name": "CIBC",
+      "country_code": "CA",
+      "product_type": "gic",
+      "source_catalog_product_type": "gic",
+      "source_language": "en",
+      "homepage_url": "https://www.cibc.com/",
+      "normalized_homepage_url": "https://www.cibc.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

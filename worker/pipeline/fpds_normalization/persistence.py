@@ -179,6 +179,7 @@ FROM (
         me.execution_metadata ->> 'metadata_storage_key' AS extraction_metadata_storage_key,
         sd.bank_code,
         sd.country_code,
+        sd.normalized_source_url,
         sd.source_type,
         sd.source_language,
         sd.source_metadata
@@ -222,7 +223,9 @@ FROM (
         ]
         model_executions = [item.model_execution_record for item in normalization_result.source_results]
         usage_records = [item.usage_record for item in normalization_result.source_results if item.usage_record is not None]
-        run_source_items = [item.run_source_item_record for item in normalization_result.source_results]
+        run_source_items = _coalesce_run_source_items(
+            [item.run_source_item_record for item in normalization_result.source_results]
+        )
         source_failure_count = sum(1 for item in normalization_result.source_results if item.normalization_action == "failed")
         source_success_count = len(normalization_result.source_results) - source_failure_count
         run_state = "failed" if source_failure_count == len(normalization_result.source_results) else "completed"
@@ -609,3 +612,54 @@ def _json_sql_literal(value: object) -> str:
     while tag in payload:
         tag = f"{tag}_x$"
     return f"{tag}{payload}{tag}"
+
+
+def _coalesce_run_source_items(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    coalesced: dict[tuple[str, str], dict[str, object]] = {}
+    for row in rows:
+        key = (str(row.get("run_id")), str(row.get("source_document_id")))
+        current = coalesced.get(key)
+        if current is None:
+            current = {
+                **row,
+                "stage_metadata": dict(row.get("stage_metadata") or {}),
+            }
+            current["stage_metadata"]["normalization_candidates"] = [
+                _run_source_candidate_summary(row)
+            ]
+            coalesced[key] = current
+            continue
+
+        current["warning_count"] = max(int(current.get("warning_count") or 0), int(row.get("warning_count") or 0))
+        current["error_count"] = max(int(current.get("error_count") or 0), int(row.get("error_count") or 0))
+        if not current.get("error_summary") and row.get("error_summary"):
+            current["error_summary"] = row.get("error_summary")
+        metadata = dict(current.get("stage_metadata") or {})
+        metadata["candidate_id"] = row.get("stage_metadata", {}).get("candidate_id") if isinstance(row.get("stage_metadata"), dict) else metadata.get("candidate_id")
+        metadata["normalization_candidates"] = [
+            *list(metadata.get("normalization_candidates") or []),
+            _run_source_candidate_summary(row),
+        ]
+        metadata["field_evidence_link_count"] = sum(
+            int(item.get("field_evidence_link_count") or 0)
+            for item in metadata["normalization_candidates"]
+            if isinstance(item, dict)
+        )
+        current["stage_metadata"] = metadata
+    return list(coalesced.values())
+
+
+def _run_source_candidate_summary(row: dict[str, object]) -> dict[str, object]:
+    metadata = row.get("stage_metadata") if isinstance(row.get("stage_metadata"), dict) else {}
+    return {
+        "candidate_id": metadata.get("candidate_id"),
+        "candidate_key": metadata.get("candidate_key"),
+        "normalization_action": metadata.get("normalization_action"),
+        "normalization_model_execution_id": metadata.get("normalization_model_execution_id"),
+        "normalized_storage_key": metadata.get("normalized_storage_key"),
+        "metadata_storage_key": metadata.get("metadata_storage_key"),
+        "validation_status": metadata.get("validation_status"),
+        "validation_issue_codes": metadata.get("validation_issue_codes") or [],
+        "source_confidence": metadata.get("source_confidence"),
+        "field_evidence_link_count": metadata.get("field_evidence_link_count") or 0,
+    }

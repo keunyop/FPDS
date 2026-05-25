@@ -660,7 +660,11 @@ def prepare_source_collection(
             message="Removed sources cannot be collected: " + ", ".join(blocked_source_ids),
         )
 
-    target_rows = [selected_by_id[source_id] for source_id in selected_source_ids if str(selected_by_id[source_id]["discovery_role"]) == "detail"]
+    target_rows = [
+        selected_by_id[source_id]
+        for source_id in selected_source_ids
+        if _is_candidate_producing_collection_source(selected_by_id[source_id])
+    ]
     if not target_rows:
         raise SourceRegistryError(
             status_code=400,
@@ -757,7 +761,7 @@ def build_source_collection_plan(
     target_source_ids = [
         str(row["source_id"])
         for row in _sort_source_rows(selected_rows)
-        if str(row["discovery_role"]) == "detail"
+        if _is_candidate_producing_collection_source(row)
     ]
     auto_included_source_ids = [
         source_id
@@ -776,7 +780,7 @@ def build_source_collection_plan(
     for group_key in sorted(grouped_included_rows):
         included_group_rows = _sort_source_rows(grouped_included_rows[group_key])
         selected_group_rows = _sort_source_rows(grouped_selected_rows.get(group_key, []))
-        target_group_rows = [row for row in selected_group_rows if str(row["discovery_role"]) == "detail"]
+        target_group_rows = [row for row in selected_group_rows if _is_candidate_producing_collection_source(row)]
         if not target_group_rows:
             continue
         country_code, bank_code, product_type, source_language = group_key
@@ -1199,6 +1203,55 @@ def _sort_source_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return priority_rank, role_rank, str(row["source_id"])
 
     return sorted(rows, key=sort_key)
+
+
+def _is_candidate_producing_collection_source(row: dict[str, Any]) -> bool:
+    discovery_role = str(row["discovery_role"])
+    if discovery_role == "detail":
+        return True
+    if str(row.get("product_type") or "").strip().lower() != "gic":
+        return False
+
+    expected_fields = row.get("expected_fields")
+    if isinstance(expected_fields, str):
+        try:
+            expected_values = json.loads(expected_fields)
+        except json.JSONDecodeError:
+            expected_values = [expected_fields]
+    else:
+        expected_values = list(expected_fields or [])
+    expected_text = " ".join(str(item).lower() for item in expected_values)
+    source_text = " ".join(
+        str(row.get(key) or "").lower()
+        for key in ("source_name", "source_url", "purpose")
+    )
+    if any(
+        token in expected_text
+        for token in (
+            "gic_rate_table",
+            "gic_rates",
+            "cashable_gic_rates",
+            "non_cashable_gic_rates",
+            "non_redeemable_gic_rates",
+            "redeemable_gic_rates",
+            "market_growth_gic_rates",
+            "product_variants",
+            "gic_types",
+            "special_rate_summary",
+            "detail_links",
+        )
+    ):
+        return True
+    return any(
+        token in source_text
+        for token in (
+            "gic",
+            "guaranteed-investment-certificate",
+            "guaranteed investment certificate",
+            "term deposit",
+            "gic-rates",
+        )
+    )
 
 
 def _build_collection_run_id(*, bank_code: str, product_type: str) -> str:

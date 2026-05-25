@@ -102,12 +102,17 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         collection_source_ids = [
             str(item["source_id"])
             for item in generated_rows
-            if str(item["discovery_role"]) != "entry" and str(item["status"]) != "removed"
+            if (
+                str(item["discovery_role"]) != "entry"
+                or _is_candidate_producing_source(item, product_type=str(group["product_type"]))
+            )
+            and str(item["status"]) != "removed"
         ]
         target_source_ids = [
             str(item["source_id"])
             for item in generated_rows
-            if str(item["discovery_role"]) == "detail" and str(item["status"]) != "removed"
+            if _is_candidate_producing_source(item, product_type=str(group["product_type"]))
+            and str(item["status"]) != "removed"
         ]
         generated_target_source_ids = list(target_source_ids)
         active_scope = _load_active_collection_scope(
@@ -116,7 +121,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             product_type=str(group["product_type"]),
         )
         collection_source_ids = _dedupe_preserve_order(
-            [*collection_source_ids, *active_scope["collection_source_ids"]]
+            [*collection_source_ids, *target_source_ids, *active_scope["collection_source_ids"]]
         )
         target_source_ids = _dedupe_preserve_order(
             [*target_source_ids, *active_scope["target_source_ids"]]
@@ -206,7 +211,11 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
         """
         SELECT
             source_id,
-            discovery_role
+            discovery_role,
+            source_name,
+            source_url,
+            purpose,
+            expected_fields
         FROM source_registry_item
         WHERE bank_code = %(bank_code)s
           AND product_type = ANY(%(product_type_scope)s)
@@ -221,17 +230,69 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
     collection_source_ids = [
         str(row["source_id"])
         for row in rows
-        if str(row["discovery_role"]) != "entry"
+        if str(row["discovery_role"]) != "entry" or _is_candidate_producing_source(row, product_type=product_type)
     ]
     target_source_ids = [
         str(row["source_id"])
         for row in rows
-        if str(row["discovery_role"]) == "detail"
+        if _is_candidate_producing_source(row, product_type=product_type)
     ]
     return {
         "collection_source_ids": collection_source_ids,
         "target_source_ids": target_source_ids,
     }
+
+
+def _is_candidate_producing_source(row: Any, *, product_type: str) -> bool:
+    discovery_role = str(row["discovery_role"])
+    if discovery_role == "detail":
+        return True
+    if _canonical_product_type_code(product_type) != "gic":
+        return False
+
+    expected_fields = row.get("expected_fields") if hasattr(row, "get") else row["expected_fields"]
+    if isinstance(expected_fields, str):
+        try:
+            expected_values = json.loads(expected_fields)
+        except json.JSONDecodeError:
+            expected_values = [expected_fields]
+    else:
+        expected_values = list(expected_fields or [])
+    expected_text = " ".join(str(item).lower() for item in expected_values)
+    source_text = " ".join(
+        str(
+            (row.get(key) if hasattr(row, "get") else row[key])
+            or ""
+        ).lower()
+        for key in ("source_name", "source_url", "purpose")
+    )
+    if any(
+        token in expected_text
+        for token in (
+            "gic_rate_table",
+            "gic_rates",
+            "cashable_gic_rates",
+            "non_cashable_gic_rates",
+            "non_redeemable_gic_rates",
+            "redeemable_gic_rates",
+            "market_growth_gic_rates",
+            "product_variants",
+            "gic_types",
+            "special_rate_summary",
+            "detail_links",
+        )
+    ):
+        return True
+    return any(
+        token in source_text
+        for token in (
+            "gic",
+            "guaranteed-investment-certificate",
+            "guaranteed investment certificate",
+            "term deposit",
+            "gic-rates",
+        )
+    )
 
 
 def _no_detail_sources_summary(discovery_notes: list[str]) -> str:

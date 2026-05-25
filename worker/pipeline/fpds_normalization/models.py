@@ -50,6 +50,7 @@ class NormalizationArtifactLookup:
     source_type: str
     source_language: str
     source_metadata: dict[str, object]
+    normalized_source_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -70,6 +71,8 @@ class NormalizationInput:
     extracted_fields: list[NormalizationExtractedField]
     evidence_links: list[NormalizationEvidenceLink]
     runtime_notes: list[str]
+    normalized_source_url: str | None = None
+    candidate_key: str | None = None
 
 
 @dataclass(frozen=True)

@@ -211,9 +211,12 @@ def _successful_stage_source_ids(
     success_actions: set[str],
 ) -> list[str]:
     source_ids: list[str] = []
+    seen: set[str] = set()
     for item in stage_output.get("source_results", []):
-        if str(item.get(action_field)) in success_actions and item.get("source_id"):
-            source_ids.append(str(item["source_id"]))
+        source_id = str(item.get("source_id") or "")
+        if str(item.get(action_field)) in success_actions and source_id and source_id not in seen:
+            source_ids.append(source_id)
+            seen.add(source_id)
     return source_ids
 
 

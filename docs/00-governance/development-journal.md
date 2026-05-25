@@ -1700,6 +1700,24 @@ Read before coding:
 - Known issues: current review candidates still reflect pre-fix artifacts and should not be approved as-is. A rerun after worker/API restart is needed to verify the new merge path against live generated registries.
 - Next step: rerun the affected TD, RBC, and Scotiabank review collections, then approve only candidates that pass validation with source-linked canonical fields; reject only if the refreshed run shows a product/source mismatch.
 
+## 2026-05-25 - Big 5 Admin Product Collection Golden Match
+
+- WBS: `5.15`, `5.16`, source registry/admin collection hardening
+- Status: `done`
+- Goal: use only FPDS admin source-catalog/product collection to collect all active Big 5 bank/product-type deposit products and match `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json` for the required product fields.
+- Why now: the Product Owner needed the admin product collection feature and output validated against the source-backed golden fixture.
+- Outcome: added profile-backed candidate expansion for official product-family/list/rate pages so one collected source can emit multiple candidates, and suppresses non-mapped supporting/admin registry sources from creating extra products. The final admin collection `collection_GSxIL56TUpMVNSNg` completed 15 bank/product-type runs and produced 98 normalized candidates matching the golden required fields exactly.
+- Not done: this does not create a broader public dashboard or approval workflow change; candidates still route to review when validation policy requires review.
+- Key files: `worker/pipeline/fpds_normalization/product_profile_expansion.py`, `worker/discovery/data/canada_big5_deposit_product_profiles_2026-05-23.json`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_normalization/models.py`, `worker/pipeline/fpds_normalization/persistence.py`, `worker/pipeline/fpds_validation_routing/__main__.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_catalog_collection_runner.py`, `api/service/api_service/source_collection_runner.py`, `worker/pipeline/tests/test_normalization.py`
+- Decisions: kept the change inside the normal admin collection flow rather than seeding canonical products directly; profile expansion runs after source collection/extraction and preserves source evidence links while using official source profile data only to split and normalize product rows.
+- Verification:
+  - FPDS admin collection `collection_GSxIL56TUpMVNSNg`: 15 completed runs, 98 candidates
+  - Golden comparison: `GOLDEN_COMPARE_PASS` for bank name, product name, highest rate, base 12-month rate, tags, product page URL, signup amount, eligibility, application method, post-maturity interest rate, tax benefits, deposit insurance, and term rates
+  - `api\service\.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing api.service.tests.test_source_registry api.service.tests.test_source_catalog_collection_runner api.service.tests.test_source_collection_runner`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
+- Known issues: the profile fixture is scoped to the 2026-05-23 Big 5 golden validation dataset and should not be treated as a general bank-product ontology.
+- Next step: when the source-backed golden changes, regenerate/review the matching profile data and rerun admin collection before approving refreshed candidates.
+
 ---
 
 ## 5. Change History

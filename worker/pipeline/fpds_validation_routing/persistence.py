@@ -165,6 +165,7 @@ COMMIT;
         self,
         *,
         source_document_ids: list[str],
+        run_id: str | None = None,
     ) -> list[ValidationArtifactLookup]:
         if not source_document_ids:
             return []
@@ -174,7 +175,7 @@ SET search_path TO {schema};
 
 SELECT COALESCE(json_agg(row_to_json(artifact_rows)), '[]'::json)::text
 FROM (
-    SELECT DISTINCT ON (me.source_document_id)
+    SELECT DISTINCT ON (COALESCE(me.execution_metadata ->> 'candidate_id', me.model_execution_id))
         me.source_document_id,
         me.execution_metadata ->> 'snapshot_id' AS snapshot_id,
         me.execution_metadata ->> 'parsed_document_id' AS parsed_document_id,
@@ -191,15 +192,19 @@ FROM (
       ON sd.source_document_id = me.source_document_id
     WHERE me.stage_name = 'normalization'
       AND me.execution_status = 'completed'
+      AND (NULLIF(:'run_id', '') IS NULL OR me.run_id = :'run_id')
       AND me.source_document_id IN (
         SELECT jsonb_array_elements_text(:'source_document_ids_json'::jsonb)
       )
-    ORDER BY me.source_document_id, me.completed_at DESC NULLS LAST, me.started_at DESC
+    ORDER BY COALESCE(me.execution_metadata ->> 'candidate_id', me.model_execution_id), me.completed_at DESC NULLS LAST, me.started_at DESC
 ) AS artifact_rows;
 """
         output = self._execute(
             sql,
-            variables={"source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True)},
+            variables={
+                "source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True),
+                "run_id": run_id or "",
+            },
         )
         payload = json.loads(output or "[]")
         return [ValidationArtifactLookup(**item) for item in payload]
@@ -272,7 +277,9 @@ FROM (
         ]
         model_executions = [item.model_execution_record for item in validation_result.source_results]
         usage_records = [item.usage_record for item in validation_result.source_results if item.usage_record is not None]
-        run_source_items = [item.run_source_item_record for item in validation_result.source_results]
+        run_source_items = _coalesce_run_source_items(
+            [item.run_source_item_record for item in validation_result.source_results]
+        )
         source_failure_count = sum(1 for item in validation_result.source_results if item.validation_action == "failed")
         source_success_count = len(validation_result.source_results) - source_failure_count
         review_queued_count = sum(1 for item in validation_result.source_results if item.validation_action == "review_queued")
@@ -619,3 +626,53 @@ def _json_sql_literal(value: object) -> str:
     while tag in payload:
         tag = f"{tag}_x$"
     return f"{tag}{payload}{tag}"
+
+
+def _coalesce_run_source_items(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    coalesced: dict[tuple[str, str], dict[str, object]] = {}
+    for row in rows:
+        key = (str(row.get("run_id")), str(row.get("source_document_id")))
+        current = coalesced.get(key)
+        if current is None:
+            current = {
+                **row,
+                "stage_metadata": dict(row.get("stage_metadata") or {}),
+            }
+            current["stage_metadata"]["validation_candidates"] = [
+                _run_source_candidate_summary(row)
+            ]
+            coalesced[key] = current
+            continue
+
+        current["warning_count"] = max(int(current.get("warning_count") or 0), int(row.get("warning_count") or 0))
+        current["error_count"] = max(int(current.get("error_count") or 0), int(row.get("error_count") or 0))
+        if not current.get("error_summary") and row.get("error_summary"):
+            current["error_summary"] = row.get("error_summary")
+        metadata = dict(current.get("stage_metadata") or {})
+        row_metadata = row.get("stage_metadata") if isinstance(row.get("stage_metadata"), dict) else {}
+        metadata["candidate_id"] = row_metadata.get("candidate_id") or metadata.get("candidate_id")
+        metadata["validation_candidates"] = [
+            *list(metadata.get("validation_candidates") or []),
+            _run_source_candidate_summary(row),
+        ]
+        current["stage_metadata"] = metadata
+    return list(coalesced.values())
+
+
+def _run_source_candidate_summary(row: dict[str, object]) -> dict[str, object]:
+    metadata = row.get("stage_metadata") if isinstance(row.get("stage_metadata"), dict) else {}
+    return {
+        "candidate_id": metadata.get("candidate_id"),
+        "validation_action": metadata.get("validation_action"),
+        "validation_model_execution_id": metadata.get("validation_model_execution_id"),
+        "normalization_model_execution_id": metadata.get("normalization_model_execution_id"),
+        "validation_storage_key": metadata.get("validation_storage_key"),
+        "metadata_storage_key": metadata.get("metadata_storage_key"),
+        "validation_status": metadata.get("validation_status"),
+        "validation_issue_codes": metadata.get("validation_issue_codes") or [],
+        "source_confidence": metadata.get("source_confidence"),
+        "candidate_state": metadata.get("candidate_state"),
+        "review_reason_code": metadata.get("review_reason_code"),
+        "queue_reason_codes": metadata.get("queue_reason_codes") or [],
+        "review_task_id": metadata.get("review_task_id"),
+    }

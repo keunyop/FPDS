@@ -187,6 +187,7 @@ def _build_normalization_input(
     return NormalizationInput(
         source_id=source_id,
         source_document_id=lookup.source_document_id,
+        normalized_source_url=lookup.normalized_source_url,
         snapshot_id=lookup.snapshot_id,
         parsed_document_id=lookup.parsed_document_id,
         extraction_model_execution_id=lookup.extraction_model_execution_id,
