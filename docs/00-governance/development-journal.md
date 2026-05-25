@@ -62,6 +62,22 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-25 - Dev Collection Data Reset
+
+- WBS: admin collection QA support
+- Status: `done`
+- Goal: clear dev product-collection outputs before a fresh collection test while preserving operator setup rows.
+- Why now: the Product Owner requested deletion of all data created by product information collection except bank and product type information.
+- Outcome: deleted dev DB collection artifacts and downstream outputs: generated source rows, source documents, snapshots, parsed/evidence rows, embeddings, model and usage records, normalized candidates, review tasks/decisions, canonical products, versions, change events, public aggregate refresh/projection rows, and collection-related audit events. Preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session, policy/config, and migration history rows. Deleted S3-compatible object storage under the dev prefix `s3://fpds-dev-private/dev/` and cleared local collection tmp artifact directories.
+- Not done: no product implementation changes or reseeding were performed.
+- Key files: `docs/00-governance/development-journal.md`, `tmp/source-catalog-collections/`, `tmp/source-collections/`, `tmp/*-persist/`
+- Decisions: keep the 15 source catalog coverage rows so the next admin collection can be launched without recreating bank/product coverage; delete `source_registry_item` rows so generated source detail is regenerated; delete only the dev object-storage prefix, not the whole bucket or any prod prefix.
+- Verification:
+  - Post-delete DB counts: `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`; collection/output tables including `source_registry_item`, `source_document`, `source_snapshot`, `parsed_document`, `evidence_chunk`, `normalized_candidate`, `review_task`, `canonical_product`, `aggregate_refresh_run`, and `public_product_projection` are `0`.
+  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` reports `object_count=0`, `total_bytes=0`.
+- Known issues: `audit_event` still has 65 preserved auth/config rows by design.
+- Next step: rerun the admin collection test from the existing bank/product coverage and inspect newly generated sources, review tasks, and aggregate output.
+
 ## 2026-05-23 - Big 5 Deposit Golden Dataset
 
 - WBS: `5.2`, `5.3`, `5.4`, admin collection QA support

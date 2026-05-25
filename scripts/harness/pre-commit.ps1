@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 . (Join-Path $PSScriptRoot "shared.ps1")
 
-$stagedFiles = Get-StagedFiles
+$stagedFiles = @(Get-StagedFiles)
 if (-not $stagedFiles -or $stagedFiles.Count -eq 0) {
     exit 0
 }
