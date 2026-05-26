@@ -1,8 +1,8 @@
-﻿# FPDS Workflow and State Design - End-to-End Ingestion Flow
+# FPDS Workflow and State Design - End-to-End Ingestion Flow
 
-Version: 1.0  
-Date: 2026-03-31  
-Status: Approved Baseline for WBS 1.3.1  
+Version: 1.0
+Date: 2026-03-31
+Status: Approved Baseline for WBS 1.3.1
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -24,7 +24,7 @@ Source Documents:
 - 이후 `1.3.2 review state machine`, `1.3.3 run lifecycle`, `1.3.4 publish lifecycle`, `1.3.5 audit trail scope`의 기준 문서로 사용한다.
 - `1.4.x`, `1.5.3`, `1.8.2`가 같은 ingestion 흐름을 참조하도록 맞춘다.
 
-이 문서는 구현 코드나 세부 DB schema를 직접 정의하는 문서가 아니다.  
+이 문서는 구현 코드나 세부 DB schema를 직접 정의하는 문서가 아니다.
 세부 state chart, ERD, BX-PF field mapping, vector backend 선택은 후속 WBS에서 구체화한다.
 
 ---
@@ -220,7 +220,8 @@ Source Documents:
 - 처리:
   - Prototype에서는 모든 candidate를 review queue로 보낸다.
   - Phase 1에서는 config 기반 auto-approve를 허용한다.
-  - `FORCE_REVIEW_ISSUE_CODES` 또는 `conflicting_evidence`가 있으면 review 강제다.
+  - active `FORCE_REVIEW_ISSUE_CODES`에 걸리거나 warning confidence floor를 넘지 못하면 review 강제다.
+  - Canada Big 5 deposit golden-pass candidate는 golden fixture field contract를 만족하면 profile/source-list evidence conflict만으로 review 강제하지 않는다.
 - 출력:
   - review task 또는 approval marker
 - 저장물:

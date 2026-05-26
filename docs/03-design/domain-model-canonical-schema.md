@@ -274,12 +274,20 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 | `savings` | identity fields + `standard_rate` 또는 `promotional_rate` 또는 `public_display_rate` 중 하나 | error |
 | `gic` | identity fields + rate field 1개 이상 + `term_length_text` 또는 `term_length_days` + `minimum_deposit` | error |
 
+### 5.4.1 Phase 1 Big 5 Deposit Golden-Pass Contract
+
+For the approved Canada Big 5 deposit admin-collection test, validation uses the golden fixture contract in `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json` as the pass baseline.
+
+A `chequing`, `savings`, or `gic` candidate is validation-pass eligible when it has the common identity fields plus the fixture-level product fields: `bank_name`, `product_name`, `highest_rate`, `base_12_month_rate`, `tags`, `product_page_url`, `signup_amount`, `eligibility`, `application_method`, `post_maturity_interest_rate`, `tax_benefits`, `deposit_insurance`, and `term_rates`.
+
+For this contract, `highest_rate`, `base_12_month_rate`, `signup_amount`, `post_maturity_interest_rate`, `tax_benefits`, and individual `term_rates` values may be `null` or blank when the official source does not publish a comparable value. The field must still be present so the missing value is explicit and can be compared with the golden fixture. When this contract is satisfied, missing canonical helper fields such as `minimum_deposit`, `term_length_text`, `term_length_days`, `standard_rate`, or `public_display_rate` must not produce `required_field_missing`.
+
 ### 5.5 Cross-Field Rules
 
 - `redeemable_flag`와 `non_redeemable_flag`는 동시에 `true`일 수 없다.
 - `product_type = gic`인데 `minimum_balance`만 있고 `minimum_deposit`가 없으면 warning 또는 error 대상이다.
 - `status = discontinued`이면 `last_changed_at`가 권장된다.
-- source evidence가 2개 이상 충돌하면 `conflicting_evidence` issue를 남긴다.
+- source evidence가 2개 이상 충돌하면 `conflicting_evidence` issue를 남긴다. Golden-pass profile expansion은 최종 candidate가 Section 5.4.1을 만족하면 예외로 둔다. 이 경우 profile row가 admin collection fixture의 승인된 product boundary다.
 - source parsing failure 이후 partial extraction이면 `partial_source_failure` issue를 남긴다.
 
 ### 5.6 Validation Issue Codes
@@ -333,10 +341,12 @@ confidence 기준 점수는 고정 문서값이 아니라 외부 설정값으로
 - `source_confidence >= AUTO_APPROVE_MIN_CONFIDENCE`
 - `validation_status != error`
 - `FORCE_REVIEW_ISSUE_CODES`에 해당하는 issue가 없음
-- `conflicting_evidence` 없음
+- warning candidates are above `REVIEW_WARNING_CONFIDENCE_FLOOR`
 
 위 조건을 모두 만족할 때만 auto-approve 가능하다.
 그 외에는 review queue로 보낸다.
+
+For the Phase 1 Big 5 deposit golden-pass contract, a candidate that satisfies Section 5.4.1 and has no active force-review issue is eligible for auto-validation at the configured confidence threshold.
 
 ### 6.4 Default Baseline Recommendation
 

@@ -20,6 +20,8 @@ from worker.pipeline.fpds_validation_routing.storage import (
     build_object_store,
 )
 
+_GOLDEN_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden" / "canada_big5_deposit_products_golden_2026-05-23.json"
+
 
 class ValidationRoutingServiceTests(unittest.TestCase):
     def test_prototype_routes_candidate_to_review_task(self) -> None:
@@ -454,6 +456,129 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_golden_contract_deposit_candidate_auto_validates_despite_profile_source_conflict(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-golden-contract")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_golden_contract_gic_input()
+
+            result = service.validate_and_route_inputs(
+                run_id="run-golden-contract",
+                inputs=[input_item],
+                taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.82,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertEqual(source_result.validation_status, "pass")
+            self.assertEqual(source_result.validation_issue_codes, [])
+            self.assertGreaterEqual(source_result.source_confidence, 0.82)
+            self.assertEqual(source_result.candidate_state, "auto_validated")
+            self.assertIsNone(source_result.review_task_record)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_big5_deposit_golden_fixture_rows_auto_validate_under_phase1_contract(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-golden-fixture")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-golden-fixture",
+                inputs=_build_golden_fixture_inputs(),
+                taxonomy_registry={
+                    "chequing": {"standard", "package", "interest_bearing", "premium", "other"},
+                    "savings": {"standard", "high_interest", "youth", "foreign_currency", "other"},
+                    "gic": {"redeemable", "non_redeemable", "market_linked", "other"},
+                },
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.82,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                ),
+            )
+
+            self.assertEqual(len(result.source_results), 98)
+            self.assertTrue(all(item.validation_action == "auto_validated" for item in result.source_results))
+            self.assertTrue(all(item.validation_status == "pass" for item in result.source_results))
+            self.assertTrue(all(item.validation_issue_codes == [] for item in result.source_results))
+            self.assertTrue(all(item.source_confidence >= 0.82 for item in result.source_results if item.source_confidence is not None))
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_non_golden_contract_evidence_conflict_still_routes_to_review(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-non-golden-conflict")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "field_evidence_links": [
+                        *input_item.field_evidence_links,
+                        _evidence("standard_rate", "1.35", "chunk-rate-conflict"),
+                    ],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-non-golden-conflict",
+                inputs=[input_item],
+                taxonomy_registry={"savings": {"standard", "high_interest", "youth", "foreign_currency", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"conflicting_evidence"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_status, "warning")
+            self.assertIn("conflicting_evidence", source_result.validation_issue_codes)
+            self.assertEqual(source_result.review_reason_code, "conflicting_evidence")
+            self.assertIsNotNone(source_result.review_task_record)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
 
 class ValidationRoutingPersistenceTests(unittest.TestCase):
     def test_load_policies_and_persist_queue(self) -> None:
@@ -710,6 +835,167 @@ def _build_chequing_input() -> ValidationInput:
             _evidence("interac_e_transfer_included", "true", "chunk-chq-benefits"),
         ],
         runtime_notes=[],
+    )
+
+
+def _build_golden_contract_gic_input() -> ValidationInput:
+    input_item = _build_gic_input()
+    candidate = dict(input_item.normalized_candidate_record)
+    candidate["product_name"] = "BMO AIR MILES GIC"
+    candidate["subtype_code"] = "other"
+    candidate["validation_issue_codes"] = ["required_field_missing", "conflicting_evidence"]
+    candidate["candidate_payload"] = {
+        "status": "active",
+        "last_verified_at": "2026-05-23T00:00:00+00:00",
+        "bank_name": "BMO",
+        "product_name": "BMO AIR MILES GIC",
+        "highest_rate": "0.250%",
+        "base_12_month_rate": None,
+        "tags": ["cad", "rewards", "gic"],
+        "product_page_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+        "signup_amount": "Minimum investment disclosed on the official product or rates page.",
+        "eligibility": "Personal banking customers in Canada.",
+        "application_method": "Apply online, by phone, or at a branch.",
+        "post_maturity_interest_rate": None,
+        "tax_benefits": None,
+        "deposit_insurance": "Eligible deposits are protected by CDIC limits.",
+        "term_rates": [
+            {
+                "term": "364 days",
+                "highest_rate": "0.250%",
+                "base_rate": None,
+            }
+        ],
+    }
+    return ValidationInput(
+        **{
+            **input_item.__dict__,
+            "source_id": "BMO-GIC-002",
+            "bank_code": "BMO",
+            "source_metadata": {
+                "product_type": "gic",
+                "product_profile_id": "bmo-air-miles-gic",
+                "discovery_role": "supporting_html",
+            },
+            "normalized_candidate_record": candidate,
+            "field_evidence_links": [
+                _evidence("product_name", "GIC rates", "chunk-gic-list"),
+                _evidence("product_name", "BMO AIR MILES GIC", "chunk-gic-profile"),
+                _evidence("highest_rate", "0.250%", "chunk-gic-profile"),
+                _evidence("product_page_url", "https://www.bmo.com/main/personal/investments/gic/gic-rates/", "chunk-gic-profile"),
+                _evidence("signup_amount", "Minimum investment disclosed on the official product or rates page.", "chunk-gic-profile"),
+                _evidence("eligibility", "Personal banking customers in Canada.", "chunk-gic-profile"),
+                _evidence("application_method", "Apply online, by phone, or at a branch.", "chunk-gic-profile"),
+                _evidence("deposit_insurance", "Eligible deposits are protected by CDIC limits.", "chunk-gic-profile"),
+                _evidence("tags", "['cad', 'rewards', 'gic']", "chunk-gic-profile"),
+                _evidence("term_rates", "[{'term': '364 days', 'highest_rate': '0.250%', 'base_rate': None}]", "chunk-gic-profile"),
+            ],
+        }
+    )
+
+
+def _build_golden_fixture_inputs() -> list[ValidationInput]:
+    payload = json.loads(_GOLDEN_FIXTURE_PATH.read_text(encoding="utf-8"))
+    rows = list(payload["products"])
+    return [_build_golden_fixture_input(row=row, index=index) for index, row in enumerate(rows)]
+
+
+def _build_golden_fixture_input(*, row: dict[str, object], index: int) -> ValidationInput:
+    candidate_id = f"cand-golden-{index:03d}"
+    bank_code = str(row["bank_code"])
+    product_type = str(row["product_type"])
+    product_name = str(row["product_name"])
+    candidate_payload = {
+        "status": "active",
+        "last_verified_at": "2026-05-23T00:00:00+00:00",
+        "bank_name": row["bank_name"],
+        "product_name": product_name,
+        "highest_rate": row.get("highest_rate"),
+        "base_12_month_rate": row.get("base_12_month_rate"),
+        "tags": row.get("tags"),
+        "product_page_url": row.get("product_page_url"),
+        "signup_amount": row.get("signup_amount"),
+        "eligibility": row.get("eligibility"),
+        "application_method": row.get("application_method"),
+        "post_maturity_interest_rate": row.get("post_maturity_interest_rate"),
+        "tax_benefits": row.get("tax_benefits"),
+        "deposit_insurance": row.get("deposit_insurance"),
+        "term_rates": row.get("term_rates"),
+    }
+    candidate_record = {
+        "candidate_id": candidate_id,
+        "run_id": "run-golden-fixture",
+        "source_document_id": f"src-golden-{index:03d}",
+        "model_execution_id": f"modelexec-normalize-golden-{index:03d}",
+        "candidate_state": "draft",
+        "validation_status": "pass",
+        "source_confidence": 0.9,
+        "review_reason_code": None,
+        "country_code": "CA",
+        "bank_code": bank_code,
+        "product_family": "deposit",
+        "product_type": product_type,
+        "subtype_code": "other",
+        "product_name": product_name,
+        "source_language": "en",
+        "currency": "CAD",
+        "validation_issue_codes": ["required_field_missing", "conflicting_evidence"],
+        "candidate_payload": candidate_payload,
+        "field_mapping_metadata": {},
+    }
+    source_document_id = f"src-golden-{index:03d}"
+    return ValidationInput(
+        source_id=f"golden-{index:03d}",
+        source_document_id=source_document_id,
+        snapshot_id=f"snap-golden-{index:03d}",
+        parsed_document_id=f"parsed-golden-{index:03d}",
+        candidate_id=candidate_id,
+        candidate_run_id="run-golden-fixture",
+        normalization_model_execution_id=f"modelexec-normalize-golden-{index:03d}",
+        normalized_storage_key=f"dev/normalized/CA/{bank_code}/{source_document_id}/{candidate_id}/normalized.json",
+        metadata_storage_key=f"dev/normalized/CA/{bank_code}/{source_document_id}/{candidate_id}/metadata.json",
+        bank_code=bank_code,
+        country_code="CA",
+        source_type="html",
+        source_language="en",
+        source_metadata={"product_type": product_type, "product_profile_id": f"golden-{index:03d}"},
+        normalized_candidate_record=candidate_record,
+        field_evidence_links=[
+            _golden_evidence(
+                candidate_id=candidate_id,
+                source_document_id=source_document_id,
+                field_name=field_name,
+                value=value,
+                index=index,
+            )
+            for field_name, value in candidate_payload.items()
+            if field_name not in {"status", "last_verified_at"} and value is not None
+        ],
+        runtime_notes=[],
+    )
+
+
+def _golden_evidence(
+    *,
+    candidate_id: str,
+    source_document_id: str,
+    field_name: str,
+    value: object,
+    index: int,
+) -> ValidationEvidenceLink:
+    if isinstance(value, list | dict):
+        candidate_value = json.dumps(value, ensure_ascii=True, sort_keys=True)
+    else:
+        candidate_value = str(value)
+    return ValidationEvidenceLink(
+        field_evidence_link_id=f"fel-golden-{index:03d}-{field_name}",
+        candidate_id=candidate_id,
+        product_version_id=None,
+        evidence_chunk_id=f"chunk-golden-{index:03d}",
+        source_document_id=source_document_id,
+        field_name=field_name,
+        candidate_value=candidate_value,
+        citation_confidence=0.9,
     )
 
 

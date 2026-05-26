@@ -407,14 +407,19 @@ class NormalizationServiceTests(unittest.TestCase):
             }
             self.assertIn("BMO AIR MILES GIC", product_names)
             self.assertIn("BMO Guaranteed Investment Certificate (GIC)", product_names)
-            profile_candidate = next(
-                item.normalized_candidate_record
+            profile_result = next(
+                item
                 for item in result.source_results
                 if item.normalized_candidate_record is not None
                 and item.normalized_candidate_record["product_name"] == "BMO AIR MILES GIC"
             )
+            profile_candidate = profile_result.normalized_candidate_record
             self.assertEqual(profile_candidate["candidate_payload"]["highest_rate"], "0.250%")
             self.assertEqual(profile_candidate["candidate_payload"]["term_rates"][0]["term"], "364 days")
+            self.assertEqual(profile_result.validation_status, "pass")
+            self.assertNotIn("required_field_missing", profile_result.validation_issue_codes)
+            self.assertNotIn("conflicting_evidence", profile_result.validation_issue_codes)
+            self.assertGreaterEqual(profile_result.source_confidence, 0.82)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -449,6 +454,44 @@ class NormalizationServiceTests(unittest.TestCase):
             )
 
             result = service.normalize_inputs(run_id="run-bmo-gic-support-suppression", inputs=[input_item])
+
+            self.assertEqual(result.source_results, [])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_profile_url_tokens_do_not_prefix_match_supporting_rate_pages(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-profile-url-exact-match")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "TD-GIC-006",
+                    "bank_code": "TD",
+                    "normalized_source_url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/market-growth-gic-rates",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "TD-GIC-006",
+                        "product_type": "gic",
+                        "discovery_role": "supporting_html",
+                        "expected_fields": ["product_variants", "minimum_guaranteed_return", "maximum_return"],
+                        "product_type_name": "GIC",
+                    },
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-td-gic-rate-support-suppression", inputs=[input_item])
 
             self.assertEqual(result.source_results, [])
         finally:

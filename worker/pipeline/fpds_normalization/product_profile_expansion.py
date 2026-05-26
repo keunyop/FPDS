@@ -46,7 +46,7 @@ def _profiles_for_item(item: NormalizationInput) -> list[ProductProfile]:
         if source_id and source_id in profile.source_ids:
             matched.append(profile)
             continue
-        if source_url and any(token in source_url for token in profile.source_url_tokens):
+        if source_url and any(_source_url_matches_token(source_url, token) for token in profile.source_url_tokens):
             matched.append(profile)
     return matched
 
@@ -190,6 +190,10 @@ def _stringify(value: object) -> str:
     if value is None:
         return ""
     return str(value)
+
+
+def _source_url_matches_token(source_url: str, token: str) -> bool:
+    return source_url.rstrip("/") == token.rstrip("/")
 
 
 def _load_product_profiles() -> tuple[ProductProfile, ...]:

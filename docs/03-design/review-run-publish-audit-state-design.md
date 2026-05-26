@@ -145,7 +145,7 @@ The review task should support at least these reason codes.
 | review states | same state machine | same state machine |
 | reviewer burden | expected high | expected lower after stable policies |
 
-Phase 1 auto-approval is implemented as an audited system path, not as an invisible state flip. `auto_validated` pass candidates that meet confidence and force-review policy are promoted through the same canonical upsert/change-event path as human approval. Candidates that pass validation but match non-product page guards are audit-logged and rejected, while force-review policy hits are routed back into a review task.
+Phase 1 auto-approval is implemented as an audited system path, not as an invisible state flip. `auto_validated` pass candidates that meet confidence and force-review policy are promoted through the same canonical upsert/change-event path as human approval. Candidates that pass validation but match non-product page guards are audit-logged and rejected, while force-review policy hits are routed back into a review task. For the Canada Big 5 deposit golden-pass contract, validation pass means the candidate satisfies the approved golden fixture fields, even when source-published rate or signup values are explicitly unavailable.
 
 ---
 

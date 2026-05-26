@@ -35,6 +35,16 @@ _RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "publ
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _NUMERIC_FIELDS = _RATE_FIELDS | _FEE_FIELDS | {"minimum_balance", "minimum_deposit"}
 _JSON_FIELDS = {"term_rate_table"}
+_DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS = (
+    "bank_name",
+    "product_name",
+    "product_page_url",
+    "signup_amount",
+    "eligibility",
+    "application_method",
+    "deposit_insurance",
+)
+_DEPOSIT_GOLDEN_RATE_FIELDS = ("highest_rate", "base_12_month_rate")
 _CORE_FIELDS = {
     "country_code",
     "bank_code",
@@ -613,13 +623,21 @@ def _compute_validation_issue_codes(
             issues.append("invalid_term_value")
 
     requiredness_type = product_type_family or product_type
-    if requiredness_type == "chequing":
+    golden_contract_candidate = _meets_deposit_golden_contract(
+        product_type=product_type,
+        product_type_family=product_type_family,
+        product_name=product_name,
+        currency=currency,
+        candidate_payload=candidate_payload,
+        dynamic_product_type=dynamic_product_type,
+    )
+    if requiredness_type == "chequing" and not golden_contract_candidate:
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.append("required_field_missing")
-    if requiredness_type == "savings":
+    if requiredness_type == "savings" and not golden_contract_candidate:
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
-    if requiredness_type == "gic":
+    if requiredness_type == "gic" and not golden_contract_candidate:
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
@@ -644,7 +662,7 @@ def _compute_validation_issue_codes(
     conflicting_fields = defaultdict(set)
     for link in evidence_links:
         conflicting_fields[link.field_name].add(link.candidate_value.strip())
-    if any(len(values) > 1 for values in conflicting_fields.values()):
+    if not golden_contract_candidate and any(len(values) > 1 for values in conflicting_fields.values()):
         issues.append("conflicting_evidence")
     return sorted(dict.fromkeys(issues))
 
@@ -806,6 +824,42 @@ def _has_meaningful_value(value: object) -> bool:
     return value not in (None, "", [], {})
 
 
+def _meets_deposit_golden_contract(
+    *,
+    product_type: str | None,
+    product_type_family: str | None,
+    product_name: str | None,
+    currency: str | None,
+    candidate_payload: dict[str, object],
+    dynamic_product_type: bool,
+) -> bool:
+    if dynamic_product_type:
+        return False
+    if (product_type_family or _canonical_product_type_family(product_type)) not in {"chequing", "savings", "gic"}:
+        return False
+    required_identity = (
+        product_type,
+        product_name,
+        currency,
+        candidate_payload.get("status"),
+        candidate_payload.get("last_verified_at"),
+    )
+    if any(value in {None, ""} for value in required_identity):
+        return False
+    if any(field_name not in candidate_payload for field_name in _DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS):
+        return False
+
+    tags = candidate_payload.get("tags")
+    if not isinstance(tags, list) or not tags:
+        return False
+    term_rates = candidate_payload.get("term_rates")
+    if not isinstance(term_rates, list):
+        return False
+    if any(field_name not in candidate_payload for field_name in _DEPOSIT_GOLDEN_RATE_FIELDS):
+        return False
+    return True
+
+
 def _refine_product_name_from_source_metadata(
     *,
     product_name: str | None,
@@ -879,6 +933,16 @@ def _compute_source_confidence(
     required_values = [product_type, product_name, currency, candidate_payload.get("status"), candidate_payload.get("last_verified_at")]
     completeness = sum(1 for item in required_values if item not in {None, ""}) / len(required_values)
     requiredness_type = product_type_family or product_type
+    golden_contract_candidate = _meets_deposit_golden_contract(
+        product_type=product_type,
+        product_type_family=product_type_family,
+        product_name=product_name,
+        currency=currency,
+        candidate_payload=candidate_payload,
+        dynamic_product_type=dynamic_product_type,
+    )
+    if golden_contract_candidate:
+        completeness = 1.0
     if requiredness_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
         completeness = min(1.0, completeness + 0.15)
     if requiredness_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
@@ -899,6 +963,8 @@ def _compute_source_confidence(
         score -= 0.25
     if "conflicting_evidence" in validation_issue_codes:
         score -= 0.15
+    if golden_contract_candidate and validation_status == "pass" and not validation_issue_codes:
+        score = max(score, 0.88)
     if dynamic_product_type:
         score = min(score - 0.08, 0.74)
     return round(max(0.0, min(0.99, score)), 4)
