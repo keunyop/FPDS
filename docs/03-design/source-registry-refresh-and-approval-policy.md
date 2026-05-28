@@ -187,6 +187,7 @@ Important rules:
 - supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
 - supporting sources should not create primary standalone candidates unless the registry explicitly marks them as candidate-producing
 - seed-backed detail hints with low page evidence remain eligible only when page validation has no negative signal; low-evidence pages with negative signals should not become candidate-producing detail sources and should rely on later rerun/source correction instead
+- a source-catalog bulk collect should enqueue the selected bank/product groups as one collection plan and process those groups sequentially inside one background runner process; the deeper source-collection stages still apply per-stage timeouts, but the plan-level runner should avoid launching one DB-connected process per group and exhausting the session pool
 
 ---
 

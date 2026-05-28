@@ -1792,6 +1792,27 @@ Read before coding:
 - Known issues: the next collection run will rebuild source registry, evidence, candidates, and review tasks from scratch.
 - Next step: run the FPDS admin collection flow again and compare the refreshed candidates to the golden fixture before approval/publish decisions.
 
+## 2026-05-28 - Admin Bulk Collection Runner Backpressure and Golden Retest
+
+- WBS: `5.15`, `5.16`, source registry/admin collection hardening
+- Status: `done`
+- Goal: rerun the Product Owner's FPDS admin product collection test from configured admin banks and product types only, compare the collected candidates to `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json`, and keep improving until the required fields match.
+- Why now: the clean retest after artifact reset initially launched one background Python process per bank/product group, which saturated the dev Supabase session pool during the 15-group Big 5 run.
+- Outcome: source-catalog collection now writes one plan file per collection id and launches one background `source_catalog_collection_runner` process for the full selected plan. The runner already processes groups sequentially, so the change preserves the admin collection path while avoiding session-pool exhaustion for bulk collection. Final collection `collection_WY0AAgRAZ5bOlD9z` completed all 15 bank/product runs, produced 98 normalized candidates, and matched the golden fixture exactly for the required product fields: 0 missing, 0 extra, 0 mismatches.
+- Not done: no product review approvals, public publish, dashboard work, or non-Big-5 scope expansion was included.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `api/service/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/00-governance/development-journal.md`
+- Decisions: fixed the general bulk-runner concurrency shape instead of adding a bank-specific retry or DB workaround; kept worker-stage timeouts as the protection against a hung group while limiting DB-connected runner fan-out.
+- Verification:
+  - FPDS admin collection `collection_WY0AAgRAZ5bOlD9z`: 15 completed runs, 98 candidates
+  - Golden comparison against `canada_big5_deposit_products_golden_2026-05-23.json`: `pass=true`, `actual_count=98`, `golden_count=98`, `missing_count=0`, `extra_count=0`, `mismatch_count=0`
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_catalog` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest tests.test_source_catalog_collection_runner tests.test_source_collection_runner` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` in `api/service`
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
+- Known issues: the repository has no root-level `tests/regression` directory; regression suites were run in the two existing regression locations. The final collection still created review-queued GIC candidates where validation policy required review, but the collected candidate field values matched the golden answer key.
+- Next step: use this single-runner collection behavior for future bank-wide/admin bulk collection tests; only approve or publish candidates through the normal review workflow.
+
 ---
 
 ## 5. Change History

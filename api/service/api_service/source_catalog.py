@@ -1292,31 +1292,26 @@ def _launch_source_catalog_collection_runner(plan: dict[str, Any]) -> None:
     api_service_path = str(REPO_ROOT / "api" / "service")
     env["PYTHONPATH"] = os.pathsep.join([api_service_path, current_python_path]) if current_python_path else api_service_path
 
-    for group in plan.get("groups", []):
-        group_plan = {
-            **plan,
-            "groups": [group],
-        }
-        run_id = str(group["run_id"])
-        plan_path = temp_dir / f"{run_id}.json"
-        log_path = temp_dir / f"{run_id}.log"
-        plan_path.write_text(json.dumps(group_plan, indent=2, ensure_ascii=True), encoding="utf-8")
+    collection_id = str(plan["collection_id"])
+    plan_path = temp_dir / f"{collection_id}.json"
+    log_path = temp_dir / f"{collection_id}.log"
+    plan_path.write_text(json.dumps(plan, indent=2, ensure_ascii=True), encoding="utf-8")
 
-        with log_path.open("a", encoding="utf-8") as log_file:
-            try:
-                subprocess.Popen(  # noqa: S603
-                    [sys.executable, "-m", "api_service.source_catalog_collection_runner", "--plan-path", str(plan_path)],
-                    cwd=str(REPO_ROOT),
-                    env=env,
-                    stdout=log_file,
-                    stderr=subprocess.STDOUT,
-                )
-            except OSError as exc:
-                raise SourceRegistryError(
-                    status_code=500,
-                    code="source_catalog_collection_launch_failed",
-                    message=f"Source catalog collection could not be launched: {exc}",
-                ) from exc
+    with log_path.open("a", encoding="utf-8") as log_file:
+        try:
+            subprocess.Popen(  # noqa: S603
+                [sys.executable, "-m", "api_service.source_catalog_collection_runner", "--plan-path", str(plan_path)],
+                cwd=str(REPO_ROOT),
+                env=env,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+            )
+        except OSError as exc:
+            raise SourceRegistryError(
+                status_code=500,
+                code="source_catalog_collection_launch_failed",
+                message=f"Source catalog collection could not be launched: {exc}",
+            ) from exc
 
 
 def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog_item_ids: list[str]) -> dict[str, Any]:

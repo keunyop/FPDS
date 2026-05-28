@@ -897,7 +897,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(result["workflow_state"], "queued")
         launch_runner.assert_called_once()
 
-    def test_launch_source_catalog_collection_runner_spawns_one_process_per_group(self) -> None:
+    def test_launch_source_catalog_collection_runner_spawns_one_process_for_full_plan(self) -> None:
         plan = {
             "collection_id": "collection-001",
             "correlation_id": "corr-001",
@@ -946,11 +946,9 @@ class SourceCatalogTests(unittest.TestCase):
         ):
             _launch_source_catalog_collection_runner(plan)
 
-        self.assertEqual(popen.call_count, 2)
-        first_plan = json.loads((repo_root / "tmp" / "source-catalog-collections" / "run-001.json").read_text(encoding="utf-8"))
-        second_plan = json.loads((repo_root / "tmp" / "source-catalog-collections" / "run-002.json").read_text(encoding="utf-8"))
-        self.assertEqual([group["run_id"] for group in first_plan["groups"]], ["run-001"])
-        self.assertEqual([group["run_id"] for group in second_plan["groups"]], ["run-002"])
+        self.assertEqual(popen.call_count, 1)
+        persisted_plan = json.loads((repo_root / "tmp" / "source-catalog-collections" / "collection-001.json").read_text(encoding="utf-8"))
+        self.assertEqual([group["run_id"] for group in persisted_plan["groups"]], ["run-001", "run-002"])
 
     def test_generate_sources_from_homepage_can_use_ai_to_resolve_detail_rows(self) -> None:
         homepage_html = """
