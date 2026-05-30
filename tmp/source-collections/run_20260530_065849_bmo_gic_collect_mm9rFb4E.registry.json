@@ -1,0 +1,162 @@
+{
+  "registry_version": "2026-05-30",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "AUTO-BMO-GIC-eaf7c3809f",
+  "sources": [
+    {
+      "source_id": "AUTO-BMO-GIC-eaf7c3809f",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "BMO GIC catalog discovery entry",
+      "url": "https://www.bmo.com/en-ca/main/personal/investments/gic",
+      "expected_fields": [
+        "product_name"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "entry_seed",
+        "candidate_origin": "seed_entry_hint",
+        "selection_confidence": "n/a",
+        "selection_reason_codes": [
+          "catalog_entry_context"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO GIC rates reference page",
+      "url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+      "expected_fields": [
+        "gic_rate_table",
+        "term_options",
+        "rate_effective_date"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-GIC-5e41e29605",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/banking-agreements-and-fees/?icid=tl-FEAT2953BRND4-AJBMOH37",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-GIC-9942aa60a8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for GIC",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

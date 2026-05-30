@@ -62,6 +62,43 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-30 - Admin Collection Golden Recollection Verification
+
+- WBS: `5.15`, `5.16`, admin collection QA verification
+- Status: `done`
+- Goal: use only the FPDS admin product collection flow to recollect all active registered bank/product-type coverage and compare the result to `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json`.
+- Why now: the Product Owner requested an end-to-end admin collection test after the dev product collection data reset, with the golden fixture as the acceptance target.
+- Outcome: launched FPDS admin collection `collection_7wJ2KRMYsDg9XEbn` across the 15 active source catalog items for the 5 active banks (`BMO`, `CIBC`, `RBC`, `SCOTIA`, `TD`) and 3 active deposit product types (`chequing`, `gic`, `savings`). All 15 ingestion runs completed and produced 98 normalized candidates. Golden comparison passed with `actual_count=98`, `golden_count=98`, and zero missing, extra, duplicate, or field-mismatched products across bank name, product name, highest rate, 12-month base rate, tags, product URL, signup amount, eligibility, application method, post-maturity interest, tax benefits, deposit insurance, and term rates.
+- Not done: no product pipeline behavior change was needed because the admin collection output already matched the golden fixture; no canonical approval or public publish step was run.
+- Key files: `tmp/fpds_admin_collection_goal_tool.py`, `tmp/collection_7wJ2KRMYsDg9XEbn_golden_compare.json`, `docs/00-governance/development-journal.md`
+- Decisions: kept verification on the admin source catalog collection path and did not seed, patch, or manually mutate collected product outputs.
+- Verification:
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev poll --collection-id collection_7wJ2KRMYsDg9XEbn --brief`
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev compare --collection-id collection_7wJ2KRMYsDg9XEbn --report-path tmp\collection_7wJ2KRMYsDg9XEbn_golden_compare.json`
+  - From `api/service`: `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` (`9` tests)
+  - From repo root: `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+- Known issues: local `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` artifacts remain as run evidence; no root-level `tests/regression` directory exists.
+- Next step: if the Product Owner wants approval/publish validation, review the 98 candidates through the normal admin workflow rather than bypassing review state.
+
+## 2026-05-29 - Dev Product Collection Data And Storage Reset
+
+- WBS: `5.15`, `5.16`, admin collection retest preparation
+- Status: `done`
+- Goal: delete all data produced by the product information collection process before a clean recollection test, while preserving bank and product-type setup.
+- Why now: the Product Owner requested removal of product collection DB artifacts and all S3 objects accumulated by product collection, excluding bank and product-type information.
+- Outcome: deleted dev DB collection and downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows.
+- Object storage: deleted every object under the dev prefix `s3://fpds-dev-private/dev/`; pre-delete summary was 1,305 objects / 115,383,901 bytes, and post-delete summary was 0 objects / 0 bytes.
+- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
+- Key files: `docs/00-governance/development-journal.md`
+- Decisions: kept the 15 source catalog coverage rows as setup data needed to launch the next admin recollection; deleted generated `source_registry_item` rows so source details will be regenerated.
+- Verification:
+  - Post-delete DB counts: `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`; collection/output tables including `source_registry_item`, `ingestion_run`, `source_document`, `source_snapshot`, `parsed_document`, `evidence_chunk`, `evidence_chunk_embedding`, `model_execution`, `llm_usage_record`, `normalized_candidate`, `field_evidence_link`, `review_task`, `canonical_product`, `product_version`, `aggregate_refresh_request`, `aggregate_refresh_run`, `public_product_projection`, and dashboard snapshot tables are `0`.
+  - `audit_event` retained 62 auth/config rows only: auth sessions, bank configuration, product-type registry configuration, and source-catalog item configuration.
+  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` reports `object_count=0`, `total_bytes=0`.
+  - Local collection tmp artifact directories were absent; only non-collection `tmp/admin-dev.log` remains.
+- Known issues: the next collection run will rebuild generated source registry details, evidence artifacts, candidates, review tasks, and aggregate outputs from scratch.
+- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect the new candidates before approval or publish decisions.
+
 ## 2026-05-29 - GIC Redeemability Flag Auto-Approval Hardening
 
 - WBS: `5.15`, `5.16`, admin collection QA hardening

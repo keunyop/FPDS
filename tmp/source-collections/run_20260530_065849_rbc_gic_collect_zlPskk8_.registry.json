@@ -1,0 +1,186 @@
+{
+  "registry_version": "2026-05-30",
+  "bank_code": "RBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.rbcroyalbank.com"
+  ],
+  "entry_source_id": "AUTO-RBC-GIC-33b3fbf20c",
+  "sources": [
+    {
+      "source_id": "RBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Strong match for a specific GIC product family detail page.",
+      "url": "https://www.rbcroyalbank.com/investments/guaranteed-return-gics.html",
+      "expected_fields": [
+        "gic_categories",
+        "minimum_investment",
+        "term_options",
+        "cashability"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Guaranteed-Return GICs - RBC Royal Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "contains_gic_keyword",
+          "official_product_family_page",
+          "likely_detail_page"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Guaranteed-Return GICs",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Strong match for a specific GIC product family detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 1,
+        "selection_reason_codes": [
+          "contains_gic_keyword",
+          "official_product_family_page",
+          "likely_detail_page",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-33b3fbf20c",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Royal Bank of Canada GIC catalog discovery entry",
+      "url": "https://www.rbcroyalbank.com/investments/gics.html",
+      "expected_fields": [
+        "product_name"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "entry_seed",
+        "candidate_origin": "seed_entry_hint",
+        "selection_confidence": "n/a",
+        "selection_reason_codes": [
+          "catalog_entry_context"
+        ]
+      }
+    },
+    {
+      "source_id": "RBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "RBC GIC rates reference page",
+      "url": "https://www.rbcroyalbank.com/investments/gic-rates.html",
+      "expected_fields": [
+        "cashable_gic_rates",
+        "non_redeemable_gic_rates",
+        "redeemable_gic_rates"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-RBC-GIC-c170aca2a3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://www.rbcroyalbank.com/investments/_assets-custom/pdf/quick-reference-guide.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}
