@@ -505,6 +505,14 @@ def _normalize_candidate(
         "normalization_method": "heuristic_subtype_inference",
         "source_subtype_label": source_subtype_label,
     }
+    _resolve_gic_redeemability_flags(
+        product_type_family=product_type_family,
+        subtype_code=subtype_code,
+        candidate_payload=candidate_payload,
+        normalized_values_for_links=normalized_values_for_links,
+        field_mapping_metadata=field_mapping_metadata,
+        runtime_notes=runtime_notes,
+    )
     candidate_payload["target_customer_tags"] = _infer_target_customer_tags(candidate_payload)
     if _truthy(candidate_payload.get("student_plan_flag")) or "student" in candidate_payload["target_customer_tags"]:
         candidate_payload["student_plan_flag"] = True
@@ -1236,14 +1244,115 @@ def _infer_subtype_code(
             return "package", None
         return "standard", None
     if product_type == "gic":
-        if "market linked" in text or "index linked" in text:
+        if any(token in text for token in ("market linked", "market smart", "index linked", "equity linked")):
             return "market_linked", None
         if "non-redeemable" in text or "non redeemable" in text or "non-cashable" in text or "non cashable" in text:
             return "non_redeemable", None
-        if "redeemable" in text:
+        if "redeemable" in text or "cashable" in text or "flexible gic" in text:
             return "redeemable", None
         return "other", product_name
     return "other", product_name
+
+
+def _resolve_gic_redeemability_flags(
+    *,
+    product_type_family: str | None,
+    subtype_code: str | None,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    runtime_notes: list[str],
+) -> None:
+    if product_type_family != "gic":
+        return
+    if not (_truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag"))):
+        return
+
+    signal = _gic_redeemability_signal(subtype_code=subtype_code, candidate_payload=candidate_payload)
+    if signal == "redeemable":
+        _set_gic_redeemability_flags(
+            redeemable=True,
+            non_redeemable=False,
+            normalized_values_for_links=normalized_values_for_links,
+            field_mapping_metadata=field_mapping_metadata,
+            candidate_payload=candidate_payload,
+            source_signal=signal,
+        )
+    elif signal == "non_redeemable":
+        _set_gic_redeemability_flags(
+            redeemable=False,
+            non_redeemable=True,
+            normalized_values_for_links=normalized_values_for_links,
+            field_mapping_metadata=field_mapping_metadata,
+            candidate_payload=candidate_payload,
+            source_signal=signal,
+        )
+    else:
+        for field_name in ("redeemable_flag", "non_redeemable_flag"):
+            candidate_payload.pop(field_name, None)
+            normalized_values_for_links.pop(field_name, None)
+            field_mapping_metadata.pop(field_name, None)
+
+    runtime_notes.append(
+        "Resolved conflicting GIC redeemability flags from product-level subtype, name, or tag signals instead of broad family-page evidence."
+    )
+
+
+def _gic_redeemability_signal(*, subtype_code: str | None, candidate_payload: dict[str, object]) -> str | None:
+    if subtype_code in {"redeemable", "non_redeemable"}:
+        return subtype_code
+    if subtype_code == "market_linked":
+        return None
+
+    signal_text = _product_signal_text(
+        candidate_payload,
+        field_names=("product_name", "source_subtype_label", "tags"),
+    )
+    if any(token in signal_text for token in ("cashable or non redeemable", "redeemable or non redeemable")):
+        return None
+    if any(token in signal_text for token in ("non redeemable", "non cashable")):
+        return "non_redeemable"
+    if any(token in signal_text for token in ("redeemable", "cashable", "flexible gic")):
+        return "redeemable"
+    return None
+
+
+def _set_gic_redeemability_flags(
+    *,
+    redeemable: bool,
+    non_redeemable: bool,
+    normalized_values_for_links: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    candidate_payload: dict[str, object],
+    source_signal: str,
+) -> None:
+    resolved_values = {
+        "redeemable_flag": redeemable,
+        "non_redeemable_flag": non_redeemable,
+    }
+    for field_name, resolved_value in resolved_values.items():
+        candidate_payload[field_name] = resolved_value
+        field_mapping_metadata[field_name] = {
+            **dict(field_mapping_metadata.get(field_name) or {}),
+            "normalized_value": resolved_value,
+            "normalization_method": "gic_redeemability_conflict_resolution",
+            "source_signal": source_signal,
+        }
+        if resolved_value:
+            normalized_values_for_links[field_name] = resolved_value
+        else:
+            normalized_values_for_links.pop(field_name, None)
+
+
+def _product_signal_text(candidate_payload: dict[str, object], *, field_names: tuple[str, ...]) -> str:
+    values: list[str] = []
+    for field_name in field_names:
+        value = candidate_payload.get(field_name)
+        if isinstance(value, list):
+            values.extend(str(item) for item in value)
+        else:
+            values.append(str(value or ""))
+    return re.sub(r"[\W_]+", " ", " ".join(values).lower()).strip()
 
 
 def _infer_target_customer_tags(candidate_payload: dict[str, object]) -> list[str]:

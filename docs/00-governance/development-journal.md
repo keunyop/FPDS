@@ -62,6 +62,26 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-05-29 - GIC Redeemability Flag Auto-Approval Hardening
+
+- WBS: `5.15`, `5.16`, admin collection QA hardening
+- Status: `done`
+- Goal: diagnose why the active Review Queue had 16 queued GIC candidates and improve the pipeline generally so future bank/product collections do not carry broad page-level GIC redeemability noise into validation errors.
+- Why now: the Product Owner reported 16 queued Review Queue items and asked whether GIC product types are inherently hard to auto-collect, with any improvement kept generic across banks and product types.
+- Outcome: active dev DB diagnosis showed all 16 queued tasks were `product_type=gic`, `queue_reason_code=validation_error`, and `validation_issue_codes=["inconsistent_cross_field_logic"]`. The issue was not that GIC cannot be collected; profile-expanded candidates inherited both `redeemable_flag=true` and `non_redeemable_flag=true` from broad GIC family/comparison page snippets. Normalization now resolves conflicting GIC redeemability flags from product-level subtype, product name, source subtype label, and tags. Clear redeemable/cashable products keep `redeemable_flag=true`; clear non-redeemable/non-cashable products keep `non_redeemable_flag=true`; mixed or ambiguous products drop those optional flags instead of forcing a false conflict.
+- Not done: did not mutate the existing 16 queued review tasks or approve current DB rows in place; a rerun or controlled revalidation is still needed if the current queue must reflect the new normalization behavior.
+- Key files: `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_normalization.py`, `docs/00-governance/development-journal.md`
+- Decisions: kept true cross-field conflicts review-blocking; the new rule only disambiguates or removes optional GIC redeemability flags when product-level signals are clearer than broad page evidence.
+- Verification:
+  - DB diagnosis: active queue count `16`; product type `gic=16`; queue reason `validation_error=16`; issue code `inconsistent_cross_field_logic=16`.
+  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_profile_gic_expansion_resolves_conflicting_redeemability_flags worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_expands_gic_rate_source_into_multiple_product_candidates worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_gic_cross_field_issue_stays_error_and_queues_reason worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_big5_deposit_golden_fixture_rows_auto_validate_under_phase1_contract`
+  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `$env:PYTHONPATH='api/service'; .\api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
+  - `git diff --check`
+- Known issues: the current DB queue remains stale relative to this code change until rerun or revalidation; no root-level `tests/regression` directory exists.
+- Next step: rerun the affected GIC collection or run a controlled revalidation/queue cleanup if the Product Owner wants the current dev DB queue to clear immediately.
+
 ## 2026-05-26 - Golden-Pass Validator Alignment
 
 - WBS: `5.15`, `5.16`, admin collection QA hardening

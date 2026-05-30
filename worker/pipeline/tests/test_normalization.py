@@ -423,6 +423,74 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_profile_gic_expansion_resolves_conflicting_redeemability_flags(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-gic-profile-redeemability")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            extracted_fields = [
+                NormalizationExtractedField(**{**field.__dict__, "candidate_value": True})
+                if field.field_name == "redeemable_flag"
+                else field
+                for field in input_item.extracted_fields
+            ]
+            evidence_links = [
+                NormalizationEvidenceLink(**{**link.__dict__, "candidate_value": "true"})
+                if link.field_name == "redeemable_flag"
+                else link
+                for link in input_item.evidence_links
+            ]
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "RBC-GIC-003",
+                    "bank_code": "RBC",
+                    "normalized_source_url": "https://www.rbcroyalbank.com/investments/guaranteed-return-gics.html",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "RBC-GIC-003",
+                        "product_type": "gic",
+                        "discovery_role": "detail",
+                        "product_type_name": "GIC",
+                    },
+                    "extracted_fields": extracted_fields,
+                    "evidence_links": evidence_links,
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-rbc-gic-profile-flags", inputs=[input_item])
+
+            candidates_by_name = {
+                item.normalized_candidate_record["product_name"]: item
+                for item in result.source_results
+                if item.normalized_candidate_record is not None
+            }
+            cashable_payload = candidates_by_name["One-Year Cashable GIC"].normalized_candidate_record["candidate_payload"]
+            self.assertTrue(cashable_payload["redeemable_flag"])
+            self.assertFalse(cashable_payload["non_redeemable_flag"])
+            non_redeemable_payload = candidates_by_name["Non-Redeemable GIC"].normalized_candidate_record["candidate_payload"]
+            self.assertFalse(non_redeemable_payload["redeemable_flag"])
+            self.assertTrue(non_redeemable_payload["non_redeemable_flag"])
+            mixed_payload = candidates_by_name["RateAdvantage GIC"].normalized_candidate_record["candidate_payload"]
+            self.assertNotIn("redeemable_flag", mixed_payload)
+            self.assertNotIn("non_redeemable_flag", mixed_payload)
+            self.assertTrue(
+                all("inconsistent_cross_field_logic" not in item.validation_issue_codes for item in result.source_results)
+            )
+            self.assertIn("Resolved conflicting GIC redeemability flags", " ".join(candidates_by_name["One-Year Cashable GIC"].runtime_notes))
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_suppresses_unprofiled_admin_gic_supporting_sources(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-gic-support-suppression")
         try:
