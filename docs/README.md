@@ -44,6 +44,7 @@ Read in this order:
 - `docs/01-planning/plan.md`: execution plan
 - `docs/01-planning/WBS.md`: current work breakdown and task status
 - `docs/01-planning/canada-big5-source-registry.md`: active source coverage baseline for Phase 1
+- `docs/01-planning/fpds-customer-demo-scenario.md`: customer demo scenario for Admin collection through Public results, including AI/usage talking points and ChatGPT image prompts
 
 ### 2.3 Requirements
 

@@ -62,6 +62,40 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-06-01 - Customer Demo Scenario Code Alignment Correction
+
+- WBS: customer demo planning, public surface communication support
+- Status: `done`
+- Goal: verify the customer demo scenario against the actual FPDS Public code after the Product Owner noted that `/methodology` is not a visible Public menu item.
+- Why now: the demo document needed to distinguish implemented routes from visible navigation so the customer walkthrough does not instruct the presenter to click a non-existent menu.
+- Outcome: confirmed `/methodology` is implemented as a direct Public route, while the Public top navigation only exposes Home(`/dashboard`), Deposit(`/products`), disabled Loan, and the language selector. Updated the demo scenario to describe Methodology as a direct URL/pre-opened tab and added a code-alignment note. Also confirmed the Product Grid bank and product type filters are checkbox-based and support multi-value BMO+TD and chequing+savings scope.
+- Not done: no product/runtime code changes.
+- Key files: `docs/01-planning/fpds-customer-demo-scenario.md`, `docs/00-governance/development-journal.md`
+- Decisions: keep `/methodology` in the governance portion of the demo because it exists and explains the public data boundary, but do not present it as a top-level menu.
+- Verification:
+  - `rg -n "methodology|방법론|BMO와 TD|chequing과 savings|bank filter|product type filter|Public 화면|Public surfaces|메뉴|navigation|필터" docs/01-planning/fpds-customer-demo-scenario.md -S`
+  - inspected `app/public/src/components/fpds/public/public-nav.tsx`
+  - inspected `app/public/src/components/fpds/public/product-grid-surface.tsx`
+  - inspected `app/public/src/app/methodology/page.tsx`
+- Known issues: none for the corrected navigation wording.
+- Next step: when preparing the live demo browser tabs, open `/dashboard`, `/products`, one product detail, and `/methodology` directly instead of relying on a Methodology menu item.
+
+## 2026-06-01 - Customer Demo Scenario For Admin Collection To Public Results
+
+- WBS: customer demo planning, `5.15`, `5.16`, public aggregate/admin observability communication support
+- Status: `done`
+- Goal: prepare a professional customer demo scenario for showing FPDS Admin collection of two banks' chequing and savings products, then FPDS Public product/grid dashboard results, with technical explanation of architecture, collection internals, AI-agent usage, and token usage.
+- Why now: the Product Owner needs to demonstrate the current FPDS build to a technically interested customer and asked for a presentation scenario, detailed demo procedure, and ChatGPT prompts for process/architecture visuals.
+- Outcome: added a customer demo scenario document covering BMO + TD chequing/savings scope, expected 17-product output, demo flow, environment/run preparation, UI procedure, AI-agent/token usage talking points, risk mitigations, customer Q&A, and separate ChatGPT image/prompts for architecture and collection-process diagrams.
+- Not done: did not launch a new live collection or modify product/runtime behavior; the document recommends pre-running the narrowed demo scope before the customer session and using completed run tabs as backup.
+- Key files: `docs/01-planning/fpds-customer-demo-scenario.md`, `docs/README.md`, `docs/00-governance/development-journal.md`
+- Decisions: recommended `BMO` and `TD` because their chequing/savings coverage gives a compact 17-product story while staying inside already validated Big 5 deposit scope; separated live collection kickoff from public-results proof to avoid relying on external bank-site latency during the customer meeting.
+- Verification:
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
+  - `git diff --check`
+- Known issues: the helper `compare` command still validates against the full 98-product Big 5 golden dataset and should not be used directly for the 17-product demo subset without scope filtering.
+- Next step: before the customer demo, run the 4-scope BMO/TD chequing/savings collection or confirm the latest aggregate snapshot already contains the desired filtered public output.
+
 ## 2026-05-30 - Admin Collection Golden Recollection Verification
 
 - WBS: `5.15`, `5.16`, admin collection QA verification
