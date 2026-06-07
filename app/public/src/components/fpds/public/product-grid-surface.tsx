@@ -1,11 +1,11 @@
-import { ArrowDownUp, ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { ArrowDownUp, ArrowRight, ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProduct, type PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -53,6 +53,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   }
 
   const activeChips = buildActiveChips(filters, filterOptions);
+  const dashboardHref = buildPublicHref("/dashboard", filters);
   const selectedTypes = new Set(filters.productTypes);
   const gicOnly = selectedTypes.size === 1 && selectedTypes.has("gic");
   const showMinimumBalance = !gicOnly;
@@ -143,19 +144,43 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
           </details>
         </Card>
 
-        {activeChips.length ? (
-          <section className="flex flex-wrap gap-2 rounded-lg border border-border bg-card px-4 py-3">
-            {activeChips.map((chip) => (
-              <Link
-                key={`${chip.group}-${chip.value}`}
-                href={chip.href}
-                className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                {chip.label}
-              </Link>
-            ))}
-          </section>
-        ) : null}
+        <section className="grid gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                {formatPublicMessage(copy.grid.productCount, { count: formatCount(products.total_items, filters.locale) })}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">
+                {formatPublicMessage(copy.grid.snapshotUpdated, { date: formatFreshnessDate(products.freshness.refreshed_at, filters.locale) })}
+              </p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {activeChips.length ? (
+                activeChips.map((chip) => (
+                  <Link
+                    key={`${chip.group}-${chip.value}`}
+                    href={chip.href}
+                    className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    {chip.label}
+                  </Link>
+                ))
+              ) : (
+                <span className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">{copy.grid.noActiveFilters}</span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            {activeChips.length ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={clearHref}>{copy.common.clearAllFilters}</Link>
+              </Button>
+            ) : null}
+            <Button asChild variant="outline" size="sm">
+              <Link href={dashboardHref}>{copy.grid.openDashboard}</Link>
+            </Button>
+          </div>
+        </section>
 
         <SortToolbar filters={filters} locale={filters.locale} options={sortOptions} />
 
@@ -212,35 +237,35 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
   return (
     <Card className="h-full gap-3 overflow-hidden border-border/80 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/15">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex min-w-0 items-center gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-              <CardDescription className="truncate text-sm">{product.bank_name}</CardDescription>
+              <div className="min-w-0">
+                <CardDescription className="truncate text-sm">{product.bank_name}</CardDescription>
+                <p className="mt-1 inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase text-primary">{product.product_type_label}</p>
+              </div>
             </div>
-            <p className="mt-2 inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">{product.product_type_label}</p>
-            <CardTitle className="mt-3 text-lg leading-snug">
-              <Link className="hover:text-primary" href={detailHref}>
+            {product.product_url ? (
+              <Button asChild variant="outline" size="xs" className="shrink-0">
+                <a href={product.product_url} target="_blank" rel="noreferrer">
+                  {copy.common.bankPage}
+                  <ExternalLink className="size-3" aria-hidden="true" />
+                </a>
+              </Button>
+            ) : null}
+          </div>
+          <div className="min-w-0">
+            <CardTitle className="text-lg leading-snug">
+              <Link className="break-words hover:text-primary" href={detailHref}>
                 {product.product_name}
               </Link>
             </CardTitle>
-            {product.product_highlight_badge_label ? (
-              <div className="mt-3">
-                <Badge>{product.product_highlight_badge_label}</Badge>
-              </div>
-            ) : null}
           </div>
-          {product.product_url ? (
-            <Button asChild variant="outline" size="xs" className="shrink-0">
-              <a href={product.product_url} target="_blank" rel="noreferrer">
-                {copy.common.bankPage}
-                <ExternalLink className="size-3" aria-hidden="true" />
-              </a>
-            </Button>
-          ) : null}
         </div>
-        {tags.length ? (
+        {product.product_highlight_badge_label || tags.length ? (
           <div className="flex flex-wrap gap-2 pt-2">
+            {product.product_highlight_badge_label ? <Badge>{product.product_highlight_badge_label}</Badge> : null}
             {tags.map((tag) => (
               <Badge key={tag} muted>
                 {tag}
@@ -250,14 +275,21 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
         ) : null}
       </CardHeader>
       <CardContent className="pt-0">
-        <dl className={cn("grid gap-2", metrics.length >= 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+        <dl className="grid gap-2 sm:grid-cols-3">
           {metrics.map((metric, index) => (
-            <div key={metric.label} className={cn("rounded-lg border p-3", index === 0 ? "border-primary/20 bg-primary/5" : "border-border bg-muted/30")}>
+            <div key={metric.label} className={cn("min-h-24 rounded-lg border p-3", index === 0 ? "border-primary/25 bg-primary/5" : "border-border bg-muted/30")}>
               <dt className="text-xs font-medium text-muted-foreground">{metric.label}</dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums text-foreground">{metric.value}</dd>
+              <dd className="mt-2 break-words text-lg font-semibold tabular-nums leading-tight text-foreground">{metric.value}</dd>
             </div>
           ))}
         </dl>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/70 pt-3">
+          <Link className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80" href={detailHref}>
+            {copy.grid.compareDetails}
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+          {product.subtype_label ? <span className="truncate text-xs font-medium text-muted-foreground">{product.subtype_label}</span> : null}
+        </div>
       </CardContent>
     </Card>
   );
@@ -401,7 +433,8 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
-      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) }
+      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
+      { label: copy.grid.metricKeyDetail, value: buildKeyDetail(product, locale) }
     ];
   }
 
@@ -415,8 +448,14 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
 
   return [
     { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
-    { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) }
+    { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
+    { label: copy.grid.metricKeyDetail, value: buildKeyDetail(product, locale) }
   ];
+}
+
+function buildKeyDetail(product: PublicProduct, locale: string) {
+  const copy = getPublicMessages(locale);
+  return product.product_highlight_badge_label ?? product.subtype_label ?? product.target_customer_tag_labels[0] ?? copy.common.notDisclosed;
 }
 
 function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse) {
@@ -523,6 +562,28 @@ function formatRate(value: number | null, locale: string) {
     return copy.common.notDisclosed;
   }
   return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+}
+
+function formatCount(value: number, locale: string) {
+  return new Intl.NumberFormat(getIntlLocale(locale), {
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function formatFreshnessDate(value: string | null, locale: string) {
+  const copy = getPublicMessages(locale);
+  if (!value) {
+    return copy.common.noDate;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value.slice(0, 10);
+  }
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(date);
 }
 
 function normalizeCurrency(currency: string) {

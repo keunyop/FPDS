@@ -62,6 +62,65 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-06-07 - Deposit List And Detail Benchmark UI Refresh
+
+- WBS: `5.9`, `5.13`, `5.14` public UI follow-on
+- Status: `done`
+- Goal: improve `/products` and `/products/[productId]` so users can scan, compare, and inspect deposit products more comfortably using financial comparison-site interaction patterns.
+- Why now: the Product Owner asked for the deposit product list and per-product detail screens to be upgraded for stronger usability, design, and UI/UX after reviewing benchmark sites.
+- Outcome: added a result-summary strip to the product list with product count, snapshot freshness, active scope, reset action, and dashboard handoff. Reworked product cards into bank/product-type headers, official-bank action, highlight/customer signals, a stable three-metric comparison strip, and a clearer detail action. Reorganized product detail into an overview, decision summary, product-type-specific metric tiles, calculator, product facts, optional term rates, key conditions, and public disclosure sequence. Added EN/KO/JA interface labels for the new UI copy.
+- Not done: no backend/API contract change, no source evidence exposure, no expansion beyond approved public deposit scope, and no scraping of benchmark sites.
+- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/lib/public-locale.ts`, `docs/00-governance/development-journal.md`
+- Decisions: kept the slice frontend-only; preserved URL query state, locale fallback behavior, source-derived product text, and the public/private evidence boundary.
+- Verification:
+  - In `app/public`: `pnpm run typecheck`
+  - In `app/public`: `pnpm run build`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+- Known issues: production build verifies renderability, but final visual QA should still be done against a running public API snapshot so real product names, translated labels, and mobile wrapping can be inspected with current data.
+- Next step: perform responsive browser QA for `/products` and representative `/products/:productId` records when the current aggregate snapshot is available.
+
+## 2026-06-07 - Public Benchmark Comparison UI Refresh
+
+- WBS: `5.9`, `5.10`, `5.11`, `5.14` public UI follow-on
+- Status: `done`
+- Goal: improve the FPDS Public Deposit catalog and dashboard against consumer financial-comparison benchmarks while preserving existing public API contracts, locale behavior, and evidence boundaries.
+- Why now: the Product Owner asked for the public site to feel more usable and polished for comparing products across banks, using financial comparison-site patterns as the benchmark.
+- Outcome: refreshed the dashboard into a stronger market overview with scope actions, active-scope chips, four KPI cards, bank/product-type composition charts, optional like-for-like scatter comparison, freshness/data-note panel, and scroll-safe ranking tables. Updated product cards with a stable three-signal comparison strip, clearer detail action, and safer long-text handling. Hardened the public navigation/header so localized labels can scroll instead of overlapping on narrow screens.
+- Not done: no backend/API contract change, no new public evidence exposure, no expansion beyond the approved Canada deposit public scope, and no external benchmark-site scraping was added.
+- Key files: `app/public/src/app/dashboard/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/lib/public-locale.ts`
+- Decisions: kept the slice frontend-only and reused existing dashboard summary/ranking/scatter API contracts; scatter is requested opportunistically only when a single product-type comparison has a supported axis preset, and scatter failure does not take down the dashboard.
+- Verification:
+  - In `app/public`: `pnpm run typecheck`
+  - In `app/public`: `pnpm run build`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - `git diff --check -- app/public/src/app/dashboard/page.tsx app/public/src/components/fpds/public/dashboard-surface.tsx app/public/src/components/fpds/public/product-grid-surface.tsx app/public/src/components/fpds/public/public-nav.tsx app/public/src/components/fpds/public/public-header.tsx app/public/src/lib/public-locale.ts goal.md`
+- Known issues: build-time verification only confirmed renderability without a live public API; visual review should be done against a running API snapshot to inspect real product names, chart density, and localized long-label behavior.
+- Next step: run responsive visual QA for `/dashboard`, `/products`, and representative `/products/:productId` states once the public API is running with the current aggregate snapshot.
+
+## 2026-06-01 - Dev Product Collection Data And Storage Reset Before Recollection
+
+- WBS: `5.15`, `5.16`, admin collection retest preparation
+- Status: `done`
+- Goal: delete all product information collection artifacts while preserving bank and product-type setup before a clean recollection test.
+- Why now: the Product Owner requested removal of all data created by product information collection, including S3-backed object storage artifacts, except bank and product-type information.
+- Outcome: deleted dev DB collection and downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows.
+- Object storage: deleted every object under the dev prefix `s3://fpds-dev-private/dev/`; pre-delete summary was 929 objects / 89,009,097 bytes, and post-delete summary was 0 objects / 0 bytes.
+- Local artifacts: removed the prior collection tmp artifact directories and report file under `tmp/source-catalog-collections/`, `tmp/source-collections/`, `tmp/aggregate-refresh/`, and `tmp/collection_7wJ2KRMYsDg9XEbn_golden_compare.json`.
+- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
+- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `docs/00-governance/development-journal.md`
+- Decisions: kept the 15 active source catalog coverage rows as setup data needed to launch the next admin recollection; deleted generated `source_registry_item` rows so source details will be regenerated.
+- Verification:
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
+  - Post-delete DB counts: `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`; collection/output tables including `source_registry_item`, `ingestion_run`, `source_document`, `source_snapshot`, `parsed_document`, `evidence_chunk`, `evidence_chunk_embedding`, `model_execution`, `llm_usage_record`, `normalized_candidate`, `field_evidence_link`, `review_task`, `canonical_product`, `product_version`, `aggregate_refresh_request`, `aggregate_refresh_run`, `public_product_projection`, and dashboard snapshot tables are `0`.
+  - `audit_event` retained 65 auth/config rows only: 35 auth rows and 30 config rows; collection-related audit count is `0`.
+  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` reports `object_count=0`, `total_bytes=0`.
+- Known issues: public products and canonical products are intentionally empty until the next collection plus auto-promotion/review/aggregate flow repopulates them.
+- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect the new candidates before approval or publish decisions.
+
 ## 2026-06-01 - Customer Demo Scenario Code Alignment Correction
 
 - WBS: customer demo planning, public surface communication support

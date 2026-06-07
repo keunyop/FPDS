@@ -39,6 +39,9 @@ type PublicMessages = {
     title: string;
     description: string;
     currentScope: string;
+    compareDetails: string;
+    productCount: string;
+    snapshotUpdated: string;
     primaryFilter: string;
     banks: string;
     productTypes: string;
@@ -76,6 +79,19 @@ type PublicMessages = {
     sortLastChange: string;
     sortBankName: string;
     sortProductName: string;
+  };
+  detail: {
+    backToList: string;
+    compareAtGlance: string;
+    decisionSummary: string;
+    disclosureTitle: string;
+    keyConditions: string;
+    officialPage: string;
+    productFacts: string;
+    similarProducts: string;
+    sourceLanguage: string;
+    termRates: string;
+    whatToCheck: string;
   };
   dashboard: {
     pageTitle: string;
@@ -165,6 +181,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "Deposit catalog",
       description: "Filter active chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
+      compareDetails: "Compare details",
+      productCount: "{count} products",
+      snapshotUpdated: "Snapshot {date}",
       primaryFilter: "Primary",
       banks: "Banks",
       productTypes: "Product types",
@@ -202,6 +221,19 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "Last change",
       sortBankName: "Bank",
       sortProductName: "Product"
+    },
+    detail: {
+      backToList: "Back to deposit list",
+      compareAtGlance: "Compare at a glance",
+      decisionSummary: "Decision summary",
+      disclosureTitle: "Important note",
+      keyConditions: "Key conditions",
+      officialPage: "Open official bank page",
+      productFacts: "Product facts",
+      similarProducts: "Similar products",
+      sourceLanguage: "Source language",
+      termRates: "Rates by term",
+      whatToCheck: "What to check"
     },
     dashboard: {
       pageTitle: "FPDS Home",
@@ -303,6 +335,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "상품 카탈로그",
       description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품을 필터링합니다.",
       currentScope: "현재 범위",
+      compareDetails: "상세 비교",
+      productCount: "{count}개 상품",
+      snapshotUpdated: "스냅샷 {date}",
       primaryFilter: "주요",
       banks: "은행",
       productTypes: "상품 유형",
@@ -340,6 +375,19 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "최근 변경",
       sortBankName: "은행",
       sortProductName: "상품"
+    },
+    detail: {
+      backToList: "예금 목록으로 돌아가기",
+      compareAtGlance: "한눈에 비교",
+      decisionSummary: "판단 요약",
+      disclosureTitle: "중요 안내",
+      keyConditions: "주요 조건",
+      officialPage: "은행 공식 페이지 열기",
+      productFacts: "상품 정보",
+      similarProducts: "비슷한 상품",
+      sourceLanguage: "원문 언어",
+      termRates: "기간별 금리",
+      whatToCheck: "확인할 내용"
     },
     dashboard: {
       pageTitle: "FPDS 대시보드",
@@ -441,6 +489,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "商品カタログ",
       description: "最新の公開スナップショットから chequing、savings、GIC 商品を絞り込みます。",
       currentScope: "現在の範囲",
+      compareDetails: "詳細比較",
+      productCount: "{count} 件の商品",
+      snapshotUpdated: "スナップショット {date}",
       primaryFilter: "主要",
       banks: "銀行",
       productTypes: "商品タイプ",
@@ -478,6 +529,19 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "最近の変更",
       sortBankName: "銀行",
       sortProductName: "商品"
+    },
+    detail: {
+      backToList: "預金一覧に戻る",
+      compareAtGlance: "比較の要点",
+      decisionSummary: "判断サマリー",
+      disclosureTitle: "重要な注記",
+      keyConditions: "主な条件",
+      officialPage: "銀行公式ページを開く",
+      productFacts: "商品情報",
+      similarProducts: "類似商品",
+      sourceLanguage: "ソース言語",
+      termRates: "期間別金利",
+      whatToCheck: "確認ポイント"
     },
     dashboard: {
       pageTitle: "FPDS ダッシュボード",

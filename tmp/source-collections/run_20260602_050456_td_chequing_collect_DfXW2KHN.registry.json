@@ -1,0 +1,419 @@
+{
+  "registry_version": "2026-06-02",
+  "bank_code": "TD",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.td.com"
+  ],
+  "entry_source_id": "TD-CHQ-002",
+  "sources": [
+    {
+      "source_id": "TD-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Likely a chequing-related banking plan page with account features and fees, suitable as a product detail source.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/all-inclusive-banking-plan",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "bundled_benefits"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open the TD All-Inclusive Bank Account Plan Online | TD Canada Trust",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "chequing_bundle_or_plan",
+          "personal_banking",
+          "canadian_domain"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "TD All-Inclusive Banking Plan",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.9,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely a chequing-related banking plan page with account features and fees, suitable as a product detail source.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "chequing_bundle_or_plan",
+          "personal_banking",
+          "canadian_domain",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct public detail page for a personal Canadian chequing account.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/unlimited-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "atm_fee_summary"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open the TD Unlimited Chequing Account Online | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "TD Unlimited Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct public detail page for a personal Canadian chequing account.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct public detail page for a personal Canadian chequing account.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/every-day-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open the TD Every Day Chequing Account Online | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "TD Every Day Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct public detail page for a personal Canadian chequing account.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct public detail page for a personal Canadian chequing account.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/minimum-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "included_transactions",
+        "additional_transaction_fee"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open the low fee TD Chequing Account online | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "TD Minimum Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct public detail page for a personal Canadian chequing account.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 3,
+        "selection_reason_codes": [
+          "exact_product_match",
+          "personal_banking",
+          "chequing_detail_page",
+          "canadian_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "TD bank account fee summary page",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges",
+      "expected_fields": [
+        "monthly_fee",
+        "atm_fee_summary",
+        "chequing_fee_table"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-CHQ-007",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Public chequing detail page, though targeted to students rather than the general audience.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/student-chequing-account",
+      "expected_fields": [
+        "product_name",
+        "monthly_fee",
+        "student_youth_eligibility",
+        "included_transactions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Open a TD Student Chequing Account | Student Bank Account | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "chequing_detail_page",
+          "personal_banking",
+          "student_segment",
+          "canadian_domain"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "TD Student Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.95,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Public chequing detail page, though targeted to students rather than the general audience.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 2,
+        "selection_reason_codes": [
+          "chequing_detail_page",
+          "personal_banking",
+          "student_segment",
+          "canadian_domain",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

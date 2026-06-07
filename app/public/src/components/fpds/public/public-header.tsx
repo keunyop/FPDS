@@ -41,7 +41,7 @@ function HeaderContent() {
           </Link>
           <LocaleSelector className="flex lg:hidden" copy={copy} locale={locale} pathname={pathname} searchParams={searchParams} />
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
           <PublicNav />
           <LocaleSelector className="hidden lg:flex" copy={copy} locale={locale} pathname={pathname} searchParams={searchParams} />
         </div>
