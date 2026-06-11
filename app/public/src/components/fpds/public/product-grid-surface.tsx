@@ -64,7 +64,6 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   const showTermBucket = gicOnly;
   const pagination = buildPagination(products, filters);
   const topListItems = topProducts?.items ?? products.items.slice(0, 5);
-  const freshnessLabel = formatPublicMessage(copy.grid.snapshotUpdated, { date: formatFreshnessDate(products.freshness.refreshed_at, filters.locale) });
   const sortOptions = [
     { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" as const },
     { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" as const },
@@ -87,7 +86,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
           </div>
         </section>
 
-        <PurposeEntryPoints filters={filters} freshnessLabel={freshnessLabel} locale={filters.locale} />
+        <PurposeEntryPoints filters={filters} locale={filters.locale} />
 
         <Card className="gap-0 overflow-hidden border-border/80 shadow-sm">
           <details className="group" open>

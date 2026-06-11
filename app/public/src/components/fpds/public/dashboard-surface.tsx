@@ -80,7 +80,6 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   const productTypeLinks = buildProductTypeDashboardLinks(filters, summary);
   const decisionWidgets = rankings.widgets.filter((widget) => widget.ranking_key !== "recently_changed_30d");
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
-  const freshnessLabel = formatPublicMessage(copy.grid.snapshotUpdated, { date: formatFreshnessDate(summary.freshness.refreshed_at, filters.locale) });
   const marketGreeting = formatPublicMessage(copy.dashboard.marketGreeting, {
     banks: formatCount(banksInScope, filters.locale),
     countries: formatCount(countriesInScope, filters.locale),
@@ -92,8 +91,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
       <div className="flex flex-col gap-6">
         <section className="grid gap-6 rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_52%,#eafaf6_100%)] p-5 shadow-sm md:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)] lg:items-end">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-primary">{copy.dashboard.marketSnapshot}</p>
-            <h1 className="mt-2 text-4xl font-semibold leading-[1.05] text-foreground md:text-5xl">{copy.dashboard.title}</h1>
+            <h1 className="text-4xl font-semibold leading-[1.05] text-foreground md:text-5xl">{copy.dashboard.title}</h1>
             <p className="mt-4 text-base leading-7 text-muted-foreground md:text-lg">{marketGreeting}</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Button asChild>
@@ -106,7 +104,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
                 <Button asChild variant="outline">
                   <Link href={clearHref}>
                     <FilterX className="size-4" aria-hidden="true" />
-                    {copy.dashboard.clearScope}
+                    {copy.common.clearFilters}
                   </Link>
                 </Button>
               ) : null}
@@ -118,7 +116,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
           </div>
         </section>
 
-        <PurposeEntryPoints filters={filters} freshnessLabel={freshnessLabel} locale={filters.locale} />
+        <PurposeEntryPoints filters={filters} locale={filters.locale} />
 
         {activeChips.length ? (
           <section aria-label={copy.grid.currentScope} className="flex flex-wrap gap-2 rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
@@ -402,22 +400,6 @@ function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(getIntlLocale(locale), {
     maximumFractionDigits: Number.isInteger(value) ? 0 : 2
   }).format(value);
-}
-
-function formatFreshnessDate(value: string | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!value) {
-    return copy.common.noDate;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10);
-  }
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).format(date);
 }
 
 function formatBucketLabel(value: string) {

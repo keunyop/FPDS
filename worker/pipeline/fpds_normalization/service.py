@@ -14,6 +14,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
 
 from .models import (
     NormalizationEvidenceLink,
@@ -391,6 +392,22 @@ def _normalize_candidate(
     normalized_values_for_links: dict[str, object] = {}
 
     for field_name, field in extracted_by_field.items():
+        rate_suppression_reason = _rate_field_suppression_reason(field_name=field_name, field=field)
+        if rate_suppression_reason is not None:
+            field_mapping_metadata[field_name] = {
+                "source_field_name": field_name,
+                "normalized_value": None,
+                "value_type": field.value_type,
+                "extraction_method": field.extraction_method,
+                "extraction_confidence": field.confidence,
+                "evidence_chunk_id": field.evidence_chunk_id,
+                "normalization_method": "canonical_rate_safety_filter",
+                "suppressed_reason": rate_suppression_reason,
+            }
+            runtime_notes.append(
+                f"Suppressed `{field_name}` value `{field.candidate_value}` because it is not a canonical annual deposit rate: {rate_suppression_reason}."
+            )
+            continue
         if field.extraction_method == "source_profile_product_expansion" and field_name == "base_12_month_rate":
             normalized_value = field.candidate_value
         else:
@@ -619,7 +636,10 @@ def _compute_validation_issue_codes(
         if decimal_value is None:
             issues.append("invalid_numeric_range")
             continue
-        if field_name in _RATE_FIELDS and not (Decimal("0") <= decimal_value <= Decimal("100")):
+        if field_name in _RATE_FIELDS and (
+            decimal_value < Decimal("0")
+            or canonical_deposit_rate_suppression_reason(value=decimal_value) is not None
+        ):
             issues.append("invalid_numeric_range")
         if field_name not in _RATE_FIELDS and decimal_value < 0:
             issues.append("invalid_numeric_range")
@@ -788,11 +808,26 @@ def _extract_rate_percentages(text: str | None) -> list[Decimal]:
             continue
         if any(token in window for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
             continue
+        if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
+            continue
         value = _as_decimal(match.group(1))
         if value is None:
             continue
         values.append(value)
     return values
+
+
+def _rate_field_suppression_reason(
+    *,
+    field_name: str,
+    field: NormalizationExtractedField,
+) -> str | None:
+    if field_name not in _RATE_FIELDS:
+        return None
+    return canonical_deposit_rate_suppression_reason(
+        value=field.candidate_value,
+        context=field.evidence_text_excerpt,
+    )
 
 
 def _has_rate_promotional_context(text: str | None) -> bool:

@@ -6,6 +6,8 @@ from hashlib import sha256
 import json
 import re
 
+from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
+
 from .models import (
     ValidationEvidenceLink,
     ValidationInput,
@@ -33,7 +35,8 @@ _NUMERIC_RANGE_FIELDS = {
     "promotional_rate",
     "public_display_rate",
 }
-_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "highest_rate", "promotional_rate", "public_display_rate"}
+_ANNUAL_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
+_RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS = (
     "bank_name",
@@ -457,7 +460,12 @@ def _compute_validation_issue_codes(
         if decimal_value is None:
             issues.add("invalid_numeric_range")
             continue
-        if field_name in _RATE_FIELDS and not (Decimal("0") <= decimal_value <= Decimal("100")):
+        if field_name in _ANNUAL_RATE_FIELDS and (
+            decimal_value < Decimal("0")
+            or canonical_deposit_rate_suppression_reason(value=decimal_value) is not None
+        ):
+            issues.add("invalid_numeric_range")
+        if field_name == "highest_rate" and not (Decimal("0") <= decimal_value <= Decimal("100")):
             issues.add("invalid_numeric_range")
         if field_name not in _RATE_FIELDS and decimal_value < 0:
             issues.add("invalid_numeric_range")

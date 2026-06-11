@@ -62,6 +62,68 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-06-11 - Public Main Screen Copy Simplification
+
+- WBS: `5.10`, `5.13`, public UI copy simplification
+- Status: `done`
+- Goal: remove Product Owner-specified explanatory copy from the FPDS public main screen: `Public snapshot`, the purpose-entry explanatory subtitle, and the scope/snapshot/official-bank trust cue block.
+- Why now: the Product Owner asked to simplify the public main screen by removing redundant snapshot/scope/process copy while keeping the comparison entry points.
+- Outcome: removed the Home hero eyebrow, removed the shared purpose-entry subtitle and compact trust cue block from public surfaces, changed the filtered Home reset action to use the existing common `Clear` label, and removed the matching EN/KO/JA locale keys. The footer no longer lists a `Public snapshot` item or repeats the aggregate snapshot sentence, while retaining the evidence-boundary note.
+- Not done: no public API, aggregate snapshot, product data, methodology route, collection pipeline, or product grid behavior contract was changed.
+- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/purpose-entry-points.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/public-footer.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/insight-dashboard-metric-definition.md`, `docs/03-design/product-grid-information-architecture.md`
+- Decisions: removed the copy at the shared component/locale-resource level instead of hiding only one dashboard instance, so the same explanatory block cannot reappear on `/products` through the shared purpose-entry component.
+- Verification:
+  - searched `app/public/src`, `app/public/README.md`, and the updated active IA docs for the removed visible English copy and removed locale/component keys
+  - in `app/public`: `pnpm run typecheck`
+  - in `app/public`: `pnpm run build`
+  - root `tests/regression` path is absent
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api\service\tests\regression -p "test_*.py"` (`9` tests)
+- Known issues: no browser visual QA was run against a live public API snapshot in this slice; production build verifies renderability but not final visual density with live data.
+- Next step: visually review `/dashboard` and `/products` with a live public API snapshot when available.
+
+## 2026-06-11 - Canonical Rate Safety Guardrail For Market-Linked Returns
+
+- WBS: `5.5`, `5.16`, collection quality hardening
+- Status: `done`
+- Goal: prevent market-linked return caps or full-term return percentages from being collected as canonical annual interest rates, after `Scotiabank Market Linked GICs` produced `60%` in `standard_rate` / `public_display_rate`.
+- Why now: the Product Owner reported an impossible collected interest rate and requested a generic fix that helps other banks and product types rather than a narrow Scotiabank exception.
+- Outcome: added a shared worker rate-safety guardrail that suppresses implausible annual deposit rates above 25% and percentage contexts that describe index return, full-term return, return caps, principal guarantee, or non-annual return semantics. Wired the guardrail into extraction percent fallback/direct extraction, normalization rate promotion, generic supporting-source rate merge, and validation routing. The specific Scotiabank `60% per year` limitation text no longer becomes `standard_rate` or `public_display_rate`; if such a value reaches validation from another path, it is routed as `invalid_numeric_range`.
+- Not done: existing collected DB rows were not mutated in this slice; affected collection output should be regenerated rather than manually patched.
+- Key files: `worker/pipeline/fpds_rate_safety.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_validation_routing.py`, `docs/03-design/domain-model-canonical-schema.md`
+- Decisions: kept `highest_rate` in the Phase 1 golden/profile contract separate because market-linked and fund-linked products may publish maximum full-term return values such as `21%` or `35%`; those values must stay explicitly tagged/noted and must not be reused as annual canonical rate fields.
+- Verification:
+  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_rate_fallback_ignores_market_linked_return_cap_context worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_suppresses_market_linked_return_cap_as_canonical_rate worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_ignores_market_linked_return_cap_context worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_implausible_deposit_rate_is_invalid_numeric_range`
+  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests -p "test_*.py"` (`109` tests)
+  - root `tests/regression` path is absent
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api\service\tests\regression -p "test_*.py"` (`9` tests)
+- Known issues: a clean recollection is still required for persisted candidates that were already collected before this guardrail.
+- Next step: rerun the affected Scotiabank GIC collection and verify the Market Linked GIC candidate either omits annual canonical rate fields or uses only source-stated annual posted/guaranteed interest evidence.
+
+## 2026-06-10 - Dev Product Collection Data And Storage Reset Before Recollection
+
+- WBS: `5.15`, `5.16`, admin collection retest preparation
+- Status: `done`
+- Goal: delete all data produced by product information collection while preserving bank and product-type setup before a clean recollection test.
+- Why now: the Product Owner requested removal of all product collection DB artifacts and S3-backed object storage artifacts, excluding bank and product-type information.
+- Outcome: deleted dev DB collection/downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3-compatible objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
+- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
+- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `docs/00-governance/development-journal.md`
+- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
+- Verification:
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
+  - Pre-delete DB counts included `source_registry_item=39`, `ingestion_run=4`, `source_document=32`, `source_snapshot=32`, `parsed_document=32`, `evidence_chunk=989`, `evidence_chunk_embedding=989`, `model_execution=73`, `llm_usage_record=73`, `normalized_candidate=17`, `field_evidence_link=802`, `canonical_product=17`, `product_version=17`, `change_event=17`, `aggregate_refresh_run=4`, `public_product_projection=43`, `dashboard_metric_snapshot=4`, `dashboard_ranking_snapshot=50`, and `dashboard_scatter_snapshot=5`.
+  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
+  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` changed from `object_count=228`, `total_bytes=43,158,843` to `object_count=0`, `total_bytes=0`.
+  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
+- Known issues: local process command-line inspection through `Get-CimInstance Win32_Process` was denied by OS permissions, so no process list was captured; DB/S3 post-delete counts remained clean.
+- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
+
 ## 2026-06-09 - Public Purpose Entry And Compare Workspace
 
 - WBS: `5.9`, `5.10`, `5.11`, `5.12`, `5.13`, public UI follow-on

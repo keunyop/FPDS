@@ -19,6 +19,7 @@ from worker.pipeline.fpds_evidence_retrieval.models import (
     MetadataFilters,
 )
 from worker.pipeline.fpds_evidence_retrieval.service import EvidenceRetrievalService
+from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
 
 from .models import (
     EvidenceLinkDraft,
@@ -915,6 +916,8 @@ def _extract_rate_context_percentages(text: str) -> list[Decimal]:
         if not any(token in window for token in ("interest", "rate", "return", "yield", "bonus")):
             continue
         if any(token in window for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
+            continue
+        if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
             continue
         try:
             values.append(Decimal(match.group(1)))
@@ -1823,10 +1826,12 @@ def _extract_cheque_book_info(text: str) -> str | None:
 
 
 def _extract_percent_value(text: str) -> str | None:
-    match = _PERCENT_RE.search(text)
-    if match is None:
-        return None
-    return _normalize_decimal(match.group(1))
+    for match in _PERCENT_RE.finditer(text):
+        window = _rate_percentage_context_window(text=text, start=match.start(), end=match.end())
+        if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
+            continue
+        return _normalize_decimal(match.group(1))
+    return None
 
 
 def _extract_boolean_flag(
@@ -2071,6 +2076,8 @@ def _extract_base_12_month_rate(text: str) -> str | None:
             continue
         if any(token in window for token in ("bonus", "promo", "promotional", "introductory")):
             continue
+        if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
+            continue
         return _normalize_decimal(match.group(1))
     return None
 
@@ -2085,6 +2092,9 @@ def _extract_term_rate_table(text: str) -> list[dict[str, object]] | None:
     for match in _TERM_RATE_ROW_RE.finditer(normalized):
         term_label = _normalize_text(match.group("term")).lower()
         rate = _normalize_decimal(match.group("rate"))
+        window = _rate_percentage_context_window(text=normalized, start=match.start("rate"), end=match.end("rate"), radius=140)
+        if canonical_deposit_rate_suppression_reason(value=rate, context=window) is not None:
+            continue
         key = (term_label, rate)
         if key in seen:
             continue
@@ -2428,6 +2438,12 @@ def _normalize_decimal(value: str) -> str:
     except InvalidOperation:
         return value.replace(",", "")
     return f"{decimal_value:.2f}"
+
+
+def _rate_percentage_context_window(*, text: str, start: int, end: int, radius: int = 100) -> str:
+    window_start = max(0, start - radius)
+    window_end = min(len(text), end + radius)
+    return text[window_start:window_end].lower()
 
 
 def _dedupe_fields(fields: list[ExtractedFieldCandidate]) -> list[ExtractedFieldCandidate]:

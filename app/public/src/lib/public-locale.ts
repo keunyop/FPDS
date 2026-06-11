@@ -102,7 +102,6 @@ type PublicMessages = {
     title: string;
     description: string;
     marketGreeting: string;
-    marketSnapshot: string;
     kpiSubtitle: string;
     composition: string;
     compositionSubtitle: string;
@@ -116,7 +115,6 @@ type PublicMessages = {
     dataNotesBody: string;
     freshness: string;
     openProducts: string;
-    clearScope: string;
     noActiveFilters: string;
     noRankingWidgets: string;
     chartUnavailable: string;
@@ -135,7 +133,6 @@ type PublicMessages = {
   purpose: {
     eyebrow: string;
     title: string;
-    description: string;
     everydayTitle: string;
     everydayBody: string;
     everydayAction: string;
@@ -148,12 +145,6 @@ type PublicMessages = {
     lowEntryTitle: string;
     lowEntryBody: string;
     lowEntryAction: string;
-    trustScopeTitle: string;
-    trustScopeBody: string;
-    trustFreshnessTitle: string;
-    trustFreshnessBody: string;
-    trustOfficialTitle: string;
-    trustOfficialBody: string;
   };
   compare: {
     eyebrow: string;
@@ -294,7 +285,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "Financial product choices, made clear",
       description: "",
       marketGreeting: "FPDS has collected {products} public products from {banks} banks across {countries} country so you can compare available coverage in one place.",
-      marketSnapshot: "Public snapshot",
       kpiSubtitle: "Current search scope",
       composition: "Market composition",
       compositionSubtitle: "Active product coverage by bank and product type.",
@@ -308,7 +298,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotesBody: "Metrics use public aggregate fields. Products missing required numeric values are excluded from affected comparisons.",
       freshness: "Freshness",
       openProducts: "Deposit",
-      clearScope: "Clear scope",
       noActiveFilters: "No filters active.",
       noRankingWidgets: "No ranking is eligible for this scope.",
       chartUnavailable: "Not enough eligible products for this chart.",
@@ -327,7 +316,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     purpose: {
       eyebrow: "Start by purpose",
       title: "What are you trying to compare?",
-      description: "Jump into a focused product view, then refine by bank, cost, rate, balance, or term.",
       everydayTitle: "Keep everyday banking costs low",
       everydayBody: "Start with chequing products sorted by lower monthly fee.",
       everydayAction: "Compare low-fee accounts",
@@ -339,13 +327,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       termAction: "Compare term rates",
       lowEntryTitle: "Start with a lower entry amount",
       lowEntryBody: "Scan products where minimum balance or deposit matters most.",
-      lowEntryAction: "Compare entry amounts",
-      trustScopeTitle: "Clear scope",
-      trustScopeBody: "Canada Big 5 public deposit products only: chequing, savings, and GIC.",
-      trustFreshnessTitle: "Snapshot based",
-      trustFreshnessBody: "Public pages use the latest successful aggregate snapshot.",
-      trustOfficialTitle: "Official next step",
-      trustOfficialBody: "FPDS compares public data; users confirm and apply on the bank site."
+      lowEntryAction: "Compare entry amounts"
     },
     compare: {
       eyebrow: "Side-by-side",
@@ -498,7 +480,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "금융상품 선택을 더 명확하게",
       description: "최신 공개 스냅샷 기준으로 현재 상품 범위를 빠르게 비교합니다.",
       marketGreeting: "FPDS는 {countries}개 국가의 {banks}개 은행에서 {products}개 공개 상품을 수집해 현재 제공 범위를 한곳에서 비교할 수 있게 정리했습니다.",
-      marketSnapshot: "공개 스냅샷",
       kpiSubtitle: "현재 공개 범위",
       composition: "시장 구성",
       compositionSubtitle: "은행과 상품 유형별 활성 상품 커버리지입니다.",
@@ -512,7 +493,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotesBody: "지표는 공개 aggregate 필드를 사용하며, 필요한 숫자 값이 없는 상품은 해당 비교에서 제외됩니다.",
       freshness: "최신성",
       openProducts: "상품 열기",
-      clearScope: "범위 해제",
       noActiveFilters: "활성 필터 없음",
       noRankingWidgets: "현재 범위에서 표시할 순위가 없습니다.",
       chartUnavailable: "차트를 그릴 수 있는 상품 수가 부족합니다.",
@@ -531,7 +511,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     purpose: {
       eyebrow: "목적부터 시작",
       title: "무엇을 비교하고 싶으신가요?",
-      description: "목적에 맞는 상품 범위로 이동한 뒤 은행, 비용, 금리, 잔액, 기간을 조정하세요.",
       everydayTitle: "일상 은행 비용 줄이기",
       everydayBody: "월 수수료가 낮은 입출금 상품부터 비교합니다.",
       everydayAction: "저수수료 계좌 비교",
@@ -543,13 +522,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       termAction: "기간 상품 금리 비교",
       lowEntryTitle: "낮은 가입 금액부터 보기",
       lowEntryBody: "최소 잔액이나 예치금이 중요한 상품을 먼저 훑어봅니다.",
-      lowEntryAction: "가입 금액 비교",
-      trustScopeTitle: "명확한 범위",
-      trustScopeBody: "캐나다 Big 5의 공개 예금 상품만 다룹니다: 입출금, 저축, GIC.",
-      trustFreshnessTitle: "스냅샷 기준",
-      trustFreshnessBody: "공개 화면은 최신 성공 aggregate 스냅샷을 사용합니다.",
-      trustOfficialTitle: "공식 확인",
-      trustOfficialBody: "FPDS는 공개 데이터를 비교하며, 확인과 신청은 은행 사이트에서 진행합니다."
+      lowEntryAction: "가입 금액 비교"
     },
     compare: {
       eyebrow: "나란히 비교",
@@ -702,7 +675,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       title: "金融商品選びをわかりやすく",
       description: "最新の公開スナップショットをもとに現在の掲載範囲をすばやく比較します。",
       marketGreeting: "FPDS は {countries} か国、{banks} 行、{products} 件の公開商品を収集し、現在の掲載範囲を 1 か所で比較できるように整理しています。",
-      marketSnapshot: "公開スナップショット",
       kpiSubtitle: "現在の公開範囲",
       composition: "市場構成",
       compositionSubtitle: "銀行別、商品タイプ別の有効商品数です。",
@@ -716,7 +688,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotesBody: "指標は公開 aggregate フィールドを使います。必要な数値がない商品は該当比較から除外されます。",
       freshness: "鮮度",
       openProducts: "商品を開く",
-      clearScope: "範囲を解除",
       noActiveFilters: "有効なフィルターなし",
       noRankingWidgets: "現在の範囲で表示できる順位はありません。",
       chartUnavailable: "チャートに必要な商品数が不足しています。",
@@ -735,7 +706,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     purpose: {
       eyebrow: "目的から始める",
       title: "何を比較しますか？",
-      description: "目的に合う商品範囲へ移動し、銀行、費用、金利、残高、期間で絞り込めます。",
       everydayTitle: "日常の銀行コストを抑える",
       everydayBody: "月額手数料が低い chequing 商品から比較します。",
       everydayAction: "低手数料口座を比較",
@@ -747,13 +717,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       termAction: "期間商品の金利を比較",
       lowEntryTitle: "少ない加入金額から見る",
       lowEntryBody: "最低残高や最低預入額が重要な商品を確認します。",
-      lowEntryAction: "加入金額を比較",
-      trustScopeTitle: "明確な範囲",
-      trustScopeBody: "カナダ Big 5 の公開預金商品だけを扱います: chequing、savings、GIC。",
-      trustFreshnessTitle: "スナップショット基準",
-      trustFreshnessBody: "公開画面は最新の成功 aggregate スナップショットを使います。",
-      trustOfficialTitle: "公式確認",
-      trustOfficialBody: "FPDS は公開データを比較します。確認と申込は銀行サイトで行います。"
+      lowEntryAction: "加入金額を比較"
     },
     compare: {
       eyebrow: "横並び比較",

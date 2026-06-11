@@ -185,7 +185,10 @@ Implemented public Home future-product wording and footer polish on `2026-06-09`
 Implemented public comparison entry polish on `2026-06-09`:
 - the public `/dashboard` route now includes purpose-first entry cards that link into focused Product Grid states for everyday banking cost, savings-rate, fixed-term return, and low-entry-amount comparison paths
 - the purpose entry keeps the dashboard metric contract unchanged and uses existing Product Grid filters/sorts rather than introducing personalized recommendation, eligibility scoring, or account-opening flows
-- compact trust cues on the Home surface reinforce scope, snapshot freshness, and official-bank confirmation without exposing public evidence traces
+
+Implemented public main-screen copy simplification on `2026-06-11`:
+- the public `/dashboard` route no longer renders the snapshot eyebrow label, the purpose-entry explanatory subtitle, or the compact trust cue block for scope, snapshot freshness, and official-bank confirmation
+- the purpose entry still keeps the dashboard metric contract unchanged and uses existing Product Grid filters/sorts
 
 ### 6.3 Ranking Row Baseline
 

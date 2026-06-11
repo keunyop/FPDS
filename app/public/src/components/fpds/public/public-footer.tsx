@@ -19,7 +19,6 @@ const FOOTER_COPY: Record<
     explore: string;
     legalNote: string;
     planned: string;
-    snapshot: string;
     aggregate: string;
     evidenceBoundary: string;
     productTypes: string;
@@ -30,9 +29,8 @@ const FOOTER_COPY: Record<
     coverage: "Coverage",
     data: "Data",
     explore: "Explore",
-    legalNote: "Public pages use the latest successful aggregate snapshot. Source evidence and internal review traces stay private.",
+    legalNote: "Source evidence and internal review traces stay private.",
     planned: "Planned",
-    snapshot: "Public snapshot",
     aggregate: "Aggregate fields",
     evidenceBoundary: "Evidence boundary",
     productTypes: "Product types"
@@ -42,9 +40,8 @@ const FOOTER_COPY: Record<
     coverage: "커버리지",
     data: "데이터",
     explore: "탐색",
-    legalNote: "공개 화면은 최신 성공 aggregate 스냅샷을 사용합니다. 원문 증거와 내부 검토 trace는 공개하지 않습니다.",
+    legalNote: "원문 증거와 내부 검토 trace는 공개하지 않습니다.",
     planned: "예정",
-    snapshot: "공개 스냅샷",
     aggregate: "집계 필드",
     evidenceBoundary: "증거 경계",
     productTypes: "상품 유형"
@@ -54,9 +51,8 @@ const FOOTER_COPY: Record<
     coverage: "掲載範囲",
     data: "データ",
     explore: "探す",
-    legalNote: "公開画面は最新の成功 aggregate スナップショットを使用します。原文証拠と内部レビュー trace は公開しません。",
+    legalNote: "原文証拠と内部レビュー trace は公開しません。",
     planned: "予定",
-    snapshot: "公開スナップショット",
     aggregate: "集計フィールド",
     evidenceBoundary: "証拠の境界",
     productTypes: "商品タイプ"
@@ -97,7 +93,6 @@ function FooterContent() {
               <FooterLink href={productsHref}>{footerCopy.productTypes}</FooterLink>
             </FooterGroup>
             <FooterGroup title={footerCopy.data}>
-              <FooterText>{footerCopy.snapshot}</FooterText>
               <FooterText>{footerCopy.aggregate}</FooterText>
               <FooterText>{footerCopy.evidenceBoundary}</FooterText>
             </FooterGroup>

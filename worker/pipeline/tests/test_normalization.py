@@ -140,6 +140,116 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_suppresses_market_linked_return_cap_as_canonical_rate(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-market-linked-rate-cap")
+        try:
+            return_cap_excerpt = (
+                "Return: The Index Return payable, if any, is based on the performance of the Underlying Index. "
+                "Your Scotiabank Market Linked GIC principal is unconditionally guaranteed. "
+                "Limitation on interest: by law, the total return you receive cannot exceed an average of "
+                "60% per year, regardless of the performance of the Underlying Index."
+            )
+            base_input = _build_gic_input()
+            unsafe_fields: list[NormalizationExtractedField] = []
+            for field in base_input.extracted_fields:
+                if field.field_name == "product_name":
+                    unsafe_fields.append(NormalizationExtractedField(**{**field.__dict__, "candidate_value": "Scotiabank Market Linked GICs"}))
+                    continue
+                if field.field_name == "standard_rate":
+                    unsafe_fields.append(
+                        NormalizationExtractedField(
+                            **{
+                                **field.__dict__,
+                                "candidate_value": "60.00",
+                                "extraction_method": "heuristic_rate_context_fallback",
+                                "evidence_text_excerpt": return_cap_excerpt,
+                            }
+                        )
+                    )
+                    unsafe_fields.append(
+                        NormalizationExtractedField(
+                            **{
+                                **field.__dict__,
+                                "field_name": "public_display_rate",
+                                "candidate_value": "60.00",
+                                "extraction_method": "heuristic_rate_context_fallback",
+                                "evidence_text_excerpt": return_cap_excerpt,
+                            }
+                        )
+                    )
+                    continue
+                unsafe_fields.append(field)
+            input_item = NormalizationInput(
+                **{
+                    **base_input.__dict__,
+                    "source_id": "AUTO-SCOTIA-GIC-market-linked",
+                    "bank_code": "SCOTIA",
+                    "source_metadata": {"product_type": "gic"},
+                    "extracted_fields": unsafe_fields,
+                    "evidence_links": [
+                        link for link in base_input.evidence_links if link.field_name != "standard_rate"
+                    ]
+                    + [
+                        NormalizationEvidenceLink(
+                            field_name="standard_rate",
+                            candidate_value="60.00",
+                            evidence_chunk_id="chunk-market-linked-rate-cap",
+                            evidence_text_excerpt=return_cap_excerpt,
+                            source_document_id="src-001",
+                            source_snapshot_id="snap-001",
+                            citation_confidence=0.78,
+                            model_execution_id="modelexec-extract-001",
+                            anchor_type="section",
+                            anchor_value="by-phone",
+                            page_no=None,
+                            chunk_index=16,
+                        ),
+                        NormalizationEvidenceLink(
+                            field_name="public_display_rate",
+                            candidate_value="60.00",
+                            evidence_chunk_id="chunk-market-linked-rate-cap",
+                            evidence_text_excerpt=return_cap_excerpt,
+                            source_document_id="src-001",
+                            source_snapshot_id="snap-001",
+                            citation_confidence=0.78,
+                            model_execution_id="modelexec-extract-001",
+                            anchor_type="section",
+                            anchor_value="by-phone",
+                            page_no=None,
+                            chunk_index=16,
+                        ),
+                    ],
+                }
+            )
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+
+            result = service.normalize_inputs(run_id="run-market-linked-rate-cap", inputs=[input_item])
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertIsNotNone(candidate)
+            payload = candidate["candidate_payload"]
+            self.assertNotIn("standard_rate", payload)
+            self.assertNotIn("public_display_rate", payload)
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+            linked_fields = {record["field_name"] for record in source_result.field_evidence_link_records}
+            self.assertNotIn("standard_rate", linked_fields)
+            self.assertNotIn("public_display_rate", linked_fields)
+            self.assertIn("Suppressed `standard_rate`", " ".join(source_result.runtime_notes))
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_normalizes_chequing_candidate_with_package_subtype_and_flags(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-chequing-service")
         try:
@@ -1327,6 +1437,43 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
+
+    def test_generic_supporting_merge_ignores_market_linked_return_cap_context(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict("product_name", "Scotiabank Market Linked GICs", "string", 0.88),
+                _field_dict("minimum_deposit", "500.00", "decimal", 0.82, evidence_chunk_id="chunk-deposit"),
+                _field_dict("term_length_text", "3 years", "string", 0.82, evidence_chunk_id="chunk-term"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="maximum_return",
+                        anchor_value="market-linked-gic-returns",
+                        excerpt=(
+                            "Scotiabank Market Linked GICs principal is guaranteed and Index Return is based on "
+                            "the performance of the Underlying Index. Limitation on interest: the total return "
+                            "cannot exceed an average of 60% per year."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-SCOTIA-GIC-market-linked",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-SCOTIA-GIC-market-linked-support": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertNotIn("public_display_rate", fields_by_name)
 
     def test_merge_supports_everyday_rate_fields_from_current_rates(self) -> None:
         base_artifact = {

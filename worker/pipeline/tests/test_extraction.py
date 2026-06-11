@@ -230,6 +230,60 @@ class ExtractionServiceTests(unittest.TestCase):
         self.assertNotIn("standard_rate", fields_by_name)
         self.assertEqual(fields_by_name["public_display_rate"].extraction_method, "heuristic_rate_context_fallback")
 
+    def test_rate_fallback_ignores_market_linked_return_cap_context(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-SCOTIA-GIC-market-linked",
+            parsed_document_id="parsed-market-linked-rate-cap",
+            source_document_id="src-market-linked-rate-cap",
+            snapshot_id="snap-market-linked-rate-cap",
+            bank_code="SCOTIA",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic"},
+        )
+        extracted_fields = [
+            _extracted_field("product_type", "gic"),
+            _extracted_field("product_name", "Scotiabank Market Linked GICs"),
+        ]
+        return_cap_excerpt = (
+            "Return: The Index Return payable, if any, is based on the performance of the Underlying Index. "
+            "Your Scotiabank Market Linked GIC principal is unconditionally guaranteed. "
+            "Limitation on interest: by law, the total return you receive cannot exceed an average of "
+            "60% per year, regardless of the performance of the Underlying Index."
+        )
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id="chunk-market-linked-rate-cap",
+                parsed_document_id="parsed-market-linked-rate-cap",
+                chunk_index=16,
+                anchor_type="section",
+                anchor_value="by-phone",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=return_cap_excerpt,
+                retrieval_metadata={},
+                source_document_id="src-market-linked-rate-cap",
+                source_snapshot_id="snap-market-linked-rate-cap",
+                bank_code="SCOTIA",
+                country_code="CA",
+                source_type="html",
+            )
+        ]
+
+        _append_rate_fallback_fields(context=context, candidates=candidates, extracted_fields=extracted_fields)
+        public_rate, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="public_display_rate",
+            excerpt=return_cap_excerpt,
+            anchor_value="by-phone",
+        )
+
+        fields_by_name = {field.field_name: field for field in extracted_fields}
+        self.assertNotIn("public_display_rate", fields_by_name)
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertIsNone(public_rate)
+
     def test_extracts_chequing_specific_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-chequing-service")
         try:

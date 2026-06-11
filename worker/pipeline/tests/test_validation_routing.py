@@ -456,6 +456,61 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_implausible_deposit_rate_is_invalid_numeric_range(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-implausible-rate")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_gic_input()
+            candidate = dict(input_item.normalized_candidate_record)
+            payload = dict(candidate["candidate_payload"])
+            payload["standard_rate"] = 60.0
+            payload["public_display_rate"] = 60.0
+            payload["redeemable_flag"] = False
+            payload["non_redeemable_flag"] = True
+            candidate["candidate_payload"] = payload
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "normalized_candidate_record": candidate,
+                    "field_evidence_links": [
+                        _evidence("standard_rate", "60.0", "chunk-gic-rate"),
+                        _evidence("public_display_rate", "60.0", "chunk-gic-rate"),
+                        _evidence("minimum_deposit", "500.0", "chunk-gic-rate"),
+                        _evidence("term_length_days", "365", "chunk-gic-rate"),
+                        _evidence("non_redeemable_flag", "true", "chunk-gic-flags"),
+                    ],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-implausible-rate",
+                inputs=[input_item],
+                taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.5,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence", "invalid_numeric_range"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("invalid_numeric_range", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_action, "review_queued")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_golden_contract_deposit_candidate_auto_validates_despite_profile_source_conflict(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-golden-contract")
         try:

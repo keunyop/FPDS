@@ -260,7 +260,7 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 
 | Field Group | Rule | Severity |
 |---|---|---|
-| rate | `standard_rate`, `promotional_rate`, `public_display_rate`는 0 이상 100 이하 decimal | error |
+| rate | annual canonical rate fields such as `standard_rate`, `base_12_month_rate`, `promotional_rate`, and `public_display_rate` must be 0 or greater and no more than 25 for Canada/Japan retail deposit collection; broader market-linked full-term return values must not be promoted into these annual rate fields | error |
 | fee | `monthly_fee`, `public_display_fee`는 0 이상 decimal | error |
 | balance/deposit | `minimum_balance`, `minimum_deposit`는 0 이상 decimal | error |
 | term | `term_length_days`는 1 이상 integer | error |
@@ -281,6 +281,8 @@ For the approved Canada Big 5 deposit admin-collection test, validation uses the
 A `chequing`, `savings`, or `gic` candidate is validation-pass eligible when it has the common identity fields plus the fixture-level product fields: `bank_name`, `product_name`, `highest_rate`, `base_12_month_rate`, `tags`, `product_page_url`, `signup_amount`, `eligibility`, `application_method`, `post_maturity_interest_rate`, `tax_benefits`, `deposit_insurance`, and `term_rates`.
 
 For this contract, `highest_rate`, `base_12_month_rate`, `signup_amount`, `post_maturity_interest_rate`, `tax_benefits`, and individual `term_rates` values may be `null` or blank when the official source does not publish a comparable value. The field must still be present so the missing value is explicit and can be compared with the golden fixture. When this contract is satisfied, missing canonical helper fields such as `minimum_deposit`, `term_length_text`, `term_length_days`, `standard_rate`, or `public_display_rate` must not produce `required_field_missing`.
+
+Market-linked or fund-linked `highest_rate` values in the golden fixture may represent maximum full-term return instead of annual interest. Those values remain explicit fixture/profile facts and must carry source context such as tags or notes; they must not be reused as canonical annual rate fields unless the source states an annual posted or guaranteed interest rate.
 
 ### 5.5 Cross-Field Rules
 

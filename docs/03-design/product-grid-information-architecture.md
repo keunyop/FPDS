@@ -199,6 +199,7 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - Product Owner follow-up on `2026-06-08` removed the product-detail Decision Summary card from the public surface while preserving official-bank, similar-product, calculator, product-fact, key-condition, term-rate, and disclosure sections.
 - Product Owner follow-up on `2026-06-09` added a purpose-first entry pattern to `/products` so users can start from everyday cost, savings-rate, fixed-term return, or low-entry-amount comparison paths before refining filters.
 - Product Owner follow-up on `2026-06-09` added a client-side comparison workspace to `/products`; users can select up to four products from the current result page and compare product, reason-to-compare, rate, monthly fee, entry amount, term, application method, and official bank page without changing the public API contract or exposing evidence data.
+- Product Owner follow-up on `2026-06-11` removed the shared purpose-entry explanatory subtitle and compact trust cue block from the public surfaces while keeping the purpose entry cards and existing Product Grid filter/sort links.
 
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 

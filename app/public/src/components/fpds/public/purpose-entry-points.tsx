@@ -1,17 +1,15 @@
-import { ArrowRight, BadgeDollarSign, Landmark, PiggyBank, ShieldCheck, TimerReset } from "lucide-react";
+import { ArrowRight, BadgeDollarSign, Landmark, PiggyBank, TimerReset } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { getPublicMessages } from "@/lib/public-locale";
 import { buildPublicHref, type PublicScopeFilters } from "@/lib/public-query";
 
 type PurposeEntryPointsProps = {
   filters: PublicScopeFilters;
-  freshnessLabel?: string;
   locale: string;
 };
 
-export function PurposeEntryPoints({ filters, freshnessLabel, locale }: PurposeEntryPointsProps) {
+export function PurposeEntryPoints({ filters, locale }: PurposeEntryPointsProps) {
   const copy = getPublicMessages(locale);
   const cards = [
     {
@@ -69,14 +67,13 @@ export function PurposeEntryPoints({ filters, freshnessLabel, locale }: PurposeE
 
   return (
     <section className="grid gap-4" aria-labelledby="purpose-entry-title">
-      <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(16rem,0.4fr)] md:items-end">
+      <div>
         <div>
           <p className="text-sm font-medium text-primary">{copy.purpose.eyebrow}</p>
           <h2 id="purpose-entry-title" className="mt-1 text-2xl font-semibold tracking-normal text-foreground">
             {copy.purpose.title}
           </h2>
         </div>
-        <p className="text-sm leading-6 text-muted-foreground md:text-right">{copy.purpose.description}</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -100,31 +97,7 @@ export function PurposeEntryPoints({ filters, freshnessLabel, locale }: PurposeE
           </Link>
         ))}
       </div>
-
-      <div className="grid gap-3 rounded-lg border border-border bg-muted/20 p-4 md:grid-cols-3">
-        <TrustItem icon={<ShieldCheck className="size-4" aria-hidden="true" />} title={copy.purpose.trustScopeTitle}>
-          {copy.purpose.trustScopeBody}
-        </TrustItem>
-        <TrustItem icon={<TimerReset className="size-4" aria-hidden="true" />} title={copy.purpose.trustFreshnessTitle}>
-          {freshnessLabel ? `${copy.purpose.trustFreshnessBody} ${freshnessLabel}` : copy.purpose.trustFreshnessBody}
-        </TrustItem>
-        <TrustItem icon={<Landmark className="size-4" aria-hidden="true" />} title={copy.purpose.trustOfficialTitle}>
-          {copy.purpose.trustOfficialBody}
-        </TrustItem>
-      </div>
     </section>
-  );
-}
-
-function TrustItem({ children, icon, title }: { children: ReactNode; icon: ReactNode; title: string }) {
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span className="flex size-7 items-center justify-center rounded-md border border-border bg-background text-primary">{icon}</span>
-        {title}
-      </div>
-      <p className="text-sm leading-6 text-muted-foreground">{children}</p>
-    </div>
   );
 }
 
@@ -141,4 +114,3 @@ function buildPurposeHref(
     page: 1
   });
 }
-

@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from decimal import Decimal, InvalidOperation
 
+from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
+
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _BALANCE_LINE_RE = re.compile(r"^\$[0-9,]")
 _WHITESPACE_RE = re.compile(r"\s+")
@@ -1061,6 +1063,11 @@ def _extract_scotia_money_master_rate_values(excerpt: str) -> dict[str, str]:
 def _extract_all_percentages(excerpt: str) -> list[Decimal]:
     values: list[Decimal] = []
     for match in _PERCENT_RE.finditer(excerpt):
+        window_start = max(0, match.start() - 90)
+        window_end = min(len(excerpt), match.end() + 90)
+        window = excerpt[window_start:window_end]
+        if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
+            continue
         decimal_value = _to_decimal(match.group(1))
         if decimal_value is not None:
             values.append(decimal_value)

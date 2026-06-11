@@ -1,27 +1,28 @@
 {
-  "registry_version": "2026-06-02",
-  "bank_code": "BMO",
+  "registry_version": "2026-06-11",
+  "bank_code": "TD",
   "country_code": "CA",
   "product_type": "savings",
   "source_language": "en",
   "allowed_domains": [
-    "www.bmo.com"
+    "www.td.com"
   ],
-  "entry_source_id": "BMO-SAV-002",
+  "entry_source_id": "TD-SAV-002",
   "sources": [
     {
-      "source_id": "BMO-SAV-002",
+      "source_id": "TD-SAV-002",
       "priority": "P0",
       "seed_source_flag": false,
       "source_type": "html",
       "discovery_role": "detail",
-      "purpose": "Strong match for a Canadian savings account product detail page.",
-      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+      "purpose": "Clear official personal savings account detail page.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/every-day-savings-account",
       "expected_fields": [
         "product_name",
-        "interest_rate_summary",
+        "description_short",
         "monthly_fee",
-        "transaction_fee"
+        "included_transactions",
+        "additional_transaction_fee"
       ],
       "source_language": "en",
       "product_type_name": "Savings",
@@ -40,329 +41,32 @@
       ],
       "fallback_policy": "generic_ai_review",
       "discovery_metadata": {
-        "page_title": "High Interest Savings Account: Savings Amplifier Account - BMO Canada",
+        "page_title": "Apply for a TD Every Day Savings Account | TD Canada Trust",
         "heading_match": true,
         "ai_unavailable": false,
         "selection_path": "seed_hint_plus_ai_plus_page_evidence",
         "ai_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint"
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug"
         ],
-        "heuristic_score": 4,
-        "primary_heading": "Savings Amplifier Account",
+        "heuristic_score": 6,
+        "primary_heading": "TD Every Day Savings Account",
         "candidate_origin": "seed_detail_hint",
         "ai_parallel_score": 0.98,
         "ai_predicted_role": "detail",
         "ai_confidence_band": "high",
-        "ai_short_rationale": "Strong match for a Canadian savings account product detail page.",
-        "page_evidence_score": 5,
-        "selection_confidence": "medium",
-        "negative_signal_count": 3,
-        "attribute_signal_count": 6,
-        "selection_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint",
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence",
-          "seed_hint_alignment"
-        ],
-        "page_evidence_reason_codes": [
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence"
-        ]
-      }
-    },
-    {
-      "source_id": "BMO-SAV-003",
-      "priority": "P0",
-      "seed_source_flag": false,
-      "source_type": "html",
-      "discovery_role": "detail",
-      "purpose": "Likely a direct Canadian savings product detail page.",
-      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder/",
-      "expected_fields": [
-        "product_name",
-        "bonus_interest_rule",
-        "monthly_fee",
-        "transaction_fee"
-      ],
-      "source_language": "en",
-      "product_type_name": "Savings",
-      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
-      "discovery_keywords": [
-        "savings account",
-        "interest savings account",
-        "high interest savings",
-        "daily interest savings",
-        "everyday savings account",
-        "personal savings",
-        "flex savings",
-        "easy access savings",
-        "interest on balance",
-        "savings"
-      ],
-      "fallback_policy": "generic_ai_review",
-      "discovery_metadata": {
-        "page_title": "Savings Builder Account (Perfect for Active Savers) - BMO Canada",
-        "heading_match": true,
-        "ai_unavailable": false,
-        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
-        "ai_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint"
-        ],
-        "heuristic_score": 4,
-        "primary_heading": "Savings Builder Account",
-        "candidate_origin": "seed_detail_hint",
-        "ai_parallel_score": 0.97,
-        "ai_predicted_role": "detail",
-        "ai_confidence_band": "high",
-        "ai_short_rationale": "Likely a direct Canadian savings product detail page.",
-        "page_evidence_score": 5,
-        "selection_confidence": "medium",
-        "negative_signal_count": 3,
-        "attribute_signal_count": 7,
-        "selection_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint",
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence",
-          "seed_hint_alignment"
-        ],
-        "page_evidence_reason_codes": [
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence"
-        ]
-      }
-    },
-    {
-      "source_id": "BMO-SAV-004",
-      "priority": "P0",
-      "seed_source_flag": false,
-      "source_type": "html",
-      "discovery_role": "detail",
-      "purpose": "Looks like a direct Canadian savings product detail page for Premium Rate Savings.",
-      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings/",
-      "expected_fields": [
-        "product_name",
-        "interest_rate_summary",
-        "plan_fee_dependency",
-        "transaction_limits"
-      ],
-      "source_language": "en",
-      "product_type_name": "Savings",
-      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
-      "discovery_keywords": [
-        "savings account",
-        "interest savings account",
-        "high interest savings",
-        "daily interest savings",
-        "everyday savings account",
-        "personal savings",
-        "flex savings",
-        "easy access savings",
-        "interest on balance",
-        "savings"
-      ],
-      "fallback_policy": "generic_ai_review",
-      "discovery_metadata": {
-        "page_title": "Premium Rate Savings Account: Flexible Savings - BMO Canada",
-        "heading_match": true,
-        "ai_unavailable": false,
-        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
-        "ai_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint"
-        ],
-        "heuristic_score": 5,
-        "primary_heading": "Premium Rate Savings Account",
-        "candidate_origin": "seed_detail_hint",
-        "ai_parallel_score": 0.99,
-        "ai_predicted_role": "detail",
-        "ai_confidence_band": "high",
-        "ai_short_rationale": "Looks like a direct Canadian savings product detail page for Premium Rate Savings.",
-        "page_evidence_score": 5,
-        "selection_confidence": "medium",
-        "negative_signal_count": 3,
-        "attribute_signal_count": 6,
-        "selection_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "canadian_locale",
-          "seed_detail_hint",
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence",
-          "seed_hint_alignment"
-        ],
-        "page_evidence_reason_codes": [
-          "title_semantic_match",
-          "detail_page_layout_signal",
-          "product_type_semantic_match",
-          "pricing_or_feature_signal",
-          "insufficient_evidence"
-        ]
-      }
-    },
-    {
-      "source_id": "BMO-SAV-006",
-      "priority": "P0",
-      "seed_source_flag": false,
-      "source_type": "html",
-      "discovery_role": "supporting_html",
-      "purpose": "BMO chequing and savings interest rates page",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
-      "expected_fields": [
-        "savings_account_rates",
-        "rate_effective_date",
-        "account_list"
-      ],
-      "source_language": "en",
-      "product_type_name": "Savings",
-      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
-      "discovery_keywords": [
-        "savings account",
-        "interest savings account",
-        "high interest savings",
-        "daily interest savings",
-        "everyday savings account",
-        "personal savings",
-        "flex savings",
-        "easy access savings",
-        "interest on balance",
-        "savings"
-      ],
-      "fallback_policy": "generic_ai_review",
-      "discovery_metadata": {
-        "selection_path": "seed_supporting_hint",
-        "candidate_origin": "seed_supporting_hint",
-        "selection_confidence": "high",
-        "selection_reason_codes": [
-          "seed_hint_alignment",
-          "supporting_source_seed"
-        ]
-      }
-    },
-    {
-      "source_id": "BMO-SAV-007",
-      "priority": "P0",
-      "seed_source_flag": false,
-      "source_type": "html",
-      "discovery_role": "supporting_html",
-      "purpose": "BMO bank account terms and conditions",
-      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
-      "expected_fields": [
-        "terms_version",
-        "service_fee_terms",
-        "account_rules"
-      ],
-      "source_language": "en",
-      "product_type_name": "Savings",
-      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
-      "discovery_keywords": [
-        "savings account",
-        "interest savings account",
-        "high interest savings",
-        "daily interest savings",
-        "everyday savings account",
-        "personal savings",
-        "flex savings",
-        "easy access savings",
-        "interest on balance",
-        "savings"
-      ],
-      "fallback_policy": "generic_ai_review",
-      "discovery_metadata": {
-        "selection_path": "seed_supporting_hint",
-        "candidate_origin": "seed_supporting_hint",
-        "selection_confidence": "high",
-        "selection_reason_codes": [
-          "seed_hint_alignment",
-          "supporting_source_seed"
-        ]
-      }
-    },
-    {
-      "source_id": "BMO-SAV-005",
-      "priority": "P1",
-      "seed_source_flag": false,
-      "source_type": "html",
-      "discovery_role": "detail",
-      "purpose": "Savings product page, but USD-denominated, so only partially relevant for Canadian savings discovery.",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings/",
-      "expected_fields": [
-        "product_name",
-        "currency",
-        "interest_rate_summary",
-        "transaction_limits"
-      ],
-      "source_language": "en",
-      "product_type_name": "Savings",
-      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
-      "discovery_keywords": [
-        "savings account",
-        "interest savings account",
-        "high interest savings",
-        "daily interest savings",
-        "everyday savings account",
-        "personal savings",
-        "flex savings",
-        "easy access savings",
-        "interest on balance",
-        "savings"
-      ],
-      "fallback_policy": "generic_ai_review",
-      "discovery_metadata": {
-        "page_title": "U.S Dollar Premium Rate Savings Account - BMO Canada",
-        "heading_match": true,
-        "ai_unavailable": false,
-        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
-        "ai_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "usd_currency_product",
-          "bank_savings_relevant_but_non_cad"
-        ],
-        "heuristic_score": 5,
-        "primary_heading": "U.S Dollar Premium Rate Savings Account",
-        "candidate_origin": "seed_detail_hint",
-        "ai_parallel_score": 0.55,
-        "ai_predicted_role": "detail",
-        "ai_confidence_band": "medium",
-        "ai_short_rationale": "Savings product page, but USD-denominated, so only partially relevant for Canadian savings discovery.",
+        "ai_short_rationale": "Clear official personal savings account detail page.",
         "page_evidence_score": 5,
         "selection_confidence": "medium",
         "negative_signal_count": 2,
         "attribute_signal_count": 6,
         "selection_reason_codes": [
-          "contains_savings_accounts_path",
-          "product_like_slug",
-          "usd_currency_product",
-          "bank_savings_relevant_but_non_cad",
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug",
           "title_semantic_match",
           "detail_page_layout_signal",
           "product_type_semantic_match",
@@ -380,23 +84,19 @@
       }
     },
     {
-      "source_id": "AUTO-BMO-SAV-57f34475b7",
-      "priority": "P2",
+      "source_id": "TD-SAV-003",
+      "priority": "P0",
       "seed_source_flag": false,
       "source_type": "html",
-      "discovery_role": "supporting_html",
-      "purpose": "Auto-generated supporting source for Savings",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/getting-started/?rg=BMO&spc=7880184&ofid=SAASTAND001&lang=en",
+      "discovery_role": "detail",
+      "purpose": "Clear official personal savings account detail page.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/epremium-savings-account",
       "expected_fields": [
         "product_name",
         "description_short",
-        "standard_rate",
-        "promotional_rate",
         "monthly_fee",
-        "minimum_deposit",
-        "term_length_text",
-        "eligibility_text",
-        "notes"
+        "transaction_fee",
+        "free_online_transfers"
       ],
       "source_language": "en",
       "product_type_name": "Savings",
@@ -415,33 +115,62 @@
       ],
       "fallback_policy": "generic_ai_review",
       "discovery_metadata": {
-        "selection_path": "supporting_only",
-        "heuristic_score": -1,
-        "candidate_origin": "homepage_or_hub_link",
-        "selection_confidence": "low",
+        "page_title": "Get a TD ePremium Online banking Account | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "TD ePremium Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.99,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clear official personal savings account detail page.",
+        "page_evidence_score": 2,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
         "selection_reason_codes": [
-          "supporting_keyword_match"
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
         ]
       }
     },
     {
-      "source_id": "AUTO-BMO-SAV-607f1a6e30",
-      "priority": "P2",
+      "source_id": "TD-SAV-004",
+      "priority": "P0",
       "seed_source_flag": false,
       "source_type": "html",
-      "discovery_role": "supporting_html",
-      "purpose": "Auto-generated supporting source for Savings",
-      "url": "https://www.bmo.com/main/personal/bank-accounts/banking-agreements-and-fees/?icid=tl-FEAT2953BRND4-AJBMOH37",
+      "discovery_role": "detail",
+      "purpose": "Clear official personal savings account detail page.",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/growth-savings-account",
       "expected_fields": [
         "product_name",
         "description_short",
-        "standard_rate",
-        "promotional_rate",
         "monthly_fee",
-        "minimum_deposit",
-        "term_length_text",
-        "eligibility_text",
-        "notes"
+        "transaction_fee",
+        "boosted_rate_eligibility"
       ],
       "source_language": "en",
       "product_type_name": "Savings",
@@ -460,12 +189,360 @@
       ],
       "fallback_policy": "generic_ai_review",
       "discovery_metadata": {
-        "selection_path": "supporting_only",
-        "heuristic_score": -2,
-        "candidate_origin": "homepage_or_hub_link",
-        "selection_confidence": "low",
+        "page_title": "TD Growth Savings Account| Savings Accounts | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "TD Growth\u2122 Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 0.98,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clear official personal savings account detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
         "selection_reason_codes": [
-          "supporting_keyword_match"
+          "product_match",
+          "personal_banking",
+          "savings_account",
+          "detail_slug",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "seed_hint_alignment"
+        ],
+        "page_evidence_reason_codes": [
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-005",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "current interest rate truth and tier values",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/account-rates",
+      "expected_fields": [
+        "public_display_rate",
+        "standard_rate",
+        "boosted_rate",
+        "rate_tiers"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "cross-product fee comparison and normalization",
+      "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts-fees-services-charges-cad-savings",
+      "expected_fields": [
+        "monthly_transaction_limit",
+        "transaction_fee",
+        "bill_payment_fee",
+        "atm_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account and service fee governing document",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513796-en.pdf",
+      "expected_fields": [
+        "effective_date",
+        "account_lineup",
+        "detailed_account_fees",
+        "transaction_definitions"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-008",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "interest calculation and tier rule governing document",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/513782-en.pdf",
+      "expected_fields": [
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "tier_definition_text"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-009",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account-level general legal terms",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/tdct-accounts-fst-en.pdf",
+      "expected_fields": [
+        "record_availability",
+        "account_change_rules",
+        "interest_applicability_references"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-010",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "account opening and basic banking access evidence",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/522050-en.pdf",
+      "expected_fields": [
+        "account_opening_requirements",
+        "refusal_grounds",
+        "compliance_notes"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-011",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "access card and credentials service terms",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/aa-eng.pdf",
+      "expected_fields": [
+        "service_access_terms",
+        "credential_usage",
+        "card_service_constraints"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "TD-SAV-012",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "general service fee supplement evidence",
+      "url": "https://www.td.com/content/dam/tdct/document/pdf/personal-banking/802234-en.pdf",
+      "expected_fields": [
+        "ancillary_service_fees",
+        "service_definitions",
+        "non_core_fees"
+      ],
+      "source_language": "en",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
         ]
       }
     }
