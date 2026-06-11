@@ -169,6 +169,24 @@ Rules:
 - `lowest_monthly_fee` and `lowest_minimum_deposit` remain valid catalog widgets but are not the mixed-type default exposure
 - single-type visualization emphasis and default widget ordering are governed by `docs/03-design/product-type-visualization-principles.md`
 
+Implemented public Home simplification on `2026-06-08`:
+- the public dashboard API still exposes the full metric and ranking catalog above
+- the public `/dashboard` route now suppresses low-value `recently_changed_30d` ranking presentation and the visible Recently Changed KPI card
+- the public `/dashboard` route no longer renders the Products by type breakdown or an inline Data notes card; methodology and data-boundary details remain reachable through `/methodology`
+- the public `/dashboard` route keeps decision-useful ranking cards, bank coverage, KPI summary, and optional like-for-like scatter when the selected product type supports it
+
+Implemented public Home future-product wording and footer polish on `2026-06-09`:
+- the public `/dashboard` route now uses product-neutral Home copy so the surface does not read as deposit-only while the API and current public catalog can still serve the active deposit scope
+- the visible Home KPI rail now shows `banks_in_scope` before `total_active_products` and suppresses the visible `highest_display_rate` / Top Interest Rate KPI card
+- the Home ranking card keeps the Top 5 interest-rate list but uses simpler rank numerals instead of filled rank badges
+- methodology is not exposed as a visible Home action; data-boundary copy is carried by the footer and the direct `/methodology` route remains available
+- the public shell now includes a footer with compact route/coverage/data groups plus a footer-style locale control shared with the header
+
+Implemented public comparison entry polish on `2026-06-09`:
+- the public `/dashboard` route now includes purpose-first entry cards that link into focused Product Grid states for everyday banking cost, savings-rate, fixed-term return, and low-entry-amount comparison paths
+- the purpose entry keeps the dashboard metric contract unchanged and uses existing Product Grid filters/sorts rather than introducing personalized recommendation, eligibility scoring, or account-opening flows
+- compact trust cues on the Home surface reinforce scope, snapshot freshness, and official-bank confirmation without exposing public evidence traces
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

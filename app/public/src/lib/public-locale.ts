@@ -79,6 +79,9 @@ type PublicMessages = {
     sortLastChange: string;
     sortBankName: string;
     sortProductName: string;
+    topFiveDefaultTitle: string;
+    topFiveSubtitle: string;
+    topFiveTitle: string;
   };
   detail: {
     backToList: string;
@@ -128,6 +131,53 @@ type PublicMessages = {
     apiUnavailableBody: string;
     retryDashboard: string;
     mixedMarket: string;
+  };
+  purpose: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    everydayTitle: string;
+    everydayBody: string;
+    everydayAction: string;
+    savingsTitle: string;
+    savingsBody: string;
+    savingsAction: string;
+    termTitle: string;
+    termBody: string;
+    termAction: string;
+    lowEntryTitle: string;
+    lowEntryBody: string;
+    lowEntryAction: string;
+    trustScopeTitle: string;
+    trustScopeBody: string;
+    trustFreshnessTitle: string;
+    trustFreshnessBody: string;
+    trustOfficialTitle: string;
+    trustOfficialBody: string;
+  };
+  compare: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    select: string;
+    selected: string;
+    selectedCount: string;
+    limit: string;
+    clear: string;
+    remove: string;
+    emptyTitle: string;
+    emptyBody: string;
+    tableProduct: string;
+    tableWhy: string;
+    entryAmount: string;
+    application: string;
+    officialPage: string;
+    reasonNoMonthlyFee: string;
+    reasonFeeKnown: string;
+    reasonRateKnown: string;
+    reasonTermRate: string;
+    reasonLowEntry: string;
+    reasonFallback: string;
   };
   methodology: {
     pageTitle: string;
@@ -220,7 +270,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortMinimumDeposit: "Minimum deposit",
       sortLastChange: "Last change",
       sortBankName: "Bank",
-      sortProductName: "Product"
+      sortProductName: "Product",
+      topFiveDefaultTitle: "Top 5 products",
+      topFiveSubtitle: "Ranked with the current filters and sort condition.",
+      topFiveTitle: "Top 5 by {sort}"
     },
     detail: {
       backToList: "Back to deposit list",
@@ -237,11 +290,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "FPDS Home",
-      pageDescription: "Deposit product comparison snapshot.",
-      title: "Deposit choices, made clear",
+      pageDescription: "Public financial product comparison snapshot.",
+      title: "Financial product choices, made clear",
       description: "",
-      marketGreeting: "FPDS has collected {products} deposit products from {banks} banks across {countries} country so you can compare the market in one place.",
-      marketSnapshot: "Deposit snapshot",
+      marketGreeting: "FPDS has collected {products} public products from {banks} banks across {countries} country so you can compare available coverage in one place.",
+      marketSnapshot: "Public snapshot",
       kpiSubtitle: "Current search scope",
       composition: "Market composition",
       compositionSubtitle: "Active product coverage by bank and product type.",
@@ -261,7 +314,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       chartUnavailable: "Not enough eligible products for this chart.",
       chartSingleTypeHint: "Choose one product type to unlock the comparison map.",
       visibleProducts: "Visible products",
-      activeProducts: "active deposit products",
+      activeProducts: "active products",
       banksInScope: "Banks",
       peakRate: "Top Interest Rate",
       topInterestRateTitle: "Top 5 Interest Rate",
@@ -269,7 +322,54 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       apiUnavailableTitle: "Dashboard could not load.",
       apiUnavailableBody: "The public aggregate API is not reachable.",
       retryDashboard: "Retry dashboard",
-      mixedMarket: "All deposits"
+      mixedMarket: "All products"
+    },
+    purpose: {
+      eyebrow: "Start by purpose",
+      title: "What are you trying to compare?",
+      description: "Jump into a focused product view, then refine by bank, cost, rate, balance, or term.",
+      everydayTitle: "Keep everyday banking costs low",
+      everydayBody: "Start with chequing products sorted by lower monthly fee.",
+      everydayAction: "Compare low-fee accounts",
+      savingsTitle: "Grow cash with a visible rate",
+      savingsBody: "Start with savings products sorted by public display rate.",
+      savingsAction: "Compare savings rates",
+      termTitle: "Lock a fixed-term return",
+      termBody: "Start with GIC and term products sorted by public display rate.",
+      termAction: "Compare term rates",
+      lowEntryTitle: "Start with a lower entry amount",
+      lowEntryBody: "Scan products where minimum balance or deposit matters most.",
+      lowEntryAction: "Compare entry amounts",
+      trustScopeTitle: "Clear scope",
+      trustScopeBody: "Canada Big 5 public deposit products only: chequing, savings, and GIC.",
+      trustFreshnessTitle: "Snapshot based",
+      trustFreshnessBody: "Public pages use the latest successful aggregate snapshot.",
+      trustOfficialTitle: "Official next step",
+      trustOfficialBody: "FPDS compares public data; users confirm and apply on the bank site."
+    },
+    compare: {
+      eyebrow: "Side-by-side",
+      title: "Compare up to 4 products",
+      subtitle: "Select products from this result page to compare the public fields that matter before opening an official bank page.",
+      select: "Compare",
+      selected: "Selected",
+      selectedCount: "{count}/{limit} selected",
+      limit: "You can compare up to 4 products at a time.",
+      clear: "Clear",
+      remove: "Remove",
+      emptyTitle: "No products selected yet.",
+      emptyBody: "Use Compare on any product card to build a focused table. FPDS does not score personal eligibility or submit applications.",
+      tableProduct: "Product",
+      tableWhy: "Why compare",
+      entryAmount: "Entry amount",
+      application: "Application",
+      officialPage: "Official page",
+      reasonNoMonthlyFee: "Monthly fee is disclosed as zero.",
+      reasonFeeKnown: "Monthly fee is available for direct cost comparison.",
+      reasonRateKnown: "A public display rate is available for rate comparison.",
+      reasonTermRate: "Term and public display rate are both available.",
+      reasonLowEntry: "Minimum balance or deposit is available for entry-cost comparison.",
+      reasonFallback: "Comparable public fields are available."
     },
     methodology: {
       pageTitle: "FPDS Methodology",
@@ -374,7 +474,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortMinimumDeposit: "최소 예치금",
       sortLastChange: "최근 변경",
       sortBankName: "은행",
-      sortProductName: "상품"
+      sortProductName: "상품",
+      topFiveDefaultTitle: "상위 5개 상품",
+      topFiveSubtitle: "현재 필터와 정렬 조건을 기준으로 보여줍니다.",
+      topFiveTitle: "{sort} 기준 상위 5개"
     },
     detail: {
       backToList: "예금 목록으로 돌아가기",
@@ -391,11 +494,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "FPDS 대시보드",
-      pageDescription: "캐나다 예금 시장 대시보드입니다.",
-      title: "예금 시장 대시보드",
-      description: "최신 공개 스냅샷 기준으로 예금 상품을 빠르게 비교합니다.",
-      marketGreeting: "FPDS는 {countries}개 국가의 {banks}개 은행에서 {products}개 예금 상품을 수집해 한곳에서 비교할 수 있게 정리했습니다.",
-      marketSnapshot: "시장 스냅샷",
+      pageDescription: "공개 금융상품 비교 스냅샷입니다.",
+      title: "금융상품 선택을 더 명확하게",
+      description: "최신 공개 스냅샷 기준으로 현재 상품 범위를 빠르게 비교합니다.",
+      marketGreeting: "FPDS는 {countries}개 국가의 {banks}개 은행에서 {products}개 공개 상품을 수집해 현재 제공 범위를 한곳에서 비교할 수 있게 정리했습니다.",
+      marketSnapshot: "공개 스냅샷",
       kpiSubtitle: "현재 공개 범위",
       composition: "시장 구성",
       compositionSubtitle: "은행과 상품 유형별 활성 상품 커버리지입니다.",
@@ -424,6 +527,53 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       apiUnavailableBody: "공개 aggregate API에 연결할 수 없습니다.",
       retryDashboard: "대시보드 다시 불러오기",
       mixedMarket: "전체 상품 유형"
+    },
+    purpose: {
+      eyebrow: "목적부터 시작",
+      title: "무엇을 비교하고 싶으신가요?",
+      description: "목적에 맞는 상품 범위로 이동한 뒤 은행, 비용, 금리, 잔액, 기간을 조정하세요.",
+      everydayTitle: "일상 은행 비용 줄이기",
+      everydayBody: "월 수수료가 낮은 입출금 상품부터 비교합니다.",
+      everydayAction: "저수수료 계좌 비교",
+      savingsTitle: "보이는 금리로 현금 굴리기",
+      savingsBody: "공개 표시 금리가 높은 저축 상품부터 비교합니다.",
+      savingsAction: "저축 금리 비교",
+      termTitle: "정해진 기간 수익 고정하기",
+      termBody: "공개 표시 금리가 높은 GIC와 정기예금 상품부터 비교합니다.",
+      termAction: "기간 상품 금리 비교",
+      lowEntryTitle: "낮은 가입 금액부터 보기",
+      lowEntryBody: "최소 잔액이나 예치금이 중요한 상품을 먼저 훑어봅니다.",
+      lowEntryAction: "가입 금액 비교",
+      trustScopeTitle: "명확한 범위",
+      trustScopeBody: "캐나다 Big 5의 공개 예금 상품만 다룹니다: 입출금, 저축, GIC.",
+      trustFreshnessTitle: "스냅샷 기준",
+      trustFreshnessBody: "공개 화면은 최신 성공 aggregate 스냅샷을 사용합니다.",
+      trustOfficialTitle: "공식 확인",
+      trustOfficialBody: "FPDS는 공개 데이터를 비교하며, 확인과 신청은 은행 사이트에서 진행합니다."
+    },
+    compare: {
+      eyebrow: "나란히 비교",
+      title: "최대 4개 상품 비교",
+      subtitle: "이 결과 페이지의 상품을 선택해 공식 은행 페이지를 열기 전에 중요한 공개 필드를 비교하세요.",
+      select: "비교",
+      selected: "선택됨",
+      selectedCount: "{count}/{limit}개 선택",
+      limit: "한 번에 최대 4개 상품까지 비교할 수 있습니다.",
+      clear: "비우기",
+      remove: "제거",
+      emptyTitle: "아직 선택한 상품이 없습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 표를 구성하세요. FPDS는 개인별 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      tableProduct: "상품",
+      tableWhy: "비교 이유",
+      entryAmount: "가입 금액",
+      application: "신청",
+      officialPage: "공식 페이지",
+      reasonNoMonthlyFee: "월 수수료가 0으로 공시되어 있습니다.",
+      reasonFeeKnown: "월 수수료가 있어 비용을 직접 비교할 수 있습니다.",
+      reasonRateKnown: "공개 표시 금리로 금리를 비교할 수 있습니다.",
+      reasonTermRate: "기간과 공개 표시 금리가 모두 제공됩니다.",
+      reasonLowEntry: "최소 잔액 또는 예치금으로 가입 비용을 비교할 수 있습니다.",
+      reasonFallback: "비교 가능한 공개 필드가 제공됩니다."
     },
     methodology: {
       pageTitle: "FPDS 방법론",
@@ -528,7 +678,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortMinimumDeposit: "最低預入額",
       sortLastChange: "最近の変更",
       sortBankName: "銀行",
-      sortProductName: "商品"
+      sortProductName: "商品",
+      topFiveDefaultTitle: "上位5件の商品",
+      topFiveSubtitle: "現在のフィルターと並び順に基づいて表示します。",
+      topFiveTitle: "{sort} の上位5件"
     },
     detail: {
       backToList: "預金一覧に戻る",
@@ -545,11 +698,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "FPDS ダッシュボード",
-      pageDescription: "カナダ預金市場のダッシュボードです。",
-      title: "預金市場ダッシュボード",
-      description: "最新の公開スナップショットをもとに預金商品をすばやく比較します。",
-      marketGreeting: "FPDS は {countries} か国、{banks} 行、{products} 件の預金商品を収集し、1 か所で比較できるように整理しています。",
-      marketSnapshot: "市場スナップショット",
+      pageDescription: "公開金融商品の比較スナップショットです。",
+      title: "金融商品選びをわかりやすく",
+      description: "最新の公開スナップショットをもとに現在の掲載範囲をすばやく比較します。",
+      marketGreeting: "FPDS は {countries} か国、{banks} 行、{products} 件の公開商品を収集し、現在の掲載範囲を 1 か所で比較できるように整理しています。",
+      marketSnapshot: "公開スナップショット",
       kpiSubtitle: "現在の公開範囲",
       composition: "市場構成",
       compositionSubtitle: "銀行別、商品タイプ別の有効商品数です。",
@@ -578,6 +731,53 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       apiUnavailableBody: "公開 aggregate API に接続できません。",
       retryDashboard: "ダッシュボードを再読み込み",
       mixedMarket: "全商品タイプ"
+    },
+    purpose: {
+      eyebrow: "目的から始める",
+      title: "何を比較しますか？",
+      description: "目的に合う商品範囲へ移動し、銀行、費用、金利、残高、期間で絞り込めます。",
+      everydayTitle: "日常の銀行コストを抑える",
+      everydayBody: "月額手数料が低い chequing 商品から比較します。",
+      everydayAction: "低手数料口座を比較",
+      savingsTitle: "表示金利で資金を増やす",
+      savingsBody: "公開表示金利が高い savings 商品から比較します。",
+      savingsAction: "預金金利を比較",
+      termTitle: "固定期間のリターンを見る",
+      termBody: "公開表示金利が高い GIC と term 商品から比較します。",
+      termAction: "期間商品の金利を比較",
+      lowEntryTitle: "少ない加入金額から見る",
+      lowEntryBody: "最低残高や最低預入額が重要な商品を確認します。",
+      lowEntryAction: "加入金額を比較",
+      trustScopeTitle: "明確な範囲",
+      trustScopeBody: "カナダ Big 5 の公開預金商品だけを扱います: chequing、savings、GIC。",
+      trustFreshnessTitle: "スナップショット基準",
+      trustFreshnessBody: "公開画面は最新の成功 aggregate スナップショットを使います。",
+      trustOfficialTitle: "公式確認",
+      trustOfficialBody: "FPDS は公開データを比較します。確認と申込は銀行サイトで行います。"
+    },
+    compare: {
+      eyebrow: "横並び比較",
+      title: "最大4件の商品を比較",
+      subtitle: "この結果ページの商品を選び、公式銀行ページを開く前に重要な公開フィールドを比較できます。",
+      select: "比較",
+      selected: "選択済み",
+      selectedCount: "{count}/{limit} 件選択",
+      limit: "一度に比較できる商品は最大4件です。",
+      clear: "クリア",
+      remove: "削除",
+      emptyTitle: "まだ商品が選択されていません。",
+      emptyBody: "商品カードの比較ボタンで表を作成します。FPDS は個人別の加入可能性スコアや申込代行を提供しません。",
+      tableProduct: "商品",
+      tableWhy: "比較理由",
+      entryAmount: "加入金額",
+      application: "申込",
+      officialPage: "公式ページ",
+      reasonNoMonthlyFee: "月額手数料がゼロとして公開されています。",
+      reasonFeeKnown: "月額手数料があり、費用を直接比較できます。",
+      reasonRateKnown: "公開表示金利で金利を比較できます。",
+      reasonTermRate: "期間と公開表示金利の両方があります。",
+      reasonLowEntry: "最低残高または最低預入額で加入コストを比較できます。",
+      reasonFallback: "比較可能な公開フィールドがあります。"
     },
     methodology: {
       pageTitle: "FPDS 方法",

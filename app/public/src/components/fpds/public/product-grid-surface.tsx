@@ -1,8 +1,10 @@
-import { ArrowDownUp, ArrowRight, ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { ArrowDownUp, ArrowRight, ChevronDown, ExternalLink, RefreshCw, SlidersHorizontal, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { ProductCompareWorkspace } from "@/components/fpds/public/product-compare-workspace";
+import { PurposeEntryPoints } from "@/components/fpds/public/purpose-entry-points";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
@@ -15,9 +17,10 @@ type ProductGridSurfaceProps = {
   filterOptions: PublicFiltersResponse | null;
   filters: ProductGridPageFilters;
   products: PublicProductsResponse | null;
+  topProducts: PublicProductsResponse | null;
 };
 
-export function ProductGridSurface({ apiUnavailable, filterOptions, filters, products }: ProductGridSurfaceProps) {
+export function ProductGridSurface({ apiUnavailable, filterOptions, filters, products, topProducts }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const clearHref = buildPublicHref("/products", {
     ...filters,
@@ -60,6 +63,8 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   const showMinimumDeposit = selectedTypes.size === 0 || selectedTypes.has("gic");
   const showTermBucket = gicOnly;
   const pagination = buildPagination(products, filters);
+  const topListItems = topProducts?.items ?? products.items.slice(0, 5);
+  const freshnessLabel = formatPublicMessage(copy.grid.snapshotUpdated, { date: formatFreshnessDate(products.freshness.refreshed_at, filters.locale) });
   const sortOptions = [
     { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" as const },
     { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" as const },
@@ -69,11 +74,20 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
       <div className="flex flex-col gap-5">
-        <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.grid.title}</h1>
+        <section className="grid gap-5 rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_55%,#eefbf7_100%)] p-5 shadow-sm md:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium text-primary">{copy.grid.resultSummary}</p>
+            <h1 className="mt-2 text-3xl font-semibold leading-tight text-foreground md:text-4xl">{copy.grid.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{copy.grid.description}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            <Button asChild>
+              <Link href={dashboardHref}>{copy.grid.openDashboard}</Link>
+            </Button>
           </div>
         </section>
+
+        <PurposeEntryPoints filters={filters} freshnessLabel={freshnessLabel} locale={filters.locale} />
 
         <Card className="gap-0 overflow-hidden border-border/80 shadow-sm">
           <details className="group" open>
@@ -176,20 +190,15 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
                 <Link href={clearHref}>{copy.common.clearAllFilters}</Link>
               </Button>
             ) : null}
-            <Button asChild variant="outline" size="sm">
-              <Link href={dashboardHref}>{copy.grid.openDashboard}</Link>
-            </Button>
           </div>
         </section>
 
         <SortToolbar filters={filters} locale={filters.locale} options={sortOptions} />
 
+        <TopProductList filters={filters} locale={filters.locale} products={topListItems} />
+
         {products.items.length ? (
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {products.items.map((product) => (
-              <ProductCard key={product.product_id} filters={filters} locale={filters.locale} product={product} />
-            ))}
-          </section>
+          <ProductCompareWorkspace filters={filters} locale={filters.locale} products={products.items} />
         ) : (
           <Card>
             <CardHeader>
@@ -235,17 +244,11 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
-    <Card className="h-full gap-3 overflow-hidden border-border/80 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/15">
+    <Card className="h-full gap-3 overflow-hidden border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-primary/15">
       <CardHeader className="pb-2">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-              <div className="min-w-0">
-                <CardDescription className="truncate text-sm">{product.bank_name}</CardDescription>
-                <p className="mt-1 inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase text-primary">{product.product_type_label}</p>
-              </div>
-            </div>
+            <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
             {product.product_url ? (
               <Button asChild variant="outline" size="xs" className="shrink-0">
                 <a href={product.product_url} target="_blank" rel="noreferrer">
@@ -256,6 +259,9 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
             ) : null}
           </div>
           <div className="min-w-0">
+            <CardDescription className="mb-2">
+              <span className="inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase text-primary">{product.product_type_label}</span>
+            </CardDescription>
             <CardTitle className="text-lg leading-snug">
               <Link className="break-words hover:text-primary" href={detailHref}>
                 {product.product_name}
@@ -292,6 +298,69 @@ function ProductCard({ filters, locale, product }: { filters: ProductGridPageFil
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function TopProductList({
+  filters,
+  locale,
+  products
+}: {
+  filters: ProductGridPageFilters;
+  locale: string;
+  products: PublicProduct[];
+}) {
+  const copy = getPublicMessages(locale);
+  const sortLabel = getSortLabel(filters.sortBy, copy);
+  const title =
+    filters.sortBy === "default"
+      ? copy.grid.topFiveDefaultTitle
+      : formatPublicMessage(copy.grid.topFiveTitle, { sort: sortLabel });
+
+  if (!products.length) {
+    return null;
+  }
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm" aria-labelledby="top-products-title">
+      <div className="grid gap-3 border-b border-border/70 bg-muted/25 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-sm font-medium text-primary">
+            <Trophy className="size-4" aria-hidden="true" />
+            {copy.grid.sortBy}
+          </p>
+          <h2 id="top-products-title" className="mt-1 text-xl font-semibold leading-tight text-foreground">
+            {title}
+          </h2>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-muted-foreground">{copy.grid.topFiveSubtitle}</p>
+      </div>
+      <div className="divide-y divide-border/70">
+        {products.map((product, index) => {
+          const metric = getSortMetric(product, filters.sortBy, locale);
+          return (
+            <Link
+              className="grid gap-3 px-4 py-3 transition-colors hover:bg-muted/30 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:items-center"
+              href={buildProductDetailHref(filters, product.product_id)}
+              key={product.product_id}
+            >
+              <span className="inline-flex size-8 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground tabular-nums">
+                {index + 1}
+              </span>
+              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+              <span className="min-w-0">
+                <span className="block break-words text-sm font-semibold text-foreground">{product.product_name}</span>
+                <span className="mt-1 inline-flex rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{product.product_type_label}</span>
+              </span>
+              <span className="rounded-lg border border-border bg-background px-3 py-2 text-left sm:min-w-36 sm:text-right">
+                <span className="block text-[11px] font-medium uppercase text-muted-foreground">{metric.label}</span>
+                <span className="mt-1 block text-base font-semibold text-foreground tabular-nums">{metric.value}</span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -426,6 +495,45 @@ function SelectField({
       </select>
     </label>
   );
+}
+
+function getSortMetric(product: PublicProduct, sortBy: string, locale: string) {
+  const copy = getPublicMessages(locale);
+  switch (sortBy) {
+    case "display_rate":
+      return { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) };
+    case "monthly_fee":
+      return { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) };
+    case "minimum_balance":
+      return { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) };
+    case "minimum_deposit":
+      return { label: copy.grid.metricMinDeposit, value: formatCurrency(product.minimum_deposit, product.currency, locale) };
+    case "last_changed_at":
+      return { label: copy.grid.metricLastChange, value: formatDate(product.last_changed_at, locale) };
+    default:
+      return buildComparisonMetrics(product, locale)[0];
+  }
+}
+
+function getSortLabel(sortBy: string, copy: ReturnType<typeof getPublicMessages>) {
+  switch (sortBy) {
+    case "display_rate":
+      return copy.grid.sortDisplayRate;
+    case "monthly_fee":
+      return copy.grid.sortMonthlyFee;
+    case "minimum_balance":
+      return copy.grid.sortMinimumBalance;
+    case "minimum_deposit":
+      return copy.grid.sortMinimumDeposit;
+    case "last_changed_at":
+      return copy.grid.sortLastChange;
+    case "bank_name":
+      return copy.grid.sortBankName;
+    case "product_name":
+      return copy.grid.sortProductName;
+    default:
+      return copy.grid.sortDefault;
+  }
 }
 
 function buildComparisonMetrics(product: PublicProduct, locale: string) {
@@ -578,6 +686,22 @@ function formatFreshnessDate(value: string | null, locale: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value.slice(0, 10);
+  }
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+}
+
+function formatDate(value: string | null, locale: string) {
+  const copy = getPublicMessages(locale);
+  if (!value) {
+    return copy.common.noDate;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
   }
   return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",

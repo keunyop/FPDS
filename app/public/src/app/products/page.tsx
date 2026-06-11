@@ -29,15 +29,21 @@ export default async function ProductGridPage({ searchParams }: ProductGridPageP
   const filters = parseProductGridPageFilters(resolvedSearchParams);
 
   let products = null;
+  let topProducts = null;
   let filterOptions = null;
   let apiUnavailable = false;
 
   try {
-    const [productsResponse, filterResponse] = await Promise.all([
+    const topProductsSearchParams = buildProductsSearchParams({ ...filters, page: 1 });
+    topProductsSearchParams.set("page_size", "5");
+
+    const [productsResponse, topProductsResponse, filterResponse] = await Promise.all([
       fetchPublicProducts(buildProductsSearchParams(filters)),
+      fetchPublicProducts(topProductsSearchParams),
       fetchPublicFilters(buildGlobalFilterSearchParams(filters))
     ]);
     products = productsResponse;
+    topProducts = topProductsResponse;
     filterOptions = filterResponse;
   } catch {
     apiUnavailable = true;
@@ -49,6 +55,7 @@ export default async function ProductGridPage({ searchParams }: ProductGridPageP
       filterOptions={filterOptions}
       filters={filters}
       products={products}
+      topProducts={topProducts}
     />
   );
 }

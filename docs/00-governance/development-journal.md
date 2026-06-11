@@ -62,6 +62,65 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-06-09 - Public Purpose Entry And Compare Workspace
+
+- WBS: `5.9`, `5.10`, `5.11`, `5.12`, `5.13`, public UI follow-on
+- Status: `done`
+- Goal: improve FPDS Public comparison usefulness using benchmark patterns for purpose-led entry, side-by-side comparison, and trust cues while staying inside the approved Canada Big 5 deposit scope.
+- Why now: the Product Owner asked for a production-quality public financial-product comparison experience, with benchmark-inspired improvements and no shortcut/demo-grade implementation.
+- Outcome: added shared purpose-first entry cards to `/dashboard` and `/products` for everyday banking cost, savings-rate, fixed-term return, and low-entry-amount paths. Added compact trust cues for scope, snapshot freshness, and official-bank confirmation. Added a client-side `/products` comparison workspace where users can select up to four currently rendered products and compare product, field-backed comparison reason, rate, monthly fee, entry amount, term, application method, and official bank page without changing public API contracts.
+- Not done: no personalized recommendation, eligibility scoring, account-opening flow, public evidence trace, Admin data model change, or new API endpoint was added.
+- Key files: `app/public/src/components/fpds/public/purpose-entry-points.tsx`, `app/public/src/components/fpds/public/product-compare-workspace.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`, `docs/03-design/insight-dashboard-metric-definition.md`
+- Decisions: kept the slice frontend-first because existing public product payloads already expose the needed rate, fee, balance/deposit, term, application, and official-page fields; used existing filters/sorts for purpose entry instead of adding a recommendation model.
+- Verification:
+  - In `app/public`: `pnpm run typecheck`
+  - In `app/public`: `pnpm run build`
+  - root `tests/regression` path is absent
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - Existing local public dev server on `http://localhost:3000`; `GET /dashboard`, `GET /products`, and `GET /methodology` returned HTTP `200`
+- Known issues: final visual QA should still be done in a browser with a live public API snapshot to inspect real product density, mobile compare-table scrolling, and localized text wrapping.
+- Next step: perform responsive browser QA for `/dashboard` and `/products`, especially compare selection and purpose-entry links, against current aggregate data.
+
+## 2026-06-09 - Public Dashboard Future-Product Footer Polish
+
+- WBS: `5.10`, `5.12`, `5.13`, `5.14` public UI follow-on
+- Status: `done`
+- Goal: adjust the FPDS Public Home surface so it no longer reads as deposit-only, simplify dashboard ranking/KPI presentation, and add a footer plus compact locale control pattern inspired by Revolut's footer structure.
+- Why now: the Product Owner noted that the current public dashboard only shows deposit products today but should not lock the Home copy to deposits because loan products are planned later.
+- Outcome: changed Home dashboard copy to product-neutral EN/KO/JA wording, removed the visible Methodology action from Home, moved the Banks KPI before Visible products, removed the visible Top Interest Rate KPI card, and simplified the Top 5 ranking numerals. Added a public footer with brand, route, coverage, data-boundary, and locale-control sections. Replaced the header language select with a compact globe/locale menu shared with the footer.
+- Not done: no backend/API contract change, no new public route, no public evidence exposure, and no Revolut branding, copy, or legal content reuse.
+- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/public-locale-menu.tsx`, `app/public/src/components/fpds/public/public-footer.tsx`, `app/public/src/app/layout.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/insight-dashboard-metric-definition.md`
+- Decisions: kept `/products` labeled as the current Deposit catalog while making `/dashboard` product-neutral; kept `/methodology` implemented as a direct route but removed it from visible Home actions; used a footer-level data-boundary note instead of adding another methodology card to the main screen.
+- Verification:
+  - In `app/public`: `pnpm run typecheck`
+  - In `app/public`: `pnpm run build`
+  - root `tests/regression` path is absent
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - Local public dev server started from `app/public`; `GET http://localhost:3000/dashboard` returned HTTP `200`
+- Known issues: production build verifies renderability, but final visual QA should still be done against a running public API snapshot to inspect real product names, localized footer wrapping, and mobile menu placement.
+- Next step: run browser/mobile visual QA for `/dashboard` with the public API service and current aggregate snapshot available.
+
+## 2026-06-08 - Public Premium Fintech UI Simplification
+
+- WBS: `5.9`, `5.10`, `5.11`, `5.13`, `5.14` public UI follow-on
+- Status: `done`
+- Goal: refresh the FPDS Public dashboard, deposit list, and product detail screens toward a more polished premium fintech experience while keeping public API contracts, locale behavior, and evidence boundaries unchanged.
+- Why now: the Product Owner asked to remove low-value public information, simplify bank-logo presentation, add a sort-aware Top 5 list on the product catalog, remove the product-detail Decision Summary block, and raise the overall visual quality without copying Revolut branding.
+- Outcome: redesigned the public dashboard hero with live KPI cards, ranking-card presentation, bank coverage, optional single-type scatter, and no visible Recently Changed KPI/ranking, Products by type card, or inline Data notes card. Added a sort-aware Top 5 list above `/products` cards using the existing products API with `page_size=5`. Simplified product cards and product detail to show bank logos without redundant visible bank-name chrome, and moved product-detail official/similar actions into the hero while removing the Decision Summary card. Added a restrained light canvas/header treatment and EN/KO/JA Top 5 labels.
+- Not done: no backend/API contract change, no data mocking, no public evidence exposure, and no new UI/animation library.
+- Key files: `app/public/src/app/products/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/components/fpds/public/bank-logo.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/app/globals.css`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`, `docs/03-design/insight-dashboard-metric-definition.md`
+- Decisions: kept the implementation frontend-only; treated the Top 5 list as a second read from the existing public products endpoint rather than a new API; preserved source-derived product text and the public/private evidence boundary; left methodology details on `/methodology` instead of repeating them on the public Home surface.
+- Verification:
+  - In `app/public`: `pnpm run typecheck`
+  - In `app/public`: `pnpm run build`
+  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
+  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
+  - Local public dev server started from `app/public`; `GET http://localhost:3000/dashboard` returned HTTP `200`
+- Known issues: visual QA with real products still requires the public API service and a current aggregate snapshot running locally; without the API, the Next.js route correctly renders the existing API-unavailable state.
+- Next step: run browser/mobile QA against `/dashboard`, `/products`, and representative `/products/:productId` pages with the API service and current public aggregate snapshot available.
+
 ## 2026-06-07 - Deposit List And Detail Benchmark UI Refresh
 
 - WBS: `5.9`, `5.13`, `5.14` public UI follow-on

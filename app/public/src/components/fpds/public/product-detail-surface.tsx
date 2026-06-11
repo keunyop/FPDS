@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ExternalLink, FileText, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, FileText, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -76,13 +76,12 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
           </Link>
         </Button>
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm md:p-5">
+        <section className="rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_55%,#eefbf7_100%)] p-4 shadow-sm md:p-6">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-primary">{product.bank_name}</p>
-                <h1 className="mt-2 break-words text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{product.product_name}</h1>
+                <h1 className="break-words text-3xl font-semibold leading-tight text-foreground md:text-4xl">{product.product_name}</h1>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge>{product.product_type_label}</Badge>
                   {product.subtype_label ? <Badge muted>{product.subtype_label}</Badge> : null}
@@ -90,46 +89,29 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
                 </div>
               </div>
             </div>
-
-            <dl className="mt-5 grid gap-3 sm:grid-cols-3">
-              {metricCards.map((metric, index) => (
-                <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
-              ))}
-            </dl>
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              {product.product_url ? (
+                <Button asChild>
+                  <a href={product.product_url} target="_blank" rel="noreferrer">
+                    {copy.detail.officialPage}
+                    <ExternalLink className="size-4" aria-hidden="true" />
+                  </a>
+                </Button>
+              ) : null}
+              <Button asChild variant="outline">
+                <Link href={similarHref}>
+                  {copy.detail.similarProducts}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
           </div>
 
-          <Card className="border-border/80 shadow-sm">
-            <CardHeader>
-              <CardDescription className="flex items-center gap-2">
-                <ShieldCheck className="size-4" aria-hidden="true" />
-                {copy.detail.decisionSummary}
-              </CardDescription>
-              <CardTitle className="text-base">{copy.detail.whatToCheck}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <dl className="grid gap-3">
-                <Fact label={copy.common.verifiedOn} value={formatDate(product.last_verified_at, filters.locale)} />
-                <Fact label={copy.common.changedOn} value={formatDate(product.last_changed_at, filters.locale)} />
-                <Fact label={copy.detail.sourceLanguage} value={product.source_language.toUpperCase()} />
-              </dl>
-              <div className="grid gap-2">
-                {product.product_url ? (
-                  <Button asChild>
-                    <a href={product.product_url} target="_blank" rel="noreferrer">
-                      {copy.detail.officialPage}
-                      <ExternalLink className="size-4" aria-hidden="true" />
-                    </a>
-                  </Button>
-                ) : null}
-                <Button asChild variant="outline">
-                  <Link href={similarHref}>
-                    {copy.detail.similarProducts}
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <dl className="mt-5 grid gap-3 sm:grid-cols-3">
+            {metricCards.map((metric, index) => (
+              <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
+            ))}
+          </dl>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
@@ -154,7 +136,6 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
               </CardHeader>
               <CardContent>
                 <dl className="grid gap-4 sm:grid-cols-2">
-                  <Fact label={copy.grid.banks} value={`${product.bank_name} (${product.bank_code})`} />
                   <Fact label={copy.grid.productTypes} value={product.product_type_label} />
                   {detailFacts.map((fact) => (
                     <Fact key={fact.label} label={fact.label} value={fact.value} />
@@ -442,22 +423,6 @@ function formatTerm(termLengthDays: number | null, locale: string) {
     return `${termLengthDays}日`;
   }
   return `${termLengthDays} days`;
-}
-
-function formatDate(value: string | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!value) {
-    return copy.common.noDate;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat(getIntlLocale(locale), {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).format(date);
 }
 
 function formatIsoDate(value: string | null) {

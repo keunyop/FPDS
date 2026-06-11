@@ -93,6 +93,7 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image: linear-gradient(180deg, #fbfdff 0%, #f7f8fb 34%, #f7f8fb 100%);
     font-feature-settings: "rlig" 1, "calt" 1;
     font-variant-numeric: tabular-nums;
     min-height: 100vh;

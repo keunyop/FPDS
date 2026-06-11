@@ -194,6 +194,11 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - Product Owner follow-up on `2026-05-21` refined the same Deposit catalog screen with denser filter controls and comparison-focused product cards. Product cards now prioritize user-relevant product metrics and avoid using repeated `Last change` tiles as filler metrics.
 - Product Owner follow-up on `2026-05-22` moved public Deposit catalog sort controls below search conditions and above the product list, focusing the visible choices on interest rate, monthly fee, and minimum balance. Product cards and product detail now show compact bank brand marks.
 - Product detail now shows a compact public disclosure note, an estimated-interest calculator, source-derived signup/application facts, and a period-by-rate table when approved aggregate metadata includes those rows.
+- Product Owner follow-up on `2026-06-08` added a sort-aware Top 5 list above the product-card grid. The list uses the same public products API and current filter/sort scope, requesting page 1 with `page_size=5` without changing the API contract.
+- Product Owner follow-up on `2026-06-08` simplified public bank branding: when a local bank logo is available, the public list and detail surfaces show the logo without a separate visible bank-name label or logo frame. Bank names remain available to assistive technology through the logo label and remain in API data.
+- Product Owner follow-up on `2026-06-08` removed the product-detail Decision Summary card from the public surface while preserving official-bank, similar-product, calculator, product-fact, key-condition, term-rate, and disclosure sections.
+- Product Owner follow-up on `2026-06-09` added a purpose-first entry pattern to `/products` so users can start from everyday cost, savings-rate, fixed-term return, or low-entry-amount comparison paths before refining filters.
+- Product Owner follow-up on `2026-06-09` added a client-side comparison workspace to `/products`; users can select up to four products from the current result page and compare product, reason-to-compare, rate, monthly fee, entry amount, term, application method, and official bank page without changing the public API contract or exposing evidence data.
 
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 

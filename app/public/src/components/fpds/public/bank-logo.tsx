@@ -24,8 +24,8 @@ export function BankLogo({ bankCode, bankName, className, size = "md" }: BankLog
     <span
       aria-label={`${bankName} logo`}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-md border border-border/60 bg-white shadow-sm",
-        isSmall ? "h-8 w-16 p-1.5" : "h-11 w-24 p-2",
+        "inline-flex shrink-0 items-center justify-center",
+        isSmall ? "h-9 w-16" : "h-12 w-24",
         className
       )}
       title={bankName}
@@ -39,7 +39,7 @@ export function BankLogo({ bankCode, bankName, className, size = "md" }: BankLog
           src={asset.src}
         />
       ) : (
-        <span className={cn("font-semibold text-foreground", isSmall ? "text-[10px]" : "text-xs")}>
+        <span className={cn("rounded-md border border-border/70 bg-white px-2 py-1 font-semibold text-foreground shadow-sm", isSmall ? "text-[10px]" : "text-xs")}>
           {normalizedCode.slice(0, 4) || bankName.slice(0, 2).toUpperCase()}
         </span>
       )}
