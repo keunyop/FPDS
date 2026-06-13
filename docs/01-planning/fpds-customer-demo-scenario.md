@@ -1,11 +1,5 @@
 # FPDS 고객사 시연 시나리오 - Admin 수집부터 Public 결과까지
 
-Version: 1.1
-작성일: 2026-06-01
-Status: Demo planning baseline
-대상: 고객사 의사결정자, 기술 검토자, Product Owner, FPDS 수행팀
-
----
 
 ## 1. 시연 목표
 
@@ -14,10 +8,10 @@ Status: Demo planning baseline
 고객에게 전달할 메시지:
 
 1. FPDS Admin에서 은행과 상품 유형 수집 범위를 운영자가 직접 통제한다.
-2. FPDS는 은행 공식 웹사이트와 PDF/요율 페이지를 수집하고 근거 자료를 보존한다.
-3. 수집 과정은 run, source, evidence, model execution, token usage, audit로 추적된다.
+2. FPDS는 은행 공식 웹사이트와 PDF, 상세 페이지를 수집하고 근거 자료를 보존한다.
+3. 수집 과정은 수집 실행, source 찾기, evidence 저장, 상품정보 추출, 토큰 사용량 기록, audit로 추적된다.
 4. 검증을 통과한 상품은 canonical product와 public aggregate projection으로 반영된다.
-5. FPDS Public은 내부 evidence를 노출하지 않고, 최신 성공 aggregate snapshot 기준으로 상품 grid와 dashboard를 제공한다.
+5. FPDS Public은 수집한 상품정보를 B2C로 제공한다.
 
 권장 시연 범위:
 
@@ -27,8 +21,6 @@ Status: Demo planning baseline
 | 은행 | `BMO`, `TD` | 인지도가 높고, 검증된 Big 5 범위 안에서 상품 수가 적당함 |
 | 상품 유형 | `chequing`, `savings` | 고객이 이해하기 쉽고 GIC보다 설명 부담이 낮음 |
 | 예상 상품 수 | 17개 | 현재 source-backed golden dataset 기준 BMO 9개 + TD 8개 |
-| Public 화면 | `/products`, `/dashboard`, `/products/:productId`; optional direct route `/methodology` | 목록, 상세, 지표를 상단 메뉴에서 보여주고, 방법론은 메뉴가 아니라 직접 URL 또는 준비된 탭으로 보여줌 |
-| Admin 화면 | `/admin/banks`, `/admin/runs`, `/admin/sources`, `/admin/usage`, `/admin/audit` | 수집 제어, 실행 진단, source lineage, token usage, audit를 설명 가능 |
 
 예상 상품 수:
 
@@ -38,38 +30,6 @@ Status: Demo planning baseline
 | TD | 5 | 3 | 8 |
 | 합계 | 10 | 7 | 17 |
 
-코드 정합성 메모:
-
-- `app/public/src/components/fpds/public/public-nav.tsx` 기준 Public 상단 navigation은 Home(`/dashboard`), Deposit(`/products`), disabled Loan, language selector로 구성된다.
-- `/methodology`는 `app/public/src/app/methodology/page.tsx`에 구현된 실제 route지만 top-level menu item은 아니다.
-- 시연 중에는 `/methodology`를 메뉴에서 찾는 흐름으로 설명하지 않고, Governance 파트에서 직접 URL 또는 미리 열어둔 탭으로 보여준다.
-- `/products`의 은행, 상품 유형, 고객 태그 필터는 checkbox 기반이며 `bank_code`, `product_type`, `target_customer_tag` 반복 query parameter를 지원한다. 따라서 BMO+TD, chequing+savings 동시 scope 시연은 현재 코드와 일치한다.
-
----
-
-## 2. 시연 전 현재 상태 설명 포인트
-
-아래 수치는 데모 준비 시점의 로컬 상태 확인값이다. 고객 시연 당일에는 반드시 다시 확인한다.
-
-최근 상태 확인 결과:
-
-- Active bank: `BMO`, `CIBC`, `RBC`, `SCOTIA`, `TD`
-- Active deposit product type: `chequing`, `savings`, `gic`
-- Active source catalog item: 15개
-- 최신 Big 5 전체 collection: `collection_7wJ2KRMYsDg9XEbn`
-- 최신 전체 collection 결과: 15개 run 완료, 98개 normalized candidate, review queue 0개
-- Canonical product: 98개
-- Product version: 98개
-- Model execution: 328개
-- LLM usage record: 328개
-- Evidence chunk / embedding: 각각 2,975개
-
-발표 시 해석:
-
-- Big 5 deposit 전체 범위는 이미 내부 검증이 완료된 상태다.
-- 고객 시연은 흐름을 명확히 보여주기 위해 2개 은행과 2개 상품 유형으로 좁힌다.
-- Public 화면은 은행 웹사이트를 실시간 조회하지 않고 최신 성공 aggregate snapshot을 읽는다.
-
 ---
 
 ## 3. 발표 시나리오
@@ -78,7 +38,7 @@ Status: Demo planning baseline
 
 권장 멘트:
 
-> 오늘은 FPDS가 은행 공식 상품 페이지를 근거 기반의 canonical product data로 바꾸는 과정을 보여드리겠습니다. 운영자는 Admin에서 은행과 상품 유형 coverage를 선택하고, FPDS는 공식 source를 수집해 snapshot, parsing, evidence retrieval, extraction, normalization, validation을 거친 뒤 검증된 상품을 public grid와 dashboard에 반영합니다. 또한 어떤 agent가 실행됐고, AI가 어디서 사용됐으며, token usage와 audit가 어떻게 남는지도 함께 보여드리겠습니다.
+> FPDS가 은행들의 다양한 공개된 상품 페이지를 수집하여 표준화된 상품정보로 바꾸는 과정을 보여드리겠습니다. 운영자는 Admin에서 은행과 상품 유형을 선택하고, FPDS는 공식 source를 수집해 snapshot, parsing, evidence retrieval, extraction, normalization, validation을 거친 뒤 검증된 상품을 public dashboard에 반영합니다. 또한 어떤 agent가 실행됐고, AI가 어디서 사용됐으며, token usage와 audit가 어떻게 남는지도 함께 보여드리겠습니다.
 
 비즈니스 문제를 짧게 정리:
 
