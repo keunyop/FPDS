@@ -62,6 +62,29 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-06-15 - Dev Product Collection Data And Storage Reset Before Recollection
+
+- WBS: `5.15`, `5.16`, admin collection retest preparation
+- Status: `done`
+- Goal: delete all data produced by product information collection while preserving bank and product-type setup before a clean recollection test.
+- Why now: the Product Owner requested removal of all product collection DB artifacts and S3-backed object storage artifacts, excluding bank and product-type information.
+- Outcome: deleted dev DB collection/downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3-compatible objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
+- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
+- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `tmp/fpds_admin_collection_goal_tool.py`, `docs/00-governance/development-journal.md`
+- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
+- Verification:
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
+  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
+  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
+  - Pre-delete DB counts included `source_registry_item=129`, `ingestion_run=15`, `source_document=105`, `source_snapshot=109`, `parsed_document=107`, `evidence_chunk=2883`, `evidence_chunk_embedding=2883`, `model_execution=327`, `llm_usage_record=327`, `normalized_candidate=98`, `field_evidence_link=4588`, `canonical_product=98`, `product_version=98`, `change_event=98`, `aggregate_refresh_request=15`, `aggregate_refresh_run=15`, `public_product_projection=762`, `dashboard_metric_snapshot=15`, `dashboard_ranking_snapshot=265`, and `dashboard_scatter_snapshot=132`.
+  - Deleted `929` S3-compatible objects under `s3://fpds-dev-private/dev/`; post-delete object storage summary is `object_count=0`, `total_bytes=0`.
+  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
+  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
+  - Local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` are absent.
+- Known issues: no new collection run was started in this slice.
+- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
+
 ## 2026-06-11 - Public Main Screen Copy Simplification
 
 - WBS: `5.10`, `5.13`, public UI copy simplification

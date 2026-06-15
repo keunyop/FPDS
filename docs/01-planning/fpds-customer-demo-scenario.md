@@ -38,13 +38,13 @@
 
 권장 멘트:
 
-> FPDS가 은행들의 다양한 공개된 상품 페이지를 수집하여 표준화된 상품정보로 바꾸는 과정을 보여드리겠습니다. 운영자는 Admin에서 은행과 상품 유형을 선택하고, FPDS는 공식 source를 수집해 snapshot, parsing, evidence retrieval, extraction, normalization, validation을 거친 뒤 검증된 상품을 public dashboard에 반영합니다. 또한 어떤 agent가 실행됐고, AI가 어디서 사용됐으며, token usage와 audit가 어떻게 남는지도 함께 보여드리겠습니다.
+> FPDS가 은행들의 다양한 공개된 상품 페이지를 수집하여 표준화된 상품정보로 바꾸는 과정을 보여드리겠습니다. 운영자는 Admin에서 은행과 상품 유형을 선택하고, FPDS는 공식 source를 수집해 snapshot 저장, 분석, 근거추출, 상품정보 표준화, 검증을 거친 뒤 검증된 상품을 public dashboard에 반영합니다. 또한 어떤 agent가 실행됐고, AI가 어디서 사용됐으며, token 사용량과 검증이 어떻게 남는지도 함께 보여드리겠습니다.
 
 비즈니스 문제를 짧게 정리:
 
-- 은행 상품 정보는 상품 상세 페이지, 요율 페이지, PDF, 동적 페이지에 흩어져 있다.
-- FPDS는 이 불안정한 원천 정보를 재현 가능하고 검토 가능한 canonical 데이터로 전환한다.
-- Public 사용자는 깔끔한 비교 화면을 보고, 운영자는 evidence, run 진단, usage, audit, health를 본다.
+- 은행 상품 정보는 상품 상세 페이지, 각종 문서, PDF, 동적 페이지에 흩어져 있다.
+- FPDS는 이 불안정한 원천 정보를 표준화된 데이터로 전환한다.
+- Public 사용자는 깔끔한 비교 화면을 보고, 운영자는 검증, 실행, 사용량, 검증 결과를 본다.
 
 ### 3.2 권장 발표 시간
 
@@ -69,77 +69,6 @@
 
 ---
 
-## 4. 시연 전 준비 체크리스트
-
-### 4.1 실행 환경
-
-터미널을 분리해서 실행한다.
-
-```powershell
-# Terminal 1 - API
-$env:FPDS_ENV_FILE=".env.dev"
-uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
-```
-
-```powershell
-# Terminal 2 - Admin web
-cd app/admin
-pnpm run dev
-```
-
-```powershell
-# Terminal 3 - Public web
-cd app/public
-pnpm run dev
-```
-
-예상 URL:
-
-| Surface | URL |
-|---|---|
-| API health | `http://localhost:4000/healthz` |
-| Admin | `http://localhost:3001/admin` |
-| Public dashboard | `http://localhost:3000/dashboard` |
-| Public product grid | `http://localhost:3000/products` |
-
-### 4.2 상태 확인
-
-시연 전 실행:
-
-```powershell
-api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state
-```
-
-확인할 것:
-
-- `active_catalog_item_count`가 15인지.
-- `canonical_product`가 0이 아닌지.
-- `public_product_projection`이 0이 아닌지.
-- 최신 collection에 failed run이 없는지.
-- review queue가 0이거나, 남아 있다면 이유를 설명할 수 있는지.
-
-### 4.3 데모 범위 사전 수집
-
-고객 앞에서 은행 사이트 지연을 기다리지 않도록, 가능하면 시연 전에 BMO/TD chequing/savings 범위를 미리 수집한다.
-
-```powershell
-api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev launch --only-bank BMO --only-bank TD --only-product-type chequing --only-product-type savings
-```
-
-반환된 `collection_id`로 polling:
-
-```powershell
-api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev wait --collection-id <collection_id> --timeout-seconds 1800 --poll-seconds 20 --brief
-```
-
-주의:
-
-- 현재 helper의 `compare` 명령은 Big 5 전체 98개 golden dataset과 비교한다.
-- 17개 데모 subset 검증에는 그대로 사용하지 않는다. subset 비교가 필요하면 helper에 scope filter를 추가해야 한다.
-- 고객 시연 중에는 live collection을 "실행 가능함"을 보여주는 용도로 사용하고, 결과 확인은 사전 완료 run tab을 백업으로 열어둔다.
-
----
-
 ## 5. 상세 시연 절차
 
 ### Step 1 - Admin 로그인과 운영자 경계 설명
@@ -152,20 +81,13 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 진행:
 
 1. Admin 계정으로 로그인한다.
-2. Admin Console이 인증된 운영자 영역임을 보여준다.
-3. 좌측 navigation의 Review, Operations, Observability 그룹을 짧게 보여준다.
+2. 메뉴 그룹을 짧게 보여준다.
 
 멘트:
 
-> Admin은 운영자 전용 신뢰 경계입니다. source 관리, collection 실행, review, run diagnostics, audit, LLM usage는 로그인 후에만 접근할 수 있습니다. Public 사용자는 내부 evidence나 raw source trace를 보지 않습니다.
+> Admin은 운영자 전용 화면입니다. 수집 은행 및 수집 자료 관리, 수집 실행, 리뷰, 토큰 사용량 등을 확인할수 있습니다.
 
-확인 포인트:
-
-- Admin은 session auth가 필요하다.
-- review/source write action은 role 권한과 CSRF token을 요구한다.
-- Public과 Admin의 신뢰 경계가 분리되어 있다.
-
-### Step 2 - Product Type과 Bank Coverage 확인
+### Step 2 - 상품 유형과 수집 은행 확인
 
 화면:
 
@@ -174,19 +96,15 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 
 진행:
 
-1. 등록된 deposit product type을 보여준다: `chequing`, `savings`, `gic`.
+1. 등록된 deposit product type을 보여준다: `chequing 요구불`, `savings 적금`, `gic 예금`.
 2. `/admin/banks`에서 BMO 상세 modal을 연다.
 3. BMO의 chequing과 savings coverage card를 보여준다.
 4. TD도 같은 방식으로 coverage가 있음을 보여준다.
 
 멘트:
 
-> 운영자가 code나 JSON 파일을 직접 수정하는 방식이 아닙니다. 은행 프로필과 product coverage는 DB-backed Admin workflow에서 관리됩니다. Collection 시점에는 은행 홈페이지와 product-type definition을 기준으로 실제 detail source row가 생성됩니다.
+> 운영자가 수집할 은행의 프로필과 수집할 상품 유형을 관리합니다. 상품 정보 수집은 등록된 은행 홈페이지와 상품 유형 정의를 기준으로 실제 상세 원천 정보가 생성됩니다.
 
-확인 포인트:
-
-- Bank와 product type registry가 운영 DB 기준이다.
-- Generated source는 시스템이 만들며, 운영자는 inspection과 soft remove를 할 수 있다.
 
 ### Step 3 - Demo Scope Collection 실행
 
@@ -199,27 +117,13 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 5. TD `Chequing` coverage card의 `Collect`를 클릭한다.
 6. TD `Savings` coverage card의 `Collect`를 클릭한다.
 
-이 방식을 쓰는 이유:
-
-- Bank list의 bulk collect는 선택된 은행의 전체 coverage를 수집하므로 GIC까지 포함될 수 있다.
-- 고객 시연 범위를 chequing/savings로 고정하려면 per-coverage `Collect`가 더 안전하다.
-
-백업 실행 명령:
-
-```powershell
-api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev launch --only-bank BMO --only-bank TD --only-product-type chequing --only-product-type savings
-```
 
 멘트:
 
-> Collection은 비동기 작업입니다. Admin UI는 queued run id를 빠르게 반환하고, 서버에서는 homepage discovery, source materialization, snapshot capture, parse/chunk, extraction, normalization, validation, auto-promotion 또는 review routing, aggregate refresh가 background에서 이어집니다.
+> 상품 수집은 비동기로 이뤄집니다.서버에서는 홈페이지 탐색, 원천정보의 snapshot 저장, 파싱과 chunking, 상품정보 추출, 표준화, 검증이 background에서 이어집니다.
 
-확인 포인트:
 
-- UI에 collection queued 메시지가 뜬다.
-- `/admin/runs`에서 새 run을 확인할 수 있다.
-
-### Step 4 - Run Status와 Pipeline Stage 확인
+### Step 4 - 실행 상태와 Pipeline Stage 확인
 
 화면:
 
@@ -235,21 +139,10 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 
 멘트:
 
-> Run은 collection 실행의 운영 record입니다. 전체가 성공하면 completed가 되고, 일부 source 문제가 있어도 partial completion으로 진단 가능한 결과를 남깁니다. 따라서 운영자는 어떤 source나 stage가 문제였는지 확인하고 재시도할 수 있습니다.
+> Run은 수집 실행의 운영 record입니다. 전체가 성공하면 completed가 되고, 일부 source 문제가 있어도 partial completion으로 진단 가능한 결과를 남깁니다. 따라서 운영자는 어떤 source나 stage가 문제였는지 확인하고 재시도할 수 있습니다.
 
-설명할 pipeline stage:
 
-1. Source catalog collection / homepage discovery.
-2. Snapshot capture.
-3. Parse and chunk.
-4. Evidence retrieval.
-5. Extraction.
-6. Normalization.
-7. Validation and routing.
-8. Canonical upsert / auto-promotion.
-9. Aggregate refresh.
-
-### Step 5 - Generated Source와 Source Lineage 확인
+### Step 5 - 생성된 소스 확인
 
 화면:
 
@@ -263,15 +156,7 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 3. URL, role/status, discovery summary, AI-predicted role이 있으면 함께 보여준다.
 4. recent collection history를 보여준다.
 
-멘트:
 
-> FPDS는 운영자가 입력한 coverage와 시스템이 생성한 source row를 분리합니다. 운영자는 은행과 상품군을 결정하고, FPDS가 그 범위 안에서 공식 detail source를 찾고 근거와 판단 정보를 남깁니다.
-
-확인 포인트:
-
-- Source URL은 은행 공식 public URL이다.
-- Discovery metadata가 source role 판단 근거를 설명한다.
-- 잘못 생성된 source는 삭제가 아니라 soft remove로 audit와 history를 보존한다.
 
 ### Step 6 - Evidence와 Reviewability 설명
 
@@ -287,13 +172,7 @@ api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --en
 
 멘트:
 
-> FPDS의 목표는 blind automation이 아닙니다. validation issue, 낮은 confidence, ambiguous mapping, dynamic product type은 review로 보냅니다. 반대로 policy를 만족한 candidate는 audited canonical path를 통해 auto-promote됩니다.
-
-확인 포인트:
-
-- Evidence trace는 Admin-only다.
-- Review action은 approve, reject, defer, edit-approve다.
-- Manual override는 change history와 audit event를 남긴다.
+> FPDS가 상품 정보를 수집할때 점수가 낮으면 사람의 review 프로세스를 거치도록 설계되었습니다. validation issue, 낮은 confidence, ambiguous mapping, dynamic product type은 review로 보냅니다. 반대로 policy를 만족한 candidate는 auto-promote됩니다.
 
 ### Step 7 - AI Agent와 Token Usage 설명
 
@@ -359,11 +238,7 @@ Token/cost 설명:
 
 > Public은 최신 성공 aggregate snapshot을 읽습니다. 은행 페이지를 실시간 호출하지 않고, raw evidence나 source excerpt도 노출하지 않습니다. 사용자는 approved projection field, filter, sort, official bank link를 봅니다. 데이터 경계와 metric 산정 설명은 필요 시 별도 methodology page를 직접 URL로 열어 확인합니다.
 
-확인 포인트:
 
-- Public은 anonymous read surface다.
-- Public product fact는 projection field이며 raw source artifact가 아니다.
-- Source-derived product text는 원천 언어를 유지한다.
 
 ### Step 9 - Public Dashboard 확인
 
@@ -382,10 +257,7 @@ Token/cost 설명:
 
 > Dashboard는 Product Grid와 같은 public aggregate projection을 사용합니다. Metric은 현재 filter scope에 맞춰 계산되고, 필요한 numeric field가 없는 상품은 해당 비교에서 추정하지 않고 제외합니다.
 
-확인 포인트:
 
-- Dashboard와 Grid가 URL-based shared filter vocabulary를 사용한다.
-- Freshness copy와 direct-route methodology page가 snapshot serving 방식을 설명한다.
 
 ### Step 10 - Governance와 운영 통제 확인
 
@@ -393,13 +265,13 @@ Token/cost 설명:
 
 - `/admin/audit`
 - `/admin/health/dashboard`
-- `http://localhost:3000/methodology` direct route. Public top navigation menu에는 없음.
+
 
 진행:
 
 1. audit event category를 보여준다.
 2. dashboard health와 latest successful snapshot 상태를 보여준다.
-3. 주소창에 직접 입력하거나 미리 준비한 탭으로 public methodology page를 보여준다.
+
 
 멘트:
 
@@ -442,17 +314,6 @@ Admin coverage selection
   -> public product grid/dashboard
 ```
 
----
-
-## 7. 시연 리스크와 대응
-
-| 리스크 | 영향 | 대응 |
-|---|---|---|
-| 은행 사이트 지연 또는 page 구조 변경 | live collection이 느려지거나 일부 실패 가능 | 데모 범위 사전 수집, 완료 run tab 준비, live collection은 실행 가능성 확인 용도로만 사용 |
-| 외부 LLM 설정/쿼터 문제 | AI scorer가 fallback되거나 fresh run token이 낮게 보일 수 있음 | selective AI design 설명, 완료 run의 usage dashboard 활용, fallback note를 governance 장점으로 설명 |
-| Aggregate refresh 지연 | fresh collection 결과가 즉시 public에 안 보일 수 있음 | latest successful snapshot 기준 설명, dashboard health 확인, 필요 시 manual retry |
-| Review queue가 비어 있음 | 고객이 review 예시를 기대할 수 있음 | policy-clear auto-promotion 설명, 필요한 경우 과거 review 예시를 별도 준비 |
-| Big 5/GIC 범위 혼선 | 시연 범위가 커져 메시지가 흐려짐 | 오늘 범위는 BMO/TD chequing/savings라고 명확히 고정 |
 
 ---
 
@@ -470,142 +331,6 @@ Admin coverage selection
 | 아직 범위 밖인 것은 무엇인가요? | personalized recommendation, public evidence exposure, external SaaS/Open API, full BX-PF runtime integration, Phase 2 market expansion은 이번 시연 범위 밖입니다. |
 
 ---
-
-## 9. ChatGPT 이미지 Prompt - 아키텍처 구조도
-
-아래 prompt를 ChatGPT 이미지 생성에 사용한다.
-
-```text
-Create a professional architecture diagram for a financial product data platform named "FPDS".
-
-Canvas: 16:9, clean enterprise style, white background, restrained blue/green/gray palette, no decorative gradients, no fictional logos.
-
-Use three horizontal swimlanes:
-1. External systems
-2. FPDS platform boundary
-3. Public and operator consumers
-
-Show these nodes:
-- Bank public websites and PDFs
-- LLM provider
-- FPDS Admin Console, authenticated
-- FPDS Public Product Grid and Insight Dashboard, anonymous
-- FastAPI Public/Admin API
-- Private ingestion worker
-- Operational PostgreSQL database
-- Object storage for raw snapshots, parsed text, evidence artifacts
-- Evidence chunk retrieval store with pgvector side table and metadata-only fallback
-- Aggregate refresh and public projection
-- Optional BX-PF target master store, marked "future / interface-ready"
-
-Show the main data flow:
-Admin selects bank and product-type coverage -> API queues collection -> private worker discovers official source pages -> snapshots are captured -> content is parsed and chunked -> evidence retrieval selects source chunks -> extraction and normalization create normalized candidates -> validation routes to auto-promotion or review -> canonical product/version/change records are stored -> aggregate refresh builds public_product_projection -> public grid/dashboard read the latest successful aggregate snapshot.
-
-Show AI usage as dashed lines:
-- LLM provider to homepage AI parallel scorer during source discovery
-- LLM provider to dynamic product extractor/normalizer only for unsupported operator-defined product types
-- Usage records flow into model_execution and llm_usage_record, visible in Admin Usage Dashboard
-
-Add security/trust notes as small callouts:
-- Public never receives raw evidence or source excerpts
-- Evidence trace is admin-only
-- Admin writes require session, role, and CSRF
-- Worker is the only boundary that calls external bank sites
-
-Labels should be concise and presentation-ready. Use Korean main labels with short English technical terms in parentheses, for example "공개 상품 목록 (Product Grid)".
-```
-
-## 10. ChatGPT 이미지 Prompt - 상품수집 프로세스 구조도
-
-아래 prompt를 ChatGPT 이미지 생성에 사용한다.
-
-```text
-Create a detailed but readable process structure diagram for FPDS product collection.
-
-Canvas: 16:9, clean process-flow style, white background, rectangular nodes, numbered stages, no icons unless simple and professional.
-
-Title: "FPDS Product Collection Process - Evidence to Public Projection"
-
-Use a left-to-right process with 10 numbered stages:
-1. Admin coverage selection: bank + product type
-2. Homepage discovery and generated source rows
-3. Snapshot capture: HTML/PDF saved to object storage
-4. Parse and chunk: parsed text + evidence chunks
-5. Evidence retrieval: metadata filter + pgvector ranking + metadata-only fallback
-6. Extraction agent: field candidates with evidence links
-7. Normalization agent: canonical candidate payload
-8. Validation and confidence routing: pass, warning, error, review
-9. Canonical upsert and audit: product, version, change event, review decision
-10. Aggregate refresh: public_product_projection, dashboard metrics, rankings, scatter
-
-Add side artifacts under the stages:
-- source_snapshot
-- parsed_document
-- evidence_chunk
-- evidence_chunk_embedding
-- extracted draft
-- normalized_candidate
-- field_evidence_link
-- model_execution
-- llm_usage_record
-- review_task
-- canonical_product / product_version
-- aggregate_refresh_run
-- public_product_projection
-
-Show AI-agent usage as small colored badges:
-- fpds-homepage-ai-parallel-scorer: optional during stage 2
-- fpds-heuristic-extractor: stage 6, zero external LLM tokens for supported chequing/savings/GIC
-- fpds-heuristic-normalizer: stage 7, zero external LLM tokens for supported chequing/savings/GIC
-- fpds-dynamic-product-extractor / normalizer: optional fallback for unsupported product types, forced to manual review
-
-Add a bottom governance band:
-"Traceability | Validation | Reviewability | Token usage | Audit | Public freshness"
-
-Labels should be Korean with technical field names preserved in English where exact table names matter.
-```
-
----
-
-## 11. 추가 ChatGPT 요청 Prompt
-
-### 11.1 발표자료 목차 생성
-
-```text
-Act as a senior product/project manager preparing a customer demo deck.
-
-Create a 12-slide Korean presentation outline for FPDS, a financial product data service.
-
-Demo scope:
-- Canada
-- BMO and TD
-- chequing and savings products
-- Admin collection to Public product grid/dashboard
-- Customer is technically interested in internal collection process, AI-agent usage, token usage, evidence trace, validation, and public freshness.
-
-Use this narrative:
-1. Business problem
-2. FPDS product boundary
-3. Architecture overview
-4. Admin coverage management
-5. Product collection pipeline
-6. Evidence and validation model
-7. AI-agent usage and token observability
-8. Review/auto-promotion/audit governance
-9. Public Product Grid
-10. Public Insight Dashboard
-11. Demo risks and controls
-12. Next steps and roadmap
-
-For each slide, provide:
-- slide title
-- key message
-- 3-5 bullets
-- suggested screen or diagram
-- speaker notes in Korean
-
-Keep tone professional, factual, and customer-ready.
-```
 
 ### 11.2 기술 Q&A Sheet 생성
 
@@ -654,50 +379,3 @@ Tone:
 - confident but not salesy
 - suitable for financial-services technical stakeholders
 ```
-
-### 11.4 리허설 체크리스트 생성
-
-```text
-Act as a demo producer.
-
-Create a one-page Korean rehearsal checklist for the FPDS demo.
-
-Include:
-- pre-demo environment checks
-- browser tabs to open
-- exact demo order
-- expected proof points
-- fallback plan if live collection is slow
-- who speaks during each segment
-- when to switch from live collection to pre-run data
-- Q&A handoff plan
-
-Keep it concise enough to print.
-```
-
----
-
-## 12. 최종 발표 유의사항
-
-Product Owner가 명시적으로 승인하지 않는 한 FPDS를 production release 완료 상태로 표현하지 않는다.
-
-권장 표현:
-
-- 현재 Phase 1 플랫폼 build이며, Admin collection과 Public aggregate-backed surface가 동작한다.
-- Evidence-first architecture와 operational traceability가 구현되어 있다.
-- Big 5 deposit coverage는 내부 검증을 통과했다.
-- 고객 시연은 메시지 집중을 위해 BMO/TD chequing/savings로 좁힌다.
-
-피해야 할 표현:
-
-- "AI가 모든 은행 page를 자동으로 이해합니다."
-- "Manual review가 필요 없습니다."
-- "Public data는 은행 페이지에서 실시간입니다."
-- "BX-PF integration이 완전히 끝났습니다."
-
-대신 사용할 표현:
-
-- "AI는 선택적으로 사용되며 usage가 관측됩니다."
-- "Validation이 auto-promotion과 review routing을 결정합니다."
-- "Public은 latest successful aggregate snapshot을 읽습니다."
-- "BX-PF는 interface-ready/future integration boundary이며 이번 시연 범위 밖입니다."
