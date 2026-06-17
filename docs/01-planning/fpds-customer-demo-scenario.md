@@ -1,4 +1,4 @@
-# FPDS 중간 보고 - Admin 수집부터 Public 결과까지
+﻿# FPDS 중간 보고 - Admin 수집부터 Public 결과까지
 
 
 ## 1. 개요
@@ -73,3 +73,15 @@
 ### Step 9 - Public Product 확인
 
 > Public은 최신 성공 aggregate snapshot을 읽습니다. 은행 페이지를 실시간 호출하지 않고, raw evidence나 source excerpt도 노출하지 않습니다. 사용자는 approved projection field, filter, sort, official bank link를 봅니다.
+
+
+## Agent
+
+| Agent | 사용 시점 | 외부 LLM 사용 | Token 영향 |
+|---|---|---:|---|
+| `fpds-homepage-ai-parallel-scorer` | homepage-first source discovery에서 후보 link scoring | OpenAI 설정이 있을 때 사용 | prompt/completion token과 estimated cost 기록 |
+| `fpds-heuristic-extractor` | chequing/savings/GIC field extraction | 사용 안 함 | execution record는 남고 token은 0 |
+| `fpds-heuristic-normalizer` | canonical mapping, subtype/taxonomy, evidence link 구성 | 사용 안 함 | execution record는 남고 token은 0 |
+| `fpds-dynamic-product-extractor` | 전문 parser가 없는 operator-added product type extraction fallback | 사용 가능 | token/cost 기록, manual review 우선 |
+| `fpds-dynamic-product-normalizer` | dynamic product canonical fallback | 사용 가능 | token/cost 기록, manual review 우선 |
+| Validation/routing policy | required field, confidence, issue code, auto-promotion/review 결정 | 사용 안 함 | LLM token 없음 |
