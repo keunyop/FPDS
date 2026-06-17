@@ -21,16 +21,10 @@
 2. 메뉴 그룹을 짧게 본다.
 
 
-> Admin은 운영자 전용 화면입니다. 수집 은행 및 수집 자료 관리, 수집 실행, 리뷰, 토큰 사용량 등을 확인할수 있습니다.
-
-> 운영자는 Admin에서 은행과 상품 유형을 선택하고, 상품 수집을 실행하면 FPDS의 AI agent가 공식 source를 수집해 snapshot 저장, 분석, 근거추출, 상품정보 표준화, 검증을 거친 뒤 검증된 상품을 public dashboard에 반영합니다. 또한 어떤 agent가 실행됐고, AI가 어디서 사용됐으며, token 사용량과 검증이 어떻게 남는지도 볼수있습니다.
-
 ### Step 2 - 상품 유형과 수집 은행
 
 1. 등록된 상품 유형을 본다.
 2. 등록된 은행을 본다.
-
-> 운영자가 수집할 은행의 프로필과 수집할 상품 유형을 관리합니다. 상품 정보 수집은 등록된 은행 홈페이지와 상품 유형 정의를 기준으로 실제 상세 원천 정보가 생성됩니다.
 
 
 ### Step 3 - 상품 수집 실행
@@ -38,7 +32,6 @@
 1. 은행 상세 modal을 연다.
 2. 상품 수집을 실행한다.
 
-> 상품 수집은 비동기로 이뤄집니다.서버에서는 홈페이지 탐색, 원천정보의 snapshot 저장, 파싱과 chunking, 상품정보 추출, 표준화, 검증이 background에서 이어집니다.
 
 
 ### Step 4 - 실행 상태 확인
@@ -46,7 +39,6 @@
 1. 실행 run을 확인한다.
 2. Run detail을 연다.
 
-> Run은 수집 실행의 record입니다. 전체가 성공하면 completed가 되고, 일부 source 문제가 있으면 운영자는 review 절차에 들어갑니다. 따라서 운영자는 어떤 stage가 문제인지 확인하고 재시도할 수 있습니다.
 
 
 ### Step 5 - 생성된 소스 확인
@@ -58,21 +50,16 @@
 
 ### Step 6 - review 설명
 
-> FPDS가 상품 정보를 수집할때 AI agent가 수집 및 추출한 상품 정보의 점수를 매겨 점수가 낮으면 운영자의 review 프로세스를 거치도록 설계되었습니다. 반대로 policy를 만족한 candidate는 auto-promote됩니다.
 
 ### Step 7 - AI Agent와 Token Usage 설명
 
 1. run detail에서 usage summary를 본다.
 2. `/admin/usage`에서 total, by-model, by-agent, by-run, trend, anomaly를 본다.
 
-> FPDS는 AI agent와 openAI LLM을 사용합니다. 모든 사용량은 run, agent, model, token count, status, estimated cost 기준으로 저장됩니다.
-
 ### Step 8 - Public Dashboard 확인
 
 
 ### Step 9 - Public Product 확인
-
-> Public은 최신 성공 aggregate snapshot을 읽습니다. 은행 페이지를 실시간 호출하지 않고, raw evidence나 source excerpt도 노출하지 않습니다. 사용자는 approved projection field, filter, sort, official bank link를 봅니다.
 
 
 ## Agent
