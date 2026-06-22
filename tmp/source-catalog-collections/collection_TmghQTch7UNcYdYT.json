@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_TmghQTch7UNcYdYT",
+  "correlation_id": "corr_4BnVDBXJDnoR0MDG",
+  "request_id": "req_ca02a21256384546b32de83958c2ea32",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260617_041700_td_savings_collect_E14Od33m",
+      "catalog_item_id": "catalog-ca-tb-saving-_8bZJSXb",
+      "bank_code": "TD",
+      "bank_name": "TD Bank",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_catalog_product_type": "savings",
+      "source_language": "en",
+      "homepage_url": "https://www.td.com/ca/en/personal-banking",
+      "normalized_homepage_url": "https://www.td.com/ca/en/personal-banking",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}
