@@ -1,0 +1,3070 @@
+[source-catalog-runner] starting run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH for ALTERNA chequing
+[source-collection-runner] run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH starting snapshot for 5 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+  "correlation_id": "corr_oWCbrolk0wnNqgPi",
+  "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-faedbe86d1188a90",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/snap-faedbe86d1188a90/raw",
+      "checksum": "d8e0fd19ad88ad03292f4f73beb2c9686ada238c4d0423ace11581e1d0a83904",
+      "fingerprint": "9db64339f8f4dedc7763fb5980a7ece5d34a65cd2bb83b7074f7a6140f5b19bb",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-05T04:51:00.547388+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-faedbe86d1188a90",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/snap-faedbe86d1188a90/raw",
+        "content_type": "text/html",
+        "checksum": "d8e0fd19ad88ad03292f4f73beb2c9686ada238c4d0423ace11581e1d0a83904",
+        "fingerprint": "9db64339f8f4dedc7763fb5980a7ece5d34a65cd2bb83b7074f7a6140f5b19bb",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+          "request_url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+          "final_url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+          "status_code": 200,
+          "content_length": 100413,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-05T04:51:00.547388+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c4c4a2b574a6283b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "selected_snapshot_id": "snap-faedbe86d1188a90",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+          "content_type": "text/html",
+          "checksum": "d8e0fd19ad88ad03292f4f73beb2c9686ada238c4d0423ace11581e1d0a83904",
+          "fingerprint": "9db64339f8f4dedc7763fb5980a7ece5d34a65cd2bb83b7074f7a6140f5b19bb",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/snap-faedbe86d1188a90/raw",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-2183897615",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-d5c3c4042a2aa2fb",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-d5c3c4042a2aa2fb/raw",
+      "checksum": "4b253204101d2e25d95c99db660d07415dda19d4ccb63ebea0224d4f4bfd8d7a",
+      "fingerprint": "f19dc350d881deea32e09cf24ae43811195ada127cf8f8ac02f5e20d73c88009",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-05T04:51:00.549954+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-d5c3c4042a2aa2fb/raw",
+        "content_type": "text/html",
+        "checksum": "4b253204101d2e25d95c99db660d07415dda19d4ccb63ebea0224d4f4bfd8d7a",
+        "fingerprint": "f19dc350d881deea32e09cf24ae43811195ada127cf8f8ac02f5e20d73c88009",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-CHE-2183897615",
+          "request_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+          "final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+          "status_code": 200,
+          "content_length": 77424,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-05T04:51:00.549954+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-282e95b801a30c5b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+          "content_type": "text/html",
+          "checksum": "4b253204101d2e25d95c99db660d07415dda19d4ccb63ebea0224d4f4bfd8d7a",
+          "fingerprint": "f19dc350d881deea32e09cf24ae43811195ada127cf8f8ac02f5e20d73c88009",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-d5c3c4042a2aa2fb/raw",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+      "source_document_id": "src-alterna-html-898475beee914b9c",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-be335bcc283e7919",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-898475beee914b9c/snap-be335bcc283e7919/raw",
+      "checksum": "940efb37b2dba8bcc41650f18f9a6bda46a82b052acee59fac1a4d79f0322bf7",
+      "fingerprint": "93a4398bf9c9822dc69f59f9a71252389e6b104b6a76fa33e8e3c24151eb30ad",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-05T04:51:00.541183+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-be335bcc283e7919",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-898475beee914b9c/snap-be335bcc283e7919/raw",
+        "content_type": "text/html",
+        "checksum": "940efb37b2dba8bcc41650f18f9a6bda46a82b052acee59fac1a4d79f0322bf7",
+        "fingerprint": "93a4398bf9c9822dc69f59f9a71252389e6b104b6a76fa33e8e3c24151eb30ad",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+          "request_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+          "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+          "status_code": 200,
+          "content_length": 75159,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-05T04:51:00.541183+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b124e01072b8d49f",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "selected_snapshot_id": "snap-be335bcc283e7919",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+          "content_type": "text/html",
+          "checksum": "940efb37b2dba8bcc41650f18f9a6bda46a82b052acee59fac1a4d79f0322bf7",
+          "fingerprint": "93a4398bf9c9822dc69f59f9a71252389e6b104b6a76fa33e8e3c24151eb30ad",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-898475beee914b9c/snap-be335bcc283e7919/raw",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+      "source_document_id": "src-alterna-html-3f2b62d087814466",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-9594c23bb45be645",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-3f2b62d087814466/snap-9594c23bb45be645/raw",
+      "checksum": "61a7a5499b4a3a2f6c8b8d419c5a1f2edfed16b425fbfe92505806f4d3bb6250",
+      "fingerprint": "8ea862a3fdbe9d353f092ce0827c55abb58b412f949355055d00ad97fa5d8ec4",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-05T04:51:00.602880+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-9594c23bb45be645",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-3f2b62d087814466/snap-9594c23bb45be645/raw",
+        "content_type": "text/html",
+        "checksum": "61a7a5499b4a3a2f6c8b8d419c5a1f2edfed16b425fbfe92505806f4d3bb6250",
+        "fingerprint": "8ea862a3fdbe9d353f092ce0827c55abb58b412f949355055d00ad97fa5d8ec4",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+          "request_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/external-account-transfers",
+          "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/external-account-transfers",
+          "status_code": 200,
+          "content_length": 106814,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-05T04:51:00.602880+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e4aff598ea43bd85",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "selected_snapshot_id": "snap-9594c23bb45be645",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+          "content_type": "text/html",
+          "checksum": "61a7a5499b4a3a2f6c8b8d419c5a1f2edfed16b425fbfe92505806f4d3bb6250",
+          "fingerprint": "8ea862a3fdbe9d353f092ce0827c55abb58b412f949355055d00ad97fa5d8ec4",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-3f2b62d087814466/snap-9594c23bb45be645/raw",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+      "source_document_id": "src-alterna-html-321f3b4a2a452379",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-5199c15fe4c8933a",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/snap-5199c15fe4c8933a/raw",
+      "checksum": "a1545e3953c47f27bfb57f1ec1d98511564ae5deed53a9ce6b626d2755928be2",
+      "fingerprint": "72628b464fba016c3847e54000be01045fd1564bbfe2c67d4923d5a55297b861",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-05T04:51:07.319961+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-5199c15fe4c8933a",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/snap-5199c15fe4c8933a/raw",
+        "content_type": "text/html",
+        "checksum": "a1545e3953c47f27bfb57f1ec1d98511564ae5deed53a9ce6b626d2755928be2",
+        "fingerprint": "72628b464fba016c3847e54000be01045fd1564bbfe2c67d4923d5a55297b861",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+          "request_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/debit-cards",
+          "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/debit-cards",
+          "status_code": 200,
+          "content_length": 135725,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-05T04:51:07.319961+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fcea14a2491a11ef",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "selected_snapshot_id": "snap-5199c15fe4c8933a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+          "content_type": "text/html",
+          "checksum": "a1545e3953c47f27bfb57f1ec1d98511564ae5deed53a9ce6b626d2755928be2",
+          "fingerprint": "72628b464fba016c3847e54000be01045fd1564bbfe2c67d4923d5a55297b861",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/snap-5199c15fe4c8933a/raw",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "correlation_id": "corr_oWCbrolk0wnNqgPi",
+    "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+    "stats": {
+      "source_total": 5,
+      "ok_count": 5,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "expected_url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-05T04:50:57.781028+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-ALTERNA-CHE-2183897615",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "expected_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-05T04:50:58.283131+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "expected_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-05T04:50:58.737817+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "expected_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/external-account-transfers",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-05T04:50:59.316702+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/external-account-transfers",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/external-account-transfers",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "expected_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/debit-cards",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-05T04:50:59.866954+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/debit-cards",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/debit-cards",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "run_state": "completed",
+    "source_document_count": 5,
+    "stored_snapshot_count": 5,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-07-05T04:50:56.608037+00:00",
+    "completed_at": "2026-07-05T04:51:09.921319+00:00"
+  }
+}
+[source-collection-runner] run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH continuing with 5 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+  "correlation_id": "corr_oWCbrolk0wnNqgPi",
+  "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+      "snapshot_id": "snap-faedbe86d1188a90",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-8b59596eb69ce291",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/metadata.json",
+      "chunk_count": 11,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c4c4a2b574a6283b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "selected_snapshot_id": "snap-faedbe86d1188a90",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-8b59596eb69ce291",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/metadata.json",
+          "chunk_count": 11,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-2183897615",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-d5c3c4042a2aa2fb",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-d48aef35081f1e3f",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/metadata.json",
+      "chunk_count": 4,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-282e95b801a30c5b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-d48aef35081f1e3f",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/metadata.json",
+          "chunk_count": 4,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+      "source_document_id": "src-alterna-html-898475beee914b9c",
+      "snapshot_id": "snap-be335bcc283e7919",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-ac369b7835b4e819",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/metadata.json",
+      "chunk_count": 4,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b124e01072b8d49f",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "selected_snapshot_id": "snap-be335bcc283e7919",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-ac369b7835b4e819",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/metadata.json",
+          "chunk_count": 4,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+      "source_document_id": "src-alterna-html-3f2b62d087814466",
+      "snapshot_id": "snap-9594c23bb45be645",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-46b2df184d2bcdfc",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/metadata.json",
+      "chunk_count": 22,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e4aff598ea43bd85",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "selected_snapshot_id": "snap-9594c23bb45be645",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-46b2df184d2bcdfc",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/metadata.json",
+          "chunk_count": 22,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+      "source_document_id": "src-alterna-html-321f3b4a2a452379",
+      "snapshot_id": "snap-5199c15fe4c8933a",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-bf7250ba69f458f9",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/metadata.json",
+      "chunk_count": 25,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fcea14a2491a11ef",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "selected_snapshot_id": "snap-5199c15fe4c8933a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-bf7250ba69f458f9",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/metadata.json",
+          "chunk_count": 25,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v1",
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "run_state": "completed",
+    "parsed_document_count": 5,
+    "evidence_chunk_count": 66,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-05T04:51:51.871102+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+  "correlation_id": "corr_oWCbrolk0wnNqgPi",
+  "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "failed_count": 0,
+    "extracted_field_count": 63,
+    "evidence_link_count": 23
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+      "snapshot_id": "snap-faedbe86d1188a90",
+      "parsed_document_id": "parsed-8b59596eb69ce291",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-2dfcb7a079037b94",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Alterna Bank - No Fee eChequing",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.88,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.83,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "account fee",
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.64,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "No Minimum Balance Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) 0.05%* Annual Interest Rate",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "ONLINE BANKING Bank 24 hours a day, 7 days a week.",
+          "value_type": "string",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "branch",
+              "mobile",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "No-Fee eChequing Account Overview High Interest eSavings No Fee eChequing TFSA eSavings RRSP eSavings Ways To Bank Our chequing account offers you the convenience of day-to-day transactions while earning interest on your daily balance",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_tax_benefits",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-66ff7461488a9583",
+          "evidence_text_excerpt": "No-Fee eChequing Account\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nOur chequing account offers you the convenience of day-to-day transactions while earning interest on your daily balance",
+          "anchor_type": "section",
+          "anchor_value": "no-fee-echequing-account",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rrsp",
+              "tfsa"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "No Minimum Balance Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) 0.05%* Annual Interest Rate.",
+          "value_type": "string",
+          "confidence": 0.85,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance",
+              "insured"
+            ]
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "transactions",
+              "unlimited"
+            ]
+          }
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "e",
+              "free",
+              "interac"
+            ]
+          }
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.66,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-95bfb3151f1692db",
+          "evidence_text_excerpt": "Registered for Digital Banking?\nDownload the app and sign in!\nLegal\neChequing Accounts and rates are only available for purchase online.\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. $1,000,000 maximum balance (plus accrued interest).\n1 Includes: Withdrawals, Transfers, Interac\u00ae e-Transfers, Me-to-Me Transfers, Bill Payments, Cheques, Pre-authorized payments, Debit card payments (POS), Alterna and THE EXCHANGE Network ATM withdrawals and transfers.\n2 Overdraft protection fee is not applicable to Quebec residents. Overdraft fees are in addition to interest charges on the outstanding overdraft amount. Interest will be calculated and debited monthly to your account based on the final daily indebtedness in the account throughout the calendar month. Interest rates set by Alterna Bank will apply both",
+          "anchor_type": "section",
+          "anchor_value": "registered-for-digital-banking",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "available",
+              "overdraft",
+              "overdraft protection",
+              "protection"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "important",
+              "information"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.88,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.83,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.64,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "No Minimum Balance Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) 0.05%* Annual Interest Rate",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "ONLINE BANKING Bank 24 hours a day, 7 days a week.",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "No-Fee eChequing Account Overview High Interest eSavings No Fee eChequing TFSA eSavings RRSP eSavings Ways To Bank Our chequing account offers you the convenience of day-to-day transactions while earning interest on your daily balance",
+          "evidence_chunk_id": "chunk-66ff7461488a9583",
+          "evidence_text_excerpt": "No-Fee eChequing Account\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nOur chequing account offers you the convenience of day-to-day transactions while earning interest on your daily balance",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-fee-echequing-account",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "No Minimum Balance Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) 0.05%* Annual Interest Rate.",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.85,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interac_e_transfer_included",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-574c6b643989c9f1",
+          "evidence_text_excerpt": "No Monthly Account Fees\nNo monthly fee; No minimum balance required\nFREE , unlimited day-to-day transactions 1\nFREE , unlimited Interac\u00ae e-Transfers\nAward-winning No-Fee eChequing Account\nAccess to over 3,300 ATMs in THE EXCHANGE\u00ae Network - Canada's largest ATM network, surcharge-free! In the United States, access 40,000 surcharge-free ATM\u2019s through the Allpoint Network .",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-monthly-account-fees",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "overdraft_available",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-95bfb3151f1692db",
+          "evidence_text_excerpt": "Registered for Digital Banking?\nDownload the app and sign in!\nLegal\neChequing Accounts and rates are only available for purchase online.\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. $1,000,000 maximum balance (plus accrued interest).\n1 Includes: Withdrawals, Transfers, Interac\u00ae e-Transfers, Me-to-Me Transfers, Bill Payments, Cheques, Pre-authorized payments, Debit card payments (POS), Alterna and THE EXCHANGE Network ATM withdrawals and transfers.\n2 Overdraft protection fee is not applicable to Quebec residents. Overdraft fees are in addition to interest charges on the outstanding overdraft amount. Interest will be calculated and debited monthly to your account based on the final daily indebtedness in the account throughout the calendar month. Interest rates set by Alterna Bank will apply both",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.66,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "registered-for-digital-banking",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information.",
+          "evidence_chunk_id": "chunk-d9b5e9117ca9336d",
+          "evidence_text_excerpt": "No Minimum Balance\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\n0.05%* Annual Interest Rate.\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nGet your bank accounts talking to each other with a few clicks. Available with",
+          "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+          "source_snapshot_id": "snap-faedbe86d1188a90",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 4
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c4c4a2b574a6283b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "selected_snapshot_id": "snap-faedbe86d1188a90",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-8b59596eb69ce291",
+          "model_execution_id": "modelexec-2dfcb7a079037b94",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/parsed-8b59596eb69ce291/metadata.json",
+          "extracted_field_count": 19,
+          "evidence_link_count": 11,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-2183897615",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-d5c3c4042a2aa2fb",
+      "parsed_document_id": "parsed-d48aef35081f1e3f",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Alterna Bank - Chequing & Savings",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Rates",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Rates are only available for purchase online.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "Chequing & Savings Prime Rate Chequing & Savings Mortgages Registered Plans Term Deposits Chequing & Savings Rates No Fee eChequing Account 0.05% High Interest eSavings Account 1.05% TFSA eSavings Account 1.05% RRSP eSavings 1.05% Legal Interest rate is annualized and subject to ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_tax_benefits",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rrsp",
+              "tfsa"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "e deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.",
+          "value_type": "string",
+          "confidence": 0.85,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "evidence_chunk_id": "chunk-6c000dbca0688147",
+          "evidence_text_excerpt": "e deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Rates are only available for purchase online.",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "Chequing & Savings Prime Rate Chequing & Savings Mortgages Registered Plans Term Deposits Chequing & Savings Rates No Fee eChequing Account 0.05% High Interest eSavings Account 1.05% TFSA eSavings Account 1.05% RRSP eSavings 1.05% Legal Interest rate is annualized and subject to ",
+          "evidence_chunk_id": "chunk-cec4483a51b876e6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "e deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.",
+          "evidence_chunk_id": "chunk-6c000dbca0688147",
+          "evidence_text_excerpt": "e deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-d5c3c4042a2aa2fb",
+          "citation_confidence": 0.85,
+          "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 2
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-282e95b801a30c5b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-d48aef35081f1e3f",
+          "model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-d48aef35081f1e3f/metadata.json",
+          "extracted_field_count": 12,
+          "evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+      "source_document_id": "src-alterna-html-898475beee914b9c",
+      "snapshot_id": "snap-be335bcc283e7919",
+      "parsed_document_id": "parsed-ac369b7835b4e819",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-41148ecbc1ae8516",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Online Banking",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Ways to Bank",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Wire Transfers Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Sending a wire transfer If you need to send funds, please Contact us to discuss the best available option",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Wire Transfers Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Sending a wire transfer If you need to send funds, please Contact us to discuss the best available option.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "mobile",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF) Please note that the transfer deta",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "information",
+              "note"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Wire Transfers Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Sending a wire transfer If you need to send funds, please Contact us to discuss the best available option",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-41148ecbc1ae8516",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Wire Transfers Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Sending a wire transfer If you need to send funds, please Contact us to discuss the best available option.",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-41148ecbc1ae8516",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF) Please note that the transfer deta",
+          "evidence_chunk_id": "chunk-0035e32c70a0f340",
+          "evidence_text_excerpt": "Wire Transfers\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nSending a wire transfer If you need to send funds, please Contact us to discuss the best available option.\nTo receive a wire transfer:\n\u2022 Canadian Currency (CAD) Incoming Wire Transfers to Canada from within Canada (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers to Canada from the U.S. (PDF) \u2022 U.S. Currency (USD) Incoming Wire Transfers from Canadian or International financial institution (other than USA) (PDF) \u2022 International Currency and Canadian Currency (NON USD) Incoming Wire Transfers from an International financial institution (PDF)\nPlease note that the transfer details must be completed EXACTLY as shown. Once this is completed, you then provide the routing information to the ordering customer (ie. the sender) so you can receive your wired funds.\nProceeds of",
+          "source_document_id": "src-alterna-html-898475beee914b9c",
+          "source_snapshot_id": "snap-be335bcc283e7919",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-41148ecbc1ae8516",
+          "anchor_type": "section",
+          "anchor_value": "wire-transfers",
+          "page_no": null,
+          "chunk_index": 1
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b124e01072b8d49f",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "selected_snapshot_id": "snap-be335bcc283e7919",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-ac369b7835b4e819",
+          "model_execution_id": "modelexec-41148ecbc1ae8516",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-898475beee914b9c/parsed-ac369b7835b4e819/metadata.json",
+          "extracted_field_count": 11,
+          "evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+      "source_document_id": "src-alterna-html-3f2b62d087814466",
+      "snapshot_id": "snap-9594c23bb45be645",
+      "parsed_document_id": "parsed-46b2df184d2bcdfc",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-8b90e782f127d7ff",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Alterna Bank - External Account Transfers",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Ways to Bank",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The following accounts are ineligible for External Account Transfers US Dollar Accounts Business and Community Accounts Accounts that require multiple signatures for authorized transactions",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": "chunk-e17be038ea57f39d",
+          "evidence_text_excerpt": "Are there any accounts that are ineligible for External Account Transfers?\nThe following accounts are ineligible for External Account Transfers\nUS Dollar Accounts\nBusiness and Community Accounts\nAccounts that require multiple signatures for authorized transactions",
+          "anchor_type": "section",
+          "anchor_value": "are-there-any-accounts-that-are-ineligible-for-external-account-transfers",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "In our new Online Banking and Mobile app, transfers now take up to 1 day to complete.",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": "chunk-519f0e13fdec143e",
+          "evidence_text_excerpt": "I completed an external transfer of funds, but the money was not debited from my account?\nIn our new Online Banking and Mobile app, transfers now take up to 1 day to complete. Transfers created during the day will be completed at approximately 10pm ET.",
+          "anchor_type": "section",
+          "anchor_value": "i-completed-an-external-transfer-of-funds-but-the-money-was-not-debited-from-my-account",
+          "page_no": null,
+          "chunk_index": 18,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "app",
+              "mobile",
+              "mobile app",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "Are External Account Transfers an option for making contributions to the RRSP and TFSA Accounts?",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_tax_benefits",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": "chunk-6dec190561aa96b7",
+          "evidence_text_excerpt": "Are External Account Transfers an option for making contributions to the RRSP and TFSA Accounts?\nAbsolutely! External account transfers are a fast and convenient way to contribute to your RRSP and TFSA accounts. However, outgoing External Accounts Transfers can only be made from your TFSA account. Funds cannot be moved out of your RRSP using the External Account Transfer feature.",
+          "anchor_type": "section",
+          "anchor_value": "are-external-account-transfers-an-option-for-making-contributions-to-the-rrsp-and-tfsa-accounts",
+          "page_no": null,
+          "chunk_index": 11,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rrsp",
+              "tfsa"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Please note that due to the scheduled transfers between Alterna Savings and Alterna Bank, the Alterna Savings limits are being recognized.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "evidence_chunk_id": "chunk-a236489dc9ca3f1d",
+          "evidence_text_excerpt": "Why are my External Account Transfers limits different when I transfer between Alterna Savings and Alterna Bank unlike when I am transfering to another Financial Institution?\nPlease note that due to the scheduled transfers between Alterna Savings and Alterna Bank, the Alterna Savings limits are being recognized. Please give our Contact Centre a call for assistance.",
+          "anchor_type": "section",
+          "anchor_value": "why-are-my-external-account-transfers-limits-different-when-i-transfer-between-alterna-savings-and-alterna-bank-unlike-when-i-am-transfering-to-another-financial-institution",
+          "page_no": null,
+          "chunk_index": 17,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "note"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "The following accounts are ineligible for External Account Transfers US Dollar Accounts Business and Community Accounts Accounts that require multiple signatures for authorized transactions",
+          "evidence_chunk_id": "chunk-e17be038ea57f39d",
+          "evidence_text_excerpt": "Are there any accounts that are ineligible for External Account Transfers?\nThe following accounts are ineligible for External Account Transfers\nUS Dollar Accounts\nBusiness and Community Accounts\nAccounts that require multiple signatures for authorized transactions",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-8b90e782f127d7ff",
+          "anchor_type": "section",
+          "anchor_value": "are-there-any-accounts-that-are-ineligible-for-external-account-transfers",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "In our new Online Banking and Mobile app, transfers now take up to 1 day to complete.",
+          "evidence_chunk_id": "chunk-519f0e13fdec143e",
+          "evidence_text_excerpt": "I completed an external transfer of funds, but the money was not debited from my account?\nIn our new Online Banking and Mobile app, transfers now take up to 1 day to complete. Transfers created during the day will be completed at approximately 10pm ET.",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-8b90e782f127d7ff",
+          "anchor_type": "section",
+          "anchor_value": "i-completed-an-external-transfer-of-funds-but-the-money-was-not-debited-from-my-account",
+          "page_no": null,
+          "chunk_index": 18
+        },
+        {
+          "field_name": "tax_benefits",
+          "candidate_value": "Are External Account Transfers an option for making contributions to the RRSP and TFSA Accounts?",
+          "evidence_chunk_id": "chunk-6dec190561aa96b7",
+          "evidence_text_excerpt": "Are External Account Transfers an option for making contributions to the RRSP and TFSA Accounts?\nAbsolutely! External account transfers are a fast and convenient way to contribute to your RRSP and TFSA accounts. However, outgoing External Accounts Transfers can only be made from your TFSA account. Funds cannot be moved out of your RRSP using the External Account Transfer feature.",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-8b90e782f127d7ff",
+          "anchor_type": "section",
+          "anchor_value": "are-external-account-transfers-an-option-for-making-contributions-to-the-rrsp-and-tfsa-accounts",
+          "page_no": null,
+          "chunk_index": 11
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Please note that due to the scheduled transfers between Alterna Savings and Alterna Bank, the Alterna Savings limits are being recognized.",
+          "evidence_chunk_id": "chunk-a236489dc9ca3f1d",
+          "evidence_text_excerpt": "Why are my External Account Transfers limits different when I transfer between Alterna Savings and Alterna Bank unlike when I am transfering to another Financial Institution?\nPlease note that due to the scheduled transfers between Alterna Savings and Alterna Bank, the Alterna Savings limits are being recognized. Please give our Contact Centre a call for assistance.",
+          "source_document_id": "src-alterna-html-3f2b62d087814466",
+          "source_snapshot_id": "snap-9594c23bb45be645",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-8b90e782f127d7ff",
+          "anchor_type": "section",
+          "anchor_value": "why-are-my-external-account-transfers-limits-different-when-i-transfer-between-alterna-savings-and-alterna-bank-unlike-when-i-am-transfering-to-another-financial-institution",
+          "page_no": null,
+          "chunk_index": 17
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e4aff598ea43bd85",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "selected_snapshot_id": "snap-9594c23bb45be645",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-46b2df184d2bcdfc",
+          "model_execution_id": "modelexec-8b90e782f127d7ff",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-3f2b62d087814466/parsed-46b2df184d2bcdfc/metadata.json",
+          "extracted_field_count": 12,
+          "evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+      "source_document_id": "src-alterna-html-321f3b4a2a452379",
+      "snapshot_id": "snap-5199c15fe4c8933a",
+      "parsed_document_id": "parsed-bf7250ba69f458f9",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-837537622f8b3a5e",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "chequing",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Online Banking",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Ways to Bank",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Debit Cards Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Debit cards with more ways to pay Your Alterna Bank debit card gives you secure access to your account for everyday banking.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "evidence_chunk_id": "chunk-61c85140358b8fe6",
+          "evidence_text_excerpt": "Debit Cards\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nDebit cards with more ways to pay Your Alterna Bank debit card gives you secure access to your account for everyday banking.\nNew white VISA \u00ae Debit cards use the VISA \u00ae network to add online and international purchasing, \u00a0while still drawing funds directly from your account. VISA \u00ae Debit cards are not credit cards. \u00a0Clients who currently have the blue Alterna card can continue to use their card for in-store purchases and ATM access until their new card arrives.",
+          "anchor_type": "section",
+          "anchor_value": "debit-cards",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "mobile",
+              "online"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "application_method",
+          "candidate_value": "Debit Cards Online Banking Mobile Banking Debit Cards Interac e-Transfer External Account Transfers Wire Transfers Debit cards with more ways to pay Your Alterna Bank debit card gives you secure access to your account for everyday banking.",
+          "evidence_chunk_id": "chunk-61c85140358b8fe6",
+          "evidence_text_excerpt": "Debit Cards\nOnline Banking\nMobile Banking\nDebit Cards\nInterac e-Transfer\nExternal Account Transfers\nWire Transfers\nDebit cards with more ways to pay Your Alterna Bank debit card gives you secure access to your account for everyday banking.\nNew white VISA \u00ae Debit cards use the VISA \u00ae network to add online and international purchasing, \u00a0while still drawing funds directly from your account. VISA \u00ae Debit cards are not credit cards. \u00a0Clients who currently have the blue Alterna card can continue to use their card for in-store purchases and ATM access until their new card arrives.",
+          "source_document_id": "src-alterna-html-321f3b4a2a452379",
+          "source_snapshot_id": "snap-5199c15fe4c8933a",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-837537622f8b3a5e",
+          "anchor_type": "section",
+          "anchor_value": "debit-cards",
+          "page_no": null,
+          "chunk_index": 1
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fcea14a2491a11ef",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "selected_snapshot_id": "snap-5199c15fe4c8933a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-bf7250ba69f458f9",
+          "model_execution_id": "modelexec-837537622f8b3a5e",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/parsed-bf7250ba69f458f9/metadata.json",
+          "extracted_field_count": 9,
+          "evidence_link_count": 1,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "run_state": "completed",
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "extracted_draft_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-05T04:52:20.113727+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+  "correlation_id": "corr_oWCbrolk0wnNqgPi",
+  "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "failed_count": 0,
+    "candidate_count": 5,
+    "field_evidence_link_count": 23
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+      "snapshot_id": "snap-faedbe86d1188a90",
+      "parsed_document_id": "parsed-8b59596eb69ce291",
+      "extraction_model_execution_id": "modelexec-2dfcb7a079037b94",
+      "normalization_action": "stored",
+      "candidate_id": "cand-db661c7599d14e16",
+      "normalization_model_execution_id": "modelexec-33833d1955f461aa",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.849,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 11,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c4c4a2b574a6283b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "selected_snapshot_id": "snap-faedbe86d1188a90",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-db661c7599d14e16",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-33833d1955f461aa",
+          "extraction_model_execution_id": "modelexec-2dfcb7a079037b94",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.849,
+          "field_evidence_link_count": 11,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-2183897615",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-d5c3c4042a2aa2fb",
+      "parsed_document_id": "parsed-d48aef35081f1e3f",
+      "extraction_model_execution_id": "modelexec-6c2e95cfe5676b8a",
+      "normalization_action": "stored",
+      "candidate_id": "cand-8c031752a4123785",
+      "normalization_model_execution_id": "modelexec-c7dab24b1751cb02",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.4812,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 4,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-282e95b801a30c5b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-8c031752a4123785",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-c7dab24b1751cb02",
+          "extraction_model_execution_id": "modelexec-6c2e95cfe5676b8a",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.4812,
+          "field_evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+      "source_document_id": "src-alterna-html-898475beee914b9c",
+      "snapshot_id": "snap-be335bcc283e7919",
+      "parsed_document_id": "parsed-ac369b7835b4e819",
+      "extraction_model_execution_id": "modelexec-41148ecbc1ae8516",
+      "normalization_action": "stored",
+      "candidate_id": "cand-4d3ad07cd9ceee6a",
+      "normalization_model_execution_id": "modelexec-0b955a1312ad3e8a",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.4225,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 3,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b124e01072b8d49f",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "selected_snapshot_id": "snap-be335bcc283e7919",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-4d3ad07cd9ceee6a",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-0b955a1312ad3e8a",
+          "extraction_model_execution_id": "modelexec-41148ecbc1ae8516",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.4225,
+          "field_evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+      "source_document_id": "src-alterna-html-3f2b62d087814466",
+      "snapshot_id": "snap-9594c23bb45be645",
+      "parsed_document_id": "parsed-46b2df184d2bcdfc",
+      "extraction_model_execution_id": "modelexec-8b90e782f127d7ff",
+      "normalization_action": "stored",
+      "candidate_id": "cand-19c4e31a8049c81e",
+      "normalization_model_execution_id": "modelexec-d00dc14e83d46afa",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.4734,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 4,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e4aff598ea43bd85",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "selected_snapshot_id": "snap-9594c23bb45be645",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-19c4e31a8049c81e",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-d00dc14e83d46afa",
+          "extraction_model_execution_id": "modelexec-8b90e782f127d7ff",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.4734,
+          "field_evidence_link_count": 4,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+      "source_document_id": "src-alterna-html-321f3b4a2a452379",
+      "snapshot_id": "snap-5199c15fe4c8933a",
+      "parsed_document_id": "parsed-bf7250ba69f458f9",
+      "extraction_model_execution_id": "modelexec-837537622f8b3a5e",
+      "normalization_action": "stored",
+      "candidate_id": "cand-47878ba04986c4c8",
+      "normalization_model_execution_id": "modelexec-9c7bb19a2a6cf6d6",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.3725,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 1,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fcea14a2491a11ef",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "selected_snapshot_id": "snap-5199c15fe4c8933a",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-47878ba04986c4c8",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-9c7bb19a2a6cf6d6",
+          "extraction_model_execution_id": "modelexec-837537622f8b3a5e",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.3725,
+          "field_evidence_link_count": 1,
+          "runtime_notes": [],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "run_state": "completed",
+    "candidate_count": 5,
+    "field_evidence_link_count": 23,
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-05T04:52:58.247849+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+warning: `VIRTUAL_ENV=api\service\.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+{
+  "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+  "correlation_id": "corr_oWCbrolk0wnNqgPi",
+  "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "queued_count": 4,
+    "auto_validated_count": 1,
+    "failed_count": 0,
+    "review_task_count": 4
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+      "snapshot_id": "snap-faedbe86d1188a90",
+      "parsed_document_id": "parsed-8b59596eb69ce291",
+      "candidate_id": "cand-db661c7599d14e16",
+      "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+      "validation_action": "auto_validated",
+      "validation_model_execution_id": "modelexec-46d213da82a96976",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/metadata.json",
+      "review_task_id": null,
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8879,
+      "candidate_state": "auto_validated",
+      "review_reason_code": null,
+      "queue_reason_codes": [],
+      "runtime_notes": [
+        "Candidate met auto-validation policy and did not create a review task."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-c4c4a2b574a6283b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-4994ca1af9c14ade",
+        "selected_snapshot_id": "snap-faedbe86d1188a90",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "auto_validated",
+          "candidate_id": "cand-db661c7599d14e16",
+          "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+          "validation_model_execution_id": "modelexec-46d213da82a96976",
+          "normalization_model_execution_id": "modelexec-33833d1955f461aa",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-4994ca1af9c14ade/cand-db661c7599d14e16/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8879,
+          "candidate_state": "auto_validated",
+          "review_reason_code": null,
+          "queue_reason_codes": [],
+          "review_task_id": null,
+          "runtime_notes": [
+            "Candidate met auto-validation policy and did not create a review task."
+          ],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-2183897615",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-d5c3c4042a2aa2fb",
+      "parsed_document_id": "parsed-d48aef35081f1e3f",
+      "candidate_id": "cand-8c031752a4123785",
+      "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-5a205b90039aa025",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/metadata.json",
+      "review_task_id": "review-1713034fa0355631",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5968,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-282e95b801a30c5b",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-d5c3c4042a2aa2fb",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-8c031752a4123785",
+          "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+          "validation_model_execution_id": "modelexec-5a205b90039aa025",
+          "normalization_model_execution_id": "modelexec-c7dab24b1751cb02",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/cand-8c031752a4123785/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5968,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-1713034fa0355631",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-b1158f4d1d",
+      "source_document_id": "src-alterna-html-898475beee914b9c",
+      "snapshot_id": "snap-be335bcc283e7919",
+      "parsed_document_id": "parsed-ac369b7835b4e819",
+      "candidate_id": "cand-4d3ad07cd9ceee6a",
+      "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-f93054a17680b66a",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/metadata.json",
+      "review_task_id": "review-4e5caa4de26e8d7c",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5558,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-b124e01072b8d49f",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-898475beee914b9c",
+        "selected_snapshot_id": "snap-be335bcc283e7919",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-4d3ad07cd9ceee6a",
+          "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+          "validation_model_execution_id": "modelexec-f93054a17680b66a",
+          "normalization_model_execution_id": "modelexec-0b955a1312ad3e8a",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-898475beee914b9c/cand-4d3ad07cd9ceee6a/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5558,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-4e5caa4de26e8d7c",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f2d8591fd5",
+      "source_document_id": "src-alterna-html-3f2b62d087814466",
+      "snapshot_id": "snap-9594c23bb45be645",
+      "parsed_document_id": "parsed-46b2df184d2bcdfc",
+      "candidate_id": "cand-19c4e31a8049c81e",
+      "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-bf41ad6639d6176d",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/metadata.json",
+      "review_task_id": "review-575899ce065c51b7",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5919,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-e4aff598ea43bd85",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-3f2b62d087814466",
+        "selected_snapshot_id": "snap-9594c23bb45be645",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-19c4e31a8049c81e",
+          "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+          "validation_model_execution_id": "modelexec-bf41ad6639d6176d",
+          "normalization_model_execution_id": "modelexec-d00dc14e83d46afa",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-3f2b62d087814466/cand-19c4e31a8049c81e/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5919,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-575899ce065c51b7",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-f9fa1f2f2f",
+      "source_document_id": "src-alterna-html-321f3b4a2a452379",
+      "snapshot_id": "snap-5199c15fe4c8933a",
+      "parsed_document_id": "parsed-bf7250ba69f458f9",
+      "candidate_id": "cand-47878ba04986c4c8",
+      "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-f7d167662fdb2344",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/metadata.json",
+      "review_task_id": "review-a8740d5713a9a53b",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5158,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-fcea14a2491a11ef",
+        "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+        "source_document_id": "src-alterna-html-321f3b4a2a452379",
+        "selected_snapshot_id": "snap-5199c15fe4c8933a",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-47878ba04986c4c8",
+          "candidate_run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+          "validation_model_execution_id": "modelexec-f7d167662fdb2344",
+          "normalization_model_execution_id": "modelexec-9c7bb19a2a6cf6d6",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-321f3b4a2a452379/cand-47878ba04986c4c8/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5158,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-a8740d5713a9a53b",
+          "runtime_notes": [
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_oWCbrolk0wnNqgPi",
+          "request_id": "req_14d1acde6f8b4fe4a3fd50c20df4b178"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "kylee1112@hotmail.com",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260705_045036_alterna_chequing_collect_ifLUf0ZH",
+    "run_state": "completed",
+    "candidate_count": 5,
+    "review_task_count": 4,
+    "review_queued_count": 4,
+    "auto_validated_count": 1,
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-05T04:53:36.904816+00:00"
+  }
+}
+[source-collection-runner] run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH auto-promoted 1 candidate(s); aggregate refresh launch=True
+[source-collection-runner] run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH completed downstream stages
+[source-catalog-runner] finished run run_20260705_045036_alterna_chequing_collect_ifLUf0ZH

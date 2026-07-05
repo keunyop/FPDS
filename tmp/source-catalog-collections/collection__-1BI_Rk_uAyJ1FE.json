@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection__-1BI_Rk_uAyJ1FE",
+  "correlation_id": "corr_xqF77zjWkvivU2k0",
+  "request_id": "req_94f0f6408c6041b781c8099f171f9c1e",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260705_043644_bridgewater_chequing_collect_hviKlN7C",
+      "catalog_item_id": "catalog-ca-bridgewater-chequing",
+      "bank_code": "BRIDGEWATER",
+      "bank_name": "Bridgewater Bank",
+      "country_code": "CA",
+      "product_type": "chequing",
+      "source_catalog_product_type": "chequing",
+      "source_language": "en",
+      "homepage_url": "https://www.bridgewaterbank.ca/",
+      "normalized_homepage_url": "https://www.bridgewaterbank.ca/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

@@ -742,6 +742,8 @@ export type BankItem = {
   status: string;
   homepage_url: string | null;
   normalized_homepage_url: string | null;
+  logo_url: string | null;
+  logo_alt_text: string | null;
   source_language: string;
   managed_flag: boolean;
   change_reason: string | null;
@@ -784,6 +786,8 @@ export type BankDetailResponse = {
     status: string;
     homepage_url: string | null;
     normalized_homepage_url: string | null;
+    logo_url: string | null;
+    logo_alt_text: string | null;
     source_language: string;
     generated_source_count: number;
     change_reason: string | null;
@@ -801,6 +805,8 @@ export type SourceCatalogItem = {
   status: string;
   homepage_url: string | null;
   normalized_homepage_url: string | null;
+  logo_url: string | null;
+  logo_alt_text: string | null;
   source_language: string;
   generated_source_count: number;
   change_reason: string | null;

@@ -107,6 +107,11 @@ The DB-backed source registry should retain at least the following fields for ge
 - `created_at`
 - `updated_at`
 
+The DB-backed bank profile should also retain screen-facing logo metadata:
+
+- `logo_url`
+- `logo_alt_text`
+
 Minimum status vocabulary for the MVP:
 
 | Status | Meaning | Default Collection Eligible |
@@ -157,11 +162,13 @@ Current live product-type onboarding note:
 - Chequing, savings, GIC, and every later product type are all ordinary operator-managed DB rows. Collection must fail clearly when the requested product type row is missing or inactive.
 - Product type code is an operator-managed identity field. When a code is corrected from the Product Types detail modal, the backend renames the registry row and cascades source catalog, generated source, candidate, canonical product, public projection, and taxonomy references instead of relying on aliases.
 - For the Phase 1 canonical deposit product types `chequing`, `savings`, and `gic`, product-type registry writes must keep the full approved subtype taxonomy synchronized, not only the generic `other` fallback. Dynamic or newly added product types still start with `other` unless a later approved subtype registry is introduced.
+- The Canada retail lending baseline is registered as `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`. FPDS canonical product type codes use hyphens even when an operator enters spaces or underscores.
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
 - Homepage-first discovery may infer a bounded discovery profile from the stored display name, description, and discovery keywords. For example, a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals, while generated source rows still preserve the registered product type code.
 - the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
 - generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
-- Operator-managed product types without specialized parser support continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
+- Operator-managed product types without specialized parser support, including the current lending baseline, continue through generic AI extraction/normalization fallback and are forced into manual review rather than public publish.
+- Source collection plans and extraction artifacts must carry `product_family` from the product type registry so lending candidates are not normalized as deposits.
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
 - A source-catalog collect should merge newly generated source rows with existing active detail rows for the same bank/product scope so a partial discovery pass does not accidentally shrink candidate-producing coverage.
@@ -217,6 +224,8 @@ Current repository state:
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
+- the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
+- the recognized Canada financial-institution baseline is live in DB through migrations `0020` and `0021`, with 28 active Canadian bank/direct-bank/credit-union profiles, logo metadata, and full active Product Type source-catalog coverage for every active Canadian financial institution
 
 ---
 
@@ -255,3 +264,5 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-04-18 | Linked the approved homepage-discovery quality follow-on design and corrected the current-state note for live operator-managed product-type onboarding |
 | 2026-04-18 | Recorded the first homepage-discovery explainability implementation slice on generated source rows and source-detail inspection |
 | 2026-04-28 | Added admin-only generated source soft removal using `removed` status so bad collected source details can be excluded from future collection without losing audit history |
+| 2026-07-05 | Added bank logo metadata and recognized Canada bank full active Product Type coverage baseline status |
+| 2026-07-05 | Added Vancity to the recognized Canada coverage set by explicit Product Owner request |

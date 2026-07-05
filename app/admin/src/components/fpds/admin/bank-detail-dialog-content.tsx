@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Globe, Landmark, Languages, ShieldCheck, Trash2 } from "lucide-react";
+import { Globe, ImageIcon, Landmark, Languages, ShieldCheck, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
 import { DestructiveConfirmDialog } from "@/components/fpds/admin/destructive-confirm-dialog";
@@ -127,6 +127,7 @@ export function BankDetailDialogContent({
   const [form, setForm] = useState({
     bank_name: detail.bank.bank_name,
     homepage_url: detail.bank.homepage_url ?? "",
+    logo_url: detail.bank.logo_url ?? "",
     source_language: detail.bank.source_language,
     status: detail.bank.status,
     change_reason: detail.bank.change_reason ?? "",
@@ -245,7 +246,21 @@ export function BankDetailDialogContent({
                 }
                 value={form.homepage_url}
               />
+              <InputField
+                icon={<ImageIcon className="size-4" />}
+                label="Logo URL"
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, logo_url: value }))
+                }
+                value={form.logo_url}
+              />
             </FieldGroup>
+
+            <BankLogoPreview
+              bankCode={detail.bank.bank_code}
+              bankName={form.bank_name || detail.bank.bank_name}
+              logoUrl={form.logo_url}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
@@ -312,6 +327,47 @@ function ReadonlySummary({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function BankLogoPreview({
+  bankCode,
+  bankName,
+  logoUrl,
+}: {
+  bankCode: string;
+  bankName: string;
+  logoUrl: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const normalizedLogoUrl = logoUrl.trim();
+  const showLogo = Boolean(normalizedLogoUrl && !failed);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [normalizedLogoUrl]);
+
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-muted/30 px-4 py-3">
+      <span className="flex h-11 w-20 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-white px-2 py-1 shadow-sm">
+        {showLogo ? (
+          <img
+            alt={`${bankName} logo`}
+            className="max-h-full max-w-full object-contain"
+            decoding="async"
+            loading="lazy"
+            onError={() => setFailed(true)}
+            src={normalizedLogoUrl}
+          />
+        ) : (
+          <span className="text-xs font-semibold text-foreground">{bankCode.slice(0, 4)}</span>
+        )}
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Logo preview</p>
+        <p className="mt-1 truncate text-sm font-medium text-foreground">{bankName}</p>
+      </div>
     </div>
   );
 }

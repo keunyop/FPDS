@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_cAy9Yf05NUwwWm4Y",
+  "correlation_id": "corr_Ai4A_fa68RzCBAZA",
+  "request_id": "req_a05a48c985184a8a806fbfbb1eb561ab",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260705_043603_b2b_chequing_collect_ntJZyMGc",
+      "catalog_item_id": "catalog-ca-b2b-chequing",
+      "bank_code": "B2B",
+      "bank_name": "B2B Bank",
+      "country_code": "CA",
+      "product_type": "chequing",
+      "source_catalog_product_type": "chequing",
+      "source_language": "en",
+      "homepage_url": "https://b2bbank.com/",
+      "normalized_homepage_url": "https://b2bbank.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

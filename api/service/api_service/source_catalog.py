@@ -72,7 +72,26 @@ _EXCLUDED_LINK_KEYWORDS = (
     "shareholders",
 )
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
-_HUB_KEYWORDS = ("account", "accounts", "bank-account", "bank-accounts", "invest", "investments", "personal")
+_HUB_KEYWORDS = (
+    "account",
+    "accounts",
+    "bank-account",
+    "bank-accounts",
+    "invest",
+    "investments",
+    "personal",
+    "borrow",
+    "borrowing",
+    "lend",
+    "lending",
+    "loan",
+    "loans",
+    "mortgage",
+    "mortgages",
+    "credit-card",
+    "credit-cards",
+    "line-of-credit",
+)
 _PAGE_NEGATIVE_KEYWORDS = ("compare", "sign in", "login", "legal", "terms and conditions")
 _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
     "chequing": (
@@ -121,6 +140,74 @@ _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
         "loan",
         "loans",
     ),
+    "credit-card": (
+        "chequing-account",
+        "chequing account",
+        "savings-account",
+        "savings account",
+        "gic",
+        "guaranteed-investment",
+        "mortgage",
+        "mortgages",
+        "personal-loan",
+        "personal loan",
+        "line-of-credit",
+        "line of credit",
+        "home-equity-line",
+        "home equity line",
+    ),
+    "mortgage": (
+        "chequing-account",
+        "chequing account",
+        "savings-account",
+        "savings account",
+        "gic",
+        "guaranteed-investment",
+        "credit-card",
+        "credit cards",
+        "personal-loan",
+        "personal loan",
+        "line-of-credit",
+        "line of credit",
+        "student-line",
+        "student line",
+    ),
+    "personal-loan": (
+        "chequing-account",
+        "chequing account",
+        "savings-account",
+        "savings account",
+        "gic",
+        "guaranteed-investment",
+        "credit-card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "line-of-credit",
+        "line of credit",
+        "home-equity-line",
+        "home equity line",
+    ),
+    "line-of-credit": (
+        "chequing-account",
+        "chequing account",
+        "savings-account",
+        "savings account",
+        "gic",
+        "guaranteed-investment",
+        "credit-card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "personal-loan",
+        "personal loan",
+        "car-loan",
+        "car loan",
+        "vehicle-loan",
+        "vehicle loan",
+        "rrsp-loan",
+        "rrsp loan",
+    ),
 }
 _REGISTERED_PLAN_WRAPPER_KEYWORDS = (
     "tax-free-savings",
@@ -163,11 +250,62 @@ _PRODUCT_TYPE_ATTRIBUTE_HINTS = {
     "chequing": ("transaction", "transactions", "debit", "everyday", "day-to-day", "monthly fee", "overdraft", "interac"),
     "savings": ("interest", "rate", "rates", "savings", "balance", "withdrawal", "tier", "tiering", "bonus"),
     "gic": ("term", "maturity", "redeemable", "non-redeemable", "minimum deposit", "compounding", "investment"),
+    "credit-card": (
+        "annual fee",
+        "purchase interest",
+        "cash advance",
+        "balance transfer",
+        "cash back",
+        "rewards",
+        "points",
+        "credit limit",
+    ),
+    "mortgage": (
+        "mortgage rate",
+        "fixed rate",
+        "variable rate",
+        "term",
+        "amortization",
+        "prepayment",
+        "payment frequency",
+        "renewal",
+    ),
+    "personal-loan": (
+        "interest rate",
+        "loan amount",
+        "monthly payment",
+        "fixed rate",
+        "term",
+        "vehicle loan",
+        "rrsp loan",
+        "repayment",
+    ),
+    "line-of-credit": (
+        "interest rate",
+        "credit limit",
+        "variable rate",
+        "minimum payment",
+        "secured",
+        "unsecured",
+        "home equity",
+        "student line",
+    ),
 }
 _DISCOVERY_PROFILE_TERMS = {
     "chequing": ("chequing", "checking", "everyday banking", "transactions", "debit card", "monthly fee"),
     "savings": ("savings", "saving", "savings account", "high interest", "interest rate", "tiered interest", "withdrawal", "balance"),
     "gic": ("gic", "gics", "term deposit", "guaranteed investment", "maturity", "redeemable", "minimum deposit"),
+    "credit-card": ("credit card", "credit cards", "cash back", "rewards", "annual fee", "purchase interest", "visa", "mastercard"),
+    "mortgage": ("mortgage", "mortgages", "mortgage rates", "fixed rate", "variable rate", "amortization", "prepayment"),
+    "personal-loan": ("personal loan", "personal loans", "loan rates", "vehicle loan", "car loan", "rrsp loan", "monthly payments"),
+    "line-of-credit": (
+        "line of credit",
+        "lines of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "credit limit",
+        "minimum payment",
+    ),
 }
 _PAGE_EVIDENCE_MINIMUM_SCORE = 4
 _DISCOVERY_DETAIL_LINK_MAX = 24
@@ -298,6 +436,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
                 lower(b.bank_code) LIKE %(search_pattern)s
                 OR lower(b.bank_name) LIKE %(search_pattern)s
                 OR lower(COALESCE(b.homepage_url, '')) LIKE %(search_pattern)s
+                OR lower(COALESCE(b.logo_url, '')) LIKE %(search_pattern)s
             )
             """
         )
@@ -311,6 +450,8 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             b.status,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language,
             b.managed_flag,
             b.change_reason,
@@ -335,6 +476,8 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             b.status,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language,
             b.managed_flag,
             b.change_reason,
@@ -406,6 +549,8 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
             status,
             homepage_url,
             normalized_homepage_url,
+            logo_url,
+            logo_alt_text,
             source_language,
             managed_flag,
             change_reason,
@@ -490,6 +635,8 @@ def create_bank_profile(
     homepage_url, normalized_homepage_url = _normalize_bank_homepage_url(
         _required_text(payload.get("homepage_url"), "homepage_url")
     )
+    logo_url = _normalize_optional_public_url(payload.get("logo_url"), "logo_url")
+    logo_alt_text = _normalize_logo_alt_text(payload.get("logo_alt_text"), bank_name=bank_name, logo_url=logo_url)
     initial_coverage_product_types = list(payload.get("initial_coverage_product_types") or [])
     existing_by_homepage = connection.execute(
         """
@@ -513,6 +660,8 @@ def create_bank_profile(
             status,
             homepage_url,
             normalized_homepage_url,
+            logo_url,
+            logo_alt_text,
             source_language,
             managed_flag,
             change_reason,
@@ -526,6 +675,8 @@ def create_bank_profile(
             %(status)s,
             %(homepage_url)s,
             %(normalized_homepage_url)s,
+            %(logo_url)s,
+            %(logo_alt_text)s,
             %(source_language)s,
             %(managed_flag)s,
             %(change_reason)s,
@@ -540,6 +691,8 @@ def create_bank_profile(
             "status": (_clean_text(payload.get("status")) or "active").lower(),
             "homepage_url": homepage_url,
             "normalized_homepage_url": normalized_homepage_url,
+            "logo_url": logo_url,
+            "logo_alt_text": logo_alt_text,
             "source_language": (_clean_text(payload.get("source_language")) or "en").lower(),
             "managed_flag": True,
             "change_reason": _clean_text(payload.get("change_reason")),
@@ -592,6 +745,8 @@ def update_bank_profile(
             status,
             homepage_url,
             normalized_homepage_url,
+            logo_url,
+            logo_alt_text,
             source_language,
             managed_flag,
             change_reason,
@@ -608,6 +763,12 @@ def update_bank_profile(
     bank_name = _required_text(payload.get("bank_name", existing_row["bank_name"]), "bank_name")
     homepage_url, normalized_homepage_url = _normalize_bank_homepage_url(
         _required_text(payload.get("homepage_url", existing_row["homepage_url"]), "homepage_url")
+    )
+    logo_url = _normalize_optional_public_url(payload.get("logo_url", existing_row.get("logo_url")), "logo_url")
+    logo_alt_text = _normalize_logo_alt_text(
+        payload.get("logo_alt_text", existing_row.get("logo_alt_text")),
+        bank_name=bank_name,
+        logo_url=logo_url,
     )
     conflict_row = connection.execute(
         """
@@ -628,6 +789,8 @@ def update_bank_profile(
     diff_summary = _build_bank_diff_summary(existing_row, {
         "bank_name": bank_name,
         "homepage_url": homepage_url,
+        "logo_url": logo_url,
+        "logo_alt_text": logo_alt_text,
         "status": updated_status,
         "country_code": updated_country_code,
         "source_language": updated_source_language,
@@ -642,6 +805,8 @@ def update_bank_profile(
             status = %(status)s,
             homepage_url = %(homepage_url)s,
             normalized_homepage_url = %(normalized_homepage_url)s,
+            logo_url = %(logo_url)s,
+            logo_alt_text = %(logo_alt_text)s,
             source_language = %(source_language)s,
             change_reason = %(change_reason)s,
             updated_at = %(updated_at)s
@@ -654,6 +819,8 @@ def update_bank_profile(
             "status": updated_status,
             "homepage_url": homepage_url,
             "normalized_homepage_url": normalized_homepage_url,
+            "logo_url": logo_url,
+            "logo_alt_text": logo_alt_text,
             "source_language": updated_source_language,
             "change_reason": updated_change_reason,
             "updated_at": utc_now(),
@@ -829,6 +996,8 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language,
             COUNT(DISTINCT sri.source_id) AS generated_source_count
         FROM source_registry_catalog_item AS sci
@@ -850,6 +1019,8 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language
         ORDER BY b.bank_name, sci.product_type
         """,
@@ -902,6 +1073,8 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language,
             COUNT(DISTINCT sri.source_id) AS generated_source_count
         FROM source_registry_catalog_item AS sci
@@ -923,6 +1096,8 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
+            b.logo_url,
+            b.logo_alt_text,
             b.source_language
         """,
         {"catalog_item_id": catalog_item_id},
@@ -985,7 +1160,7 @@ def create_source_catalog_item(
 
     bank_row = connection.execute(
         """
-        SELECT bank_code, country_code, bank_name, homepage_url, normalized_homepage_url, source_language
+        SELECT bank_code, country_code, bank_name, homepage_url, normalized_homepage_url, logo_url, logo_alt_text, source_language
         FROM bank
         WHERE bank_code = %(bank_code)s
         """,
@@ -2631,16 +2806,19 @@ def _candidate_promotes_to_detail(
 ) -> bool:
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return False
+    strong_page_detail_signal = _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
     if _candidate_is_seed_backed(candidate):
         return True
     if page_evidence.negative_signal_count >= 2:
         return False
-    if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail"):
+    if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail") and not strong_page_detail_signal:
         return False
     if ai_score is not None:
+        if ai_score.predicted_role == "supporting_html" and strong_page_detail_signal:
+            return True
         if ai_score.predicted_role != "detail":
             return False
-        return ai_score.relevance_score >= 4.0
+        return ai_score.relevance_score >= 4.0 or strong_page_detail_signal
     if ai_unavailable:
         return (
             candidate.heuristic_score > 0
@@ -2648,7 +2826,23 @@ def _candidate_promotes_to_detail(
             and page_evidence.attribute_signal_count >= 2
             and page_evidence.negative_signal_count == 0
         )
-    return candidate.heuristic_score > 0
+    return candidate.heuristic_score > 0 or strong_page_detail_signal
+
+
+def _candidate_has_strong_page_detail_signal(*, candidate: HomepageCandidate, page_evidence: PageEvidenceAssessment) -> bool:
+    candidate_fingerprint = f"{candidate.normalized_url} {candidate.anchor_text}".lower()
+    if any(keyword in candidate_fingerprint for keyword in ("legal", "terms", "conditions", "agreement", "disclosure", "service-fee", "service fee")):
+        return False
+    if page_evidence.page_evidence_score < 7:
+        return False
+    if page_evidence.negative_signal_count > 0:
+        return False
+    if page_evidence.attribute_signal_count < 2:
+        return False
+    reason_codes = set(page_evidence.page_evidence_reason_codes)
+    if not (page_evidence.heading_match or "title_semantic_match" in reason_codes):
+        return False
+    return candidate.heuristic_score > 0 or "product_type_semantic_match" in reason_codes
 
 
 def _build_detail_discovery_metadata(
@@ -2671,6 +2865,13 @@ def _build_detail_discovery_metadata(
                 *(_coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else []),
                 *page_evidence.page_evidence_reason_codes,
                 "seed_hint_alignment" if candidate.seed_source_id else "",
+                (
+                    "strong_page_evidence_detail_override"
+                    if ai_score is not None
+                    and ai_score.predicted_role == "supporting_html"
+                    and _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
+                    else ""
+                ),
             ]
         )
     )
@@ -3099,8 +3300,28 @@ def _link_is_relevant_supporting_source(
         normalized_url=normalized_url,
         anchor_text=anchor_text,
     ) > 0
-    has_bank_account_terms_signal = "bank-account" in fingerprint or "bank accounts" in fingerprint
-    return has_product_signal or (has_supporting_signal and has_bank_account_terms_signal)
+    return has_product_signal or (has_supporting_signal and _has_supporting_product_context_signal(fingerprint))
+
+
+def _has_supporting_product_context_signal(fingerprint: str) -> bool:
+    return any(
+        keyword in fingerprint
+        for keyword in (
+            "bank-account",
+            "bank accounts",
+            "credit-card",
+            "credit cards",
+            "mortgage",
+            "mortgages",
+            "loan",
+            "loans",
+            "line-of-credit",
+            "line of credit",
+            "borrow",
+            "borrowing",
+            "lending",
+        )
+    )
 
 
 def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -> bool:
@@ -3244,6 +3465,14 @@ def _product_type_discovery_profile(product_type: str, product_type_definition: 
     if product_type in _DISCOVERY_PROFILE_TERMS:
         return product_type
     code_tokens = set(filter(None, product_type.replace("-", " ").split()))
+    if {"credit", "card"}.issubset(code_tokens) or "card" in code_tokens:
+        return "credit-card"
+    if "mortgage" in code_tokens or "mortgages" in code_tokens:
+        return "mortgage"
+    if "loc" in code_tokens or "heloc" in code_tokens or {"line", "credit"}.issubset(code_tokens):
+        return "line-of-credit"
+    if "loan" in code_tokens or "loans" in code_tokens:
+        return "personal-loan"
     if "gic" in code_tokens or {"term", "deposit"}.issubset(code_tokens):
         return "gic"
     if "savings" in code_tokens or "saving" in code_tokens:
@@ -3308,6 +3537,8 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
         "status": str(row["status"]),
         "homepage_url": row.get("homepage_url"),
         "normalized_homepage_url": row.get("normalized_homepage_url"),
+        "logo_url": row.get("logo_url"),
+        "logo_alt_text": row.get("logo_alt_text"),
         "source_language": str(row.get("source_language") or "en"),
         "managed_flag": bool(row.get("managed_flag", False)),
         "change_reason": row.get("change_reason"),
@@ -3330,6 +3561,8 @@ def _serialize_source_catalog_row(row: dict[str, Any], *, bank_row: dict[str, An
         "status": str(row["status"]),
         "homepage_url": bank_row.get("homepage_url"),
         "normalized_homepage_url": bank_row.get("normalized_homepage_url"),
+        "logo_url": bank_row.get("logo_url"),
+        "logo_alt_text": bank_row.get("logo_alt_text"),
         "source_language": str(bank_row.get("source_language") or "en"),
         "generated_source_count": generated_source_count,
         "change_reason": row.get("change_reason"),
@@ -3434,6 +3667,10 @@ def _build_bank_diff_summary(existing_row: dict[str, Any], updated: dict[str, An
         changes.append("Bank name")
     if str(existing_row.get("homepage_url") or "") != str(updated["homepage_url"]):
         changes.append("Homepage URL")
+    if str(existing_row.get("logo_url") or "") != str(updated.get("logo_url") or ""):
+        changes.append("Logo URL")
+    if str(existing_row.get("logo_alt_text") or "") != str(updated.get("logo_alt_text") or ""):
+        changes.append("Logo alt text")
     if str(existing_row["status"]) != str(updated["status"]):
         changes.append("Status")
     if str(existing_row["country_code"]) != str(updated["country_code"]):
@@ -3578,6 +3815,29 @@ def _normalize_bank_homepage_url(homepage_url: str) -> tuple[str, str]:
             message="homepage_url must be a valid public http or https URL.",
         ) from exc
     return normalized, normalized
+
+
+def _normalize_optional_public_url(value: Any, field_name: str) -> str | None:
+    cleaned = _clean_text(value)
+    if cleaned is None:
+        return None
+    candidate = cleaned
+    if "://" not in candidate:
+        candidate = f"https://{candidate.lstrip('/')}"
+    try:
+        return normalize_source_url(candidate)
+    except ValueError as exc:
+        raise SourceRegistryError(
+            status_code=422,
+            code=f"{field_name}_invalid",
+            message=f"{field_name} must be a valid public http or https URL.",
+        ) from exc
+
+
+def _normalize_logo_alt_text(value: Any, *, bank_name: str, logo_url: str | None) -> str | None:
+    if logo_url is None:
+        return None
+    return _clean_text(value) or f"{bank_name} logo"
 
 
 def _normalize_search(value: Any) -> str | None:

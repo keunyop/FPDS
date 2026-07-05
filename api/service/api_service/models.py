@@ -59,6 +59,8 @@ class SourceCollectionRequest(BaseModel):
 class BankWriteRequest(BaseModel):
     bank_name: str | None = Field(default=None, max_length=300)
     homepage_url: str | None = Field(default=None, max_length=2000)
+    logo_url: str | None = Field(default=None, max_length=2000)
+    logo_alt_text: str | None = Field(default=None, max_length=300)
     country_code: str | None = Field(default=None, max_length=10)
     source_language: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, max_length=30)
@@ -79,6 +81,7 @@ class SourceCatalogCollectionRequest(BaseModel):
 
 class ProductTypeWriteRequest(BaseModel):
     product_type_code: str | None = Field(default=None, max_length=50)
+    product_family: str | None = Field(default=None, max_length=50)
     display_name: str | None = Field(default=None, max_length=120)
     description: str | None = Field(default=None, max_length=2000)
     status: str | None = Field(default=None, max_length=30)

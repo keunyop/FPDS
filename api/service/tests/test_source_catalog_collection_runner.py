@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from unittest.mock import patch
 
@@ -102,6 +103,49 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             update_call["error_summary"],
             "Homepage discovery produced no detail sources eligible for collection. Homepage discovery completed but no candidate-producing detail sources were identified.",
         )
+
+    def test_run_group_metadata_infers_lending_product_family(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-cc-001",
+            "correlation_id": "corr-cc-001",
+            "request_id": "req-cc-001",
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-cc-001",
+            "catalog_item_id": "catalog-ca-rbc-credit-card-12345678",
+            "bank_code": "RBC",
+            "bank_name": "RBC",
+            "country_code": "CA",
+            "product_type": "credit_card",
+            "source_language": "en",
+            "homepage_url": "https://www.rbcroyalbank.com/personal.html",
+            "normalized_homepage_url": "https://www.rbcroyalbank.com/personal",
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch(
+                "api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item",
+                return_value=CatalogItemMaterializationResult(
+                    generated_rows=[],
+                    discovery_notes=["Homepage discovery completed but no candidate-producing detail sources were identified."],
+                    detail_source_ids=[],
+                ),
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner._load_active_collection_scope",
+                return_value={"collection_source_ids": [], "target_source_ids": []},
+            ),
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        update_call = next(params for sql, params in connection.calls if "UPDATE ingestion_run" in sql)
+        run_metadata = json.loads(str(update_call["run_metadata"]))
+        self.assertEqual(run_metadata["product_type"], "credit-card")
+        self.assertEqual(run_metadata["product_family"], "lending")
 
     def test_run_group_uses_registered_product_type_code_without_aliasing(self) -> None:
         connection = _Connection()

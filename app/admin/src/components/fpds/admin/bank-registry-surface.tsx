@@ -451,9 +451,12 @@ export function BankRegistrySurface({
                       />
                     </td>
                     <td className="border-b border-border/70 px-3 py-4">
-                      <button className="bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
-                        {item.bank_name}
-                      </button>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <BankLogoMark bank={item} />
+                        <button className="min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
+                          {item.bank_name}
+                        </button>
+                      </div>
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.bank_code}</td>
                     <td className="border-b border-border/70 px-3 py-4">
@@ -632,6 +635,31 @@ function FilterSelect({
   );
 }
 
+function BankLogoMark({ bank }: { bank: BankItem }) {
+  const [failed, setFailed] = useState(false);
+  const logoUrl = bank.logo_url ?? "";
+  const showLogo = Boolean(logoUrl && !failed);
+
+  return (
+    <span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-white px-2 py-1 shadow-sm">
+      {showLogo ? (
+        <img
+          alt={bank.logo_alt_text ?? `${bank.bank_name} logo`}
+          className="max-h-full max-w-full object-contain"
+          decoding="async"
+          loading="lazy"
+          onError={() => setFailed(true)}
+          src={logoUrl}
+        />
+      ) : (
+        <span className="text-[10px] font-semibold text-foreground">
+          {bank.bank_code.slice(0, 4)}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function formatStatus(locale: AdminLocale, value: string) {
   if (value === "active") {
     return BANK_COPY[locale].active;
@@ -665,6 +693,8 @@ function buildPreviewBankDetail(bank: BankItem): BankDetailResponse {
       status: item.status,
       homepage_url: bank.homepage_url,
       normalized_homepage_url: bank.normalized_homepage_url,
+      logo_url: bank.logo_url,
+      logo_alt_text: bank.logo_alt_text,
       source_language: bank.source_language,
       generated_source_count: item.generated_source_count,
       change_reason: null,

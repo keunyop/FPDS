@@ -47,8 +47,10 @@ def _product_type_definitions(*codes: str) -> dict[str, dict[str, object]]:
     definitions: dict[str, dict[str, object]] = {}
     for code in codes:
         label = code.replace("-", " ").title()
+        product_family = "lending" if code in {"credit-card", "mortgage", "personal-loan", "line-of-credit"} else "deposit"
         definitions[code] = {
             "product_type_code": code,
+            "product_family": product_family,
             "display_name": label,
             "description": f"{label} product type",
             "discovery_keywords": [code],
@@ -132,6 +134,40 @@ class SourceRegistryTests(unittest.TestCase):
             plan["groups"][0]["included_sources"][0]["discovery_metadata"],
             {"selection_path": "heuristic_plus_ai_plus_page_evidence"},
         )
+
+    def test_build_source_collection_plan_carries_lending_product_family(self) -> None:
+        selected_rows = [
+            {
+                "source_id": "RBC-CC-001",
+                "bank_code": "RBC",
+                "country_code": "CA",
+                "product_type": "credit-card",
+                "source_name": "RBC credit cards",
+                "source_url": "https://www.rbcroyalbank.com/credit-cards/",
+                "source_type": "html",
+                "discovery_role": "detail",
+                "priority": "P0",
+                "source_language": "en",
+                "purpose": "detail",
+                "expected_fields": ["product_name", "annual_fee"],
+                "seed_source_flag": False,
+                "discovery_metadata": {},
+            }
+        ]
+
+        plan = build_source_collection_plan(
+            selected_rows=selected_rows,
+            included_rows=selected_rows,
+            product_type_definitions=_product_type_definitions("credit-card"),
+            collection_id="collection-cc-001",
+            correlation_id="corr-cc-001",
+            actor={"email": "admin@example.com"},
+            request_id="req-001",
+        )
+
+        group = plan["groups"][0]
+        self.assertEqual(group["product_family"], "lending")
+        self.assertEqual(group["included_sources"][0]["product_family"], "lending")
 
     def test_load_source_registry_list_omits_null_filter_params(self) -> None:
         connection = _QueuedConnection(

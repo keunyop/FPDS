@@ -29,6 +29,61 @@ _GENERIC_EXPECTED_FIELDS = (
     "eligibility_text",
     "notes",
 )
+_SUPPORTED_PRODUCT_FAMILIES = {"deposit", "lending"}
+_LENDING_EXPECTED_FIELDS_BY_TYPE = {
+    "credit-card": (
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes",
+    ),
+    "mortgage": (
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes",
+    ),
+    "personal-loan": (
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes",
+    ),
+    "line-of-credit": (
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes",
+    ),
+}
 _STOPWORDS = {
     "able",
     "account",
@@ -123,7 +178,7 @@ def normalize_product_type_filters(*, search: str | None, status: str | None) ->
 
 
 def load_product_type_list(connection: Connection, *, filters: ProductTypeFilters) -> dict[str, Any]:
-    where_clauses = ["product_family = 'deposit'"]
+    where_clauses: list[str] = []
     params: dict[str, Any] = {}
     if filters.status:
         where_clauses.append("status = %(status)s")
@@ -140,6 +195,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
             """
         )
 
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     rows = connection.execute(
         f"""
         SELECT
@@ -155,8 +211,8 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
             created_at,
             updated_at
         FROM product_type_registry
-        WHERE {" AND ".join(where_clauses)}
-        ORDER BY display_name, product_type_code
+        {where_sql}
+        ORDER BY product_family, display_name, product_type_code
         """,
         params,
     ).fetchall()
@@ -213,17 +269,18 @@ def load_product_type_definitions_map(
     codes: list[str] | None = None,
     active_only: bool = False,
 ) -> dict[str, dict[str, Any]]:
-    where_clauses = ["product_family = 'deposit'"]
+    where_clauses: list[str] = []
     params: dict[str, Any] = {}
     if active_only:
         where_clauses.append("status = 'active'")
     if codes:
-        normalized_codes = sorted({str(item).strip().lower() for item in codes if str(item).strip()})
+        normalized_codes = sorted({canonicalize_product_type_code(item) for item in codes if str(item).strip()})
         if not normalized_codes:
             return {}
         where_clauses.append("product_type_code = ANY(%(codes)s)")
         params["codes"] = normalized_codes
 
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     rows = connection.execute(
         f"""
         SELECT
@@ -239,7 +296,7 @@ def load_product_type_definitions_map(
             created_at,
             updated_at
         FROM product_type_registry
-        WHERE {" AND ".join(where_clauses)}
+        {where_sql}
         """,
         params,
     ).fetchall()
@@ -284,6 +341,10 @@ def create_product_type_definition(
 
     requested_code = _clean_text(payload.get("product_type_code"))
     product_type_code = _slugify_product_type_code(requested_code or display_name)
+    product_family = _normalize_product_family(
+        payload.get("product_family"),
+        fallback=_infer_product_family(product_type_code=product_type_code, display_name=display_name, description=description),
+    )
     existing = connection.execute(
         """
         SELECT product_type_code
@@ -305,8 +366,11 @@ def create_product_type_definition(
         description=description,
         provided=list(payload.get("discovery_keywords") or []),
         regenerate=True,
+        product_family=product_family,
     )
-    expected_fields = _normalize_string_list(payload.get("expected_fields") or _GENERIC_EXPECTED_FIELDS)
+    expected_fields = _normalize_string_list(
+        payload.get("expected_fields") or _default_expected_fields_for_product_type(product_type_code=product_type_code, product_family=product_family)
+    )
     fallback_policy = "generic_ai_review"
     connection.execute(
         """
@@ -325,7 +389,7 @@ def create_product_type_definition(
         )
         VALUES (
             %(product_type_code)s,
-            'deposit',
+            %(product_family)s,
             %(display_name)s,
             %(description)s,
             %(status)s,
@@ -339,6 +403,7 @@ def create_product_type_definition(
         """,
         {
             "product_type_code": product_type_code,
+            "product_family": product_family,
             "display_name": display_name,
             "description": description,
             "status": status,
@@ -349,7 +414,12 @@ def create_product_type_definition(
             "updated_at": now,
         },
     )
-    _sync_product_type_taxonomy_registry(connection, product_type_code=product_type_code, status=status)
+    _sync_product_type_taxonomy_registry(
+        connection,
+        product_type_code=product_type_code,
+        product_family=product_family,
+        status=status,
+    )
     _record_product_type_audit_event(
         connection,
         actor=actor,
@@ -357,7 +427,7 @@ def create_product_type_definition(
         event_type="product_type_created",
         target_id=product_type_code,
         diff_summary=f"Created product type `{product_type_code}`.",
-        metadata={"product_type_code": product_type_code, "display_name": display_name},
+        metadata={"product_type_code": product_type_code, "product_family": product_family, "display_name": display_name},
     )
     created = load_product_type_definition(connection, product_type_code=product_type_code)
     if created is None:
@@ -399,6 +469,7 @@ def update_product_type_definition(
 
     display_name = _required_text(payload.get("display_name", existing["display_name"]), "display_name")
     description = _required_text(payload.get("description", existing["description"]), "description")
+    product_family = _normalize_product_family(payload.get("product_family"), fallback=str(existing.get("product_family") or "deposit"))
     status = (_clean_text(payload.get("status", existing["status"])) or "active").lower()
     if status not in {"active", "inactive"}:
         raise SourceRegistryError(status_code=422, code="invalid_product_type_status", message="status must be active or inactive.")
@@ -410,14 +481,20 @@ def update_product_type_definition(
         description=description,
         provided=list(payload.get("discovery_keywords") or ([] if definition_supplied else existing["discovery_keywords"])),
         regenerate=explicit_keywords or definition_supplied,
+        product_family=product_family,
     )
-    expected_fields = _normalize_string_list(payload.get("expected_fields") or existing["expected_fields"] or _GENERIC_EXPECTED_FIELDS)
+    expected_fields = _normalize_string_list(
+        payload.get("expected_fields")
+        or existing["expected_fields"]
+        or _default_expected_fields_for_product_type(product_type_code=updated_code, product_family=product_family)
+    )
     now = utc_now()
     connection.execute(
         """
         UPDATE product_type_registry
         SET
             product_type_code = %(updated_product_type_code)s,
+            product_family = %(product_family)s,
             display_name = %(display_name)s,
             description = %(description)s,
             status = %(status)s,
@@ -429,6 +506,7 @@ def update_product_type_definition(
         {
             "existing_product_type_code": existing_code,
             "updated_product_type_code": updated_code,
+            "product_family": product_family,
             "display_name": display_name,
             "description": description,
             "status": status,
@@ -439,7 +517,12 @@ def update_product_type_definition(
     )
     if updated_code != existing_code:
         _cascade_product_type_code_update(connection, existing_code=existing_code, updated_code=updated_code)
-    _sync_product_type_taxonomy_registry(connection, product_type_code=updated_code, status=status)
+    _sync_product_type_taxonomy_registry(
+        connection,
+        product_type_code=updated_code,
+        product_family=product_family,
+        status=status,
+    )
     updated = load_product_type_definition(connection, product_type_code=updated_code)
     if updated is None:
         raise SourceRegistryError(status_code=500, code="product_type_missing_after_update", message="Updated product type could not be reloaded.")
@@ -450,7 +533,12 @@ def update_product_type_definition(
         event_type="product_type_updated",
         target_id=updated_code,
         diff_summary=_build_product_type_diff_summary(existing, updated),
-        metadata={"product_type_code": updated_code, "previous_product_type_code": existing_code, "display_name": display_name},
+        metadata={
+            "product_type_code": updated_code,
+            "previous_product_type_code": existing_code,
+            "product_family": product_family,
+            "display_name": display_name,
+        },
     )
     return updated
 
@@ -541,7 +629,6 @@ def delete_product_type_definition(
         """
         DELETE FROM taxonomy_registry
         WHERE country_code = 'CA'
-          AND product_family = 'deposit'
           AND product_type = %(product_type_code)s
         """,
         {"product_type_code": existing_code},
@@ -565,16 +652,16 @@ def delete_product_type_definition(
     return existing
 
 
-def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type_code: str, status: str) -> None:
+def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type_code: str, product_family: str, status: str) -> None:
     now = utc_now()
     subtype_rows = [
         {
-            "taxonomy_id": _taxonomy_id(product_type_code=product_type_code, subtype_code=subtype_code),
+            "taxonomy_id": _taxonomy_id(product_family=product_family, product_type_code=product_type_code, subtype_code=subtype_code),
             "subtype_code": subtype_code,
             "display_order": display_order,
             "notes": notes,
         }
-        for subtype_code, display_order, notes in _taxonomy_subtypes_for_product_type(product_type_code)
+        for subtype_code, display_order, notes in _taxonomy_subtypes_for_product_type(product_type_code, product_family=product_family)
     ]
     connection.execute(
         """
@@ -602,7 +689,7 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
         SELECT
             taxonomy_id,
             'CA',
-            'deposit',
+            %(product_family)s,
             %(product_type)s,
             subtype_code,
             display_order,
@@ -618,6 +705,7 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
         """,
         {
             "product_type": product_type_code,
+            "product_family": product_family,
             "active_flag": status == "active",
             "subtype_rows": json.dumps(subtype_rows, ensure_ascii=True),
             "created_at": now,
@@ -631,29 +719,39 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
             active_flag = %(active_flag)s,
             updated_at = %(updated_at)s
         WHERE country_code = 'CA'
-          AND product_family = 'deposit'
+          AND product_family = %(product_family)s
           AND product_type = %(product_type)s
         """,
         {
             "product_type": product_type_code,
+            "product_family": product_family,
             "active_flag": status == "active",
             "updated_at": now,
         },
     )
-
-
-def _taxonomy_subtypes_for_product_type(product_type_code: str) -> tuple[tuple[str, int, str], ...]:
-    return _CANONICAL_DEPOSIT_SUBTYPES.get(
-        product_type_code,
-        (("other", 999, "operator_managed_product_type_generic_fallback"),),
+    connection.execute(
+        """
+        DELETE FROM taxonomy_registry
+        WHERE country_code = 'CA'
+          AND product_family <> %(product_family)s
+          AND product_type = %(product_type)s
+        """,
+        {"product_type": product_type_code, "product_family": product_family},
     )
 
 
-def _taxonomy_id(*, product_type_code: str, subtype_code: str) -> str:
+def _taxonomy_subtypes_for_product_type(product_type_code: str, *, product_family: str) -> tuple[tuple[str, int, str], ...]:
+    if product_family == "deposit":
+        return _CANONICAL_DEPOSIT_SUBTYPES.get(
+            product_type_code,
+            (("other", 999, "operator_managed_product_type_generic_fallback"),),
+        )
+    return (("other", 999, f"Canada {product_family} taxonomy v1 generic fallback"),)
+
+
+def _taxonomy_id(*, product_family: str, product_type_code: str, subtype_code: str) -> str:
     normalized_subtype = subtype_code.replace("_", "-")
-    if product_type_code in _CANONICAL_DEPOSIT_SUBTYPES:
-        return f"tax-ca-deposit-{product_type_code}-{normalized_subtype}"
-    return f"tax-{product_type_code}-{normalized_subtype}"
+    return f"tax-ca-{product_family}-{product_type_code}-{normalized_subtype}"
 
 
 def _record_product_type_audit_event(
@@ -723,7 +821,7 @@ def _record_product_type_audit_event(
 
 def _build_product_type_diff_summary(existing: dict[str, Any], updated: dict[str, Any]) -> str:
     changes: list[str] = []
-    for label, key in (("Name", "display_name"), ("Description", "description"), ("Status", "status")):
+    for label, key in (("Name", "display_name"), ("Description", "description"), ("Product family", "product_family"), ("Status", "status")):
         if str(existing.get(key) or "") != str(updated.get(key) or ""):
             changes.append(label)
     if list(existing.get("discovery_keywords") or []) != list(updated.get("discovery_keywords") or []):
@@ -779,6 +877,49 @@ def _normalize_string_list(values: Any) -> list[str]:
     return normalized
 
 
+def _normalize_product_family(value: Any, *, fallback: str = "deposit") -> str:
+    candidate = (_clean_text(value) or fallback or "deposit").lower().replace("_", "-")
+    if candidate not in _SUPPORTED_PRODUCT_FAMILIES:
+        raise SourceRegistryError(
+            status_code=422,
+            code="invalid_product_family",
+            message="product_family must be deposit or lending.",
+        )
+    return candidate
+
+
+def _infer_product_family(*, product_type_code: str, display_name: str, description: str) -> str:
+    fingerprint = " ".join([product_type_code, display_name, description]).lower()
+    if any(
+        term in fingerprint
+        for term in (
+            "credit-card",
+            "credit card",
+            "mortgage",
+            "loan",
+            "loans",
+            "line-of-credit",
+            "line of credit",
+            "heloc",
+            "home equity",
+            "borrowing",
+            "lending",
+            "vehicle financing",
+            "auto loan",
+            "car loan",
+            "rrsp loan",
+        )
+    ):
+        return "lending"
+    return "deposit"
+
+
+def _default_expected_fields_for_product_type(*, product_type_code: str, product_family: str) -> tuple[str, ...]:
+    if product_family == "lending":
+        return _LENDING_EXPECTED_FIELDS_BY_TYPE.get(product_type_code, _LENDING_EXPECTED_FIELDS_BY_TYPE["personal-loan"])
+    return _GENERIC_EXPECTED_FIELDS
+
+
 def _slugify_product_type_code(value: str) -> str:
     normalized = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     if not normalized:
@@ -792,20 +933,39 @@ def canonicalize_product_type_code(value: Any) -> str:
     return re.sub(r"-+", "-", normalized).strip("-")
 
 
-def _merge_keywords(*, display_name: str, description: str, provided: list[str], regenerate: bool) -> list[str]:
+def _merge_keywords(
+    *,
+    display_name: str,
+    description: str,
+    provided: list[str],
+    regenerate: bool,
+    product_family: str | None = None,
+) -> list[str]:
     if not regenerate:
         return _normalize_existing_keywords(provided)
 
     candidates = [*_normalize_string_list(provided)]
-    ai_keywords = _generate_ai_discovery_keywords(display_name=display_name, description=description, provided=candidates)
+    resolved_product_family = product_family or _infer_product_family(product_type_code=display_name, display_name=display_name, description=description)
+    ai_keywords = _generate_ai_discovery_keywords(
+        display_name=display_name,
+        description=description,
+        provided=candidates,
+        product_family=resolved_product_family,
+    )
     if ai_keywords:
         candidates.extend(ai_keywords)
     else:
-        candidates.extend(_generate_heuristic_discovery_keywords(display_name=display_name, description=description))
+        candidates.extend(
+            _generate_heuristic_discovery_keywords(
+                display_name=display_name,
+                description=description,
+                product_family=resolved_product_family,
+            )
+        )
     return _sanitize_discovery_keywords(candidates, display_name=display_name)
 
 
-def _generate_ai_discovery_keywords(*, display_name: str, description: str, provided: list[str]) -> list[str]:
+def _generate_ai_discovery_keywords(*, display_name: str, description: str, provided: list[str], product_family: str = "deposit") -> list[str]:
     provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
     api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
     if provider != "openai" or not api_key:
@@ -813,7 +973,7 @@ def _generate_ai_discovery_keywords(*, display_name: str, description: str, prov
 
     payload = {
         "country_code": "CA",
-        "product_family": "deposit",
+        "product_family": product_family,
         "display_name": display_name,
         "description": description,
         "operator_seed_keywords": provided,
@@ -825,7 +985,7 @@ def _generate_ai_discovery_keywords(*, display_name: str, description: str, prov
     request_body = {
         "model": os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
         "instructions": (
-            "You generate high-quality discovery keywords for FPDS Canadian deposit product types. "
+            "You generate high-quality discovery keywords for FPDS Canadian banking product types. "
             "Use the product type description plus your financial-domain knowledge. "
             "Return 6 to 12 short keywords or phrases that are likely to appear on official bank pages. "
             "Prefer product-category terms, URL or heading phrases, and useful attribute terms. "
@@ -870,7 +1030,7 @@ def _generate_ai_discovery_keywords(*, display_name: str, description: str, prov
     return [str(item) for item in parsed.get("keywords", []) if str(item).strip()]
 
 
-def _generate_heuristic_discovery_keywords(*, display_name: str, description: str) -> list[str]:
+def _generate_heuristic_discovery_keywords(*, display_name: str, description: str, product_family: str = "deposit") -> list[str]:
     text = f"{display_name} {description}".lower()
     candidates: list[str] = [display_name]
     rule_groups: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
@@ -904,6 +1064,22 @@ def _generate_heuristic_discovery_keywords(*, display_name: str, description: st
         (
             ("rrsp", "retirement"),
             ("rrsp", "retirement savings", "registered retirement savings"),
+        ),
+        (
+            ("credit card", "credit-card", "cash back", "cashback", "rewards", "annual fee", "purchase interest"),
+            ("credit cards", "cash back", "rewards", "annual fee", "purchase interest rate", "balance transfer", "travel rewards"),
+        ),
+        (
+            ("mortgage", "fixed rate", "variable rate", "amortization", "prepayment"),
+            ("mortgages", "mortgage rates", "fixed rate mortgage", "variable rate mortgage", "amortization", "prepayment privileges"),
+        ),
+        (
+            ("personal loan", "loan", "loans", "car loan", "vehicle loan", "rrsp loan", "installment"),
+            ("personal loans", "loan rates", "fixed rate loan", "vehicle loan", "rrsp loan", "monthly payments"),
+        ),
+        (
+            ("line of credit", "line-of-credit", "heloc", "home equity line", "student line"),
+            ("lines of credit", "line of credit", "home equity line of credit", "student line of credit", "credit limit", "variable interest rate"),
         ),
     )
     for triggers, terms in rule_groups:

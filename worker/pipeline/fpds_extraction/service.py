@@ -671,8 +671,9 @@ def _extract_fields(
     matches: list[EvidenceMatch],
     requested_fields: list[str],
 ) -> list[ExtractedFieldCandidate]:
+    product_family = _infer_product_family(context)
     extracted: list[ExtractedFieldCandidate] = [
-        _build_derived_field(context=context, field_name="product_family", candidate_value="deposit", value_type="string"),
+        _build_derived_field(context=context, field_name="product_family", candidate_value=product_family, value_type="string"),
         _build_derived_field(context=context, field_name="product_type", candidate_value=_infer_product_type(context), value_type="string"),
         _build_derived_field(context=context, field_name="bank_code", candidate_value=context.bank_code, value_type="string"),
         _build_derived_field(context=context, field_name="country_code", candidate_value=context.country_code, value_type="string"),
@@ -1244,6 +1245,29 @@ def _extract_description(*, context: ExtractionDocumentContext, candidates: list
 def _infer_product_type(context: ExtractionDocumentContext) -> str:
     raw_value = str(context.source_metadata.get("product_type", "")).strip().lower()
     return raw_value or "deposit"
+
+
+def _infer_product_family(context: ExtractionDocumentContext) -> str:
+    raw_value = str(context.source_metadata.get("product_family", "")).strip().lower().replace("_", "-")
+    if raw_value in {"deposit", "lending"}:
+        return raw_value
+    product_type = _infer_product_type(context)
+    if product_type in _CANONICAL_PRODUCT_TYPES or _canonical_product_type_family(product_type) is not None:
+        return "deposit"
+    if any(
+        token in product_type
+        for token in (
+            "credit-card",
+            "credit_card",
+            "mortgage",
+            "loan",
+            "line-of-credit",
+            "line_of_credit",
+            "heloc",
+        )
+    ):
+        return "lending"
+    return "deposit"
 
 
 def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
@@ -2472,6 +2496,7 @@ def _build_extracted_artifact_payload(
     model_id: str,
     started_at: str,
 ) -> dict[str, object]:
+    product_family = _infer_product_family(context)
     return {
         "run_id": run_id,
         "correlation_id": correlation_id,
@@ -2485,7 +2510,7 @@ def _build_extracted_artifact_payload(
         "model_id": model_id,
         "started_at": started_at,
         "schema_context": {
-            "product_family": "deposit",
+            "product_family": product_family,
             "product_type": _infer_product_type(context),
             "source_language": context.source_language,
             "expected_fields": context.source_metadata.get("expected_fields", []),

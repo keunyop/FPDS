@@ -222,7 +222,6 @@ FROM (
     FROM taxonomy_registry
     WHERE active_flag = true
       AND country_code = 'CA'
-      AND product_family = 'deposit'
     GROUP BY product_type
 ) AS taxonomy_rows;
 """

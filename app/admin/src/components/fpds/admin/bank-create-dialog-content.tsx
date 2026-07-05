@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Globe, Landmark, Languages, ShieldCheck } from "lucide-react";
+import { Globe, ImageIcon, Landmark, Languages, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -26,6 +26,7 @@ type BankCreateDialogContentProps = {
 type CreateBankFormState = {
   bank_name: string;
   homepage_url: string;
+  logo_url: string;
   source_language: string;
   status: string;
   change_reason: string;
@@ -97,6 +98,7 @@ const CREATE_BANK_COPY = {
 const DEFAULT_CREATE_FORM: CreateBankFormState = {
   bank_name: "",
   homepage_url: "",
+  logo_url: "",
   source_language: "en",
   status: "active",
   change_reason: "",
@@ -177,6 +179,14 @@ export function BankCreateDialogContent({ csrfToken, locale, productTypes, onCre
               setCreateForm((current) => ({ ...current, homepage_url: value }))
             }
             value={createForm.homepage_url}
+          />
+          <InputField
+            icon={<ImageIcon className="size-4" />}
+            label="Logo URL"
+            onChange={(value) =>
+              setCreateForm((current) => ({ ...current, logo_url: value }))
+            }
+            value={createForm.logo_url}
           />
         </FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">

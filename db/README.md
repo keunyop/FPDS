@@ -24,6 +24,9 @@ Files:
 - `migrations/0016_auto_promotion_aggregate_trigger.sql`: allows aggregate refresh requests triggered by audited candidate auto-promotion
 - `migrations/0017_canonical_identity_alias_repair.sql`: repairs common bank and product-type identity aliases such as RBC/TD/SCOTIA and GIC
 - `migrations/0018_canonical_source_document_identity_repair.sql`: realigns `source_document_id` values with canonical bank/url/type identity after alias repair
+- `migrations/0019_canada_lending_product_types.sql`: registers the Canada retail lending Product Type baseline (`credit-card`, `mortgage`, `personal-loan`, `line-of-credit`) plus generic `other` lending taxonomy fallback rows
+- `migrations/0020_canada_recognized_banks_full_coverage.sql`: adds bank logo metadata, registers recognized Canadian retail/direct banking brands, and creates active source-catalog coverage for every active Canadian bank/Product Type pair
+- `migrations/0021_vancity_credit_union_full_coverage.sql`: registers Vancity per Product Owner request and creates active source-catalog coverage for every active Product Type
 
 How to apply when a database is available:
 
@@ -41,6 +44,9 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0015_phase1_review_confidence_polic
 psql $env:FPDS_DATABASE_URL -f db/migrations/0016_auto_promotion_aggregate_trigger.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0017_canonical_identity_alias_repair.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0018_canonical_source_document_identity_repair.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0019_canada_lending_product_types.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0020_canada_recognized_banks_full_coverage.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0021_vancity_credit_union_full_coverage.sql
 ```
 
 Notes:
@@ -48,4 +54,4 @@ Notes:
 - Use the connection target from `.env.dev.example` or `.env.prod.example`.
 - Keep future migrations additive and append-only where possible.
 - Put extension-specific or vendor-specific migrations in later numbered files.
-- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only in the current migration chain; chequing, savings, GIC, and any later product types must be registered through admin/operator DB writes.
+- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, and `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.

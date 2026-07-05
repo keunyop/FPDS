@@ -20,6 +20,7 @@ from api_service.source_catalog import (
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
     _generate_bank_code,
+    _link_is_relevant_supporting_source,
     _ordered_detail_candidates,
     _promote_detail_candidates,
     _product_type_discovery_profile,
@@ -34,6 +35,7 @@ from api_service.source_catalog import (
     load_bank_list,
     normalize_bank_filters,
     start_source_catalog_collection,
+    update_bank_profile,
 )
 from api_service.errors import SourceRegistryError
 
@@ -69,8 +71,10 @@ class _QueuedConnection:
 
 def _product_type_definition(product_type_code: str) -> dict[str, object]:
     label = product_type_code.replace("-", " ").title()
+    product_family = "lending" if product_type_code in {"credit-card", "mortgage", "personal-loan", "line-of-credit"} else "deposit"
     return {
         "product_type_code": product_type_code,
+        "product_family": product_family,
         "display_name": label,
         "description": f"{label} product type",
         "status": "active",
@@ -103,6 +107,76 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         self.assertGreater(score, 0)
+
+    def test_lending_product_type_discovery_profiles_are_recognized(self) -> None:
+        self.assertEqual(_product_type_discovery_profile("credit_card", _product_type_definition("credit-card")), "credit-card")
+        self.assertEqual(_product_type_discovery_profile("mortgages", _product_type_definition("mortgage")), "mortgage")
+        self.assertEqual(_product_type_discovery_profile("vehicle-loan", _product_type_definition("personal-loan")), "personal-loan")
+        self.assertEqual(_product_type_discovery_profile("home-equity-loc", _product_type_definition("line-of-credit")), "line-of-credit")
+
+    def test_credit_card_page_evidence_uses_lending_attribute_signals(self) -> None:
+        detail_html = """
+        <html>
+          <head><title>Cash Back Credit Card</title></head>
+          <body>
+            <h1>Cash Back Credit Card</h1>
+            <p>Earn cash back rewards with an annual fee and a purchase interest rate.</p>
+          </body>
+        </html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/credit-cards/cash-back",
+                fetch_policy=SimpleNamespace(),
+                product_type="credit-card",
+                product_type_definition={
+                    **_product_type_definition("credit-card"),
+                    "display_name": "Credit Card",
+                    "description": "Credit cards with annual fee, rewards, cash back, and purchase interest details.",
+                    "discovery_keywords": ["credit cards", "cash back", "annual fee"],
+                },
+            )
+
+        self.assertGreaterEqual(result.page_evidence_score, 4)
+        self.assertIn("pricing_or_feature_signal", result.page_evidence_reason_codes)
+
+    def test_credit_card_page_evidence_rejects_mortgage_page(self) -> None:
+        detail_html = """
+        <html>
+          <head><title>Mortgage Rates</title></head>
+          <body>
+            <h1>Mortgage Rates</h1>
+            <p>Choose fixed rate or variable rate mortgage terms with amortization options.</p>
+          </body>
+        </html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/mortgages/rates",
+                fetch_policy=SimpleNamespace(),
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+            )
+
+        self.assertIn("other_product_type", result.page_evidence_reason_codes)
+        self.assertGreaterEqual(result.negative_signal_count, 2)
+
+    def test_lending_supporting_sources_accept_rate_pages_with_product_context(self) -> None:
+        self.assertTrue(
+            _link_is_relevant_supporting_source(
+                product_type="mortgage",
+                product_type_definition={
+                    **_product_type_definition("mortgage"),
+                    "display_name": "Mortgage",
+                    "description": "Mortgage rates, fixed rate, variable rate, term, and amortization details.",
+                    "discovery_keywords": ["mortgage rates", "fixed rate mortgage"],
+                },
+                normalized_url="https://www.examplebank.ca/mortgages/rates",
+                anchor_text="Mortgage rates",
+            )
+        )
 
     def test_create_bank_profile_auto_generates_bank_code(self) -> None:
         connection = _QueuedConnection([None, None])
@@ -207,6 +281,92 @@ class SourceCatalogTests(unittest.TestCase):
         insert_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO bank" in sql]
         self.assertEqual(insert_calls[0][1]["homepage_url"], "https://www.atlasbank.ca/")
         self.assertEqual(insert_calls[0][1]["normalized_homepage_url"], "https://www.atlasbank.ca/")
+
+    def test_create_bank_profile_persists_logo_metadata(self) -> None:
+        connection = _QueuedConnection([None, None])
+
+        with (
+            patch("api_service.source_catalog._generate_bank_code", return_value="ATL"),
+            patch(
+                "api_service.source_catalog.load_bank_detail",
+                return_value={
+                    "bank": {
+                        "bank_code": "ATL",
+                        "bank_name": "Atlas Bank",
+                        "homepage_url": "https://www.atlasbank.ca/",
+                        "logo_url": "https://www.atlasbank.ca/assets/logo.svg",
+                        "logo_alt_text": "Atlas Bank logo",
+                    }
+                },
+            ),
+            patch("api_service.source_catalog._record_catalog_audit_event"),
+        ):
+            result = create_bank_profile(
+                connection,
+                payload={
+                    "bank_name": "Atlas Bank",
+                    "homepage_url": "https://www.atlasbank.ca/",
+                    "logo_url": "www.atlasbank.ca/assets/logo.svg",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["logo_url"], "https://www.atlasbank.ca/assets/logo.svg")
+        insert_call = next(params for sql, params in connection.calls if "INSERT INTO bank" in sql)
+        self.assertEqual(insert_call["logo_url"], "https://www.atlasbank.ca/assets/logo.svg")
+        self.assertEqual(insert_call["logo_alt_text"], "Atlas Bank logo")
+
+    def test_update_bank_profile_updates_logo_metadata(self) -> None:
+        existing_row = {
+            "bank_code": "ATL",
+            "country_code": "CA",
+            "bank_name": "Atlas Bank",
+            "status": "active",
+            "homepage_url": "https://www.atlasbank.ca/",
+            "normalized_homepage_url": "https://www.atlasbank.ca/",
+            "logo_url": None,
+            "logo_alt_text": None,
+            "source_language": "en",
+            "managed_flag": True,
+            "change_reason": None,
+            "created_at": None,
+            "updated_at": None,
+        }
+        connection = _QueuedConnection([existing_row, None, None])
+
+        with (
+            patch(
+                "api_service.source_catalog.load_bank_detail",
+                return_value={
+                    "bank": {
+                        "bank_code": "ATL",
+                        "bank_name": "Atlas Bank",
+                        "homepage_url": "https://www.atlasbank.ca/",
+                        "logo_url": "https://www.atlasbank.ca/assets/logo.svg",
+                        "logo_alt_text": "Atlas primary mark",
+                    }
+                },
+            ),
+            patch("api_service.source_catalog._record_catalog_audit_event"),
+        ):
+            result = update_bank_profile(
+                connection,
+                bank_code="ATL",
+                payload={
+                    "bank_name": "Atlas Bank",
+                    "homepage_url": "https://www.atlasbank.ca/",
+                    "logo_url": "https://www.atlasbank.ca/assets/logo.svg",
+                    "logo_alt_text": "Atlas primary mark",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["logo_alt_text"], "Atlas primary mark")
+        update_call = next(params for sql, params in connection.calls if "UPDATE bank" in sql)
+        self.assertEqual(update_call["logo_url"], "https://www.atlasbank.ca/assets/logo.svg")
+        self.assertEqual(update_call["logo_alt_text"], "Atlas primary mark")
 
     def test_generate_bank_code_prefers_known_seed_bank_codes(self) -> None:
         td_connection = _QueuedConnection([None])
@@ -1006,6 +1166,136 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
+
+    def test_strong_page_evidence_override_applies_across_product_types(self) -> None:
+        cases = [
+            {
+                "product_type": "chequing",
+                "url": "https://www.examplebank.ca/personal/accounts/no-fee-echequing",
+                "label": "No Fee eChequing",
+                "title": "No Fee eChequing Account",
+                "heading": "No Fee eChequing Account",
+            },
+            {
+                "product_type": "credit-card",
+                "url": "https://www.examplebank.ca/personal/credit-cards/cash-back-visa",
+                "label": "Cash Back Visa Card",
+                "title": "Cash Back Visa Card",
+                "heading": "Cash Back Visa Card",
+            },
+            {
+                "product_type": "mortgage",
+                "url": "https://www.examplebank.ca/personal/mortgages/fixed-rate-mortgage",
+                "label": "Fixed Rate Mortgage",
+                "title": "Fixed Rate Mortgage",
+                "heading": "Fixed Rate Mortgage",
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(product_type=case["product_type"]):
+                candidate = HomepageCandidate(
+                    normalized_url=str(case["url"]),
+                    raw_url=str(case["url"]),
+                    anchor_text=str(case["label"]),
+                    source_type="html",
+                    origin="homepage_or_hub_link",
+                    heuristic_score=2,
+                    supporting_signal=True,
+                    seed_source_id=None,
+                    source_name_hint=None,
+                    priority_hint=None,
+                    expected_fields_hint=[],
+                )
+                ai_score = AiParallelCandidateScore(
+                    candidate_url=candidate.normalized_url,
+                    predicted_role="supporting_html",
+                    relevance_score=6.0,
+                    confidence_band="medium",
+                    reason_codes=["product_type_semantic_match", "pricing_or_feature_signal"],
+                    short_rationale="Useful product page, but scorer conservatively classified it as supporting.",
+                )
+                page_evidence = PageEvidenceAssessment(
+                    page_evidence_score=9,
+                    page_evidence_reason_codes=[
+                        "title_semantic_match",
+                        "detail_page_layout_signal",
+                        "product_type_semantic_match",
+                        "pricing_or_feature_signal",
+                    ],
+                    page_title=str(case["title"]),
+                    primary_heading=str(case["heading"]),
+                    heading_match=True,
+                    attribute_signal_count=4,
+                    negative_signal_count=0,
+                )
+
+                self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence))
+
+    def test_generate_sources_from_homepage_promotes_alterna_no_fee_echequing_detail(self) -> None:
+        homepage_html = """
+        <html>
+          <body>
+            <a href="/en/personal/accounts/no-fee-echequing">No Fee eChequing</a>
+            <a href="/en/personal/rates/chequing-savings">Chequing & Savings rates</a>
+          </body>
+        </html>
+        """
+        detail_html = """
+        <html>
+          <head><title>Alterna Bank - No Fee eChequing</title></head>
+          <body>
+            <h1>No-Fee eChequing Account</h1>
+            <p>Our chequing account offers day-to-day transactions with no monthly fee.</p>
+            <p>FREE, unlimited day-to-day transactions and Interac e-Transfers.</p>
+            <p>No minimum balance is required, and overdraft protection is available.</p>
+          </body>
+        </html>
+        """
+
+        candidate_url = "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing"
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=[homepage_html, detail_html, detail_html]),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        candidate_url: AiParallelCandidateScore(
+                            candidate_url=candidate_url,
+                            predicted_role="supporting_html",
+                            relevance_score=6.0,
+                            confidence_band="medium",
+                            reason_codes=["product_type_semantic_match", "pricing_or_feature_signal"],
+                            short_rationale="The No Fee eChequing page is the strongest chequing match.",
+                        )
+                    },
+                    notes=["Scored Alterna Bank homepage-discovered candidate links for chequing-product relevance."],
+                ),
+            ),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="ALTERNA",
+                bank_name="Alterna Bank",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition={
+                    **_product_type_definition("chequing"),
+                    "description": "Chequing account for everyday transactions, debit card payments, bill payments, transfers, fees, and overdraft.",
+                    "discovery_keywords": ["chequing account", "chequing", "no monthly fee", "unlimited transactions"],
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                },
+                homepage_url="https://www.alternabank.ca/en/personal",
+                source_language="en",
+            )
+
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertEqual(len(detail_rows), 1)
+        self.assertEqual(detail_rows[0]["normalized_url"], candidate_url)
+        self.assertEqual(detail_rows[0]["discovery_metadata"]["ai_predicted_role"], "supporting_html")
+        self.assertIn("strong_page_evidence_detail_override", detail_rows[0]["discovery_metadata"]["selection_reason_codes"])
 
     def test_page_evidence_does_not_treat_product_cta_copy_as_negative(self) -> None:
         detail_html = """
@@ -2099,6 +2389,36 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertEqual(result[0]["status"], "removed")
         self.assertEqual(result[0]["change_reason"], "removed_by_operator")
+
+    def test_recognized_bank_migration_adds_logos_and_full_active_product_type_coverage(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0020_canada_recognized_banks_full_coverage.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ADD COLUMN IF NOT EXISTS logo_url", migration_sql)
+        self.assertIn("ADD COLUMN IF NOT EXISTS logo_alt_text", migration_sql)
+        self.assertIn("CROSS JOIN product_type_registry", migration_sql)
+        self.assertIn("bank.status = 'active'", migration_sql)
+        self.assertIn("product_type_registry.status = 'active'", migration_sql)
+        self.assertIn("ON CONFLICT (bank_code, country_code, product_type) DO UPDATE", migration_sql)
+        for bank_code in ("NATIONAL", "TANGERINE", "SIMPLII", "EQBANK", "MANULIFE", "ROGERSBANK"):
+            self.assertIn(f"('{bank_code}'", migration_sql)
+
+    def test_vancity_migration_adds_full_active_product_type_coverage(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0021_vancity_credit_union_full_coverage.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("'VANCITY'", migration_sql)
+        self.assertIn("'https://www.vancity.com/'", migration_sql)
+        self.assertIn("'https://www.vancity.com/favicon.ico'", migration_sql)
+        self.assertIn("CROSS JOIN product_type_registry", migration_sql)
+        self.assertIn("bank.bank_code = 'VANCITY'", migration_sql)
+        self.assertIn("bank.status = 'active'", migration_sql)
+        self.assertIn("product_type_registry.status = 'active'", migration_sql)
+        self.assertIn("ON CONFLICT (bank_code, country_code, product_type) DO UPDATE", migration_sql)
 
 
 if __name__ == "__main__":

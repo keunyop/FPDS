@@ -62,6 +62,24 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-07-05 - Canada Lending Product Type Baseline
+
+- WBS: `5.16`, lending product type onboarding follow-on
+- Status: `done`
+- Goal: register Canadian retail lending Product Types before the Product Owner runs future FPDS Admin collection, and make the existing collection path preserve lending family metadata.
+- Why now: the Product Owner requested Product Type registration for lending products while keeping actual product collection operator-triggered from FPDS Admin.
+- Outcome: added migration `0019_canada_lending_product_types.sql`, registered `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`, and added active generic `other` taxonomy fallback rows. Product Type list/map queries now include all product families, create/update can persist `product_family`, source collection plans carry product family into temporary registry payloads, and extraction artifacts derive `product_family` from source metadata instead of hard-coding `deposit`. Homepage discovery now has lending-specific profile, exclusion, supporting-source, and page-evidence terms.
+- Not done: no lending product collection run was started; no lending-specific parser, public dashboard behavior, or auto-publish path was added.
+- Key files: `db/migrations/0019_canada_lending_product_types.sql`, `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_collection_runner.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `README.md`, `db/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`
+- Decisions: FPDS canonical codes use hyphens (`credit-card`, `personal-loan`, `line-of-credit`) even when an operator enters underscores; lending remains generic AI extraction/manual review until specialized lending parsers and publish rules are separately approved.
+- Verification:
+  - `uv run --directory api/service python -m unittest tests.test_product_types tests.test_source_catalog tests.test_source_registry tests.test_source_collection_runner tests.test_source_catalog_collection_runner`
+  - `uv run python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_lending_source_metadata_sets_product_family_in_artifact`
+  - Applied migration `db/migrations/0019_canada_lending_product_types.sql` to the configured dev database.
+  - DB read-back confirmed four active lending Product Types with `fallback_policy=generic_ai_review` and four active `lending/*/other` taxonomy rows.
+- Known issues: the Product Owner still needs to add bank coverage and run actual lending source collection from FPDS Admin.
+- Next step: in FPDS Admin, attach the desired lending Product Types to banks, collect, then inspect generated sources and review-queued candidates before approving any canonical data.
+
 ## 2026-06-16 - Dev Product Collection Incremental Reset For Recollection
 
 - WBS: `5.15`, `5.16`, admin collection retest preparation
@@ -2189,6 +2207,63 @@ Read before coding:
   - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
 - Known issues: the repository has no root-level `tests/regression` directory; regression suites were run in the two existing regression locations. The final collection still created review-queued GIC candidates where validation policy required review, but the collected candidate field values matched the golden answer key.
 - Next step: use this single-runner collection behavior for future bank-wide/admin bulk collection tests; only approve or publish candidates through the normal review workflow.
+
+## 2026-07-05 - Recognized Canada Bank Registry And Coverage Baseline
+
+- WBS: `5.18`, source registry/admin collection setup
+- Status: `done`
+- Goal: register recognizable Canadian retail/direct banking institutions, add UI-usable logo metadata, and attach every active Product Type as coverage for every active Canadian bank without starting product collection.
+- Why now: the Product Owner expanded the FPDS bank registry beyond the original five banks and wants future Admin-run collection available across the full active Product Type set.
+- Outcome: added migration `0020_canada_recognized_banks_full_coverage.sql`, expanded the dev registry to 27 active Canadian bank/direct-bank profiles, added `bank.logo_url` and `bank.logo_alt_text`, and created 189 active source-catalog coverage rows across 27 banks x 7 active Product Types with zero missing active bank/product-type pairs.
+- Not done: no source/product collection run was started; credit unions, foreign-only branches, and non-retail institutions remain outside the current bank model scope.
+- Key files: `db/migrations/0020_canada_recognized_banks_full_coverage.sql`, `api/service/api_service/models.py`, `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-create-dialog-content.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `app/admin/src/lib/admin-api.ts`, `app/public/src/components/fpds/public/bank-logo.tsx`, `README.md`, `db/README.md`, `docs/01-planning/WBS.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- Decisions: used a defensible "recognizable Canada retail/direct bank" scope based on official bank listings and public retail banking presence; stored official homepage/favicon/logo URLs rather than copying copyrighted logo bitmap files into the repo.
+- Verification:
+  - Applied `db/migrations/0020_canada_recognized_banks_full_coverage.sql` to the dev database.
+  - Dev database post-check: `active_bank_count=27`, `active_product_type_count=7`, `active_catalog_item_count=189`, `missing_coverage_count=0`.
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog`
+  - `uv run --directory api/service python -m unittest tests.test_product_types tests.test_source_catalog tests.test_source_registry tests.test_source_collection_runner tests.test_source_catalog_collection_runner`
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run typecheck` in `app/public`
+- Known issues: several newly registered institutions are narrow or single-product banks, so later Admin collection may produce fewer viable product candidates than full-service banks for some Product Types. Operators should review generated source details before approving candidates.
+- Next step: the Product Owner can run collection from FPDS Admin for selected banks/Product Types; source collection results should be reviewed through the normal evidence and review workflow.
+
+## 2026-07-05 - Vancity Coverage Follow-up
+
+- WBS: `5.18`, source registry/admin collection setup
+- Status: `done`
+- Goal: add Vancity to the recognized Canadian coverage set by explicit Product Owner request and give it every active Product Type coverage row.
+- Why now: the Product Owner asked to include Vancity after the 27-profile bank/direct-bank baseline had been completed.
+- Outcome: added migration `0021_vancity_credit_union_full_coverage.sql`, registered active `VANCITY` with official homepage/logo metadata, added Vancity to the public `BankLogo` mapping, and expanded the dev source-catalog baseline to 28 active profiles and 196 active coverage rows.
+- Not done: no product/source collection run was started.
+- Key files: `db/migrations/0021_vancity_credit_union_full_coverage.sql`, `api/service/tests/test_source_catalog.py`, `app/public/src/components/fpds/public/bank-logo.tsx`, `README.md`, `db/README.md`, `docs/01-planning/WBS.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
+- Decisions: Vancity is a credit union rather than a bank, but it is included in the bank registry model because the Product Owner explicitly requested it and it has public Canadian personal banking product coverage.
+- Verification:
+  - Applied `db/migrations/0021_vancity_credit_union_full_coverage.sql` to the dev database.
+  - Dev database post-check: `active_bank_count=28`, `active_product_type_count=7`, `active_catalog_item_count=196`, `active_vancity_count=1`, `vancity_coverage_count=7`, `vancity_missing_coverage_count=0`.
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog`
+  - `pnpm run typecheck` in `app/public`
+- Known issues: Vancity coverage may require operator review after collection because some lending/deposit pages can be routed through credit-union terminology rather than bank terminology.
+- Next step: the Product Owner can run the Vancity collection scope from FPDS Admin when ready.
+
+## 2026-07-05 - Strong Page Evidence Homepage Discovery Fix
+
+- WBS: `5.15`, `5.16`, source registry/admin collection hardening
+- Status: `done`
+- Goal: diagnose `run_20260705_043538_alterna_chequing_collect_eD4F8JxI`, then fix the underlying homepage-discovery promotion rule generically rather than adding a bank/product exception.
+- Why now: the run showed a quality gap in the new recognized-bank collection path: the AI scorer identified the explicit No Fee eChequing page as the strongest match, but the detail-promotion gate treated the page as supporting because the product name contains `fee`.
+- Outcome: homepage detail promotion now allows a product-type-agnostic strong-page-evidence override when an HTML candidate has high product-title/heading evidence, multiple product-attribute signals, no negative signals, and no legal/terms/disclosure URL pattern. The rule applies to chequing, credit cards, mortgages, and other Product Types through the same page-evidence contract, so explicit product pages are not demoted solely because their names or paths contain words that also appear on supporting pages.
+- Not done: the historical failed run was not mutated and no new product collection run was started.
+- Key files: `api/service/api_service/source_catalog.py`, `api/service/tests/test_source_catalog.py`, `docs/03-design/homepage-discovery-scoring-enhancement.md`
+- Decisions: kept AI `irrelevant` as a veto for non-seed candidates and kept terms/legal/disclosure pages out of the override, so the generic fix does not turn rate/fee schedules or legal documents into product detail pages.
+- Verification:
+  - Reproduced page evidence for `https://www.alternabank.ca/en/personal/accounts/no-fee-echequing`: `page_evidence_score=9`, `attribute_signal_count=4`, `negative_signal_count=0`.
+  - Added cross-product coverage for the strong-page-evidence override across chequing, credit-card, and mortgage candidates.
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog`
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog tests.test_source_catalog_collection_runner tests.test_source_collection_runner`
+  - `uv run --directory api/service python -m unittest tests.test_product_types tests.test_source_registry`
+- Known issues: existing run `run_20260705_043538_alterna_chequing_collect_eD4F8JxI` remains a completed partial run; rerun Alterna chequing collection after the updated API code is running.
+- Next step: rerun Alterna Bank chequing collection from FPDS Admin and inspect the generated No Fee eChequing detail source before approving downstream candidates.
 
 ---
 

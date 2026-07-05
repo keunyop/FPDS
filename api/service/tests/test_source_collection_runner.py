@@ -308,6 +308,34 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             ["SRC-001"],
         )
 
+    def test_build_registry_payload_carries_lending_product_family(self) -> None:
+        payload = source_collection_runner._build_registry_payload(
+            {
+                "bank_code": "RBC",
+                "country_code": "CA",
+                "product_type": "credit-card",
+                "product_family": "lending",
+                "source_language": "en",
+                "included_sources": [
+                    {
+                        "source_id": "RBC-CC-001",
+                        "priority": "P0",
+                        "seed_source_flag": False,
+                        "source_type": "html",
+                        "discovery_role": "detail",
+                        "purpose": "detail",
+                        "source_url": "https://www.rbcroyalbank.com/credit-cards/",
+                        "expected_fields": ["product_name", "annual_fee"],
+                        "source_language": "en",
+                        "product_family": "lending",
+                    }
+                ],
+            }
+        )
+
+        self.assertEqual(payload["product_family"], "lending")
+        self.assertEqual(payload["sources"][0]["product_family"], "lending")
+
     def test_run_stage_raises_clear_error_when_worker_stage_times_out(self) -> None:
         with (
             patch("api_service.source_collection_runner.shutil.which", return_value="uv"),

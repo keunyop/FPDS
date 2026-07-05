@@ -9,6 +9,7 @@ from api_service.product_types import (
     create_product_type_definition,
     delete_product_type_definition,
     _merge_keywords,
+    load_product_type_definitions_map,
     load_product_type_list,
     normalize_product_type_filters,
     require_product_type_definition,
@@ -46,12 +47,19 @@ class _QueuedConnection:
         return _QueuedCursor(self._responses.pop(0))
 
 
-def _product_type_row(*, status: str = "active") -> dict[str, object]:
+def _product_type_row(
+    *,
+    status: str = "active",
+    product_type_code: str = "tfsa-savings",
+    product_family: str = "deposit",
+    display_name: str = "TFSA Savings",
+    description: str = "Tax-free savings deposit account for retail customers.",
+) -> dict[str, object]:
     return {
-        "product_type_code": "tfsa-savings",
-        "product_family": "deposit",
-        "display_name": "TFSA Savings",
-        "description": "Tax-free savings deposit account for retail customers.",
+        "product_type_code": product_type_code,
+        "product_family": product_family,
+        "display_name": display_name,
+        "description": description,
         "status": status,
         "managed_flag": True,
         "discovery_keywords": ["tfsa", "tax free savings", "savings"],
@@ -79,8 +87,48 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(result["applied_filters"]["search"], "tfsa")
         self.assertEqual(result["applied_filters"]["status"], "active")
 
+    def test_load_product_type_list_includes_lending_families(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    _product_type_row(
+                        product_type_code="credit-card",
+                        product_family="lending",
+                        display_name="Credit Card",
+                        description="Canadian retail credit cards.",
+                    )
+                ],
+            ]
+        )
+
+        result = load_product_type_list(connection, filters=normalize_product_type_filters(search=None, status="active"))
+
+        self.assertEqual(result["summary"]["total_items"], 1)
+        self.assertEqual(result["items"][0]["product_type_code"], "credit-card")
+        self.assertEqual(result["items"][0]["product_family"], "lending")
+        self.assertNotIn("product_family = 'deposit'", connection.calls[0][0])
+
+    def test_load_product_type_definitions_map_canonicalizes_underscored_lending_code(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    _product_type_row(
+                        product_type_code="line-of-credit",
+                        product_family="lending",
+                        display_name="Line of Credit",
+                        description="Canadian personal lines of credit.",
+                    )
+                ],
+            ]
+        )
+
+        result = load_product_type_definitions_map(connection, codes=["line_of_credit"], active_only=True)
+
+        self.assertIn("line-of-credit", result)
+        self.assertEqual(connection.calls[0][1]["codes"], ["line-of-credit"])
+
     def test_create_product_type_definition_inserts_registry_and_taxonomy_entries(self) -> None:
-        connection = _QueuedConnection([None, None, None, None, None])
+        connection = _QueuedConnection([None, None, None, None, None, None])
 
         with (
             patch("api_service.product_types.load_product_type_definition", return_value=_product_type_row()),
@@ -104,6 +152,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(result["product_type_code"], "tfsa-savings")
         insert_calls = [(sql, params) for sql, params in connection.calls if "INSERT INTO product_type_registry" in sql]
         self.assertEqual(len(insert_calls), 1)
+        self.assertEqual(insert_calls[0][1]["product_family"], "deposit")
         self.assertEqual(insert_calls[0][1]["fallback_policy"], "generic_ai_review")
         discovery_keywords = json.loads(insert_calls[0][1]["discovery_keywords"])
         self.assertEqual(discovery_keywords[:3], ["tfsa", "tax free savings account", "registered savings"])
@@ -114,7 +163,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertEqual(audit_calls[0][1]["actor_role_snapshot"], "admin")
 
     def test_create_canonical_chequing_syncs_all_supported_subtypes(self) -> None:
-        connection = _QueuedConnection([None, None, None, None, None])
+        connection = _QueuedConnection([None, None, None, None, None, None])
         chequing_row = {
             **_product_type_row(),
             "product_type_code": "chequing",
@@ -142,10 +191,47 @@ class ProductTypeRegistryTests(unittest.TestCase):
         taxonomy_params = next(params for sql, params in connection.calls if "INSERT INTO taxonomy_registry" in sql)
         subtype_codes = {item["subtype_code"] for item in json.loads(str(taxonomy_params["subtype_rows"]))}
         self.assertEqual(subtype_codes, {"standard", "package", "interest_bearing", "premium", "other"})
+        self.assertEqual(taxonomy_params["product_family"], "deposit")
         self.assertTrue(taxonomy_params["active_flag"])
 
+    def test_create_lending_product_type_infers_family_and_generic_taxonomy(self) -> None:
+        connection = _QueuedConnection([None, None, None, None, None, None])
+        credit_card_row = _product_type_row(
+            product_type_code="credit-card",
+            product_family="lending",
+            display_name="Credit Card",
+            description="Canadian retail credit cards with annual fee, rewards, and purchase interest details.",
+        )
+
+        with (
+            patch("api_service.product_types.load_product_type_definition", return_value=credit_card_row),
+            patch("api_service.product_types.new_id", return_value="audit-credit-card"),
+            patch("api_service.product_types._generate_ai_discovery_keywords", return_value=[]),
+        ):
+            result = create_product_type_definition(
+                connection,
+                payload={
+                    "product_type_code": "credit_card",
+                    "display_name": "Credit Card",
+                    "description": "Canadian retail credit cards with annual fee, rewards, and purchase interest details.",
+                    "status": "active",
+                },
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
+            )
+
+        self.assertEqual(result["product_type_code"], "credit-card")
+        insert_params = next(params for sql, params in connection.calls if "INSERT INTO product_type_registry" in sql)
+        self.assertEqual(insert_params["product_family"], "lending")
+        self.assertIn("annual_fee", json.loads(insert_params["expected_fields"]))
+        taxonomy_params = next(params for sql, params in connection.calls if "INSERT INTO taxonomy_registry" in sql)
+        subtype_rows = json.loads(str(taxonomy_params["subtype_rows"]))
+        self.assertEqual(taxonomy_params["product_family"], "lending")
+        self.assertEqual(subtype_rows[0]["taxonomy_id"], "tax-ca-lending-credit-card-other")
+        self.assertEqual(subtype_rows[0]["subtype_code"], "other")
+
     def test_update_product_type_definition_updates_taxonomy_and_audit(self) -> None:
-        connection = _QueuedConnection([None, None, None, None])
+        connection = _QueuedConnection([None, None, None, None, None])
         existing = _product_type_row(status="active")
         updated = _product_type_row(status="inactive")
 
@@ -173,7 +259,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertTrue(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
 
     def test_update_product_type_status_only_preserves_keywords(self) -> None:
-        connection = _QueuedConnection([None, None, None, None])
+        connection = _QueuedConnection([None, None, None, None, None])
         existing = _product_type_row(status="active")
         existing["discovery_keywords"] = ["existing keyword", "tfsa"]
         updated = dict(existing)
@@ -203,7 +289,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         updated = dict(existing)
         updated["product_type_code"] = "savings"
         updated["display_name"] = "Savings"
-        connection = _QueuedConnection([existing, *([None] * 11), updated, None])
+        connection = _QueuedConnection([existing, *([None] * 12), updated, None])
 
         with (
             patch("api_service.product_types.new_id", return_value="audit-rename"),
@@ -339,6 +425,20 @@ class ProductTypeRegistryTests(unittest.TestCase):
         self.assertNotIn("for", keywords)
         self.assertNotIn("such", keywords)
         self.assertNotIn("and", keywords)
+
+    def test_merge_keywords_fallback_generates_lending_credit_card_terms(self) -> None:
+        with patch("api_service.product_types._generate_ai_discovery_keywords", return_value=[]):
+            keywords = _merge_keywords(
+                display_name="Credit Card",
+                description="Canadian credit cards with cash back rewards, annual fee, and purchase interest rates.",
+                provided=[],
+                regenerate=True,
+                product_family="lending",
+            )
+
+        self.assertIn("credit cards", keywords)
+        self.assertIn("cash back", keywords)
+        self.assertIn("annual fee", keywords)
 
 
 if __name__ == "__main__":

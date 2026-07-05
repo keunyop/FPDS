@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-04-15`:
+As of `2026-07-05`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -72,6 +72,8 @@ As of `2026-04-15`:
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
 - a completed dashboard health surface on `/admin/health/dashboard` with aggregate freshness, queue visibility, serving fallback, stale or failed state signals, and operator retry
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection
+- a registered Canada retail lending Product Type baseline for future Admin-run source collection, with active `generic_ai_review` fallback taxonomy rows for credit cards, mortgages, personal loans, and lines of credit
+- a recognized Canadian bank and credit-union registry baseline with logo metadata and full active Product Type coverage for every active Canadian financial institution in the source catalog
 - a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish surfaces route-oriented
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
@@ -149,6 +151,8 @@ Out of scope for the current FPDS build:
 - `WBS 5.13` freshness/metric note wording is now implemented and gives the repo locale-aware public methodology/freshness note cards plus clearer dashboard note wording for snapshot timing, metric semantics, exclusion rules, and public evidence non-exposure
 - `WBS 5.15` source registry admin MVP is now implemented and gives the repo a live DB-backed bank and source-catalog flow with `/admin/banks` as the primary operator surface for both bank setup and coverage management, compatibility redirects for `/admin/source-catalog`, read-only `/admin/sources`, `GET/POST/PATCH /api/admin/banks`, `GET/POST/PATCH /api/admin/source-catalog`, and `POST /api/admin/source-catalog/collect`
 - `WBS 5.16` operator-managed product type onboarding is now implemented for the admin and collection pipeline: `/admin/product-types` manages all product types as DB rows, bank coverage pickers are registry-driven, homepage-first discovery uses stored product type definitions, hybrid candidate scoring, and page-level evidence validation, and product types without specialized parser support flow through generic AI extraction plus normalization fallback into manual review instead of public publish
+- a Canada retail lending Product Type baseline is now registered for Admin-run source collection with `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`; these types use generic AI extraction and manual review fallback until lending-specific parsers and public publish behavior are separately approved
+- a recognized Canadian financial-institution baseline is now registered for Admin-run source collection with 28 active Canadian bank/direct-bank/credit-union profiles, logo metadata for bank screens, and 196 active source-catalog coverage rows across 7 active Product Types
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`
 - the first FastAPI admin service baseline is now tracked in `api/service/pyproject.toml`

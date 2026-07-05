@@ -60,6 +60,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         "product_type": _canonical_product_type_code(group["product_type"]),
         "source_catalog_product_type": source_catalog_product_type,
     }
+    group["product_family"] = _catalog_product_family(group)
     settings = Settings.from_env()
     collection_plan: dict[str, Any] | None = None
     collection_group: dict[str, Any] | None = None
@@ -347,6 +348,7 @@ def _catalog_run_metadata(
         "bank_code": str(group["bank_code"]),
         "country_code": str(group["country_code"]),
         "product_type": str(group["product_type"]),
+        "product_family": _catalog_product_family(group),
         "source_language": str(group["source_language"]),
         "discovery_status": discovery_status,
         "discovery_notes": discovery_notes,
@@ -362,6 +364,18 @@ def _actor_from_plan(plan: dict[str, Any]) -> dict[str, Any]:
     if isinstance(actor, dict):
         return actor
     return {}
+
+
+def _catalog_product_family(group: dict[str, Any]) -> str:
+    explicit = str(group.get("product_family") or "").strip().lower().replace("_", "-")
+    if explicit in {"deposit", "lending"}:
+        return explicit
+    product_type = _canonical_product_type_code(group.get("product_type") or "")
+    if product_type in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        return "lending"
+    if any(token in product_type for token in ("credit-card", "mortgage", "loan", "line-of-credit", "heloc")):
+        return "lending"
+    return "deposit"
 
 
 def _mark_run_finished(

@@ -184,6 +184,71 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_lending_source_metadata_sets_product_family_in_artifact(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-lending-family")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="RBC-CC-001",
+                parsed_document_id="parsed-cc-001",
+                source_document_id="src-cc-001",
+                snapshot_id="snap-cc-001",
+                bank_code="RBC",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "credit-card",
+                    "product_family": "lending",
+                    "product_type_dynamic": True,
+                    "product_type_name": "Credit Card",
+                    "product_type_description": "Canadian retail credit cards.",
+                    "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-cc-001",
+                    parsed_document_id="parsed-cc-001",
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="cash-back-credit-card",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Cash Back Credit Card\nAnnual fee: $0. Purchase interest rate: 20.99%.",
+                    retrieval_metadata={},
+                    source_document_id="src-cc-001",
+                    source_snapshot_id="snap-cc-001",
+                    bank_code="RBC",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.extract_documents(
+                run_id="run-cc-001",
+                correlation_id="corr-cc-001",
+                request_id="req-cc-001",
+                inputs=[ExtractionInput(context=context, candidates=candidates)],
+            )
+
+            source_result = result.source_results[0]
+            extracted_by_field = {item.field_name: item for item in source_result.extracted_fields}
+            self.assertEqual(extracted_by_field["product_family"].candidate_value, "lending")
+            extracted_path = temp_path / Path(str(source_result.extracted_storage_key).replace("/", "\\"))
+            payload = json.loads(extracted_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["schema_context"]["product_family"], "lending")
+            self.assertEqual(payload["schema_context"]["product_type"], "credit-card")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_rate_fallback_scans_product_rate_chunk_when_field_match_missed(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-RBC-SAV-hisa",

@@ -143,6 +143,10 @@ A URL should be promoted to a generated `detail` source only when:
 - page-level evidence score crosses a minimum threshold
 - the page remains same-domain and fetch-safe
 
+Runtime refinement:
+- strong page-level evidence may override an AI `supporting_html` role when the candidate is a non-seed HTML page with clear product-title or heading alignment, multiple product-attribute signals, no negative signals, and no legal/terms/disclosure URL pattern. This applies across product types, so explicit product pages are not demoted solely because their product name or page path contains words that can also appear on supporting pages, such as fee, rate, term, or service.
+- AI `irrelevant` remains a veto for non-seed candidates, and terms/legal/disclosure pages remain non-detail even when test fixtures or surrounding content carry product keywords.
+
 Otherwise:
 - demote to `supporting_html` if the page is useful but not candidate-producing
 - keep as non-promoted candidate evidence only
@@ -227,6 +231,10 @@ Examples:
 - `chequing` should weight transactions, monthly fee, debit-card usage, and day-to-day banking language
 - `savings` should weight interest, savings growth, withdrawal or tiering language
 - `gic` should weight term, maturity, redeemability, deposit minimum, or compounding language
+- `credit-card` should weight annual fee, purchase interest, rewards, cash back, balance transfer, and card-network language
+- `mortgage` should weight mortgage rates, fixed or variable rate, term, amortization, renewal, refinance, and prepayment language
+- `personal-loan` should weight loan amount, interest rate, fixed rate, vehicle or RRSP loan variants, term, and monthly payment language
+- `line-of-credit` should weight credit limit, variable interest rate, secured or unsecured line, student/professional line, home equity, and minimum payment language
 - operator-managed product types should inherit the same contract through their stored display name and description
 
 This is still not a full ontology engine.
@@ -375,6 +383,8 @@ Future implementation should be considered aligned to this design when:
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Clarified the product-type-agnostic strong-page-evidence override for explicit product detail pages that AI scores as supporting because of words such as fee, rate, term, or service |
+| 2026-07-05 | Added Canada retail lending discovery examples for the registered `lending` product family baseline |
 | 2026-04-18 | Added the homepage-first discovery quality-improvement baseline centered on AI parallel scoring, stronger product-type description usage, and page-level evidence scoring |
 | 2026-04-18 | Recorded the first implementation slice: bounded AI parallel scorer, page-level evidence gating, generated-source discovery metadata persistence, and source-detail explainability |
 | 2026-04-26 | Recorded the runtime rule that product type `discovery_keywords` are AI-generated from display name and description when the provider is configured, with deterministic fallback only for provider-unavailable cases |

@@ -588,6 +588,7 @@ def start_source_collection(
                 "bank_code": group["bank_code"],
                 "country_code": group["country_code"],
                 "product_type": group["product_type"],
+                "product_family": group.get("product_family", "deposit"),
                 "source_language": group["source_language"],
                 "target_source_ids": group["target_source_ids"],
                 "included_source_ids": group["included_source_ids"],
@@ -784,6 +785,8 @@ def build_source_collection_plan(
         if not target_group_rows:
             continue
         country_code, bank_code, product_type, source_language = group_key
+        product_type_definition = product_type_definitions.get(product_type, {})
+        product_family = str(product_type_definition.get("product_family") or "deposit")
         run_id = (run_id_overrides or {}).get(group_key) or _build_collection_run_id(bank_code=bank_code, product_type=product_type)
         groups.append(
             {
@@ -791,6 +794,7 @@ def build_source_collection_plan(
                 "country_code": country_code,
                 "bank_code": bank_code,
                 "product_type": product_type,
+                "product_family": product_family,
                 "source_language": source_language,
                 "selected_source_ids": [str(row["source_id"]) for row in selected_group_rows],
                 "target_source_ids": [str(row["source_id"]) for row in target_group_rows],
@@ -926,6 +930,7 @@ def _collection_source_record(row: dict[str, Any], *, product_type_definition: d
         "bank_code": str(row["bank_code"]),
         "country_code": str(row["country_code"]),
         "product_type": str(row["product_type"]),
+        "product_family": str(product_type_definition.get("product_family") or "deposit"),
         "source_name": str(row["source_name"]),
         "source_url": str(row["source_url"]),
         "source_type": str(row["source_type"]),
@@ -968,6 +973,7 @@ def _insert_collection_run_row(
         "bank_code": group["bank_code"],
         "country_code": group["country_code"],
         "product_type": group["product_type"],
+        "product_family": group.get("product_family", "deposit"),
         "source_language": group["source_language"],
     }
     connection.execute(

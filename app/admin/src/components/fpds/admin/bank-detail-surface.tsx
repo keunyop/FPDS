@@ -25,6 +25,7 @@ export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfa
   const [form, setForm] = useState({
     bank_name: detail.bank.bank_name,
     homepage_url: detail.bank.homepage_url ?? "",
+    logo_url: detail.bank.logo_url ?? "",
     source_language: detail.bank.source_language,
     status: detail.bank.status,
     change_reason: detail.bank.change_reason ?? "",
@@ -95,6 +96,7 @@ export function BankDetailSurface({ detail, locale, csrfToken }: BankDetailSurfa
             <ReadonlyField label="Country" value={detail.bank.country_code} />
             <TextField label="Bank name" value={form.bank_name} onChange={(value) => setForm((current) => ({ ...current, bank_name: value }))} />
             <TextField label="Homepage URL" value={form.homepage_url} onChange={(value) => setForm((current) => ({ ...current, homepage_url: value }))} />
+            <TextField label="Logo URL" value={form.logo_url} onChange={(value) => setForm((current) => ({ ...current, logo_url: value }))} />
             <SelectField label="Language" options={LANGUAGE_OPTIONS} value={form.source_language} onChange={(value) => setForm((current) => ({ ...current, source_language: value }))} />
             <SelectField label="Status" options={["active", "inactive"]} value={form.status} onChange={(value) => setForm((current) => ({ ...current, status: value }))} />
           </div>

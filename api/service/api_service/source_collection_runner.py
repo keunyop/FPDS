@@ -228,6 +228,7 @@ def _filter_requested_source_ids(*, requested_source_ids: list[str], successful_
 def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
     sources = list(group.get("included_sources", []))
     entry_source = next((item for item in sources if str(item.get("discovery_role")) == "entry"), None) or sources[0]
+    product_family = str(group.get("product_family") or entry_source.get("product_family") or "deposit")
     allowed_domains = sorted(
         {
             hostname
@@ -241,6 +242,7 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
         "bank_code": group["bank_code"],
         "country_code": group["country_code"],
         "product_type": group["product_type"],
+        "product_family": product_family,
         "source_language": group["source_language"],
         "allowed_domains": allowed_domains,
         "entry_source_id": entry_source["source_id"],
@@ -255,6 +257,7 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
                 "url": item["source_url"],
                 "expected_fields": item["expected_fields"],
                 "source_language": item["source_language"],
+                "product_family": item.get("product_family", product_family),
                 "product_type_name": item.get("product_type_name"),
                 "product_type_description": item.get("product_type_description"),
                 "discovery_keywords": item.get("discovery_keywords", []),
