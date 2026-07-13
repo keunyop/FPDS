@@ -219,6 +219,10 @@ def load_review_task_detail(
         candidate_model_execution_id=_string_or_none(row.get("candidate_model_execution_id")),
         stage_metadata=stage_metadata,
     )
+    source_review_context = _build_source_review_context(
+        source_metadata=source_metadata,
+        candidate_payload=candidate_payload,
+    )
 
     return {
         "review_task": {
@@ -274,6 +278,7 @@ def load_review_task_detail(
             "error_count": int(row["error_count"]) if row.get("error_count") is not None else None,
             "error_summary": _string_or_none(row.get("error_summary")),
             "runtime_notes": _coerce_string_list(row.get("runtime_notes")),
+            **source_review_context,
         },
         "proposed_fields": [
             {
@@ -299,6 +304,46 @@ def load_review_task_detail(
         "current_product": _load_current_product_summary(connection, review_row=row),
         "decision_history": [_serialize_decision_row(item) for item in history_rows],
         "available_actions": _available_actions(review_state=str(row["review_state"]), actor_role=actor_role),
+    }
+
+
+def _build_source_review_context(
+    *,
+    source_metadata: dict[str, Any],
+    candidate_payload: dict[str, Any],
+) -> dict[str, Any]:
+    discovery_metadata = _coerce_mapping(source_metadata.get("discovery_metadata"))
+    expected_fields = _coerce_string_list(source_metadata.get("expected_fields"))
+    missing_expected_fields = [
+        field_name
+        for field_name in expected_fields
+        if _is_empty_review_value(candidate_payload.get(field_name))
+    ]
+    assessment_keys = (
+        "selection_path",
+        "selection_confidence",
+        "ai_predicted_role",
+        "ai_parallel_score",
+        "ai_confidence_band",
+        "ai_short_rationale",
+        "page_evidence_score",
+        "page_title",
+        "primary_heading",
+        "product_identity_match",
+    )
+    assessment = {
+        key: discovery_metadata[key]
+        for key in assessment_keys
+        if key in discovery_metadata and discovery_metadata[key] is not None
+    }
+    assessment["selection_reason_codes"] = _coerce_string_list(discovery_metadata.get("selection_reason_codes"))
+    assessment["ai_reason_codes"] = _coerce_string_list(discovery_metadata.get("ai_reason_codes"))
+    assessment["page_evidence_reason_codes"] = _coerce_string_list(discovery_metadata.get("page_evidence_reason_codes"))
+    return {
+        "discovery_role": _string_or_none(source_metadata.get("discovery_role")),
+        "expected_fields": expected_fields,
+        "missing_expected_fields": missing_expected_fields,
+        "discovery_assessment": assessment,
     }
 
 

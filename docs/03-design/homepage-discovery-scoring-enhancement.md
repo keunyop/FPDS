@@ -144,8 +144,10 @@ A URL should be promoted to a generated `detail` source only when:
 - the page remains same-domain and fetch-safe
 
 Runtime refinement:
-- strong page-level evidence may override an AI `supporting_html` role when the candidate is a non-seed HTML page with clear product-title or heading alignment, multiple product-attribute signals, no negative signals, and no legal/terms/disclosure URL pattern. This applies across product types, so explicit product pages are not demoted solely because their product name or page path contains words that can also appear on supporting pages, such as fee, rate, term, or service.
+- strong page-level evidence may override an AI `supporting_html` role only when the candidate is a non-seed HTML page with a product-identity phrase in the title or primary heading, multiple distinct product-attribute signals, no negative signals, no legal/terms/disclosure URL pattern, sufficient AI relevance, and no supporting/not-detail AI reason code. This applies across product types, so explicit named product pages can recover from a conservative supporting classification while service, transfer, rates, calculator, and category pages remain non-candidate-producing.
+- repeated occurrences of one attribute term count once; they cannot manufacture the multiple independent signals required for a strong-page override.
 - AI `irrelevant` remains a veto for non-seed candidates, and terms/legal/disclosure pages remain non-detail even when test fixtures or surrounding content carry product keywords.
+- when a successful rediscovery explicitly rejects a previously generated non-seed `detail` URL, that generated source is made inactive before the next collection scope is materialized. Fetch-unavailable candidates are preserved rather than deactivated because a transient network failure is not evidence that the source is invalid.
 
 Otherwise:
 - demote to `supporting_html` if the page is useful but not candidate-producing
@@ -189,6 +191,7 @@ Recommended reason-code vocabulary:
 - `promo_or_apply_flow`
 - `insufficient_evidence`
 - `seed_hint_alignment`
+- `not_product_detail`
 
 ### 5.3 Constraints
 
@@ -330,6 +333,7 @@ Minimum follow-on expectations:
 - run detail should distinguish `discovery weak` from `fetch failed`
 - no-detail outcomes should indicate whether candidate generation was empty or candidate validation rejected all pages
 - audit history should preserve the reason a generated source was promoted, demoted, or preserved
+- Review Detail should expose a compact subset of source-discovery role, AI role/rationale, product-identity result, and missing expected fields so an operator can distinguish a bad source from a valid but incomplete candidate without opening separate diagnostics
 
 This is especially important because current operator pain already shows a difference between:
 - no detail found
@@ -383,6 +387,7 @@ Future implementation should be considered aligned to this design when:
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Tightened support-page override rules around product identity, distinct attribute signals, AI veto reasons, and safe stale generated-detail deactivation; added reviewer-facing discovery context |
 | 2026-07-05 | Clarified the product-type-agnostic strong-page-evidence override for explicit product detail pages that AI scores as supporting because of words such as fee, rate, term, or service |
 | 2026-07-05 | Added Canada retail lending discovery examples for the registered `lending` product family baseline |
 | 2026-04-18 | Added the homepage-first discovery quality-improvement baseline centered on AI parallel scoring, stronger product-type description usage, and page-level evidence scoring |

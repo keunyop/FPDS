@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ApplicationShell5 } from "@/components/application-shell5";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { ReviewQueueSurface, type ReviewQueuePageFilters } from "@/components/fpds/admin/review-queue-surface";
-import { fetchAdminSession, fetchProductTypeList, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchBankList, fetchProductTypeList, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type ReviewQueuePageProps = {
@@ -21,14 +21,17 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let queue: Awaited<ReturnType<typeof fetchReviewQueue>> = null;
   let productTypeList: Awaited<ReturnType<typeof fetchProductTypeList>> | null = null;
+  let bankList: Awaited<ReturnType<typeof fetchBankList>> | null = null;
   let apiUnavailable = false;
 
   try {
     session = await fetchAdminSession();
     if (session) {
-      [queue, productTypeList] = await Promise.all([
+      const bankSearchParams = new URLSearchParams({ status: "active" });
+      [queue, productTypeList, bankList] = await Promise.all([
         fetchReviewQueue(apiSearchParams),
         fetchProductTypeList(),
+        fetchBankList(bankSearchParams),
       ]);
     }
   } catch {
@@ -43,7 +46,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
     redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref("/admin/reviews", new URLSearchParams(), locale))}`);
   }
 
-  if (!session || !queue || !productTypeList || apiUnavailable) {
+  if (!session || !queue || !productTypeList || !bankList || apiUnavailable) {
     return <AdminApiUnavailable locale={locale} title="Review queue could not load." />;
   }
 
@@ -60,6 +63,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
       }}
     >
       <ReviewQueueSurface
+        banks={bankList.items}
         csrfToken={session.csrf_token}
         filters={filters}
         locale={locale}

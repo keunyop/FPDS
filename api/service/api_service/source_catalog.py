@@ -93,6 +93,13 @@ _HUB_KEYWORDS = (
     "line-of-credit",
 )
 _PAGE_NEGATIVE_KEYWORDS = ("compare", "sign in", "login", "legal", "terms and conditions")
+_AI_DETAIL_OVERRIDE_VETO_REASON_CODES = {
+    "hub_page_not_detail",
+    "insufficient_evidence",
+    "not_product_detail",
+    "promo_or_apply_flow",
+    "supporting_terms_or_rates_page",
+}
 _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
     "chequing": (
         "savings-account",
@@ -291,6 +298,15 @@ _PRODUCT_TYPE_ATTRIBUTE_HINTS = {
         "student line",
     ),
 }
+_PRODUCT_TYPE_IDENTITY_HINTS = {
+    "chequing": ("chequing account", "checking account", "echequing", "e-chequing"),
+    "savings": ("savings account", "saving account", "esavings", "e-savings"),
+    "gic": ("gic", "term deposit", "guaranteed investment certificate"),
+    "credit-card": ("credit card", "visa card", "mastercard", "american express card"),
+    "mortgage": ("mortgage",),
+    "personal-loan": ("personal loan", "car loan", "vehicle loan", "rrsp loan"),
+    "line-of-credit": ("line of credit", "home equity line", "student line", "professional line"),
+}
 _DISCOVERY_PROFILE_TERMS = {
     "chequing": ("chequing", "checking", "everyday banking", "transactions", "debit card", "monthly fee"),
     "savings": ("savings", "saving", "savings account", "high interest", "interest rate", "tiered interest", "withdrawal", "balance"),
@@ -337,6 +353,7 @@ class HomepageSourceGenerationResult:
     detail_source_ids: list[str]
     model_execution_records: tuple[dict[str, Any], ...] = ()
     usage_records: tuple[dict[str, Any], ...] = ()
+    rejected_detail_urls: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -392,6 +409,7 @@ class PageEvidenceAssessment:
     attribute_signal_count: int
     negative_signal_count: int
     fetch_error: str | None = None
+    product_identity_match: bool = False
 
 
 def normalize_bank_filters(*, search: str | None, status: str | None) -> BankFilters:
@@ -1568,6 +1586,16 @@ def _materialize_sources_for_catalog_item(
         discovery_notes.append(
             "Existing active detail sources were preserved because homepage discovery did not produce replacement detail sources."
         )
+    rejected_detail_count = _deactivate_rejected_generated_detail_sources(
+        connection,
+        bank_code=bank_code,
+        product_type=product_type,
+        normalized_urls=list(generation_result.rejected_detail_urls),
+    )
+    if rejected_detail_count:
+        discovery_notes.append(
+            f"Deactivated {rejected_detail_count} previously generated detail source(s) that failed current detail-page validation."
+        )
     persisted_rows = _upsert_source_registry_rows(connection, generated_rows) if generated_rows else []
     _persist_source_catalog_usage_records(
         connection,
@@ -1581,6 +1609,41 @@ def _materialize_sources_for_catalog_item(
         model_execution_records=generation_result.model_execution_records,
         usage_records=generation_result.usage_records,
     )
+
+
+def _deactivate_rejected_generated_detail_sources(
+    connection: Connection,
+    *,
+    bank_code: str,
+    product_type: str,
+    normalized_urls: list[str],
+) -> int:
+    rejected_urls = sorted({normalize_source_url(item) for item in normalized_urls if str(item).strip()})
+    if not rejected_urls:
+        return 0
+    result = connection.execute(
+        """
+        UPDATE source_registry_item
+        SET
+            status = 'inactive',
+            updated_at = %(updated_at)s,
+            change_reason = 'rejected_by_homepage_detail_validation'
+        WHERE bank_code = %(bank_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND normalized_url = ANY(%(normalized_urls)s)
+          AND discovery_role = 'detail'
+          AND status = 'active'
+          AND seed_source_flag = false
+          AND source_id LIKE 'AUTO-%%'
+        """,
+        {
+            "updated_at": utc_now(),
+            "bank_code": bank_code,
+            "product_type_scope": _product_type_scope_codes(product_type),
+            "normalized_urls": rejected_urls,
+        },
+    )
+    return max(0, int(result.rowcount or 0))
 
 
 def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1945,7 +2008,7 @@ def _generate_sources_from_homepage(
         request_id=request_id,
     )
     discovery_notes.extend(ai_result.notes)
-    detail_rows, detail_notes = _promote_detail_candidates(
+    detail_rows, rejected_detail_urls, detail_notes = _promote_detail_candidates(
         bank_code=bank_code,
         bank_name=bank_name,
         country_code=country_code,
@@ -2128,6 +2191,7 @@ def _generate_sources_from_homepage(
             item for item in [ai_result.model_execution_record] if item is not None
         ),
         usage_records=tuple(item for item in [ai_result.usage_record] if item is not None),
+        rejected_detail_urls=tuple(rejected_detail_urls),
     )
 
 
@@ -2544,7 +2608,9 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
         "instructions": (
             "You score bounded Canadian bank candidate URLs for homepage-first product discovery. "
             "Do not invent URLs. Score only the candidate links provided. "
-            "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type."
+            "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type. "
+            "Use a relevance_score from 0 to 10. A detail page must describe one named financial product; category lists, rates or fee tables, calculators, "
+            "and banking-service pages such as transfers or debit-card instructions are supporting pages, not product detail pages."
         ),
         "input": [
             {
@@ -2576,11 +2642,24 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
                                     "candidate_url": {"type": "string"},
                                     "candidate_label": {"type": "string"},
                                     "predicted_role": {"type": "string", "enum": ["detail", "supporting_html", "irrelevant"]},
-                                    "relevance_score": {"type": "number"},
+                                    "relevance_score": {"type": "number", "minimum": 0, "maximum": 10},
                                     "confidence_band": {"type": "string", "enum": ["high", "medium", "low"]},
                                     "reason_codes": {
                                         "type": "array",
-                                        "items": {"type": "string"},
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "product_type_semantic_match",
+                                                "detail_page_layout_signal",
+                                                "pricing_or_feature_signal",
+                                                "hub_page_not_detail",
+                                                "supporting_terms_or_rates_page",
+                                                "promo_or_apply_flow",
+                                                "insufficient_evidence",
+                                                "seed_hint_alignment",
+                                                "not_product_detail"
+                                            ]
+                                        },
                                     },
                                     "short_rationale": {"type": "string"},
                                 },
@@ -2658,20 +2737,23 @@ def _promote_detail_candidates(
     candidates: list[HomepageCandidate],
     ai_scores: dict[str, AiParallelCandidateScore],
     ai_unavailable: bool = False,
-) -> tuple[list[dict[str, Any]], list[str]]:
+) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
     notes: list[str] = []
     detail_rows: list[dict[str, Any]] = []
     promoted_count = 0
+    rejected_detail_urls: list[str] = []
     seed_fetch_fallback_count = 0
     seed_low_evidence_fallback_count = 0
     evaluated = 0
     for candidate in _ordered_detail_candidates(candidates=candidates, ai_scores=ai_scores):
         ai_score = ai_scores.get(candidate.normalized_url)
         if ai_score and ai_score.predicted_role == "irrelevant" and not _candidate_is_seed_backed(candidate):
+            rejected_detail_urls.append(candidate.normalized_url)
             continue
         if not _candidate_is_seed_backed(candidate) and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
+            rejected_detail_urls.append(candidate.normalized_url)
             continue
         evaluated += 1
         page_evidence = _score_page_evidence(
@@ -2713,6 +2795,8 @@ def _promote_detail_candidates(
                     or (ai_unavailable and _seed_detail_has_hard_negative(page_evidence))
                     or (_seed_detail_has_hard_negative(page_evidence) and not ai_unavailable)
                 ):
+                    if not _candidate_is_seed_backed(candidate):
+                        rejected_detail_urls.append(candidate.normalized_url)
                     continue
                 metadata = _build_detail_discovery_metadata(
                     candidate=candidate,
@@ -2772,7 +2856,11 @@ def _promote_detail_candidates(
             notes.append(f"Homepage discovery promoted {promoted_count} detail source(s) after candidate scoring and page evidence validation.")
     elif evaluated:
         notes.append("Homepage discovery candidate validation rejected all tentative detail pages.")
-    return detail_rows, _dedupe_preserve_order([note for note in notes if note])
+    return (
+        detail_rows,
+        _dedupe_preserve_order(rejected_detail_urls),
+        _dedupe_preserve_order([note for note in notes if note]),
+    )
 
 
 def _ordered_detail_candidates(*, candidates: list[HomepageCandidate], ai_scores: dict[str, AiParallelCandidateScore]) -> list[HomepageCandidate]:
@@ -2815,7 +2903,7 @@ def _candidate_promotes_to_detail(
         return False
     if ai_score is not None:
         if ai_score.predicted_role == "supporting_html" and strong_page_detail_signal:
-            return True
+            return _ai_supporting_override_allowed(ai_score)
         if ai_score.predicted_role != "detail":
             return False
         return ai_score.relevance_score >= 4.0 or strong_page_detail_signal
@@ -2840,9 +2928,23 @@ def _candidate_has_strong_page_detail_signal(*, candidate: HomepageCandidate, pa
     if page_evidence.attribute_signal_count < 2:
         return False
     reason_codes = set(page_evidence.page_evidence_reason_codes)
+    if "product_identity_signal" not in reason_codes:
+        return False
     if not (page_evidence.heading_match or "title_semantic_match" in reason_codes):
         return False
     return candidate.heuristic_score > 0 or "product_type_semantic_match" in reason_codes
+
+
+def _ai_supporting_override_allowed(ai_score: AiParallelCandidateScore) -> bool:
+    normalized_reason_codes = {str(item).strip().lower() for item in ai_score.reason_codes if str(item).strip()}
+    has_veto = any(
+        code in _AI_DETAIL_OVERRIDE_VETO_REASON_CODES
+        or "not_product_detail" in code
+        or code.startswith("supporting_")
+        or code.endswith("_not_detail")
+        for code in normalized_reason_codes
+    )
+    return ai_score.relevance_score >= 4.0 and ai_score.confidence_band != "low" and not has_veto
 
 
 def _build_detail_discovery_metadata(
@@ -2891,6 +2993,7 @@ def _build_detail_discovery_metadata(
         "page_title": page_evidence.page_title,
         "primary_heading": page_evidence.primary_heading,
         "heading_match": page_evidence.heading_match,
+        "product_identity_match": page_evidence.product_identity_match,
         "attribute_signal_count": page_evidence.attribute_signal_count,
         "negative_signal_count": page_evidence.negative_signal_count,
         "ai_unavailable": ai_unavailable,
@@ -2969,12 +3072,13 @@ def _score_page_evidence(
     primary_heading = parser.primary_heading
     heading_text = " ".join([primary_heading, *parser.secondary_headings]).strip()
     body_text = " ".join(parser.body_chunks[:40]).strip()
+    identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
     semantic_terms = _product_type_semantic_terms(product_type_definition)
     attribute_terms = _product_type_attribute_keywords(product_type, product_type_definition)
-    title_match = _term_hits(title_text, semantic_terms)
-    primary_heading_match = _term_hits(primary_heading, semantic_terms)
+    title_match = _term_hits(title_text, identity_terms)
+    primary_heading_match = _term_hits(primary_heading, identity_terms)
     body_match = _term_hits(body_text, semantic_terms)
-    attribute_hits = _term_hits(body_text, attribute_terms) + _term_hits(heading_text, attribute_terms)
+    attribute_hits = _distinct_term_hits(" ".join([heading_text, body_text]), attribute_terms)
     negative_hits = _negative_term_hits(" ".join([title_text, heading_text, body_text]))
     scope_exclusion_reason = _source_scope_exclusion_reason(
         product_type=product_type,
@@ -2983,6 +3087,9 @@ def _score_page_evidence(
 
     score = 0
     reason_codes: list[str] = []
+    product_identity_match = bool(title_match or primary_heading_match)
+    if product_identity_match:
+        reason_codes.append("product_identity_signal")
     if title_match:
         score += 3
         reason_codes.append("title_semantic_match")
@@ -3017,6 +3124,7 @@ def _score_page_evidence(
         heading_match=bool(primary_heading_match),
         attribute_signal_count=attribute_hits,
         negative_signal_count=negative_hits,
+        product_identity_match=product_identity_match,
     )
 
 
@@ -3082,6 +3190,11 @@ def _collapse_whitespace(value: str) -> str:
 def _term_hits(text: str, terms: list[str]) -> int:
     fingerprint = text.lower()
     return sum(1 for term in terms if term and term in fingerprint)
+
+
+def _distinct_term_hits(text: str, terms: list[str]) -> int:
+    fingerprint = text.lower()
+    return len({term for term in terms if term and term in fingerprint})
 
 
 def _negative_term_hits(text: str) -> int:
@@ -3446,6 +3559,36 @@ def _product_type_description_terms(product_type_definition: dict[str, Any]) -> 
         if len(tokens) >= 16:
             break
     return tokens
+
+
+def _product_type_identity_keywords(product_type: str, product_type_definition: dict[str, Any]) -> list[str]:
+    canonical_product_type = _canonical_product_type_code(product_type)
+    curated_hints = list(_PRODUCT_TYPE_IDENTITY_HINTS.get(canonical_product_type, ()))
+    if curated_hints:
+        return curated_hints
+
+    identity_nouns = (
+        "account",
+        "card",
+        "mortgage",
+        "loan",
+        "line of credit",
+        "gic",
+        "term deposit",
+        "certificate",
+    )
+    candidates = [
+        str(product_type_definition.get("display_name") or "").strip().lower(),
+        canonical_product_type.replace("-", " "),
+        *_product_type_keywords(product_type_definition),
+    ]
+    return _dedupe_preserve_order(
+        [
+            item
+            for item in candidates
+            if item and (any(noun in item for noun in identity_nouns) or len(item.split()) >= 2)
+        ]
+    )
 
 
 def _product_type_semantic_terms(product_type_definition: dict[str, Any]) -> list[str]:

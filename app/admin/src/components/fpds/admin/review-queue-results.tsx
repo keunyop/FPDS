@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, CirclePause, Loader2, X } from "lucide-react";
+import { CirclePause, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { ProductTypeItem, ReviewDecisionAction, ReviewQueueResponse, ReviewTaskListItem } from "@/lib/admin-api";
+import type { ProductTypeItem, ReviewQueueResponse, ReviewTaskListItem } from "@/lib/admin-api";
 import {
   buildAdminHref,
   formatAdminDateTime,
@@ -39,7 +39,7 @@ type ReviewQueueResultsProps = {
   csrfToken: string | null | undefined;
 };
 
-type BulkAction = Extract<ReviewDecisionAction, "approve" | "reject" | "defer">;
+type BulkAction = "defer";
 
 const ACTIVE_REVIEW_STATES = new Set(["queued", "deferred"]);
 
@@ -55,7 +55,7 @@ const RESULTS_COPY = {
   select: "Select",
   selected: (count: number) => `${count} selected`,
   selectPage: "Select active rows on this page",
-  bulkUnavailable: "Bulk actions apply to queued or deferred rows.",
+  bulkUnavailable: "Only bulk defer is available. Approval and rejection require opening each task.",
   bulkSucceeded: (action: string, count: number) => `${action} completed for ${count} task${count === 1 ? "" : "s"}.`,
   bulkPartial: (action: string, succeeded: number, failed: number) => `${action} completed for ${succeeded}; ${failed} failed.`,
   bulkFailed: (action: string, failed: number) => `${action} failed for ${failed} task${failed === 1 ? "" : "s"}.`,
@@ -230,14 +230,6 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
               <span className="text-xs text-muted-foreground">{RESULTS_COPY.bulkUnavailable}</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button disabled={selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("approve")} size="sm" type="button">
-                {pendingAction === "approve" ? <Loader2 className="animate-spin" /> : <Check />}
-                {pendingAction === "approve" ? "Approving..." : translateReviewAction(locale, "approve")}
-              </Button>
-              <Button disabled={selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("reject")} size="sm" type="button" variant="destructive">
-                {pendingAction === "reject" ? <Loader2 className="animate-spin" /> : <X />}
-                {pendingAction === "reject" ? "Rejecting..." : translateReviewAction(locale, "reject")}
-              </Button>
               <Button disabled={selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("defer")} size="sm" type="button" variant="outline">
                 {pendingAction === "defer" ? <Loader2 className="animate-spin" /> : <CirclePause />}
                 {pendingAction === "defer" ? "Deferring..." : translateReviewAction(locale, "defer")}
@@ -426,15 +418,8 @@ function isBulkSelectable(item: ReviewTaskListItem) {
   return ACTIVE_REVIEW_STATES.has(item.review_state);
 }
 
-function actionLabel(action: BulkAction) {
-  switch (action) {
-    case "approve":
-      return "Approve";
-    case "reject":
-      return "Reject";
-    case "defer":
-      return "Defer";
-  }
+function actionLabel(_action: BulkAction) {
+  return "Defer";
 }
 
 async function responseErrorMessage(response: Response) {

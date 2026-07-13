@@ -599,6 +599,24 @@ export type ReviewTaskDetailResponse = {
     error_count: number | null;
     error_summary: string | null;
     runtime_notes: string[];
+    discovery_role: string | null;
+    expected_fields: string[];
+    missing_expected_fields: string[];
+    discovery_assessment: {
+      selection_path?: string;
+      selection_confidence?: string;
+      selection_reason_codes: string[];
+      ai_predicted_role?: string;
+      ai_parallel_score?: number;
+      ai_confidence_band?: string;
+      ai_reason_codes: string[];
+      ai_short_rationale?: string;
+      page_evidence_score?: number;
+      page_evidence_reason_codes: string[];
+      page_title?: string;
+      primary_heading?: string;
+      product_identity_match?: boolean;
+    };
   };
   proposed_fields: Array<{
     field_name: string;

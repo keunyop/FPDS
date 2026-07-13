@@ -6,6 +6,7 @@ from api_service.review_detail import (
     _available_actions,
     _build_diff_summary,
     _build_field_trace_groups,
+    _build_source_review_context,
     _build_validation_issues,
     _changed_field_names,
     _collect_model_execution_ids,
@@ -186,6 +187,29 @@ class ReviewDetailTests(unittest.TestCase):
 
         self.assertEqual([item["field_name"] for item in groups[:4]], ["product_name", "base_12_month_rate", "application_method", "term_rate_table"])
         self.assertEqual(groups[1]["label"], "Base Rate, 12 Months")
+
+    def test_build_source_review_context_exposes_actionable_discovery_and_missing_fields(self) -> None:
+        context = _build_source_review_context(
+            source_metadata={
+                "discovery_role": "detail",
+                "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                "discovery_metadata": {
+                    "ai_predicted_role": "supporting_html",
+                    "ai_parallel_score": 0.65,
+                    "ai_reason_codes": ["not_product_detail"],
+                    "ai_short_rationale": "This is a transfer support page.",
+                    "page_evidence_score": 9,
+                    "product_identity_match": False,
+                    "selection_reason_codes": ["strong_page_evidence_detail_override"],
+                },
+            },
+            candidate_payload={"product_name": "Online Banking", "monthly_fee": None},
+        )
+
+        self.assertEqual(context["discovery_role"], "detail")
+        self.assertEqual(context["missing_expected_fields"], ["monthly_fee", "included_transactions"])
+        self.assertEqual(context["discovery_assessment"]["ai_predicted_role"], "supporting_html")
+        self.assertEqual(context["discovery_assessment"]["product_identity_match"], False)
 
     def test_record_evidence_trace_viewed_emits_review_audit_event(self) -> None:
         connection = _RecordingConnection()

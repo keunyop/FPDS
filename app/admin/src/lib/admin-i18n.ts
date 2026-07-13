@@ -31,7 +31,7 @@ const REVIEW_STATE_LABELS: Record<AdminLocale, Record<string, string>> = {
     deferred: "보류",
   },
   ja: {
-    queued: "保留",
+    queued: "待機中",
     approved: "承認済み",
     rejected: "却下済み",
     edited: "編集承認",

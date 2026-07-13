@@ -290,7 +290,7 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
         <IssueDecisionCard detail={detail} />
       </div>
 
-      <ReviewDataCoverageCard detail={detail} />
+      <ReviewFocusSummaryCard detail={detail} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
         <article className="min-w-0 rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
@@ -464,54 +464,76 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
   );
 }
 
-function ReviewDataCoverageCard({ detail }: { detail: ReviewTaskDetailResponse }) {
-  const payload = detail.candidate.candidate_payload;
-  const rows = buildReviewCoverageRows(payload);
+function ReviewFocusSummaryCard({ detail }: { detail: ReviewTaskDetailResponse }) {
+  const populatedFields = detail.field_trace_groups;
+  const fieldsWithEvidence = populatedFields.filter((item) => item.has_evidence);
+  const fieldsWithoutEvidence = populatedFields.filter((item) => !item.has_evidence);
+  const focusFields = [...populatedFields]
+    .sort((left, right) => {
+      if (left.has_evidence !== right.has_evidence) {
+        return left.has_evidence ? 1 : -1;
+      }
+      if (left.evidence_count !== right.evidence_count) {
+        return left.evidence_count - right.evidence_count;
+      }
+      return left.label.localeCompare(right.label);
+    })
+    .slice(0, 6);
 
   return (
     <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
-      <SectionHeading eyebrow="Collection coverage" title="Deposit fields for review" />
-      <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {rows.map((row) => (
-          <div className="min-w-0 rounded-lg border border-border/80 bg-background p-3" key={row.label}>
-            <dt className="text-xs font-medium text-muted-foreground">{row.label}</dt>
-            <dd className="mt-1 break-words text-sm font-medium leading-6 text-foreground">{row.value}</dd>
-          </div>
-        ))}
+      <SectionHeading eyebrow="Review focus" title="Candidate field coverage" />
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        Fields without direct evidence are shown first, followed by fields with the fewest evidence links.
+      </p>
+
+      {detail.source_context.missing_expected_fields.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm leading-6 text-warning">
+          <span className="font-medium">Missing expected fields:</span>{" "}
+          {detail.source_context.missing_expected_fields.map(toTitleCase).join(", ")}. Verify these against the origin source before approving.
+        </div>
+      ) : null}
+
+      <dl className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <CoverageMetric label="Populated fields" value={populatedFields.length} />
+        <CoverageMetric label="Fields with evidence" value={fieldsWithEvidence.length} />
+        <CoverageMetric label="Without direct evidence" value={fieldsWithoutEvidence.length} />
+        <CoverageMetric label="Evidence links" value={detail.evidence_summary.item_count} />
       </dl>
+
+      {focusFields.length > 0 ? (
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {focusFields.map((field) => (
+            <div className="min-w-0 rounded-lg border border-border/80 bg-background p-3" key={field.field_name}>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-xs font-medium text-muted-foreground">{field.label}</p>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium",
+                    field.has_evidence ? "bg-success-soft text-success" : "bg-warning-soft text-warning",
+                  )}
+                >
+                  {field.evidence_count} evidence
+                </span>
+              </div>
+              <p className="mt-2 break-words text-sm font-medium leading-6 text-foreground">{formatValue(field.value)}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-5 text-sm leading-6 text-muted-foreground">No populated candidate fields are available for review.</p>
+      )}
     </article>
   );
 }
 
-function buildReviewCoverageRows(payload: Record<string, unknown>) {
-  const depositAmount = payload.minimum_deposit ?? payload.minimum_balance;
-  return [
-    { label: "Product name", value: formatValue(payload.product_name) },
-    { label: "Highest rate", value: formatRateValue(payload.public_display_rate) },
-    { label: "Base rate (12M)", value: formatRateValue(payload.base_12_month_rate ?? payload.standard_rate) },
-    { label: "Customer tags", value: formatValue(payload.target_customer_tags) },
-    { label: "Deposit amount", value: formatValue(depositAmount) },
-    { label: "Eligibility", value: formatValue(payload.eligibility_text) },
-    { label: "Application method", value: formatValue(payload.application_method) },
-    { label: "Post-maturity rate", value: formatValue(payload.post_maturity_interest_rate) },
-    { label: "Tax benefits", value: formatValue(payload.tax_benefits) },
-    { label: "Deposit insurance", value: formatValue(payload.deposit_insurance) },
-    { label: "Rates by term", value: formatTermRateTableSummary(payload.term_rate_table) },
-  ];
-}
-
-function formatRateValue(value: unknown) {
-  if (typeof value === "number") {
-    return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
-  }
-  return formatValue(value);
-}
-
-function formatTermRateTableSummary(value: unknown) {
-  if (!Array.isArray(value) || value.length === 0) {
-    return "n/a";
-  }
-  return `${value.length} row${value.length === 1 ? "" : "s"} captured`;
+function CoverageMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="min-w-0 rounded-lg border border-border/80 bg-background p-3">
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className="mt-1 text-lg font-semibold text-foreground">{value}</dd>
+    </div>
+  );
 }
 
 function DecisionRecommendationCard({ recommendation }: { recommendation: Recommendation }) {
@@ -536,6 +558,7 @@ function DecisionRecommendationCard({ recommendation }: { recommendation: Recomm
 }
 
 function SourceDecisionCard({ detail }: { detail: ReviewTaskDetailResponse }) {
+  const discovery = detail.source_context.discovery_assessment;
   return (
     <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
       <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Decision facts</p>
@@ -545,7 +568,17 @@ function SourceDecisionCard({ detail }: { detail: ReviewTaskDetailResponse }) {
         <MetaRow label="Type" value={toTitleCase(detail.candidate.product_type)} />
         <MetaRow label="Confidence" value={formatConfidence(detail.candidate.source_confidence)} />
         <MetaRow label="Evidence fields" value={`${detail.evidence_summary.field_count} fields / ${detail.evidence_summary.item_count} links`} />
+        {detail.source_context.discovery_role ? <MetaRow label="Source role" value={toTitleCase(detail.source_context.discovery_role)} /> : null}
+        {discovery.ai_predicted_role ? <MetaRow label="AI source role" value={toTitleCase(discovery.ai_predicted_role)} /> : null}
+        {typeof discovery.product_identity_match === "boolean" ? (
+          <MetaRow label="Product identity" value={discovery.product_identity_match ? "Detected" : "Not detected"} />
+        ) : null}
       </dl>
+      {discovery.ai_short_rationale ? (
+        <p className="mt-4 rounded-lg border border-border/80 bg-background p-3 text-sm leading-6 text-muted-foreground">
+          {discovery.ai_short_rationale}
+        </p>
+      ) : null}
       {detail.source_context.source_url ? (
         <Button asChild className="mt-4 w-full justify-center" variant="outline">
           <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">

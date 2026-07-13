@@ -6,7 +6,7 @@ import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { ReviewQueueResults } from "@/components/fpds/admin/review-queue-results";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
-import type { ProductTypeItem, ReviewQueueResponse } from "@/lib/admin-api";
+import type { BankItem, ProductTypeItem, ReviewQueueResponse } from "@/lib/admin-api";
 import {
   buildAdminHref,
   translateReviewState,
@@ -16,7 +16,6 @@ import {
 import { buildAdminProductTypeOptions } from "@/lib/admin-product-types";
 
 const REVIEW_STATES = ["queued", "deferred", "approved", "edited", "rejected"] as const;
-const BANK_OPTIONS = ["TD", "RBC", "BMO", "SCOTIA", "CIBC"] as const;
 const VALIDATION_OPTIONS = ["pass", "warning", "error"] as const;
 
 const REVIEW_QUEUE_COPY = {
@@ -226,11 +225,12 @@ type ReviewQueueSurfaceProps = {
   queue: ReviewQueueResponse;
   filters: ReviewQueuePageFilters;
   locale: AdminLocale;
+  banks: BankItem[];
   productTypes: ProductTypeItem[];
   csrfToken: string | null | undefined;
 };
 
-export function ReviewQueueSurface({ queue, filters, locale, productTypes, csrfToken }: ReviewQueueSurfaceProps) {
+export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes, csrfToken }: ReviewQueueSurfaceProps) {
   const copy = REVIEW_QUEUE_COPY[locale];
   const productTypeOptions = buildAdminProductTypeOptions(productTypes);
   const stateCounts = queue.summary.state_counts;
@@ -311,9 +311,9 @@ export function ReviewQueueSurface({ queue, filters, locale, productTypes, csrfT
                 name="bank_code"
               >
                 <option value="">{copy.allBanks}</option>
-                {BANK_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {banks.map((bank) => (
+                  <option key={bank.bank_code} value={bank.bank_code}>
+                    {bank.bank_name} ({bank.bank_code})
                   </option>
                 ))}
               </select>

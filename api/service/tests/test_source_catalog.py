@@ -19,6 +19,7 @@ from api_service.source_catalog import (
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
+    _deactivate_rejected_generated_detail_sources,
     _generate_bank_code,
     _link_is_relevant_supporting_source,
     _ordered_detail_candidates,
@@ -43,6 +44,7 @@ from api_service.errors import SourceRegistryError
 class _QueuedCursor:
     def __init__(self, payload: object) -> None:
         self.payload = payload
+        self.rowcount = int(payload) if isinstance(payload, int) else 0
 
     def fetchone(self) -> dict[str, object] | None:
         if isinstance(self.payload, list):
@@ -1218,6 +1220,7 @@ class SourceCatalogTests(unittest.TestCase):
                 page_evidence = PageEvidenceAssessment(
                     page_evidence_score=9,
                     page_evidence_reason_codes=[
+                        "product_identity_signal",
                         "title_semantic_match",
                         "detail_page_layout_signal",
                         "product_type_semantic_match",
@@ -1231,6 +1234,55 @@ class SourceCatalogTests(unittest.TestCase):
                 )
 
                 self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence))
+
+    def test_supporting_page_veto_blocks_detail_override_across_product_types(self) -> None:
+        cases = [
+            ("chequing", "https://www.examplebank.ca/wire-transfers", "not_product_detail"),
+            ("savings", "https://www.examplebank.ca/savings-rates", "supporting_terms_or_rates_page"),
+            ("credit-card", "https://www.examplebank.ca/credit-card-rates", "supporting_terms_or_rates_page"),
+            ("mortgage", "https://www.examplebank.ca/mortgage-calculator", "not_product_detail"),
+        ]
+
+        for product_type, url, veto_reason in cases:
+            with self.subTest(product_type=product_type):
+                candidate = HomepageCandidate(
+                    normalized_url=url,
+                    raw_url=url,
+                    anchor_text="Support page",
+                    source_type="html",
+                    origin="homepage_or_hub_link",
+                    heuristic_score=4,
+                    supporting_signal=True,
+                    seed_source_id=None,
+                    source_name_hint=None,
+                    priority_hint=None,
+                    expected_fields_hint=[],
+                )
+                ai_score = AiParallelCandidateScore(
+                    candidate_url=url,
+                    predicted_role="supporting_html",
+                    relevance_score=8.0,
+                    confidence_band="high",
+                    reason_codes=[veto_reason, "pricing_or_feature_signal"],
+                    short_rationale="Relevant supporting material, not a named product detail page.",
+                )
+                page_evidence = PageEvidenceAssessment(
+                    page_evidence_score=9,
+                    page_evidence_reason_codes=[
+                        "product_identity_signal",
+                        "title_semantic_match",
+                        "detail_page_layout_signal",
+                        "pricing_or_feature_signal",
+                    ],
+                    page_title="Product rates and tools",
+                    primary_heading="Product rates and tools",
+                    heading_match=True,
+                    attribute_signal_count=4,
+                    negative_signal_count=0,
+                    product_identity_match=True,
+                )
+
+                self.assertFalse(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence))
 
     def test_generate_sources_from_homepage_promotes_alterna_no_fee_echequing_detail(self) -> None:
         homepage_html = """
@@ -1297,6 +1349,112 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["discovery_metadata"]["ai_predicted_role"], "supporting_html")
         self.assertIn("strong_page_evidence_detail_override", detail_rows[0]["discovery_metadata"]["selection_reason_codes"])
 
+    def test_chequing_support_pages_do_not_override_ai_supporting_role(self) -> None:
+        cases = [
+            (
+                "https://www.examplebank.ca/personal/accounts/ways-to-bank/wire-transfers",
+                "Wire Transfers",
+                "Send and receive wire transfers through online banking for everyday transactions.",
+                ["not_product_detail", "pricing_or_feature_signal"],
+            ),
+            (
+                "https://www.examplebank.ca/personal/accounts/ways-to-bank/external-account-transfers",
+                "External Account Transfers",
+                "Move money between an external account and online banking.",
+                ["not_product_detail", "pricing_or_feature_signal"],
+            ),
+            (
+                "https://www.examplebank.ca/personal/accounts/ways-to-bank/debit-cards",
+                "Debit Cards",
+                "Use a debit card for everyday transactions and Interac purchases.",
+                ["not_product_detail", "pricing_or_feature_signal"],
+            ),
+            (
+                "https://www.examplebank.ca/personal/rates/chequing-savings",
+                "Chequing & Savings Rates",
+                "Current rates for chequing and savings accounts.",
+                ["supporting_terms_or_rates_page", "pricing_or_feature_signal"],
+            ),
+        ]
+        definition = {
+            **_product_type_definition("chequing"),
+            "description": "A chequing account for everyday transactions, debit payments, transfers, fees, and overdraft.",
+            "discovery_keywords": ["chequing account", "everyday banking", "debit card", "transfers"],
+        }
+
+        for url, heading, body, reason_codes in cases:
+            with self.subTest(url=url), patch(
+                "api_service.source_catalog.fetch_text",
+                return_value=f"<html><head><title>{heading}</title></head><body><h1>{heading}</h1><p>{body}</p></body></html>",
+            ):
+                evidence = _score_page_evidence(
+                    raw_url=url,
+                    fetch_policy=SimpleNamespace(),
+                    product_type="chequing",
+                    product_type_definition=definition,
+                )
+                candidate = HomepageCandidate(
+                    normalized_url=url,
+                    raw_url=url,
+                    anchor_text=heading,
+                    source_type="html",
+                    origin="homepage_or_hub_link",
+                    heuristic_score=4,
+                    supporting_signal="rates" in url,
+                    seed_source_id=None,
+                    source_name_hint=None,
+                    priority_hint=None,
+                    expected_fields_hint=[],
+                )
+                ai_score = AiParallelCandidateScore(
+                    candidate_url=url,
+                    predicted_role="supporting_html",
+                    relevance_score=7.0,
+                    confidence_band="high",
+                    reason_codes=reason_codes,
+                    short_rationale="Relevant support page, not a named chequing product.",
+                )
+
+                self.assertFalse(evidence.product_identity_match)
+                self.assertNotIn("product_identity_signal", evidence.page_evidence_reason_codes)
+                self.assertFalse(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_repeated_support_attribute_counts_once(self) -> None:
+        definition = {
+            **_product_type_definition("chequing"),
+            "description": "A chequing account supporting transfers.",
+            "discovery_keywords": ["chequing account"],
+        }
+        html = "<html><head><title>Wire Transfers</title></head><body><h1>Wire Transfers</h1><p>Transfers transfers transfers.</p></body></html>"
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/ways-to-bank/wire-transfers",
+                fetch_policy=SimpleNamespace(),
+                product_type="chequing",
+                product_type_definition=definition,
+            )
+
+        self.assertEqual(evidence.attribute_signal_count, 1)
+
+    def test_deactivates_only_explicitly_rejected_generated_detail_sources(self) -> None:
+        connection = _QueuedConnection([2])
+
+        count = _deactivate_rejected_generated_detail_sources(
+            connection,
+            bank_code="ALTERNA",
+            product_type="chequing",
+            normalized_urls=[
+                "https://www.alternabank.ca/en/personal/accounts/ways-to-bank/wire-transfers",
+                "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+            ],
+        )
+
+        self.assertEqual(count, 2)
+        sql, params = connection.calls[0]
+        self.assertIn("seed_source_flag = false", sql)
+        self.assertIn("source_id LIKE 'AUTO-%%'", sql)
+        self.assertEqual(len(params["normalized_urls"]), 2)
+
     def test_page_evidence_does_not_treat_product_cta_copy_as_negative(self) -> None:
         detail_html = """
         <html>
@@ -1354,7 +1512,7 @@ class SourceCatalogTests(unittest.TestCase):
                 fetch_error="timed out",
             ),
         ):
-            rows, notes = _promote_detail_candidates(
+            rows, _rejected_urls, notes = _promote_detail_candidates(
                 bank_code="BMO",
                 bank_name="BMO",
                 country_code="CA",
@@ -1415,7 +1573,7 @@ class SourceCatalogTests(unittest.TestCase):
                 negative_signal_count=1,
             ),
         ):
-            rows, notes = _promote_detail_candidates(
+            rows, _rejected_urls, notes = _promote_detail_candidates(
                 bank_code="BMO",
                 bank_name="BMO",
                 country_code="CA",
@@ -1536,7 +1694,7 @@ class SourceCatalogTests(unittest.TestCase):
             )
 
         with patch("api_service.source_catalog._score_page_evidence", side_effect=fake_page_evidence):
-            rows, notes = _promote_detail_candidates(
+            rows, _rejected_urls, notes = _promote_detail_candidates(
                 bank_code="BMO",
                 bank_name="BMO",
                 country_code="CA",
@@ -2241,7 +2399,7 @@ class SourceCatalogTests(unittest.TestCase):
                 """
 
                 with patch("api_service.source_catalog.fetch_text", return_value=html):
-                    rows, notes = _promote_detail_candidates(
+                    rows, _rejected_urls, notes = _promote_detail_candidates(
                         bank_code="TEST",
                         bank_name="Test Bank",
                         country_code="CA",

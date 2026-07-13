@@ -172,6 +172,7 @@ Current live product-type onboarding note:
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
 - A source-catalog collect should merge newly generated source rows with existing active detail rows for the same bank/product scope so a partial discovery pass does not accidentally shrink candidate-producing coverage.
+- A successful rediscovery should deactivate only explicitly rejected, non-seed, automatically generated detail rows in the same bank/Product Type scope. It must preserve seed rows and candidates whose page fetch was unavailable, so stale false-positive details leave collection scope without treating transient fetch failures as deletion evidence.
 
 ---
 
@@ -221,6 +222,7 @@ Current repository state:
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
 - collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; for Canada Big 5 deposit collection, validation-pass follows the golden fixture field contract; promoted candidates enqueue aggregate refresh, and non-product page-title false positives are audit-logged and rejected
+- detail promotion now requires independent product-identity evidence for a strong page override and honors AI support/not-detail veto reasons; the 2026-07-13 Alterna chequing verification rerun used two active product-detail sources, auto-validated two valid products, and created zero review tasks while three stale support/rates details were made inactive
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
