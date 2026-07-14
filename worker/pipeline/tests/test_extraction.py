@@ -2461,7 +2461,7 @@ class ExtractionServiceTests(unittest.TestCase):
 
             with (
                 patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.4-mini"),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
                 patch(
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
@@ -2478,7 +2478,7 @@ class ExtractionServiceTests(unittest.TestCase):
                             ],
                         },
                         {
-                            "model_id": "gpt-5.4-mini",
+                            "model_id": "gpt-5.6-luna",
                             "prompt_tokens": 120,
                             "completion_tokens": 34,
                             "provider_request_id": "resp-dyn-001",
@@ -2569,7 +2569,7 @@ class ExtractionServiceTests(unittest.TestCase):
 
             with (
                 patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.4-mini"),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
                 patch(
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
@@ -2578,7 +2578,7 @@ class ExtractionServiceTests(unittest.TestCase):
                             "field_candidates": [],
                         },
                         {
-                            "model_id": "gpt-5.4-mini",
+                            "model_id": "gpt-5.6-luna",
                             "prompt_tokens": 160,
                             "completion_tokens": 18,
                             "provider_request_id": "resp-bmo-gic-nav",

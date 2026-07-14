@@ -63,6 +63,41 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-07-13 - Medium Reasoning for Quality-Sensitive Product Collection
+
+- WBS: `5.15`, `5.16`, AI-assisted discovery and worker-runtime hardening follow-on
+- Status: `done`
+- Goal: use GPT-5.6 Luna's default `medium` reasoning only for homepage product-detail classification and dynamic product extraction or normalization, while retaining `none` for the high-volume product-type keyword generator.
+- Why now: the Product Owner chose higher default reasoning for the collection decisions where semantic judgment and evidence-grounded mapping most affect product data quality.
+- Outcome: removed the explicit `reasoning.effort="none"` field from the homepage parallel scorer and the shared dynamic extraction/normalization Responses runtime. Omitting the field lets `gpt-5.6-luna` use its documented `medium` default. The product-type discovery-keyword generator remains explicitly at `none`; no prompt, JSON schema, parser, validation, or review-routing rule changed.
+- Key files: `api/service/api_service/source_catalog.py`, `worker/pipeline/fpds_ai_runtime.py`, `api/service/tests/test_source_catalog.py`, `worker/pipeline/tests/test_ai_runtime.py`, `docs/03-design/dev-prod-environment-spec.md`
+- Decisions: apply the higher effort only to the two quality-sensitive collection stages, not globally. This supersedes the prior all-path `none` compatibility baseline while preserving the keyword generator's low-latency behavior.
+- Verification:
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog tests.test_product_types` -> `76` passed.
+  - `uv run python -m unittest worker.pipeline.tests.test_ai_runtime worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization` -> `81` passed.
+  - Request-construction tests confirm the homepage scorer and dynamic runtime omit `reasoning`; the stage-specific static test confirms the keyword generator retains `reasoning.effort="none"`.
+- Known issues: the first representative collection at `medium` has not yet been run, so its quality, latency, and cost effect is unmeasured in FPDS production-like data.
+- Next step: compare a representative collection's structured-output validity, false-positive detail rate, latency, and cost with the prior `none` baseline before expanding `medium` to any other stage.
+
+## 2026-07-13 - GPT-5.6 Luna Runtime Migration
+
+- WBS: `5.15`, AI-assisted discovery and worker-runtime hardening follow-on
+- Status: `done` for repository and configured dev environment
+- Goal: replace the active FPDS GPT-5.4 mini runtime defaults with the requested GPT-5.6 Luna model while preserving the existing Responses API structured-output contracts and the prior low-latency operating behavior.
+- Why now: the Product Owner requested that all current GPT-5.4 mini execution paths move to GPT-5.6 Luna.
+- Outcome: changed the Worker shared OpenAI runtime, Admin homepage parallel scorer, Product Type keyword generator, tracked dev/prod environment examples, and the configured dev environment to `gpt-5.6-luna`. The model is available to the configured dev API project (`GET /v1/models/gpt-5.6-luna` returned `200`). All three Responses request builders now explicitly send `reasoning.effort="none"`, preserving GPT-5.4 mini's effective default instead of silently taking GPT-5.6's `medium` default. Existing prompts, JSON schemas, endpoint choice, error handling, and token/cost aggregation were intentionally retained.
+- Not done: no optional GPT-5.6 Pro mode, persisted reasoning, prompt-cache change, Programmatic Tool Calling, multi-agent behavior, or prompt rewrite was added; there was no measured regression that required it.
+- Key files: `.env.dev.example`, `.env.prod.example`, `worker/pipeline/fpds_ai_runtime.py`, `worker/pipeline/tests/test_ai_runtime.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/product_types.py`, `api/service/tests/test_source_catalog.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `docs/03-design/dev-prod-environment-spec.md`
+- Decisions: `gpt-5.6-luna` is the exact API slug for the Product Owner's requested GPT-5.6 Luna tier; it fits FPDS's bounded extraction, classification, routing, and high-volume structured-output workloads. Keep `reasoning.effort=none` as the compatibility baseline and evaluate any higher effort separately with representative collection traces.
+- Verification:
+  - Official OpenAI model guidance confirmed the `gpt-5.6-luna` slug and Luna workload role.
+  - Configured dev OpenAI project model lookup: `gpt-5.6-luna`, HTTP `200`.
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog tests.test_product_types` -> `75` passed.
+  - `uv run python -m unittest worker.pipeline.tests.test_ai_runtime worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization` -> `81` passed.
+  - `git diff --check` -> passed.
+- Known issues: a deployed production secret/configuration store is outside this workspace. Before production rollout, set `FPDS_LLM_MODEL=gpt-5.6-luna` there and verify model access with the production OpenAI project; the repository defaults and production example are already updated.
+- Next step: on the next representative production-like collection, compare structured-output validity, latency, token usage, and estimated cost against the prior GPT-5.4 mini baseline before considering a different reasoning effort.
+
 ## 2026-07-13 - Unframed Bank Logos and Official Asset Refresh
 
 - WBS: `5.9`, `5.15` UI and bank-registry hardening follow-on

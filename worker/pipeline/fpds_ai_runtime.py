@@ -13,7 +13,7 @@ def llm_provider_configured() -> bool:
     return provider == "openai" and bool(api_key)
 
 
-def configured_model_id(*, default: str = "gpt-5.4-mini") -> str:
+def configured_model_id(*, default: str = "gpt-5.6-luna") -> str:
     return os.getenv("FPDS_LLM_MODEL", default).strip() or default
 
 

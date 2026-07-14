@@ -5,7 +5,7 @@ import shutil
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from api_service.source_catalog import (
     AiParallelCandidateScore,
@@ -21,6 +21,7 @@ from api_service.source_catalog import (
     _candidate_promotes_to_detail,
     _deactivate_rejected_generated_detail_sources,
     _generate_bank_code,
+    _invoke_openai_parallel_scorer,
     _link_is_relevant_supporting_source,
     _ordered_detail_candidates,
     _promote_detail_candidates,
@@ -849,7 +850,7 @@ class SourceCatalogTests(unittest.TestCase):
                             "source_document_id": None,
                             "stage_name": "source_catalog_collection",
                             "agent_name": "fpds-homepage-ai-parallel-scorer",
-                            "model_id": "gpt-5.4-mini",
+                            "model_id": "gpt-5.6-luna",
                             "execution_status": "completed",
                             "execution_metadata": {"candidate_link_count": 1},
                             "started_at": "2026-04-28T20:39:48+00:00",
@@ -869,7 +870,7 @@ class SourceCatalogTests(unittest.TestCase):
                             "usage_metadata": {
                                 "usage_mode": "openai-homepage-parallel-scoring",
                                 "provider": "openai",
-                                "model_id": "gpt-5.4-mini",
+                                "model_id": "gpt-5.6-luna",
                             },
                             "recorded_at": "2026-04-28T20:39:49+00:00",
                         },
@@ -2596,6 +2597,56 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertIn('onError={() => setFailed(true)}', public_logo_component)
         self.assertNotIn('rounded-md border border-border/70 bg-white', public_logo_component)
+
+    def test_homepage_parallel_scorer_uses_default_medium_reasoning_effort_when_omitted(self) -> None:
+        response = MagicMock()
+        response.read.return_value = json.dumps(
+            {
+                "id": "resp-homepage-score-001",
+                "model": "gpt-5.6-luna",
+                "output": [
+                    {
+                        "type": "message",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "text": '{"summary":"ok","candidate_scores":[]}',
+                            }
+                        ],
+                    }
+                ],
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            }
+        ).encode("utf-8")
+
+        with patch("api_service.source_catalog.urllib.request.urlopen") as urlopen:
+            urlopen.return_value.__enter__.return_value = response
+            result, metadata = _invoke_openai_parallel_scorer(
+                model_id="gpt-5.6-luna",
+                api_key="test-key",
+                payload={"product_type": "chequing", "candidates": []},
+            )
+
+        request_body = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
+        self.assertEqual(request_body["model"], "gpt-5.6-luna")
+        self.assertNotIn("reasoning", request_body)
+        self.assertEqual(result, {"summary": "ok", "candidate_scores": []})
+        self.assertEqual(metadata["model_id"], "gpt-5.6-luna")
+
+    def test_gpt_5_6_luna_reasoning_effort_is_stage_specific(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        default_medium_paths = (
+            repo_root / "worker" / "pipeline" / "fpds_ai_runtime.py",
+            repo_root / "api" / "service" / "api_service" / "source_catalog.py",
+        )
+        for source_path in default_medium_paths:
+            source = source_path.read_text(encoding="utf-8")
+            self.assertIn("gpt-5.6-luna", source)
+            self.assertNotIn('"reasoning": {"effort": "none"}', source)
+
+        keyword_generator_source = (repo_root / "api" / "service" / "api_service" / "product_types.py").read_text(encoding="utf-8")
+        self.assertIn("gpt-5.6-luna", keyword_generator_source)
+        self.assertIn('"reasoning": {"effort": "none"}', keyword_generator_source)
 
 
 if __name__ == "__main__":

@@ -983,7 +983,8 @@ def _generate_ai_discovery_keywords(*, display_name: str, description: str, prov
         ),
     }
     request_body = {
-        "model": os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini",
+        "model": os.getenv("FPDS_LLM_MODEL", "gpt-5.6-luna").strip() or "gpt-5.6-luna",
+        "reasoning": {"effort": "none"},
         "instructions": (
             "You generate high-quality discovery keywords for FPDS Canadian banking product types. "
             "Use the product type description plus your financial-domain knowledge. "

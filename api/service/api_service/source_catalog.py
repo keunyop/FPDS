@@ -1488,7 +1488,7 @@ def _launch_source_catalog_collection_runner(plan: dict[str, Any]) -> None:
     collection_id = str(plan["collection_id"])
     plan_path = temp_dir / f"{collection_id}.json"
     log_path = temp_dir / f"{collection_id}.log"
-    plan_path.write_text(json.dumps(plan, indent=2, ensure_ascii=True), encoding="utf-8")
+    plan_path.write_text(json.dumps(plan, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
 
     with log_path.open("a", encoding="utf-8") as log_file:
         try:
@@ -2457,7 +2457,7 @@ def _score_candidate_links_with_ai(
         }
         for item in candidates
     ]
-    model_id = os.getenv("FPDS_LLM_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini"
+    model_id = os.getenv("FPDS_LLM_MODEL", "gpt-5.6-luna").strip() or "gpt-5.6-luna"
     started_at = datetime.now(UTC)
     try:
         resolution, usage = _invoke_openai_parallel_scorer(

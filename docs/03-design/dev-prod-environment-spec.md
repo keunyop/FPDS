@@ -141,7 +141,7 @@ Rules:
 | `FPDS_SOURCE_BROWSER_EXECUTABLE` | optional explicit path to the browser executable used for fallback capture when auto-detection is not enough |
 | `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` | max runtime for one worker stage launched by the source-collection runner before the run is failed instead of remaining indefinitely `started`. Current default baseline: `1800` seconds |
 | `FPDS_LLM_PROVIDER` | model provider label |
-| `FPDS_LLM_MODEL` | model name |
+| `FPDS_LLM_MODEL` | model name; current OpenAI default: `gpt-5.6-luna` |
 | `FPDS_LLM_API_KEY` | model provider credential |
 | `FPDS_BXPF_MODE` | publish mode such as `mock`, `disabled`, or `live` |
 | `FPDS_BXPF_BASE_URL` | BX-PF endpoint placeholder |
@@ -152,6 +152,8 @@ Rules:
 - `dev` defaults to non-live BX-PF behavior
 - real BX-PF write-back is `prod` only
 - exact source allowlist values remain placeholders until security follow-on work wires the final approved list
+- Homepage product-detail candidate scoring and dynamic product extraction or normalization omit `reasoning.effort`, so `gpt-5.6-luna` uses its default `medium` effort for these quality-sensitive collection decisions. Product-type discovery-keyword generation retains explicit `reasoning.effort=none` as a high-volume, latency-sensitive task. Any further effort increase needs measured evaluation before adoption.
+- Before a production rollout, the deployment secret/configuration store must set `FPDS_LLM_MODEL=gpt-5.6-luna` and the configured OpenAI project must confirm read access to that exact model ID.
 
 ### 4.6 Security and Browser Policy
 
