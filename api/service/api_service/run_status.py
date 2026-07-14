@@ -367,6 +367,7 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
             "source_ids": _coerce_string_list(run_metadata.get("source_ids")),
             "retry_action": describe_run_retry_action(
                 run_state=str(run_row["run_state"]),
+                partial_completion_flag=bool(run_row["partial_completion_flag"]),
                 retried_by_run_id=_string_or_none(run_row.get("retried_by_run_id")),
                 run_type=str(run_row["run_type"]),
                 run_metadata=run_metadata,

@@ -1,0 +1,47 @@
+{
+  "collection_id": "collection_JjmCP3IXqRwFbxiu",
+  "correlation_id": "corr_fxGpGy923U4HW3ju",
+  "request_id": "req_codex_goal_20260714061744",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260714_061744_alterna_gic_collect_8sW_YCcx",
+      "catalog_item_id": "catalog-ca-alterna-gic",
+      "bank_code": "ALTERNA",
+      "bank_name": "Alterna Bank",
+      "country_code": "CA",
+      "product_type": "gic",
+      "source_catalog_product_type": "gic",
+      "source_language": "en",
+      "homepage_url": "https://www.alternabank.ca/en/personal",
+      "normalized_homepage_url": "https://www.alternabank.ca/en/personal",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    },
+    {
+      "run_id": "run_20260714_061744_alterna_savings_collect_yZYBNY8o",
+      "catalog_item_id": "catalog-ca-alterna-savings",
+      "bank_code": "ALTERNA",
+      "bank_name": "Alterna Bank",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_catalog_product_type": "savings",
+      "source_language": "en",
+      "homepage_url": "https://www.alternabank.ca/en/personal",
+      "normalized_homepage_url": "https://www.alternabank.ca/en/personal",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

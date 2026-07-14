@@ -13,7 +13,7 @@ from .models import (
     ParseSourceSnapshot,
     ParsedArtifact,
 )
-from .parser import parse_snapshot_bytes
+from .parser import PARSER_VERSION, parse_snapshot_bytes
 from .storage import ParseChunkObjectStore, ParseChunkStorageConfig
 
 
@@ -24,12 +24,14 @@ class ParseChunkService:
         storage_config: ParseChunkStorageConfig,
         object_store: ParseChunkObjectStore,
         parser: Callable[..., ParsedArtifact] = parse_snapshot_bytes,
+        parser_version: str = PARSER_VERSION,
         chunk_max_chars: int = 900,
         chunk_overlap_chars: int = 120,
     ):
         self.storage_config = storage_config
         self.object_store = object_store
         self.parser = parser
+        self.parser_version = parser_version
         self.chunk_max_chars = chunk_max_chars
         self.chunk_overlap_chars = chunk_overlap_chars
 
@@ -43,7 +45,9 @@ class ParseChunkService:
         existing_parsed_documents: list[ExistingParsedDocumentRecord] | None = None,
     ) -> ParseChunkResult:
         known_parsed = {
-            item.snapshot_id: item for item in (existing_parsed_documents or [])
+            item.snapshot_id: item
+            for item in (existing_parsed_documents or [])
+            if item.parser_version == self.parser_version
         }
         source_results: list[ParseChunkSourceResult] = []
         partial_completion_flag = False
@@ -77,7 +81,7 @@ class ParseChunkService:
         request_id: str | None,
         existing_parsed: ExistingParsedDocumentRecord | None,
     ) -> ParseChunkSourceResult:
-        if existing_parsed is not None:
+        if existing_parsed is not None and existing_parsed.parser_version == self.parser_version:
             return self._build_reused_result(
                 run_id=run_id,
                 snapshot=snapshot,

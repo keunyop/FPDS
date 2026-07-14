@@ -29,7 +29,7 @@ As of `2026-07-13`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
-- the latest completed slice hardened support-page discovery and the Admin Review Queue after four Alterna chequing false-positive review tasks
+- the latest completed slice hardened Runs/Review Queue and deposit collection after Alterna rate/source-role false positives; corrected public records are inactive, active Queue is empty, and the latest public API-equivalent active-only projection excludes the retracted products
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
 Read before coding:
@@ -62,6 +62,27 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-13 - Runs and Review Queue Collection Accuracy Hardening
+
+- WBS: `4.2`, `4.5`, `5.15`, `5.16`, collection QA hardening
+- Status: `done`
+- Goal: diagnose current Operations Runs and Queued Review Queue items, automate every safely resolvable case with bank/product-generic rules, and make any remaining human review faster and clearer.
+- Why now: the active Alterna queue contained savings/GIC candidates with missing rates plus a linked PDF treated as a product, while earlier completed-partial lending runs lacked retry and two bad auto-promotions remained active publicly.
+- Outcome: parser v2 preserves heading-only values and nested rate cards; parsed documents are now versioned per snapshot/parser; only `detail` sources produce candidates; generated supporting HTML is retained as evidence; retail discovery excludes clear business/commercial pages; rate safety suppresses redemption percentages; extraction fixes fee-waiver direction, registered/tax/navigation contamination, maturity-only redeemability, promotion boilerplate, and post-maturity noise. Generic supporting-rate merge now replaces invalid GIC zero placeholders and builds grounded term tables. Completed-partial collection runs are retryable. Review Queue rows now show source role, missing expected fields, and a suggested action. A newer approved same-detail-source candidate automatically supersedes older active reviews with audit history.
+- Live verification: Alterna Savings collection `collection_Goosj-QQ2YmvpPfC` approved `cand-706062bfb55d3fe6` at `1.05%` with no review. Alterna GIC collection `collection_IgRmWSN6nXoHbAJc` completed cleanly, approved `cand-9a2156c937e5e906`, and created zero review tasks; DB values are standard/public/12-month `2.65%` with 1/2/3/4/5-year term rates `2.65/2.85/3.10/3.25/3.30%`, while false introductory, registered-plan, and post-maturity fields are absent.
+- Database: applied `0023_versioned_parsed_documents.sql` to dev after the first parser-v2 run exposed the historical one-parsed-document-per-snapshot uniqueness constraint. The failed GIC attempt was retried through the supported run-retry path and completed.
+- Outcome after Product Owner approval: retracted `cand-324e94861d70de31` (linked PDF-derived 20% GIC), `cand-c93e5b9d7e13cec0` (out-of-scope Small Business eChequing), and `cand-db25b724324d7925` (linked-PDF Queue task). Products `prod_Dy_L58___l1FzOcS` and `prod_K-MXTPAc9ZP3JYQn` are `inactive`. Superseded same-source review tasks for `cand-e19255488c3ee953`, `cand-bef2904f4e538da8`, and `cand-44a408a2dce7636b` now have candidate state `superseded` and review state `rejected` with system audit events. Aggregate request `aggreq_2GRzBwVK_9HSsP_b` completed as snapshot `agg_9J6Z09MBdCIdwK8Y`; active Queue is `0`; public API-equivalent active-only retrieval has `20` products and excludes both retracted product ids.
+- Key files: `api/service/api_service/source_catalog.py`, `source_registry.py`, `source_catalog_collection_runner.py`, `candidate_auto_promotion.py`, `candidate_safety_remediation.py`, `review_queue.py`, `run_retry.py`, `worker/pipeline/fpds_parse_chunk/`, `fpds_extraction/service.py`, `fpds_normalization/supporting_merge.py`, `fpds_rate_safety.py`, `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `db/migrations/0023_versioned_parsed_documents.sql`
+- Decisions: supporting/linked sources are evidence-only; missing source role routes to review instead of publication; explicit non-detail role is rejected before canonical upsert; business/commercial pages do not enter retail product scope; exact same-detail-source success may close older queued/deferred tasks, but unrelated or genuinely ambiguous tasks remain human decisions.
+- Verification:
+  - API full suite: `179` passed.
+  - Worker full suite: `123` passed.
+  - Admin: `pnpm run typecheck` passed; `pnpm run build` passed with all `23` static pages generated.
+  - Focused extraction/normalization/evidence/rate suite: `93` passed.
+  - `git diff --check` passed.
+- Known issues: local collection logs/registry artifacts are retained as run evidence and were not deleted. Raw snapshot history retains inactive projection rows by design, while the public API always filters to `status='active'`.
+- Next step: resume normal multi-bank collection monitoring; new collection cases now use the generalized safety and review rules from this slice.
 
 ## 2026-07-13 - Medium Reasoning for Quality-Sensitive Product Collection
 

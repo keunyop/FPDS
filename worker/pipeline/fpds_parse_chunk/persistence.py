@@ -323,7 +323,7 @@ SELECT
     retention_class,
     parsed_at
 FROM parsed_document_payload
-ON CONFLICT (snapshot_id) DO NOTHING;
+ON CONFLICT (snapshot_id, parser_version) DO NOTHING;
 
 WITH evidence_chunk_payload AS (
     SELECT *

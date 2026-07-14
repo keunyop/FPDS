@@ -28,6 +28,7 @@ Files:
 - `migrations/0020_canada_recognized_banks_full_coverage.sql`: adds bank logo metadata, registers recognized Canadian retail/direct banking brands, and creates active source-catalog coverage for every active Canadian bank/Product Type pair
 - `migrations/0021_vancity_credit_union_full_coverage.sql`: registers Vancity per Product Owner request and creates active source-catalog coverage for every active Product Type
 - `migrations/0022_bank_logo_asset_refresh.sql`: replaces recognized-bank favicon defaults with verified official logo assets while preserving operator-supplied custom logo URLs
+- `migrations/0023_versioned_parsed_documents.sql`: permits one immutable parsed artifact per snapshot and parser version so parser upgrades can reparse without overwriting earlier evidence lineage
 
 How to apply when a database is available:
 
@@ -49,6 +50,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0019_canada_lending_product_types.s
 psql $env:FPDS_DATABASE_URL -f db/migrations/0020_canada_recognized_banks_full_coverage.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0021_vancity_credit_union_full_coverage.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0022_bank_logo_asset_refresh.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0023_versioned_parsed_documents.sql
 ```
 
 Notes:

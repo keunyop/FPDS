@@ -85,6 +85,7 @@ This document applies the already-approved baseline decisions below.
 | `deferred` | reject | `rejected` | persist decision reason, actor, timestamp |
 | `deferred` | approve | `approved` | persist decision reason, actor, timestamp |
 | `deferred` | edit & approve | `edited` | persist override diff, actor, timestamp |
+| `queued` or `deferred` | newer candidate from the same detail source is approved | `rejected` | mark the older candidate `superseded`, persist `superseded_by_approved_candidate`, emit system audit |
 
 ### 3.5 Review Action Semantics
 
@@ -133,6 +134,7 @@ The review task should support at least these reason codes.
 - Only one active review task may exist for a single `candidate_id`.
 - `queued` and `deferred` are the only active states.
 - Terminal states may not transition back except by creating a new review task from a later candidate.
+- Queue list rows should expose source role, missing expected fields, and a short recommended action so reviewers can distinguish non-product rejection, field verification, and genuine domain review before opening detail.
 - Review actions must record actor, timestamp, and decision reason.
 - `edit & approve` must persist field-level diff between candidate-derived values and reviewer-approved values.
 - If the same review action is submitted twice, the second submission must be treated idempotently and must not create duplicate change or publish events.
@@ -216,6 +218,7 @@ Minimum required summary fields:
 - A retry creates a new run record linked by `retry_of_run_id`.
 - The earlier run becomes `retried` after the new run attempt is formally registered.
 - Retried run history must remain queryable in admin surfaces.
+- A failed run or a completed run with `partial_completion_flag=true` is retryable; a clean completed run is not.
 - Publish retry is excluded from run retry and handled in publish lifecycle.
 
 ### 4.7 Run Stage Telemetry Expectations
@@ -370,6 +373,7 @@ Every audit event must support at least the following fields.
 | `review_task_requeued` | user/system | deferred task resumed | include requeue reason |
 | `candidate_auto_promoted` | system | policy promotes an `auto_validated` pass candidate | include confidence policy, candidate id, product/version id, and change-event types |
 | `candidate_auto_promotion_skipped` | system | policy blocks auto-promotion for review or rejection | include skip reason, previous/new candidate state, and review task id when queued |
+| `stale_review_auto_superseded` | system | a newer candidate from the same detail source is approved | include old/new candidate ids and previous review/candidate states |
 | `evidence_trace_viewed` | user | reviewer opens sensitive trace context | include review task/product context |
 | `run_started` | system/user/scheduler | run initialization | include trigger metadata |
 | `run_completed` | system | run terminal completion | include summary counters |

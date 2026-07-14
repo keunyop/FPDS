@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_ntJkcgOF8miVsXja",
+  "correlation_id": "corr_Uvo7JGNlBIOHATYE",
+  "request_id": "req_ca07b934a3c64d82b3887f34c744e303",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260714_053949_alterna_gic_collect_bNYA9_6M",
+      "catalog_item_id": "catalog-ca-alterna-gic",
+      "bank_code": "ALTERNA",
+      "bank_name": "Alterna Bank",
+      "country_code": "CA",
+      "product_type": "gic",
+      "source_catalog_product_type": "gic",
+      "source_language": "en",
+      "homepage_url": "https://www.alternabank.ca/en/personal",
+      "normalized_homepage_url": "https://www.alternabank.ca/en/personal",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

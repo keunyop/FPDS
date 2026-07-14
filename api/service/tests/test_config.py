@@ -32,6 +32,23 @@ class SettingsTests(unittest.TestCase):
 
         previous = os.environ.copy()
         try:
+            # Other settings tests intentionally load the repository environment.
+            # Clear only this fixture's keys so unittest discovery order cannot
+            # override the explicit temporary env file through os.environ.
+            for key in (
+                "FPDS_DATABASE_URL",
+                "FPDS_PUBLIC_WEB_ORIGIN",
+                "FPDS_ADMIN_WEB_ORIGIN",
+                "FPDS_PUBLIC_API_ORIGIN",
+                "FPDS_ADMIN_API_ORIGIN",
+                "FPDS_ALLOWED_PUBLIC_ORIGINS",
+                "FPDS_ALLOWED_ADMIN_ORIGINS",
+                "FPDS_ADMIN_SESSION_SECRET",
+                "FPDS_ADMIN_CSRF_SECRET",
+                "FPDS_COOKIE_SECURE",
+                "FPDS_COOKIE_SAMESITE",
+            ):
+                os.environ.pop(key, None)
             settings = Settings.from_env(env_path)
         finally:
             if env_path.exists():

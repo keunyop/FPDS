@@ -30,6 +30,20 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "cannot exceed",
     "not exceed",
     "regardless of the performance",
+    "of the original investment",
+    "of original investment",
+    "of the original principal",
+    "of original principal",
+    "of the principal balance",
+    "partial redemption",
+    "partial withdrawal",
+    "redemption limit",
+    "withdrawal limit",
+    "amount may be redeemed",
+    "amount may be withdrawn",
+    "redeem up to",
+    "withdraw up to",
+    "encash up to",
 )
 
 

@@ -1,0 +1,31 @@
+{
+  "collection_id": "collection_4Xntgd976fDkHXs7",
+  "correlation_id": "corr_bfyomvBL-pj3hcBi",
+  "request_id": "req_88817aadc8494a58a2085cf3acde83ac",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "kylee1112@hotmail.com",
+  "actor": {
+    "user_id": "user_cG5bnKFGP5jEEIFc",
+    "email": "kylee1112@hotmail.com",
+    "display_name": "Admin Operator",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260714_053957_alterna_personal-loan_collect_BIsZC9-p",
+      "catalog_item_id": "catalog-ca-alterna-personal-loan",
+      "bank_code": "ALTERNA",
+      "bank_name": "Alterna Bank",
+      "country_code": "CA",
+      "product_type": "personal-loan",
+      "source_catalog_product_type": "personal-loan",
+      "source_language": "en",
+      "homepage_url": "https://www.alternabank.ca/en/personal",
+      "normalized_homepage_url": "https://www.alternabank.ca/en/personal",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

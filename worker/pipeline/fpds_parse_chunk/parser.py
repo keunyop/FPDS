@@ -10,7 +10,7 @@ from pypdf import PdfReader
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v1"
+PARSER_VERSION = "fpds-parse-chunk-v2"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -92,7 +92,7 @@ def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:
     def flush_section() -> None:
         nonlocal current_lines, current_title
         text_lines = [line for line in current_lines if line]
-        if not text_lines:
+        if not text_lines and not current_title:
             return
         section_title = current_title or "Document"
         section_text = "\n".join([section_title, *text_lines])
@@ -105,8 +105,16 @@ def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:
             )
         )
         current_lines = []
+        current_title = None
 
-    for tag in container.find_all(["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "td", "th"], recursive=True):
+    semantic_tags = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "td", "th"}
+    supplemental_tags = {"div", "span", "dt", "dd", "strong"}
+    all_tags = semantic_tags | supplemental_tags
+    for tag in container.find_all(sorted(all_tags), recursive=True):
+        # Preserve leaf values used by modern rate cards without repeating text
+        # already represented by a semantic or nested leaf element.
+        if tag.name in supplemental_tags and tag.find(all_tags, recursive=True) is not None:
+            continue
         text = _normalize_text(tag.get_text(" ", strip=True))
         if not text:
             continue

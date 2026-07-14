@@ -7,7 +7,7 @@ Current scope:
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - login, logout, session introspection, and approval-gated signup-request routes
-- review queue list route backed by `review_task` and `normalized_candidate`
+- review queue list route backed by `review_task` and `normalized_candidate`, including source role, missing expected fields, and a recommended next action
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
 - run list route backed by `ingestion_run` with protected run-state diagnostics
 - run detail read route with source processing summary, error summary, related review tasks, and usage summary
@@ -18,7 +18,7 @@ Current scope:
 - guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
-- audited auto-promotion for `auto_validated` pass candidates after collection, including non-product skip/reject guards
+- audited auto-promotion for `auto_validated` pass candidates after collection, including non-detail/non-product skip/reject guards and same-detail-source stale-review supersession
 - read-only source registry list/detail routes backed by generated `source_registry_item`
 - approve, reject, defer, and edit-approve review mutations
 - approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
@@ -131,6 +131,7 @@ cd api/service
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
 - Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
+- Completed collection runs with `partial_completion_flag=true` expose the same retry path, while clean completed runs remain non-retryable.
 - Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
 - Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
 - LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
@@ -155,7 +156,7 @@ cd api/service
 - Downstream collection stages now stop when snapshot capture produces no usable sources, and they only process the subset of sources whose snapshots were actually stored or reused so the final run error reflects the real failing stage more accurately.
 - `POST /api/admin/sources` and `PATCH /api/admin/sources/:sourceId` are intentionally kept as read-only error responses in the MVP so the live operator flow stays centered on `/api/admin/banks` and `/api/admin/source-catalog`.
 - Dynamic product-type onboarding is now live for the admin registry and collection pipeline: `/api/admin/product-types` now supports list/create/detail/update/delete for operator-defined types, delete is blocked when bank coverage or generated sources still reference the type, bank coverage writes validate against the registry, source collection plans carry product-type definitions into the worker stages, and non-canonical types use the generic AI extraction or normalization fallback path with safe manual-review routing.
-- The current source-collection MVP keeps candidate-producing scope centered on selected `detail` sources and only auto-includes the existing TD savings supporting sources already required by the live normalization path.
+- Candidate-producing scope is restricted to `detail` sources. Generated `supporting_html`, `supporting_pdf`, and linked-document sources may be fetched, parsed, and merged as evidence, but cannot define standalone products. Product-matched generic supporting rate pages can fill missing or invalid savings/GIC rate fields.
 - Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.

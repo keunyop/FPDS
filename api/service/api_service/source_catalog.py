@@ -2085,6 +2085,60 @@ def _generate_sources_from_homepage(
             if str(hint.get("source_id") or "").strip():
                 source_rows[-1]["source_id"] = str(hint["source_id"])
             promoted_supporting_urls.add(normalized_url)
+        ai_supporting_count = 0
+        for candidate in html_candidates:
+            ai_score = ai_result.scores.get(candidate.normalized_url)
+            if ai_score is None or ai_score.predicted_role != "supporting_html":
+                continue
+            if candidate.normalized_url in promoted_detail_urls or candidate.normalized_url in promoted_supporting_urls:
+                continue
+            if not _link_is_relevant_supporting_source(
+                product_type=product_type,
+                discovery_product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=candidate.normalized_url,
+                anchor_text=candidate.anchor_text,
+            ):
+                continue
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=candidate.normalized_url,
+                    raw_url=candidate.raw_url,
+                    source_name=candidate.source_name_hint or _generated_link_name(
+                        bank_name,
+                        product_type_label,
+                        candidate.anchor_text,
+                        fallback="support",
+                        normalized_url=candidate.normalized_url,
+                    ),
+                    discovery_role="supporting_html",
+                    priority="P1" if ai_score.confidence_band == "high" else "P2",
+                    purpose=ai_score.short_rationale or f"AI-classified supporting source for {product_type_label}",
+                    expected_fields=candidate.expected_fields_hint or expected_fields,
+                    discovery_metadata={
+                        "selection_path": "ai_supporting_role",
+                        "selection_confidence": ai_score.confidence_band,
+                        "selection_reason_codes": _coerce_reason_codes(ai_score.reason_codes),
+                        "candidate_origin": candidate.origin,
+                        "heuristic_score": candidate.heuristic_score,
+                        "ai_parallel_score": ai_score.relevance_score,
+                        "ai_predicted_role": ai_score.predicted_role,
+                        "ai_confidence_band": ai_score.confidence_band,
+                        "ai_reason_codes": _coerce_reason_codes(ai_score.reason_codes),
+                        "ai_short_rationale": ai_score.short_rationale,
+                    },
+                )
+            )
+            promoted_supporting_urls.add(candidate.normalized_url)
+            ai_supporting_count += 1
+        if ai_supporting_count:
+            discovery_notes.append(
+                f"Preserved {ai_supporting_count} AI-classified supporting HTML source(s) for evidence merging."
+            )
         for _, link in unique_supporting_links:
             if link.normalized_url in promoted_detail_urls:
                 continue
@@ -3446,6 +3500,21 @@ def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -
 
 
 def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> str | None:
+    normalized_fingerprint = fingerprint.lower()
+    if any(
+        keyword in normalized_fingerprint
+        for keyword in (
+            "/small-business",
+            "small business",
+            "/business-banking",
+            "business banking",
+            "/commercial-banking",
+            "commercial banking",
+            "/corporate-banking",
+            "corporate banking",
+        )
+    ):
+        return "non_consumer_business_page"
     if any(keyword in fingerprint for keyword in ("investor", "investors", "shareholder", "shareholders")):
         return "non_product_or_investor_page"
     if any(keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS):

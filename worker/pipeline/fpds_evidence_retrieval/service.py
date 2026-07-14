@@ -206,7 +206,12 @@ def _resolve_retrieval_mode(
 
 
 def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
-    if "rate" in field_name and ("%" in excerpt_text or "interest" in excerpt_text):
+    if "rate" in field_name and "%" in excerpt_text:
+        # Rate-card widgets often render the numeric value in its own leaf node.
+        # A percentage-only chunk is stronger rate evidence than generic prose
+        # containing the word "rate" and must survive the top-N retrieval cutoff.
+        return 0.62
+    if "rate" in field_name and "interest" in excerpt_text:
         return 0.18
     if "fee" in field_name and ("fee" in excerpt_text or "$" in excerpt_text):
         return 0.18

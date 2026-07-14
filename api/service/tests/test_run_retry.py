@@ -45,6 +45,7 @@ class RunRetryTests(unittest.TestCase):
                 {
                     "run_id": "run-failed-001",
                     "run_state": "failed",
+                    "partial_completion_flag": False,
                     "trigger_type": "admin_source_catalog_collection",
                     "triggered_by": "admin@example.com",
                     "retry_of_run_id": None,
@@ -99,6 +100,7 @@ class RunRetryTests(unittest.TestCase):
                 {
                     "run_id": "run-failed-002",
                     "run_state": "failed",
+                    "partial_completion_flag": False,
                     "trigger_type": "admin_source_collection",
                     "triggered_by": "admin@example.com",
                     "retry_of_run_id": None,
@@ -147,6 +149,7 @@ class RunRetryTests(unittest.TestCase):
                 {
                     "run_id": "run-completed-001",
                     "run_state": "completed",
+                    "partial_completion_flag": False,
                     "trigger_type": "admin_source_collection",
                     "triggered_by": "admin@example.com",
                     "retry_of_run_id": None,
@@ -166,6 +169,48 @@ class RunRetryTests(unittest.TestCase):
             )
 
         self.assertEqual(captured.exception.code, "run_retry_not_supported")
+
+    def test_completed_partial_source_catalog_run_can_be_retried(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {
+                    "run_id": "run-partial-001",
+                    "run_state": "completed",
+                    "partial_completion_flag": True,
+                    "trigger_type": "admin_source_catalog_collection",
+                    "triggered_by": "admin@example.com",
+                    "retry_of_run_id": None,
+                    "retried_by_run_id": None,
+                    "run_metadata": {
+                        "pipeline_stage": "source_catalog_collection",
+                        "catalog_item_id": "catalog-ca-alterna-mortgage",
+                        "bank_code": "ALTERNA",
+                        "product_type": "mortgage",
+                    },
+                    "run_type": "source_catalog_collection",
+                },
+                None,
+            ]
+        )
+
+        with (
+            patch(
+                "api_service.run_retry.start_source_catalog_collection",
+                return_value={"collection_id": "collection-004", "correlation_id": "corr-004", "run_ids": ["run-retry-004"]},
+            ),
+            patch("api_service.run_retry._record_retry_audit_event") as record_audit,
+        ):
+            result = retry_failed_run(
+                connection,
+                run_id="run-partial-001",
+                actor={"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+                request_context={"request_id": "req-004"},
+            )
+
+        self.assertEqual(result["retry_run_id"], "run-retry-004")
+        update_sql = next(sql for sql, _params in connection.calls if "UPDATE ingestion_run" in sql)
+        self.assertIn("partial_completion_flag = true", update_sql)
+        self.assertEqual(record_audit.call_args.kwargs["previous_state"], "completed")
 
 
 if __name__ == "__main__":

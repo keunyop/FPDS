@@ -55,6 +55,9 @@ export type ReviewTaskListItem = {
     severity: string;
     summary: string;
   }>;
+  source_role: string;
+  missing_expected_fields: string[];
+  recommended_action: "reject_non_product_source" | "verify_missing_fields" | "inspect_validation_evidence" | "review_evidence";
   created_at: string;
   updated_at: string;
 };

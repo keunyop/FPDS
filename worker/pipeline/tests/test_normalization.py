@@ -1405,6 +1405,58 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
 
+    def test_generic_gic_support_replaces_zero_placeholder_rates_for_bank_prefixed_title(self) -> None:
+        zero_rows = [
+            {
+                "term_label": f"{year} year",
+                "term_length_days": year * 365,
+                "rate": "0.00",
+                "minimum_deposit": "500.00",
+                "notes": None,
+            }
+            for year in (1, 2, 3)
+        ]
+        base_artifact = {
+            "schema_context": {"product_type": "gic-term-deposit"},
+            "extracted_fields": [
+                _field_dict("product_name", "Alterna Bank - eTerm Deposits", "string", 0.88),
+                _field_dict("base_12_month_rate", "0.00", "decimal", 0.59, evidence_chunk_id="chunk-placeholder"),
+                _field_dict("term_rate_table", zero_rows, "json", 0.55, evidence_chunk_id="chunk-placeholder"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="term_deposit_rates",
+                        anchor_value="term-deposit-rates",
+                        excerpt=(
+                            "Term Deposit Rates eTerm Deposit Annual Interest Rates "
+                            "1 Year 2.65% 2 Year 2.85% 3 Year 3.10% 4 Year 3.25% 5 Year 3.30%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-ALTERNA-GIC-5677039dfb",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-ALTERNA-GIC-23f7460057": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "2.65")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "2.65")
+        self.assertEqual(fields_by_name["base_12_month_rate"]["candidate_value"], "2.65")
+        self.assertEqual(
+            [row["rate"] for row in fields_by_name["term_rate_table"]["candidate_value"]],
+            ["2.65", "2.85", "3.10", "3.25", "3.30"],
+        )
+        self.assertTrue(fields_by_name["term_rate_table"]["field_metadata"]["generic_supporting_merge"])
+
     def test_generic_supporting_merge_accepts_generated_gic_rate_table_fields(self) -> None:
         base_artifact = {
             "schema_context": {"product_type": "gic-term-deposit"},

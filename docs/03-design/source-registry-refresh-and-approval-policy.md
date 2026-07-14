@@ -198,7 +198,9 @@ Important rules:
 - the run must persist which source rows were selected so the collection scope is reproducible later
 - `detail` sources are the default candidate-producing scope
 - supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
-- supporting sources should not create primary standalone candidates unless the registry explicitly marks them as candidate-producing
+- only `detail` sources create primary standalone candidates; supporting and linked sources remain evidence-only even when selected or auto-included
+- AI-classified `supporting_html` pages should be retained when they provide product-matched rate/fee/term evidence, and normalization may merge their grounded fields into the related detail candidate
+- retail collection scope must reject clearly business/commercial/corporate product pages before they become generated detail sources
 - seed-backed detail hints with low page evidence remain eligible only when page validation has no negative signal; low-evidence pages with negative signals should not become candidate-producing detail sources and should rely on later rerun/source correction instead
 - a source-catalog bulk collect should enqueue the selected bank/product groups as one collection plan and process those groups sequentially inside one background runner process; the deeper source-collection stages still apply per-stage timeouts, but the plan-level runner should avoid launching one DB-connected process per group and exhausting the session pool
 
@@ -226,10 +228,10 @@ Current repository state:
 - generated source detail lives in `source_registry_item`
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
-- collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; for Canada Big 5 deposit collection, validation-pass follows the golden fixture field contract; promoted candidates enqueue aggregate refresh, and non-product page-title false positives are audit-logged and rejected
+- collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; for Canada Big 5 deposit collection, validation-pass follows the golden fixture field contract; promoted candidates enqueue aggregate refresh, non-detail/non-product false positives are audit-logged and rejected, and an approved newer candidate resolves older active reviews from the same detail source as superseded
 - detail promotion now requires independent product-identity evidence for a strong page override and honors AI support/not-detail veto reasons; the 2026-07-13 Alterna chequing verification rerun used two active product-detail sources, auto-validated two valid products, and created zero review tasks while three stale support/rates details were made inactive
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
-- candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
+- candidate-producing scope is role-aware and limited to `detail`. Existing bank-specific merges remain supported, while generated product-matched supporting HTML can now provide generic savings or GIC rate evidence without becoming a candidate itself
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 - the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
 - the recognized Canada financial-institution baseline is live in DB through migrations `0020`, `0021`, and `0022`, with 28 active Canadian bank/direct-bank/credit-union profiles, refreshed official logo metadata where publicly available, and full active Product Type source-catalog coverage for every active Canadian financial institution

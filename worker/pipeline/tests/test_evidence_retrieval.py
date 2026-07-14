@@ -71,6 +71,58 @@ class EvidenceRetrievalServiceTests(unittest.TestCase):
         self.assertEqual(result.matches[0].evidence_chunk_id, "chunk-fee-001")
         self.assertGreater(result.matches[0].score, result.matches[1].score)
 
+    def test_percentage_only_rate_card_value_outranks_generic_rate_prose(self) -> None:
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id="chunk-rate-value",
+                parsed_document_id="parsed-rate-card",
+                chunk_index=3,
+                anchor_type="section",
+                anchor_value="1-05",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt="1.05%*\nGet Started",
+                retrieval_metadata={},
+                source_document_id="src-rate-card",
+                source_snapshot_id="snap-rate-card",
+                bank_code="BANK",
+                country_code="CA",
+                source_type="html",
+            ),
+            *[
+                EvidenceChunkCandidate(
+                    evidence_chunk_id=f"chunk-rate-prose-{index}",
+                    parsed_document_id="parsed-rate-card",
+                    chunk_index=index,
+                    anchor_type="section",
+                    anchor_value="rates",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt="Interest rates are subject to change. See current rates for details.",
+                    retrieval_metadata={},
+                    source_document_id="src-rate-card",
+                    source_snapshot_id="snap-rate-card",
+                    bank_code="BANK",
+                    country_code="CA",
+                    source_type="html",
+                )
+                for index in range(3)
+            ],
+        ]
+        request = EvidenceRetrievalRequest(
+            correlation_id=None,
+            run_id="run-rate-card",
+            parsed_document_id="parsed-rate-card",
+            field_names=["standard_rate"],
+            metadata_filters=MetadataFilters(),
+            retrieval_mode="metadata-only",
+            max_matches_per_field=3,
+        )
+
+        result = self.service.retrieve(request=request, candidates=candidates)
+
+        self.assertEqual(result.matches[0].evidence_chunk_id, "chunk-rate-value")
+
     def test_retrieve_filters_candidates_by_metadata(self) -> None:
         request = EvidenceRetrievalRequest(
             correlation_id=None,

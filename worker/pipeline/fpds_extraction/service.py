@@ -143,7 +143,7 @@ _TERM_RE = re.compile(
 _TERM_RATE_ROW_RE = re.compile(
     r"(?P<term>\d{1,3}\s*(?:days|months|years|day|month|year))\b"
     r"(?P<body>[^%\n\r]{0,120}?)"
-    r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+    r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
     re.IGNORECASE,
 )
 _WHITESPACE_RE = re.compile(r"\s+")
@@ -1026,6 +1026,8 @@ def _extract_candidate_value(
         if field_name == "post_maturity_interest_rate":
             return _extract_post_maturity_interest_rate(text), "string", "heuristic_post_maturity_interest_rate", {}
         if field_name == "tax_benefits":
+            if not _source_is_registered_product(context):
+                return None, "string", "heuristic_tax_benefits", {"suppressed_reason": "sibling_registered_product_navigation"}
             return _extract_tax_benefits(text), "string", "heuristic_tax_benefits", {}
         if field_name == "deposit_insurance":
             return _extract_deposit_insurance(text), "string", "heuristic_deposit_insurance", {}
@@ -1662,15 +1664,17 @@ def _extract_money_value(
 
 def _extract_monthly_fee_with_minimum_balance_waiver(text: str) -> str | None:
     match = _fee_waiver_pattern().search(text)
-    if match is None:
-        return None
-    return _normalize_decimal(match.group("fee"))
+    if match is not None:
+        return _normalize_decimal(match.group("fee"))
+    reverse_values = _extract_no_fee_if_balance_values(text)
+    return reverse_values[0] if reverse_values is not None else None
 
 
 def _extract_minimum_balance_for_fee_waiver(*, context: ExtractionDocumentContext, text: str) -> str | None:
     match = _fee_waiver_pattern().search(text)
     if match is None:
-        return None
+        reverse_values = _extract_no_fee_if_balance_values(text)
+        return reverse_values[1] if reverse_values is not None else None
     if _is_bmo_chequing_other_product_fee_waiver(context=context, text=text, match=match):
         return None
     balance = match.group("balance_after_label") or match.group("balance_before_label")
@@ -1680,7 +1684,11 @@ def _extract_minimum_balance_for_fee_waiver(*, context: ExtractionDocumentContex
 def _extract_fee_waiver_condition(*, context: ExtractionDocumentContext, text: str) -> str | None:
     match = _fee_waiver_pattern().search(text)
     if match is None:
-        return None
+        reverse_values = _extract_no_fee_if_balance_values(text)
+        if reverse_values is None:
+            return None
+        fee, balance = reverse_values
+        return f"Monthly fee {fee} is waived to 0.00 with a {balance} minimum balance."
     if _is_bmo_chequing_other_product_fee_waiver(context=context, text=text, match=match):
         return None
     fee = _normalize_decimal(match.group("fee"))
@@ -1789,6 +1797,38 @@ def _fee_waiver_pattern() -> re.Pattern[str]:
     )
 
 
+def _extract_no_fee_if_balance_values(text: str) -> tuple[str, str] | None:
+    """Read fee waivers phrased as free-if-balanced, then state the base fee.
+
+    Many bank pages lead with the waived price and place the actual monthly fee in
+    a parenthetical.  Treating the first zero as the product fee reverses the
+    economic meaning of the disclosure.
+    """
+
+    normalized = _normalize_text(text)
+    if not re.search(r"\bno\s+monthly(?:\s+plan)?\s+fee\b", normalized, flags=re.IGNORECASE):
+        return None
+    balance_match = re.search(
+        r"(?:minimum\s+(?:daily\s+(?:closing\s+)?)?balance(?:\s+of)?\s*\$\s?(?P<after>[0-9][0-9,]*(?:\.\d{1,2})?)"
+        r"|\$\s?(?P<before>[0-9][0-9,]*(?:\.\d{1,2})?)\s+minimum\s+(?:daily\s+(?:closing\s+)?)?balance)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if balance_match is None:
+        return None
+    fee_match = re.search(
+        r"\$\s?(?P<fee>[0-9][0-9,]*(?:\.\d{1,2})?)\s*(?:/\s*month|per\s+month|monthly)\s+(?:plan\s+)?fee",
+        normalized[balance_match.end() :],
+        flags=re.IGNORECASE,
+    )
+    if fee_match is None:
+        return None
+    return (
+        _normalize_decimal(fee_match.group("fee")),
+        _normalize_decimal(balance_match.group("after") or balance_match.group("before")),
+    )
+
+
 def _matches_zero_money_label(*, text: str, label_patterns: tuple[str, ...]) -> bool:
     for label_pattern in label_patterns:
         if re.search(
@@ -1876,11 +1916,15 @@ def _extract_boolean_flag(
             return True
         return None
     if field_name == "registered_flag":
-        if any(token in lowered for token in ("tfsa", "rrsp", "registered")):
+        if any(token in lowered for token in ("tfsa", "rrsp", "registered")) and (
+            _source_is_registered_product(context) or _has_registered_product_availability_context(lowered)
+        ):
             return True
         return None
     if field_name == "redeemable_flag":
         if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
+            return False
+        if _cashable_only_at_maturity(lowered):
             return False
         if any(token in lowered for token in ("redeemable", "cashable", "early redemption")):
             return True
@@ -1888,11 +1932,13 @@ def _extract_boolean_flag(
     if field_name == "non_redeemable_flag":
         if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
             return True
+        if _cashable_only_at_maturity(lowered):
+            return True
         if "redeemable" in lowered or "cashable" in lowered:
             return False
         return None
     if field_name == "registered_plan_supported":
-        if any(token in lowered for token in ("tfsa", "rrsp", "rrif", "resp", "registered plan", "registered account")):
+        if _source_is_registered_product(context) or _has_registered_product_availability_context(lowered):
             return True
         return None
     if field_name == "unlimited_transactions_flag":
@@ -1992,8 +2038,12 @@ def _has_product_promotional_context(*, context: ExtractionDocumentContext, text
         if source_id != context.source_id
         for term in terms
     ]
+    has_concrete_offer = _PERCENT_RE.search(text) is not None or any(
+        token in lowered
+        for token in ("for 3 months", "for three months", "for the first", "offer expires", "until ")
+    )
     if not current_terms:
-        return True
+        return has_concrete_offer
 
     found_current_promo = False
     found_other_only_promo = False
@@ -2021,7 +2071,7 @@ def _has_product_promotional_context(*, context: ExtractionDocumentContext, text
         return True
     if found_other_only_promo:
         return False
-    return True
+    return has_concrete_offer
 
 
 def _source_product_terms(context: ExtractionDocumentContext) -> tuple[str, ...]:
@@ -2152,17 +2202,30 @@ def _term_label_to_days(term_label: str) -> int | None:
 
 
 def _extract_application_method(text: str) -> str | None:
-    return _extract_limited_sentence(
-        text,
-        ("apply", "open account", "online", "branch", "mobile app", "phone", "appointment"),
-    )
+    normalized = _normalize_text(text)
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        lowered = raw_sentence.lower()
+        has_action = any(token in lowered for token in ("apply", "open an account", "open account", "purchase", "book an appointment"))
+        has_channel = any(token in lowered for token in ("online", "branch", "mobile app", "phone", "appointment"))
+        if has_action and has_channel:
+            return _normalize_text(raw_sentence)[:280]
+    return None
 
 
 def _extract_post_maturity_interest_rate(text: str) -> str | None:
-    return _extract_limited_sentence(
-        text,
-        ("after maturity", "post-maturity", "maturity", "renewal", "renewed", "reinvest"),
-    )
+    normalized = _normalize_text(text)
+    for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
+        lowered = raw_sentence.lower()
+        has_post_maturity_action = any(
+            token in lowered
+            for token in ("after maturity", "post-maturity", "post maturity", "renewal", "renewed", "reinvest")
+        )
+        has_at_maturity_rate = "at maturity" in lowered and "rate" in lowered
+        if (has_post_maturity_action or has_at_maturity_rate) and any(
+            token in lowered for token in ("interest", "rate", "renew", "reinvest")
+        ):
+            return _normalize_text(raw_sentence)[:280]
+    return None
 
 
 def _extract_tax_benefits(text: str) -> str | None:
@@ -2262,6 +2325,17 @@ def _extract_eligibility_text(text: str) -> str | None:
         if "?" in sentence:
             continue
         lowered = sentence.lower()
+        if any(
+            token in lowered
+            for token in (
+                "eligible deposits",
+                "deposit insurance",
+                "insured by cdic",
+                "cdic eligible",
+                "canada deposit insurance corporation",
+            )
+        ):
+            continue
         score = 0
         if any(token in lowered for token in ("eligible", "eligibility", "qualify", "qualified")):
             score += 4
@@ -2298,6 +2372,26 @@ def _extract_eligibility_text(text: str) -> str | None:
     if best is None:
         return None
     return best[2]
+
+
+def _source_is_registered_product(context: ExtractionDocumentContext) -> bool:
+    product_text = " ".join(
+        str(context.source_metadata.get(key) or "").lower()
+        for key in ("product_type", "product_type_name", "product_name", "source_name", "page_title", "primary_heading")
+    )
+    return any(token in product_text for token in ("tfsa", "rrsp", "rrif", "resp", "registered"))
+
+
+def _has_registered_product_availability_context(lowered: str) -> bool:
+    return re.search(
+        r"\b(?:(?:also\s+)?available\s+(?:as|in|for)|eligible\s+for|may\s+be\s+held\s+in|can\s+be\s+held\s+in)\s+"
+        r"(?:an?\s+)?(?:tfsa|rrsp|rrif|resp|registered(?:\s+(?:plan|account))?)\b",
+        lowered,
+    ) is not None
+
+
+def _cashable_only_at_maturity(lowered: str) -> bool:
+    return re.search(r"\b(?:cashable|redeemable)\s+(?:only\s+)?(?:at|upon)\s+maturity\b", lowered) is not None
 
 
 def _extract_tier_definition_text(text: str) -> str | None:

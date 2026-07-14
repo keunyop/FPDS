@@ -52,6 +52,11 @@ class ReviewQueueTests(unittest.TestCase):
                 {"code": "manual_sampling_review", "severity": "warning", "summary": "Prototype routing keeps all candidates in review."},
                 {"code": "low_confidence", "severity": "warning", "summary": "The overall source confidence was below the routing threshold."},
             ],
+            "candidate_payload": {"product_name": "TD ePremium Savings Account", "monthly_fee": None},
+            "source_metadata": {
+                "discovery_role": "detail",
+                "expected_fields": ["product_name", "monthly_fee", "standard_rate"],
+            },
             "created_at": datetime(2026, 4, 13, 12, 0, tzinfo=UTC),
             "updated_at": datetime(2026, 4, 13, 12, 30, tzinfo=UTC),
         }
@@ -66,6 +71,37 @@ class ReviewQueueTests(unittest.TestCase):
             "A field could not be mapped with enough certainty. Prototype routing keeps all candidates in review. (+1 more)",
         )
         self.assertEqual(serialized["created_at"], "2026-04-13T12:00:00+00:00")
+        self.assertEqual(serialized["source_role"], "detail")
+        self.assertEqual(serialized["missing_expected_fields"], ["monthly_fee", "standard_rate"])
+        self.assertEqual(serialized["recommended_action"], "verify_missing_fields")
+
+    def test_supporting_source_review_is_recommended_for_rejection(self) -> None:
+        row = {
+            "review_task_id": "review-pdf",
+            "candidate_id": "cand-pdf",
+            "run_id": "run-pdf",
+            "country_code": "CA",
+            "bank_code": "BANK",
+            "bank_name": "Bank",
+            "product_type": "gic",
+            "product_name": "Deposits are denominated in Canadian dollars.",
+            "review_state": "queued",
+            "candidate_state": "in_review",
+            "validation_status": "error",
+            "validation_issue_codes": ["required_field_missing"],
+            "source_confidence": Decimal("0.67"),
+            "queue_reason_code": "required_field_missing",
+            "issue_summary": [],
+            "candidate_payload": {"product_name": "Deposits are denominated in Canadian dollars."},
+            "source_metadata": {"discovery_role": "linked_pdf", "expected_fields": ["product_name", "standard_rate"]},
+            "created_at": datetime(2026, 7, 14, 5, 40, tzinfo=UTC),
+            "updated_at": datetime(2026, 7, 14, 5, 40, tzinfo=UTC),
+        }
+
+        serialized = _serialize_review_task_row(row)
+
+        self.assertEqual(serialized["recommended_action"], "reject_non_product_source")
+        self.assertEqual(serialized["source_role"], "linked_pdf")
 
 
 if __name__ == "__main__":

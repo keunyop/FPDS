@@ -10,7 +10,11 @@ from api_service import source_collection_runner
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.source_catalog import _canonical_product_type_code, _materialize_sources_for_catalog_item, _product_type_scope_codes
-from api_service.source_registry import _insert_collection_run_row, prepare_source_collection
+from api_service.source_registry import (
+    _insert_collection_run_row,
+    _is_candidate_producing_collection_source,
+    prepare_source_collection,
+)
 
 
 def main() -> int:
@@ -245,55 +249,9 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
 
 
 def _is_candidate_producing_source(row: Any, *, product_type: str) -> bool:
-    discovery_role = str(row["discovery_role"])
-    if discovery_role == "detail":
-        return True
-    if _canonical_product_type_code(product_type) != "gic":
-        return False
-
-    expected_fields = row.get("expected_fields") if hasattr(row, "get") else row["expected_fields"]
-    if isinstance(expected_fields, str):
-        try:
-            expected_values = json.loads(expected_fields)
-        except json.JSONDecodeError:
-            expected_values = [expected_fields]
-    else:
-        expected_values = list(expected_fields or [])
-    expected_text = " ".join(str(item).lower() for item in expected_values)
-    source_text = " ".join(
-        str(
-            (row.get(key) if hasattr(row, "get") else row[key])
-            or ""
-        ).lower()
-        for key in ("source_name", "source_url", "purpose")
-    )
-    if any(
-        token in expected_text
-        for token in (
-            "gic_rate_table",
-            "gic_rates",
-            "cashable_gic_rates",
-            "non_cashable_gic_rates",
-            "non_redeemable_gic_rates",
-            "redeemable_gic_rates",
-            "market_growth_gic_rates",
-            "product_variants",
-            "gic_types",
-            "special_rate_summary",
-            "detail_links",
-        )
-    ):
-        return True
-    return any(
-        token in source_text
-        for token in (
-            "gic",
-            "guaranteed-investment-certificate",
-            "guaranteed investment certificate",
-            "term deposit",
-            "gic-rates",
-        )
-    )
+    del product_type
+    normalized_row = dict(row) if not isinstance(row, dict) else row
+    return _is_candidate_producing_collection_source(normalized_row)
 
 
 def _no_detail_sources_summary(discovery_notes: list[str]) -> str:

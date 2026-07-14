@@ -1,0 +1,1562 @@
+[source-catalog-runner] starting run run_20260714_062549_alterna_savings_collect_NaU1p66k for ALTERNA savings
+[source-collection-runner] run run_20260714_062549_alterna_savings_collect_NaU1p66k starting snapshot for 2 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+{
+  "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+  "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+  "request_id": "req_codex_goal_20260714062549",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+      "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-e5d0eaf1385b8400",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/snap-e5d0eaf1385b8400/raw",
+      "checksum": "4716083d3b2ebada8d568850a8743b9a24fe89c6e0a23b578c7e38252f06ac45",
+      "fingerprint": "ce9cf876e70b636c31960a553fc209d90558718acea3814e37acfa058ff55054",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-14T06:26:08.796358+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-e5d0eaf1385b8400",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/snap-e5d0eaf1385b8400/raw",
+        "content_type": "text/html",
+        "checksum": "4716083d3b2ebada8d568850a8743b9a24fe89c6e0a23b578c7e38252f06ac45",
+        "fingerprint": "ce9cf876e70b636c31960a553fc209d90558718acea3814e37acfa058ff55054",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+          "request_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+          "final_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+          "status_code": 200,
+          "content_length": 97710,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-14T06:26:08.796358+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-08fe82f735a6f4d0",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "selected_snapshot_id": "snap-e5d0eaf1385b8400",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260714062549",
+          "content_type": "text/html",
+          "checksum": "4716083d3b2ebada8d568850a8743b9a24fe89c6e0a23b578c7e38252f06ac45",
+          "fingerprint": "ce9cf876e70b636c31960a553fc209d90558718acea3814e37acfa058ff55054",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/snap-e5d0eaf1385b8400/raw",
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-SAV-7b4c50c5f1",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-5ce529130447087d",
+      "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-5ce529130447087d/raw",
+      "checksum": "5927e6793bad570f4fa500d5f6cb3ab081629f8cc983f73615ef167372827ddc",
+      "fingerprint": "eef43c7c956fe4b3b0a19fdaed53713c3fec31db2fa3bd3d57e8985b00edf25b",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-14T06:26:08.776812+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-5ce529130447087d",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-5ce529130447087d/raw",
+        "content_type": "text/html",
+        "checksum": "5927e6793bad570f4fa500d5f6cb3ab081629f8cc983f73615ef167372827ddc",
+        "fingerprint": "eef43c7c956fe4b3b0a19fdaed53713c3fec31db2fa3bd3d57e8985b00edf25b",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-ALTERNA-SAV-7b4c50c5f1",
+          "request_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+          "final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+          "status_code": 200,
+          "content_length": 77424,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "max-age=60, private",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-14T06:26:08.776812+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-720672c407d36ed8",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-5ce529130447087d",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260714062549",
+          "content_type": "text/html",
+          "checksum": "5927e6793bad570f4fa500d5f6cb3ab081629f8cc983f73615ef167372827ddc",
+          "fingerprint": "eef43c7c956fe4b3b0a19fdaed53713c3fec31db2fa3bd3d57e8985b00edf25b",
+          "object_storage_key": "dev/snapshots/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/snap-5ce529130447087d/raw",
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+    "request_id": "req_codex_goal_20260714062549",
+    "stats": {
+      "source_total": 2,
+      "ok_count": 2,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "expected_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-14T06:26:07.746995+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-ALTERNA-SAV-7b4c50c5f1",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "expected_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-14T06:26:08.236830+00:00",
+        "final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "normalized_final_url": "https://www.alternabank.ca/en/personal/rates/chequing-savings",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "run_state": "completed",
+    "source_document_count": 2,
+    "stored_snapshot_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-07-14T06:26:06.412650+00:00",
+    "completed_at": "2026-07-14T06:26:12.118040+00:00"
+  }
+}
+[source-collection-runner] run run_20260714_062549_alterna_savings_collect_NaU1p66k continuing with 2 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+{
+  "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+  "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+  "request_id": "req_codex_goal_20260714062549",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+      "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+      "snapshot_id": "snap-e5d0eaf1385b8400",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-64b66bef115770a6",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/metadata.json",
+      "chunk_count": 12,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-08fe82f735a6f4d0",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "selected_snapshot_id": "snap-e5d0eaf1385b8400",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-64b66bef115770a6",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/metadata.json",
+          "chunk_count": 12,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-SAV-7b4c50c5f1",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-5ce529130447087d",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-48190c0b4857ded6",
+      "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/metadata.json",
+      "chunk_count": 5,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-720672c407d36ed8",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-5ce529130447087d",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-48190c0b4857ded6",
+          "parsed_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/metadata.json",
+          "chunk_count": 5,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "run_state": "completed",
+    "parsed_document_count": 2,
+    "evidence_chunk_count": 17,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-14T06:26:34.524548+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+{
+  "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+  "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+  "request_id": "req_codex_goal_20260714062549",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "extracted_field_count": 34,
+    "evidence_link_count": 18
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+      "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+      "snapshot_id": "snap-e5d0eaf1385b8400",
+      "parsed_document_id": "parsed-64b66bef115770a6",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-a825c10201ca5c01",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Alterna Bank - High Interest eSavings",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Accounts",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-67a52c31e3d6d714",
+          "evidence_text_excerpt": "High Interest eSavings\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nSaving made easy. Earn high interest on every dollar without having it locked in for an extended period of time. There are no monthly fees and no minimum balance required.",
+          "anchor_type": "section",
+          "anchor_value": "high-interest-esavings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-67a52c31e3d6d714",
+          "evidence_text_excerpt": "High Interest eSavings\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nSaving made easy. Earn high interest on every dollar without having it locked in for an extended period of time. There are no monthly fees and no minimum balance required.",
+          "anchor_type": "section",
+          "anchor_value": "high-interest-esavings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "fee",
+              "monthly",
+              "monthly fee"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.64,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.05",
+          "value_type": "decimal",
+          "confidence": 0.62,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-0f0bb582ab1ea95f",
+          "evidence_text_excerpt": "1.05%*\nGet Started",
+          "anchor_type": "section",
+          "anchor_value": "1-05",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.05",
+          "value_type": "decimal",
+          "confidence": 0.62,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-0f0bb582ab1ea95f",
+          "evidence_text_excerpt": "1.05%*\nGet Started",
+          "anchor_type": "section",
+          "anchor_value": "1-05",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": []
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "No Minimum Balance No minimum balance required",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "External Account Transfer Apply online now It typically takes just 5 minutes to apply for your account - all online!",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-a401a3554e45e4d0",
+          "evidence_text_excerpt": "r Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different financial institutions so you can transfer funds with ease.\nTransfer funds to and from your account to another financial institution\nFund new accounts from your external account if other financial institutions support it\nSetting up is easy! Find out more on External Account Transfer .\nExternal Account Transfer\nApply online now\nIt typically takes just 5 minutes to apply for your account - all online!\nGet Started",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 8,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "apply",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) We make banking easy, accessible, and secure - wherever you are.",
+          "value_type": "string",
+          "confidence": 0.85,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance",
+              "insured"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the closing balance and paid monthly.",
+          "value_type": "string",
+          "confidence": 0.97,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-f5ce14661f049d4f",
+          "evidence_text_excerpt": "Legal\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. High Interest eSavings Accounts and rates are only available for purchase online. Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date.\nMaximum balance per customer is $250,000 (plus accrued interest).\nClick here for our FAQs on Account Limits.\nhere\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "anchor_type": "section",
+          "anchor_value": "legal",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-f5ce14661f049d4f",
+          "evidence_text_excerpt": "Legal\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. High Interest eSavings Accounts and rates are only available for purchase online. Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date.\nMaximum balance per customer is $250,000 (plus accrued interest).\nClick here for our FAQs on Account Limits.\nhere\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "anchor_type": "section",
+          "anchor_value": "legal",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "is",
+              "monthly",
+              "paid",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "evidence_chunk_id": "chunk-f446ed0b606270e2",
+          "evidence_text_excerpt": "e banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nService Fees\nGet your bank accounts talking to each other with a few clicks. Available with your Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different financial institutions so you can transfer funds with ease.\nGet your bank accounts talking to each other with a few clicks.\nAvailable with your Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "important",
+              "information"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-67a52c31e3d6d714",
+          "evidence_text_excerpt": "High Interest eSavings\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nSaving made easy. Earn high interest on every dollar without having it locked in for an extended period of time. There are no monthly fees and no minimum balance required.",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "high-interest-esavings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "public_display_fee",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-67a52c31e3d6d714",
+          "evidence_text_excerpt": "High Interest eSavings\nOverview\nHigh Interest eSavings\nNo Fee eChequing\nTFSA eSavings\nRRSP eSavings\nWays To Bank\nSaving made easy. Earn high interest on every dollar without having it locked in for an extended period of time. There are no monthly fees and no minimum balance required.",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "high-interest-esavings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.64,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.05",
+          "evidence_chunk_id": "chunk-0f0bb582ab1ea95f",
+          "evidence_text_excerpt": "1.05%*\nGet Started",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.62,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "1-05",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.05",
+          "evidence_chunk_id": "chunk-0f0bb582ab1ea95f",
+          "evidence_text_excerpt": "1.05%*\nGet Started",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.62,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "1-05",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "No Minimum Balance No minimum balance required",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "External Account Transfer Apply online now It typically takes just 5 minutes to apply for your account - all online!",
+          "evidence_chunk_id": "chunk-a401a3554e45e4d0",
+          "evidence_text_excerpt": "r Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different financial institutions so you can transfer funds with ease.\nTransfer funds to and from your account to another financial institution\nFund new accounts from your external account if other financial institutions support it\nSetting up is easy! Find out more on External Account Transfer .\nExternal Account Transfer\nApply online now\nIt typically takes just 5 minutes to apply for your account - all online!\nGet Started",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 8
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Safe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC) We make banking easy, accessible, and secure - wherever you are.",
+          "evidence_chunk_id": "chunk-9deb3e1dcec9e31c",
+          "evidence_text_excerpt": "No Minimum Balance\nNo minimum balance required.\nSafe and secure \u2013 eligible deposits are insured up to the maximum amount through the Canada Deposit Insurance Corporation (CDIC)\nWe make banking easy, accessible, and secure - wherever you are. ONLINE BANKING Bank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch. MOBILE Get the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nWe make banking easy, accessible, and secure - wherever you are.\nONLINE BANKING\nBank 24 hours a day, 7 days a week. Pay your bills online and skip that trip to a mailbox or bank branch.\nMOBILE\nGet the full experience of online banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.85,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the closing balance and paid monthly.",
+          "evidence_chunk_id": "chunk-f5ce14661f049d4f",
+          "evidence_text_excerpt": "Legal\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. High Interest eSavings Accounts and rates are only available for purchase online. Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date.\nMaximum balance per customer is $250,000 (plus accrued interest).\nClick here for our FAQs on Account Limits.\nhere\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.97,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "legal",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-f5ce14661f049d4f",
+          "evidence_text_excerpt": "Legal\n*Interest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. High Interest eSavings Accounts and rates are only available for purchase online. Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date.\nMaximum balance per customer is $250,000 (plus accrued interest).\nClick here for our FAQs on Account Limits.\nhere\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "legal",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information.",
+          "evidence_chunk_id": "chunk-f446ed0b606270e2",
+          "evidence_text_excerpt": "e banking plus more. Whether you're checking your balances or depositing your cheques easily with Deposit Anywhere\u2122, do it all within your fingertips.\nAt Alterna, our members always come first. We\u2019ve always believed that being upfront and honest is the most respectful way to provide important information. That\u2019s why everything you need to know about our current service fees and account features can be found here:\nService Fees\nGet your bank accounts talking to each other with a few clicks. Available with your Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different financial institutions so you can transfer funds with ease.\nGet your bank accounts talking to each other with a few clicks.\nAvailable with your Alterna Bank account, External Account Transfer is a free feature that lets you link all your accounts from different",
+          "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+          "source_snapshot_id": "snap-e5d0eaf1385b8400",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "anchor_type": "section",
+          "anchor_value": "no-minimum-balance",
+          "page_no": null,
+          "chunk_index": 7
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-08fe82f735a6f4d0",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "selected_snapshot_id": "snap-e5d0eaf1385b8400",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-64b66bef115770a6",
+          "model_execution_id": "modelexec-a825c10201ca5c01",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/parsed-64b66bef115770a6/metadata.json",
+          "extracted_field_count": 19,
+          "evidence_link_count": 11,
+          "runtime_notes": [],
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-SAV-7b4c50c5f1",
+      "source_document_id": "src-alterna-html-95d273adb4df58a1",
+      "snapshot_id": "snap-5ce529130447087d",
+      "parsed_document_id": "parsed-48190c0b4857ded6",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-1869bbe422c6aa6c",
+      "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "ALTERNA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Chequing & Savings",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Rates",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "0.05",
+          "value_type": "decimal",
+          "confidence": 0.98,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "0.05",
+          "value_type": "decimal",
+          "confidence": 0.98,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Rates are only available for purchase online.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_application_method",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "online"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.",
+          "value_type": "string",
+          "confidence": 0.85,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-5d410f362b673e9f",
+          "evidence_text_excerpt": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the closing balance and paid monthly.",
+          "value_type": "string",
+          "confidence": 0.97,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.78,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "is",
+              "monthly",
+              "paid",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "The rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "evidence_chunk_id": "chunk-5d410f362b673e9f",
+          "evidence_text_excerpt": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "withdrawal"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "0.05",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "0.05",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "application_method",
+          "candidate_value": "Rates are only available for purchase online.",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.",
+          "evidence_chunk_id": "chunk-5d410f362b673e9f",
+          "evidence_text_excerpt": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.85,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 3
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the closing balance and paid monthly.",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.97,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-feb1dc533b2d69c6",
+          "evidence_text_excerpt": "Chequing & Savings\nPrime Rate\nChequing & Savings\nMortgages\nRegistered Plans\nTerm Deposits\nChequing & Savings\nRates\nNo Fee eChequing Account\n0.05%\nHigh Interest eSavings Account\n1.05%\nTFSA eSavings Account\n1.05%\nRRSP eSavings\n1.05%\nLegal\nInterest rate is annualized and subject to change without notice. Interest is calculated daily on the closing balance and paid monthly. Rates are only available for purchase online. For accounts opened before May 1, 2017, the maximum balance per customer is $1,000,000 (plus accrued interest). For accounts opened on or after May 1, 2017 the maximum balance per customer is $250,000 (plus accrued interest). Due to local and proxy caching on the Internet, please ensure that you are viewing rates as at the current day's date. Only eligible deposits held in Canadian currency, having a term of five years or less and payable in Canada are insurable under the",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.78,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "The rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice.",
+          "evidence_chunk_id": "chunk-5d410f362b673e9f",
+          "evidence_text_excerpt": "and payable in Canada are insurable under the Canada Deposit Insurance Corporation Act.\nThe rates above are for general informational purposes only, and are subject to change or withdrawal at any time without notice. For more information, and to find out more about our product terms, conditions, and application process, please visit us in branch, or call us at 1.866.560.0120.\n\u200b\u200b\nCS Alterna Bank is a member of Canada Deposit Insurance Corporation (CDIC) .\nCanada Deposit Insurance Corporation (CDIC)",
+          "source_document_id": "src-alterna-html-95d273adb4df58a1",
+          "source_snapshot_id": "snap-5ce529130447087d",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "anchor_type": "section",
+          "anchor_value": "chequing-savings",
+          "page_no": null,
+          "chunk_index": 3
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-720672c407d36ed8",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-95d273adb4df58a1",
+        "selected_snapshot_id": "snap-5ce529130447087d",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-48190c0b4857ded6",
+          "model_execution_id": "modelexec-1869bbe422c6aa6c",
+          "extracted_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/ALTERNA/src-alterna-html-95d273adb4df58a1/parsed-48190c0b4857ded6/metadata.json",
+          "extracted_field_count": 15,
+          "evidence_link_count": 7,
+          "runtime_notes": [],
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "run_state": "completed",
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "extracted_draft_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-14T06:26:47.592617+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+{
+  "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+  "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+  "request_id": "req_codex_goal_20260714062549",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "stored_count": 1,
+    "failed_count": 0,
+    "candidate_count": 1,
+    "field_evidence_link_count": 11
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+      "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+      "snapshot_id": "snap-e5d0eaf1385b8400",
+      "parsed_document_id": "parsed-64b66bef115770a6",
+      "extraction_model_execution_id": "modelexec-a825c10201ca5c01",
+      "normalization_action": "stored",
+      "candidate_id": "cand-706062bfb55d3fe6",
+      "normalization_model_execution_id": "modelexec-567a1e6621ff6921",
+      "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8458,
+      "runtime_notes": [],
+      "error_summary": null,
+      "field_evidence_link_count": 11,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-08fe82f735a6f4d0",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "selected_snapshot_id": "snap-e5d0eaf1385b8400",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-706062bfb55d3fe6",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-567a1e6621ff6921",
+          "extraction_model_execution_id": "modelexec-a825c10201ca5c01",
+          "normalized_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8458,
+          "field_evidence_link_count": 11,
+          "runtime_notes": [],
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "field_evidence_link_count": 11,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-14T06:27:00.781439+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+{
+  "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+  "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+  "request_id": "req_codex_goal_20260714062549",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "queued_count": 0,
+    "auto_validated_count": 1,
+    "failed_count": 0,
+    "review_task_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-ALTERNA-SAV-1518db2454",
+      "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+      "snapshot_id": "snap-e5d0eaf1385b8400",
+      "parsed_document_id": "parsed-64b66bef115770a6",
+      "candidate_id": "cand-706062bfb55d3fe6",
+      "candidate_run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+      "validation_action": "auto_validated",
+      "validation_model_execution_id": "modelexec-a37480e045e8e762",
+      "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/metadata.json",
+      "review_task_id": null,
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8858,
+      "candidate_state": "auto_validated",
+      "review_reason_code": null,
+      "queue_reason_codes": [],
+      "runtime_notes": [
+        "Candidate met auto-validation policy and did not create a review task."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-08fe82f735a6f4d0",
+        "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+        "source_document_id": "src-alterna-html-6cda0944b0b8066f",
+        "selected_snapshot_id": "snap-e5d0eaf1385b8400",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "auto_validated",
+          "candidate_id": "cand-706062bfb55d3fe6",
+          "candidate_run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+          "validation_model_execution_id": "modelexec-a37480e045e8e762",
+          "normalization_model_execution_id": "modelexec-567a1e6621ff6921",
+          "validation_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/ALTERNA/src-alterna-html-6cda0944b0b8066f/cand-706062bfb55d3fe6/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8858,
+          "candidate_state": "auto_validated",
+          "review_reason_code": null,
+          "queue_reason_codes": [],
+          "review_task_id": null,
+          "runtime_notes": [
+            "Candidate met auto-validation policy and did not create a review task."
+          ],
+          "correlation_id": "corr_F1WzbM59YjfUDQ5X",
+          "request_id": "req_codex_goal_20260714062549"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260714_062549_alterna_savings_collect_NaU1p66k",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "review_task_count": 0,
+    "review_queued_count": 0,
+    "auto_validated_count": 1,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-14T06:27:12.496240+00:00"
+  }
+}
+[source-collection-runner] run run_20260714_062549_alterna_savings_collect_NaU1p66k auto-promoted 1 candidate(s); aggregate refresh launch=True
+[source-collection-runner] run run_20260714_062549_alterna_savings_collect_NaU1p66k completed downstream stages
+[source-catalog-runner] finished run run_20260714_062549_alterna_savings_collect_NaU1p66k

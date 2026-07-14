@@ -1,0 +1,167 @@
+{
+  "registry_version": "2026-07-14",
+  "bank_code": "ALTERNA",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.alternabank.ca"
+  ],
+  "entry_source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+  "sources": [
+    {
+      "source_id": "AUTO-ALTERNA-CHE-03ef951eca",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names a personal chequing account and strongly signals product features such as no monthly fee.",
+      "url": "https://www.alternabank.ca/en/personal/accounts/no-fee-echequing",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Alterna Bank - No Fee eChequing",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 2,
+        "primary_heading": "No-Fee eChequing Account Overdraft Protection",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names a personal chequing account and strongly signals product features such as no monthly fee.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-ALTERNA-CHE-cfda0405eb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "A named eChequing account with likely product-specific details, but it is explicitly for small businesses rather than personal banking.",
+      "url": "https://www.alternabank.ca/en/small-business/business-services/account-small-business-echequing",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Chequing",
+      "product_type_description": "A bank account designed for everyday transactions such as deposits, withdrawals, debit card payments, bill payments, and transfers. It usually offers easy access to funds but little or no interest.",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Alterna Bank - Small Business eChequing Account",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Small Business eChequing Account",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "A named eChequing account with likely product-specific details, but it is explicitly for small businesses rather than personal banking.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    }
+  ]
+}

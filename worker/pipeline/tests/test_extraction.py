@@ -15,6 +15,137 @@ from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, bui
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_free_if_balanced_disclosure_preserves_base_fee_and_waiver_threshold(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-CHQ-001",
+            parsed_document_id="parsed-fee-waiver",
+            source_document_id="src-fee-waiver",
+            snapshot_id="snap-fee-waiver",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "chequing"},
+        )
+        excerpt = "No monthly fee with a minimum daily closing balance of $3,000 ($5 monthly fee if not maintained)."
+
+        monthly_fee, *_ = _extract_candidate_value(context=context, field_name="monthly_fee", excerpt=excerpt, anchor_value="fees")
+        minimum_balance, *_ = _extract_candidate_value(context=context, field_name="minimum_balance", excerpt=excerpt, anchor_value="fees")
+        waiver, *_ = _extract_candidate_value(context=context, field_name="fee_waiver_condition", excerpt=excerpt, anchor_value="fees")
+
+        self.assertEqual(monthly_fee, "5.00")
+        self.assertEqual(minimum_balance, "3000.00")
+        self.assertEqual(waiver, "Monthly fee 5.00 is waived to 0.00 with a 3000.00 minimum balance.")
+
+    def test_navigation_and_disclosure_noise_does_not_create_semantic_fields(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-SAV-001",
+            parsed_document_id="parsed-noise",
+            source_document_id="src-noise",
+            snapshot_id="snap-noise",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "savings", "product_name": "High Interest Savings"},
+        )
+
+        registered, *_ = _extract_candidate_value(
+            context=context,
+            field_name="registered_flag",
+            excerpt="Other accounts: TFSA eSavings and RRSP eSavings.",
+            anchor_value="accounts",
+        )
+        eligibility, *_ = _extract_candidate_value(
+            context=context,
+            field_name="eligibility_text",
+            excerpt="Eligible deposits are insured by CDIC up to applicable limits.",
+            anchor_value="deposit-insurance",
+        )
+        application, *_ = _extract_candidate_value(
+            context=context,
+            field_name="application_method",
+            excerpt="Online banking is available 24 hours a day.",
+            anchor_value="online-banking",
+        )
+        tax_benefits, *_ = _extract_candidate_value(
+            context=context,
+            field_name="tax_benefits",
+            excerpt="Other accounts: TFSA eSavings and RRSP eSavings may offer tax benefits.",
+            anchor_value="accounts",
+        )
+
+        self.assertIsNone(registered)
+        self.assertIsNone(eligibility)
+        self.assertIsNone(application)
+        self.assertIsNone(tax_benefits)
+
+    def test_cashable_only_at_maturity_is_not_early_redeemable(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-GIC-001",
+            parsed_document_id="parsed-gic-maturity",
+            source_document_id="src-gic-maturity",
+            snapshot_id="snap-gic-maturity",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic"},
+        )
+        excerpt = "The term deposit is cashable upon maturity only."
+
+        redeemable, *_ = _extract_candidate_value(context=context, field_name="redeemable_flag", excerpt=excerpt, anchor_value="terms")
+        non_redeemable, *_ = _extract_candidate_value(context=context, field_name="non_redeemable_flag", excerpt=excerpt, anchor_value="terms")
+
+        self.assertFalse(redeemable)
+        self.assertTrue(non_redeemable)
+
+    def test_gic_placeholders_and_navigation_do_not_create_false_product_fields(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-ALTERNA-GIC-001",
+            parsed_document_id="parsed-gic-placeholder",
+            source_document_id="src-gic-placeholder",
+            snapshot_id="snap-gic-placeholder",
+            bank_code="ALTERNA",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic", "product_name": "Alterna Bank - eTerm Deposits"},
+        )
+        rate_excerpt = (
+            "Our current eTerm Deposit Rates 1 year eTerm deposit Minimum $500 Maximum $500,000 % * "
+            "2 year eTerm deposit Minimum $500 Maximum $500,000 % *"
+        )
+        legal_excerpt = (
+            "Special promotional rates may be changed or withdrawn at any time without notice. "
+            "Cashable upon maturity only."
+        )
+
+        base_rate, *_ = _extract_candidate_value(
+            context=context, field_name="base_12_month_rate", excerpt=rate_excerpt, anchor_value="rates"
+        )
+        term_table, *_ = _extract_candidate_value(
+            context=context, field_name="term_rate_table", excerpt=rate_excerpt, anchor_value="rates"
+        )
+        introductory, *_ = _extract_candidate_value(
+            context=context, field_name="introductory_rate_flag", excerpt=legal_excerpt, anchor_value="legal"
+        )
+        registered, *_ = _extract_candidate_value(
+            context=context,
+            field_name="registered_plan_supported",
+            excerpt="eTerm Deposits Overview Registered Plans",
+            anchor_value="eterm-deposits",
+        )
+        post_maturity, *_ = _extract_candidate_value(
+            context=context, field_name="post_maturity_interest_rate", excerpt=legal_excerpt, anchor_value="legal"
+        )
+
+        self.assertIsNone(base_rate)
+        self.assertIsNone(term_table)
+        self.assertIsNone(introductory)
+        self.assertIsNone(registered)
+        self.assertIsNone(post_maturity)
+
     def test_extracts_requested_deposit_detail_fields(self) -> None:
         context = ExtractionDocumentContext(
             source_id="BMO-GIC-001",

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import argparse
 import json
 from typing import Any
 
 from api_service.source_catalog import _record_catalog_audit_event, start_source_catalog_collection
 from api_service.source_registry import _record_source_registry_audit_event, start_source_collection
 from api_service.security import utc_now
+from api_service.config import Settings
+from api_service.db import open_connection
 
 SUPPORTED_RETRY_RUN_TYPES = {"source_catalog_collection", "source_collection", "admin_source_collection"}
 
@@ -21,6 +24,7 @@ class RunRetryError(Exception):
 def describe_run_retry_action(
     *,
     run_state: str,
+    partial_completion_flag: bool = False,
     retried_by_run_id: str | None,
     run_type: str,
     run_metadata: dict[str, Any],
@@ -30,10 +34,10 @@ def describe_run_retry_action(
             "available": False,
             "reason": "This run already has a later retry attempt.",
         }
-    if run_state != "failed":
+    if run_state != "failed" and not (run_state == "completed" and partial_completion_flag):
         return {
             "available": False,
-            "reason": "Only failed runs can be retried.",
+            "reason": "Only failed or partially completed runs can be retried.",
         }
 
     normalized_run_type = (run_type or "").strip().lower()
@@ -42,7 +46,7 @@ def describe_run_retry_action(
             return {"available": True, "reason": None}
         return {
             "available": False,
-            "reason": "This failed source-catalog run is missing its catalog item context.",
+            "reason": "This source-catalog run is missing its catalog item context.",
         }
 
     if normalized_run_type in {"source_collection", "admin_source_collection"}:
@@ -51,12 +55,12 @@ def describe_run_retry_action(
             return {"available": True, "reason": None}
         return {
             "available": False,
-            "reason": "This failed source-collection run is missing its selected source context.",
+            "reason": "This source-collection run is missing its selected source context.",
         }
 
     return {
         "available": False,
-        "reason": "Retry is currently available only for failed collection runs.",
+        "reason": "Retry is currently available only for failed or partially completed collection runs.",
     }
 
 
@@ -72,6 +76,7 @@ def retry_failed_run(
         SELECT
             ir.run_id,
             ir.run_state,
+            ir.partial_completion_flag,
             ir.trigger_type,
             ir.triggered_by,
             ir.retry_of_run_id,
@@ -89,6 +94,7 @@ def retry_failed_run(
     run_metadata = _coerce_mapping(row.get("run_metadata"))
     retry_action = describe_run_retry_action(
         run_state=str(row["run_state"]),
+        partial_completion_flag=bool(row.get("partial_completion_flag")),
         retried_by_run_id=_string_or_none(row.get("retried_by_run_id")),
         run_type=str(row["run_type"]),
         run_metadata=run_metadata,
@@ -121,7 +127,7 @@ def retry_failed_run(
         raise RunRetryError(
             status_code=409,
             code="run_retry_not_supported",
-            message="Retry is currently available only for failed collection runs.",
+            message="Retry is currently available only for failed or partially completed collection runs.",
         )
 
     retry_run_ids = [str(item) for item in result.get("run_ids", []) if str(item).strip()]
@@ -144,7 +150,7 @@ def retry_failed_run(
             completed_at = COALESCE(completed_at, %(retry_requested_at)s),
             run_metadata = run_metadata || %(retry_metadata)s::jsonb
         WHERE run_id = %(run_id)s
-          AND run_state = 'failed'
+          AND (run_state = 'failed' OR (run_state = 'completed' AND partial_completion_flag = true))
           AND retried_by_run_id IS NULL
         """,
         {
@@ -169,6 +175,7 @@ def retry_failed_run(
         original_run_id=run_id,
         retry_run_id=retry_run_id,
         run_metadata=run_metadata,
+        previous_state=str(row["run_state"]),
     )
 
     return {
@@ -190,6 +197,7 @@ def _record_retry_audit_event(
     original_run_id: str,
     retry_run_id: str,
     run_metadata: dict[str, Any],
+    previous_state: str,
 ) -> None:
     payload = {
         "original_run_id": original_run_id,
@@ -206,7 +214,7 @@ def _record_retry_audit_event(
             event_type="source_catalog_collection_retried",
             target_id=retry_run_id,
             target_type="source_catalog_collection",
-            diff_summary=f"Retried failed source-catalog run {original_run_id}.",
+            diff_summary=f"Retried {previous_state} source-catalog run {original_run_id}.",
             metadata=payload,
         )
         return
@@ -217,10 +225,10 @@ def _record_retry_audit_event(
         actor=actor,
         target_id=retry_run_id,
         request_context=request_context,
-        previous_state="failed",
+        previous_state=previous_state,
         new_state="started",
         reason_text=None,
-        diff_summary=f"Retried failed source-collection run {original_run_id}.",
+        diff_summary=f"Retried {previous_state} source-collection run {original_run_id}.",
         payload=payload,
         event_category="run",
         target_type="source_collection",
@@ -257,3 +265,24 @@ def _coerce_string_list(value: object) -> list[str]:
 def _string_or_none(value: object) -> str | None:
     text = str(value).strip() if value is not None else ""
     return text or None
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Retry an eligible failed or partially completed FPDS collection run.")
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--request-id", default="run-retry-cli")
+    args = parser.parse_args()
+    actor = {"actor_type": "system", "role": "admin", "display_name": "FPDS run retry"}
+    with open_connection(Settings.from_env()) as connection:
+        result = retry_failed_run(
+            connection,
+            run_id=args.run_id,
+            actor=actor,
+            request_context={"request_id": args.request_id, "user_agent": "fpds-run-retry-cli"},
+        )
+    print(json.dumps(result, ensure_ascii=True, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

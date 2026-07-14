@@ -52,6 +52,19 @@ class _ConnectionContext:
 
 
 class SourceCatalogCollectionRunnerTests(unittest.TestCase):
+    def test_only_detail_sources_can_produce_standalone_candidates(self) -> None:
+        detail = {"discovery_role": "detail", "product_type": "gic"}
+        linked_terms = {
+            "discovery_role": "linked_pdf",
+            "product_type": "gic",
+            "source_name": "Registered Term Deposit Terms",
+            "purpose": "Auto-generated linked PDF source for GIC",
+            "expected_fields": ["product_name", "standard_rate"],
+        }
+
+        self.assertTrue(source_catalog_collection_runner._is_candidate_producing_source(detail, product_type="gic"))
+        self.assertFalse(source_catalog_collection_runner._is_candidate_producing_source(linked_terms, product_type="gic"))
+
     def test_run_group_marks_run_completed_when_no_detail_sources_are_found(self) -> None:
         connection = _Connection()
         plan = {

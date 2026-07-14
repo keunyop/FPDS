@@ -65,6 +65,7 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
             "monthly_fee": 0,
             "status": "active",
         },
+        "discovery_role": "detail",
     }
 
 
@@ -77,12 +78,13 @@ class CandidateAutoPromotionTests(unittest.TestCase):
                 [_candidate_row()],
                 None,
                 None,
-                None,
                 [],
                 None,
                 None,
                 None,
                 None,
+                None,
+                [],
                 None,
             ]
         )
@@ -116,6 +118,45 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         refresh_call = next(params for sql, params in connection.calls if "INSERT INTO aggregate_refresh_request" in sql)
         self.assertEqual(refresh_call["trigger_reason"], "auto_promotion")
         self.assertIn('"candidate_ids": ["cand-001"]', str(refresh_call["request_metadata"]))
+
+    def test_approval_supersedes_older_same_source_review_with_audit(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_document_id"] = "src-detail-001"
+        connection = _Connection(
+            [
+                _policy_rows(),
+                [candidate],
+                None,
+                None,
+                None,
+                [],
+                None,
+                None,
+                None,
+                [
+                    {
+                        "candidate_id": "cand-stale",
+                        "run_id": "run-stale",
+                        "previous_candidate_state": "in_review",
+                        "review_task_id": "review-stale",
+                        "previous_review_state": "queued",
+                    }
+                ],
+                None,
+                None,
+                None,
+            ]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_items"][0]["superseded_review_count"], 1)
+        supersede_call = next(params for sql, params in connection.calls if "superseded_candidates AS" in sql)
+        self.assertEqual(supersede_call["approved_candidate_id"], "cand-001")
+        audit_call = next(params for sql, params in connection.calls if "stale_review_auto_superseded" in sql)
+        self.assertEqual(audit_call["candidate_id"], "cand-stale")
+        self.assertEqual(audit_call["review_task_id"], "review-stale")
+        self.assertIn('"approved_candidate_id": "cand-001"', str(audit_call["event_payload"]))
 
     def test_force_review_issue_candidate_is_not_promoted(self) -> None:
         connection = _Connection(
@@ -166,6 +207,31 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(candidate_update_call["reason_code"], "non_product_page_title")
         audit_call = next(params for sql, params in connection.calls if "candidate_auto_promotion_skipped" in sql)
         self.assertEqual(audit_call["new_state"], "rejected")
+
+    def test_supporting_source_candidate_is_rejected_before_canonical_promotion(self) -> None:
+        candidate = _candidate_row()
+        candidate["discovery_role"] = "linked_pdf"
+        connection = _Connection([_policy_rows(), [candidate], None, None])
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "non_detail_source_role")
+        self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+        audit_call = next(params for sql, params in connection.calls if "candidate_auto_promotion_skipped" in sql)
+        self.assertEqual(audit_call["new_state"], "rejected")
+        self.assertIn('"discovery_role": "linked_pdf"', str(audit_call["event_payload"]))
+
+    def test_missing_source_role_is_queued_instead_of_published(self) -> None:
+        candidate = _candidate_row()
+        candidate["discovery_role"] = None
+        connection = _Connection([_policy_rows(), [candidate], None, {"review_task_id": "review-role"}, None])
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "source_role_missing")
+        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
 
 
 if __name__ == "__main__":

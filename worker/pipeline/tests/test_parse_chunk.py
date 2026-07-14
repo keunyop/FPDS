@@ -6,6 +6,7 @@ from shutil import rmtree
 import unittest
 
 from worker.pipeline.fpds_parse_chunk.models import ExistingParsedDocumentRecord, ParseSourceSnapshot
+from worker.pipeline.fpds_parse_chunk.parser import PARSER_VERSION
 from worker.pipeline.fpds_parse_chunk.persistence import (
     ParseChunkDatabaseConfig,
     PsqlParseChunkRepository,
@@ -15,6 +16,56 @@ from worker.pipeline.fpds_parse_chunk.storage import ParseChunkStorageConfig, bu
 
 
 class ParseChunkServiceTests(unittest.TestCase):
+    def test_html_snapshot_preserves_heading_only_rate_and_leaf_rate_card_values(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("parse-chunk-rate-card")
+        try:
+            snapshot = ParseSourceSnapshot(
+                source_id="AUTO-BANK-GIC-001",
+                snapshot_id="snap-html-rate-card",
+                source_document_id="src-html-rate-card",
+                object_storage_key="dev/snapshots/CA/BANK/src-html-rate-card/snap-html-rate-card/raw",
+                content_type="text/html",
+                source_language="en",
+                bank_code="BANK",
+                country_code="CA",
+            )
+            _write_object(
+                temp_path,
+                snapshot.object_storage_key,
+                b"""
+                <html><body><main>
+                  <h1>High Interest Savings</h1>
+                  <h1>1.05%*</h1>
+                  <h2>eTerm Deposits</h2>
+                  <div class="rate-card"><span>1 year</span><div class="rate--value"><span>2.65%</span></div></div>
+                  <div class="rate-card"><span>3 years</span><div class="rate--value">3.10%</div></div>
+                </main></body></html>
+                """,
+            )
+            storage_config = ParseChunkStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                snapshot_object_prefix="snapshots",
+                parsed_object_prefix="parsed",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ParseChunkService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+                chunk_max_chars=500,
+                chunk_overlap_chars=20,
+            )
+
+            result = service.parse_snapshots(run_id="run-rate-card", snapshots=[snapshot])
+
+            excerpts = " ".join(item["evidence_excerpt"] for item in result.source_results[0].evidence_chunk_records)
+            self.assertIn("1.05%", excerpts)
+            self.assertIn("2.65%", excerpts)
+            self.assertIn("3.10%", excerpts)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_html_snapshot_parses_and_chunks_with_section_anchor(self) -> None:
         temp_path = _prepare_workspace_temp_dir("parse-chunk-html")
         try:
@@ -191,7 +242,7 @@ class ParseChunkServiceTests(unittest.TestCase):
             parsed_document_id="parsed-existing-001",
             snapshot_id=snapshot.snapshot_id,
             parsed_storage_key="dev/parsed/CA/TD/src-reuse-001/parsed-existing-001/parsed.txt",
-            parser_version="fpds-parse-chunk-v1",
+            parser_version=PARSER_VERSION,
             parse_quality_note=None,
             parser_metadata={"metadata_storage_key": "dev/parsed/CA/TD/src-reuse-001/parsed-existing-001/metadata.json"},
             retention_class="hot",
@@ -220,6 +271,52 @@ class ParseChunkServiceTests(unittest.TestCase):
         self.assertEqual(item.parse_action, "reused")
         self.assertEqual(item.chunk_count, 3)
         self.assertEqual(item.parsed_document_id, existing.parsed_document_id)
+
+    def test_legacy_parser_output_is_reparsed_after_parser_upgrade(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("parse-chunk-upgrade")
+        try:
+            snapshot = ParseSourceSnapshot(
+                source_id="AUTO-BANK-SAV-001",
+                snapshot_id="snap-upgrade-001",
+                source_document_id="src-upgrade-001",
+                object_storage_key="dev/snapshots/CA/BANK/src-upgrade-001/snap-upgrade-001/raw",
+                content_type="text/html",
+                source_language="en",
+                bank_code="BANK",
+                country_code="CA",
+            )
+            _write_object(temp_path, snapshot.object_storage_key, b"<html><body><main><h1>1.05%</h1></main></body></html>")
+            existing = ExistingParsedDocumentRecord(
+                parsed_document_id="parsed-v1",
+                snapshot_id=snapshot.snapshot_id,
+                parsed_storage_key="dev/parsed/old.txt",
+                parser_version="fpds-parse-chunk-v1",
+                parse_quality_note=None,
+                parser_metadata={},
+                retention_class="hot",
+                parsed_at="2026-07-01T00:00:00+00:00",
+                chunk_count=1,
+            )
+            storage_config = ParseChunkStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                snapshot_object_prefix="snapshots",
+                parsed_object_prefix="parsed",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ParseChunkService(storage_config=storage_config, object_store=build_object_store(storage_config))
+
+            result = service.parse_snapshots(
+                run_id="run-upgrade",
+                snapshots=[snapshot],
+                existing_parsed_documents=[existing],
+            )
+
+            self.assertEqual(result.source_results[0].parse_action, "stored")
+            self.assertEqual(result.source_results[0].parsed_document_record["parser_version"], PARSER_VERSION)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
 
 
 class ParseChunkPersistenceTests(unittest.TestCase):
@@ -307,6 +404,7 @@ class ParseChunkPersistenceTests(unittest.TestCase):
             variables = runner.last_variables()
             self.assertEqual(variables["run_state"], "completed")
             self.assertIn("parsed_document_payload", runner.last_sql())
+            self.assertIn("ON CONFLICT (snapshot_id, parser_version) DO NOTHING", runner.last_sql())
             self.assertIn("\"parsed_document_id\"", runner.last_sql())
             self.assertIn("\"evidence_chunk_id\"", runner.last_sql())
         finally:

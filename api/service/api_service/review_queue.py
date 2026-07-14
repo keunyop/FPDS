@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+import json
 from typing import Any, Iterable
 from typing import TYPE_CHECKING
 
@@ -77,6 +78,8 @@ def load_review_queue(
       ON nc.candidate_id = rt.candidate_id
     LEFT JOIN bank AS b
       ON b.bank_code = nc.bank_code
+    JOIN source_document AS sd
+      ON sd.source_document_id = nc.source_document_id
     """
     where_sql, params = _build_where_clause(filters)
 
@@ -127,6 +130,8 @@ def load_review_queue(
             nc.source_confidence,
             rt.queue_reason_code,
             rt.issue_summary,
+            nc.candidate_payload,
+            sd.source_metadata,
             rt.created_at,
             rt.updated_at
         {from_clause}
@@ -245,6 +250,15 @@ def _build_order_by_clause(filters: ReviewQueueFilters) -> str:
 
 def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
     issue_items = _coerce_issue_items(row.get("issue_summary"))
+    source_metadata = _coerce_mapping(row.get("source_metadata"))
+    candidate_payload = _coerce_mapping(row.get("candidate_payload"))
+    expected_fields = _coerce_string_list(source_metadata.get("expected_fields"))
+    missing_expected_fields = [
+        field_name
+        for field_name in expected_fields
+        if _is_empty_review_value(candidate_payload.get(field_name))
+    ]
+    source_role = str(source_metadata.get("discovery_role") or "unknown")
     return {
         "review_task_id": str(row["review_task_id"]),
         "candidate_id": str(row["candidate_id"]),
@@ -262,6 +276,13 @@ def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
         "queue_reason_code": str(row["queue_reason_code"]),
         "issue_summary": _summarize_issue_items(issue_items, fallback_reason=str(row["queue_reason_code"])),
         "issue_summary_items": issue_items,
+        "source_role": source_role,
+        "missing_expected_fields": missing_expected_fields,
+        "recommended_action": _recommended_queue_action(
+            source_role=source_role,
+            missing_expected_fields=missing_expected_fields,
+            validation_status=str(row["validation_status"]),
+        ),
         "created_at": row["created_at"].isoformat(),
         "updated_at": row["updated_at"].isoformat(),
     }
@@ -288,6 +309,33 @@ def _coerce_string_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item) for item in value]
+
+
+def _coerce_mapping(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return {str(key): item for key, item in value.items()}
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        if isinstance(parsed, dict):
+            return {str(key): item for key, item in parsed.items()}
+    return {}
+
+
+def _is_empty_review_value(value: Any) -> bool:
+    return value is None or value == "" or value == [] or value == {}
+
+
+def _recommended_queue_action(*, source_role: str, missing_expected_fields: list[str], validation_status: str) -> str:
+    if source_role not in {"detail", "unknown"}:
+        return "reject_non_product_source"
+    if missing_expected_fields:
+        return "verify_missing_fields"
+    if validation_status == "error":
+        return "inspect_validation_evidence"
+    return "review_evidence"
 
 
 def _serialize_confidence(value: Any) -> float | None:

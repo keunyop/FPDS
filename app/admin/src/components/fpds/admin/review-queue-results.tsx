@@ -63,6 +63,9 @@ const RESULTS_COPY = {
   bank: "Bank",
   product: "Product",
   issueSummary: "Issue summary",
+  sourceRole: "Source role",
+  missingFields: "Missing",
+  recommendation: "Suggested next step",
   confidence: "Confidence",
   validation: "Validation",
   created: "Created",
@@ -314,6 +317,13 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                               </span>
                             ))}
                           </div>
+                          <div className="grid gap-1 rounded-xl border border-border/70 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+                            <span><span className="font-medium text-foreground">{RESULTS_COPY.sourceRole}:</span> {toTitleCase(item.source_role)}</span>
+                            {item.missing_expected_fields.length > 0 ? (
+                              <span><span className="font-medium text-foreground">{RESULTS_COPY.missingFields}:</span> {item.missing_expected_fields.map(toTitleCase).join(", ")}</span>
+                            ) : null}
+                            <span><span className="font-medium text-foreground">{RESULTS_COPY.recommendation}:</span> {recommendedActionLabel(item.recommended_action)}</span>
+                          </div>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -482,4 +492,24 @@ function issueBadgeClasses(severity: string) {
     return "bg-destructive/10 text-destructive";
   }
   return "bg-warning-soft text-warning";
+}
+
+function recommendedActionLabel(action: ReviewTaskListItem["recommended_action"]) {
+  switch (action) {
+    case "reject_non_product_source":
+      return "Reject: supporting evidence is not a standalone product";
+    case "verify_missing_fields":
+      return "Verify the listed fields, then edit and approve";
+    case "inspect_validation_evidence":
+      return "Inspect validation evidence before deciding";
+    default:
+      return "Review the evidence and decide";
+  }
+}
+
+function toTitleCase(value: string) {
+  return value
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }

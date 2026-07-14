@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import json
 import re
 from decimal import Decimal, InvalidOperation
 
 from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
 
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
+_TERM_RATE_ROW_RE = re.compile(
+    r"(?P<term>\d{1,3}\s*(?:days?|months?|years?))\b"
+    r"(?P<body>[^%\n\r]{0,120}?)"
+    r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
+    re.IGNORECASE,
+)
 _BALANCE_LINE_RE = re.compile(r"^\$[0-9,]")
 _WHITESPACE_RE = re.compile(r"\s+")
 _MONTH_RE = re.compile(r"\b(month|months|monthly|next month)\b", re.IGNORECASE)
@@ -306,7 +313,11 @@ def _build_generic_gic_rate_supplement(
     terms: tuple[str, ...],
     existing_fields: dict[str, dict[str, object]],
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
-    if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")):
+    desired_fields = ("standard_rate", "public_display_rate", "base_12_month_rate", "term_rate_table")
+    if all(
+        field_name in existing_fields and not _is_invalid_gic_rate_record(field_name, existing_fields[field_name])
+        for field_name in desired_fields
+    ):
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
     match = _find_generic_support_match(
@@ -333,7 +344,7 @@ def _build_generic_gic_rate_supplement(
     if match is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    rate_values = _extract_generic_rate_values(str(match.get("evidence_text_excerpt", "")))
+    rate_values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
     if not rate_values:
         return {
             "field_updates": {},
@@ -357,7 +368,7 @@ def _build_generic_field_updates(
     *,
     support_source_id: str,
     match: dict[str, object],
-    field_values: dict[str, str],
+    field_values: dict[str, object],
     existing_fields: dict[str, dict[str, object]],
     extraction_method: str,
     runtime_note: str,
@@ -365,12 +376,13 @@ def _build_generic_field_updates(
     field_updates: dict[str, dict[str, object]] = {}
     evidence_updates: dict[str, dict[str, object]] = {}
     for field_name, candidate_value in field_values.items():
-        if field_name in existing_fields:
+        if field_name in existing_fields and not _is_invalid_gic_rate_record(field_name, existing_fields[field_name]):
             continue
+        value_type = "json" if field_name == "term_rate_table" else "decimal"
         field_updates[field_name] = _build_support_field(
             field_name=field_name,
             candidate_value=candidate_value,
-            value_type="decimal",
+            value_type=value_type,
             match=match,
             extraction_method=extraction_method,
             field_metadata={
@@ -455,6 +467,10 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
     }
     if "|" in product_name:
         candidates.add(_normalize_text(product_name.split("|", 1)[0]))
+    for segment in re.split(r"\s+(?:-|–|—|\|)\s+", product_name):
+        normalized_segment = _normalize_text(segment)
+        if normalized_segment:
+            candidates.add(normalized_segment)
     expanded: set[str] = set()
     for candidate in candidates:
         if not candidate:
@@ -472,6 +488,8 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
             expanded.add(simplified.replace("gic", "gics"))
         if "gics" in simplified:
             expanded.add(simplified.replace("gics", "gic"))
+        if "deposits" in simplified:
+            expanded.add(re.sub(r"\bdeposits\b", "deposit", simplified))
 
     return tuple(
         item
@@ -502,6 +520,77 @@ def _extract_generic_rate_values(excerpt: str) -> dict[str, str]:
         "standard_rate": _format_decimal(standard_rate),
         "public_display_rate": _format_decimal(public_display_rate),
     }
+
+
+def _extract_generic_gic_rate_values(excerpt: str) -> dict[str, object]:
+    rows: list[dict[str, object]] = []
+    seen_terms: set[str] = set()
+    for match in _TERM_RATE_ROW_RE.finditer(_WHITESPACE_RE.sub(" ", excerpt)):
+        term_label = _normalize_text(match.group("term"))
+        if term_label in seen_terms:
+            continue
+        rate = _to_decimal(match.group("rate"))
+        if rate is None or rate <= 0:
+            continue
+        seen_terms.add(term_label)
+        rows.append(
+            {
+                "term_label": term_label,
+                "term_length_days": _term_label_to_days(term_label),
+                "rate": _format_decimal(rate),
+                "minimum_deposit": None,
+                "notes": None,
+            }
+        )
+    if not rows:
+        return _extract_generic_rate_values(excerpt)
+
+    one_year_row = next(
+        (
+            row
+            for row in rows
+            if row["term_length_days"] in {360, 365} or row["term_label"] in {"12 month", "12 months", "1 year"}
+        ),
+        rows[0],
+    )
+    display_rate = str(one_year_row["rate"])
+    return {
+        "standard_rate": display_rate,
+        "public_display_rate": display_rate,
+        "base_12_month_rate": display_rate,
+        "term_rate_table": rows,
+    }
+
+
+def _term_label_to_days(term_label: str) -> int | None:
+    match = re.fullmatch(r"(\d{1,3})\s*(day|days|month|months|year|years)", term_label)
+    if match is None:
+        return None
+    value = int(match.group(1))
+    unit = match.group(2)
+    if unit.startswith("day"):
+        return value
+    if unit.startswith("month"):
+        return value * 30
+    return value * 365
+
+
+def _is_invalid_gic_rate_record(field_name: str, record: dict[str, object]) -> bool:
+    if field_name == "term_rate_table":
+        value = record.get("candidate_value")
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except (TypeError, ValueError, json.JSONDecodeError):
+                return True
+        if not isinstance(value, list) or not value:
+            return True
+        rates = [_to_decimal(str(row.get("rate"))) for row in value if isinstance(row, dict)]
+        return not rates or all(rate is None or rate <= 0 for rate in rates)
+    if field_name not in {"standard_rate", "public_display_rate", "base_12_month_rate"}:
+        return False
+    value = _to_decimal(str(record.get("candidate_value") or ""))
+    return value is None or value <= 0
 
 
 def _extract_generic_monthly_fee_values(excerpt: str) -> dict[str, str]:

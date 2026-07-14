@@ -96,6 +96,65 @@ def promote_auto_validated_candidates(
                 }
             )
             continue
+        discovery_role = str(row.get("discovery_role") or "").strip().lower()
+        if not discovery_role:
+            reason_code = "source_role_missing"
+            review_task_id = _queue_candidate_for_review(
+                connection,
+                row=row,
+                queue_reason_code=reason_code,
+                issue_codes=[reason_code],
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="in_review",
+                reason_code=reason_code,
+                reason_text="Candidate source role was missing, so automatic publication was unsafe.",
+                review_task_id=review_task_id,
+                event_payload={"source_confidence": float(row["source_confidence"])},
+            )
+            skipped_items.append(
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
+            )
+            continue
+        if discovery_role != "detail":
+            reason_code = "non_detail_source_role"
+            _mark_candidate_auto_rejected(
+                connection,
+                candidate_id=candidate_id,
+                reason_code=reason_code,
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="rejected",
+                reason_code=reason_code,
+                reason_text="Candidate came from a supporting source that cannot define a standalone product.",
+                event_payload={
+                    "discovery_role": discovery_role or None,
+                    "source_confidence": float(row["source_confidence"]),
+                },
+            )
+            skipped_items.append(
+                {
+                    "candidate_id": candidate_id,
+                    "skip_reason": reason_code,
+                    "action": "rejected",
+                    "discovery_role": discovery_role or None,
+                }
+            )
+            continue
         product_name_skip_reason = _non_product_name_skip_reason(str(row.get("product_name") or ""))
         if product_name_skip_reason is not None:
             _mark_candidate_auto_rejected(
@@ -159,6 +218,20 @@ def promote_auto_validated_candidates(
             decided_at=decided_at,
             policy=policy,
         )
+        superseded_reviews = _supersede_stale_reviews_for_source(
+            connection,
+            approved_candidate_id=candidate_id,
+            decided_at=decided_at,
+        )
+        for stale_review in superseded_reviews:
+            _record_stale_review_superseded_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                approved_candidate_id=candidate_id,
+                stale_review=stale_review,
+                decided_at=decided_at,
+            )
         promoted_items.append(
             {
                 "candidate_id": candidate_id,
@@ -166,6 +239,7 @@ def promote_auto_validated_candidates(
                 "product_id": str(product_result["product_id"]),
                 "product_version_id": product_result["product_version_id"],
                 "change_event_types": [str(item) for item in product_result["change_event_types"]],
+                "superseded_review_count": len(superseded_reviews),
             }
         )
 
@@ -235,8 +309,11 @@ def _load_candidate_rows(
             nc.validation_status,
             nc.validation_issue_codes,
             nc.source_confidence,
-            nc.candidate_payload
+            nc.candidate_payload,
+            sd.source_metadata ->> 'discovery_role' AS discovery_role
         FROM normalized_candidate AS nc
+        JOIN source_document AS sd
+          ON sd.source_document_id = nc.source_document_id
         WHERE nc.candidate_state = 'auto_validated'
           AND nc.validation_status = 'pass'
           AND nc.source_confidence >= %(min_confidence)s
@@ -328,6 +405,151 @@ def _mark_candidate_auto_promoted(
     )
 
 
+def _supersede_stale_reviews_for_source(
+    connection: Connection,
+    *,
+    approved_candidate_id: str,
+    decided_at: datetime,
+) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        WITH approved AS (
+            SELECT source_document_id, created_at
+            FROM normalized_candidate
+            WHERE candidate_id = %(approved_candidate_id)s
+        ),
+        stale AS (
+            SELECT
+                nc.candidate_id,
+                nc.run_id,
+                nc.candidate_state AS previous_candidate_state,
+                rt.review_task_id,
+                rt.review_state AS previous_review_state
+            FROM normalized_candidate AS nc
+            JOIN approved AS current_candidate
+              ON current_candidate.source_document_id = nc.source_document_id
+             AND nc.created_at < current_candidate.created_at
+            JOIN review_task AS rt
+              ON rt.candidate_id = nc.candidate_id
+            WHERE nc.candidate_id <> %(approved_candidate_id)s
+              AND nc.candidate_state IN ('in_review', 'auto_validated')
+              AND rt.review_state IN ('queued', 'deferred')
+            FOR UPDATE OF nc, rt
+        ),
+        superseded_candidates AS (
+            UPDATE normalized_candidate AS nc
+            SET
+                candidate_state = 'superseded',
+                review_reason_code = 'superseded_by_approved_candidate',
+                updated_at = %(decided_at)s
+            FROM stale
+            WHERE nc.candidate_id = stale.candidate_id
+            RETURNING nc.candidate_id
+        ),
+        resolved_reviews AS (
+            UPDATE review_task AS rt
+            SET
+                review_state = 'rejected',
+                queue_reason_code = 'superseded_by_approved_candidate',
+                updated_at = %(decided_at)s
+            FROM stale
+            WHERE rt.review_task_id = stale.review_task_id
+            RETURNING rt.review_task_id
+        )
+        SELECT stale.*
+        FROM stale
+        JOIN superseded_candidates USING (candidate_id)
+        JOIN resolved_reviews USING (review_task_id)
+        ORDER BY stale.candidate_id
+        """,
+        {
+            "approved_candidate_id": approved_candidate_id,
+            "decided_at": decided_at,
+        },
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _record_stale_review_superseded_audit_event(
+    connection: Connection,
+    *,
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+    approved_candidate_id: str,
+    stale_review: dict[str, Any],
+    decided_at: datetime,
+) -> None:
+    connection.execute(
+        """
+        INSERT INTO audit_event (
+            audit_event_id,
+            event_category,
+            event_type,
+            actor_type,
+            actor_id,
+            actor_role_snapshot,
+            target_type,
+            target_id,
+            previous_state,
+            new_state,
+            reason_code,
+            reason_text,
+            run_id,
+            candidate_id,
+            review_task_id,
+            request_id,
+            diff_summary,
+            source_ref,
+            event_payload,
+            occurred_at
+        )
+        VALUES (
+            %(audit_event_id)s,
+            'review',
+            'stale_review_auto_superseded',
+            'system',
+            %(actor_id)s,
+            %(actor_role_snapshot)s,
+            'review_task',
+            %(review_task_id)s,
+            %(previous_state)s,
+            'rejected',
+            'superseded_by_approved_candidate',
+            'A newer candidate from the same detail source was approved, so this stale review no longer requires operator action.',
+            %(run_id)s,
+            %(candidate_id)s,
+            %(review_task_id)s,
+            %(request_id)s,
+            'Resolved stale review after a newer same-source candidate was approved.',
+            %(source_ref)s,
+            %(event_payload)s::jsonb,
+            %(occurred_at)s
+        )
+        """,
+        {
+            "audit_event_id": new_id("audit"),
+            "actor_id": actor.get("user_id"),
+            "actor_role_snapshot": actor.get("role"),
+            "review_task_id": str(stale_review["review_task_id"]),
+            "previous_state": str(stale_review["previous_review_state"]),
+            "run_id": str(stale_review["run_id"]),
+            "candidate_id": str(stale_review["candidate_id"]),
+            "request_id": request_context.get("request_id"),
+            "source_ref": request_context.get("request_id"),
+            "event_payload": json.dumps(
+                {
+                    "approved_candidate_id": approved_candidate_id,
+                    "previous_candidate_state": stale_review["previous_candidate_state"],
+                    "previous_review_state": stale_review["previous_review_state"],
+                },
+                ensure_ascii=True,
+                sort_keys=True,
+            ),
+            "occurred_at": decided_at,
+        },
+    )
+
+
 def _queue_candidate_for_review(
     connection: Connection,
     *,
@@ -339,8 +561,10 @@ def _queue_candidate_for_review(
     candidate_id = str(row["candidate_id"])
     issue_summary = [
         {
+            "code": issue_code,
             "issue_code": issue_code,
             "severity": "warning",
+            "summary": "Auto-promotion policy requires manual review for this issue code.",
             "message": "Auto-promotion policy requires manual review for this issue code.",
         }
         for issue_code in issue_codes

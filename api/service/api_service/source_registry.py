@@ -1212,52 +1212,14 @@ def _sort_source_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _is_candidate_producing_collection_source(row: dict[str, Any]) -> bool:
-    discovery_role = str(row["discovery_role"])
-    if discovery_role == "detail":
-        return True
-    if str(row.get("product_type") or "").strip().lower() != "gic":
-        return False
+    """Return whether this source may create a standalone product candidate.
 
-    expected_fields = row.get("expected_fields")
-    if isinstance(expected_fields, str):
-        try:
-            expected_values = json.loads(expected_fields)
-        except json.JSONDecodeError:
-            expected_values = [expected_fields]
-    else:
-        expected_values = list(expected_fields or [])
-    expected_text = " ".join(str(item).lower() for item in expected_values)
-    source_text = " ".join(
-        str(row.get(key) or "").lower()
-        for key in ("source_name", "source_url", "purpose")
-    )
-    if any(
-        token in expected_text
-        for token in (
-            "gic_rate_table",
-            "gic_rates",
-            "cashable_gic_rates",
-            "non_cashable_gic_rates",
-            "non_redeemable_gic_rates",
-            "redeemable_gic_rates",
-            "market_growth_gic_rates",
-            "product_variants",
-            "gic_types",
-            "special_rate_summary",
-            "detail_links",
-        )
-    ):
-        return True
-    return any(
-        token in source_text
-        for token in (
-            "gic",
-            "guaranteed-investment-certificate",
-            "guaranteed investment certificate",
-            "term deposit",
-            "gic-rates",
-        )
-    )
+    Supporting HTML/PDF and linked documents are evidence for a detail source.  They
+    must never become products merely because their name, URL, or expected fields
+    mention a product family.
+    """
+
+    return str(row.get("discovery_role") or "").strip().lower() == "detail"
 
 
 def _build_collection_run_id(*, bank_code: str, product_type: str) -> str:
