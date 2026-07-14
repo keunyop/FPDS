@@ -2578,6 +2578,25 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("product_type_registry.status = 'active'", migration_sql)
         self.assertIn("ON CONFLICT (bank_code, country_code, product_type) DO UPDATE", migration_sql)
 
+    def test_bank_logo_refresh_uses_official_assets_without_overwriting_custom_urls(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0022_bank_logo_asset_refresh.sql"
+        ).read_text(encoding="utf-8")
+        public_logo_component = (
+            repo_root / "app" / "public" / "src" / "components" / "fpds" / "public" / "bank-logo.tsx"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("official_logo_refresh", migration_sql)
+        self.assertIn("bank.logo_url IS NULL OR bank.logo_url = official_logo_refresh.previous_logo_url", migration_sql)
+        self.assertIn("0022_bank_logo_asset_refresh.sql", migration_sql)
+        for bank_code in ("NATIONAL", "TANGERINE", "EQBANK", "MANULIFE", "ALTERNA", "FNBC", "SIMPLII", "VERSABANK"):
+            self.assertIn(f"'{bank_code}'", migration_sql)
+            self.assertIn(f"{bank_code}: {{ src:", public_logo_component)
+
+        self.assertIn('onError={() => setFailed(true)}', public_logo_component)
+        self.assertNotIn('rounded-md border border-border/70 bg-white', public_logo_component)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -112,6 +112,11 @@ The DB-backed bank profile should also retain screen-facing logo metadata:
 - `logo_url`
 - `logo_alt_text`
 
+Logo presentation rule:
+- Admin and Public present bank marks without a surrounding card, border, or decorative background.
+- `logo_url` should use a verified official brand asset where one is publicly available. Favicon URLs are a narrowly scoped resilience fallback for a blocked, retired, or otherwise unavailable full official asset.
+- A migration refresh must not replace an operator-supplied custom logo URL.
+
 Minimum status vocabulary for the MVP:
 
 | Status | Meaning | Default Collection Eligible |
@@ -227,7 +232,7 @@ Current repository state:
 - candidate-producing scope is still role-aware, with selected `detail` sources as the primary scope and only explicit savings supporting-source merge paths auto-included today, including selected TD, BMO Savings Amplifier/Builder/Premium Rate Savings, and Scotia savings rate sources
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 - the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
-- the recognized Canada financial-institution baseline is live in DB through migrations `0020` and `0021`, with 28 active Canadian bank/direct-bank/credit-union profiles, logo metadata, and full active Product Type source-catalog coverage for every active Canadian financial institution
+- the recognized Canada financial-institution baseline is live in DB through migrations `0020`, `0021`, and `0022`, with 28 active Canadian bank/direct-bank/credit-union profiles, refreshed official logo metadata where publicly available, and full active Product Type source-catalog coverage for every active Canadian financial institution
 
 ---
 
@@ -268,3 +273,4 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-04-28 | Added admin-only generated source soft removal using `removed` status so bad collected source details can be excluded from future collection without losing audit history |
 | 2026-07-05 | Added bank logo metadata and recognized Canada bank full active Product Type coverage baseline status |
 | 2026-07-05 | Added Vancity to the recognized Canada coverage set by explicit Product Owner request |
+| 2026-07-13 | Added the unframed bank-logo presentation rule and official asset refresh policy |

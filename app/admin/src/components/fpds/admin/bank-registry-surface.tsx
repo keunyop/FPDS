@@ -641,7 +641,7 @@ function BankLogoMark({ bank }: { bank: BankItem }) {
   const showLogo = Boolean(logoUrl && !failed);
 
   return (
-    <span className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-white px-2 py-1 shadow-sm">
+    <span className="flex h-10 w-14 shrink-0 items-center justify-center">
       {showLogo ? (
         <img
           alt={bank.logo_alt_text ?? `${bank.bank_name} logo`}
@@ -652,7 +652,7 @@ function BankLogoMark({ bank }: { bank: BankItem }) {
           src={logoUrl}
         />
       ) : (
-        <span className="text-[10px] font-semibold text-foreground">
+        <span className="text-[10px] font-semibold tracking-tight text-foreground">
           {bank.bank_code.slice(0, 4)}
         </span>
       )}

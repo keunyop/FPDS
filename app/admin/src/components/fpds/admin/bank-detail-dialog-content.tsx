@@ -349,8 +349,8 @@ function BankLogoPreview({
   }, [normalizedLogoUrl]);
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-muted/30 px-4 py-3">
-      <span className="flex h-11 w-20 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-white px-2 py-1 shadow-sm">
+    <div className="flex items-center gap-3 py-1">
+      <span className="flex h-11 w-20 shrink-0 items-center justify-center">
         {showLogo ? (
           <img
             alt={`${bankName} logo`}
@@ -361,7 +361,7 @@ function BankLogoPreview({
             src={normalizedLogoUrl}
           />
         ) : (
-          <span className="text-xs font-semibold text-foreground">{bankCode.slice(0, 4)}</span>
+          <span className="text-xs font-semibold tracking-tight text-foreground">{bankCode.slice(0, 4)}</span>
         )}
       </span>
       <div className="min-w-0">

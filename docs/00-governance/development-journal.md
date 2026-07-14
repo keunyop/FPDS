@@ -63,6 +63,26 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-07-13 - Unframed Bank Logos and Official Asset Refresh
+
+- WBS: `5.9`, `5.15` UI and bank-registry hardening follow-on
+- Status: `done`
+- Goal: show bank logos directly, without an unnecessary logo card, in both FPDS Public and Admin; replace unreliable favicon-only defaults with verified official brand assets wherever public assets are available.
+- Why now: the Public and Admin bank presentations used bordered white logo containers, while most recognized Canadian banks depended on a generic favicon URL that could be visually weak or fail to resolve.
+- Outcome: Public `BankLogo`, Admin bank-list marks, and the Admin bank-detail preview now render unframed. Public failures degrade to a plain, accessible bank-code identifier instead of a bordered placeholder. A new `0022` migration replaces 22 recognized-bank favicon defaults with official logo assets, preserves operator-supplied custom logo URLs, and was applied to dev. The active Canadian registry now has logo metadata for all 28 banks, including 22 full official logo assets; the remaining six use official favicon fallback because a full asset was blocked, retired, or not safely discoverable.
+- Not done: no inactive/retired institution was removed from the bank registry, and no unverified third-party logo asset was introduced.
+- Key files: `app/public/src/components/fpds/public/bank-logo.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `db/migrations/0022_bank_logo_asset_refresh.sql`, `db/README.md`, `app/public/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `api/service/tests/test_source_catalog.py`
+- Decisions: official bank-hosted assets are preferred; an official favicon is permitted only as a resilience fallback; logo metadata migrations update only the seed favicon value (or a missing value) and never replace an operator custom URL.
+- Verification:
+  - Verified all 22 refreshed official logo URLs returned `200`; SVG/PNG assets were returned for each (Oaken returns its binary logo behind a generic content-type header).
+  - Applied `db/migrations/0022_bank_logo_asset_refresh.sql` to the configured dev database: `UPDATE 22`, migration-history insert succeeded.
+  - Dev DB read-back: 28 active Canadian banks have `logo_url`; 22 use full official-logo assets; migration history confirms `0022_bank_logo_asset_refresh.sql`.
+  - `uv run --directory api/service python -m unittest tests.test_source_catalog` -> `57` passed.
+  - `pnpm run typecheck` in `app/public` and `app/admin` -> passed.
+  - `pnpm run build` in `app/public` and `app/admin` -> passed; Public generated 6 routes and Admin generated 23 routes.
+- Known issues: a small number of brands remain on official favicon fallback because their full logo asset cannot presently be verified without using an untrusted third-party source; their display is still stable and unframed.
+- Next step: re-check fallback brands only when their official sites publish stable public wordmark assets or when the Product Owner changes the recognized-bank registry scope.
+
 ## 2026-07-13 - Review Queue False-Positive Collection Hardening
 
 - WBS: `4.2` to `4.4`, `5.15`, `5.16` hardening follow-on
