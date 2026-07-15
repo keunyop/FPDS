@@ -6,6 +6,7 @@ import json
 from typing import Any
 from typing import TYPE_CHECKING
 
+from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items, is_empty_review_value
 from api_service.security import new_id, utc_now
 
 if TYPE_CHECKING:
@@ -223,6 +224,21 @@ def load_review_task_detail(
         source_metadata=source_metadata,
         candidate_payload=candidate_payload,
     )
+    current_product = _load_current_product_summary(connection, review_row=row)
+    expected_fields = _coerce_string_list(source_metadata.get("expected_fields"))
+    review_diagnosis = build_review_diagnosis(
+        source_role=str(source_metadata.get("discovery_role") or "unknown"),
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+        validation_status=str(row["validation_status"]),
+        validation_issue_codes=validation_issue_codes,
+    )
+    review_field_items = build_review_field_items(
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+        evidence_field_names=[str(item["field_name"]) for item in evidence_links],
+        current_payload=_coerce_mapping(current_product.get("normalized_payload")) if current_product else None,
+    )
 
     return {
         "review_task": {
@@ -289,6 +305,8 @@ def load_review_task_detail(
             }
             for item in field_trace_groups
         ],
+        "review_diagnosis": review_diagnosis,
+        "review_field_items": review_field_items,
         "field_trace_groups": field_trace_groups,
         "evidence_summary": {
             "item_count": len(evidence_links),
@@ -301,7 +319,7 @@ def load_review_task_detail(
             validation_status=str(row["validation_status"]),
         ),
         "model_executions": model_executions,
-        "current_product": _load_current_product_summary(connection, review_row=row),
+        "current_product": current_product,
         "decision_history": [_serialize_decision_row(item) for item in history_rows],
         "available_actions": _available_actions(review_state=str(row["review_state"]), actor_role=actor_role),
     }
@@ -317,7 +335,7 @@ def _build_source_review_context(
     missing_expected_fields = [
         field_name
         for field_name in expected_fields
-        if _is_empty_review_value(candidate_payload.get(field_name))
+        if is_empty_review_value(candidate_payload.get(field_name))
     ]
     assessment_keys = (
         "selection_path",
@@ -505,9 +523,10 @@ def apply_review_decision(
 
     normalized_reason_code = _normalize_text(reason_code)
     normalized_reason_text = _normalize_text(reason_text)
+    candidate_payload = _coerce_mapping(review_row.get("candidate_payload"))
     normalized_override_payload = _normalize_override_payload(
         override_payload=override_payload,
-        base_payload=_coerce_mapping(review_row.get("candidate_payload")),
+        base_payload=candidate_payload,
     )
 
     if action_type in {"reject", "defer"} and not (normalized_reason_code or normalized_reason_text):
@@ -532,14 +551,13 @@ def apply_review_decision(
         normalized_reason_code = "manual_override"
 
     decided_at = utc_now()
-    candidate_payload = _coerce_mapping(review_row.get("candidate_payload"))
     approved_payload = {
         **candidate_payload,
         **normalized_override_payload,
     }
     approved_product_name = _approved_product_name(review_row=review_row, approved_payload=approved_payload)
     persisted_candidate_payload = {
-        **candidate_payload,
+        **approved_payload,
         "product_name": approved_product_name,
     }
     changed_fields = sorted(normalized_override_payload.keys())
@@ -1773,7 +1791,7 @@ def _approved_product_name(*, review_row: dict[str, Any], approved_payload: dict
 
 
 def _is_empty_review_value(value: Any) -> bool:
-    return value is None or value == ""
+    return is_empty_review_value(value)
 
 
 def _short_value(value: Any) -> str:

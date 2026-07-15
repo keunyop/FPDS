@@ -1,0 +1,1138 @@
+{
+  "registry_version": "2026-07-15",
+  "bank_code": "B2B",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "b2bbank.com",
+    "www.b2bbank.com"
+  ],
+  "entry_source_id": "AUTO-B2B-MOR-80c9acab80",
+  "sources": [
+    {
+      "source_id": "AUTO-B2B-MOR-80c9acab80",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "A dedicated mortgage-renewal page describing a mortgage lifecycle product explicitly included in the mortgage definition.",
+      "url": "https://www.b2bbank.com/b2b-mortgages/mortgage-renewal",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mortgage renewal | B2B Bank",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 9,
+        "primary_heading": null,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A dedicated mortgage-renewal page describing a mortgage lifecycle product explicitly included in the mortgage definition.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-838ba290c2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated mortgage-renewal detail page; renewal is an included mortgage product type.",
+      "url": "https://b2bbank.com/b2b-mortgages/mortgage-renewal",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mortgage renewal | B2B Bank",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": null,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated mortgage-renewal detail page; renewal is an included mortgage product type.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-eac391aadb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated mortgage-refinance detail page; refinancing is explicitly included in the target mortgage definition.",
+      "url": "https://www.b2bbank.com/b2b-mortgages/mortgage-refinance",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mortgage refinancing | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Mortgage refinancing",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated mortgage-refinance detail page; refinancing is explicitly included in the target mortgage definition.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-f7c64c2958",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated mortgage-refinance page describing an included mortgage product variant.",
+      "url": "https://b2bbank.com/en/b2b-mortgages/mortgage-refinance",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mortgage refinancing | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Mortgage refinancing",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated mortgage-refinance page describing an included mortgage product variant.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-1374a73f1d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General mortgage hub/category page, not an individual product detail page.",
+      "url": "https://b2bbank.com/en/b2b-mortgages/index",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General mortgage hub/category page, not an individual product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-5ab19e235a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage solutions hub likely linking to multiple offerings rather than describing one named product.",
+      "url": "https://b2bbank.com/b2b-mortgages/index",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage solutions hub likely linking to multiple offerings rather than describing one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-a938c6f552",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage overview/category page that likely aggregates products instead of detailing one product.",
+      "url": "https://b2bbank.com/en/mortgages/our-mortgages",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage overview/category page that likely aggregates products instead of detailing one product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-b218f8f4d4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage FAQ content can support product research but is not a single product detail page.",
+      "url": "https://b2bbank.com/faq/index?tab=mortgages",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage FAQ content can support product research but is not a single product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-19318d49d1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Mortgage",
+      "url": "https://b2bbank.com/advisor-broker-rates/loan-rates",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-38dbf776e3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Marketing-material page covering insured and conventional mortgages; useful supporting content, but not clearly one product detail page.",
+      "url": "https://b2bbank.com/marketing-material/pdf/?doc=20",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Marketing-material page covering insured and conventional mortgages; useful supporting content, but not clearly one product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-3cb78a4cd1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage workflow content may support processing or application operations, but does not indicate a product detail page.",
+      "url": "https://b2bbank.com/en/workflows/mortgages",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail",
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Mortgage workflow content may support processing or application operations, but does not indicate a product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "not_product_detail",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-5a3736cad7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Marketing-material landing page referencing mortgage and HELOC products, but not itself a single product detail page.",
+      "url": "https://b2bbank.com/en/marketing-material/pdf/?doc=35",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Marketing-material landing page referencing mortgage and HELOC products, but not itself a single product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-6511cee6d8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Likely a mortgage-product listing or alternate content endpoint, not a single named product detail page.",
+      "url": "https://b2bbank.com/en/mortgages/our-mortgages.snc",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Likely a mortgage-product listing or alternate content endpoint, not a single named product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-8862860f4c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Getting-started guidance for mortgages rather than a single named mortgage product.",
+      "url": "https://b2bbank.com/en/getting-started/mortgages",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Getting-started guidance for mortgages rather than a single named mortgage product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-c153a27c4b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Appears to be an alternate mortgage workflow endpoint rather than a named product page.",
+      "url": "https://b2bbank.com/en/workflows/mortgages.snc",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail",
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Appears to be an alternate mortgage workflow endpoint rather than a named product page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "not_product_detail",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-c5d206fa01",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Application-process guidance and likely mortgage navigation, not a single named mortgage product.",
+      "url": "https://b2bbank.com/mortgages/our-mortgages#broker-resources",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Application-process guidance and likely mortgage navigation, not a single named mortgage product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-d49d78334f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General mortgage onboarding or navigation page, not an individual named mortgage product.",
+      "url": "https://b2bbank.com/getting-started/mortgages",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "General mortgage onboarding or navigation page, not an individual named mortgage product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-e1f7cb0683",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Mortgage",
+      "url": "https://b2bbank.com/en/advisor-broker-rates/loan-rates",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-MOR-d162c06f54",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://b2bbank.com/sn_uploads/marketing/Mortgage_Look_Back_Guarantee_ENG.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

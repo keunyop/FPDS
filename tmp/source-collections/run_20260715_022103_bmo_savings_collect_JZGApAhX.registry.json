@@ -1,0 +1,1083 @@
+{
+  "registry_version": "2026-07-15",
+  "bank_code": "BMO",
+  "country_code": "CA",
+  "product_type": "savings",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.bmo.com"
+  ],
+  "entry_source_id": "BMO-SAV-002",
+  "sources": [
+    {
+      "source_id": "BMO-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The Savings Amplifier is a named savings product with a product-specific URL.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-amplifier/",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "monthly_fee",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "High Interest Savings Account: Savings Amplifier Account - BMO Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Savings Amplifier Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The Savings Amplifier is a named savings product with a product-specific URL.",
+        "page_evidence_score": 2,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The URL identifies one named Savings Builder account rather than a general category.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/savings-builder/",
+      "expected_fields": [
+        "product_name",
+        "bonus_interest_rule",
+        "monthly_fee",
+        "transaction_fee"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Savings Builder Account (Perfect for Active Savers) - BMO Canada",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_low_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Savings Builder Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL identifies one named Savings Builder account rather than a general category.",
+        "page_evidence_score": 0,
+        "selection_confidence": "medium-low",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 6,
+        "product_identity_match": false,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "page_evidence_below_threshold",
+          ""
+        ],
+        "page_evidence_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-SAV-004",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "URL and label identify a single named BMO savings account, making this a strong official product-detail candidate.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/premium-rate-savings/",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "plan_fee_dependency",
+        "transaction_limits"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Premium Rate Savings Account: Flexible Savings - BMO Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Premium Rate Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "URL and label identify a single named BMO savings account, making this a strong official product-detail candidate.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-SAV-006",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO chequing and savings interest rates page",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings/interest-rates/",
+      "expected_fields": [
+        "savings_account_rates",
+        "rate_effective_date",
+        "account_list"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-SAV-007",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "BMO bank account terms and conditions",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/global-terms-and-conditions/",
+      "expected_fields": [
+        "terms_version",
+        "service_fee_terms",
+        "account_rules"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ]
+      }
+    },
+    {
+      "source_id": "BMO-SAV-005",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names one specific U.S. dollar savings account and is located under BMO savings-account pages.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/us-prem-savings/",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "interest_rate_summary",
+        "transaction_limits"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "U.S Dollar Premium Rate Savings Account - BMO Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "U.S Dollar Premium Rate Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names one specific U.S. dollar savings account and is located under BMO savings-account pages.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-02a3d89b34",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A savings calculator or tool can support discovery but does not describe one named financial product.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/savings-calculator/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A savings calculator or tool can support discovery but does not describe one named financial product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-0773c588d3",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General savings advice and not a product offer.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/savings-accounts/rules-of-savings/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General savings advice and not a product offer.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-15827b4966",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A broad bank-account hub likely linking to products; it is not a single savings-account detail page.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A broad bank-account hub likely linking to products; it is not a single savings-account detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-30080595c7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Discusses multiple account types and benefits rather than one named product.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/types-of-savings-accounts/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Discusses multiple account types and benefits rather than one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-8a6f2c25c3",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational comparison content relevant to savings, but not a product page.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/chequing-vs-savings-account/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational comparison content relevant to savings, but not a product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-b08d6cccce",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General educational explanation of savings accounts, not an individual account offer.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/what-is-a-savings-account/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General educational explanation of savings accounts, not an individual account offer.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-57f34475b7",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/getting-started/?rg=BMO&spc=7880184&ofid=SAASTAND001&lang=en",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-5834218981",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant educational content about HISAs, but the label indicates an explanatory article rather than one named BMO account.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/savings-accounts/what-is-a-high-interest-savings-account/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 10,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Relevant educational content about HISAs, but the label indicates an explanatory article rather than one named BMO account.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-607f1a6e30",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Savings",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/banking-agreements-and-fees/?icid=tl-FEAT2953BRND4-AJBMOH37",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-7486aa1dcc",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A digital banking savings-goals feature rather than a deposit-account product.",
+      "url": "https://www.bmo.com/main/personal/ways-to-bank/app-features/savings-goals/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "A digital banking savings-goals feature rather than a deposit-account product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-78b2e6e207",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General account-management or educational content, not a named savings product.",
+      "url": "https://www.bmo.com/main/personal/bank-accounts/multiple-bank-accounts/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "General account-management or educational content, not a named savings product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-7f0943ab9a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A youth banking category may include savings accounts, but it is not one named savings product.",
+      "url": "https://www.bmo.com/en-ca/main/personal/bank-accounts/kids-and-teens/?icid=tl-US81162CHAN1-JBBMO14",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "A youth banking category may include savings accounts, but it is not one named savings product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BMO-SAV-b2dc2e20fd",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Likely educational guidance about emergency savings, not a named deposit account.",
+      "url": "https://www.bmo.com/en-ca/personal/bank-accounts/savings-accounts/emergency-fund/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Likely educational guidance about emergency savings, not a named deposit account.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    }
+  ]
+}

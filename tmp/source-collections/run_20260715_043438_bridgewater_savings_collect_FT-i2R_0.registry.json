@@ -1,0 +1,573 @@
+{
+  "registry_version": "2026-07-15",
+  "bank_code": "BRIDGEWATER",
+  "country_code": "CA",
+  "product_type": "savings",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "bridgewaterbank.ca"
+  ],
+  "entry_source_id": "AUTO-BRIDGEWATER-SAV-6e940e0439",
+  "sources": [
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-6e940e0439",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The URL and label identify a single named savings product, making this the most likely official public detail page.",
+      "url": "https://bridgewaterbank.ca/savings/my-savings-acccount/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "My Savings Account | Bridgewater Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "My Savings Account",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL and label identify a single named savings product, making this the most likely official public detail page.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-0f3b105181",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Likely educational content associated with the savings product, not a page containing the product\u2019s full account terms and fields.",
+      "url": "https://bridgewaterbank.ca/savings/my-savings-acccount/why-save/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely educational content associated with the savings product, not a page containing the product\u2019s full account terms and fields.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-347d70ef7e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "This is a calculator tool, not a savings account product page.",
+      "url": "https://bridgewaterbank.ca/savings/savings-accounts/calculators/cost-of-waiting/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "This is a calculator tool, not a savings account product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-638de61929",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant supporting information for savings accounts, but an FAQ page is not a single named product detail page.",
+      "url": "https://bridgewaterbank.ca/savings/savings-accounts/faqs/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant supporting information for savings accounts, but an FAQ page is not a single named product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-aeb30d0e4f",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A savings-related tools page, but calculators are explicitly supporting content rather than product detail.",
+      "url": "https://bridgewaterbank.ca/savings/savings-accounts/calculators/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A savings-related tools page, but calculators are explicitly supporting content rather than product detail.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-b125d9ffa4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Nested under the savings product, but the label and manage-my-account path suggest servicing or usage guidance rather than core product details.",
+      "url": "https://bridgewaterbank.ca/savings/my-savings-acccount/manage-my-account/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Nested under the savings product, but the label and manage-my-account path suggest servicing or usage guidance rather than core product details.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-b1d40879f6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A relevant savings landing page, but too broad to represent a single named savings account.",
+      "url": "https://bridgewaterbank.ca/savings/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A relevant savings landing page, but too broad to represent a single named savings account.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-e636f46641",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "This appears to be an application or account-opening flow rather than the public page describing one savings product.",
+      "url": "https://bridgewaterbank.ca/savings/savings-accounts/open-an-account/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "This appears to be an application or account-opening flow rather than the public page describing one savings product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-abc5567525",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "The named Smart eSavings product is highly relevant, but the rates-and-features path suggests a supporting rate/feature page rather than the primary product detail page.",
+      "url": "https://bridgewaterbank.ca/savings/savings-accounts/rates-features/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "The named Smart eSavings product is highly relevant, but the rates-and-features path suggests a supporting rate/feature page rather than the primary product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-BRIDGEWATER-SAV-6456aa5cab",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Savings",
+      "url": "https://bridgewaterbank.ca/wp-content/uploads/2022/07/2528-Smart-eSavings-Pre-Authorized-Debit-Agreement-2022.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

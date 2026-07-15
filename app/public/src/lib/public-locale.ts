@@ -774,6 +774,40 @@ export function getPublicMessages(locale: string): PublicMessages {
   return PUBLIC_MESSAGES[normalizePublicLocale(locale)];
 }
 
+export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan") {
+  const copy = getPublicMessages(locale);
+  if (catalog === "deposit") {
+    return {
+      pageDescription: copy.grid.pageDescription,
+      pageTitle: copy.grid.pageTitle,
+      title: copy.grid.title,
+      description: copy.grid.description,
+    };
+  }
+  if (normalizePublicLocale(locale) === "ko") {
+    return {
+      pageTitle: "FPDS 대출",
+      pageDescription: "캐나다 대출 상품 카탈로그입니다.",
+      title: "대출 상품",
+      description: "최신 공개 스냅샷에서 활성 모기지, 개인 대출, 신용한도 대출 상품을 조회합니다.",
+    };
+  }
+  if (normalizePublicLocale(locale) === "ja") {
+    return {
+      pageTitle: "FPDS ローン",
+      pageDescription: "カナダのローン商品のカタログです。",
+      title: "ローン商品",
+      description: "最新の公開スナップショットから、有効な住宅ローン、個人ローン、ライン・オブ・クレジット商品を絞り込みます。",
+    };
+  }
+  return {
+    pageTitle: "FPDS Loan",
+    pageDescription: "Filterable loan product catalog.",
+    title: "Loan catalog",
+    description: "Filter active mortgage, personal loan, and line of credit products from the latest public snapshot.",
+  };
+}
+
 export function normalizePublicLocale(locale: string): PublicLocale {
   return locale === "ko" || locale === "ja" ? locale : "en";
 }

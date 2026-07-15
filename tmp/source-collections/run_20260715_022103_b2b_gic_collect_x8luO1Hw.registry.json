@@ -1,0 +1,1117 @@
+{
+  "registry_version": "2026-07-15",
+  "bank_code": "B2B",
+  "country_code": "CA",
+  "product_type": "gic",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "b2bbank.com"
+  ],
+  "entry_source_id": "AUTO-B2B-GIC-24ac53a582",
+  "sources": [
+    {
+      "source_id": "AUTO-B2B-GIC-24ac53a582",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "English equivalent of the direct short-term GIC product page, with strong product-detail signals.",
+      "url": "https://b2bbank.com/en/deposits/short-term-gics",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Short Term Guaranteed Investment Certificates (GICs) | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Short-Term Guaranteed Investment Certificates (GICs)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "English equivalent of the direct short-term GIC product page, with strong product-detail signals.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-31a6b8a213",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names long-term GICs and is located in the deposits product section; likely describes the product and its terms.",
+      "url": "https://b2bbank.com/deposits/long-term-gics",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Long-Term Guaranteed Investment Certificates (GICs) | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Long-Term Guaranteed Investment Certificates (GICs)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names long-term GICs and is located in the deposits product section; likely describes the product and its terms.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-586711d63f",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "English equivalent of the direct long-term GIC product page, with strong product-detail signals.",
+      "url": "https://b2bbank.com/en/deposits/long-term-gics",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Long-Term Guaranteed Investment Certificates (GICs) | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Long-Term Guaranteed Investment Certificates (GICs)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "English equivalent of the direct long-term GIC product page, with strong product-detail signals.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-ee5f932ffc",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names short-term GICs and is located in the deposits product section; likely describes the product and its terms.",
+      "url": "https://b2bbank.com/deposits/short-term-gics",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Short Term Guaranteed Investment Certificates (GICs) | B2B Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Short-Term Guaranteed Investment Certificates (GICs)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names short-term GICs and is located in the deposits product section; likely describes the product and its terms.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-2d1b3a7224",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant to purchasing a GIC, but explicitly a workflow for opening or applying rather than a named product detail page.",
+      "url": "https://b2bbank.com/en/workflows/gic-purchase-new-accounts",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant to purchasing a GIC, but explicitly a workflow for opening or applying rather than a named product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-86b813606a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Directly relevant GIC rate table, but not an individual named GIC product detail page.",
+      "url": "https://b2bbank.com/en/advisor-broker-rates/gic-rates",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly relevant GIC rate table, but not an individual named GIC product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-8aab81e1b8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "GIC-specific supporting information, likely answering general questions across multiple GIC products.",
+      "url": "https://b2bbank.com/faq/gic-deposits-faq",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "GIC-specific supporting information, likely answering general questions across multiple GIC products.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-932a9d0ae4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A GIC purchase workflow for new accounts, not an individual product detail page.",
+      "url": "https://b2bbank.com/workflows/gic-purchase-new-accounts",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A GIC purchase workflow for new accounts, not an individual product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-a997bbccf0",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant GIC transaction workflow, but not a standalone product description.",
+      "url": "https://b2bbank.com/en/workflows/gic-renewal-or-purchase-existing-accounts",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant GIC transaction workflow, but not a standalone product description.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-b705d1fa99",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A GIC renewal or purchase process page rather than a standalone GIC product description.",
+      "url": "https://b2bbank.com/workflows/gic-renewal-or-purchase-existing-accounts",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A GIC renewal or purchase process page rather than a standalone GIC product description.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-e900978a26",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Highly relevant GIC rate page, but rates tables are supporting pages rather than named product detail pages.",
+      "url": "https://b2bbank.com/advisor-broker-rates/gic-rates",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Highly relevant GIC rate page, but rates tables are supporting pages rather than named product detail pages.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-fe1473dbfb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Investment accounts and services overview that may direct users to GICs, but is a category page rather than product detail.",
+      "url": "https://b2bbank.com/en/investment-accounts/our-investment-accounts-and-services",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Investment accounts and services overview that may direct users to GICs, but is a category page rather than product detail.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-83c72fecab",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "The label indicates a GIC-related authorization form, but the URL is a general forms page rather than product detail.",
+      "url": "https://b2bbank.com/en/forms/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "The label indicates a GIC-related authorization form, but the URL is a general forms page rather than product detail.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-14d3b3879b",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/0622-07-103E_B2B_Bank_Non-Registered_GIC_Application.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-1713b0afa6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-08-402E_About_GICs_EN_10-15-14.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-3fd7d71c09",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-03-106E_Transfer_Authorization_for_Registered_Investments.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-c9fab0c105",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/0622-03-144E_Entity_GIC_Account_Authorization.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-caecddcbd9",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-08-451E_GIC_Admin_Tips_Registered_EN_08-23-14.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-ed24d80439",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-08-452E_GIC_Admin_Tips_Non-Registered_EN_08-23-14.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-f93fab15d6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-03-151E_Renew_or_Purchase_Additional_Investment_Term_Deposit.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-B2B-GIC-fd96894dd0",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for GIC",
+      "url": "https://b2bbank.com/sn_uploads/marketing/622-07-322E_B2B_Bank_Non-Registered_GIC_Schedule_A__for_Corporations_and_Other_Entities.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

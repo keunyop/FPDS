@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from psycopg import Connection
 
 SUPPORTED_LOCALES = ("en", "ko", "ja")
-SUPPORTED_PRODUCT_TYPES = ("chequing", "savings", "gic")
+SUPPORTED_PRODUCT_TYPES = ("chequing", "savings", "gic", "mortgage", "personal-loan", "line-of-credit")
 SUPPORTED_FEE_BUCKETS = ("free", "low_fee", "high_fee")
 SUPPORTED_MINIMUM_BALANCE_BUCKETS = ("none", "under_1000", "from_1000_to_4999", "5000_plus")
 SUPPORTED_MINIMUM_DEPOSIT_BUCKETS = ("none", "under_500", "from_500_to_4999", "5000_plus")
@@ -21,16 +21,28 @@ PRODUCT_TYPE_LABELS = {
         "chequing": "Chequing",
         "savings": "Savings",
         "gic": "GIC",
+        "credit-card": "Credit Card",
+        "mortgage": "Mortgage",
+        "personal-loan": "Personal Loan",
+        "line-of-credit": "Line of Credit",
     },
     "ko": {
         "chequing": "입출금",
         "savings": "저축",
         "gic": "GIC",
+        "credit-card": "신용카드",
+        "mortgage": "모기지",
+        "personal-loan": "개인 대출",
+        "line-of-credit": "신용한도 대출",
     },
     "ja": {
         "chequing": "当座預金",
         "savings": "貯蓄預金",
         "gic": "GIC",
+        "credit-card": "クレジットカード",
+        "mortgage": "住宅ローン",
+        "personal-loan": "個人ローン",
+        "line-of-credit": "ライン・オブ・クレジット",
     },
 }
 

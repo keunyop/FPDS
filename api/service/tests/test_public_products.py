@@ -244,6 +244,54 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["target_customer_tags"][0]["code"], "student")
         self.assertEqual(payload["fee_buckets"][0]["code"], "free")
 
+    def test_load_public_products_accepts_lending_product_types_and_serializes_lending_fields(self) -> None:
+        loan_row = dict(_projection_rows()[0])
+        loan_row.update(
+            {
+                "product_id": "mortgage-b2b-refinance",
+                "bank_code": "B2B",
+                "bank_name": "B2B Bank",
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "product_name": "Mortgage Refinance",
+                "public_display_rate": Decimal("4.49"),
+                "refresh_metadata": {
+                    "mortgage_rate": "4.49%",
+                    "rate_type": "Variable",
+                    "term_length_text": "5 years",
+                    "amortization_text": "Up to 30 years",
+                },
+            }
+        )
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=[*_projection_rows(), loan_row],
+        )
+        query = normalize_public_products_query(
+            locale="en",
+            country_code="CA",
+            bank_codes=None,
+            product_types=["mortgage"],
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="display_rate",
+            sort_order="desc",
+            page=1,
+            page_size=20,
+        )
+
+        payload = load_public_products(connection, query=query)
+
+        self.assertEqual(payload["total_items"], 1)
+        self.assertEqual(payload["items"][0]["product_type_label"], "Mortgage")
+        self.assertEqual(payload["items"][0]["mortgage_rate"], "4.49%")
+        self.assertEqual(payload["items"][0]["term_length_text"], "5 years")
+
 
 def _latest_success_snapshot() -> dict[str, object]:
     return {

@@ -588,7 +588,10 @@ def _load_canonical_scope_stats(connection: Any, *, country_code: str) -> dict[s
             MAX(COALESCE(last_changed_at, last_verified_at)) AS latest_canonical_change_at
         FROM canonical_product
         WHERE country_code = %(country_code)s
-          AND product_family = 'deposit'
+          AND (
+                product_family = 'deposit'
+                OR product_type IN ('mortgage', 'personal-loan', 'line-of-credit')
+          )
         """,
         {"country_code": country_code},
     ).fetchone()

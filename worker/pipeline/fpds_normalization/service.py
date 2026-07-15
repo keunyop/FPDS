@@ -466,7 +466,13 @@ def _normalize_candidate(
             }
 
     product_type_family = _canonical_product_type_family(product_type)
-    _clean_product_context_fields(product_type_family=product_type_family, candidate_payload=candidate_payload)
+    _clean_product_context_fields(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        normalized_values_for_links=normalized_values_for_links,
+        field_mapping_metadata=field_mapping_metadata,
+        runtime_notes=runtime_notes,
+    )
     alias_field = _apply_product_type_aliases(product_type_family=product_type_family, candidate_payload=candidate_payload, runtime_notes=runtime_notes)
     evidence_links_for_output = list(item.evidence_links)
     if alias_field is not None and candidate_payload.get("minimum_deposit") not in {None, ""}:
@@ -1066,7 +1072,56 @@ def _canonical_product_type_family(product_type: str | None) -> str | None:
     return None
 
 
-def _clean_product_context_fields(*, product_type_family: str | None, candidate_payload: dict[str, object]) -> None:
+def _clean_product_context_fields(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object] | None = None,
+    field_mapping_metadata: dict[str, object] | None = None,
+    runtime_notes: list[str] | None = None,
+) -> None:
+    suppressed_fields: list[str] = []
+    for field_name, value in list(candidate_payload.items()):
+        if field_name in _CORE_FIELDS or not isinstance(value, str):
+            continue
+        if (
+            _looks_like_navigation_contamination(value)
+            or _looks_like_non_value_rate(field_name=field_name, value=value)
+            or _looks_like_non_value_eligibility(field_name=field_name, value=value)
+        ):
+            candidate_payload.pop(field_name, None)
+            if normalized_values_for_links is not None:
+                normalized_values_for_links.pop(field_name, None)
+            if field_mapping_metadata is not None:
+                field_mapping_metadata.pop(field_name, None)
+            suppressed_fields.append(field_name)
+
+    if suppressed_fields and runtime_notes is not None:
+        runtime_notes.append(
+            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: "
+            + ", ".join(sorted(suppressed_fields))
+            + "."
+        )
+
+    withdrawal_text = str(candidate_payload.get("withdrawal_limit_text") or "").strip()
+    withdrawal_match = re.search(
+        r"\b(?:one|1)\s+free\s+withdrawal(?:s)?\s+(?:a|per)\s+month\b",
+        withdrawal_text,
+        flags=re.IGNORECASE,
+    )
+    if withdrawal_match is not None and len(withdrawal_text) > len(withdrawal_match.group(0)) + 40:
+        cleaned_withdrawal = _clean_text_value(withdrawal_match.group(0)).capitalize() + "."
+        candidate_payload["withdrawal_limit_text"] = cleaned_withdrawal
+        if normalized_values_for_links is not None:
+            normalized_values_for_links["withdrawal_limit_text"] = cleaned_withdrawal
+        if field_mapping_metadata is not None and "withdrawal_limit_text" in field_mapping_metadata:
+            metadata = dict(field_mapping_metadata["withdrawal_limit_text"] or {})
+            metadata["normalized_value"] = cleaned_withdrawal
+            metadata["normalization_method"] = "semantic_withdrawal_limit_cleanup"
+            field_mapping_metadata["withdrawal_limit_text"] = metadata
+        if runtime_notes is not None:
+            runtime_notes.append("Reduced broad savings copy to the explicit monthly free-withdrawal limit.")
+
     if product_type_family == "gic":
         description = str(candidate_payload.get("description_short") or "").strip()
         if description and _gic_text_conflicts_with_product_context(description):
@@ -1086,6 +1141,67 @@ def _clean_product_context_fields(*, product_type_family: str | None, candidate_
             )
             if simple_interest_match is not None:
                 candidate_payload["interest_calculation_method"] = _clean_text_value(simple_interest_match.group(0))
+
+
+def _looks_like_navigation_contamination(value: str) -> bool:
+    normalized = " ".join(value.lower().split())
+    if normalized in {"home", "go to main content", "document go to main content", "learn more", "read more"}:
+        return True
+    if "go to main content" in normalized and len(normalized) < 120:
+        return True
+    if len(normalized) < 140:
+        return False
+    navigation_markers = (
+        "main navigation",
+        "online banking",
+        "find an atm",
+        "find a branch",
+        "about us",
+        "contact us",
+        "frequently asked questions",
+        "calculators",
+        "forms and documents",
+        "credit cards",
+        "chequing accounts",
+        "savings accounts",
+        "personal loans",
+        "mortgages",
+        "find your bdm",
+        "get started",
+        "tools and support",
+        "advisor access",
+        "marketing material",
+        "workflows",
+        "our accounts",
+        "investment accounts",
+        "mortgage loan calculator",
+        "mortgage rates",
+        "faqs",
+    )
+    return sum(marker in normalized for marker in navigation_markers) >= 3
+
+
+def _looks_like_non_value_rate(*, field_name: str, value: str) -> bool:
+    normalized_field = field_name.strip().lower()
+    if not (normalized_field.endswith("_rate") or normalized_field in {"rate", "mortgage_rate", "interest_rate"}):
+        return False
+    normalized_value = " ".join(value.split())
+    if len(normalized_value) < 45:
+        return False
+    if normalized_field == "post_maturity_interest_rate" and len(normalized_value) >= 160:
+        return not re.search(r"(?:%|\bprime\b)", normalized_value, flags=re.IGNORECASE)
+    return not re.search(r"(?:\d|%|\bprime\b)", normalized_value, flags=re.IGNORECASE)
+
+
+def _looks_like_non_value_eligibility(*, field_name: str, value: str) -> bool:
+    if field_name not in {"eligibility", "eligibility_text"}:
+        return False
+    normalized = " ".join(value.lower().split())
+    return len(normalized) < 120 and (
+        normalized.startswith("and ")
+        or "we understand that" in normalized
+        or normalized in {"learn more", "get started", "contact us"}
+    )
 
 
 def _apply_product_type_aliases(

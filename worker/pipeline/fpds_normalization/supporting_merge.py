@@ -494,7 +494,18 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
     return tuple(
         item
         for item in sorted(expanded, key=len, reverse=True)
-        if len(item) >= 4 and item not in {"savings", "chequing", "checking", "gic", "gics"}
+        if (
+            len(item) >= 4
+            and item not in {"savings", "chequing", "checking", "gic", "gics"}
+            and not _is_institution_only_target_term(item)
+        )
+    )
+
+
+def _is_institution_only_target_term(value: str) -> bool:
+    tokens = value.split()
+    return (len(tokens) <= 3 and tokens[-1:] == ["bank"]) or (
+        len(tokens) <= 4 and tokens[-2:] == ["credit", "union"]
     )
 
 

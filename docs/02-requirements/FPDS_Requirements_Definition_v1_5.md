@@ -539,6 +539,7 @@ Current boundary:
 - this capability is now implemented in live `WBS 5.16` for the admin registry and collection pipeline
 - the live runtime now lets operators define additional deposit product types, attach them to bank coverage, and run homepage-first discovery plus generic AI fallback through manual review
 - public publish, dashboard aggregation, and auto-approval semantics remain constrained to the existing reviewed canonical flow until later slices widen those downstream surfaces intentionally
+- Product Owner approval on `2026-07-14` widens the Public Product Grid to review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products. This does not widen auto-approval: lending candidates continue to require review before entering the public aggregate snapshot.
 
 ## 8.3 Data Ingestion Requirements
 
@@ -1188,7 +1189,7 @@ Later follow-on requirement:
 Phase 1 확정 상품군은 chequing, savings, gic이다.
 
 ### BR-001A Deferred Product Type Extensibility
-FPDS now supports operator-defined product types for the admin registry and collection pipeline, with the matching AI-assisted discovery contract plus generic extraction, normalization, validation, and vocabulary fallback rules. Those dynamic types remain review-first and are not implicitly widened into downstream public publish behavior without later approved slices.
+FPDS now supports operator-defined product types for the admin registry and collection pipeline, with the matching AI-assisted discovery contract plus generic extraction, normalization, validation, and vocabulary fallback rules. Those dynamic types remain review-first and are not implicitly widened into downstream public publish behavior without later approved slices. The approved Public Loan slice exposes only review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products.
 
 ### BR-002 Phase 2 Country Constraint
 Phase 2 확정 범위는 일본 Big 5 은행의 수신상품이다.

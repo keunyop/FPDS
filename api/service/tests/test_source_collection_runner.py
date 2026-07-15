@@ -4,12 +4,46 @@ import subprocess
 import shutil
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from api_service import source_collection_runner
 
 
 class SourceCollectionRunnerTests(unittest.TestCase):
+    def test_logical_review_supersession_records_system_audit(self) -> None:
+        stale_cursor = MagicMock()
+        stale_cursor.fetchall.return_value = [
+            {
+                "candidate_id": "cand-old",
+                "run_id": "run-old",
+                "previous_candidate_state": "in_review",
+                "review_task_id": "review-old",
+                "previous_review_state": "queued",
+                "replacement_candidate_id": "cand-new",
+            }
+        ]
+        connection = MagicMock()
+        connection.execute.side_effect = [stale_cursor, MagicMock()]
+        manager = MagicMock()
+        manager.__enter__.return_value = connection
+        manager.__exit__.return_value = False
+
+        with (
+            patch("api_service.source_collection_runner.Settings.from_env", return_value=MagicMock()),
+            patch("api_service.source_collection_runner.open_connection", return_value=manager),
+            patch("api_service.source_collection_runner.new_id", return_value="audit-001"),
+        ):
+            count = source_collection_runner._supersede_stale_logical_reviews_for_run(
+                run_id="run-new",
+                plan={"request_id": "req-001"},
+            )
+
+        self.assertEqual(count, 1)
+        audit_sql, audit_params = connection.execute.call_args_list[1].args
+        self.assertIn("stale_review_auto_superseded", audit_sql)
+        self.assertEqual(audit_params["review_task_id"], "review-old")
+        self.assertIn('"replacement_candidate_id": "cand-new"', audit_params["event_payload"])
+
     def _workspace_temp_path(self, name: str) -> Path:
         path = Path.cwd() / "tmp" / "test-source-collection-runner" / name
         if path.exists():
@@ -99,6 +133,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                         {"source_id": "BMO-CHQ-002", "normalization_action": "stored"},
                     ]
                 }
+            if module_name == "worker.pipeline.fpds_validation_routing":
+                return {"source_results": [{"source_id": "BMO-CHQ-002", "validation_action": "review_queued"}]}
             return {}
 
         temp_dir = self._workspace_temp_path("filter-successes")
@@ -106,6 +142,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._persist_end_to_end_source_summary") as persist_summary,
+            patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
@@ -132,6 +170,10 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         self.assertNotIn("BMO-CHQ-006", normalization_args)
         self.assertNotIn("BMO-CHQ-007", normalization_args)
         self.assertIn("BMO-CHQ-002", validation_args)
+        summary = persist_summary.call_args.kwargs["summary"]
+        self.assertEqual(summary["source_success_count"], 1)
+        self.assertEqual(summary["source_failure_count"], 2)
+        self.assertTrue(summary["partial_completion_flag"])
 
     def test_run_group_filters_normalization_and_validation_to_upstream_stage_successes(self) -> None:
         plan = {
@@ -216,6 +258,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                         {"source_id": "BMO-SAV-002", "normalization_action": "stored"},
                     ]
                 }
+            if module_name == "worker.pipeline.fpds_validation_routing":
+                return {"source_results": [{"source_id": "BMO-SAV-002", "validation_action": "auto_validated"}]}
             return {}
 
         temp_dir = self._workspace_temp_path("filter-upstream-successes")
@@ -223,6 +267,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._persist_end_to_end_source_summary"),
+            patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
@@ -292,6 +338,22 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             ),
             ["SRC-001", "SRC-002"],
         )
+
+    def test_target_dedupe_keeps_one_byte_identical_snapshot(self) -> None:
+        retained, duplicates = source_collection_runner._dedupe_target_sources_by_snapshot_checksum(
+            snapshot_output={
+                "source_results": [
+                    {"source_id": "SRC-EN", "checksum": "same-content"},
+                    {"source_id": "SRC-DEFAULT", "checksum": "same-content"},
+                    {"source_id": "SRC-OTHER", "checksum": "different-content"},
+                    {"source_id": "SRC-UNKNOWN", "checksum": None},
+                ]
+            },
+            target_source_ids=["SRC-EN", "SRC-DEFAULT", "SRC-OTHER", "SRC-UNKNOWN"],
+        )
+
+        self.assertEqual(retained, ["SRC-EN", "SRC-OTHER", "SRC-UNKNOWN"])
+        self.assertEqual(duplicates, ["SRC-DEFAULT"])
 
     def test_successful_stage_source_ids_supports_non_snapshot_stages(self) -> None:
         self.assertEqual(

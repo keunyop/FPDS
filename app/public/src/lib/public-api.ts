@@ -42,6 +42,18 @@ export type PublicProduct = {
   post_maturity_interest_rate: string | null;
   tax_benefits: string | null;
   deposit_insurance: string | null;
+  description_short: string | null;
+  mortgage_rate: string | null;
+  interest_rate: string | null;
+  rate_type: string | null;
+  term_length_text: string | null;
+  amortization_text: string | null;
+  payment_frequency: string | null;
+  prepayment_privileges: string | null;
+  loan_amount_text: string | null;
+  monthly_payment_text: string | null;
+  credit_limit_text: string | null;
+  security_requirement: string | null;
   term_rate_table: PublicTermRateRow[];
   term_length_days: number | null;
   product_highlight_badge_code: string | null;

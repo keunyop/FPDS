@@ -295,6 +295,14 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
     ];
   }
 
+  if (product.product_family === "lending") {
+    return [
+      { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
+      { label: loanMetricLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
+      { label: loanMetricLabel("term", locale), value: product.term_length_text ?? copy.common.notDisclosed }
+    ];
+  }
+
   return [
     { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
     { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
@@ -305,6 +313,15 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
 function buildKeyDetail(product: PublicProduct, locale: string) {
   const copy = getPublicMessages(locale);
   return product.product_highlight_badge_label ?? product.subtype_label ?? product.target_customer_tag_labels[0] ?? copy.common.notDisclosed;
+}
+
+function loanMetricLabel(field: "rateType" | "term", locale: string) {
+  const labels = {
+    en: { rateType: "Rate type", term: "Term" },
+    ko: { rateType: "금리 유형", term: "기간" },
+    ja: { rateType: "金利タイプ", term: "期間" }
+  };
+  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
 }
 
 function buildComparisonReason(product: PublicProduct, locale: string) {
@@ -395,4 +412,3 @@ function formatTerm(termLengthDays: number | null, locale: string) {
   }
   return `${termLengthDays} days`;
 }
-

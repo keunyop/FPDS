@@ -54,11 +54,14 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
   }
 
   const product = detail.product;
+  const catalogPath = product.product_family === "lending" ? "/loans" : "/products";
+  const catalogHref = buildPublicHref(catalogPath, filters);
+  const backToCatalog = product.product_family === "lending" ? loanLabel("back", filters.locale) : copy.detail.backToList;
   const metricCards = buildMetricCards(product, filters.locale);
   const detailFacts = buildDetailFacts(product, filters.locale);
   const decisionItems = buildDecisionItems(product, filters.locale);
   const disclosureDate = formatIsoDate(product.last_verified_at ?? detail.freshness.refreshed_at);
-  const similarHref = buildPublicHref("/products", {
+  const similarHref = buildPublicHref(catalogPath, {
     ...filters,
     bankCodes: [product.bank_code],
     page: 1,
@@ -70,9 +73,9 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
     <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
       <div className="flex flex-col gap-5">
         <Button asChild variant="ghost" className="w-fit">
-          <Link href={productsHref}>
+          <Link href={catalogHref}>
             <ArrowLeft className="size-4" aria-hidden="true" />
-            {copy.detail.backToList}
+            {backToCatalog}
           </Link>
         </Button>
 
@@ -116,15 +119,17 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
 
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           <div className="grid gap-4">
-            <InterestCalculator
-              currency={product.currency}
-              locale={filters.locale}
-              minimumBalance={product.minimum_balance}
-              minimumDeposit={product.minimum_deposit}
-              productType={product.product_type}
-              rate={product.public_display_rate}
-              termLengthDays={product.term_length_days}
-            />
+            {product.product_family === "deposit" ? (
+              <InterestCalculator
+                currency={product.currency}
+                locale={filters.locale}
+                minimumBalance={product.minimum_balance}
+                minimumDeposit={product.minimum_deposit}
+                productType={product.product_type}
+                rate={product.public_display_rate}
+                termLengthDays={product.term_length_days}
+              />
+            ) : null}
 
             <Card className="border-border/80 shadow-sm">
               <CardHeader>
@@ -221,6 +226,14 @@ function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] 
     ];
   }
 
+  if (product.product_family === "lending") {
+    return [
+      { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
+      { label: loanLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
+      { label: loanLabel("term", locale), value: product.term_length_text ?? copy.common.notDisclosed }
+    ];
+  }
+
   return [
     { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
     { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
@@ -230,6 +243,18 @@ function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] 
 
 function buildDetailFacts(product: PublicProduct, locale: string) {
   const facts: DetailFact[] = [];
+  if (product.product_family === "lending") {
+    addFact(facts, loanLabel("rate", locale), product.mortgage_rate ?? product.interest_rate, locale);
+    addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);
+    addFact(facts, loanLabel("term", locale), product.term_length_text, locale);
+    addFact(facts, loanLabel("amortization", locale), product.amortization_text, locale);
+    addFact(facts, loanLabel("payment", locale), product.payment_frequency, locale);
+    addFact(facts, loanLabel("prepayment", locale), product.prepayment_privileges, locale);
+    addFact(facts, loanLabel("loanAmount", locale), product.loan_amount_text ?? product.credit_limit_text, locale);
+    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
+    addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
+    return facts;
+  }
   const depositAmount = product.minimum_deposit ?? product.minimum_balance;
   if (depositAmount != null) {
     addFact(facts, detailLabel("depositAmount", locale), formatCurrency(depositAmount, product.currency, locale), locale);
@@ -248,6 +273,13 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
 
 function buildDecisionItems(product: PublicProduct, locale: string) {
   const facts: DetailFact[] = [];
+  if (product.product_family === "lending") {
+    addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);
+    addFact(facts, loanLabel("term", locale), product.term_length_text, locale);
+    addFact(facts, loanLabel("prepayment", locale), product.prepayment_privileges, locale);
+    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
+    return facts.slice(0, 4);
+  }
   addFact(facts, detailLabel("bestFor", locale), buildKeyDetail(product, locale), locale);
   addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
   addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
@@ -268,6 +300,15 @@ function addFact(facts: DetailFact[], label: string, value: string | null, local
   if (value && value.trim() && value !== notDisclosed) {
     facts.push({ label, value });
   }
+}
+
+function loanLabel(key: "amortization" | "back" | "loanAmount" | "payment" | "prepayment" | "rate" | "rateType" | "term", locale: string) {
+  const labels = {
+    en: { amortization: "Amortization", back: "Back to loan list", loanAmount: "Loan amount / credit limit", payment: "Payment frequency", prepayment: "Prepayment", rate: "Interest rate", rateType: "Rate type", term: "Term" },
+    ko: { amortization: "상환 기간", back: "대출 목록으로", loanAmount: "대출 금액 / 한도", payment: "상환 주기", prepayment: "중도상환", rate: "금리", rateType: "금리 유형", term: "기간" },
+    ja: { amortization: "償却期間", back: "ローン一覧に戻る", loanAmount: "借入額 / 利用限度額", payment: "返済頻度", prepayment: "繰上返済", rate: "金利", rateType: "金利タイプ", term: "期間" }
+  };
+  return labels[locale as keyof typeof labels]?.[key] ?? labels.en[key];
 }
 
 function TermRateTable({

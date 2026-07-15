@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items
 from api_service.review_detail import (
     _available_actions,
     _build_diff_summary,
@@ -41,6 +42,34 @@ class _FailingAuditConnection:
 
 
 class ReviewDetailTests(unittest.TestCase):
+    def test_review_diagnosis_prioritizes_suspect_fields_and_direct_edit(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "mortgage_rate"],
+            candidate_payload={
+                "product_name": "Example Mortgage",
+                "mortgage_rate": "Competitive mortgage rates help you find a flexible solution for your goals.",
+            },
+            validation_status="pass",
+            validation_issue_codes=[],
+        )
+
+        self.assertEqual(diagnosis["category"], "suspect_fields")
+        self.assertEqual(diagnosis["recommended_action"], "edit_approve")
+        self.assertEqual(diagnosis["affected_fields"][0]["field_name"], "mortgage_rate")
+
+    def test_review_field_items_include_missing_expected_fields_first(self) -> None:
+        items = build_review_field_items(
+            expected_fields=["product_name", "standard_rate"],
+            candidate_payload={"product_name": "Example GIC"},
+            evidence_field_names=["product_name"],
+            current_payload=None,
+        )
+
+        self.assertEqual(items[0]["field_name"], "standard_rate")
+        self.assertTrue(items[0]["missing"])
+        self.assertTrue(items[0]["editable"])
+
     def test_normalize_override_payload_keeps_only_real_changes(self) -> None:
         normalized = _normalize_override_payload(
             override_payload={
@@ -117,7 +146,8 @@ class ReviewDetailTests(unittest.TestCase):
     def test_is_empty_review_value_handles_list_without_hash_error(self) -> None:
         self.assertTrue(_is_empty_review_value(None))
         self.assertTrue(_is_empty_review_value(""))
-        self.assertFalse(_is_empty_review_value([]))
+        self.assertTrue(_is_empty_review_value([]))
+        self.assertTrue(_is_empty_review_value({}))
         self.assertFalse(_is_empty_review_value(["bonus_rate"]))
 
     def test_collect_model_execution_ids_keeps_stage_order_and_deduplicates(self) -> None:

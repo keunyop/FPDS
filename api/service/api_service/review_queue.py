@@ -7,6 +7,8 @@ import json
 from typing import Any, Iterable
 from typing import TYPE_CHECKING
 
+from api_service.review_diagnosis import build_review_diagnosis, is_empty_review_value
+
 if TYPE_CHECKING:
     from psycopg import Connection
 
@@ -256,9 +258,16 @@ def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
     missing_expected_fields = [
         field_name
         for field_name in expected_fields
-        if _is_empty_review_value(candidate_payload.get(field_name))
+        if is_empty_review_value(candidate_payload.get(field_name))
     ]
     source_role = str(source_metadata.get("discovery_role") or "unknown")
+    diagnosis = build_review_diagnosis(
+        source_role=source_role,
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+        validation_status=str(row["validation_status"]),
+        validation_issue_codes=_coerce_string_list(row.get("validation_issue_codes")),
+    )
     return {
         "review_task_id": str(row["review_task_id"]),
         "candidate_id": str(row["candidate_id"]),
@@ -278,11 +287,8 @@ def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
         "issue_summary_items": issue_items,
         "source_role": source_role,
         "missing_expected_fields": missing_expected_fields,
-        "recommended_action": _recommended_queue_action(
-            source_role=source_role,
-            missing_expected_fields=missing_expected_fields,
-            validation_status=str(row["validation_status"]),
-        ),
+        "review_diagnosis": diagnosis,
+        "recommended_action": diagnosis["recommended_action"],
         "created_at": row["created_at"].isoformat(),
         "updated_at": row["updated_at"].isoformat(),
     }
@@ -322,10 +328,6 @@ def _coerce_mapping(value: Any) -> dict[str, Any]:
         if isinstance(parsed, dict):
             return {str(key): item for key, item in parsed.items()}
     return {}
-
-
-def _is_empty_review_value(value: Any) -> bool:
-    return value is None or value == "" or value == [] or value == {}
 
 
 def _recommended_queue_action(*, source_role: str, missing_expected_fields: list[str], validation_status: str) -> str:

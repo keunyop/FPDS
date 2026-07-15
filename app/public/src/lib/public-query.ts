@@ -10,6 +10,7 @@ export type PublicScopeFilters = {
 };
 
 export type ProductGridPageFilters = PublicScopeFilters & {
+  catalogProductTypes: string[];
   sortBy: string;
   sortOrder: "asc" | "desc";
   page: number;
@@ -19,7 +20,10 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
-export type PublicRoutePath = "/dashboard" | "/products" | "/methodology" | `/products/${string}`;
+export type PublicRoutePath = "/dashboard" | "/products" | "/loans" | "/methodology" | `/products/${string}`;
+
+export const DEPOSIT_PRODUCT_TYPES = ["chequing", "savings", "gic"] as const;
+export const LOAN_PRODUCT_TYPES = ["mortgage", "personal-loan", "line-of-credit"] as const;
 
 const SORT_OPTIONS = new Set([
   "default",
@@ -54,13 +58,21 @@ type PublicHrefState = PublicScopeFilters &
     axisPreset: string;
   }>;
 
-export function parseProductGridPageFilters(searchParams: PageSearchParams): ProductGridPageFilters {
+export function parseProductGridPageFilters(searchParams: PageSearchParams, catalogProductTypes: readonly string[] = []): ProductGridPageFilters {
   const locale = firstValue(searchParams.locale).toLowerCase();
   const sortBy = firstValue(searchParams.sort_by).toLowerCase();
   const sortOrder = firstValue(searchParams.sort_order).toLowerCase();
 
+  const parsedScope = parsePublicScopeFilters(searchParams);
+  const allowedTypes = new Set(catalogProductTypes);
+  const selectedProductTypes = allowedTypes.size
+    ? parsedScope.productTypes.filter((productType) => allowedTypes.has(productType))
+    : parsedScope.productTypes;
+
   return {
-    ...parsePublicScopeFilters(searchParams),
+    ...parsedScope,
+    productTypes: selectedProductTypes,
+    catalogProductTypes: [...catalogProductTypes],
     locale: SUPPORTED_LOCALES.has(locale) ? locale : "en",
     sortBy: SORT_OPTIONS.has(sortBy) ? sortBy : "default",
     sortOrder: sortOrder === "asc" ? "asc" : "desc",
@@ -78,7 +90,10 @@ export function parseDashboardPageFilters(searchParams: PageSearchParams): Dashb
 }
 
 export function buildProductsSearchParams(filters: ProductGridPageFilters) {
-  const params = buildScopedFilterSearchParams(filters);
+  const params = buildScopedFilterSearchParams({
+    ...filters,
+    productTypes: filters.productTypes.length ? filters.productTypes : filters.catalogProductTypes,
+  });
   params.set("sort_by", filters.sortBy);
   params.set("sort_order", filters.sortOrder);
   params.set("page", String(filters.page));
@@ -159,7 +174,7 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
     params.set("term_bucket", state.termBucket);
   }
 
-  if (path === "/products") {
+  if (path === "/products" || path === "/loans") {
     if (state.sortBy && state.sortBy !== "default") {
       params.set("sort_by", state.sortBy);
     }

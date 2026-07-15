@@ -201,6 +201,14 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - Product Owner follow-up on `2026-06-09` added a client-side comparison workspace to `/products`; users can select up to four products from the current result page and compare product, reason-to-compare, rate, monthly fee, entry amount, term, application method, and official bank page without changing the public API contract or exposing evidence data.
 - Product Owner follow-up on `2026-06-11` removed the shared purpose-entry explanatory subtitle and compact trust cue block from the public surfaces while keeping the purpose entry cards and existing Product Grid filter/sort links.
 
+### 10.8 Public Loan Catalog
+
+- Product Owner direction on `2026-07-14` activates `/loans` as a sibling catalog to `/products`.
+- `/loans` uses the same anonymous Public API, compact filters, sorting, comparison workspace, product detail route, locale handling, and public evidence boundary as the Deposit catalog.
+- Its bounded Product Type scope is `mortgage`, `personal-loan`, and `line-of-credit`; Loan-specific cards prioritize rate, rate type, and term, while detail adds amortization, payment frequency, prepayment, and applicable lending conditions.
+- The aggregate snapshot may include lending only from review-approved canonical products. Candidates, deferred products, and raw evidence remain unavailable to the Public surface.
+- Deposit-only purpose cards and deposit amount/fee bucket controls are not shown in the Loan catalog.
+
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 
 - `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`

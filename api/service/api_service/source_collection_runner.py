@@ -14,6 +14,7 @@ from api_service.aggregate_refresh import launch_aggregate_refresh_runner
 from api_service.candidate_auto_promotion import promote_auto_validated_candidates
 from api_service.config import Settings
 from api_service.db import open_connection
+from api_service.security import new_id
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -66,6 +67,18 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         requested_source_ids=target_source_ids,
         successful_source_ids=successful_source_ids,
     )
+    successful_target_source_ids, duplicate_target_source_ids = _dedupe_target_sources_by_snapshot_checksum(
+        snapshot_output=snapshot_output,
+        target_source_ids=successful_target_source_ids,
+    )
+    if duplicate_target_source_ids:
+        print(
+            (
+                f"[source-collection-runner] run {run_id} skipped {len(duplicate_target_source_ids)} "
+                "duplicate target source(s) with byte-identical snapshots"
+            ),
+            flush=True,
+        )
     if not successful_target_source_ids:
         raise RuntimeError("Snapshot capture produced no target sources eligible for normalization.")
 
@@ -117,10 +130,29 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     if not normalization_successful_target_source_ids:
         raise RuntimeError("Normalization failed for all extracted target sources.")
 
-    _run_stage(
+    validation_output = _run_stage(
         "worker.pipeline.fpds_validation_routing",
         base_args + ["--routing-mode", "phase1"] + _source_args(normalization_successful_target_source_ids),
     )
+    validation_successful_target_source_ids = _successful_stage_source_ids(
+        stage_output=validation_output,
+        action_field="validation_action",
+        success_actions={"review_queued", "auto_validated"},
+    )
+    superseded_review_count = _supersede_stale_logical_reviews_for_run(run_id=run_id, plan=plan)
+    if superseded_review_count:
+        print(
+            f"[source-collection-runner] run {run_id} superseded {superseded_review_count} older logical duplicate review(s)",
+            flush=True,
+        )
+    run_summary = _build_end_to_end_source_summary(
+        included_source_ids=included_source_ids,
+        target_source_ids=target_source_ids,
+        duplicate_target_source_ids=duplicate_target_source_ids,
+        extraction_successful_source_ids=extraction_successful_source_ids,
+        validation_successful_target_source_ids=validation_successful_target_source_ids,
+    )
+    _persist_end_to_end_source_summary(run_id=run_id, summary=run_summary)
     promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
     if promotion_result["promoted_count"]:
         launch_result = launch_aggregate_refresh_runner()
@@ -223,6 +255,243 @@ def _successful_stage_source_ids(
 def _filter_requested_source_ids(*, requested_source_ids: list[str], successful_source_ids: list[str]) -> list[str]:
     successful_source_id_set = set(successful_source_ids)
     return [source_id for source_id in requested_source_ids if source_id in successful_source_id_set]
+
+
+def _dedupe_target_sources_by_snapshot_checksum(
+    *,
+    snapshot_output: dict[str, Any],
+    target_source_ids: list[str],
+) -> tuple[list[str], list[str]]:
+    """Keep one normalization target per byte-identical snapshot.
+
+    Supporting sources still pass through parse and extraction. Targets without a
+    checksum are retained because equivalence cannot be proven safely.
+    """
+    target_set = set(target_source_ids)
+    checksum_by_source_id = {
+        str(item.get("source_id")): str(item.get("checksum") or "").strip()
+        for item in snapshot_output.get("source_results", [])
+        if str(item.get("source_id") or "") in target_set
+    }
+    retained: list[str] = []
+    duplicates: list[str] = []
+    seen_checksums: set[str] = set()
+    for source_id in target_source_ids:
+        checksum = checksum_by_source_id.get(source_id, "")
+        if checksum and checksum in seen_checksums:
+            duplicates.append(source_id)
+            continue
+        retained.append(source_id)
+        if checksum:
+            seen_checksums.add(checksum)
+    return retained, duplicates
+
+
+def _build_end_to_end_source_summary(
+    *,
+    included_source_ids: list[str],
+    target_source_ids: list[str],
+    duplicate_target_source_ids: list[str],
+    extraction_successful_source_ids: list[str],
+    validation_successful_target_source_ids: list[str],
+) -> dict[str, Any]:
+    included_set = set(included_source_ids)
+    target_set = set(target_source_ids)
+    duplicate_set = set(duplicate_target_source_ids)
+    supporting_set = included_set - target_set
+    successful_set = (
+        (supporting_set & set(extraction_successful_source_ids))
+        | (target_set & set(validation_successful_target_source_ids))
+        | duplicate_set
+    )
+    failed_source_ids = sorted(included_set - successful_set)
+    success_count = len(included_set) - len(failed_source_ids)
+    failure_count = len(failed_source_ids)
+    error_summary = None
+    if failure_count:
+        error_summary = (
+            f"{failure_count} of {len(included_set)} collection source(s) did not reach their required terminal stage."
+        )
+    return {
+        "source_scope_count": len(included_set),
+        "source_success_count": success_count,
+        "source_failure_count": failure_count,
+        "partial_completion_flag": failure_count > 0,
+        "error_summary": error_summary,
+        "failed_source_ids": failed_source_ids,
+        "deduplicated_target_source_ids": sorted(duplicate_set),
+    }
+
+
+def _persist_end_to_end_source_summary(*, run_id: str, summary: dict[str, Any]) -> None:
+    settings = Settings.from_env()
+    with open_connection(settings) as connection:
+        connection.execute(
+            """
+            UPDATE ingestion_run
+            SET
+                run_state = CASE WHEN %(source_success_count)s = 0 THEN 'failed' ELSE 'completed' END,
+                source_scope_count = %(source_scope_count)s,
+                source_success_count = %(source_success_count)s,
+                source_failure_count = %(source_failure_count)s,
+                partial_completion_flag = %(partial_completion_flag)s,
+                error_summary = %(error_summary)s,
+                run_metadata = run_metadata || %(run_metadata)s::jsonb,
+                completed_at = %(completed_at)s
+            WHERE run_id = %(run_id)s
+            """,
+            {
+                "run_id": run_id,
+                "source_scope_count": summary["source_scope_count"],
+                "source_success_count": summary["source_success_count"],
+                "source_failure_count": summary["source_failure_count"],
+                "partial_completion_flag": summary["partial_completion_flag"],
+                "error_summary": summary["error_summary"],
+                "run_metadata": json.dumps({"end_to_end_source_summary": summary}, ensure_ascii=True, sort_keys=True),
+                "completed_at": datetime.now(UTC),
+            },
+        )
+
+
+def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any]) -> int:
+    """Leave one active task per exact logical product after a newer rerun.
+
+    This only coalesces detail-source tasks with the same bank, family, type, and
+    product name. It does not approve or reject the product proposal itself.
+    """
+    decided_at = datetime.now(UTC)
+    settings = Settings.from_env()
+    with open_connection(settings) as connection:
+        stale_rows = connection.execute(
+            """
+            WITH newest AS (
+                SELECT DISTINCT ON (
+                    nc.country_code,
+                    nc.bank_code,
+                    nc.product_family,
+                    nc.product_type,
+                    lower(nc.product_name)
+                )
+                    nc.candidate_id,
+                    nc.country_code,
+                    nc.bank_code,
+                    nc.product_family,
+                    nc.product_type,
+                    lower(nc.product_name) AS normalized_product_name,
+                    nc.created_at
+                FROM normalized_candidate AS nc
+                JOIN review_task AS rt
+                  ON rt.candidate_id = nc.candidate_id
+                JOIN source_document AS sd
+                  ON sd.source_document_id = nc.source_document_id
+                WHERE nc.run_id = %(run_id)s
+                  AND rt.review_state IN ('queued', 'deferred')
+                  AND COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') = 'detail'
+                ORDER BY
+                    nc.country_code,
+                    nc.bank_code,
+                    nc.product_family,
+                    nc.product_type,
+                    lower(nc.product_name),
+                    nc.created_at DESC,
+                    nc.candidate_id DESC
+            ),
+            stale AS (
+                SELECT
+                    nc.candidate_id,
+                    nc.run_id,
+                    nc.candidate_state AS previous_candidate_state,
+                    rt.review_task_id,
+                    rt.review_state AS previous_review_state,
+                    newest.candidate_id AS replacement_candidate_id
+                FROM newest
+                JOIN normalized_candidate AS nc
+                  ON nc.country_code = newest.country_code
+                 AND nc.bank_code = newest.bank_code
+                 AND nc.product_family = newest.product_family
+                 AND nc.product_type = newest.product_type
+                 AND lower(nc.product_name) = newest.normalized_product_name
+                 AND (
+                    nc.created_at < newest.created_at
+                    OR (nc.created_at = newest.created_at AND nc.candidate_id < newest.candidate_id)
+                 )
+                JOIN review_task AS rt
+                  ON rt.candidate_id = nc.candidate_id
+                JOIN source_document AS sd
+                  ON sd.source_document_id = nc.source_document_id
+                WHERE rt.review_state IN ('queued', 'deferred')
+                  AND nc.candidate_state = 'in_review'
+                  AND COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') = 'detail'
+                FOR UPDATE OF nc, rt
+            ),
+            superseded_candidates AS (
+                UPDATE normalized_candidate AS nc
+                SET
+                    candidate_state = 'superseded',
+                    review_reason_code = 'superseded_by_newer_logical_candidate',
+                    updated_at = %(decided_at)s
+                FROM stale
+                WHERE nc.candidate_id = stale.candidate_id
+                RETURNING nc.candidate_id
+            ),
+            resolved_reviews AS (
+                UPDATE review_task AS rt
+                SET
+                    review_state = 'rejected',
+                    queue_reason_code = 'superseded_by_newer_logical_candidate',
+                    updated_at = %(decided_at)s
+                FROM stale
+                WHERE rt.review_task_id = stale.review_task_id
+                RETURNING rt.review_task_id
+            )
+            SELECT stale.*
+            FROM stale
+            JOIN superseded_candidates USING (candidate_id)
+            JOIN resolved_reviews USING (review_task_id)
+            ORDER BY stale.review_task_id
+            """,
+            {"run_id": run_id, "decided_at": decided_at},
+        ).fetchall()
+        for stale in stale_rows:
+            connection.execute(
+                """
+                INSERT INTO audit_event (
+                    audit_event_id, event_category, event_type, actor_type,
+                    target_type, target_id, previous_state, new_state,
+                    reason_code, reason_text, run_id, candidate_id,
+                    review_task_id, request_id, diff_summary, source_ref,
+                    event_payload, occurred_at
+                )
+                VALUES (
+                    %(audit_event_id)s, 'review', 'stale_review_auto_superseded', 'system',
+                    'review_task', %(review_task_id)s, %(previous_state)s, 'rejected',
+                    'superseded_by_newer_logical_candidate',
+                    'A newer detail-source candidate represents the same bank, product type, and product name.',
+                    %(stale_run_id)s, %(candidate_id)s, %(review_task_id)s,
+                    %(request_id)s, 'Resolved an older logical duplicate review task.',
+                    %(request_id)s, %(event_payload)s::jsonb, %(occurred_at)s
+                )
+                """,
+                {
+                    "audit_event_id": new_id("audit"),
+                    "review_task_id": str(stale["review_task_id"]),
+                    "previous_state": str(stale["previous_review_state"]),
+                    "stale_run_id": str(stale["run_id"]),
+                    "candidate_id": str(stale["candidate_id"]),
+                    "request_id": plan.get("request_id"),
+                    "event_payload": json.dumps(
+                        {
+                            "replacement_candidate_id": str(stale["replacement_candidate_id"]),
+                            "replacement_run_id": run_id,
+                            "previous_candidate_state": str(stale["previous_candidate_state"]),
+                        },
+                        ensure_ascii=True,
+                        sort_keys=True,
+                    ),
+                    "occurred_at": decided_at,
+                },
+            )
+    return len(stale_rows)
 
 
 def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:

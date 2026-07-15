@@ -25,11 +25,11 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-13`:
+As of `2026-07-14`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
-- the latest completed slice hardened Runs/Review Queue and deposit collection after Alterna rate/source-role false positives; corrected public records are inactive, active Queue is empty, and the latest public API-equivalent active-only projection excludes the retracted products
+- the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
 Read before coding:
@@ -62,6 +62,51 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-14 - Review Detail Product-Style Candidate Presentation
+
+- WBS: `4.2`, `4.3`, `4.4`, Admin review UX follow-on
+- Status: done
+- Goal: present each review candidate as a financial product detail without weakening evidence-led human decision controls.
+- Outcome: the Review Detail now begins with a candidate product presentation aligned to Public detail hierarchy: product identity, source-derived description, three product-family-aware metrics, product facts, and key conditions. Lending prioritizes rate, rate type, term, amortization, payment, prepayment, amount/limit, and security; chequing prioritizes fee, balance, and transaction cues; deposit/term products prioritize rate, term, and entry amount. The overview uses the reviewer’s in-progress edits immediately, while the field list below remains the source of truth for agent value, effective value, inline evidence, correction, and approval decisions.
+- Decisions: retain the explicit `Candidate product` state and the Admin-only source link; do not reuse Public disclosure copy or expose the evidence workflow as consumer content. Duplicate source-link action was removed from the decision-facts card to keep the screen concise.
+- Key files: `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/README.md`, `docs/03-design/admin-information-architecture.md`.
+- Verification: `pnpm run typecheck` passed; `pnpm run build` passed and generated the protected Review Detail route; `git diff --check` passed.
+- Next step: use the new summary during the next queued Mortgage review and confirm field values against the linked bank source before approval.
+
+## 2026-07-14 - Public Loan Catalog Activation
+
+- WBS: `5.6`, `5.7`, `5.9`, `5.16`
+- Status: implemented; awaiting a required operator approval for the first public lending product
+- Goal: make review-approved loans discoverable in FPDS Public with the same safe publish boundary as deposits.
+- Why now: the Product Owner requested Loan discovery in Public and confirmed Mortgage, Personal Loan, and Line of Credit as the catalog scope. The registry was already active, but the public aggregate and navigation were deposit-only.
+- Outcome: Public now has a localized `/loans` catalog, enabled navigation/footer links, lending-aware list/detail/compare cards, and loan-specific rate, term, payment, amount, and prepayment fields. Deposit-only purpose/fee/minimum-deposit controls are not shown for loans. Aggregate refresh now projects active canonical Mortgage, Personal Loan, and Line of Credit rows, and preserves a safe numeric lending display rate from grounded payload fields. Credit Card remains outside this catalog. Collection plans now carry the registered lending family, preventing a mortgage collection from falling back to `deposit`.
+- Live verification: B2B Mortgage collection `collection_m5x_wgxkLzh42qgV` completed without failures. It created fresh `Mortgage renewal` (`cand-a5954efdbc6f297a`) and `Mortgage refinancing` (`cand-46a314440defa9cc`) candidates, both validation-pass and `in_review`; an older duplicate renewal candidate was superseded. No lending canonical product or public projection existed before this run, so no loan is publicly shown until an operator makes the required approval decision.
+- Decisions: never auto-publish a collection candidate solely to populate the Loan catalog. The user-approved catalog covers Mortgage, Personal Loan, and Line of Credit only; Credit Card stays separate.
+- Key files: `app/public/src/app/loans/page.tsx`, `product-grid-surface.tsx`, `product-detail-surface.tsx`, `public-query.ts`, `api/service/api_service/public_common.py`, `public_products.py`, `aggregate_refresh.py`, `worker/pipeline/fpds_aggregate_refresh/`, `source_catalog.py`.
+- Verification: API full suite `187` passed; Worker full suite `127` passed; Public `pnpm run typecheck` passed; Public `pnpm run build` passed and generated `/loans`; `git diff --check` passed.
+- Next step: review and approve or reject the two new B2B Mortgage candidates in Admin Review Queue. Once a candidate is approved and aggregate refresh completes, it will appear at `/loans` without any further code change.
+
+## 2026-07-14 - Multi-Bank Runs and Problem-First Review Hardening
+
+- WBS: `4.2`, `4.3`, `4.4`, `4.5`, `5.15`, `5.16`, collection QA hardening
+- Status: `done`
+- Goal: inspect the current Runs and active Review Queue, remove safely automatable duplicate/noise cases, improve future collection across banks and product types, and make unavoidable human decisions concise and field-editable.
+- Why now: collection `collection_TncoSuZwjn6Mhd9X` completed 21 runs but left eight active B2B reviews. Four GIC tasks represented two products through locale/host aliases, four Mortgage tasks represented two products twice, candidate fields contained navigation text, and all seven Bridgewater runs had failed because a `www` homepage redirected to the apex host outside the literal allowlist. Several BMO/B2B runs also rejected strong named-detail candidates after whole-page navigation terms inflated negative scores.
+- Outcome: homepage discovery now treats `www`/apex as one bounded bank host, permits high-confidence confirmed product identity to overcome navigation-wide negatives while retaining hard scope vetoes, collapses same-title/heading detail aliases, and deduplicates byte-identical target snapshots before normalization. Registered `product_family` is carried into collection plans. Final Runs summaries now represent the full source scope and preserve upstream failures instead of showing only the last stage. Normalization removes navigation and non-value rate copy, refuses corporate ownership percentages as deposit rates, prevents bank-name-only supporting evidence matches, and reduces broad withdrawal copy to an explicit limit. Newer exact logical-product review tasks supersede older active duplicates with system audit events.
+- Review UX: Queue and detail use one `review_diagnosis` contract with category, concise headline, affected fields, and an actual review action. Detail uses the union of expected, collected, evidence-linked, and current fields; missing/suspect rows come first, values are editable inline, evidence expands in the row, recommendation controls CTA priority, and arbitrary raw-field editing is an advanced fallback. Re-edits persist the prior approved payload so a later correction does not restore old agent values.
+- Live verification: first B2B GIC rerun `collection_tgiG0xYdX-gd15y_` reduced four detail candidates to two but exposed a corporate-form `25%` ownership value incorrectly merged as a rate. After the generic evidence-safety fix, `collection_Pme_NfK9hgLM2_7R` produced exactly two candidates with no `25%` rate and no navigation-contaminated description/application/deposit-insurance/post-maturity fields. Both remain review-required because the official detail pages do not publish required rate/minimum-deposit values. Its final Run correctly reports `3 of 19` sources not reaching the required terminal stage. Six older GIC duplicate/stale reviews and two same-run Mortgage duplicates were auditably superseded, leaving one task per logical product. Bridgewater Savings `collection_KWsPW9y_cgVSRZmj` passed the formerly failing apex redirect, captured `10/10` snapshots, produced one `2.70%` candidate, and created zero review tasks. Follow-up `collection_8enjijAejDwwJNjo` also produced one pass candidate and zero reviews; its final payload retains the grounded `2.70%` rate and CDIC evidence, removes `Home`/filler fields, and reduces withdrawal text to `One free withdrawal a month.`
+- Active Queue after cleanup: four tasks: B2B Short-Term GIC and Long-Term GIC (`missing_fields`, edit/approve after sourcing the unavailable values), plus Mortgage refinancing and renewal (`suspect_fields`, inline correction of listed navigation/non-value fields). Mortgage is active in the Product Type Registry under `lending`, with 28 active bank-coverage rows and an active Canadian generic taxonomy fallback; it can be recollected when current lending terms need to replace the older source-time payloads.
+- Key files: `api/service/api_service/source_catalog.py`, `source_collection_runner.py`, `review_diagnosis.py`, `review_queue.py`, `review_detail.py`, `worker/pipeline/fpds_normalization/service.py`, `supporting_merge.py`, `fpds_rate_safety.py`, `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `review-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `docs/03-design/admin-information-architecture.md`, `homepage-discovery-scoring-enhancement.md`
+- Decisions: duplicate review coalescing requires exact country/bank/family/type/product-name identity and detail-source roles; it never approves the proposal. Same-product page collapse requires confirmed page title and heading identity. Missing official values stay human-reviewable rather than being inferred. Domain aliases strip only a leading `www.` and do not widen the fetch allowlist to unrelated hosts.
+- Verification:
+  - API full suite: `186` passed.
+  - Worker full suite: `126` passed.
+  - Admin: `pnpm run typecheck` passed; `pnpm run build` passed with all `23` static pages generated.
+  - Focused post-live rate/normalization suite: `51` passed.
+  - `git diff --check` passed.
+- Known issues: B2B GIC official pages still omit comparable rates and minimum deposits, so two operator decisions remain legitimate. Existing Mortgage candidates retain source-time noisy values but the new Review UI identifies and edits them directly; Mortgage coverage is active and can be recollected when a fresh lending run is required. Local collection logs and registries remain as dev evidence.
+- Next step: review the four remaining B2B tasks through the normal UI; run Mortgage collection when a refreshed source payload is needed.
 
 ## 2026-07-13 - Runs and Review Queue Collection Accuracy Hardening
 

@@ -7,22 +7,25 @@ import { ProductCompareWorkspace } from "@/components/fpds/public/product-compar
 import { PurposeEntryPoints } from "@/components/fpds/public/purpose-entry-points";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicMessages } from "@/lib/public-locale";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProduct, type PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
 type ProductGridSurfaceProps = {
   apiUnavailable: boolean;
+  catalog: "deposit" | "loan";
   filterOptions: PublicFiltersResponse | null;
   filters: ProductGridPageFilters;
   products: PublicProductsResponse | null;
   topProducts: PublicProductsResponse | null;
 };
 
-export function ProductGridSurface({ apiUnavailable, filterOptions, filters, products, topProducts }: ProductGridSurfaceProps) {
+export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, filters, products, topProducts }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
-  const clearHref = buildPublicHref("/products", {
+  const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
+  const catalogPath = catalog === "loan" ? "/loans" : "/products";
+  const clearHref = buildCatalogHref(catalogPath, {
     ...filters,
     bankCodes: [],
     productTypes: [],
@@ -44,7 +47,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             <Button asChild>
-              <Link href={buildPublicHref("/products", filters)}>
+              <Link href={buildCatalogHref(catalogPath, filters)}>
                 <RefreshCw className="size-4" aria-hidden="true" />
                 {copy.grid.retryButton}
               </Link>
@@ -55,16 +58,21 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
     );
   }
 
-  const activeChips = buildActiveChips(filters, filterOptions);
+  const activeChips = buildActiveChips(filters, filterOptions, catalogPath);
   const dashboardHref = buildPublicHref("/dashboard", filters);
   const selectedTypes = new Set(filters.productTypes);
   const gicOnly = selectedTypes.size === 1 && selectedTypes.has("gic");
-  const showMinimumBalance = !gicOnly;
-  const showMinimumDeposit = selectedTypes.size === 0 || selectedTypes.has("gic");
-  const showTermBucket = gicOnly;
-  const pagination = buildPagination(products, filters);
+  const showDepositFilters = catalog === "deposit";
+  const showMinimumBalance = showDepositFilters && !gicOnly;
+  const showMinimumDeposit = showDepositFilters && (selectedTypes.size === 0 || selectedTypes.has("gic"));
+  const showTermBucket = showDepositFilters && gicOnly;
+  const pagination = buildPagination(products, filters, catalogPath);
   const topListItems = topProducts?.items ?? products.items.slice(0, 5);
-  const sortOptions = [
+  const sortOptions = catalog === "loan" ? [
+    { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" as const },
+    { value: "bank_name", label: copy.grid.sortBankName, order: "asc" as const },
+    { value: "product_name", label: copy.grid.sortProductName, order: "asc" as const }
+  ] : [
     { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" as const },
     { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" as const },
     { value: "minimum_balance", label: copy.grid.sortMinimumBalance, order: "asc" as const }
@@ -76,8 +84,8 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
         <section className="grid gap-5 rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_55%,#eefbf7_100%)] p-5 shadow-sm md:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-3xl">
             <p className="text-sm font-medium text-primary">{copy.grid.resultSummary}</p>
-            <h1 className="mt-2 text-3xl font-semibold leading-tight text-foreground md:text-4xl">{copy.grid.title}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{copy.grid.description}</p>
+            <h1 className="mt-2 text-3xl font-semibold leading-tight text-foreground md:text-4xl">{catalogCopy.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{catalogCopy.description}</p>
           </div>
           <div className="flex flex-wrap gap-2 lg:justify-end">
             <Button asChild>
@@ -86,7 +94,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
           </div>
         </section>
 
-        <PurposeEntryPoints filters={filters} locale={filters.locale} />
+        {catalog === "deposit" ? <PurposeEntryPoints filters={filters} locale={filters.locale} /> : null}
 
         <Card className="gap-0 overflow-hidden border-border/80 shadow-sm">
           <details className="group" open>
@@ -98,7 +106,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
             <CardContent className="px-4 py-4 sm:px-5">
-              <form action="/products" className="grid gap-4">
+              <form action={catalogPath} className="grid gap-4">
                 <input name="locale" type="hidden" value={filters.locale} />
                 <input name="sort_by" type="hidden" value={filters.sortBy} />
                 <input name="sort_order" type="hidden" value={filters.sortOrder} />
@@ -192,7 +200,7 @@ export function ProductGridSurface({ apiUnavailable, filterOptions, filters, pro
           </div>
         </section>
 
-        <SortToolbar filters={filters} locale={filters.locale} options={sortOptions} />
+        <SortToolbar catalogPath={catalogPath} filters={filters} locale={filters.locale} options={sortOptions} />
 
         <TopProductList filters={filters} locale={filters.locale} products={topListItems} />
 
@@ -364,10 +372,12 @@ function TopProductList({
 }
 
 function SortToolbar({
+  catalogPath,
   filters,
   locale,
   options
 }: {
+  catalogPath: "/loans" | "/products";
   filters: ProductGridPageFilters;
   locale: string;
   options: Array<{ label: string; order: "asc" | "desc"; value: string }>;
@@ -386,7 +396,7 @@ function SortToolbar({
             "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
             filters.sortBy === "default" ? "border-primary/40 bg-primary/5 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
-          href={buildProductsHref(filters, { page: 1, sortBy: "default", sortOrder: "desc" })}
+          href={buildCatalogHref(catalogPath, { ...filters, page: 1, sortBy: "default", sortOrder: "desc" })}
         >
           {copy.grid.sortDefault}
         </Link>
@@ -399,7 +409,7 @@ function SortToolbar({
                 "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
                 active ? "border-primary/40 bg-primary/5 text-primary" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
-              href={buildProductsHref(filters, { page: 1, sortBy: option.value, sortOrder: option.order })}
+              href={buildCatalogHref(catalogPath, { ...filters, page: 1, sortBy: option.value, sortOrder: option.order })}
               key={option.value}
             >
               {option.label}
@@ -553,6 +563,14 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
     ];
   }
 
+  if (product.product_family === "lending") {
+    return [
+      { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
+      { label: loanMetricLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
+      { label: loanMetricLabel("term", locale), value: product.term_length_text ?? copy.common.notDisclosed }
+    ];
+  }
+
   return [
     { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
     { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
@@ -565,13 +583,13 @@ function buildKeyDetail(product: PublicProduct, locale: string) {
   return product.product_highlight_badge_label ?? product.subtype_label ?? product.target_customer_tag_labels[0] ?? copy.common.notDisclosed;
 }
 
-function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse) {
+function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse, catalogPath: "/loans" | "/products") {
   const chips: Array<{ group: string; href: string; label: string; value: string }> = [];
 
   for (const bankCode of filters.bankCodes) {
     chips.push({
       group: "bank_code",
-      href: buildProductsHref(filters, { bankCodes: filters.bankCodes.filter((value) => value !== bankCode), page: 1 }),
+      href: buildCatalogHref(catalogPath, { ...filters, bankCodes: filters.bankCodes.filter((value) => value !== bankCode), page: 1 }),
       label: findLabel(filterOptions.banks, bankCode),
       value: bankCode
     });
@@ -579,7 +597,7 @@ function buildActiveChips(filters: ProductGridPageFilters, filterOptions: Public
   for (const productType of filters.productTypes) {
     chips.push({
       group: "product_type",
-      href: buildProductsHref(filters, { productTypes: filters.productTypes.filter((value) => value !== productType), page: 1 }),
+      href: buildCatalogHref(catalogPath, { ...filters, productTypes: filters.productTypes.filter((value) => value !== productType), page: 1 }),
       label: findLabel(filterOptions.product_types, productType),
       value: productType
     });
@@ -587,28 +605,28 @@ function buildActiveChips(filters: ProductGridPageFilters, filterOptions: Public
   for (const tag of filters.targetCustomerTags) {
     chips.push({
       group: "target_customer_tag",
-      href: buildProductsHref(filters, { targetCustomerTags: filters.targetCustomerTags.filter((value) => value !== tag), page: 1 }),
+      href: buildCatalogHref(catalogPath, { ...filters, targetCustomerTags: filters.targetCustomerTags.filter((value) => value !== tag), page: 1 }),
       label: findLabel(filterOptions.target_customer_tags, tag),
       value: tag
     });
   }
 
-  addSingleChip(chips, "fee_bucket", filters.feeBucket, filterOptions.fee_buckets, buildProductsHref(filters, { feeBucket: "", page: 1 }));
+  addSingleChip(chips, "fee_bucket", filters.feeBucket, filterOptions.fee_buckets, buildCatalogHref(catalogPath, { ...filters, feeBucket: "", page: 1 }));
   addSingleChip(
     chips,
     "minimum_balance_bucket",
     filters.minimumBalanceBucket,
     filterOptions.minimum_balance_buckets,
-    buildProductsHref(filters, { minimumBalanceBucket: "", page: 1 })
+    buildCatalogHref(catalogPath, { ...filters, minimumBalanceBucket: "", page: 1 })
   );
   addSingleChip(
     chips,
     "minimum_deposit_bucket",
     filters.minimumDepositBucket,
     filterOptions.minimum_deposit_buckets,
-    buildProductsHref(filters, { minimumDepositBucket: "", page: 1 })
+    buildCatalogHref(catalogPath, { ...filters, minimumDepositBucket: "", page: 1 })
   );
-  addSingleChip(chips, "term_bucket", filters.termBucket, filterOptions.term_buckets, buildProductsHref(filters, { termBucket: "", page: 1 }));
+  addSingleChip(chips, "term_bucket", filters.termBucket, filterOptions.term_buckets, buildCatalogHref(catalogPath, { ...filters, termBucket: "", page: 1 }));
 
   return chips;
 }
@@ -625,7 +643,7 @@ function addSingleChip(
   }
 }
 
-function buildPagination(products: PublicProductsResponse, filters: ProductGridPageFilters) {
+function buildPagination(products: PublicProductsResponse, filters: ProductGridPageFilters, catalogPath: "/loans" | "/products") {
   if (products.total_pages <= 1) {
     return null;
   }
@@ -633,13 +651,22 @@ function buildPagination(products: PublicProductsResponse, filters: ProductGridP
   return {
     hasPrevious: products.page > 1,
     hasNext: products.page < products.total_pages,
-    previousHref: buildProductsHref(filters, { page: Math.max(1, products.page - 1) }),
-    nextHref: buildProductsHref(filters, { page: Math.min(products.total_pages, products.page + 1) })
+    previousHref: buildCatalogHref(catalogPath, { ...filters, page: Math.max(1, products.page - 1) }),
+    nextHref: buildCatalogHref(catalogPath, { ...filters, page: Math.min(products.total_pages, products.page + 1) })
   };
 }
 
-function buildProductsHref(filters: ProductGridPageFilters, overrides: Partial<ProductGridPageFilters>) {
-  return buildPublicHref("/products", { ...filters, ...overrides });
+function buildCatalogHref(catalogPath: "/loans" | "/products", filters: ProductGridPageFilters) {
+  return buildPublicHref(catalogPath, filters);
+}
+
+function loanMetricLabel(field: "rateType" | "term", locale: string) {
+  const labels = {
+    en: { rateType: "Rate type", term: "Term" },
+    ko: { rateType: "금리 유형", term: "기간" },
+    ja: { rateType: "金利タイプ", term: "期間" }
+  };
+  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
 }
 
 function buildProductDetailHref(filters: ProductGridPageFilters, productId: string) {

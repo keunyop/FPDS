@@ -144,10 +144,13 @@ A URL should be promoted to a generated `detail` source only when:
 - the page remains same-domain and fetch-safe
 
 Runtime refinement:
+- same-site checks canonicalize the leading `www.` label, so a bank homepage may safely redirect between `www.example.ca` and `example.ca` without widening the fetch allowlist beyond that registrable host scope.
 - strong page-level evidence may override an AI `supporting_html` role only when the candidate is a non-seed HTML page with a product-identity phrase in the title or primary heading, multiple distinct product-attribute signals, no negative signals, no legal/terms/disclosure URL pattern, sufficient AI relevance, and no supporting/not-detail AI reason code. This applies across product types, so explicit named product pages can recover from a conservative supporting classification while service, transfer, rates, calculator, and category pages remain non-candidate-producing.
+- a high-confidence AI `detail` classification plus confirmed title/heading product identity and product attributes may recover from navigation-wide negative terms; hard scope exclusions such as business, investor, registered-plan wrapper, or another product type remain vetoes.
 - repeated occurrences of one attribute term count once; they cannot manufacture the multiple independent signals required for a strong-page override.
 - AI `irrelevant` remains a veto for non-seed candidates, and terms/legal/disclosure pages remain non-detail even when test fixtures or surrounding content carry product keywords.
 - when a successful rediscovery explicitly rejects a previously generated non-seed `detail` URL, that generated source is made inactive before the next collection scope is materialized. Fetch-unavailable candidates are preserved rather than deactivated because a transient network failure is not evidence that the source is invalid.
+- promoted pages with the same bank, product type, confirmed page title, and confirmed primary heading collapse into one canonical detail source; locale or host variants are retained as aliases. Byte-identical target snapshots are also deduplicated before normalization as a second safety layer.
 
 Otherwise:
 - demote to `supporting_html` if the page is useful but not candidate-producing

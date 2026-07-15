@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 import { ProductGridSurface } from "@/components/fpds/public/product-grid-surface";
-import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
+import { getPublicCatalogCopy, normalizePublicLocale } from "@/lib/public-locale";
 import { fetchPublicFilters, fetchPublicProducts } from "@/lib/public-api";
 import {
-  buildGlobalFilterSearchParams,
   buildProductsSearchParams,
+  DEPOSIT_PRODUCT_TYPES,
   parseProductGridPageFilters
 } from "@/lib/public-query";
 
@@ -16,17 +16,17 @@ type ProductGridPageProps = {
 export async function generateMetadata({ searchParams }: ProductGridPageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
   const locale = normalizePublicLocale(typeof resolvedSearchParams.locale === "string" ? resolvedSearchParams.locale : "");
-  const copy = getPublicMessages(locale);
+  const copy = getPublicCatalogCopy(locale, "deposit");
 
   return {
-    title: copy.grid.pageTitle,
-    description: copy.grid.pageDescription
+    title: copy.pageTitle,
+    description: copy.pageDescription
   };
 }
 
 export default async function ProductGridPage({ searchParams }: ProductGridPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const filters = parseProductGridPageFilters(resolvedSearchParams);
+  const filters = parseProductGridPageFilters(resolvedSearchParams, DEPOSIT_PRODUCT_TYPES);
 
   let products = null;
   let topProducts = null;
@@ -40,7 +40,7 @@ export default async function ProductGridPage({ searchParams }: ProductGridPageP
     const [productsResponse, topProductsResponse, filterResponse] = await Promise.all([
       fetchPublicProducts(buildProductsSearchParams(filters)),
       fetchPublicProducts(topProductsSearchParams),
-      fetchPublicFilters(buildGlobalFilterSearchParams(filters))
+      fetchPublicFilters(buildProductsSearchParams(filters))
     ]);
     products = productsResponse;
     topProducts = topProductsResponse;
@@ -52,6 +52,7 @@ export default async function ProductGridPage({ searchParams }: ProductGridPageP
   return (
     <ProductGridSurface
       apiUnavailable={apiUnavailable}
+      catalog="deposit"
       filterOptions={filterOptions}
       filters={filters}
       products={products}

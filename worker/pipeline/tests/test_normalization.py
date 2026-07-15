@@ -16,7 +16,7 @@ from worker.pipeline.fpds_normalization.persistence import (
     NormalizationDatabaseConfig,
     PsqlNormalizationRepository,
 )
-from worker.pipeline.fpds_normalization.service import NormalizationService
+from worker.pipeline.fpds_normalization.service import NormalizationService, _clean_product_context_fields
 from worker.pipeline.fpds_normalization.storage import (
     NormalizationStorageConfig,
     build_object_store,
@@ -28,6 +28,57 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_product_context_cleanup_suppresses_navigation_and_marketing_rate_copy(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Mortgage",
+            "description_short": "Go to main content",
+            "summary_text": "Home",
+            "eligibility_text": "And we understand that you sometimes need to make adjustments",
+            "application_method": (
+                "Main navigation Online banking Find an ATM Find a branch About us Contact us "
+                "Credit cards Chequing accounts Savings accounts Personal loans Mortgages Calculators "
+                "Apply online after reviewing the product details."
+            ),
+            "mortgage_rate": "Competitive mortgage rates help you choose a solution that suits your financial goals.",
+            "deposit_insurance": (
+                "FAQs Automated property valuation Calculators Mortgage loan calculator Get Started Mortgage rates "
+                "Workflows Find your BDM Tools and Support Advisor Access Marketing material."
+            ),
+            "post_maturity_interest_rate": (
+                "Interest payments can be deposited into a Canadian bank account. For terms of 2 to 5 years, "
+                "interest is compounded and paid at maturity, and payments can be sent to the client or advisor."
+            ),
+            "prepayment_privileges": "Prepay up to 20% of the original principal each year.",
+            "withdrawal_limit_text": (
+                "The smart way to save with automatic contributions, one free withdrawal a month and easy access."
+            ),
+        }
+        normalized_values = dict(payload)
+        mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+        notes: list[str] = []
+
+        _clean_product_context_fields(
+            product_type_family=None,
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+            runtime_notes=notes,
+        )
+
+        self.assertNotIn("description_short", payload)
+        self.assertNotIn("summary_text", payload)
+        self.assertNotIn("application_method", payload)
+        self.assertNotIn("mortgage_rate", payload)
+        self.assertNotIn("deposit_insurance", payload)
+        self.assertNotIn("post_maturity_interest_rate", payload)
+        self.assertNotIn("eligibility_text", payload)
+        self.assertEqual(payload["withdrawal_limit_text"], "One free withdrawal a month.")
+        self.assertEqual(normalized_values["withdrawal_limit_text"], "One free withdrawal a month.")
+        self.assertEqual(payload["prepayment_privileges"], "Prepay up to 20% of the original principal each year.")
+        self.assertNotIn("mortgage_rate", normalized_values)
+        self.assertNotIn("application_method", mapping_metadata)
+        self.assertIn("incorrectly mapped as product data", notes[0])
+
     def test_normalizes_candidate_and_field_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-service")
         try:
@@ -1234,6 +1285,45 @@ class NormalizationServiceTests(unittest.TestCase):
 
 
 class SupportingMergeTests(unittest.TestCase):
+    def test_generic_gic_support_rejects_bank_only_ownership_percentage_match(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict(
+                    "product_name",
+                    "Long-Term Guaranteed Investment Certificates (GICs) | B2B Bank",
+                    "string",
+                    0.88,
+                ),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="standard_rate",
+                        anchor_value="corporate-ownership",
+                        excerpt=(
+                            "B2B Bank Non-Registered GIC Schedule A. List each person who owns or controls "
+                            "25% or more of the voting shares of the corporation."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-B2B-GIC-long-term",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-B2B-GIC-corporate-form": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertNotIn("public_display_rate", fields_by_name)
+
     def test_supporting_source_ids_for_td_targets(self) -> None:
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-002"), ("BMO-SAV-006",))
         self.assertEqual(supporting_source_ids_for_target("BMO-SAV-003"), ("BMO-SAV-006",))

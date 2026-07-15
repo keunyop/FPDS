@@ -231,6 +231,11 @@ Minimum columns:
 - created at
 - status
 
+Runtime review-triage refinement:
+- Queue rows use one backend diagnosis contract for the issue category, concise headline, affected fields, and recommended decision.
+- Missing or suspect fields are shown before generic validation context; raw issue codes remain secondary diagnostic data.
+- Recommended decisions use the actual review actions (`approve`, `edit_approve`, `reject`, `defer`) so list and detail guidance cannot conflict.
+
 ### 7.3 Review Detail / Trace Viewer
 
 Purpose:
@@ -244,6 +249,14 @@ Minimum panels:
 - decision form
 - override diff preview
 - action history
+
+Runtime decision refinement:
+- a product-style candidate summary appears before decision controls, reusing the Public detail hierarchy of identity, three product-family-specific metrics, product facts, and key conditions while clearly retaining the candidate state
+- the primary field list is the union of expected, collected, evidence-linked, and currently approved fields, with missing or suspect values first
+- each editable row shows the agent value, current effective value, inline correction control, and immediately expandable evidence
+- the recommended action is the primary decision control; alternatives remain available according to role and review state
+- arbitrary raw-field editing is an advanced fallback, not the default review path
+- explanatory copy stays short and does not repeat the same issue across multiple summary panels
 
 ### 7.4 Source Registry Management
 
@@ -313,6 +326,12 @@ Purpose:
 - source processing summary
 - failure section
 - related review tasks
+
+Run summary rule:
+- final source success/failure counts describe the complete collection scope, not only the last worker stage
+- a target source succeeds after validation/routing; an evidence-only supporting source succeeds after extraction
+- byte-identical target aliases may be counted as safely deduplicated rather than normalized into duplicate candidates
+- upstream source failures remain visible in the final partial-completion flag and error summary
 - usage summary
 
 ### 7.6 Change History and Product Record

@@ -10,6 +10,10 @@ _PRODUCT_TYPE_LABELS = {
     "chequing": "Chequing",
     "savings": "Savings",
     "gic": "GIC",
+    "credit-card": "Credit Card",
+    "mortgage": "Mortgage",
+    "personal-loan": "Personal Loan",
+    "line-of-credit": "Line of Credit",
 }
 _RANKING_KEYS = (
     "highest_display_rate",
@@ -113,7 +117,7 @@ class AggregateRefreshService:
         payload = dict(canonical_row.canonical_payload)
         bank_name = canonical_row.bank_name or str(payload.get("bank_name") or canonical_row.bank_code)
         subtype_code = canonical_row.subtype_code or _coerce_string(payload.get("subtype_code"))
-        public_display_rate = _coerce_float(payload.get("public_display_rate"))
+        public_display_rate = _public_display_rate(payload=payload, product_family=canonical_row.product_family)
         public_display_fee = _coerce_float(payload.get("public_display_fee"))
         monthly_fee = _coerce_float(payload.get("monthly_fee"))
         minimum_balance = _coerce_float(payload.get("minimum_balance"))
@@ -399,6 +403,23 @@ def _build_product_refresh_metadata(
         "tax_benefits",
         "deposit_insurance",
         "effective_date",
+        "description_short",
+        "mortgage_rate",
+        "interest_rate",
+        "purchase_interest_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "loan_amount_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "fees_text",
     ):
         value = _coerce_string(payload.get(field_name))
         if value is not None:
@@ -473,6 +494,32 @@ def _coerce_float(value: object) -> float | None:
     try:
         return float(value)
     except (TypeError, ValueError):
+        return None
+
+
+def _public_display_rate(*, payload: dict[str, object], product_family: str) -> float | None:
+    direct = _coerce_rate(payload.get("public_display_rate"))
+    if direct is not None:
+        return direct
+    if product_family != "lending":
+        return None
+    for field_name in ("mortgage_rate", "interest_rate", "purchase_interest_rate"):
+        rate = _coerce_rate(payload.get(field_name))
+        if rate is not None:
+            return rate
+    return None
+
+
+def _coerce_rate(value: object) -> float | None:
+    numeric = _coerce_float(value)
+    if numeric is not None:
+        return numeric
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip().rstrip("% ").strip()
+    try:
+        return float(normalized)
+    except ValueError:
         return None
 
 

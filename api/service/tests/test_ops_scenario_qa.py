@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import json
 import unittest
 
 from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
@@ -158,6 +159,14 @@ class OpsScenarioQATests(unittest.TestCase):
         self.assertEqual(review_decision_call["action_type"], "edit_approve")
         self.assertIn("Monthly Fee: 5 -> 0", str(review_decision_call["diff_summary"]))
         self.assertIn("Notes: empty -> No monthly fee", str(review_decision_call["diff_summary"]))
+        candidate_update = next(
+            params
+            for sql, params in connection.calls
+            if "UPDATE normalized_candidate" in sql
+        )
+        persisted_candidate_payload = json.loads(str(candidate_update["candidate_payload"]))
+        self.assertEqual(persisted_candidate_payload["monthly_fee"], 0)
+        self.assertEqual(persisted_candidate_payload["notes"], "No monthly fee")
 
     def test_review_edit_approve_updates_canonical_product_name_from_override(self) -> None:
         decided_at = datetime(2026, 4, 13, 23, 30, tzinfo=UTC)

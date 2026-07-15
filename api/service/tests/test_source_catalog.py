@@ -20,6 +20,8 @@ from api_service.source_catalog import (
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
     _deactivate_rejected_generated_detail_sources,
+    _dedupe_detail_rows_by_product_identity,
+    _extract_allowed_links,
     _generate_bank_code,
     _invoke_openai_parallel_scorer,
     _link_is_relevant_supporting_source,
@@ -89,6 +91,100 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_detail_identity_dedupe_collapses_locale_aliases(self) -> None:
+        base = {
+            "bank_code": "B2B",
+            "product_type": "gic",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "priority": "P1",
+            "seed_source_flag": False,
+            "discovery_metadata": {
+                "product_identity_match": True,
+                "page_title": "B2B Bank | Short Term GICs",
+                "primary_heading": "Short Term GICs",
+            },
+        }
+        rows = [
+            {
+                **base,
+                "source_id": "AUTO-B2B-GIC-A",
+                "source_url": "https://b2bbank.com/en/deposits/short-term-gics",
+                "normalized_url": "https://b2bbank.com/en/deposits/short-term-gics",
+                "alias_urls": [],
+            },
+            {
+                **base,
+                "source_id": "AUTO-B2B-GIC-B",
+                "source_url": "https://www.b2bbank.com/deposits/short-term-gics",
+                "normalized_url": "https://www.b2bbank.com/deposits/short-term-gics",
+                "alias_urls": [],
+            },
+        ]
+
+        deduped, duplicate_urls = _dedupe_detail_rows_by_product_identity(rows)
+
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(len(duplicate_urls), 1)
+        self.assertIn(duplicate_urls[0], deduped[0]["alias_urls"])
+
+    def test_extract_allowed_links_accepts_www_and_apex_aliases_only(self) -> None:
+        html = """
+        <a href="https://bridgewaterbank.ca/personal/savings">Savings</a>
+        <a href="https://www.bridgewaterbank.ca/personal/gic">GIC</a>
+        <a href="https://bridgewaterbank.ca.evil.example/phish">Bad</a>
+        """
+
+        links = _extract_allowed_links(
+            html_text=html,
+            base_url="https://www.bridgewaterbank.ca/",
+            hostname="www.bridgewaterbank.ca",
+        )
+
+        self.assertEqual(
+            [item.normalized_url for item in links],
+            [
+                "https://bridgewaterbank.ca/personal/savings",
+                "https://www.bridgewaterbank.ca/personal/gic",
+            ],
+        )
+
+    def test_confirmed_product_identity_can_override_navigation_negative_terms(self) -> None:
+        url = "https://www.examplebank.ca/en/personal/mortgages/refinance"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Refinance your mortgage",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=8.0,
+            confidence_band="high",
+            reason_codes=["named_product_detail"],
+            short_rationale="A named consumer mortgage detail page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=7,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match"],
+            page_title="Refinance your mortgage",
+            primary_heading="Refinance your mortgage",
+            heading_match=True,
+            attribute_signal_count=2,
+            negative_signal_count=3,
+            product_identity_match=True,
+        )
+
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
     def _workspace_temp_path(self, name: str) -> Path:
         path = Path.cwd() / "tmp" / "test-source-catalog" / name
         if path.exists():
@@ -498,6 +594,7 @@ class SourceCatalogTests(unittest.TestCase):
                         "country_code": "CA",
                         "bank_name": "Atlas Bank",
                         "status": "active",
+                        "product_family": "deposit",
                         "homepage_url": "https://www.atlasbank.ca",
                         "normalized_homepage_url": "https://www.atlasbank.ca",
                         "source_language": "en",
@@ -702,6 +799,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "country_code": "CA",
                 "product_type": "savings",
                 "source_catalog_product_type": "savings",
+                "product_family": "deposit",
                 "source_language": "en",
                 "homepage_url": "https://www.atlasbank.ca",
                 "normalized_homepage_url": "https://www.atlasbank.ca",

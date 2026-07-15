@@ -19,6 +19,14 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
             canonical_deposit_rate_suppression_reason(value="3.10", context="3 year annual interest rate 3.10%"),
         )
 
+    def test_corporate_ownership_percentage_is_not_a_deposit_rate(self) -> None:
+        context = "List each person who owns or controls 25% or more of the voting shares of the corporation."
+
+        self.assertEqual(
+            canonical_deposit_rate_suppression_reason(value="25", context=context),
+            "implausible_annual_deposit_rate",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

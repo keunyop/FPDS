@@ -36,6 +36,7 @@ from api_service.source_registry_utils import (
 )
 from worker.discovery.fpds_discovery.discovery import extract_links
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
+from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
 from worker.pipeline.fpds_ai_runtime import estimated_cost_usd
 
 if TYPE_CHECKING:
@@ -1008,6 +1009,7 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             sci.country_code,
             sci.product_type,
             sci.status,
+            ptr.product_family,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1021,6 +1023,8 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
+        JOIN product_type_registry AS ptr
+            ON ptr.product_type_code = sci.product_type
         LEFT JOIN source_registry_item AS sri
             ON sri.bank_code = sci.bank_code
            AND sri.product_type = sci.product_type
@@ -1369,6 +1373,7 @@ def start_source_catalog_collection(
             sci.country_code,
             sci.product_type,
             sci.status,
+            ptr.product_family,
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
@@ -1376,6 +1381,9 @@ def start_source_catalog_collection(
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
+        JOIN product_type_registry AS ptr
+            ON ptr.product_type_code = sci.product_type
+           AND ptr.status = 'active'
         WHERE sci.catalog_item_id = ANY(%(catalog_item_ids)s)
         ORDER BY b.bank_name, sci.product_type
         """,
@@ -1456,6 +1464,7 @@ def _build_source_catalog_collection_plan(
                 "country_code": str(row["country_code"]),
                 "product_type": product_type,
                 "source_catalog_product_type": original_product_type,
+                "product_family": str(row.get("product_family") or "deposit"),
                 "source_language": str(row.get("source_language") or "en"),
                 "homepage_url": str(row["homepage_url"]),
                 "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
@@ -1868,7 +1877,7 @@ def _generate_sources_from_homepage(
     if not hostname:
         raise SourceRegistryError(status_code=422, code="bank_homepage_invalid", message="Bank homepage URL must include a hostname.")
 
-    fetch_policy = DiscoveryFetchPolicy(allowed_domains=(hostname,))
+    fetch_policy = DiscoveryFetchPolicy(allowed_domains=_discovery_allowed_domains(hostname))
     detail_links: list[tuple[int, Any]] = []
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
@@ -2572,6 +2581,7 @@ def _score_candidate_links_with_ai(
 
     notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
     hostname = urlparse(normalized_homepage_url).hostname or ""
+    allowed_domains = _discovery_allowed_domains(hostname)
     scores: dict[str, AiParallelCandidateScore] = {}
     valid_candidate_urls = {item.normalized_url for item in candidates}
     for item in resolution.get("candidate_scores", []):
@@ -2584,7 +2594,7 @@ def _score_candidate_links_with_ai(
         if normalized_url not in valid_candidate_urls:
             notes.append(f"AI scored an unbounded candidate for {candidate_label}; the score was ignored.")
             continue
-        if not parsed_hostname or not (parsed_hostname == hostname or parsed_hostname.endswith(f".{hostname}")):
+        if not host_matches_allowed_domains(parsed_hostname, allowed_domains):
             notes.append(f"AI scored an out-of-scope URL for {candidate_label}; the score was ignored.")
             continue
         if infer_source_type(normalized_url) != "html":
@@ -2898,6 +2908,13 @@ def _promote_detail_candidates(
             row["source_id"] = candidate.seed_source_id
         detail_rows.append(row)
         promoted_count += 1
+    detail_rows, duplicate_detail_urls = _dedupe_detail_rows_by_product_identity(detail_rows)
+    if duplicate_detail_urls:
+        rejected_detail_urls.extend(duplicate_detail_urls)
+        notes.append(
+            f"Collapsed {len(duplicate_detail_urls)} same-product locale or host alias page(s) into canonical detail sources."
+        )
+    promoted_count = len(detail_rows)
     if promoted_count:
         fallback_parts = []
         if seed_fetch_fallback_count:
@@ -2915,6 +2932,38 @@ def _promote_detail_candidates(
         _dedupe_preserve_order(rejected_detail_urls),
         _dedupe_preserve_order([note for note in notes if note]),
     )
+
+
+def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
+    by_identity: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    unkeyed: list[dict[str, Any]] = []
+    duplicate_urls: list[str] = []
+    for row in rows:
+        metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
+        page_title = " ".join(str(metadata.get("page_title") or "").lower().split())
+        primary_heading = " ".join(str(metadata.get("primary_heading") or "").lower().split())
+        if not metadata.get("product_identity_match") or not page_title or not primary_heading:
+            unkeyed.append(row)
+            continue
+        identity = (str(row["bank_code"]), str(row["product_type"]), page_title, primary_heading)
+        current = by_identity.get(identity)
+        if current is None:
+            by_identity[identity] = row
+            continue
+        preferred, duplicate = sorted((current, row), key=_generated_source_row_sort_key)
+        alias_urls = list(
+            dict.fromkeys(
+                [
+                    *list(preferred.get("alias_urls") or []),
+                    str(duplicate.get("source_url") or ""),
+                    str(duplicate.get("normalized_url") or ""),
+                ]
+            )
+        )
+        preferred["alias_urls"] = [url for url in alias_urls if url and url != preferred.get("normalized_url")]
+        by_identity[identity] = preferred
+        duplicate_urls.append(str(duplicate["normalized_url"]))
+    return [*by_identity.values(), *unkeyed], _dedupe_preserve_order(duplicate_urls)
 
 
 def _ordered_detail_candidates(*, candidates: list[HomepageCandidate], ai_scores: dict[str, AiParallelCandidateScore]) -> list[HomepageCandidate]:
@@ -2951,7 +3000,11 @@ def _candidate_promotes_to_detail(
     strong_page_detail_signal = _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
     if _candidate_is_seed_backed(candidate):
         return True
-    if page_evidence.negative_signal_count >= 2:
+    confirmed_product_identity = _candidate_has_confirmed_product_identity(
+        ai_score=ai_score,
+        page_evidence=page_evidence,
+    )
+    if page_evidence.negative_signal_count >= 2 and not confirmed_product_identity:
         return False
     if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail") and not strong_page_detail_signal:
         return False
@@ -2969,6 +3022,30 @@ def _candidate_promotes_to_detail(
             and page_evidence.negative_signal_count == 0
         )
     return candidate.heuristic_score > 0 or strong_page_detail_signal
+
+
+def _candidate_has_confirmed_product_identity(
+    *,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    if ai_score is None or ai_score.predicted_role != "detail" or ai_score.relevance_score < 4.0:
+        return False
+    reason_codes = set(page_evidence.page_evidence_reason_codes)
+    if any(
+        code in reason_codes
+        for code in (
+            "registered_plan_wrapper",
+            "other_product_type",
+            "non_product_or_investor_page",
+        )
+    ):
+        return False
+    return (
+        page_evidence.product_identity_match
+        and (page_evidence.heading_match or "title_semantic_match" in reason_codes)
+        and page_evidence.attribute_signal_count >= 1
+    )
 
 
 def _candidate_has_strong_page_detail_signal(*, candidate: HomepageCandidate, page_evidence: PageEvidenceAssessment) -> bool:
@@ -3257,13 +3334,21 @@ def _negative_term_hits(text: str) -> int:
 
 
 def _extract_allowed_links(*, html_text: str, base_url: str, hostname: str) -> list[Any]:
+    allowed_domains = _discovery_allowed_domains(hostname)
     allowed_links: list[Any] = []
     for link in extract_links(html_text, base_url=base_url):
         link_hostname = urlparse(link.normalized_url).hostname
-        if not link_hostname or not (link_hostname == hostname or link_hostname.endswith(f".{hostname}")):
+        if not link_hostname or not host_matches_allowed_domains(link_hostname, allowed_domains):
             continue
         allowed_links.append(link)
     return allowed_links
+
+
+def _discovery_allowed_domains(hostname: str) -> tuple[str, ...]:
+    normalized = hostname.strip().lower().rstrip(".")
+    if normalized.startswith("www."):
+        normalized = normalized[4:]
+    return (normalized,)
 
 
 def _dedupe_page_candidates(items: list[tuple[int, str, str]]) -> list[tuple[int, str, str]]:

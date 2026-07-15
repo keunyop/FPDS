@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_m5x_wgxkLzh42qgV",
+  "correlation_id": "corr_HynCcWkTQCHn__EI",
+  "request_id": "public-loan-b2b-mortgage-collection-20260714",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "Codex Product Owner-requested lending verification",
+  "actor": {
+    "user_id": "system:codex",
+    "email": null,
+    "display_name": "Codex Product Owner-requested lending verification",
+    "role": "system"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260715_052135_b2b_mortgage_collect_4vRhTJw6",
+      "catalog_item_id": "catalog-ca-b2b-mortgage",
+      "bank_code": "B2B",
+      "bank_name": "B2B Bank",
+      "country_code": "CA",
+      "product_type": "mortgage",
+      "source_catalog_product_type": "mortgage",
+      "product_family": "lending",
+      "source_language": "en",
+      "homepage_url": "https://b2bbank.com/",
+      "normalized_homepage_url": "https://b2bbank.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

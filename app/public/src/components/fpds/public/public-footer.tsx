@@ -66,6 +66,7 @@ function FooterContent() {
   const footerCopy = FOOTER_COPY[locale];
   const dashboardHref = buildScopedPublicHrefFromSearchParams("/dashboard", searchParams);
   const productsHref = buildScopedPublicHrefFromSearchParams("/products", searchParams);
+  const loansHref = buildScopedPublicHrefFromSearchParams("/loans", searchParams);
 
   return (
     <footer className="border-t border-border/80 bg-card/80">
@@ -85,7 +86,7 @@ function FooterContent() {
             <FooterGroup title={footerCopy.explore}>
               <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
               <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
-              <FooterMuted label={copy.nav.loan} note={footerCopy.planned} />
+              <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
             </FooterGroup>
             <FooterGroup title={footerCopy.coverage}>
               <FooterLink href={productsHref}>{copy.dashboard.banksInScope}</FooterLink>
@@ -132,15 +133,6 @@ function FooterLink({ children, href }: Readonly<{ children: ReactNode; href: st
     <Link className="text-sm text-muted-foreground transition-colors hover:text-foreground" href={href}>
       {children}
     </Link>
-  );
-}
-
-function FooterMuted({ label, note }: { label: string; note: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 text-sm text-muted-foreground/75" aria-disabled="true">
-      <span>{label}</span>
-      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">{note}</span>
-    </span>
   );
 }
 

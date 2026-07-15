@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-13`:
+As of `2026-07-14`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -28,6 +28,8 @@ As of `2026-07-13`:
 - `WBS 4.4` evidence trace viewer is now complete with field-selectable trace drilldown, enriched evidence metadata, parsed mapping context, and model-run references on the live `/admin/reviews/:reviewTaskId` route
 - Review Queue collection hardening now prevents AI-classified support/service/rates pages from being promoted through page-evidence overrides without a real product-identity signal, deactivates explicitly rejected non-seed generated detail rows on rediscovery, and gives reviewers registry-backed bank filters plus generic field/evidence/discovery context; an Alterna chequing live rerun completed with two valid candidates and zero new review tasks
 - Runs/Review Queue hardening now restricts standalone candidates to `detail` sources, preserves supporting rate evidence without publishing it as a product, rejects retail-scope business pages, reparses snapshots by parser version, safely retries completed-partial runs, and shows source role, missing expected fields, and a recommended reviewer action in the Queue. Alterna live verification auto-approved Savings at `1.05%` and eTerm GIC rates at `2.65%/2.85%/3.10%` with zero new review tasks.
+- Multi-bank collection/review hardening now treats `www` and apex redirects as the same bounded bank host, recovers confirmed product details from navigation-wide negative terms, collapses same-product locale/host aliases and byte-identical target snapshots, preserves end-to-end source failures in final Runs summaries, suppresses navigation/marketing copy from candidate fields, and gives Queue/detail one problem-first diagnosis with a Public-detail-style candidate product summary, inline field correction, and evidence.
+- Public now has separate Deposit and Loan catalog routes. Loan accepts review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products through the same aggregate snapshot and public-only data boundary; candidates that still require review remain non-public.
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns

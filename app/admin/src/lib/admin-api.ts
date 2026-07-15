@@ -34,6 +34,34 @@ export type SignupRequestListResponse = {
   };
 };
 
+export type ReviewDiagnosisAction = "approve" | "edit_approve" | "reject" | "defer";
+
+export type ReviewDiagnosisAffectedField = {
+  field_name: string;
+  label: string;
+  issue_type: string | null;
+  current_value: unknown;
+};
+
+export type ReviewDiagnosis = {
+  category: string;
+  headline: string;
+  recommended_action: ReviewDiagnosisAction;
+  affected_fields: ReviewDiagnosisAffectedField[];
+};
+
+export type ReviewFieldItem = {
+  field_name: string;
+  label: string;
+  agent_value: unknown;
+  effective_value: unknown;
+  missing: boolean;
+  suspect: boolean;
+  issue_type: string | null;
+  evidence_count: number;
+  editable: boolean;
+};
+
 export type ReviewTaskListItem = {
   review_task_id: string;
   candidate_id: string;
@@ -57,7 +85,8 @@ export type ReviewTaskListItem = {
   }>;
   source_role: string;
   missing_expected_fields: string[];
-  recommended_action: "reject_non_product_source" | "verify_missing_fields" | "inspect_validation_evidence" | "review_evidence";
+  review_diagnosis: ReviewDiagnosis;
+  recommended_action: ReviewDiagnosisAction;
   created_at: string;
   updated_at: string;
 };
@@ -627,6 +656,8 @@ export type ReviewTaskDetailResponse = {
     value: unknown;
     evidence_count: number;
   }>;
+  review_diagnosis: ReviewDiagnosis;
+  review_field_items: ReviewFieldItem[];
   field_trace_groups: ReviewFieldTraceGroup[];
   evidence_summary: {
     item_count: number;

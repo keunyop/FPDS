@@ -306,24 +306,34 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2">
-                          <p className="text-sm leading-6 text-foreground">{item.issue_summary}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {item.issue_summary_items.slice(0, 2).map((issue) => (
-                              <span
-                                className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", issueBadgeClasses(issue.severity))}
-                                key={`${item.review_task_id}-${issue.code}`}
-                              >
-                                {issue.code}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", diagnosisBadgeClasses(item.review_diagnosis.category))}>
+                                {diagnosisCategoryLabel(item.review_diagnosis.category)}
                               </span>
-                            ))}
-                          </div>
-                          <div className="grid gap-1 rounded-xl border border-border/70 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
-                            <span><span className="font-medium text-foreground">{RESULTS_COPY.sourceRole}:</span> {toTitleCase(item.source_role)}</span>
-                            {item.missing_expected_fields.length > 0 ? (
-                              <span><span className="font-medium text-foreground">{RESULTS_COPY.missingFields}:</span> {item.missing_expected_fields.map(toTitleCase).join(", ")}</span>
+                              <span className="text-xs text-muted-foreground">{toTitleCase(item.source_role)}</span>
+                            </div>
+                            <p className="text-sm font-medium leading-6 text-foreground">{item.review_diagnosis.headline}</p>
+                            {item.review_diagnosis.affected_fields.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {item.review_diagnosis.affected_fields.slice(0, 4).map((field) => (
+                                  <span
+                                    className="rounded-full border border-warning/25 bg-warning-soft px-2.5 py-1 text-[11px] font-medium text-warning"
+                                    key={`${item.review_task_id}-${field.field_name}`}
+                                  >
+                                    {field.label}
+                                  </span>
+                                ))}
+                                {item.review_diagnosis.affected_fields.length > 4 ? (
+                                  <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                                    +{item.review_diagnosis.affected_fields.length - 4}
+                                  </span>
+                                ) : null}
+                              </div>
                             ) : null}
-                            <span><span className="font-medium text-foreground">{RESULTS_COPY.recommendation}:</span> {recommendedActionLabel(item.recommended_action)}</span>
-                          </div>
+                            <div className="rounded-lg border border-border/70 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground">{RESULTS_COPY.recommendation}:</span>{" "}
+                              {recommendedActionLabel(item.review_diagnosis.recommended_action)}
+                            </div>
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -487,24 +497,42 @@ function validationBadgeClasses(status: string) {
   }
 }
 
-function issueBadgeClasses(severity: string) {
-  if (severity === "error") {
-    return "bg-destructive/10 text-destructive";
-  }
-  return "bg-warning-soft text-warning";
-}
-
 function recommendedActionLabel(action: ReviewTaskListItem["recommended_action"]) {
   switch (action) {
-    case "reject_non_product_source":
-      return "Reject: supporting evidence is not a standalone product";
-    case "verify_missing_fields":
-      return "Verify the listed fields, then edit and approve";
-    case "inspect_validation_evidence":
-      return "Inspect validation evidence before deciding";
+    case "edit_approve":
+      return "Correct fields and approve";
+    case "reject":
+      return "Reject";
+    case "defer":
+      return "Defer and investigate";
     default:
-      return "Review the evidence and decide";
+      return "Approve after verification";
   }
+}
+
+function diagnosisCategoryLabel(category: string) {
+  switch (category) {
+    case "non_product_source":
+      return "Not a product";
+    case "suspect_fields":
+      return "Wrong values";
+    case "missing_fields":
+      return "Missing values";
+    case "validation_error":
+      return "Validation error";
+    default:
+      return "Evidence check";
+  }
+}
+
+function diagnosisBadgeClasses(category: string) {
+  if (category === "non_product_source") {
+    return "bg-destructive/10 text-destructive";
+  }
+  if (category === "evidence_review") {
+    return "bg-info-soft text-info";
+  }
+  return "bg-warning-soft text-warning";
 }
 
 function toTitleCase(value: string) {

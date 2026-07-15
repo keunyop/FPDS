@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_8enjijAejDwwJNjo",
+  "correlation_id": "corr_nLn3-9328lmkdhpR",
+  "request_id": "req_codex_goal_20260715043438",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260715_043438_bridgewater_savings_collect_FT-i2R_0",
+      "catalog_item_id": "catalog-ca-bridgewater-savings",
+      "bank_code": "BRIDGEWATER",
+      "bank_name": "Bridgewater Bank",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_catalog_product_type": "savings",
+      "product_family": "deposit",
+      "source_language": "en",
+      "homepage_url": "https://www.bridgewaterbank.ca/",
+      "normalized_homepage_url": "https://www.bridgewaterbank.ca/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

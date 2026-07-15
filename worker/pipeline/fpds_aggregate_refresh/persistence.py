@@ -155,7 +155,10 @@ FROM (
       ON pv.product_id = cp.product_id
      AND pv.version_no = cp.current_version_no
     WHERE cp.country_code = :'country_code'
-      AND cp.product_family = 'deposit'
+      AND (
+            cp.product_family = 'deposit'
+            OR cp.product_type IN ('mortgage', 'personal-loan', 'line-of-credit')
+          )
       AND (
             jsonb_array_length(:'bank_codes_json'::jsonb) = 0
             OR cp.bank_code IN (SELECT jsonb_array_elements_text(:'bank_codes_json'::jsonb))

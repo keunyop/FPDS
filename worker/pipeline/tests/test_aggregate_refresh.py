@@ -71,6 +71,38 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         )
         self.assertIn("bucket_policy", result.refresh_metadata)
 
+    def test_lending_projection_uses_a_confirmed_lending_rate_and_keeps_comparison_fields(self) -> None:
+        result = AggregateRefreshService().build_snapshot(
+            snapshot_id="agg-loan-001",
+            refresh_scope="phase1_public",
+            country_code="CA",
+            canonical_rows=[
+                _row(
+                    product_id="mortgage-001",
+                    bank_code="TD",
+                    product_family="lending",
+                    product_type="mortgage",
+                    subtype_code="other",
+                    product_name="TD Fixed Mortgage",
+                    last_changed_at="2026-04-12T00:00:00+00:00",
+                    payload={
+                        "mortgage_rate": "4.49%",
+                        "rate_type": "Fixed",
+                        "term_length_text": "5 years",
+                        "amortization_text": "Up to 30 years",
+                    },
+                )
+            ],
+            refreshed_at="2026-04-13T12:00:00+00:00",
+        )
+
+        projection = result.projection_rows[0]
+
+        self.assertEqual(projection["product_family"], "lending")
+        self.assertEqual(projection["public_display_rate"], 4.49)
+        self.assertEqual(projection["refresh_metadata"]["mortgage_rate"], "4.49%")
+        self.assertEqual(projection["refresh_metadata"]["amortization_text"], "Up to 30 years")
+
 
 class AggregateRefreshPersistenceTests(unittest.TestCase):
     def test_repository_loads_canonical_rows_and_persists_snapshot(self) -> None:
@@ -134,6 +166,7 @@ class AggregateRefreshPersistenceTests(unittest.TestCase):
         load_variables = runner.variables_for_call(2)
         self.assertEqual(ensure_variables["attempted_at"], "2026-04-13T12:00:00+00:00")
         self.assertEqual(load_variables["bank_codes_json"], '["TD"]')
+        self.assertIn("cp.product_type IN ('mortgage', 'personal-loan', 'line-of-credit')", runner.calls[2][1])
         self.assertIn("public_product_projection", runner.calls[3][1])
         self.assertIn("dashboard_metric_snapshot", runner.calls[3][1])
 
@@ -292,6 +325,7 @@ def _row(
     product_name: str,
     last_changed_at: str,
     payload: dict[str, object],
+    product_family: str = "deposit",
     status: str = "active",
 ) -> CanonicalAggregateRow:
     bank_name = {
@@ -306,7 +340,7 @@ def _row(
         bank_code=bank_code,
         bank_name=bank_name,
         country_code="CA",
-        product_family="deposit",
+        product_family=product_family,
         product_type=product_type,
         subtype_code=subtype_code,
         product_name=product_name,

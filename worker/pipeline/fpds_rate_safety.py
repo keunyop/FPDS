@@ -44,6 +44,11 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "redeem up to",
     "withdraw up to",
     "encash up to",
+    "owns or controls",
+    "voting shares",
+    "beneficial ownership",
+    "ownership stake",
+    "ownership, control and structure",
 )
 
 
@@ -53,7 +58,7 @@ def canonical_deposit_rate_suppression_reason(
     context: str | None = None,
 ) -> str | None:
     decimal_value = _to_decimal(value)
-    if decimal_value is not None and decimal_value > MAX_CANONICAL_ANNUAL_DEPOSIT_RATE:
+    if decimal_value is not None and decimal_value >= MAX_CANONICAL_ANNUAL_DEPOSIT_RATE:
         return "implausible_annual_deposit_rate"
 
     normalized_context = _normalize_context(context)
