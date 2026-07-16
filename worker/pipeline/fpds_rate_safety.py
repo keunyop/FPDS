@@ -49,6 +49,20 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "beneficial ownership",
     "ownership stake",
     "ownership, control and structure",
+    "cash back",
+    "cashback",
+    "rewards rate",
+    "reward rate",
+    "prepay up to",
+    "prepayment privilege",
+    "prepayment amount",
+    "original mortgage amount",
+    "original principal each year",
+    "home equity",
+    "minimum equity",
+    "down payment",
+    "loan-to-value",
+    "loan to value",
 )
 
 

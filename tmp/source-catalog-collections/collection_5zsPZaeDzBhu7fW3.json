@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_5zsPZaeDzBhu7fW3",
+  "correlation_id": "corr_3AxPRRCeGcyTjFrH",
+  "request_id": "req_codex_goal_20260716050846",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260716_050846_fairstone_personal-loan_collect_dHPpOcaN",
+      "catalog_item_id": "catalog-ca-fairstone-personal-loan",
+      "bank_code": "FAIRSTONE",
+      "bank_name": "Fairstone Bank of Canada",
+      "country_code": "CA",
+      "product_type": "personal-loan",
+      "source_catalog_product_type": "personal-loan",
+      "product_family": "lending",
+      "source_language": "en",
+      "homepage_url": "https://www.fairstone.ca/",
+      "normalized_homepage_url": "https://www.fairstone.ca/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

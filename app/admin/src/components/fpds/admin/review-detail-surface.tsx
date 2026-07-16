@@ -211,6 +211,14 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
       }),
     [detail.review_field_items],
   );
+  const issueReviewFields = useMemo(
+    () => orderedReviewFields.filter((item) => item.missing || item.suspect),
+    [orderedReviewFields],
+  );
+  const otherReviewFields = useMemo(
+    () => orderedReviewFields.filter((item) => !item.missing && !item.suspect),
+    [orderedReviewFields],
+  );
 
   const decisionDisabled = Boolean(pendingAction);
   const editApproveDisabled =
@@ -315,16 +323,17 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
 
       <ReviewProductPresentation detail={detail} editableValues={editableValues} />
 
-      <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <DecisionRecommendationCard recommendation={recommendation} />
         <SourceDecisionCard detail={detail} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_25rem]">
         <article className="min-w-0 rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
-          <SectionHeading eyebrow="Review fields" title="Agent values and reviewer corrections" />
-          <div className="mt-5 grid gap-3">
-            {orderedReviewFields.map((item) => (
+          <SectionHeading eyebrow="Review fields" title={issueReviewFields.length > 0 ? "Fix flagged values" : "No field issues detected"} />
+          {issueReviewFields.length > 0 ? (
+            <div className="mt-5 grid gap-3">
+              {issueReviewFields.map((item) => (
               <FieldReviewRow
                 editableValue={editableValues[item.field_name] ?? valueToEditableString(item.effective_value)}
                 item={item}
@@ -332,8 +341,28 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
                 onValueChange={(value) => updateEditableField(item.field_name, value)}
                 trace={detail.field_trace_groups.find((traceItem) => traceItem.field_name === item.field_name) ?? null}
               />
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : null}
+
+          {otherReviewFields.length > 0 ? (
+            <details className="mt-5 rounded-lg border border-border/80 bg-background">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
+                Other collected fields ({otherReviewFields.length})
+              </summary>
+              <div className="grid gap-3 border-t border-border/70 p-4">
+                {otherReviewFields.map((item) => (
+                  <FieldReviewRow
+                    editableValue={editableValues[item.field_name] ?? valueToEditableString(item.effective_value)}
+                    item={item}
+                    key={item.field_name}
+                    onValueChange={(value) => updateEditableField(item.field_name, value)}
+                    trace={detail.field_trace_groups.find((traceItem) => traceItem.field_name === item.field_name) ?? null}
+                  />
+                ))}
+              </div>
+            </details>
+          ) : null}
 
           <details className="mt-5 rounded-lg border border-dashed border-border bg-background">
             <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-muted-foreground">Add another field (advanced)</summary>
@@ -398,32 +427,6 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
               </p>
             ) : (
               <div className="mt-5 grid gap-4">
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-foreground">Reason code</span>
-                  <select
-                    className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
-                    onChange={(event) => setReasonCode(event.target.value)}
-                    value={reasonCode}
-                  >
-                    <option value="">Optional</option>
-                    {REASON_CODE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {toTitleCase(option)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="grid gap-2 text-sm">
-                  <span className="font-medium text-foreground">Reviewer note</span>
-                  <Textarea
-                    className="min-h-24 rounded-lg bg-background"
-                    onChange={(event) => setReasonText(event.target.value)}
-                    placeholder="Short note for audit history."
-                    value={reasonText}
-                  />
-                </label>
-
                 {productNameError ? (
                   <StatusMessage tone="destructive">{productNameError}</StatusMessage>
                 ) : null}
@@ -449,6 +452,36 @@ export function ReviewDetailSurface({ detail, csrfToken }: ReviewDetailSurfacePr
                     <p className="text-xs leading-5 text-muted-foreground">Correct a highlighted field to enable edit and approve.</p>
                   ) : null}
                 </div>
+
+                <details className="rounded-lg border border-border/80 bg-background">
+                  <summary className="cursor-pointer px-3 py-2 text-sm font-medium text-muted-foreground">Decision note (optional)</summary>
+                  <div className="grid gap-3 border-t border-border/70 p-3">
+                    <label className="grid gap-2 text-sm">
+                      <span className="font-medium text-foreground">Reason code</span>
+                      <select
+                        className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                        onChange={(event) => setReasonCode(event.target.value)}
+                        value={reasonCode}
+                      >
+                        <option value="">Use suggested reason</option>
+                        {REASON_CODE_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {toTitleCase(option)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="grid gap-2 text-sm">
+                      <span className="font-medium text-foreground">Reviewer note</span>
+                      <Textarea
+                        className="min-h-20 rounded-lg bg-background"
+                        onChange={(event) => setReasonText(event.target.value)}
+                        placeholder="Add audit context."
+                        value={reasonText}
+                      />
+                    </label>
+                  </div>
+                </details>
               </div>
             )}
           </article>
@@ -764,26 +797,20 @@ function DecisionRecommendationCard({ recommendation }: { recommendation: Recomm
 }
 
 function SourceDecisionCard({ detail }: { detail: ReviewTaskDetailResponse }) {
-  const discovery = detail.source_context.discovery_assessment;
   return (
     <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Decision facts</p>
+      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">Source check</p>
       <dl className="mt-4 grid gap-3 text-sm">
-        <MetaRow label="Product" value={detail.candidate.product_name} />
-        <MetaRow label="Bank" value={`${detail.candidate.bank_name} (${detail.candidate.bank_code})`} />
-        <MetaRow label="Type" value={toTitleCase(detail.candidate.product_type)} />
         <MetaRow label="Confidence" value={formatConfidence(detail.candidate.source_confidence)} />
         <MetaRow label="Evidence fields" value={`${detail.evidence_summary.field_count} fields / ${detail.evidence_summary.item_count} links`} />
         {detail.source_context.discovery_role ? <MetaRow label="Source role" value={toTitleCase(detail.source_context.discovery_role)} /> : null}
-        {discovery.ai_predicted_role ? <MetaRow label="AI source role" value={toTitleCase(discovery.ai_predicted_role)} /> : null}
-        {typeof discovery.product_identity_match === "boolean" ? (
-          <MetaRow label="Product identity" value={discovery.product_identity_match ? "Detected" : "Not detected"} />
-        ) : null}
       </dl>
-      {discovery.ai_short_rationale ? (
-        <p className="mt-4 rounded-lg border border-border/80 bg-background p-3 text-sm leading-6 text-muted-foreground">
-          {discovery.ai_short_rationale}
-        </p>
+      {detail.source_context.source_url ? (
+        <Button asChild className="mt-4 w-full" variant="outline">
+          <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">
+            Open source <ExternalLink />
+          </a>
+        </Button>
       ) : null}
     </article>
   );
@@ -1375,6 +1402,24 @@ function fieldIssueLabel(item: ReviewFieldItem) {
   }
   if (item.issue_type === "non_value_copy") {
     return "Not a value";
+  }
+  if (item.issue_type === "invalid_type") {
+    return "Wrong type";
+  }
+  if (item.issue_type === "unresolved_placeholder") {
+    return "Broken template";
+  }
+  if (item.issue_type === "cross_field_conflict") {
+    return "Conflicts with term";
+  }
+  if (item.issue_type === "source_identity_mismatch") {
+    return "Wrong product";
+  }
+  if (item.issue_type === "page_copy") {
+    return "Page copy";
+  }
+  if (item.issue_type === "duplicated_page_copy") {
+    return "Duplicated copy";
   }
   return "Check value";
 }

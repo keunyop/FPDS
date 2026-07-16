@@ -25,11 +25,12 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-14`:
+As of `2026-07-15`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
+- the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
 Read before coding:
@@ -62,6 +63,26 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-15 - Cross-Product Collection Accuracy And Concise Review Decisions
+
+- WBS: `4.2`, `4.5`, `5.15`, `5.16`, collection QA and Review UX hardening
+- Status: done
+- Goal: inspect the actual multi-bank Runs, collected Sources, and queued Review tasks; remove generalizable collection errors; and leave only clear, evidence-led human decisions.
+- Why now: collection `collection_yIwEWUvWHFGyljyx` completed 28 bank/product runs and produced 27 candidates with 12 active reviews, but broad page sections, navigation, unresolved rate templates, wrong-type flags, and cashback/prepayment/equity percentages were mapped as product terms. CIBC detail scope was broad, EQ GIC and Fairstone homepage discovery missed valid official pages, Canadian Tire returned a JavaScript-only shell, and the generic `manual_sampling` summary did not tell the reviewer what was actually wrong.
+- Outcome: operator-defined extraction and normalization are constrained to each registered `expected_fields` contract. Shared cleanup rejects unresolved templates, wrong-type booleans, duplicated/navigation/footer copy, term conflicts, non-value calculator/estimate fields, invalid amortization/payment/prepayment text, and percentages whose evidence describes rewards, prepayment, equity, down payment, loan-to-value, or unresolved template identifiers rather than interest. Lending/card requiredness is product-type aware. Homepage discovery can safely use a product-identifying homepage, a tightly gated deposit-family overview, or high-confidence title-led detail evidence; it retains candidate rejection counts, reports JavaScript shells actionably, and excludes retail business, editorial/resource, and mortgage switch/manage service-flow pages from standalone products.
+- Review UX: Queue/detail use the same diagnosis for missing fields, invalid types, templates, page copy, term conflicts, and source/product identity mismatch. Only affected fields open initially; other collected values, optional reason/note controls, model context, and history remain collapsed. Source facts are reduced to confidence, evidence coverage, role, and open-source action. Editorial/service-flow candidates recommend `reject` without asking the operator to repair irrelevant fields; valid incomplete products recommend inline edit/approve.
+- Live verification: EQ GIC run `collection_2LzrfqvnNHeabTeQ` completed with one clean candidate and no false `2.75%` account/footer rate; only minimum deposit, term, and rate remain for human verification because the fetched official page does not expose them. Fairstone Personal Loan run `collection_5zsPZaeDzBhu7fW3` promoted the product-identifying homepage, retained the grounded `$500-$60,000` amount, and asks only for interest rate and term. Final CIBC Mortgage run `collection_WMLQGKwDPmpNE7mr` completed `26/26` sources with no failures, produced four review-first candidates, and superseded three older logical duplicates. The earlier `20%` prepayment/equity-as-rate error plus amortization/payment/calculator page copy are gone. Fixed and Variable products now ask for the missing published mortgage rate; the Home Power Plan source also flags its Fixed-Rate product-name mismatch; and `Switch your mortgage` is clearly recommended for rejection as a service flow. Its source-time `5.25` template-derived value led to the final generic unresolved-template numeric-rate guard, and future switch/manage flows are excluded before candidate creation.
+- Queue recheck: all 12 original active tasks now have a concrete field-level outcome. Credit card, line-of-credit, mortgage, personal-loan, and HELOC cases identify only their bad/missing fields and use edit/approve; the EQ reverse-mortgage mismatch and CIBC cross-page mortgage identities are explicitly flagged; non-product source patterns use reject. No task was auto-approved or published as part of this slice.
+- Decisions: prefer conservative omission and human verification over inferring a rate from rewards, equity, template identifiers, or nearby account content. A family overview is candidate-producing only for deposit types under strict identity/AI/veto gates. Educational articles and operator service journeys cannot become products. JavaScript rendering is not silently widened; the Run directs the operator to add bounded official detail URLs or seek approval for a rendered-HTML discovery capability.
+- Key files: `api/service/api_service/source_catalog.py`, `review_diagnosis.py`, `review_queue.py`, `review_detail.py`, `worker/pipeline/fpds_extraction/service.py`, `fpds_normalization/service.py`, `fpds_rate_safety.py`, `fpds_validation_routing/service.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/README.md`, `worker/pipeline/README.md`, `docs/03-design/admin-information-architecture.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`.
+- Verification:
+  - API full suite: `200` passed.
+  - Worker main suite: `132` passed; regression suite: `2` passed.
+  - Foundation checks: repo doctor and baseline validation passed; Admin typecheck/build passed with all `23` routes generated; Public typecheck/build passed with all `7` routes generated.
+  - `git diff --check` passed.
+- Known issues: Canadian Tire's homepage response is an explicit JavaScript shell, so bounded HTML discovery cannot enumerate its products without official detail-source URLs or an approved rendered-HTML path. Dynamic/personalized official rate pages for EQ, Fairstone, and CIBC may still require a reviewer to enter a source-verified value or defer/reject; the system now makes that limitation explicit and prevents unsafe inference.
+- Next step: operators should reject the current CIBC switch-service task, correct or defer the explicitly listed missing/mismatched CIBC/EQ/Fairstone fields from official evidence, and add bounded Canadian Tire product-detail URLs unless the Product Owner chooses a rendered discovery follow-on.
 
 ## 2026-07-14 - Review Detail Product-Style Candidate Presentation
 

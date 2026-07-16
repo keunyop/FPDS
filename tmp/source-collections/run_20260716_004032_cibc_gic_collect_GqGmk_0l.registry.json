@@ -1,0 +1,956 @@
+{
+  "registry_version": "2026-07-16",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "gic",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com",
+    "www.cibconline.cibc.com"
+  ],
+  "entry_source_id": "CIBC-GIC-002",
+  "sources": [
+    {
+      "source_id": "CIBC-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Named Flexible GIC product with a product-specific URL and strong alignment to the GIC discovery target.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/flexible.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "minimum_deposit",
+        "standard_rate",
+        "term_options",
+        "interest_payment_rules"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Flexible GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "CIBC Flexible GIC\u00ae",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named Flexible GIC product with a product-specific URL and strong alignment to the GIC discovery target.",
+        "page_evidence_score": 8,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 1,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "CIBC-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Named Bonus Rate GIC product page; likely to contain product terms and promotional or standard rate information.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/bonus-rate.html",
+      "expected_fields": [
+        "product_name",
+        "cashability",
+        "term_options",
+        "rate_structure"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Bonus Rate GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "CIBC Bonus Rate GIC",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named Bonus Rate GIC product page; likely to contain product terms and promotional or standard rate information.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-6034b8f9b2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Named Non-Redeemable GIC product page with strong product-specific URL semantics.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/non-redeemable.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Non-Redeemable GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "CIBC Non-Redeemable GIC \u24d8",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named Non-Redeemable GIC product page with strong product-specific URL semantics.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-8cb819aba1",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Named Variable Rate GIC product page with strong product-specific and feature-specific signals.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/variable-rate-gic.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Variable Rate GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "CIBC Variable Rate GIC",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named Variable Rate GIC product page with strong product-specific and feature-specific signals.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-c642f759a9",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Named USD Non-Redeemable GIC product page, likely containing currency-specific terms and eligibility details.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/usd-non-redeemable.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC USD Non-Redeemable GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "CIBC USD Non-Redeemable GIC \u24d8",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named USD Non-Redeemable GIC product page, likely containing currency-specific terms and eligibility details.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-db89ad2dda",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Explicitly named EasyBuilder GIC with a product-specific page path.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/easybuilder.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC EasyBuilder GIC | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "CIBC EasyBuilder GIC\u2122",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explicitly named EasyBuilder GIC with a product-specific page path.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-ecbbc96c59",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Clearly focused on Market Linked GICs, though the structured-notes context may make it a specialized product or explanatory page.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/structured-notes/market-linked-gics.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Market Linked GICs | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "CIBC Market Linked GICs",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Clearly focused on Market Linked GICs, though the structured-notes context may make it a specialized product or explanatory page.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-5aca30df92",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "GIC-related educational and utility content, but not a single named financial product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/articles-and-tools.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "GIC-related educational and utility content, but not a single named financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-5f494d6307",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language GIC calculator and therefore a supporting tool rather than a named product page.",
+      "url": "https://www.cibc.com/fr/personal-banking/investments/investment-calculators/gic-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language GIC calculator and therefore a supporting tool rather than a named product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-7797037fcf",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Application or investment flow for a Bonus Rate GIC rather than the primary public product-detail page.",
+      "url": "https://www.cibconline.cibc.com/ebm-resources/public/investment-applications/client/index.html#/gic/get-started?prodId=BBLT&accountType=NONREG&locale=en",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Application or investment flow for a Bonus Rate GIC rather than the primary public product-detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-7de393200c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language equivalent of the official GIC category hub; useful supporting content but not a single product detail page.",
+      "url": "https://www.cibc.com/fr/personal-banking/investments/gics.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language equivalent of the official GIC category hub; useful supporting content but not a single product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-87016938cc",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational transcript explaining GICs generally, not a page for one named GIC product.",
+      "url": "https://www.cibc.com/en/transcripts/what-is-a-gic.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational transcript explaining GICs generally, not a page for one named GIC product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-8a82541f9c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broad investments account-and-product directory, not a single GIC detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/all-account-types-and-products.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broad investments account-and-product directory, not a single GIC detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-955f1dc59d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language broad investment product directory, not a named GIC product page.",
+      "url": "https://www.cibc.com/fr/personal-banking/investments/all-account-types-and-products.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language broad investment product directory, not a named GIC product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-b9fe2be03a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Glossary supporting GIC terminology; it does not represent one named GIC product.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/gics/glossary.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Glossary supporting GIC terminology; it does not represent one named GIC product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-GIC-ffd945e0b6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Calculator for evaluating GIC investments; it is a tool rather than a financial product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/investments/investment-calculators/gic-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Calculator for evaluating GIC investments; it is a tool rather than a financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    }
+  ]
+}

@@ -147,6 +147,11 @@ Runtime refinement:
 - same-site checks canonicalize the leading `www.` label, so a bank homepage may safely redirect between `www.example.ca` and `example.ca` without widening the fetch allowlist beyond that registrable host scope.
 - strong page-level evidence may override an AI `supporting_html` role only when the candidate is a non-seed HTML page with a product-identity phrase in the title or primary heading, multiple distinct product-attribute signals, no negative signals, no legal/terms/disclosure URL pattern, sufficient AI relevance, and no supporting/not-detail AI reason code. This applies across product types, so explicit named product pages can recover from a conservative supporting classification while service, transfer, rates, calculator, and category pages remain non-candidate-producing.
 - a high-confidence AI `detail` classification plus confirmed title/heading product identity and product attributes may recover from navigation-wide negative terms; hard scope exclusions such as business, investor, registered-plan wrapper, or another product type remain vetoes.
+- high-confidence named detail candidates remain eligible when the bounded page signal is title-led but body attributes are thin or layout-dependent; this requires a positive heuristic, confirmed title/heading identity, a minimum page score, and the same hard-scope vetoes.
+- for `chequing`, `savings`, and `gic`, an official family overview may become candidate-producing when AI identifies it as a high-relevance hub, the title confirms the product type, the heuristic is positive, and no service/rates/promo/insufficient-evidence veto is present. This is the review-first fallback for banks that publish variants on one family page; it is not applied to dynamic lending category pages.
+- a bank homepage may itself enter the bounded candidate set when its title or primary heading identifies the selected product type. Normal page evidence and AI gates still apply, preventing the same homepage from becoming every product type.
+- editorial URL families such as `resource-centre`, `resource-center`, `articles`, and `blog`, plus mortgage switch/manage service flows, are supporting content or operator journeys rather than standalone product candidates, even when the title names a financial concept.
+- when a fetched homepage exposes only an explicit JavaScript-required shell and no bounded links, Runs records that cause and directs the operator to add official detail URLs or use an approved rendered-HTML discovery path.
 - repeated occurrences of one attribute term count once; they cannot manufacture the multiple independent signals required for a strong-page override.
 - AI `irrelevant` remains a veto for non-seed candidates, and terms/legal/disclosure pages remain non-detail even when test fixtures or surrounding content carry product keywords.
 - when a successful rediscovery explicitly rejects a previously generated non-seed `detail` URL, that generated source is made inactive before the next collection scope is materialized. Fetch-unavailable candidates are preserved rather than deactivated because a transient network failure is not evidence that the source is invalid.
@@ -335,6 +340,7 @@ Minimum follow-on expectations:
 - generated-source rows should retain discovery-scoring metadata or a compact explainability subset
 - run detail should distinguish `discovery weak` from `fetch failed`
 - no-detail outcomes should indicate whether candidate generation was empty or candidate validation rejected all pages
+- AI candidate role, relevance, confidence, and reason codes are retained in bounded model-execution metadata, and Runs include a compact rejection-count summary such as `ai_irrelevant` or `page_evidence_below_threshold`
 - audit history should preserve the reason a generated source was promoted, demoted, or preserved
 - Review Detail should expose a compact subset of source-discovery role, AI role/rationale, product-identity result, and missing expected fields so an operator can distinguish a bad source from a valid but incomplete candidate without opening separate diagnostics
 
@@ -390,6 +396,7 @@ Future implementation should be considered aligned to this design when:
 
 | Date | Change |
 |---|---|
+| 2026-07-15 | Added bounded homepage-self candidates, safe deposit family-overview promotion, stable high-confidence title-led recovery, retail business/editorial exclusions, JavaScript-shell guidance, persisted AI candidate scores, and actionable detail-rejection summaries after EQ GIC and Fairstone live QA |
 | 2026-07-13 | Tightened support-page override rules around product identity, distinct attribute signals, AI veto reasons, and safe stale generated-detail deactivation; added reviewer-facing discovery context |
 | 2026-07-05 | Clarified the product-type-agnostic strong-page-evidence override for explicit product detail pages that AI scores as supporting because of words such as fee, rate, term, or service |
 | 2026-07-05 | Added Canada retail lending discovery examples for the registered `lending` product family baseline |

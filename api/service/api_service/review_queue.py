@@ -7,7 +7,7 @@ import json
 from typing import Any, Iterable
 from typing import TYPE_CHECKING
 
-from api_service.review_diagnosis import build_review_diagnosis, is_empty_review_value
+from api_service.review_diagnosis import build_review_diagnosis
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -133,6 +133,7 @@ def load_review_queue(
             rt.queue_reason_code,
             rt.issue_summary,
             nc.candidate_payload,
+            sd.normalized_source_url AS source_url,
             sd.source_metadata,
             rt.created_at,
             rt.updated_at
@@ -252,14 +253,12 @@ def _build_order_by_clause(filters: ReviewQueueFilters) -> str:
 
 def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
     issue_items = _coerce_issue_items(row.get("issue_summary"))
-    source_metadata = _coerce_mapping(row.get("source_metadata"))
+    source_metadata = {
+        **_coerce_mapping(row.get("source_metadata")),
+        "normalized_source_url": row.get("source_url"),
+    }
     candidate_payload = _coerce_mapping(row.get("candidate_payload"))
     expected_fields = _coerce_string_list(source_metadata.get("expected_fields"))
-    missing_expected_fields = [
-        field_name
-        for field_name in expected_fields
-        if is_empty_review_value(candidate_payload.get(field_name))
-    ]
     source_role = str(source_metadata.get("discovery_role") or "unknown")
     diagnosis = build_review_diagnosis(
         source_role=source_role,
@@ -267,7 +266,14 @@ def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
         candidate_payload=candidate_payload,
         validation_status=str(row["validation_status"]),
         validation_issue_codes=_coerce_string_list(row.get("validation_issue_codes")),
+        product_type=str(row["product_type"]),
+        source_metadata=source_metadata,
     )
+    missing_expected_fields = [
+        str(item["field_name"])
+        for item in diagnosis["affected_fields"]
+        if item.get("issue_type") == "missing"
+    ]
     return {
         "review_task_id": str(row["review_task_id"]),
         "candidate_id": str(row["candidate_id"]),

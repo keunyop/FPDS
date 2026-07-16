@@ -100,6 +100,8 @@ _AI_DETAIL_OVERRIDE_VETO_REASON_CODES = {
     "not_product_detail",
     "promo_or_apply_flow",
     "supporting_terms_or_rates_page",
+    "non_product_editorial_page",
+    "non_product_service_flow",
 }
 _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
     "chequing": (
@@ -1898,6 +1900,10 @@ def _generate_sources_from_homepage(
     homepage_links = _extract_allowed_links(html_text=homepage_html, base_url=normalized_homepage_url, hostname=hostname)
     if homepage_html and not homepage_links:
         discovery_notes.append("Homepage fetch succeeded but no allowed detail or supporting links were extracted.")
+        if _looks_like_javascript_shell(homepage_html):
+            discovery_notes.append(
+                "Homepage appears to require JavaScript rendering; add bounded official detail-source URLs or use an approved rendered-HTML discovery path."
+            )
     for link in homepage_links:
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
         if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
@@ -2000,6 +2006,20 @@ def _generate_sources_from_homepage(
         supporting_links=unique_supporting_links,
         seed_detail_hints=seed_detail_hints,
     )
+    homepage_self_candidate = _build_homepage_self_candidate(
+        product_type=discovery_product_type,
+        product_type_definition=product_type_definition,
+        homepage_url=homepage_url,
+        normalized_homepage_url=normalized_homepage_url,
+        homepage_html=homepage_html,
+    )
+    if homepage_self_candidate is not None:
+        by_url = {candidate.normalized_url: candidate for candidate in html_candidates}
+        _merge_homepage_candidate(by_url, homepage_self_candidate)
+        html_candidates = list(by_url.values())
+        discovery_notes.append(
+            "Included the bank homepage as a bounded detail candidate because its title or primary heading identifies this product type."
+        )
     ai_result = _score_candidate_links_with_ai(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -2358,6 +2378,62 @@ def _merge_homepage_candidate(by_url: dict[str, HomepageCandidate], candidate: H
     )
 
 
+def _build_homepage_self_candidate(
+    *,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    homepage_url: str,
+    normalized_homepage_url: str,
+    homepage_html: str,
+) -> HomepageCandidate | None:
+    if not homepage_html:
+        return None
+    parser = _PageSignalParser()
+    parser.feed(homepage_html)
+    identity_text = " ".join([parser.title_text, parser.primary_heading]).strip()
+    if not identity_text:
+        return None
+    identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
+    if _term_hits(identity_text, identity_terms) == 0:
+        return None
+    fingerprint = f"{normalized_homepage_url} {identity_text}".lower()
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint):
+        return None
+    heuristic_score = _score_product_link(
+        product_type=product_type,
+        product_type_definition=product_type_definition,
+        normalized_url=normalized_homepage_url,
+        anchor_text=identity_text,
+    )
+    return HomepageCandidate(
+        normalized_url=normalized_homepage_url,
+        raw_url=homepage_url,
+        anchor_text=identity_text,
+        source_type="html",
+        origin="homepage_self_detail_candidate",
+        heuristic_score=max(1, heuristic_score),
+        supporting_signal=False,
+        seed_source_id=None,
+        source_name_hint=identity_text[:280],
+        priority_hint="P1",
+        expected_fields_hint=[],
+    )
+
+
+def _looks_like_javascript_shell(html_text: str) -> bool:
+    if not html_text:
+        return False
+    lowered = " ".join(html_text.lower().split())
+    explicit_markers = (
+        "enable javascript",
+        "javascript is required",
+        "javascript must be enabled",
+        "requires javascript",
+        "please turn on javascript",
+    )
+    return any(marker in lowered for marker in explicit_markers)
+
+
 def _load_seed_entry_url(
     *,
     bank_code: str,
@@ -2639,6 +2715,16 @@ def _score_candidate_links_with_ai(
             execution_status="completed",
             started_at=started_at,
             completed_at=completed_at,
+            candidate_scores=[
+                {
+                    "candidate_url": score.candidate_url,
+                    "predicted_role": score.predicted_role,
+                    "relevance_score": score.relevance_score,
+                    "confidence_band": score.confidence_band,
+                    "reason_codes": score.reason_codes,
+                }
+                for score in scores.values()
+            ],
         )
         prompt_tokens = int(usage.get("prompt_tokens") or 0)
         completion_tokens = int(usage.get("completion_tokens") or 0)
@@ -2674,7 +2760,8 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
             "Do not invent URLs. Score only the candidate links provided. "
             "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type. "
             "Use a relevance_score from 0 to 10. A detail page must describe one named financial product; category lists, rates or fee tables, calculators, "
-            "and banking-service pages such as transfers or debit-card instructions are supporting pages, not product detail pages."
+            "educational articles, guides, resource centres, and banking-service pages such as transfers or debit-card instructions are supporting pages, "
+            "not product detail pages."
         ),
         "input": [
             {
@@ -2811,13 +2898,16 @@ def _promote_detail_candidates(
     seed_fetch_fallback_count = 0
     seed_low_evidence_fallback_count = 0
     evaluated = 0
+    rejection_counts: Counter[str] = Counter()
     for candidate in _ordered_detail_candidates(candidates=candidates, ai_scores=ai_scores):
         ai_score = ai_scores.get(candidate.normalized_url)
         if ai_score and ai_score.predicted_role == "irrelevant" and not _candidate_is_seed_backed(candidate):
             rejected_detail_urls.append(candidate.normalized_url)
+            rejection_counts["ai_irrelevant"] += 1
             continue
         if not _candidate_is_seed_backed(candidate) and candidate.heuristic_score <= 0 and (ai_score is None or ai_score.predicted_role != "detail"):
             rejected_detail_urls.append(candidate.normalized_url)
+            rejection_counts["insufficient_candidate_signal"] += 1
             continue
         evaluated += 1
         page_evidence = _score_page_evidence(
@@ -2829,6 +2919,7 @@ def _promote_detail_candidates(
         if page_evidence.fetch_error:
             notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
             if not _candidate_is_seed_backed(candidate):
+                rejection_counts["page_fetch_unavailable"] += 1
                 continue
             metadata = {
                 "selection_path": "seed_hint_fetch_unavailable",
@@ -2853,7 +2944,13 @@ def _promote_detail_candidates(
             }
             seed_fetch_fallback_count += 1
         else:
-            if not _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=page_evidence, ai_unavailable=ai_unavailable):
+            if not _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=page_evidence,
+                ai_unavailable=ai_unavailable,
+                allow_family_overview=discovery_product_type in {"chequing", "savings", "gic"},
+            ):
                 if (
                     not _candidate_is_seed_backed(candidate)
                     or (ai_unavailable and _seed_detail_has_hard_negative(page_evidence))
@@ -2861,6 +2958,7 @@ def _promote_detail_candidates(
                 ):
                     if not _candidate_is_seed_backed(candidate):
                         rejected_detail_urls.append(candidate.normalized_url)
+                    rejection_counts[_detail_rejection_reason(ai_score=ai_score, page_evidence=page_evidence)] += 1
                     continue
                 metadata = _build_detail_discovery_metadata(
                     candidate=candidate,
@@ -2927,11 +3025,42 @@ def _promote_detail_candidates(
             notes.append(f"Homepage discovery promoted {promoted_count} detail source(s) after candidate scoring and page evidence validation.")
     elif evaluated:
         notes.append("Homepage discovery candidate validation rejected all tentative detail pages.")
+    if rejection_counts:
+        notes.append(
+            "Detail rejection summary: "
+            + ", ".join(f"{reason}={count}" for reason, count in sorted(rejection_counts.items()))
+            + "."
+        )
     return (
         detail_rows,
         _dedupe_preserve_order(rejected_detail_urls),
         _dedupe_preserve_order([note for note in notes if note]),
     )
+
+
+def _detail_rejection_reason(
+    *,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> str:
+    reason_codes = set(page_evidence.page_evidence_reason_codes)
+    for reason in (
+        "non_consumer_business_page",
+        "registered_plan_wrapper",
+        "other_product_type",
+        "non_product_or_investor_page",
+    ):
+        if reason in reason_codes:
+            return reason
+    if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
+        return "page_evidence_below_threshold"
+    if ai_score is None:
+        return "ai_score_missing"
+    if ai_score.predicted_role != "detail":
+        return f"ai_role_{ai_score.predicted_role}"
+    if ai_score.relevance_score < 4.0:
+        return "ai_relevance_below_threshold"
+    return "detail_policy_not_met"
 
 
 def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
@@ -2994,9 +3123,20 @@ def _candidate_promotes_to_detail(
     ai_score: AiParallelCandidateScore | None,
     page_evidence: PageEvidenceAssessment,
     ai_unavailable: bool = False,
+    allow_family_overview: bool = False,
 ) -> bool:
+    if allow_family_overview and _deposit_family_overview_can_be_detail(
+        candidate=candidate,
+        ai_score=ai_score,
+        page_evidence=page_evidence,
+    ):
+        return True
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
-        return False
+        return _high_confidence_detail_overrides_low_page_score(
+            candidate=candidate,
+            ai_score=ai_score,
+            page_evidence=page_evidence,
+        )
     strong_page_detail_signal = _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
     if _candidate_is_seed_backed(candidate):
         return True
@@ -3024,6 +3164,80 @@ def _candidate_promotes_to_detail(
     return candidate.heuristic_score > 0 or strong_page_detail_signal
 
 
+def _deposit_family_overview_can_be_detail(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    if (
+        ai_score is None
+        or ai_score.predicted_role != "supporting_html"
+        or ai_score.relevance_score < 7.0
+        or ai_score.confidence_band == "low"
+        or candidate.heuristic_score <= 0
+        or page_evidence.negative_signal_count > 0
+        or not page_evidence.product_identity_match
+        or "title_semantic_match" not in page_evidence.page_evidence_reason_codes
+        or page_evidence.page_evidence_score < 3
+    ):
+        return False
+    ai_reasons = set(_coerce_reason_codes(ai_score.reason_codes))
+    if "hub_page_not_detail" not in ai_reasons:
+        return False
+    return not any(
+        reason in ai_reasons
+        for reason in (
+            "not_product_detail",
+            "supporting_terms_or_rates_page",
+            "non_product_editorial_page",
+            "non_product_service_flow",
+            "promo_or_apply_flow",
+            "insufficient_evidence",
+        )
+    )
+
+
+def _high_confidence_detail_overrides_low_page_score(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    if (
+        ai_score is None
+        or ai_score.predicted_role != "detail"
+        or ai_score.relevance_score < 8.0
+        or ai_score.confidence_band != "high"
+        or candidate.heuristic_score <= 0
+    ):
+        return False
+    reason_codes = {
+        *page_evidence.page_evidence_reason_codes,
+        *_coerce_reason_codes(ai_score.reason_codes),
+    }
+    if any(
+        code in reason_codes
+        for code in (
+            "registered_plan_wrapper",
+            "other_product_type",
+            "non_product_or_investor_page",
+            "non_product_editorial_page",
+            "non_product_service_flow",
+            "non_consumer_business_page",
+            "promo_or_apply_flow",
+            "not_product_detail",
+            "supporting_terms_or_rates_page",
+        )
+    ):
+        return False
+    return (
+        page_evidence.product_identity_match
+        and (page_evidence.heading_match or "title_semantic_match" in reason_codes)
+        and page_evidence.page_evidence_score >= 3
+    )
+
+
 def _candidate_has_confirmed_product_identity(
     *,
     ai_score: AiParallelCandidateScore | None,
@@ -3038,6 +3252,8 @@ def _candidate_has_confirmed_product_identity(
             "registered_plan_wrapper",
             "other_product_type",
             "non_product_or_investor_page",
+            "non_product_editorial_page",
+            "non_product_service_flow",
         )
     ):
         return False
@@ -3168,6 +3384,8 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
             "registered_plan_wrapper",
             "other_product_type",
             "non_product_or_investor_page",
+            "non_product_editorial_page",
+            "non_product_service_flow",
         )
     )
 
@@ -3589,14 +3807,41 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
     if any(
         keyword in normalized_fingerprint
         for keyword in (
+            "/resource-centre/",
+            "/resource-center/",
+            "/articles/",
+            "/blog/",
+        )
+    ):
+        return "non_product_editorial_page"
+    if any(
+        keyword in normalized_fingerprint
+        for keyword in (
+            "/switch-mortgage",
+            "/switch-your-mortgage",
+            "/manage-mortgage",
+            "/manage-my-mortgage",
+        )
+    ):
+        return "non_product_service_flow"
+    if any(
+        keyword in normalized_fingerprint
+        for keyword in (
             "/small-business",
             "small business",
             "/business-banking",
+            "/business",
             "business banking",
             "/commercial-banking",
             "commercial banking",
             "/corporate-banking",
             "corporate banking",
+            "business credit",
+            "business card",
+            "business loan",
+            "business mortgage",
+            "business account",
+            "business gic",
         )
     ):
         return "non_consumer_business_page"
@@ -3649,6 +3894,7 @@ def _build_source_catalog_ai_model_execution_record(
     completed_at: datetime,
     error_summary: str | None = None,
     fallback_mode: str | None = None,
+    candidate_scores: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     metadata: dict[str, Any] = {
         "bank_code": bank_code,
@@ -3668,6 +3914,8 @@ def _build_source_catalog_ai_model_execution_record(
         metadata["error_summary"] = error_summary[:800]
     if fallback_mode:
         metadata["fallback_mode"] = fallback_mode
+    if candidate_scores:
+        metadata["candidate_scores"] = candidate_scores[:40]
     return {
         "model_execution_id": _build_source_catalog_ai_model_execution_id(
             run_id=run_id,

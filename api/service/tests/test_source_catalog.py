@@ -15,6 +15,7 @@ from api_service.source_catalog import (
     HomepageSourceGenerationResult,
     PageEvidenceAssessment,
     _build_source_catalog_collection_plan,
+    _build_homepage_self_candidate,
     _generate_sources_from_homepage,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
@@ -25,10 +26,12 @@ from api_service.source_catalog import (
     _generate_bank_code,
     _invoke_openai_parallel_scorer,
     _link_is_relevant_supporting_source,
+    _looks_like_javascript_shell,
     _ordered_detail_candidates,
     _promote_detail_candidates,
     _product_type_discovery_profile,
     _record_catalog_audit_event,
+    _source_scope_exclusion_reason,
     _score_candidate_links_with_ai,
     _score_page_evidence,
     _score_product_link,
@@ -91,6 +94,72 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_editorial_resource_page_is_out_of_product_candidate_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="mortgage",
+                fingerprint="https://www.examplebank.ca/mortgages/resource-centre/how-refinancing-works",
+            ),
+            "non_product_editorial_page",
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="mortgage",
+                fingerprint="https://www.examplebank.ca/mortgages/refinance-mortgage",
+            )
+        )
+
+    def test_mortgage_management_flow_is_out_of_product_candidate_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="mortgage",
+                fingerprint="https://www.examplebank.ca/mortgages/switch-mortgage.html",
+            ),
+            "non_product_service_flow",
+        )
+
+    def test_javascript_shell_detection_requires_explicit_rendering_marker(self) -> None:
+        self.assertTrue(
+            _looks_like_javascript_shell(
+                "<html><body><noscript>Please enable JavaScript to continue.</noscript><div id='app'></div></body></html>"
+            )
+        )
+        self.assertFalse(
+            _looks_like_javascript_shell(
+                "<html><body><script src='/app.js'></script><h1>Everyday banking</h1></body></html>"
+            )
+        )
+
+    def test_product_identifying_homepage_can_be_a_bounded_detail_candidate(self) -> None:
+        candidate = _build_homepage_self_candidate(
+            product_type="personal-loan",
+            product_type_definition={
+                **_product_type_definition("personal-loan"),
+                "discovery_keywords": ["personal loan", "secured loan", "unsecured loan"],
+            },
+            homepage_url="https://www.examplebank.ca/",
+            normalized_homepage_url="https://www.examplebank.ca/",
+            homepage_html=(
+                "<html><head><title>Personal loans for Canadians</title></head>"
+                "<body><h1>Secured and unsecured personal loans</h1></body></html>"
+            ),
+        )
+
+        self.assertIsNotNone(candidate)
+        self.assertEqual(candidate.origin, "homepage_self_detail_candidate")
+        self.assertEqual(candidate.normalized_url, "https://www.examplebank.ca/")
+
+    def test_unrelated_homepage_is_not_a_detail_candidate(self) -> None:
+        candidate = _build_homepage_self_candidate(
+            product_type="mortgage",
+            product_type_definition=_product_type_definition("mortgage"),
+            homepage_url="https://www.examplebank.ca/",
+            normalized_homepage_url="https://www.examplebank.ca/",
+            homepage_html="<html><head><title>Welcome to Example Bank</title></head><body><h1>Banking made simple</h1></body></html>",
+        )
+
+        self.assertIsNone(candidate)
+
     def test_detail_identity_dedupe_collapses_locale_aliases(self) -> None:
         base = {
             "bank_code": "B2B",
@@ -184,6 +253,122 @@ class SourceCatalogTests(unittest.TestCase):
         )
 
         self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_high_confidence_identity_can_override_low_whole_page_score(self) -> None:
+        url = "https://www.examplebank.ca/personal-banking/investments/gics"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Guaranteed Investment Certificates",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=4,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["named_product_detail"],
+            short_rationale="Official GIC product page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=3,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "pricing_or_feature_signal"],
+            page_title="Guaranteed Investment Certificates",
+            primary_heading="Lock in your GIC rate",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=2,
+            product_identity_match=True,
+        )
+
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_high_confidence_override_keeps_scope_veto(self) -> None:
+        url = "https://www.examplebank.ca/business-banking/gics"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Business GICs",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=4,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["named_product_detail"],
+            short_rationale="Business GIC page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=2,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "non_consumer_business_page"],
+            page_title="Business GICs",
+            primary_heading="Business GICs",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=2,
+            product_identity_match=True,
+        )
+
+        self.assertFalse(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_deposit_family_overview_can_be_candidate_producing_source(self) -> None:
+        url = "https://www.examplebank.ca/personal-banking/gics"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="GICs and GIC rates",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=True,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="supporting_html",
+            relevance_score=8.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "hub_page_not_detail", "seed_hint_alignment"],
+            short_rationale="Official GIC family overview.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=3,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match"],
+            page_title="GICs | Example Bank",
+            primary_heading=None,
+            heading_match=False,
+            attribute_signal_count=0,
+            negative_signal_count=0,
+            product_identity_match=True,
+        )
+
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            )
+        )
+        self.assertFalse(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
 
     def _workspace_temp_path(self, name: str) -> Path:
         path = Path.cwd() / "tmp" / "test-source-catalog" / name

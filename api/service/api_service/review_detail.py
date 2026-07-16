@@ -199,7 +199,10 @@ def load_review_task_detail(
     issue_items = _coerce_issue_items(row.get("issue_summary"))
     candidate_payload = _coerce_mapping(row.get("candidate_payload"))
     field_mapping_metadata = _coerce_mapping(row.get("field_mapping_metadata"))
-    source_metadata = _coerce_mapping(row.get("source_metadata"))
+    source_metadata = {
+        **_coerce_mapping(row.get("source_metadata")),
+        "normalized_source_url": row.get("source_url"),
+    }
     stage_metadata = _coerce_mapping(row.get("stage_metadata"))
     evidence_links = [
         _serialize_evidence_row(
@@ -232,12 +235,16 @@ def load_review_task_detail(
         candidate_payload=candidate_payload,
         validation_status=str(row["validation_status"]),
         validation_issue_codes=validation_issue_codes,
+        product_type=str(row["product_type"]),
+        source_metadata=source_metadata,
     )
     review_field_items = build_review_field_items(
         expected_fields=expected_fields,
         candidate_payload=candidate_payload,
         evidence_field_names=[str(item["field_name"]) for item in evidence_links],
         current_payload=_coerce_mapping(current_product.get("normalized_payload")) if current_product else None,
+        product_type=str(row["product_type"]),
+        source_metadata=source_metadata,
     )
 
     return {

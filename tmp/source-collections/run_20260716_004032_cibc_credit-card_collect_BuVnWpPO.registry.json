@@ -1,0 +1,1518 @@
+{
+  "registry_version": "2026-07-16",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "AUTO-CIBC-CRE-187a5a93e7",
+  "sources": [
+    {
+      "source_id": "AUTO-CIBC-CRE-187a5a93e7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Product-specific URL for the CIBC Costco Mastercard, likely containing named-card features, fees, rates, and application information.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/costco-mastercard.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Apply for the CIBC Costco Mastercard | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "CIBC Costco Mastercard",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Product-specific URL for the CIBC Costco Mastercard, likely containing named-card features, fees, rates, and application information.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-0563a329bd",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Business credit-card hub; relevant to the broader card family but not a single named product.",
+      "url": "https://www.cibc.com/en/business/credit-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Business credit-card hub; relevant to the broader card family but not a single named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-087bc637fe",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "No-annual-fee credit-card category or comparison page covering multiple cards.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/no-annual-fee.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "No-annual-fee credit-card category or comparison page covering multiple cards.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-13a9b012a5",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Promotional benefits page for CIBC credit cards, not a named-card product detail.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/rewards-and-points/discount-code-budget.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 11,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Promotional benefits page for CIBC credit cards, not a named-card product detail.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-15104777a2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Explains cash-back benefits across cards and does not identify one product.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/rewards-and-points/cash-back-benefits.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 10,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explains cash-back benefits across cards and does not identify one product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-22409e467f",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General personal credit-card landing page and category hub.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General personal credit-card landing page and category hub.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-24d5e12e5c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Editorial article about travel cards; useful context but not a product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/travel-card.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Editorial article about travel cards; useful context but not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-2ab81b702e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Cash-back credit-card category page covering multiple products.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/cash-back-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Cash-back credit-card category page covering multiple products.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-3c8874a341",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational content about U.S.-dollar cards rather than one named product.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/us-dollar-card.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational content about U.S.-dollar cards rather than one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-55307b1949",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Costco-card collection page that likely lists multiple Costco products.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/costco-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Costco-card collection page that likely lists multiple Costco products.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-633adf13d7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General educational article, not a card product page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/multiple-credit-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General educational article, not a card product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-8225a1c871",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational article about insurance benefits, without a specific card product.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/credit-card-insurance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational article about insurance benefits, without a specific card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-8555e8ea43",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Credit-card benefit and promotional page focused on Avis discounts rather than a specific card.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/rewards-and-points/discount-code-avis.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 11,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Credit-card benefit and promotional page focused on Avis discounts rather than a specific card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-910cf5737e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Likely the main catalog of CIBC cards; useful for discovery but not a single-product page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Likely the main catalog of CIBC cards; useful for discovery but not a single-product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-9c791eaf76",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Card-servicing guidance article rather than a credit-card product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/dispute-credit-charge.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Card-servicing guidance article rather than a credit-card product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-a162f341fc",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Rewards calculator supporting card comparison, not a financial product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/rewards-and-points/calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Rewards calculator supporting card comparison, not a financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-aaaa231865",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Aeroplan card benefits page, likely supporting several Aeroplan cards rather than detailing one card.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/rewards-and-points/aeroplan-benefits.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Aeroplan card benefits page, likely supporting several Aeroplan cards rather than detailing one card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-b17dda1c9e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language duplicate of a rewards-card hub; relevant but not a detail page and mismatched to the requested English source language.",
+      "url": "https://www.cibc.com/fr/personal-banking/credit-cards/rewards-and-points.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language duplicate of a rewards-card hub; relevant but not a detail page and mismatched to the requested English source language.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-dce2e15cf7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant travel-credit-card category page, but it covers multiple cards rather than one named product.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/travel-rewards-cards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 13,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant travel-credit-card category page, but it covers multiple cards rather than one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-edc6fd67e5",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General credit-card security article, not a product page.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles/credit-card-fraud.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General credit-card security article, not a product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-efe04aa4c4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Article index related to credit cards, without product-level terms.",
+      "url": "https://www.cibc.com/en/personal-banking/credit-cards/articles.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Article index related to credit cards, without product-level terms.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-1f3c2a8742",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Credit Card",
+      "url": "https://www.cibc.com/en/business/credit-cards/corporate-classic-plus-visa.html#termsandconditions",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-36eecb2551",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.cibc.com/content/dam/small_business/business-information-and-documents-required-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-44736b7d50",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.cibc.com/content/dam/cibc-public-assets/personal-banking/credit-cards/all-credit-cards/costco/documents/cibc-costco-benefit-guide-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-50baa6328d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.cibc.com/content/dam/cibc-public-assets/business/loans-and-lines-of-credit/documents/business-credit-application-document-checklist-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-948921d601",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.cibc.com/content/dam/cibc-public-assets/personal-banking/credit-cards/all-credit-cards/costco/documents/cibc-costco-business-benefits-guide-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-CRE-c41e084ced",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.cibc.com/content/dam/cibc-public-assets/personal-banking/credit-cards/all-credit-cards/adapta/documents/cibc-auto-club-handbook-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

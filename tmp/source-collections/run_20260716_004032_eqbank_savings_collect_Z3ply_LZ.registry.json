@@ -1,0 +1,306 @@
+{
+  "registry_version": "2026-07-16",
+  "bank_code": "EQBANK",
+  "country_code": "CA",
+  "product_type": "savings",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.eqbank.ca"
+  ],
+  "entry_source_id": "AUTO-EQBANK-SAV-2b23c88175",
+  "sources": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Direct personal-banking URL naming the Notice Savings Account; highly likely to be the official product detail page.",
+      "url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Notice Savings Account | EQ Bank",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Give advance notice on withdrawals, get a better rate.",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Direct personal-banking URL naming the Notice Savings Account; highly likely to be the official product detail page.",
+        "page_evidence_score": 6,
+        "selection_confidence": "medium",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 7,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-5db01fbd9c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "This is a transfer service page rather than a named savings account or deposit product.",
+      "url": "https://www.eqbank.ca/personal-banking/international-money-transfers",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "This is a transfer service page rather than a named savings account or deposit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deposit-insurance information is relevant to deposit accounts generally but does not describe one named savings product.",
+      "url": "https://www.eqbank.ca/general-banking/deposit-insurance-information",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Deposit-insurance information is relevant to deposit accounts generally but does not describe one named savings product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Clearly associated with the US Dollar Account and likely contains useful fees and features, but it is a supporting terms/features page rather than the main product page.",
+      "url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clearly associated with the US Dollar Account and likely contains useful fees and features, but it is a supporting terms/features page rather than the main product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "The label matches a savings product, but the common-questions URL indicates an FAQ or informational page rather than the primary product detail page.",
+      "url": "https://www.eqbank.ca/about-us/help/common-questions#notice-savings-account-section",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "promotional_rate",
+        "monthly_fee",
+        "minimum_deposit",
+        "term_length_text",
+        "eligibility_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "Savings",
+      "product_type_description": "A deposit account used to store money while earning interest. It is suitable for short- to medium-term savings and typically allows flexible access to funds.",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.5,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "The label matches a savings product, but the common-questions URL indicates an FAQ or informational page rather than the primary product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    }
+  ]
+}

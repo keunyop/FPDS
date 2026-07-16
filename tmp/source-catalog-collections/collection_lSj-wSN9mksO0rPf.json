@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_lSj-wSN9mksO0rPf",
+  "correlation_id": "corr_o7xYNc4-9889we5m",
+  "request_id": "req_codex_goal_20260716050853",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260716_050853_cibc_mortgage_collect_05i18RtR",
+      "catalog_item_id": "catalog-ca-cibc-mortgage",
+      "bank_code": "CIBC",
+      "bank_name": "CIBC",
+      "country_code": "CA",
+      "product_type": "mortgage",
+      "source_catalog_product_type": "mortgage",
+      "product_family": "lending",
+      "source_language": "en",
+      "homepage_url": "https://www.cibc.com/en/personal-banking.html",
+      "normalized_homepage_url": "https://www.cibc.com/en/personal-banking.html",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

@@ -235,6 +235,9 @@ Runtime review-triage refinement:
 - Queue rows use one backend diagnosis contract for the issue category, concise headline, affected fields, and recommended decision.
 - Missing or suspect fields are shown before generic validation context; raw issue codes remain secondary diagnostic data.
 - Recommended decisions use the actual review actions (`approve`, `edit_approve`, `reject`, `defer`) so list and detail guidance cannot conflict.
+- Requiredness is product-type aware: optional description, notes, application, eligibility, rewards, and supporting text do not force an edit, while a concise rate/fee/amount/term/secured priority set does.
+- Suspect-field diagnosis covers invalid types, unresolved templates, duplicated or broad page copy, term conflicts, and source-title/product-name mismatch in addition to navigation text.
+- Editorial/resource-centre URLs and mortgage switch/manage service flows are diagnosed as non-product sources with `reject` as the recommended action, including for already queued historical candidates.
 
 ### 7.3 Review Detail / Trace Viewer
 
@@ -257,6 +260,9 @@ Runtime decision refinement:
 - the recommended action is the primary decision control; alternatives remain available according to role and review state
 - arbitrary raw-field editing is an advanced fallback, not the default review path
 - explanatory copy stays short and does not repeat the same issue across multiple summary panels
+- only affected fields are expanded initially; all other collected fields remain editable in one collapsed group
+- source check shows confidence, evidence coverage, source role, and the source link without duplicating bank/product identity or AI rationale already available in diagnostic context
+- reason code and reviewer note are optional collapsed controls; the recommended decision actions remain immediately available
 
 ### 7.4 Source Registry Management
 
@@ -493,6 +499,7 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-07-15 | Refined Review to product-aware requiredness and concrete suspect-field types; only flagged fields open by default, other values and optional audit notes stay collapsed, and source facts no longer duplicate product identity or AI explanation |
 | 2026-04-06 | Initial admin information architecture baseline created for WBS 1.7.4 |
 | 2026-04-13 | Added Audit Log as an operations surface with drilldown rules distinct from canonical change history |
 | 2026-04-15 | Added Source Registry Management as an operations surface for DB-backed source editing and multi-select candidate collection kickoff |

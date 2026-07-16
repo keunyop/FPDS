@@ -27,6 +27,18 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
             "implausible_annual_deposit_rate",
         )
 
+    def test_cashback_and_mortgage_prepayment_percentages_are_not_rates(self) -> None:
+        for context in (
+            "Earn 3% cash back on eligible purchases.",
+            "Prepay up to 20% of the original mortgage amount each year.",
+            "A minimum 20% home equity position is required.",
+        ):
+            with self.subTest(context=context):
+                self.assertEqual(
+                    canonical_deposit_rate_suppression_reason(value="20" if "20%" in context else "3", context=context),
+                    "non_annual_return_context",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

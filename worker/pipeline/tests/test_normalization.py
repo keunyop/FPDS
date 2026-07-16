@@ -16,7 +16,12 @@ from worker.pipeline.fpds_normalization.persistence import (
     NormalizationDatabaseConfig,
     PsqlNormalizationRepository,
 )
-from worker.pipeline.fpds_normalization.service import NormalizationService, _clean_product_context_fields
+from worker.pipeline.fpds_normalization.service import (
+    NormalizationService,
+    _clean_product_context_fields,
+    _extract_rate_percentages,
+    _rate_evidence_is_account_context,
+)
 from worker.pipeline.fpds_normalization.storage import (
     NormalizationStorageConfig,
     build_object_store,
@@ -28,6 +33,18 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_gic_rate_rejects_nearby_personal_account_direct_deposit_rate(self) -> None:
+        context = (
+            "Everyday Banking Personal Account Rates Earn 2.75% interest. "
+            "Boost your interest rate in your Personal Account when you set up direct deposit. "
+            "Investing GICs RRSP."
+        )
+
+        self.assertTrue(_rate_evidence_is_account_context(value="2.75", context=context))
+        self.assertFalse(_rate_evidence_is_account_context(value="4.10", context="1 year GIC rate 4.10%"))
+        self.assertEqual(_extract_rate_percentages(context, product_type_family="gic"), [])
+        self.assertEqual([float(value) for value in _extract_rate_percentages(context, product_type_family="savings")], [2.75])
+
     def test_product_context_cleanup_suppresses_navigation_and_marketing_rate_copy(self) -> None:
         payload: dict[str, object] = {
             "product_name": "Example Mortgage",
@@ -49,6 +66,12 @@ class NormalizationServiceTests(unittest.TestCase):
                 "interest is compounded and paid at maturity, and payments can be sent to the client or advisor."
             ),
             "prepayment_privileges": "Prepay up to 20% of the original principal each year.",
+            "secured_flag": "Unsecured or secured variants are available.",
+            "credit_limit_text": "Your limit is RDS%rate_placeholder% and subject to approval.",
+            "term_length_text": "Terms from 12 months to 96 months.",
+            "term_length_days": 30,
+            "fees_text": "A broad product page section " + "with repeated marketing details " * 8,
+            "minimum_payment_text": "A broad product page section " + "with repeated marketing details " * 8,
             "withdrawal_limit_text": (
                 "The smart way to save with automatic contributions, one free withdrawal a month and easy access."
             ),
@@ -75,9 +98,73 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["withdrawal_limit_text"], "One free withdrawal a month.")
         self.assertEqual(normalized_values["withdrawal_limit_text"], "One free withdrawal a month.")
         self.assertEqual(payload["prepayment_privileges"], "Prepay up to 20% of the original principal each year.")
+        self.assertNotIn("secured_flag", payload)
+        self.assertNotIn("credit_limit_text", payload)
+        self.assertNotIn("term_length_days", payload)
+        self.assertNotIn("fees_text", payload)
+        self.assertNotIn("minimum_payment_text", payload)
         self.assertNotIn("mortgage_rate", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
         self.assertIn("incorrectly mapped as product data", notes[0])
+
+    def test_lending_cleanup_rejects_rate_and_term_fields_from_unrelated_context(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Mortgage",
+            "mortgage_rate": 20.0,
+            "payment_frequency": (
+                "Mortgage payment calculator Find out how changing your payment frequency and making prepayments can save you money."
+            ),
+            "amortization_text": (
+                "Document Mortgages Manage My Mortgage Fixed Rate Mortgages Variable Rate Mortgages Mortgage Calculators"
+            ),
+            "eligibility_text": "Home equity calculator Calculate how much you may qualify to borrow through a mortgage.",
+            "prepayment_privileges": "What flexible payment and prepayment options do I have? " + "Payment options and marketing copy. " * 8,
+        }
+        normalized_values = dict(payload)
+        mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+
+        _clean_product_context_fields(
+            product_type_family="mortgage",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+            evidence_context_by_field={
+                "mortgage_rate": "Pre-payment privileges of up to 20% of the original mortgage amount annually."
+            },
+        )
+
+        self.assertEqual(payload, {"product_name": "Example Mortgage"})
+        self.assertNotIn("mortgage_rate", normalized_values)
+
+    def test_lending_cleanup_rejects_numeric_rate_derived_from_unresolved_template(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Mortgage",
+            "mortgage_rate": 5.25,
+        }
+
+        _clean_product_context_fields(
+            product_type_family="mortgage",
+            candidate_payload=payload,
+            evidence_context_by_field={
+                "mortgage_rate": "RDS%rate[5].5YRVARCLO.Published(3_null_null_Years_T,null,18,null)(#O2#)%"
+            },
+        )
+
+        self.assertEqual(payload, {"product_name": "Example Mortgage"})
+
+    def test_lending_cleanup_keeps_concise_supported_term_fields(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Mortgage",
+            "payment_frequency": "Monthly or accelerated bi-weekly",
+            "amortization_text": "Up to 30 years",
+            "eligibility_text": "Applicants must have at least 20% equity and qualifying income.",
+        }
+
+        _clean_product_context_fields(product_type_family="mortgage", candidate_payload=payload)
+
+        self.assertEqual(payload["payment_frequency"], "Monthly or accelerated bi-weekly")
+        self.assertEqual(payload["amortization_text"], "Up to 30 years")
+        self.assertIn("must have at least 20% equity", str(payload["eligibility_text"]))
 
     def test_normalizes_candidate_and_field_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-service")

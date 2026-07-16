@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_6J4sLFdPNDeJDZEa",
+  "correlation_id": "corr_mObyN2e2ZdPrwvvN",
+  "request_id": "req_codex_goal_20260716050628",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260716_050628_eqbank_gic_collect_D01Hk11P",
+      "catalog_item_id": "catalog-ca-eqbank-gic",
+      "bank_code": "EQBANK",
+      "bank_name": "EQ Bank (Equitable Bank)",
+      "country_code": "CA",
+      "product_type": "gic",
+      "source_catalog_product_type": "gic",
+      "product_family": "deposit",
+      "source_language": "en",
+      "homepage_url": "https://www.eqbank.ca/",
+      "normalized_homepage_url": "https://www.eqbank.ca/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

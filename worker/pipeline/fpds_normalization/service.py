@@ -56,6 +56,14 @@ _CORE_FIELDS = {
     "source_language",
     "currency",
 }
+_DYNAMIC_OPERATIONAL_FIELDS = {
+    "status",
+    "last_verified_at",
+    "bank_name",
+    "product_name",
+    "source_subtype_label",
+    "subtype_code",
+}
 _DATE_RE = re.compile(r"([A-Z][a-z]+ \d{1,2}, \d{4})")
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _RATE_CONTEXT_FIELDS = {
@@ -375,6 +383,7 @@ def _normalize_candidate(
         str(item.source_metadata.get("product_type", "")) or None,
     )
     dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
+    product_type_family = _canonical_product_type_family(product_type)
     product_name = _refine_product_name_from_source_metadata(
         product_name=_coalesce_string(_field_value(extracted_by_field, "product_name")),
         source_metadata=item.source_metadata,
@@ -392,7 +401,11 @@ def _normalize_candidate(
     normalized_values_for_links: dict[str, object] = {}
 
     for field_name, field in extracted_by_field.items():
-        rate_suppression_reason = _rate_field_suppression_reason(field_name=field_name, field=field)
+        rate_suppression_reason = _rate_field_suppression_reason(
+            field_name=field_name,
+            field=field,
+            product_type_family=product_type_family,
+        )
         if rate_suppression_reason is not None:
             field_mapping_metadata[field_name] = {
                 "source_field_name": field_name,
@@ -465,13 +478,24 @@ def _normalize_candidate(
                 "provider_request_id": dynamic_usage.get("provider_request_id"),
             }
 
-    product_type_family = _canonical_product_type_family(product_type)
+        _enforce_dynamic_field_contract(
+            expected_fields=item.source_metadata.get("expected_fields", []),
+            candidate_payload=candidate_payload,
+            normalized_values_for_links=normalized_values_for_links,
+            field_mapping_metadata=field_mapping_metadata,
+            runtime_notes=runtime_notes,
+        )
+
     _clean_product_context_fields(
         product_type_family=product_type_family,
         candidate_payload=candidate_payload,
         normalized_values_for_links=normalized_values_for_links,
         field_mapping_metadata=field_mapping_metadata,
         runtime_notes=runtime_notes,
+        evidence_context_by_field={
+            field_name: field.evidence_text_excerpt or ""
+            for field_name, field in extracted_by_field.items()
+        },
     )
     alias_field = _apply_product_type_aliases(product_type_family=product_type_family, candidate_payload=candidate_payload, runtime_notes=runtime_notes)
     evidence_links_for_output = list(item.evidence_links)
@@ -557,6 +581,7 @@ def _normalize_candidate(
         candidate_payload=candidate_payload,
         evidence_links=item.evidence_links,
         dynamic_product_type=dynamic_product_type,
+        expected_fields=[str(field_name) for field_name in item.source_metadata.get("expected_fields", [])],
     )
     validation_status = _resolve_validation_status(validation_issue_codes)
     source_confidence = _compute_source_confidence(
@@ -615,6 +640,7 @@ def _compute_validation_issue_codes(
     candidate_payload: dict[str, object],
     evidence_links: list[NormalizationEvidenceLink],
     dynamic_product_type: bool = False,
+    expected_fields: list[str] | None = None,
 ) -> list[str]:
     issues: list[str] = []
     required_identity = {
@@ -692,6 +718,11 @@ def _compute_validation_issue_codes(
             issues.append("required_field_missing")
         if subtype_code in {None, ""}:
             issues.append("ambiguous_mapping")
+        if any(
+            candidate_payload.get(field_name) in {None, ""}
+            for field_name in _dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields or [])
+        ):
+            issues.append("required_field_missing")
 
     conflicting_fields = defaultdict(set)
     for link in evidence_links:
@@ -699,6 +730,17 @@ def _compute_validation_issue_codes(
     if not golden_contract_candidate and any(len(values) > 1 for values in conflicting_fields.values()):
         issues.append("conflicting_evidence")
     return sorted(dict.fromkeys(issues))
+
+
+def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
+    normalized_type = str(product_type or "").strip().lower()
+    priority = {
+        "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
+        "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
+        "personal-loan": {"product_name", "interest_rate", "loan_amount_text", "term_length_text"},
+        "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
+    }.get(normalized_type, {"product_name"})
+    return [field_name for field_name in expected_fields if field_name in priority]
 
 
 def _apply_rate_evidence_fallback(
@@ -719,7 +761,10 @@ def _apply_rate_evidence_fallback(
     if match is None:
         return
 
-    percentages = _extract_rate_percentages(match.evidence_text_excerpt)
+    percentages = _extract_rate_percentages(
+        match.evidence_text_excerpt,
+        product_type_family=product_type_family,
+    )
     if not percentages:
         return
 
@@ -802,7 +847,11 @@ def _find_rate_evidence_fallback_match(
     return ranked[0][2]
 
 
-def _extract_rate_percentages(text: str | None) -> list[Decimal]:
+def _extract_rate_percentages(
+    text: str | None,
+    *,
+    product_type_family: str | None = None,
+) -> list[Decimal]:
     if not text:
         return []
     values: list[Decimal] = []
@@ -816,6 +865,11 @@ def _extract_rate_percentages(text: str | None) -> list[Decimal]:
             continue
         if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
             continue
+        if product_type_family == "gic" and _rate_evidence_is_account_context(
+            value=match.group(1),
+            context=text,
+        ):
+            continue
         value = _as_decimal(match.group(1))
         if value is None:
             continue
@@ -827,13 +881,37 @@ def _rate_field_suppression_reason(
     *,
     field_name: str,
     field: NormalizationExtractedField,
+    product_type_family: str | None = None,
 ) -> str | None:
     if field_name not in _RATE_FIELDS:
         return None
-    return canonical_deposit_rate_suppression_reason(
+    generic_reason = canonical_deposit_rate_suppression_reason(
         value=field.candidate_value,
         context=field.evidence_text_excerpt,
     )
+    if generic_reason is not None:
+        return generic_reason
+    if product_type_family == "gic" and _rate_evidence_is_account_context(
+        value=field.candidate_value,
+        context=field.evidence_text_excerpt,
+    ):
+        return "other_product_rate_context"
+    return None
+
+
+def _rate_evidence_is_account_context(*, value: object, context: str | None) -> bool:
+    normalized_context = " ".join(str(context or "").lower().split())
+    normalized_value = str(value).replace("%", "").strip()
+    if not normalized_context or not normalized_value:
+        return False
+    account_markers = ("personal account", "savings account", "chequing account", "checking account", "direct deposit")
+    for match in re.finditer(re.escape(normalized_value), normalized_context):
+        window = normalized_context[max(0, match.start() - 150): min(len(normalized_context), match.end() + 150)]
+        if any(marker in window for marker in account_markers) and not any(
+            marker in window for marker in ("gic rate", "gic rates", "guaranteed investment certificate", "term deposit rate")
+        ):
+            return True
+    return False
 
 
 def _has_rate_promotional_context(text: str | None) -> bool:
@@ -951,6 +1029,16 @@ def _looks_like_generic_product_name(value: object) -> bool:
         "gic / term deposit",
         "term deposit",
         "term deposits",
+        "credit card",
+        "credit cards",
+        "mortgage",
+        "mortgages",
+        "residential mortgage",
+        "residential mortgages",
+        "personal loan",
+        "personal loans",
+        "line of credit",
+        "lines of credit",
     }
 
 
@@ -1069,7 +1157,57 @@ def _canonical_product_type_family(product_type: str | None) -> str | None:
         return "savings"
     if "chequing" in normalized or "checking" in normalized:
         return "chequing"
+    if normalized in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        return normalized
+    if "credit card" in normalized:
+        return "credit-card"
+    if "mortgage" in normalized:
+        return "mortgage"
+    if "line of credit" in normalized or "heloc" in normalized:
+        return "line-of-credit"
+    if "loan" in normalized:
+        return "personal-loan"
     return None
+
+
+def _enforce_dynamic_field_contract(
+    *,
+    expected_fields: object,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    runtime_notes: list[str],
+) -> None:
+    allowed_fields = {
+        str(field_name).strip()
+        for field_name in expected_fields if str(field_name).strip()
+    } if isinstance(expected_fields, (list, tuple, set)) else set()
+    if not allowed_fields:
+        return
+    allowed_fields.update(_DYNAMIC_OPERATIONAL_FIELDS)
+    suppressed_fields = [
+        field_name
+        for field_name in candidate_payload
+        if field_name not in allowed_fields
+    ]
+    for field_name in suppressed_fields:
+        candidate_payload.pop(field_name, None)
+        normalized_values_for_links.pop(field_name, None)
+        metadata = dict(field_mapping_metadata.get(field_name) or {})
+        metadata.update(
+            {
+                "normalized_value": None,
+                "normalization_method": "dynamic_product_field_contract",
+                "suppressed_reason": "field_not_registered_for_product_type",
+            }
+        )
+        field_mapping_metadata[field_name] = metadata
+    if suppressed_fields:
+        runtime_notes.append(
+            "Suppressed fields outside the registered product-type contract: "
+            + ", ".join(sorted(suppressed_fields))
+            + "."
+        )
 
 
 def _clean_product_context_fields(
@@ -1079,16 +1217,35 @@ def _clean_product_context_fields(
     normalized_values_for_links: dict[str, object] | None = None,
     field_mapping_metadata: dict[str, object] | None = None,
     runtime_notes: list[str] | None = None,
+    evidence_context_by_field: dict[str, str] | None = None,
 ) -> None:
     suppressed_fields: list[str] = []
     for field_name, value in list(candidate_payload.items()):
-        if field_name in _CORE_FIELDS or not isinstance(value, str):
+        if field_name in _CORE_FIELDS:
             continue
-        if (
-            _looks_like_navigation_contamination(value)
-            or _looks_like_non_value_rate(field_name=field_name, value=value)
-            or _looks_like_non_value_eligibility(field_name=field_name, value=value)
-        ):
+        evidence_context = (evidence_context_by_field or {}).get(field_name, "")
+        should_suppress = _looks_like_non_rate_numeric_context(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        )
+        if isinstance(value, str):
+            should_suppress = should_suppress or (
+                _looks_like_navigation_contamination(value)
+                or _looks_like_non_value_rate(field_name=field_name, value=value)
+                or _looks_like_non_value_eligibility(field_name=field_name, value=value)
+                or _looks_like_invalid_field_type(field_name=field_name, value=value)
+                or _looks_like_unresolved_placeholder(value)
+                or _looks_like_wrong_frequency_context(
+                    field_name=field_name,
+                    value=value,
+                    context=evidence_context,
+                )
+                or _looks_like_invalid_payment_frequency(field_name=field_name, value=value)
+                or _looks_like_invalid_amortization(field_name=field_name, value=value)
+                or _looks_like_broad_page_copy(field_name=field_name, value=value)
+            )
+        if should_suppress:
             candidate_payload.pop(field_name, None)
             if normalized_values_for_links is not None:
                 normalized_values_for_links.pop(field_name, None)
@@ -1102,6 +1259,27 @@ def _clean_product_context_fields(
             + ", ".join(sorted(suppressed_fields))
             + "."
         )
+
+    duplicated_fields = _duplicated_page_copy_fields(candidate_payload)
+    for field_name in duplicated_fields:
+        candidate_payload.pop(field_name, None)
+        if normalized_values_for_links is not None:
+            normalized_values_for_links.pop(field_name, None)
+        if field_mapping_metadata is not None:
+            field_mapping_metadata.pop(field_name, None)
+    if duplicated_fields and runtime_notes is not None:
+        runtime_notes.append(
+            "Suppressed duplicated page copy mapped to multiple fields: "
+            + ", ".join(sorted(duplicated_fields))
+            + "."
+        )
+
+    _suppress_inconsistent_term_length(
+        candidate_payload=candidate_payload,
+        normalized_values_for_links=normalized_values_for_links,
+        field_mapping_metadata=field_mapping_metadata,
+        runtime_notes=runtime_notes,
+    )
 
     withdrawal_text = str(candidate_payload.get("withdrawal_limit_text") or "").strip()
     withdrawal_match = re.search(
@@ -1145,9 +1323,11 @@ def _clean_product_context_fields(
 
 def _looks_like_navigation_contamination(value: str) -> bool:
     normalized = " ".join(value.lower().split())
-    if normalized in {"home", "go to main content", "document go to main content", "learn more", "read more"}:
+    if normalized in {"home", "go to main content", "skip to main content", "document go to main content", "document skip to main content", "learn more", "read more"}:
         return True
-    if "go to main content" in normalized and len(normalized) < 120:
+    if any(marker in normalized for marker in ("go to main content", "skip to main content")) and len(normalized) < 120:
+        return True
+    if normalized.startswith("document ") and len(normalized.split()) <= 4:
         return True
     if len(normalized) < 140:
         return False
@@ -1177,6 +1357,13 @@ def _looks_like_navigation_contamination(value: str) -> bool:
         "mortgage loan calculator",
         "mortgage rates",
         "faqs",
+        "investor relations",
+        "careers",
+        "bug bounty",
+        "public accountability statement",
+        "community news",
+        "privacy & legal",
+        "accessibility",
     )
     return sum(marker in normalized for marker in navigation_markers) >= 3
 
@@ -1186,6 +1373,8 @@ def _looks_like_non_value_rate(*, field_name: str, value: str) -> bool:
     if not (normalized_field.endswith("_rate") or normalized_field in {"rate", "mortgage_rate", "interest_rate"}):
         return False
     normalized_value = " ".join(value.split())
+    if len(normalized_value) >= 180:
+        return True
     if len(normalized_value) < 45:
         return False
     if normalized_field == "post_maturity_interest_rate" and len(normalized_value) >= 160:
@@ -1193,11 +1382,164 @@ def _looks_like_non_value_rate(*, field_name: str, value: str) -> bool:
     return not re.search(r"(?:\d|%|\bprime\b)", normalized_value, flags=re.IGNORECASE)
 
 
+def _looks_like_non_rate_numeric_context(*, field_name: str, value: object, context: str) -> bool:
+    normalized_field = field_name.strip().lower()
+    if not (normalized_field.endswith("_rate") or normalized_field in {"rate", "mortgage_rate", "interest_rate"}):
+        return False
+    if isinstance(value, str) and not re.fullmatch(r"\s*\d{1,3}(?:\.\d+)?\s*%?\s*", value):
+        return False
+    return (
+        canonical_deposit_rate_suppression_reason(value=value, context=context) is not None
+        or _looks_like_unresolved_placeholder(context)
+    )
+
+
+def _looks_like_invalid_field_type(*, field_name: str, value: str) -> bool:
+    normalized_field = field_name.strip().lower()
+    if normalized_field.endswith("_flag") or normalized_field in {"secured_flag", "redeemable_flag"}:
+        return value.strip().lower() not in {"true", "false", "yes", "no", "1", "0"}
+    return False
+
+
+def _looks_like_unresolved_placeholder(value: str) -> bool:
+    normalized = value.lower()
+    return bool(re.search(r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\])", normalized))
+
+
+def _looks_like_wrong_frequency_context(*, field_name: str, value: str, context: str) -> bool:
+    if field_name not in {"compounding_frequency", "interest_payment_frequency"}:
+        return False
+    normalized_value = value.strip().lower()
+    if normalized_value not in {"weekly", "biweekly", "bi-weekly", "monthly", "semi-monthly"}:
+        return False
+    normalized_context = " ".join(context.lower().split())
+    return "payment frequency" in normalized_context and not any(
+        marker in normalized_context
+        for marker in ("interest payment", "interest is paid", "interest compounded", "interest compounds")
+    )
+
+
+def _looks_like_invalid_payment_frequency(*, field_name: str, value: str) -> bool:
+    if field_name != "payment_frequency":
+        return False
+    normalized = " ".join(value.lower().split())
+    if len(normalized) > 100 or any(marker in normalized for marker in ("calculator", "prepayment", "pre-payment", "special offers")):
+        return True
+    frequency_markers = ("weekly", "biweekly", "bi-weekly", "semi-monthly", "monthly", "accelerated")
+    return not any(marker in normalized for marker in frequency_markers)
+
+
+def _looks_like_invalid_amortization(*, field_name: str, value: str) -> bool:
+    if field_name != "amortization_text":
+        return False
+    normalized = " ".join(value.lower().split())
+    if len(normalized) > 160:
+        return True
+    return re.search(r"\b\d{1,3}\s*(?:year|years|month|months)\b", normalized) is None
+
+
+def _looks_like_broad_page_copy(*, field_name: str, value: str) -> bool:
+    normalized = " ".join(value.split())
+    if field_name == "application_method" and normalized.lower().startswith("how do i apply"):
+        return True
+    concise_fields = {
+        "fees_text",
+        "minimum_payment_text",
+        "credit_limit_text",
+        "monthly_payment_text",
+        "rate_type",
+        "payment_frequency",
+        "security_requirement",
+        "collateral_text",
+        "deposit_insurance",
+        "term_length_text",
+        "prepayment_privileges",
+    }
+    return len(normalized) >= 240 and field_name in concise_fields
+
+
+def _duplicated_page_copy_fields(candidate_payload: dict[str, object]) -> set[str]:
+    by_value: dict[str, list[str]] = {}
+    for field_name, value in candidate_payload.items():
+        if not isinstance(value, str):
+            continue
+        normalized = " ".join(value.lower().split())
+        if len(normalized) < 120:
+            continue
+        by_value.setdefault(normalized, []).append(field_name)
+    return {
+        field_name
+        for field_names in by_value.values()
+        if len(field_names) >= 2
+        for field_name in field_names
+    }
+
+
+def _suppress_inconsistent_term_length(
+    *,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object] | None,
+    field_mapping_metadata: dict[str, object] | None,
+    runtime_notes: list[str] | None,
+) -> None:
+    term_days = candidate_payload.get("term_length_days")
+    term_text = str(candidate_payload.get("term_length_text") or "")
+    if term_days in {None, ""} or not term_text:
+        return
+    try:
+        numeric_days = int(str(term_days))
+    except (TypeError, ValueError):
+        return
+    durations: list[int] = []
+    for amount, unit in re.findall(r"(?<!\d)(\d{1,3})\s*(day|days|month|months|year|years)\b", term_text, flags=re.IGNORECASE):
+        value = int(amount)
+        lowered_unit = unit.lower()
+        durations.append(value if lowered_unit.startswith("day") else value * 30 if lowered_unit.startswith("month") else value * 365)
+    if not durations:
+        return
+    minimum_days = min(durations)
+    maximum_days = max(durations)
+    tolerance = max(7, round(minimum_days * 0.08))
+    if minimum_days - tolerance <= numeric_days <= maximum_days + max(7, round(maximum_days * 0.08)):
+        return
+    candidate_payload.pop("term_length_days", None)
+    if normalized_values_for_links is not None:
+        normalized_values_for_links.pop("term_length_days", None)
+    if field_mapping_metadata is not None:
+        metadata = dict(field_mapping_metadata.get("term_length_days") or {})
+        metadata.update(
+            {
+                "normalized_value": None,
+                "normalization_method": "cross_field_term_safety",
+                "suppressed_reason": "term_days_conflict_with_term_text",
+            }
+        )
+        field_mapping_metadata["term_length_days"] = metadata
+    if runtime_notes is not None:
+        runtime_notes.append(
+            f"Suppressed `term_length_days` value `{numeric_days}` because it conflicts with `{term_text}`."
+        )
+
+
 def _looks_like_non_value_eligibility(*, field_name: str, value: str) -> bool:
     if field_name not in {"eligibility", "eligibility_text"}:
         return False
     normalized = " ".join(value.lower().split())
-    return len(normalized) < 120 and (
+    calculator_cta = "calculator" in normalized and any(
+        marker in normalized
+        for marker in ("calculate", "find out how much", "may qualify to borrow", "estimate how much")
+    ) and not any(
+        marker in normalized
+        for marker in ("must ", "requires ", "eligible if", "at least", "minimum ", "resident", "income", "credit score")
+    )
+    estimate_output = any(
+        marker in normalized
+        for marker in ("receive an estimate", "get an estimate", "estimate for the total")
+    ) and "eligible" in normalized and not any(
+        marker in normalized
+        for marker in ("must ", "requires ", "eligible if", "at least", "minimum ", "resident", "income", "credit score")
+    )
+    return calculator_cta or estimate_output or len(normalized) < 120 and (
         normalized.startswith("and ")
         or "we understand that" in normalized
         or normalized in {"learn more", "get started", "contact us"}
@@ -1287,9 +1629,11 @@ def _normalize_dynamic_fields_with_ai(
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
             instructions=(
-                "You are the FPDS Normalization Agent for dynamic deposit product types. "
+                "You are the FPDS Normalization Agent for operator-defined financial product types. "
                 "Map extracted fields into a conservative canonical candidate payload. "
-                "Keep only values grounded in the extracted inputs. "
+                "Keep only values grounded in the extracted inputs and return only fields listed in expected_fields. "
+                "Never map cashback, rewards, prepayment, equity, down-payment, or instalment-plan percentages to generic annual rate fields. "
+                "Boolean fields must remain booleans, and navigation or whole-page marketing copy must be omitted. "
                 "Use subtype_code `other` unless the subtype is obvious from the product definition and extracted evidence."
             ),
             payload={
@@ -1297,6 +1641,7 @@ def _normalize_dynamic_fields_with_ai(
                 "product_type_name": item.source_metadata.get("product_type_name"),
                 "product_type_description": item.source_metadata.get("product_type_description"),
                 "fallback_policy": item.source_metadata.get("fallback_policy"),
+                "expected_fields": list(item.source_metadata.get("expected_fields", [])),
                 "extracted_fields": [
                     {
                         "field_name": field.field_name,
@@ -1315,9 +1660,14 @@ def _normalize_dynamic_fields_with_ai(
         return {}, [f"Dynamic product normalization AI fallback was unavailable: {exc}"], None
 
     normalized_payload: dict[str, object] = {}
+    expected_fields = {
+        str(field_name).strip()
+        for field_name in item.source_metadata.get("expected_fields", [])
+        if str(field_name).strip()
+    }
     for item_payload in response_payload.get("normalized_fields", []):
         field_name = str(item_payload.get("field_name") or "").strip()
-        if not field_name:
+        if not field_name or expected_fields and field_name not in expected_fields:
             continue
         normalized_value = _normalize_field_value(
             field_name=field_name,

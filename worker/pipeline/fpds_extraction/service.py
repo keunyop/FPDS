@@ -1467,9 +1467,11 @@ def _extract_dynamic_fields_with_ai(
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
             instructions=(
-                "You are the FPDS Extraction Agent for dynamic deposit product types. "
+                "You are the FPDS Extraction Agent for operator-defined financial product types. "
                 "Read the product type definition and candidate evidence chunks, then extract only grounded field candidates. "
-                "Do not invent values. Prefer exact values from one evidence chunk. "
+                "Return only requested_fields. Do not invent values or copy page navigation, headings, calls to action, or unrelated product terms. "
+                "For percentages, verify the surrounding text describes the requested field; cashback, rewards, prepayment, equity, and down-payment percentages are not interest rates. "
+                "Boolean fields must be true or false, never descriptive text. Prefer exact values from one evidence chunk. "
                 "If a field is not supported by the evidence, omit it."
             ),
             payload={

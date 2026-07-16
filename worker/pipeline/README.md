@@ -125,6 +125,7 @@ Current boundary:
 - BMO AIR MILES Chequing extraction now keeps AIR MILES comparison-table fee and minimum-balance text product-scoped, avoids using the generic word `plus` as a Plus-account boundary, and suppresses nav-only cheque/student/newcomer/interest noise
 - generic BMO footer/navigation text such as `Important banking info` is suppressed before it can populate canonical fields such as notes or interest calculation method
 - dynamic product extraction now suppresses obvious cross-product navigation chunks before deriving product titles or long-text fields, so `gic-term-deposit` candidates do not promote chequing or card menu text as product evidence
+- operator-defined product extraction and normalization are bounded to the registered `expected_fields`; the AI may not introduce deposit aliases or unrelated fields into lending/card candidates, and percentage prompts explicitly separate interest rates from cashback, rewards, prepayment, equity, and down-payment values
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -140,6 +141,10 @@ What `WBS 3.6` stores today:
 - clearly noisy long-text fields such as generic notes, marketing promo copy, and fee-at-a-glance snippets can now be suppressed before canonical candidate persistence
 - chequing subtype inference now aligns to the approved taxonomy: `standard`, `package`, `interest_bearing`, `premium`, `other`
 - normalization and validation now also align GIC term and redeemability rules at candidate creation time so missing deposit or term values, invalid term lengths, and conflicting redeemability flags are surfaced before review routing
+- shared candidate cleanup now removes wrong-type flag values, unresolved template tokens, duplicated/whole-page field copy, short `Document ...` navigation labels, payment-frequency values misused as interest frequency, and numeric term values that conflict with the published term text
+- lending cleanup also requires concise duration-shaped amortization values, actual periodic payment-frequency values, and concise prepayment terms; removes calculator/estimate output from eligibility; and suppresses numeric rate fields when their own evidence is an unresolved template or describes cashback, prepayment, equity, down payment, or loan-to-value instead of interest
+- GIC rate fallback rejects account/direct-deposit percentages from navigation or footer evidence, and footer/company navigation is not accepted as deposit-insurance evidence
+- dynamic lending/card validation checks a concise product-type priority set instead of reporting every optional expected field as required; these candidates remain review-first and are never auto-published by this fallback
 - extraction overlays selected registry metadata onto persisted source-document metadata so shared support URLs, such as BMO savings and chequing rate pages, keep the current run's product type and expected fields
 
 Current boundary:

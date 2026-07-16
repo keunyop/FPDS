@@ -1,0 +1,1486 @@
+{
+  "registry_version": "2026-07-16",
+  "bank_code": "CIBC",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.cibc.com"
+  ],
+  "entry_source_id": "AUTO-CIBC-MOR-3142225d67",
+  "sources": [
+    {
+      "source_id": "AUTO-CIBC-MOR-3142225d67",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names a mortgage product category with a specific rate type and is highly likely to describe CIBC fixed-rate mortgage offerings.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/fixed-rate-mortgages.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Fixed Rate Mortgages | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Fixed rate mortgages",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names a mortgage product category with a specific rate type and is highly likely to describe CIBC fixed-rate mortgage offerings.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-34d1365b2e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names CIBC's Home Power Plan mortgage, a specific mortgage product combining mortgage and home-equity functionality.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/home-power-plan-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CIBC Home Power Plan Mortgages | CIBC Mortgages",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "CIBC Home Power Plan\u00ae. Your all-in-one mortgage and borrowing solution.",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names CIBC's Home Power Plan mortgage, a specific mortgage product combining mortgage and home-equity functionality.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-95155b9585",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names a specific variable-rate mortgage product and is highly likely to contain product terms, rates, and features.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/variable-rate-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Variable Rate Mortgages | CIBC",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Variable rate mortgages",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names a specific variable-rate mortgage product and is highly likely to contain product terms, rates, and features.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-0a3eb7266b",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant to mortgage and home-equity borrowing, but broad and likely educational rather than a single product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/use-your-home-equity.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant to mortgage and home-equity borrowing, but broad and likely educational rather than a single product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-0ac98c6b79",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage education and payment guidance, not a named mortgage product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/resource-centre/mortgage-down-payment.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage education and payment guidance, not a named mortgage product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-139233d2b4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Official mortgage rate table with strong relevance, but rate tables are supporting pages rather than single-product details.",
+      "url": "https://www.cibc.com/en/interest-rates/mortgage-rates.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official mortgage rate table with strong relevance, but rate tables are supporting pages rather than single-product details.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-212fad55b6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant explanatory tooltip for variable-rate mortgages, not a primary product page.",
+      "url": "https://www.cibc.com/en/component-references/personal-banking/mortgages/tooltip/variable-rate-mortgages.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant explanatory tooltip for variable-rate mortgages, not a primary product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-292d0ce041",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant mortgage-switching journey, but it describes an acquisition or application flow rather than one distinct mortgage product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/switch-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant mortgage-switching journey, but it describes an acquisition or application flow rather than one distinct mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-2b1d4bc83c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant mortgage guidance for first-time buyers, but it is a customer-scenario page rather than one named mortgage product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/first-time-home-buyer.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant mortgage guidance for first-time buyers, but it is a customer-scenario page rather than one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-39824fd4b3",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Highly relevant to mortgage refinancing and home equity, but the resource-centre framing suggests a broad guidance page rather than one named mortgage product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/resource-centre/mortgage-refinancing.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 9,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Highly relevant to mortgage refinancing and home equity, but the resource-centre framing suggests a broad guidance page rather than one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-41cfa807b6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage calculator hub and supporting tool collection, not a product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/calculators.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage calculator hub and supporting tool collection, not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-4dd05824d4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage-relevant debt-consolidation guidance, but it covers multiple borrowing products rather than one named mortgage.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/resource-centre/debt-consolidation-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage-relevant debt-consolidation guidance, but it covers multiple borrowing products rather than one named mortgage.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-60d827c598",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant fixed-rate mortgage explanatory component, but the tooltip/dialog path indicates supporting content rather than a primary detail page.",
+      "url": "https://www.cibc.com/en/component-references/personal-banking/mortgages/tooltip/fixed-rate-mortgages.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant fixed-rate mortgage explanatory component, but the tooltip/dialog path indicates supporting content rather than a primary detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-7f6d656291",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage contact and likely application-support page, but it does not describe one named mortgage product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/contact-us.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage contact and likely application-support page, but it does not describe one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-a9b77e7752",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage-related guidance for purchasing property, likely covering multiple options and scenarios rather than one product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/buy-your-next-property.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage-related guidance for purchasing property, likely covering multiple options and scenarios rather than one product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-cd529875e9",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage planning calculator, not a financial product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/calculators/affordability-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage planning calculator, not a financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-d3de5228a7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Official mortgage hub with broad navigation to products and resources, but not a single named mortgage product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official mortgage hub with broad navigation to products and resources, but not a single named mortgage product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-dcdde069f6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage payment calculation tool and therefore supporting content rather than a product page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/calculators/payment-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage payment calculation tool and therefore supporting content rather than a product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-f4541d0832",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Strong mortgage relevance and likely rate-selection content, but it is a rate-finding or comparison page rather than one named product.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/find-mortgage-rates.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Strong mortgage relevance and likely rate-selection content, but it is a rate-finding or comparison page rather than one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-f61d433c9c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage-related prepayment calculator, not a named mortgage product detail page.",
+      "url": "https://www.cibc.com/en/personal-banking/mortgages/calculators/prepayment-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage-related prepayment calculator, not a named mortgage product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-de9fc295e4",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language duplicate of the mortgage-switching flow; relevant but not a standalone named mortgage product detail page.",
+      "url": "https://www.cibc.com/fr/personal-banking/mortgages/switch-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "French-language duplicate of the mortgage-switching flow; relevant but not a standalone named mortgage product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-0385718099",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.cibc.com/content/dam/personal_banking/insurance/pdfs/mortgages-product-summary-pa.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-0f9161c234",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.cibc.com/content/dam/personal_banking/insurance/pdfs/product-summary-creditor-insurance-mortgages-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-682f6213b5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.cibc.com/content/dam/personal_banking/insurance/pdfs/mortgages-product-summary-zh.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-c05d0a3bbf",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.cibc.com/content/dam/personal_banking/insurance/pdfs/quebec-residents-product-summary-creditor-insurance-cibc-mortgages-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-CIBC-MOR-d82c67f3d4",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.cibc.com/content/dam/cibc-public-assets/personal-banking/insurance/documents/cibc-ins-creditor-insurance-mortgages-cert-13001-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

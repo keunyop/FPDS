@@ -58,6 +58,100 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["recommended_action"], "edit_approve")
         self.assertEqual(diagnosis["affected_fields"][0]["field_name"], "mortgage_rate")
 
+    def test_review_diagnosis_flags_types_placeholders_and_term_conflicts(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "interest_rate", "credit_limit_text", "secured_flag", "notes"],
+            candidate_payload={
+                "product_name": "Home Equity Line of Credit",
+                "interest_rate": "Prime plus a variable margin",
+                "credit_limit_text": "Available credit RDS%rate_placeholder%",
+                "secured_flag": "Document Residential Mortgages",
+                "term_length_text": "Terms from 12 months to 96 months",
+                "term_length_days": 30,
+            },
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="line-of-credit",
+        )
+
+        self.assertEqual(diagnosis["category"], "suspect_fields")
+        self.assertEqual(
+            {item["issue_type"] for item in diagnosis["affected_fields"]},
+            {"unresolved_placeholder", "invalid_type", "cross_field_conflict"},
+        )
+
+    def test_review_diagnosis_ignores_brand_suffix_when_checking_source_identity(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "mortgage_rate", "rate_type", "term_length_text"],
+            candidate_payload={
+                "product_name": "CIBC Fixed-Rate Closed Mortgage",
+                "mortgage_rate": "Prime - 0.20%",
+                "rate_type": "Fixed",
+                "term_length_text": "5 years",
+            },
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="mortgage",
+            source_metadata={
+                "discovery_metadata": {
+                    "page_title": "CIBC Home Power Plan Mortgages | CIBC Mortgages",
+                    "primary_heading": "CIBC Home Power Plan. Your all-in-one borrowing solution.",
+                }
+            },
+        )
+
+        self.assertEqual(diagnosis["category"], "suspect_fields")
+        self.assertEqual(diagnosis["affected_fields"][0]["field_name"], "product_name")
+        self.assertEqual(diagnosis["affected_fields"][0]["issue_type"], "source_identity_mismatch")
+
+    def test_review_diagnosis_recommends_reject_for_editorial_source(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "mortgage_rate", "term_length_text"],
+            candidate_payload={"product_name": "Mortgage refinancing"},
+            validation_status="error",
+            validation_issue_codes=["required_field_missing"],
+            product_type="mortgage",
+            source_metadata={
+                "normalized_source_url": "https://www.examplebank.ca/mortgages/resource-centre/mortgage-refinancing.html"
+            },
+        )
+
+        self.assertEqual(diagnosis["category"], "non_product_source")
+        self.assertEqual(diagnosis["recommended_action"], "reject")
+
+    def test_review_diagnosis_recommends_reject_for_mortgage_service_flow(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "mortgage_rate"],
+            candidate_payload={"product_name": "Switch your mortgage", "mortgage_rate": 5.25},
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="mortgage",
+            source_metadata={
+                "normalized_source_url": "https://www.examplebank.ca/mortgages/switch-mortgage.html"
+            },
+        )
+
+        self.assertEqual(diagnosis["category"], "non_product_source")
+        self.assertEqual(diagnosis["recommended_action"], "reject")
+        self.assertEqual(diagnosis["affected_fields"], [])
+
+    def test_optional_expected_fields_do_not_force_edit(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "annual_fee", "purchase_interest_rate", "notes", "application_method"],
+            candidate_payload={"product_name": "Cash Back Card", "annual_fee": 0, "purchase_interest_rate": "20.99%"},
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="credit-card",
+        )
+
+        self.assertEqual(diagnosis["category"], "evidence_review")
+        self.assertEqual(diagnosis["recommended_action"], "approve")
+
     def test_review_field_items_include_missing_expected_fields_first(self) -> None:
         items = build_review_field_items(
             expected_fields=["product_name", "standard_rate"],

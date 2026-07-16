@@ -59,7 +59,7 @@ _SUMMARY_MESSAGES = {
     "inconsistent_cross_field_logic": "Cross-field rules were not internally consistent.",
     "low_confidence": "The overall source confidence was below the routing threshold.",
     "validation_error": "Validation produced one or more error-level issues.",
-    "manual_sampling_review": "Prototype routing keeps all candidates in review.",
+    "manual_sampling_review": "This product type requires a reviewer decision before publication.",
     "taxonomy_registry_sync_missing": "The candidate taxonomy is part of the approved canonical deposit baseline but is missing from the active DB registry.",
 }
 _CANONICAL_DEPOSIT_SUBTYPE_REGISTRY = {
@@ -146,6 +146,7 @@ class ValidationRoutingService:
                 runtime_notes=item.runtime_notes,
                 taxonomy_registry=taxonomy_registry,
                 dynamic_product_type=dynamic_product_type,
+                expected_fields=[str(field_name) for field_name in item.source_metadata.get("expected_fields", [])],
             )
             validation_status = _resolve_validation_status(validation_issue_codes)
             source_confidence = _compute_source_confidence(
@@ -423,6 +424,7 @@ def _compute_validation_issue_codes(
     runtime_notes: list[str],
     taxonomy_registry: dict[str, set[str]],
     dynamic_product_type: bool = False,
+    expected_fields: list[str] | None = None,
 ) -> list[str]:
     issues = set(str(item) for item in candidate_record.get("validation_issue_codes", []))
 
@@ -509,6 +511,11 @@ def _compute_validation_issue_codes(
         ]
         if not any(_has_meaningful_value(value) for value in non_core_values):
             issues.add("required_field_missing")
+        if any(
+            candidate_payload.get(field_name) in {None, ""}
+            for field_name in _dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields or [])
+        ):
+            issues.add("required_field_missing")
 
     conflicting_values: dict[str, set[str]] = {}
     for link in field_evidence_links:
@@ -535,6 +542,17 @@ def _compute_validation_issue_codes(
         issues.discard("conflicting_evidence")
 
     return sorted(issues)
+
+
+def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
+    normalized_type = str(product_type or "").strip().lower()
+    priority = {
+        "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
+        "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
+        "personal-loan": {"product_name", "interest_rate", "loan_amount_text", "term_length_text"},
+        "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
+    }.get(normalized_type, {"product_name"})
+    return [field_name for field_name in expected_fields if field_name in priority]
 
 
 def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
