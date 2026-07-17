@@ -1,0 +1,2991 @@
+[source-catalog-runner] starting run run_20260717_063505_eqbank_savings_collect_aMvljsc8 for EQBANK savings
+[source-collection-runner] run run_20260717_063505_eqbank_savings_collect_aMvljsc8 starting snapshot for 5 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+{
+  "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-2d4fe9816b849811",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/snap-2d4fe9816b849811/raw",
+      "checksum": "7815b96447dd931c54199c75b90871bd22b1bb666f2996cc6a35714fba8aebe5",
+      "fingerprint": "90f3f422bdbeb06c33c1e03532ac1c5c0ca7c4ba608402b0aed2812974877be6",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:35:39.390457+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-2d4fe9816b849811",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/snap-2d4fe9816b849811/raw",
+        "content_type": "text/html",
+        "checksum": "7815b96447dd931c54199c75b90871bd22b1bb666f2996cc6a35714fba8aebe5",
+        "fingerprint": "90f3f422bdbeb06c33c1e03532ac1c5c0ca7c4ba608402b0aed2812974877be6",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+          "request_url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+          "final_url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+          "status_code": 200,
+          "content_length": 419432,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:35:39.390457+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a35d2f87e7aacf97",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "selected_snapshot_id": "snap-2d4fe9816b849811",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063505",
+          "content_type": "text/html",
+          "checksum": "7815b96447dd931c54199c75b90871bd22b1bb666f2996cc6a35714fba8aebe5",
+          "fingerprint": "90f3f422bdbeb06c33c1e03532ac1c5c0ca7c4ba608402b0aed2812974877be6",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/snap-2d4fe9816b849811/raw",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+      "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-abae18ba33b5decc",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/snap-abae18ba33b5decc/raw",
+      "checksum": "074c2246e020ff4212c367dc374e9af5b596df0de2e7aba85387079628a6e876",
+      "fingerprint": "1d2bab6bc37d128ac5cb6286b65d68e8e95177919b72a45fb7d007da547d40f9",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:35:39.347256+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-abae18ba33b5decc",
+        "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/snap-abae18ba33b5decc/raw",
+        "content_type": "text/html",
+        "checksum": "074c2246e020ff4212c367dc374e9af5b596df0de2e7aba85387079628a6e876",
+        "fingerprint": "1d2bab6bc37d128ac5cb6286b65d68e8e95177919b72a45fb7d007da547d40f9",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+          "request_url": "https://www.eqbank.ca/general-banking/deposit-insurance-information",
+          "final_url": "https://www.eqbank.ca/legal/deposit-insurance-information",
+          "status_code": 200,
+          "content_length": 238950,
+          "content_type": "text/html",
+          "redirect_count": 1,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:35:39.347256+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1b62620f3881d1d4",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+        "selected_snapshot_id": "snap-abae18ba33b5decc",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063505",
+          "content_type": "text/html",
+          "checksum": "074c2246e020ff4212c367dc374e9af5b596df0de2e7aba85387079628a6e876",
+          "fingerprint": "1d2bab6bc37d128ac5cb6286b65d68e8e95177919b72a45fb7d007da547d40f9",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/snap-abae18ba33b5decc/raw",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "attempt_count": 1,
+          "preflight_status": "warning",
+          "preflight_issue_codes": [
+            "final_url_changed"
+          ]
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-d27db3ac79",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-26c19aa6641df84c",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-26c19aa6641df84c/raw",
+      "checksum": "5e5f126e070858b1a405d8bbdc9110141646fcd033d011d2fc72350eece33ccf",
+      "fingerprint": "3a1b465b0e4d793b6e3004b3c8348292e6c9f7a43ba3820e4a431ec62c09aa9a",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:35:39.126910+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-26c19aa6641df84c",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-26c19aa6641df84c/raw",
+        "content_type": "text/html",
+        "checksum": "5e5f126e070858b1a405d8bbdc9110141646fcd033d011d2fc72350eece33ccf",
+        "fingerprint": "3a1b465b0e4d793b6e3004b3c8348292e6c9f7a43ba3820e4a431ec62c09aa9a",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-SAV-d27db3ac79",
+          "request_url": "https://www.eqbank.ca/rates",
+          "final_url": "https://www.eqbank.ca/rates",
+          "status_code": 200,
+          "content_length": 407502,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:35:39.126910+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-80e6461557eafa2c",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-26c19aa6641df84c",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063505",
+          "content_type": "text/html",
+          "checksum": "5e5f126e070858b1a405d8bbdc9110141646fcd033d011d2fc72350eece33ccf",
+          "fingerprint": "3a1b465b0e4d793b6e3004b3c8348292e6c9f7a43ba3820e4a431ec62c09aa9a",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-26c19aa6641df84c/raw",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+      "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-fae9e641be729055",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/snap-fae9e641be729055/raw",
+      "checksum": "ee29a1d4f98e35bf4e8b0ee78eaa8a8add2fad199da5f2c4a231cfd217f01492",
+      "fingerprint": "371296f3484b42d0cd6194088b6c4c183ab0f9cc2f1af6d7e872a9a7cc5439c8",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:35:39.163927+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-fae9e641be729055",
+        "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/snap-fae9e641be729055/raw",
+        "content_type": "text/html",
+        "checksum": "ee29a1d4f98e35bf4e8b0ee78eaa8a8add2fad199da5f2c4a231cfd217f01492",
+        "fingerprint": "371296f3484b42d0cd6194088b6c4c183ab0f9cc2f1af6d7e872a9a7cc5439c8",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+          "request_url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+          "final_url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+          "status_code": 200,
+          "content_length": 263031,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:35:39.163927+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0c51871bfebcf661",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+        "selected_snapshot_id": "snap-fae9e641be729055",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063505",
+          "content_type": "text/html",
+          "checksum": "ee29a1d4f98e35bf4e8b0ee78eaa8a8add2fad199da5f2c4a231cfd217f01492",
+          "fingerprint": "371296f3484b42d0cd6194088b6c4c183ab0f9cc2f1af6d7e872a9a7cc5439c8",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/snap-fae9e641be729055/raw",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+      "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-da01a6ab3691e14f",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/snap-da01a6ab3691e14f/raw",
+      "checksum": "4783a88c13072bc21a0a77261fcd785f6bb919eba8fe9776c1080e286b0d18ed",
+      "fingerprint": "190edea870e9e64b6870407fec5e25e16ebe8cb489c28f5421c17684f3b16523",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:35:46.157618+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-da01a6ab3691e14f",
+        "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/snap-da01a6ab3691e14f/raw",
+        "content_type": "text/html",
+        "checksum": "4783a88c13072bc21a0a77261fcd785f6bb919eba8fe9776c1080e286b0d18ed",
+        "fingerprint": "190edea870e9e64b6870407fec5e25e16ebe8cb489c28f5421c17684f3b16523",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+          "request_url": "https://www.eqbank.ca/about-us/help/common-questions#notice-savings-account-section",
+          "final_url": "https://www.eqbank.ca/about-us/help/common-questions#notice-savings-account-section",
+          "status_code": 200,
+          "content_length": 1726789,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:35:46.157618+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-39eed833af7809a0",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+        "selected_snapshot_id": "snap-da01a6ab3691e14f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063505",
+          "content_type": "text/html",
+          "checksum": "4783a88c13072bc21a0a77261fcd785f6bb919eba8fe9776c1080e286b0d18ed",
+          "fingerprint": "190edea870e9e64b6870407fec5e25e16ebe8cb489c28f5421c17684f3b16523",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/snap-da01a6ab3691e14f/raw",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "correlation_id": "corr_AA122fNkhb08xqQP",
+    "request_id": "req_codex_goal_20260717063505",
+    "stats": {
+      "source_total": 5,
+      "ok_count": 4,
+      "warning_count": 1,
+      "error_count": 0,
+      "issue_total": 1
+    },
+    "source_checks": [
+      {
+        "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "expected_url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:35:33.062598+00:00",
+        "final_url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+        "normalized_final_url": "https://www.eqbank.ca/personal-banking/notice-savings-account",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+        "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+        "expected_url": "https://www.eqbank.ca/general-banking/deposit-insurance-information",
+        "expected_source_type": "html",
+        "status": "warning",
+        "fetched_at": "2026-07-17T06:35:34.416669+00:00",
+        "final_url": "https://www.eqbank.ca/legal/deposit-insurance-information",
+        "normalized_final_url": "https://www.eqbank.ca/legal/deposit-insurance-information",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 1,
+        "error_summary": null,
+        "issues": [
+          {
+            "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+            "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+            "issue_code": "final_url_changed",
+            "severity": "warning",
+            "expected_url": "https://www.eqbank.ca/general-banking/deposit-insurance-information",
+            "detected_url": "https://www.eqbank.ca/legal/deposit-insurance-information",
+            "expected_source_type": "html",
+            "detected_content_type": "text/html",
+            "message": "Final fetched URL differs from the approved active registry URL."
+          }
+        ]
+      },
+      {
+        "source_id": "AUTO-EQBANK-SAV-d27db3ac79",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "expected_url": "https://www.eqbank.ca/rates",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:35:35.455188+00:00",
+        "final_url": "https://www.eqbank.ca/rates",
+        "normalized_final_url": "https://www.eqbank.ca/rates",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+        "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+        "expected_url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:35:36.580800+00:00",
+        "final_url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+        "normalized_final_url": "https://www.eqbank.ca/personal-banking/savings/usd/us-dollar-account-fees-features",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+        "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+        "expected_url": "https://www.eqbank.ca/about-us/help/common-questions",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:35:37.827795+00:00",
+        "final_url": "https://www.eqbank.ca/about-us/help/common-questions#notice-savings-account-section",
+        "normalized_final_url": "https://www.eqbank.ca/about-us/help/common-questions",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "run_state": "completed",
+    "source_document_count": 5,
+    "stored_snapshot_count": 5,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-07-17T06:35:30.825531+00:00",
+    "completed_at": "2026-07-17T06:35:49.741510+00:00"
+  }
+}
+[source-collection-runner] run run_20260717_063505_eqbank_savings_collect_aMvljsc8 continuing with 5 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+{
+  "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+      "snapshot_id": "snap-2d4fe9816b849811",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-5d9faf500330a012",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/metadata.json",
+      "chunk_count": 19,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a35d2f87e7aacf97",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "selected_snapshot_id": "snap-2d4fe9816b849811",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-5d9faf500330a012",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/metadata.json",
+          "chunk_count": 19,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+      "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+      "snapshot_id": "snap-abae18ba33b5decc",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-075946716345ce38",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/metadata.json",
+      "chunk_count": 3,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1b62620f3881d1d4",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+        "selected_snapshot_id": "snap-abae18ba33b5decc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-075946716345ce38",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/metadata.json",
+          "chunk_count": 3,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-d27db3ac79",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_id": "snap-26c19aa6641df84c",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-4a1eb241c9f27608",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/metadata.json",
+      "chunk_count": 54,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-80e6461557eafa2c",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-26c19aa6641df84c",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-4a1eb241c9f27608",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/metadata.json",
+          "chunk_count": 54,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+      "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+      "snapshot_id": "snap-fae9e641be729055",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-c7d65076dd56e4d2",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/metadata.json",
+      "chunk_count": 10,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0c51871bfebcf661",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+        "selected_snapshot_id": "snap-fae9e641be729055",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-c7d65076dd56e4d2",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/metadata.json",
+          "chunk_count": 10,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+      "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+      "snapshot_id": "snap-da01a6ab3691e14f",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-9c83c03078af414f",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/metadata.json",
+      "chunk_count": 582,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-39eed833af7809a0",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+        "selected_snapshot_id": "snap-da01a6ab3691e14f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-9c83c03078af414f",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/metadata.json",
+          "chunk_count": 582,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "run_state": "completed",
+    "parsed_document_count": 5,
+    "evidence_chunk_count": 668,
+    "run_source_item_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:36:49.889688+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+{
+  "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 5,
+    "stored_count": 5,
+    "failed_count": 0,
+    "extracted_field_count": 70,
+    "evidence_link_count": 30
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+      "snapshot_id": "snap-2d4fe9816b849811",
+      "parsed_document_id": "parsed-5d9faf500330a012",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-1e6894b9b07a3207",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Notice Savings Account | EQ Bank",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Notice Savings Account",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.35",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-d56ae84c5bf2f3df",
+          "evidence_text_excerpt": "What are the current interest rates for the Notice Savings Account?\nFor the 10 Day Notice Savings Account, the interest rate is 2.35% *\n2.35%\nFor the 30 Day Notice Savings Account, the interest rate is 2.75% *\n2.75%",
+          "anchor_type": "section",
+          "anchor_value": "what-are-the-current-interest-rates-for-the-notice-savings-account",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "earn",
+              "interest",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "You\u2019re looking for an account that\u2019s eligible for CDIC protection",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-0e189e3994bf8fdd",
+          "evidence_text_excerpt": "It\u2019s right for you if:\nYou want to save longer to receive higher interest.\nYou\u2019re able to wait the 10- or 30-day notice period to access your funds.\nYou want free unlimited deposits and withdrawals.\nYou\u2019re looking for an account that\u2019s eligible for CDIC protection.\nYou're looking for a completely digital banking experience.",
+          "anchor_type": "section",
+          "anchor_value": "it-s-right-for-you-if",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Earn up to 2.75% interest * 2.75% No fees, no minimum balance CDIC eligibility \u2020 for deposits Open an account Our Rates How It Works Eligibility 10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account 10 Day Earn 2.35% * 2.35% When y",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cdic"
+            ]
+          }
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": [
+            {
+              "term_label": "10 day",
+              "term_length_days": 10,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "30 day",
+              "term_length_days": 30,
+              "rate": "2.75",
+              "minimum_deposit": null,
+              "notes": null
+            }
+          ],
+          "value_type": "json",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_term_rate_table",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-d56ae84c5bf2f3df",
+          "evidence_text_excerpt": "What are the current interest rates for the Notice Savings Account?\nFor the 10 Day Notice Savings Account, the interest rate is 2.35% *\n2.35%\nFor the 30 Day Notice Savings Account, the interest rate is 2.75% *\n2.75%",
+          "anchor_type": "section",
+          "anchor_value": "what-are-the-current-interest-rates-for-the-notice-savings-account",
+          "page_no": null,
+          "chunk_index": 10,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "The notice period determines the number of days that your funds will be held in your Notice Savings Account after making a withdrawal.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "evidence_chunk_id": "chunk-61809c4ee7d38f79",
+          "evidence_text_excerpt": "How do I give advance notice before making a withdrawal?\nWhen you open the EQ Bank Notice Savings Account, choose a notice period that best suits your needs from the two available options. The notice period determines the number of days that your funds will be held in your Notice Savings Account after making a withdrawal.\nYou can make unlimited withdrawals from your Notice Savings Account by transferring your funds to an externally linked account, Personal Account, or Joint Account. The funds will be available in the account you select after your notice period ends.\nunlimited",
+          "anchor_type": "section",
+          "anchor_value": "how-do-i-give-advance-notice-before-making-a-withdrawal",
+          "page_no": null,
+          "chunk_index": 13,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "withdrawal",
+              "withdrawals"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.35",
+          "evidence_chunk_id": "chunk-d56ae84c5bf2f3df",
+          "evidence_text_excerpt": "What are the current interest rates for the Notice Savings Account?\nFor the 10 Day Notice Savings Account, the interest rate is 2.35% *\n2.35%\nFor the 30 Day Notice Savings Account, the interest rate is 2.75% *\n2.75%",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "what-are-the-current-interest-rates-for-the-notice-savings-account",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "You\u2019re looking for an account that\u2019s eligible for CDIC protection",
+          "evidence_chunk_id": "chunk-0e189e3994bf8fdd",
+          "evidence_text_excerpt": "It\u2019s right for you if:\nYou want to save longer to receive higher interest.\nYou\u2019re able to wait the 10- or 30-day notice period to access your funds.\nYou want free unlimited deposits and withdrawals.\nYou\u2019re looking for an account that\u2019s eligible for CDIC protection.\nYou're looking for a completely digital banking experience.",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "it-s-right-for-you-if",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Earn up to 2.75% interest * 2.75% No fees, no minimum balance CDIC eligibility \u2020 for deposits Open an account Our Rates How It Works Eligibility 10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account 10 Day Earn 2.35% * 2.35% When y",
+          "evidence_chunk_id": "chunk-d5d9a21ec55e55af",
+          "evidence_text_excerpt": "Give advance notice on withdrawals, get a better rate.\nbetter rate.\nEarn up to 2.75% interest *\n2.75%\nNo fees, no minimum balance\nCDIC eligibility \u2020 for deposits\nOpen an account\nOur Rates\nHow It Works\nEligibility\n10 Day Notice Savings Account Earn 2.35% * When you provide 10 days notice to withdraw Open an account\n10 Day\nEarn\n2.35% *\n2.35%\nWhen you provide 10 days notice to withdraw\nOpen an account\n30 Day Notice Savings Account Earn 2.75% * When you provide 30 days notice to withdraw Open an account\n30 Day\nEarn\n2.75% *\n2.75%\nWhen you provide 30 days notice to withdraw\nOpen an account",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "give-advance-notice-on-withdrawals-get-a-better-rate",
+          "page_no": null,
+          "chunk_index": 1
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": "[{\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"10 day\", \"term_length_days\": 10}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.75\", \"term_label\": \"30 day\", \"term_length_days\": 30}]",
+          "evidence_chunk_id": "chunk-d56ae84c5bf2f3df",
+          "evidence_text_excerpt": "What are the current interest rates for the Notice Savings Account?\nFor the 10 Day Notice Savings Account, the interest rate is 2.35% *\n2.35%\nFor the 30 Day Notice Savings Account, the interest rate is 2.75% *\n2.75%",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "what-are-the-current-interest-rates-for-the-notice-savings-account",
+          "page_no": null,
+          "chunk_index": 10
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "The notice period determines the number of days that your funds will be held in your Notice Savings Account after making a withdrawal.",
+          "evidence_chunk_id": "chunk-61809c4ee7d38f79",
+          "evidence_text_excerpt": "How do I give advance notice before making a withdrawal?\nWhen you open the EQ Bank Notice Savings Account, choose a notice period that best suits your needs from the two available options. The notice period determines the number of days that your funds will be held in your Notice Savings Account after making a withdrawal.\nYou can make unlimited withdrawals from your Notice Savings Account by transferring your funds to an externally linked account, Personal Account, or Joint Account. The funds will be available in the account you select after your notice period ends.\nunlimited",
+          "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+          "source_snapshot_id": "snap-2d4fe9816b849811",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "anchor_type": "section",
+          "anchor_value": "how-do-i-give-advance-notice-before-making-a-withdrawal",
+          "page_no": null,
+          "chunk_index": 13
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a35d2f87e7aacf97",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "selected_snapshot_id": "snap-2d4fe9816b849811",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-5d9faf500330a012",
+          "model_execution_id": "modelexec-1e6894b9b07a3207",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/parsed-5d9faf500330a012/metadata.json",
+          "extracted_field_count": 15,
+          "evidence_link_count": 7,
+          "runtime_notes": [],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-98c0f13820",
+      "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+      "snapshot_id": "snap-abae18ba33b5decc",
+      "parsed_document_id": "parsed-075946716345ce38",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-52e5b52184d4cef4",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Deposit Insurance Information",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Equitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). EQ Bank i",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Deposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": "chunk-0f9bf93163751cdc",
+          "evidence_text_excerpt": "Deposit Insurance Information\nEquitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). EQ Bank is a trade name of Equitable Bank.\nDeposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada.",
+          "anchor_type": "section",
+          "anchor_value": "deposit-insurance-information",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Deposit Insurance Information Equitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada.",
+          "value_type": "string",
+          "confidence": 0.95,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "evidence_chunk_id": "chunk-0f9bf93163751cdc",
+          "evidence_text_excerpt": "Deposit Insurance Information\nEquitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). EQ Bank is a trade name of Equitable Bank.\nDeposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada.",
+          "anchor_type": "section",
+          "anchor_value": "deposit-insurance-information",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance",
+              "insured"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "Deposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada",
+          "evidence_chunk_id": "chunk-0f9bf93163751cdc",
+          "evidence_text_excerpt": "Deposit Insurance Information\nEquitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). EQ Bank is a trade name of Equitable Bank.\nDeposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada.",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-52e5b52184d4cef4",
+          "anchor_type": "section",
+          "anchor_value": "deposit-insurance-information",
+          "page_no": null,
+          "chunk_index": 0
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Deposit Insurance Information Equitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada.",
+          "evidence_chunk_id": "chunk-0f9bf93163751cdc",
+          "evidence_text_excerpt": "Deposit Insurance Information\nEquitable Bank is a federally regulated deposit taking institution and is authorized to accept deposits in all provinces and territories across Canada. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). EQ Bank is a trade name of Equitable Bank.\nDeposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, per insured category, per depositor, as outlined in CDIC\u2019s \" Protecting Your Deposits \", and provided such deposits are payable in Canada.",
+          "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+          "source_snapshot_id": "snap-abae18ba33b5decc",
+          "citation_confidence": 0.95,
+          "model_execution_id": "modelexec-52e5b52184d4cef4",
+          "anchor_type": "section",
+          "anchor_value": "deposit-insurance-information",
+          "page_no": null,
+          "chunk_index": 0
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-1b62620f3881d1d4",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-d60043a44aa7f18d",
+        "selected_snapshot_id": "snap-abae18ba33b5decc",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-075946716345ce38",
+          "model_execution_id": "modelexec-52e5b52184d4cef4",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-d60043a44aa7f18d/parsed-075946716345ce38/metadata.json",
+          "extracted_field_count": 10,
+          "evidence_link_count": 2,
+          "runtime_notes": [],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-d27db3ac79",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_id": "snap-26c19aa6641df84c",
+      "parsed_document_id": "parsed-4a1eb241c9f27608",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-26612bede2e14d55",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Everyday Banking",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Rates",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "base_12_month_rate",
+          "candidate_value": "3.30",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_12_month_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-9fc2b46df4188ca0",
+          "evidence_text_excerpt": "Rate\nNon-registered 1 Year\n3.30% 1\n3.30%\nLearn more\nRegistered 5 years\n4.00% 1\n4.00%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "1",
+              "1 year",
+              "rate",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-2fe46798aec3a31a",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-2fe46798aec3a31a",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cdic",
+              "insurance"
+            ]
+          }
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": [
+            {
+              "term_label": "1 year",
+              "term_length_days": 365,
+              "rate": "3.30",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "15 month",
+              "term_length_days": 450,
+              "rate": "3.40",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "2 year",
+              "term_length_days": 730,
+              "rate": "3.55",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "27 month",
+              "term_length_days": 810,
+              "rate": "3.70",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "3 year",
+              "term_length_days": 1095,
+              "rate": "3.65",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "4 year",
+              "term_length_days": 1460,
+              "rate": "3.75",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "5 year",
+              "term_length_days": 1825,
+              "rate": "4.00",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "6 year",
+              "term_length_days": 2190,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "7 year",
+              "term_length_days": 2555,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "10 year",
+              "term_length_days": 3650,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            }
+          ],
+          "value_type": "json",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_term_rate_table",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "evidence_chunk_id": "chunk-9fe61f8d6f187eef",
+          "evidence_text_excerpt": "Rate 1\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\n6 Year\n2.35%\n7 Year\n2.35%\n10 Year\n2.35%\nRRSP\nTerm",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 44,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rate",
+              "term"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "base_12_month_rate",
+          "candidate_value": "3.30",
+          "evidence_chunk_id": "chunk-9fc2b46df4188ca0",
+          "evidence_text_excerpt": "Rate\nNon-registered 1 Year\n3.30% 1\n3.30%\nLearn more\nRegistered 5 years\n4.00% 1\n4.00%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-d850396c2b203cc4",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance",
+          "evidence_chunk_id": "chunk-2fe46798aec3a31a",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "evidence_chunk_id": "chunk-2fe46798aec3a31a",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": "[{\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.30\", \"term_label\": \"1 year\", \"term_length_days\": 365}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.40\", \"term_label\": \"15 month\", \"term_length_days\": 450}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.55\", \"term_label\": \"2 year\", \"term_length_days\": 730}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.70\", \"term_label\": \"27 month\", \"term_length_days\": 810}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.65\", \"term_label\": \"3 year\", \"term_length_days\": 1095}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.75\", \"term_label\": \"4 year\", \"term_length_days\": 1460}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"4.00\", \"term_label\": \"5 year\", \"term_length_days\": 1825}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"6 year\", \"term_length_days\": 2190}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"7 year\", \"term_length_days\": 2555}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"10 year\", \"term_length_days\": 3650}]",
+          "evidence_chunk_id": "chunk-9fe61f8d6f187eef",
+          "evidence_text_excerpt": "Rate 1\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\n6 Year\n2.35%\n7 Year\n2.35%\n10 Year\n2.35%\nRRSP\nTerm",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-26c19aa6641df84c",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 44
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-80e6461557eafa2c",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-26c19aa6641df84c",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-4a1eb241c9f27608",
+          "model_execution_id": "modelexec-26612bede2e14d55",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-4a1eb241c9f27608/metadata.json",
+          "extracted_field_count": 16,
+          "evidence_link_count": 8,
+          "runtime_notes": [],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f02bc9919b",
+      "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+      "snapshot_id": "snap-fae9e641be729055",
+      "parsed_document_id": "parsed-c7d65076dd56e4d2",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-19d8c45743b6574c",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "No everyday banking fees",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "All monetary amounts in this table refer to US dollars.",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest Calculations Interest begins to accrue on every dollar the day your account becomes active.",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": "chunk-a2caf180469f5c94",
+          "evidence_text_excerpt": "Interest Calculations\nInterest begins to accrue on every dollar the day your account becomes active. Interest is calculated daily on the total closing balance and at the rates per annum, as offered. Interest is paid monthly. Interest is paid in the same currency as the Account. Interest rates are subject to change without advance notice.",
+          "anchor_type": "section",
+          "anchor_value": "interest-calculations",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "calculation",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "value_type": "string",
+          "confidence": 0.95,
+          "extraction_method": "heuristic_frequency",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": "chunk-a2caf180469f5c94",
+          "evidence_text_excerpt": "Interest Calculations\nInterest begins to accrue on every dollar the day your account becomes active. Interest is calculated daily on the total closing balance and at the rates per annum, as offered. Interest is paid monthly. Interest is paid in the same currency as the Account. Interest rates are subject to change without advance notice.",
+          "anchor_type": "section",
+          "anchor_value": "interest-calculations",
+          "page_no": null,
+          "chunk_index": 5,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest is paid",
+              "is",
+              "monthly",
+              "paid",
+              "paid monthly"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "1 Electronic Transaction(s) means transactions with respect to an EQ Bank Account, including deposits; withdrawals, (which include; transaction cancellation instructions; transfers , Electronic Funds Transfers (EFTs), and International",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "evidence_chunk_id": "chunk-40ca554762da40dc",
+          "evidence_text_excerpt": "Electronic Transaction Details 1\nYou can make electronic transactions through our mobile and online banking applications, or by telephone with the help of our Customer Care team. Our Customer Care call centre is capable of processing EFTs.\nAn Electronic Funds Transfer (EFT) is the electronic transfer of funds between your Accounts at EQ Bank, or between your EQ Bank Accounts and your linked external accounts at other financial institutions.\nIt typically takes one to two business days for funds to arrive in your EQ Bank account or to your external account after the EFT request is made.\nPlease see the US Dollar Account Agreement for further details.\n1 Electronic Transaction(s) means transactions with respect to an EQ Bank Account, including deposits; withdrawals, (which include; transaction cancellation instructions; transfers , Electronic Funds Transfers (EFTs), and International",
+          "anchor_type": "section",
+          "anchor_value": "electronic-transaction-details-1",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "transaction",
+              "withdrawals"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest Calculations Interest begins to accrue on every dollar the day your account becomes active.",
+          "evidence_chunk_id": "chunk-a2caf180469f5c94",
+          "evidence_text_excerpt": "Interest Calculations\nInterest begins to accrue on every dollar the day your account becomes active. Interest is calculated daily on the total closing balance and at the rates per annum, as offered. Interest is paid monthly. Interest is paid in the same currency as the Account. Interest rates are subject to change without advance notice.",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-19d8c45743b6574c",
+          "anchor_type": "section",
+          "anchor_value": "interest-calculations",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "interest_payment_frequency",
+          "candidate_value": "monthly",
+          "evidence_chunk_id": "chunk-a2caf180469f5c94",
+          "evidence_text_excerpt": "Interest Calculations\nInterest begins to accrue on every dollar the day your account becomes active. Interest is calculated daily on the total closing balance and at the rates per annum, as offered. Interest is paid monthly. Interest is paid in the same currency as the Account. Interest rates are subject to change without advance notice.",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "citation_confidence": 0.95,
+          "model_execution_id": "modelexec-19d8c45743b6574c",
+          "anchor_type": "section",
+          "anchor_value": "interest-calculations",
+          "page_no": null,
+          "chunk_index": 5
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "1 Electronic Transaction(s) means transactions with respect to an EQ Bank Account, including deposits; withdrawals, (which include; transaction cancellation instructions; transfers , Electronic Funds Transfers (EFTs), and International",
+          "evidence_chunk_id": "chunk-40ca554762da40dc",
+          "evidence_text_excerpt": "Electronic Transaction Details 1\nYou can make electronic transactions through our mobile and online banking applications, or by telephone with the help of our Customer Care team. Our Customer Care call centre is capable of processing EFTs.\nAn Electronic Funds Transfer (EFT) is the electronic transfer of funds between your Accounts at EQ Bank, or between your EQ Bank Accounts and your linked external accounts at other financial institutions.\nIt typically takes one to two business days for funds to arrive in your EQ Bank account or to your external account after the EFT request is made.\nPlease see the US Dollar Account Agreement for further details.\n1 Electronic Transaction(s) means transactions with respect to an EQ Bank Account, including deposits; withdrawals, (which include; transaction cancellation instructions; transfers , Electronic Funds Transfers (EFTs), and International",
+          "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+          "source_snapshot_id": "snap-fae9e641be729055",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-19d8c45743b6574c",
+          "anchor_type": "section",
+          "anchor_value": "electronic-transaction-details-1",
+          "page_no": null,
+          "chunk_index": 7
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-0c51871bfebcf661",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-961f5902d8bfe8fa",
+        "selected_snapshot_id": "snap-fae9e641be729055",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-c7d65076dd56e4d2",
+          "model_execution_id": "modelexec-19d8c45743b6574c",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-961f5902d8bfe8fa/parsed-c7d65076dd56e4d2/metadata.json",
+          "extracted_field_count": 11,
+          "evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-SAV-f5dadab5e1",
+      "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+      "snapshot_id": "snap-da01a6ab3691e14f",
+      "parsed_document_id": "parsed-9c83c03078af414f",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "savings",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Opening an account",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Banking should be easy. If you\u2019ve got questions, we\u2019ve got answers.",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.76,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-612192a0ceca111f",
+          "evidence_text_excerpt": "Do I need to maintain a minimum balance in my EQ Bank account?\nYou don\u2019t! You\u2019re able to keep a $0 balance in your account, should you choose to.",
+          "anchor_type": "section",
+          "anchor_value": "do-i-need-to-maintain-a-minimum-balance-in-my-eq-bank-account",
+          "page_no": null,
+          "chunk_index": 89,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "maintain",
+              "minimum",
+              "minimum balance"
+            ]
+          }
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "100.00",
+          "value_type": "decimal",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-4af56a5a168330c6",
+          "evidence_text_excerpt": "How can I confirm if I have received my referral bonus?\nYour referral bonus will be paid after the qualifying deposit has been completed. It will be deposited directly into your account, typically within 3 to 5 business days.\nAs the referrer, you can view the status of your sent invitations from your account dashboard:\nIn progress means the person you referred has yet to open an EQ Bank account or complete the $100 minimum deposit.\nCompleted means the referral was successful and the referral bonus has been credited.\nExpired means the person you referred signed up for an EQ Bank account, but did not complete the $100 minimum deposit within 30 days.",
+          "anchor_type": "section",
+          "anchor_value": "how-can-i-confirm-if-i-have-received-my-referral-bonus",
+          "page_no": null,
+          "chunk_index": 138,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "deposit",
+              "minimum",
+              "minimum deposit"
+            ]
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-b4d9f1dad1098053",
+          "evidence_text_excerpt": "Why did my interest rate revert to 1.00% ?\n1.00%\nIf qualifying direct deposits are less than $2,000 by the last day of the month, your interest rate will revert to the base rate of 1.00% within the first two weeks of the following month.\n1.00%",
+          "anchor_type": "section",
+          "anchor_value": "why-did-my-interest-rate-revert-to-1-00",
+          "page_no": null,
+          "chunk_index": 476,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-79fe92cb47424de6",
+          "evidence_text_excerpt": "When will I start earning 2.75% \u2020 interest and for how long?\n2.75%\nIf qualifying transactions are detected by the last day of the month, your 2.75% \u2020 interest rate will take effect within the first two weeks of the following month. You will earn 2.75% \u2020 as long as you continue to meet the qualification threshold.\n2.75%",
+          "anchor_type": "section",
+          "anchor_value": "when-will-i-start-earning-2-75-interest-and-for-how-long",
+          "page_no": null,
+          "chunk_index": 461,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "earn",
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "How will I receive my tax slips for my EQ Bank RRSP? Tax slips, such as the RRSP Contribution Receipt or T4RSP, can be downloaded as PDFs by signing in to your account through the EQ Bank mobile app or web browser. You can find the dates of when these documents will be available ",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-a8f9408f909e9c1b",
+          "evidence_text_excerpt": "How will I receive my tax slips for my EQ Bank RRSP?\nTax slips, such as the RRSP Contribution Receipt or T4RSP, can be downloaded as PDFs by signing in to your account through the EQ Bank mobile app or web browser.\nYou can find the dates of when these documents will be available for download here .\nhere\nActual or deemed withdrawals from an RRSP will be reported on a T4RSP slip. You won\u2019t be issued a T4RSP slip, unless you\u2019ve made withdrawals from your EQ Bank RRSP.\nEQ Bank will issue two contribution receipts, which will allow you to claim the appropriate deductions to your taxable income:\nYour 2023 contribution receipt, which states the contributions made in the last 10 months of 2023\nYour 2024 contribution receipt, which states the contributions made for the first 60 days of 2024\nYou can always access the archive of your past tax documents by signing in to your EQ Bank account. New",
+          "anchor_type": "section",
+          "anchor_value": "how-will-i-receive-my-tax-slips-for-my-eq-bank-rrsp",
+          "page_no": null,
+          "chunk_index": 212,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "first",
+              "for",
+              "for the first",
+              "the"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "You\u2019ll need to send your unique link to friends, who then must use that link to open their EQ Bank account\u2014and make a deposit of at least $100 within 30 days, in order to qualify for the referral bonus",
+          "value_type": "string",
+          "confidence": 0.59,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-47a7e4b537d4c724",
+          "evidence_text_excerpt": "What do I need to do to qualify for the referral bonus?\nIf you\u2019re already a customer, you can sign in to your EQ Bank account and click on \u201cRefer a friend\u201d to find your unique referral link. You\u2019ll need to send your unique link to friends, who then must use that link to open their EQ Bank account\u2014and make a deposit of at least $100 within 30 days, in order to qualify for the referral bonus. Once the person you referred has funded their account, the bonus will be credited to your account, typically within 3 to 5 business days.\nIf you\u2019re a new customer, please ensure you sign up through the correct referral link in order to qualify for the referral bonus. You must deposit a minimum of $100 into your account within 30 days, and the bonus will be credited to your account, typically within 3 to 5 business days.",
+          "anchor_type": "section",
+          "anchor_value": "what-do-i-need-to-do-to-qualify-for-the-referral-bonus",
+          "page_no": null,
+          "chunk_index": 134,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "can",
+              "qualify",
+              "who"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Will my deposits be eligible for CDIC coverage?",
+          "value_type": "string",
+          "confidence": 0.95,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-facadecc8767c407",
+          "evidence_text_excerpt": "Will my deposits be eligible for CDIC coverage?\nEQ Bank is a trade name of Equitable Bank. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). Deposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, \u2020 per insured category, per depositor, and provided such deposits are payable in Canada, as outlined in CDIC\u2019s \u201c Protecting your Deposits \u201d.\nFor clarity, deposits made by sole proprietorships are protected. They are not considered separate and distinct from the sole proprietor (the individual). Eligible deposits under sole proprietorships are combined with those of the sole proprietor.",
+          "anchor_type": "section",
+          "anchor_value": "will-my-deposits-be-eligible-for-cdic-coverage",
+          "page_no": null,
+          "chunk_index": 494,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "canada",
+              "cdic",
+              "corporation",
+              "deposit",
+              "deposit insurance",
+              "insurance",
+              "insured"
+            ]
+          }
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the total closing balance of your card and at the rates per annum, as offered.",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_sentence",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-e80a5b4ff2274dc1",
+          "evidence_text_excerpt": "How does EQ Bank Card interest work?\nYou earn interest on your card\u2019s total balance. Your earnings are then deposited monthly into your linked Personal Account. Interest is calculated daily on the total closing balance of your card and at the rates per annum, as offered. The interest rate for your card will always be the same as your EQ Bank Personal Account interest rate.",
+          "anchor_type": "section",
+          "anchor_value": "how-does-eq-bank-card-interest-work",
+          "page_no": null,
+          "chunk_index": 350,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "balance",
+              "calculated",
+              "calculated daily",
+              "closing",
+              "daily",
+              "interest",
+              "interest is calculated",
+              "is"
+            ]
+          }
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Qualifying withdrawals* are tax free.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-1867d887aa4f3975",
+          "evidence_text_excerpt": "What\u2019s the difference between a First Home Savings Account (FHSA) and the Home Buyers\u2019 Plan (HBP)?\nWith the current Home Buyers' Plan, you can withdraw up to $60,000 from your RRSP to buy a home. You must then pay back the funds to your RRSP (Registered Retirement Savings Plan) over a period of 15 years.\nUnlike the Home Buyers\u2019 Plan, with an FHSA the funds do not need to be paid back.\nThe Home Buyers\u2019 Plan allows you to withdraw from your RRSP to buy or build a qualifying home for yourself or a related person with a disability.\nCurrently, the HBP withdrawal limit is $60,000. Unlike the HBP, you won\u2019t need to pay back the funds with the FHSA, and there\u2019s no withdrawal amount limit. Qualifying withdrawals* are tax free.\nDid you know that you can combine the FHSA and the HBP? You can maximize both programs and put up to $100,000 (plus any investment growth in the FHSA) toward a down",
+          "anchor_type": "section",
+          "anchor_value": "what-s-the-difference-between-a-first-home-savings-account-fhsa-and-the-home-buyers-plan-hbp",
+          "page_no": null,
+          "chunk_index": 390,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "limit",
+              "withdrawal",
+              "withdrawals"
+            ]
+          }
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Note: our hold period will apply (click here for more information on US Dollar Account holds).",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_text",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "evidence_chunk_id": "chunk-02007ca7c62ff940",
+          "evidence_text_excerpt": "What transactions can I make with my EQ Bank US Dollar Account?\nOur US Dollar Account allows you to transfer funds in a number of ways:\nYou can transfer funds from a linked external account (from a Canadian Financial Institution\u2014in CAD or USD) to your EQ Bank US Dollar Account. When you transfer funds in CAD, the transaction will first appear in CAD in your Personal Account, and then it will be automatically deposited into your USD account in US dollars. It will appear as 2 steps in your account, but will only require one step on your end; convenient, right? Note: our hold period will apply (click here for more information on US Dollar Account holds).\nIf you would like to move funds from your Personal Account to your EQ Bank US Dollar Account, you can do so by making a transfer that will convert the funds from Canadian dollars to US dollars.\nIf you would like to move funds from your EQ",
+          "anchor_type": "section",
+          "anchor_value": "what-transactions-can-i-make-with-my-eq-bank-us-dollar-account",
+          "page_no": null,
+          "chunk_index": 268,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "apply",
+              "information",
+              "note"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "minimum_balance",
+          "candidate_value": "0.00",
+          "evidence_chunk_id": "chunk-612192a0ceca111f",
+          "evidence_text_excerpt": "Do I need to maintain a minimum balance in my EQ Bank account?\nYou don\u2019t! You\u2019re able to keep a $0 balance in your account, should you choose to.",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.76,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "do-i-need-to-maintain-a-minimum-balance-in-my-eq-bank-account",
+          "page_no": null,
+          "chunk_index": 89
+        },
+        {
+          "field_name": "minimum_deposit",
+          "candidate_value": "100.00",
+          "evidence_chunk_id": "chunk-4af56a5a168330c6",
+          "evidence_text_excerpt": "How can I confirm if I have received my referral bonus?\nYour referral bonus will be paid after the qualifying deposit has been completed. It will be deposited directly into your account, typically within 3 to 5 business days.\nAs the referrer, you can view the status of your sent invitations from your account dashboard:\nIn progress means the person you referred has yet to open an EQ Bank account or complete the $100 minimum deposit.\nCompleted means the referral was successful and the referral bonus has been credited.\nExpired means the person you referred signed up for an EQ Bank account, but did not complete the $100 minimum deposit within 30 days.",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "how-can-i-confirm-if-i-have-received-my-referral-bonus",
+          "page_no": null,
+          "chunk_index": 138
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-b4d9f1dad1098053",
+          "evidence_text_excerpt": "Why did my interest rate revert to 1.00% ?\n1.00%\nIf qualifying direct deposits are less than $2,000 by the last day of the month, your interest rate will revert to the base rate of 1.00% within the first two weeks of the following month.\n1.00%",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "why-did-my-interest-rate-revert-to-1-00",
+          "page_no": null,
+          "chunk_index": 476
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "evidence_chunk_id": "chunk-79fe92cb47424de6",
+          "evidence_text_excerpt": "When will I start earning 2.75% \u2020 interest and for how long?\n2.75%\nIf qualifying transactions are detected by the last day of the month, your 2.75% \u2020 interest rate will take effect within the first two weeks of the following month. You will earn 2.75% \u2020 as long as you continue to meet the qualification threshold.\n2.75%",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "when-will-i-start-earning-2-75-interest-and-for-how-long",
+          "page_no": null,
+          "chunk_index": 461
+        },
+        {
+          "field_name": "promotional_period_text",
+          "candidate_value": "How will I receive my tax slips for my EQ Bank RRSP? Tax slips, such as the RRSP Contribution Receipt or T4RSP, can be downloaded as PDFs by signing in to your account through the EQ Bank mobile app or web browser. You can find the dates of when these documents will be available ",
+          "evidence_chunk_id": "chunk-a8f9408f909e9c1b",
+          "evidence_text_excerpt": "How will I receive my tax slips for my EQ Bank RRSP?\nTax slips, such as the RRSP Contribution Receipt or T4RSP, can be downloaded as PDFs by signing in to your account through the EQ Bank mobile app or web browser.\nYou can find the dates of when these documents will be available for download here .\nhere\nActual or deemed withdrawals from an RRSP will be reported on a T4RSP slip. You won\u2019t be issued a T4RSP slip, unless you\u2019ve made withdrawals from your EQ Bank RRSP.\nEQ Bank will issue two contribution receipts, which will allow you to claim the appropriate deductions to your taxable income:\nYour 2023 contribution receipt, which states the contributions made in the last 10 months of 2023\nYour 2024 contribution receipt, which states the contributions made for the first 60 days of 2024\nYou can always access the archive of your past tax documents by signing in to your EQ Bank account. New",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "how-will-i-receive-my-tax-slips-for-my-eq-bank-rrsp",
+          "page_no": null,
+          "chunk_index": 212
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "You\u2019ll need to send your unique link to friends, who then must use that link to open their EQ Bank account\u2014and make a deposit of at least $100 within 30 days, in order to qualify for the referral bonus",
+          "evidence_chunk_id": "chunk-47a7e4b537d4c724",
+          "evidence_text_excerpt": "What do I need to do to qualify for the referral bonus?\nIf you\u2019re already a customer, you can sign in to your EQ Bank account and click on \u201cRefer a friend\u201d to find your unique referral link. You\u2019ll need to send your unique link to friends, who then must use that link to open their EQ Bank account\u2014and make a deposit of at least $100 within 30 days, in order to qualify for the referral bonus. Once the person you referred has funded their account, the bonus will be credited to your account, typically within 3 to 5 business days.\nIf you\u2019re a new customer, please ensure you sign up through the correct referral link in order to qualify for the referral bonus. You must deposit a minimum of $100 into your account within 30 days, and the bonus will be credited to your account, typically within 3 to 5 business days.",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.59,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "what-do-i-need-to-do-to-qualify-for-the-referral-bonus",
+          "page_no": null,
+          "chunk_index": 134
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "Will my deposits be eligible for CDIC coverage?",
+          "evidence_chunk_id": "chunk-facadecc8767c407",
+          "evidence_text_excerpt": "Will my deposits be eligible for CDIC coverage?\nEQ Bank is a trade name of Equitable Bank. Equitable Bank is a member of the Canada Deposit Insurance Corporation (CDIC). Deposits made under EQ Bank and Equitable Bank are aggregately eligible for CDIC protection up to $100,000, \u2020 per insured category, per depositor, and provided such deposits are payable in Canada, as outlined in CDIC\u2019s \u201c Protecting your Deposits \u201d.\nFor clarity, deposits made by sole proprietorships are protected. They are not considered separate and distinct from the sole proprietor (the individual). Eligible deposits under sole proprietorships are combined with those of the sole proprietor.",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.95,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "will-my-deposits-be-eligible-for-cdic-coverage",
+          "page_no": null,
+          "chunk_index": 494
+        },
+        {
+          "field_name": "interest_calculation_method",
+          "candidate_value": "Interest is calculated daily on the total closing balance of your card and at the rates per annum, as offered.",
+          "evidence_chunk_id": "chunk-e80a5b4ff2274dc1",
+          "evidence_text_excerpt": "How does EQ Bank Card interest work?\nYou earn interest on your card\u2019s total balance. Your earnings are then deposited monthly into your linked Personal Account. Interest is calculated daily on the total closing balance of your card and at the rates per annum, as offered. The interest rate for your card will always be the same as your EQ Bank Personal Account interest rate.",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "how-does-eq-bank-card-interest-work",
+          "page_no": null,
+          "chunk_index": 350
+        },
+        {
+          "field_name": "withdrawal_limit_text",
+          "candidate_value": "Qualifying withdrawals* are tax free.",
+          "evidence_chunk_id": "chunk-1867d887aa4f3975",
+          "evidence_text_excerpt": "What\u2019s the difference between a First Home Savings Account (FHSA) and the Home Buyers\u2019 Plan (HBP)?\nWith the current Home Buyers' Plan, you can withdraw up to $60,000 from your RRSP to buy a home. You must then pay back the funds to your RRSP (Registered Retirement Savings Plan) over a period of 15 years.\nUnlike the Home Buyers\u2019 Plan, with an FHSA the funds do not need to be paid back.\nThe Home Buyers\u2019 Plan allows you to withdraw from your RRSP to buy or build a qualifying home for yourself or a related person with a disability.\nCurrently, the HBP withdrawal limit is $60,000. Unlike the HBP, you won\u2019t need to pay back the funds with the FHSA, and there\u2019s no withdrawal amount limit. Qualifying withdrawals* are tax free.\nDid you know that you can combine the FHSA and the HBP? You can maximize both programs and put up to $100,000 (plus any investment growth in the FHSA) toward a down",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "what-s-the-difference-between-a-first-home-savings-account-fhsa-and-the-home-buyers-plan-hbp",
+          "page_no": null,
+          "chunk_index": 390
+        },
+        {
+          "field_name": "notes",
+          "candidate_value": "Note: our hold period will apply (click here for more information on US Dollar Account holds).",
+          "evidence_chunk_id": "chunk-02007ca7c62ff940",
+          "evidence_text_excerpt": "What transactions can I make with my EQ Bank US Dollar Account?\nOur US Dollar Account allows you to transfer funds in a number of ways:\nYou can transfer funds from a linked external account (from a Canadian Financial Institution\u2014in CAD or USD) to your EQ Bank US Dollar Account. When you transfer funds in CAD, the transaction will first appear in CAD in your Personal Account, and then it will be automatically deposited into your USD account in US dollars. It will appear as 2 steps in your account, but will only require one step on your end; convenient, right? Note: our hold period will apply (click here for more information on US Dollar Account holds).\nIf you would like to move funds from your Personal Account to your EQ Bank US Dollar Account, you can do so by making a transfer that will convert the funds from Canadian dollars to US dollars.\nIf you would like to move funds from your EQ",
+          "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+          "source_snapshot_id": "snap-da01a6ab3691e14f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "anchor_type": "section",
+          "anchor_value": "what-transactions-can-i-make-with-my-eq-bank-us-dollar-account",
+          "page_no": null,
+          "chunk_index": 268
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-39eed833af7809a0",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-2a4bd17a606be35f",
+        "selected_snapshot_id": "snap-da01a6ab3691e14f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-9c83c03078af414f",
+          "model_execution_id": "modelexec-4b6d891b2afe9c1d",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2a4bd17a606be35f/parsed-9c83c03078af414f/metadata.json",
+          "extracted_field_count": 18,
+          "evidence_link_count": 10,
+          "runtime_notes": [],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "run_state": "completed",
+    "model_execution_count": 5,
+    "usage_record_count": 5,
+    "run_source_item_count": 5,
+    "extracted_draft_count": 5,
+    "source_success_count": 5,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:37:22.520901+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+{
+  "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "stored_count": 1,
+    "failed_count": 0,
+    "candidate_count": 1,
+    "field_evidence_link_count": 5
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+      "snapshot_id": "snap-2d4fe9816b849811",
+      "parsed_document_id": "parsed-5d9faf500330a012",
+      "extraction_model_execution_id": "modelexec-1e6894b9b07a3207",
+      "normalization_action": "stored",
+      "candidate_id": "cand-192c48fa466f7805",
+      "normalization_model_execution_id": "modelexec-e1d258ce278b3306",
+      "normalized_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/metadata.json",
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8574,
+      "runtime_notes": [
+        "Suppressed `public_display_rate` value `2.75` because it is not a canonical annual deposit rate: non_annual_return_context.",
+        "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance."
+      ],
+      "error_summary": null,
+      "field_evidence_link_count": 5,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a35d2f87e7aacf97",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "selected_snapshot_id": "snap-2d4fe9816b849811",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-192c48fa466f7805",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-e1d258ce278b3306",
+          "extraction_model_execution_id": "modelexec-1e6894b9b07a3207",
+          "normalized_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8574,
+          "field_evidence_link_count": 5,
+          "runtime_notes": [
+            "Suppressed `public_display_rate` value `2.75` because it is not a canonical annual deposit rate: non_annual_return_context.",
+            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance."
+          ],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "field_evidence_link_count": 5,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:37:44.595841+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+{
+  "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "queued_count": 0,
+    "auto_validated_count": 1,
+    "failed_count": 0,
+    "review_task_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-SAV-2b23c88175",
+      "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+      "snapshot_id": "snap-2d4fe9816b849811",
+      "parsed_document_id": "parsed-5d9faf500330a012",
+      "candidate_id": "cand-192c48fa466f7805",
+      "candidate_run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+      "validation_action": "auto_validated",
+      "validation_model_execution_id": "modelexec-1b8afd3b650d7768",
+      "validation_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/metadata.json",
+      "review_task_id": null,
+      "validation_status": "pass",
+      "validation_issue_codes": [],
+      "source_confidence": 0.8451,
+      "candidate_state": "auto_validated",
+      "review_reason_code": null,
+      "queue_reason_codes": [],
+      "runtime_notes": [
+        "Suppressed `public_display_rate` value `2.75` because it is not a canonical annual deposit rate: non_annual_return_context.",
+        "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance.",
+        "Candidate met auto-validation policy and did not create a review task."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-a35d2f87e7aacf97",
+        "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+        "source_document_id": "src-eqbank-html-b75de9f9920ac63b",
+        "selected_snapshot_id": "snap-2d4fe9816b849811",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "auto_validated",
+          "candidate_id": "cand-192c48fa466f7805",
+          "candidate_run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+          "validation_model_execution_id": "modelexec-1b8afd3b650d7768",
+          "normalization_model_execution_id": "modelexec-e1d258ce278b3306",
+          "validation_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-b75de9f9920ac63b/cand-192c48fa466f7805/metadata.json",
+          "validation_status": "pass",
+          "validation_issue_codes": [],
+          "source_confidence": 0.8451,
+          "candidate_state": "auto_validated",
+          "review_reason_code": null,
+          "queue_reason_codes": [],
+          "review_task_id": null,
+          "runtime_notes": [
+            "Suppressed `public_display_rate` value `2.75` because it is not a canonical annual deposit rate: non_annual_return_context.",
+            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance.",
+            "Candidate met auto-validation policy and did not create a review task."
+          ],
+          "correlation_id": "corr_AA122fNkhb08xqQP",
+          "request_id": "req_codex_goal_20260717063505"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "review_task_count": 0,
+    "review_queued_count": 0,
+    "auto_validated_count": 1,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:37:54.770916+00:00"
+  }
+}
+[source-collection-runner] run run_20260717_063505_eqbank_savings_collect_aMvljsc8 auto-promoted 1 candidate(s); aggregate refresh launch=True
+[source-collection-runner] run run_20260717_063505_eqbank_savings_collect_aMvljsc8 completed downstream stages
+[source-catalog-runner] finished run run_20260717_063505_eqbank_savings_collect_aMvljsc8

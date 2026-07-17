@@ -6,15 +6,153 @@ from shutil import rmtree
 import unittest
 from unittest.mock import patch
 
-from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
+from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate, EvidenceMatch
 from worker.pipeline.fpds_extraction.__main__ import _context_with_registry_metadata
 from worker.pipeline.fpds_extraction.models import ExtractedFieldCandidate, ExtractionDocumentContext, ExtractionInput
 from worker.pipeline.fpds_extraction.persistence import ExtractionDatabaseConfig, PsqlExtractionRepository
-from worker.pipeline.fpds_extraction.service import ExtractionService, _append_rate_fallback_fields, _extract_candidate_value
+from worker.pipeline.fpds_extraction.service import (
+    ExtractionService,
+    _append_rate_fallback_fields,
+    _extract_candidate_value,
+    _extract_from_matches,
+)
 from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, build_object_store
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_term_rate_table_uses_most_complete_grounded_match(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-GIC-RATES",
+            parsed_document_id="parsed-gic-rates",
+            source_document_id="src-gic-rates",
+            snapshot_id="snap-gic-rates",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic", "product_name": "GICs"},
+        )
+        excerpts = {
+            "chunk-short": "1 Year 3.30% 5 Year 4.00%",
+            "chunk-full": "1 Year 3.30% 2 Year 3.55% 3 Year 3.65% 4 Year 3.75% 5 Year 4.00%",
+        }
+        candidates = {
+            chunk_id: EvidenceChunkCandidate(
+                evidence_chunk_id=chunk_id,
+                parsed_document_id="parsed-gic-rates",
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value="rates",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=excerpt,
+                retrieval_metadata={},
+                source_document_id="src-gic-rates",
+                source_snapshot_id="snap-gic-rates",
+                bank_code="BANK",
+                country_code="CA",
+                source_type="html",
+            )
+            for index, (chunk_id, excerpt) in enumerate(excerpts.items())
+        }
+        matches = [
+            EvidenceMatch(
+                evidence_chunk_id=chunk_id,
+                field_name="term_rate_table",
+                score=0.95 if chunk_id == "chunk-short" else 0.85,
+                retrieval_mode="metadata-only",
+                evidence_text_excerpt=excerpt,
+                source_document_id="src-gic-rates",
+                source_snapshot_id="snap-gic-rates",
+                model_execution_id=None,
+                parsed_document_id="parsed-gic-rates",
+                anchor_type="section",
+                anchor_value="rates",
+                page_no=None,
+                chunk_index=index,
+                match_metadata={"matched_keywords": ["rate"]},
+            )
+            for index, (chunk_id, excerpt) in enumerate(excerpts.items())
+        ]
+
+        field = _extract_from_matches(
+            context=context,
+            field_name="term_rate_table",
+            matches=matches,
+            candidate_map=candidates,
+        )
+
+        self.assertIsNotNone(field)
+        assert field is not None
+        self.assertEqual(field.evidence_chunk_id, "chunk-full")
+        self.assertEqual(len(field.candidate_value), 5)
+
+    def test_withdrawal_percentage_is_not_an_interest_rate(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-GIC-001",
+            parsed_document_id="parsed-gic-withdrawal",
+            source_document_id="src-gic-withdrawal",
+            snapshot_id="snap-gic-withdrawal",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic", "product_name": "EasyBuilder GIC"},
+        )
+
+        rate, *_ = _extract_candidate_value(
+            context=context,
+            field_name="standard_rate",
+            excerpt="Each year, you can withdraw 20% of your initial investment without penalty.",
+            anchor_value="Withdrawals",
+        )
+
+        self.assertIsNone(rate)
+
+    def test_overdraft_service_waiver_is_not_account_monthly_fee(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-CHQ-001",
+            parsed_document_id="parsed-overdraft-fee",
+            source_document_id="src-overdraft-fee",
+            snapshot_id="snap-overdraft-fee",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "chequing", "product_name": "Smart Account"},
+        )
+
+        fee, *_ = _extract_candidate_value(
+            context=context,
+            field_name="monthly_fee",
+            excerpt="Monthly fixed fee for Overdraft Protection Service: waived.",
+            anchor_value="Overdraft protection",
+        )
+
+        self.assertIsNone(fee)
+
+    def test_audience_cross_sell_does_not_set_product_flag(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-CHQ-001",
+            parsed_document_id="parsed-audience-cross-sell",
+            source_document_id="src-audience-cross-sell",
+            snapshot_id="snap-audience-cross-sell",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "chequing", "product_name": "Smart Account", "source_name": "Smart Account"},
+        )
+
+        student, *_ = _extract_candidate_value(
+            context=context,
+            field_name="student_plan_flag",
+            excerpt="Explore our student chequing account.",
+            anchor_value="Other accounts",
+        )
+
+        self.assertIsNone(student)
+
     def test_free_if_balanced_disclosure_preserves_base_fee_and_waiver_threshold(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-CHQ-001",
@@ -194,6 +332,12 @@ class ExtractionServiceTests(unittest.TestCase):
             excerpt="Interest rate: 1.10%. Interest is paid monthly.",
             anchor_value="rates",
         )
+        registration_navigation, _, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="application_method",
+            excerpt="Apply for a bank account. You must be registered for Online and Mobile Banking. Need to register?",
+            anchor_value="apply",
+        )
 
         self.assertEqual(term_type, "json")
         self.assertEqual(term_table[1]["term_label"], "12 months")
@@ -202,6 +346,7 @@ class ExtractionServiceTests(unittest.TestCase):
         self.assertEqual(application_method, "Apply online or in branch.")
         self.assertEqual(deposit_insurance, "Eligible deposits are protected by CDIC limits.")
         self.assertIsNone(unrelated_application_method)
+        self.assertIsNone(registration_navigation)
 
     def test_extracts_sparse_draft_and_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-service")
@@ -586,7 +731,7 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertTrue(extracted_by_field["interac_e_transfer_included"].candidate_value)
             self.assertTrue(extracted_by_field["overdraft_available"].candidate_value)
             self.assertTrue(extracted_by_field["student_plan_flag"].candidate_value)
-            self.assertTrue(extracted_by_field["newcomer_plan_flag"].candidate_value)
+            self.assertNotIn("newcomer_plan_flag", extracted_by_field)
             self.assertIn("cheque book", extracted_by_field["cheque_book_info"].candidate_value.lower())
             self.assertGreaterEqual(len(source_result.evidence_links), 6)
         finally:

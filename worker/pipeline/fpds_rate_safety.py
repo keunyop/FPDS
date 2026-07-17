@@ -80,6 +80,11 @@ def canonical_deposit_rate_suppression_reason(
         return None
     if any(marker in normalized_context for marker in _NON_ANNUAL_RETURN_MARKERS):
         return "non_annual_return_context"
+    if re.search(
+        r"\b(?:withdraw|redeem|encash|prepay|pre-pay)(?:\s+\w+){0,8}\s+\d{1,3}(?:\.\d+)?\s*%",
+        normalized_context,
+    ):
+        return "non_annual_return_context"
     return None
 
 

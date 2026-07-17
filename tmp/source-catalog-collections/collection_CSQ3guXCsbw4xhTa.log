@@ -1,0 +1,1465 @@
+[source-catalog-runner] starting run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC for EQBANK gic
+[source-collection-runner] run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC starting snapshot for 2 source(s)
+[source-collection-runner] launching stage fpds_snapshot with timeout 1800s
+{
+  "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+  "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+  "request_id": "req_codex_goal_20260717063150",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+      "source_document_id": "src-eqbank-html-649d928496e63e48",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-b38159d88142b3a5",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-649d928496e63e48/snap-b38159d88142b3a5/raw",
+      "checksum": "3c0076c5f5e0ccf2292b6cb7f52b9be09b694744cfd12f64624b1ca577205df3",
+      "fingerprint": "93f73e24f243d33c615f119444a98131d45474e84ef1e8cd27872fef71e2df21",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:32:13.732791+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-b38159d88142b3a5",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-649d928496e63e48/snap-b38159d88142b3a5/raw",
+        "content_type": "text/html",
+        "checksum": "3c0076c5f5e0ccf2292b6cb7f52b9be09b694744cfd12f64624b1ca577205df3",
+        "fingerprint": "93f73e24f243d33c615f119444a98131d45474e84ef1e8cd27872fef71e2df21",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+          "request_url": "https://www.eqbank.ca/personal-banking/gics",
+          "final_url": "https://www.eqbank.ca/personal-banking/gics",
+          "status_code": 200,
+          "content_length": 300072,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:32:13.732791+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cbf364f216ca7014",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "selected_snapshot_id": "snap-b38159d88142b3a5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063150",
+          "content_type": "text/html",
+          "checksum": "3c0076c5f5e0ccf2292b6cb7f52b9be09b694744cfd12f64624b1ca577205df3",
+          "fingerprint": "93f73e24f243d33c615f119444a98131d45474e84ef1e8cd27872fef71e2df21",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-649d928496e63e48/snap-b38159d88142b3a5/raw",
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-GIC-141a6b5383",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_action": "stored",
+      "attempt_count": 1,
+      "snapshot_id": "snap-19459e74989ee72f",
+      "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-19459e74989ee72f/raw",
+      "checksum": "f98be2042966c1ed40a0deef889490f9c19773c131512cd8f827f3e1abbaaf70",
+      "fingerprint": "7c211f1cb2ed50cd402cc3f366b33eff08d2130e146282e45f8f7a9f21bef9ca",
+      "content_type": "text/html",
+      "fetch_status": "fetched",
+      "fetched_at": "2026-07-17T06:32:13.736148+00:00",
+      "error_summary": null,
+      "source_snapshot_record": {
+        "snapshot_id": "snap-19459e74989ee72f",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-19459e74989ee72f/raw",
+        "content_type": "text/html",
+        "checksum": "f98be2042966c1ed40a0deef889490f9c19773c131512cd8f827f3e1abbaaf70",
+        "fingerprint": "7c211f1cb2ed50cd402cc3f366b33eff08d2130e146282e45f8f7a9f21bef9ca",
+        "fetch_status": "fetched",
+        "response_metadata": {
+          "source_id": "AUTO-EQBANK-GIC-141a6b5383",
+          "request_url": "https://www.eqbank.ca/rates",
+          "final_url": "https://www.eqbank.ca/rates",
+          "status_code": 200,
+          "content_length": 407516,
+          "content_type": "text/html",
+          "redirect_count": 0,
+          "etag": null,
+          "last_modified": null,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "attempt_count": 1
+        },
+        "retention_class": "hot",
+        "fetched_at": "2026-07-17T06:32:13.736148+00:00"
+      },
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-3fc03c99a50a237f",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-19459e74989ee72f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "snapshot_action": "stored",
+          "request_id": "req_codex_goal_20260717063150",
+          "content_type": "text/html",
+          "checksum": "f98be2042966c1ed40a0deef889490f9c19773c131512cd8f827f3e1abbaaf70",
+          "fingerprint": "7c211f1cb2ed50cd402cc3f366b33eff08d2130e146282e45f8f7a9f21bef9ca",
+          "object_storage_key": "dev/snapshots/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/snap-19459e74989ee72f/raw",
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "attempt_count": 1,
+          "preflight_status": "ok",
+          "preflight_issue_codes": []
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+    "request_id": "req_codex_goal_20260717063150",
+    "stats": {
+      "source_total": 2,
+      "ok_count": 2,
+      "warning_count": 0,
+      "error_count": 0,
+      "issue_total": 0
+    },
+    "source_checks": [
+      {
+        "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "expected_url": "https://www.eqbank.ca/personal-banking/gics",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:32:10.970955+00:00",
+        "final_url": "https://www.eqbank.ca/personal-banking/gics",
+        "normalized_final_url": "https://www.eqbank.ca/personal-banking/gics",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      },
+      {
+        "source_id": "AUTO-EQBANK-GIC-141a6b5383",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "expected_url": "https://www.eqbank.ca/rates",
+        "expected_source_type": "html",
+        "status": "ok",
+        "fetched_at": "2026-07-17T06:32:12.296601+00:00",
+        "final_url": "https://www.eqbank.ca/rates",
+        "normalized_final_url": "https://www.eqbank.ca/rates",
+        "status_code": 200,
+        "content_type": "text/html",
+        "redirect_count": 0,
+        "error_summary": null,
+        "issues": []
+      }
+    ]
+  },
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3",
+    "source_fetch_timeout_seconds": 45,
+    "source_fetch_concurrency": 4,
+    "preflight_drift_check_enabled": true
+  },
+  "persistence": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "run_state": "completed",
+    "source_document_count": 2,
+    "stored_snapshot_count": 2,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "started_at": "2026-07-17T06:32:08.653547+00:00",
+    "completed_at": "2026-07-17T06:32:18.140310+00:00"
+  }
+}
+[source-collection-runner] run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC continuing with 2 successful snapshot source(s)
+[source-collection-runner] launching stage fpds_parse_chunk with timeout 1800s
+{
+  "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+  "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+  "request_id": "req_codex_goal_20260717063150",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "reused_count": 0,
+    "failed_count": 0
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+      "source_document_id": "src-eqbank-html-649d928496e63e48",
+      "snapshot_id": "snap-b38159d88142b3a5",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-a7672e42b2dd1840",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/metadata.json",
+      "chunk_count": 16,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cbf364f216ca7014",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "selected_snapshot_id": "snap-b38159d88142b3a5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-a7672e42b2dd1840",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/metadata.json",
+          "chunk_count": 16,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-GIC-141a6b5383",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_id": "snap-19459e74989ee72f",
+      "parse_action": "stored",
+      "parsed_document_id": "parsed-9a4bbb1db6ef92ce",
+      "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/parsed.txt",
+      "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/metadata.json",
+      "chunk_count": 54,
+      "parse_quality_note": null,
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-3fc03c99a50a237f",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-19459e74989ee72f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "parse_action": "stored",
+          "parsed_document_id": "parsed-9a4bbb1db6ef92ce",
+          "parsed_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/parsed.txt",
+          "metadata_storage_key": "dev/parsed/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/metadata.json",
+          "chunk_count": 54,
+          "parse_quality_note": null,
+          "parser_version": "fpds-parse-chunk-v2",
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "run_state": "completed",
+    "parsed_document_count": 2,
+    "evidence_chunk_count": 70,
+    "run_source_item_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:32:36.012382+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_extraction with timeout 1800s
+{
+  "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+  "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+  "request_id": "req_codex_goal_20260717063150",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 2,
+    "stored_count": 2,
+    "failed_count": 0,
+    "extracted_field_count": 29,
+    "evidence_link_count": 13
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+      "source_document_id": "src-eqbank-html-649d928496e63e48",
+      "snapshot_id": "snap-b38159d88142b3a5",
+      "parsed_document_id": "parsed-a7672e42b2dd1840",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-910e5c6452058215",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "GICs | EQ Bank",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Skip to main content",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.75",
+          "value_type": "decimal",
+          "confidence": 0.98,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": "chunk-263966a1342b0763",
+          "evidence_text_excerpt": "Download\u2028EQ Bank App\n\u2122Trademark of Equitable Bank, all rights reserved. EQ Bank is a trade name of Equitable Bank.\nPrivacy & Legal\nSecurity\nAccessibility\nAccounts Everyday Banking Personal Account Joint Account EQ Bank Card International Money Transfers Savings Notice Savings Account TFSA FHSA US Dollar Account Rates Rates Earn 2.75% interest * Boost your interest rate in your Personal Account when you set up direct deposit. Learn More\nAccounts\nEveryday Banking Personal Account Joint Account EQ Bank Card International Money Transfers\nEveryday Banking\nPersonal Account\nJoint Account\nEQ Bank Card\nInternational Money Transfers\nSavings Notice Savings Account TFSA FHSA US Dollar Account\nSavings\nNotice Savings Account\nTFSA\nFHSA\nUS Dollar Account\nRates Rates\nRates\nEarn 2.75% interest *\n2.75%\nBoost your interest rate in your Personal Account when you set up direct deposit.\nLearn More\nInvesting",
+          "anchor_type": "section",
+          "anchor_value": "download-eq-bank-app",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": "chunk-263966a1342b0763",
+          "evidence_text_excerpt": "Download\u2028EQ Bank App\n\u2122Trademark of Equitable Bank, all rights reserved. EQ Bank is a trade name of Equitable Bank.\nPrivacy & Legal\nSecurity\nAccessibility\nAccounts Everyday Banking Personal Account Joint Account EQ Bank Card International Money Transfers Savings Notice Savings Account TFSA FHSA US Dollar Account Rates Rates Earn 2.75% interest * Boost your interest rate in your Personal Account when you set up direct deposit. Learn More\nAccounts\nEveryday Banking Personal Account Joint Account EQ Bank Card International Money Transfers\nEveryday Banking\nPersonal Account\nJoint Account\nEQ Bank Card\nInternational Money Transfers\nSavings Notice Savings Account TFSA FHSA US Dollar Account\nSavings\nNotice Savings Account\nTFSA\nFHSA\nUS Dollar Account\nRates Rates\nRates\nEarn 2.75% interest *\n2.75%\nBoost your interest rate in your Personal Account when you set up direct deposit.\nLearn More\nInvesting",
+          "anchor_type": "section",
+          "anchor_value": "download-eq-bank-app",
+          "page_no": null,
+          "chunk_index": 7,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "earn",
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "EQ Bank About EQ Bank Community News Investor Relations Careers On Open Banking CDIC Member Bug Bounty Program Public Accountability Statement",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "evidence_chunk_id": "chunk-c5958d4806ae1e1a",
+          "evidence_text_excerpt": "EQ Bank\nAbout EQ Bank\nCommunity\nNews\nInvestor Relations\nCareers\nOn Open Banking\nCDIC Member\nBug Bounty Program\nPublic Accountability Statement",
+          "anchor_type": "section",
+          "anchor_value": "eq-bank",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cdic"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.75",
+          "evidence_chunk_id": "chunk-263966a1342b0763",
+          "evidence_text_excerpt": "Download\u2028EQ Bank App\n\u2122Trademark of Equitable Bank, all rights reserved. EQ Bank is a trade name of Equitable Bank.\nPrivacy & Legal\nSecurity\nAccessibility\nAccounts Everyday Banking Personal Account Joint Account EQ Bank Card International Money Transfers Savings Notice Savings Account TFSA FHSA US Dollar Account Rates Rates Earn 2.75% interest * Boost your interest rate in your Personal Account when you set up direct deposit. Learn More\nAccounts\nEveryday Banking Personal Account Joint Account EQ Bank Card International Money Transfers\nEveryday Banking\nPersonal Account\nJoint Account\nEQ Bank Card\nInternational Money Transfers\nSavings Notice Savings Account TFSA FHSA US Dollar Account\nSavings\nNotice Savings Account\nTFSA\nFHSA\nUS Dollar Account\nRates Rates\nRates\nEarn 2.75% interest *\n2.75%\nBoost your interest rate in your Personal Account when you set up direct deposit.\nLearn More\nInvesting",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "citation_confidence": 0.98,
+          "model_execution_id": "modelexec-910e5c6452058215",
+          "anchor_type": "section",
+          "anchor_value": "download-eq-bank-app",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "2.75",
+          "evidence_chunk_id": "chunk-263966a1342b0763",
+          "evidence_text_excerpt": "Download\u2028EQ Bank App\n\u2122Trademark of Equitable Bank, all rights reserved. EQ Bank is a trade name of Equitable Bank.\nPrivacy & Legal\nSecurity\nAccessibility\nAccounts Everyday Banking Personal Account Joint Account EQ Bank Card International Money Transfers Savings Notice Savings Account TFSA FHSA US Dollar Account Rates Rates Earn 2.75% interest * Boost your interest rate in your Personal Account when you set up direct deposit. Learn More\nAccounts\nEveryday Banking Personal Account Joint Account EQ Bank Card International Money Transfers\nEveryday Banking\nPersonal Account\nJoint Account\nEQ Bank Card\nInternational Money Transfers\nSavings Notice Savings Account TFSA FHSA US Dollar Account\nSavings\nNotice Savings Account\nTFSA\nFHSA\nUS Dollar Account\nRates Rates\nRates\nEarn 2.75% interest *\n2.75%\nBoost your interest rate in your Personal Account when you set up direct deposit.\nLearn More\nInvesting",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-910e5c6452058215",
+          "anchor_type": "section",
+          "anchor_value": "download-eq-bank-app",
+          "page_no": null,
+          "chunk_index": 7
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "EQ Bank About EQ Bank Community News Investor Relations Careers On Open Banking CDIC Member Bug Bounty Program Public Accountability Statement",
+          "evidence_chunk_id": "chunk-c5958d4806ae1e1a",
+          "evidence_text_excerpt": "EQ Bank\nAbout EQ Bank\nCommunity\nNews\nInvestor Relations\nCareers\nOn Open Banking\nCDIC Member\nBug Bounty Program\nPublic Accountability Statement",
+          "source_document_id": "src-eqbank-html-649d928496e63e48",
+          "source_snapshot_id": "snap-b38159d88142b3a5",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-910e5c6452058215",
+          "anchor_type": "section",
+          "anchor_value": "eq-bank",
+          "page_no": null,
+          "chunk_index": 1
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cbf364f216ca7014",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "selected_snapshot_id": "snap-b38159d88142b3a5",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-a7672e42b2dd1840",
+          "model_execution_id": "modelexec-910e5c6452058215",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-649d928496e63e48/parsed-a7672e42b2dd1840/metadata.json",
+          "extracted_field_count": 11,
+          "evidence_link_count": 3,
+          "runtime_notes": [],
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    },
+    {
+      "source_id": "AUTO-EQBANK-GIC-141a6b5383",
+      "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+      "snapshot_id": "snap-19459e74989ee72f",
+      "parsed_document_id": "parsed-9a4bbb1db6ef92ce",
+      "extraction_action": "stored",
+      "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+      "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/extracted.json",
+      "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/metadata.json",
+      "runtime_notes": [],
+      "error_summary": null,
+      "extracted_fields": [
+        {
+          "field_name": "product_family",
+          "candidate_value": "deposit",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_type",
+          "candidate_value": "gic",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "bank_code",
+          "candidate_value": "EQBANK",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "country_code",
+          "candidate_value": "CA",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "source_language",
+          "candidate_value": "en",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "currency",
+          "candidate_value": "CAD",
+          "value_type": "string",
+          "confidence": 0.99,
+          "extraction_method": "derived_context",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Everyday Banking",
+          "value_type": "string",
+          "confidence": 0.88,
+          "extraction_method": "derived_title",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "description_short",
+          "candidate_value": "Rates",
+          "value_type": "string",
+          "confidence": 0.7,
+          "extraction_method": "derived_description",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": null,
+          "evidence_text_excerpt": null,
+          "anchor_type": null,
+          "anchor_value": null,
+          "page_no": null,
+          "chunk_index": null,
+          "field_metadata": {
+            "derived_field": true
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "base_12_month_rate",
+          "candidate_value": "3.30",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_12_month_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-9cc655c875674ad4",
+          "evidence_text_excerpt": "Rate\nNon-registered 1 Year\n3.30% 1\n3.30%\nLearn more\nRegistered 5 years\n4.00% 1\n4.00%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 12,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "1",
+              "1 year",
+              "rate",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.99,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "interest",
+              "interest rate",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "1.00",
+          "value_type": "decimal",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_percent",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "bonus",
+              "rate"
+            ]
+          }
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_eligibility_text",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-2b534a0273afcac3",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "eligible"
+            ]
+          }
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_deposit_insurance",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-2b534a0273afcac3",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "cdic",
+              "insurance"
+            ]
+          }
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": [
+            {
+              "term_label": "1 year",
+              "term_length_days": 365,
+              "rate": "3.30",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "15 month",
+              "term_length_days": 450,
+              "rate": "3.40",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "2 year",
+              "term_length_days": 730,
+              "rate": "3.55",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "27 month",
+              "term_length_days": 810,
+              "rate": "3.70",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "3 year",
+              "term_length_days": 1095,
+              "rate": "3.65",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "4 year",
+              "term_length_days": 1460,
+              "rate": "3.75",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "5 year",
+              "term_length_days": 1825,
+              "rate": "4.00",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "6 year",
+              "term_length_days": 2190,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "7 year",
+              "term_length_days": 2555,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            },
+            {
+              "term_label": "10 year",
+              "term_length_days": 3650,
+              "rate": "2.35",
+              "minimum_deposit": null,
+              "notes": null
+            }
+          ],
+          "value_type": "json",
+          "confidence": 0.91,
+          "extraction_method": "heuristic_term_rate_table",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-c42ddc56ec2f860e",
+          "evidence_text_excerpt": "Rate 1\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\n6 Year\n2.35%\n7 Year\n2.35%\n10 Year\n2.35%\nRRSP\nTerm",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 44,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "rate",
+              "term"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "27 month",
+          "value_type": "string",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_term_text",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-419ea7ce9f2ef06f",
+          "evidence_text_excerpt": "Rate 1\nRate\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\nRRSP\nTerm",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 20,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "month",
+              "term",
+              "year"
+            ]
+          }
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": 810,
+          "value_type": "integer",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_term_days",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "evidence_chunk_id": "chunk-419ea7ce9f2ef06f",
+          "evidence_text_excerpt": "Rate 1\nRate\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\nRRSP\nTerm",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 20,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "month",
+              "term",
+              "year"
+            ]
+          }
+        }
+      ],
+      "evidence_links": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "base_12_month_rate",
+          "candidate_value": "3.30",
+          "evidence_chunk_id": "chunk-9cc655c875674ad4",
+          "evidence_text_excerpt": "Rate\nNon-registered 1 Year\n3.30% 1\n3.30%\nLearn more\nRegistered 5 years\n4.00% 1\n4.00%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 12
+        },
+        {
+          "field_name": "public_display_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.99,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "promotional_rate",
+          "candidate_value": "1.00",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "introductory_rate_flag",
+          "candidate_value": "true",
+          "evidence_chunk_id": "chunk-5dbf6558123ea4f3",
+          "evidence_text_excerpt": "Rate\nPersonal Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more\nJoint Account\nBase rate: 1.00% * Bonus interest rate: 2.75% ** ( 1.00% * base rate + 1.75% ** bonus interest)\n1.00%\n2.75%\n1.00%\n1.75%\nLearn more",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate",
+          "page_no": null,
+          "chunk_index": 6
+        },
+        {
+          "field_name": "eligibility_text",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance",
+          "evidence_chunk_id": "chunk-2b534a0273afcac3",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51
+        },
+        {
+          "field_name": "deposit_insurance",
+          "candidate_value": "A safe place for your money No matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "evidence_chunk_id": "chunk-2b534a0273afcac3",
+          "evidence_text_excerpt": "A safe place for your money\nNo matter which product you choose, EQ Bank deposits are eligible for CDIC insurance.",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "a-safe-place-for-your-money",
+          "page_no": null,
+          "chunk_index": 51
+        },
+        {
+          "field_name": "term_rate_table",
+          "candidate_value": "[{\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.30\", \"term_label\": \"1 year\", \"term_length_days\": 365}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.40\", \"term_label\": \"15 month\", \"term_length_days\": 450}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.55\", \"term_label\": \"2 year\", \"term_length_days\": 730}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.70\", \"term_label\": \"27 month\", \"term_length_days\": 810}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.65\", \"term_label\": \"3 year\", \"term_length_days\": 1095}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"3.75\", \"term_label\": \"4 year\", \"term_length_days\": 1460}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"4.00\", \"term_label\": \"5 year\", \"term_length_days\": 1825}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"6 year\", \"term_length_days\": 2190}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"7 year\", \"term_length_days\": 2555}, {\"minimum_deposit\": null, \"notes\": null, \"rate\": \"2.35\", \"term_label\": \"10 year\", \"term_length_days\": 3650}]",
+          "evidence_chunk_id": "chunk-c42ddc56ec2f860e",
+          "evidence_text_excerpt": "Rate 1\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\n6 Year\n2.35%\n7 Year\n2.35%\n10 Year\n2.35%\nRRSP\nTerm",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.91,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 44
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "27 month",
+          "evidence_chunk_id": "chunk-419ea7ce9f2ef06f",
+          "evidence_text_excerpt": "Rate 1\nRate\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\nRRSP\nTerm",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 20
+        },
+        {
+          "field_name": "term_length_days",
+          "candidate_value": "810",
+          "evidence_chunk_id": "chunk-419ea7ce9f2ef06f",
+          "evidence_text_excerpt": "Rate 1\nRate\n1 Year\n3.30%\n15 Month\n3.40%\n2 Year\n3.55%\n27 Month\n3.70%\n3 Year\n3.65%\n4 Year\n3.75%\n5 Year\n4.00%\nRRSP\nTerm",
+          "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+          "source_snapshot_id": "snap-19459e74989ee72f",
+          "citation_confidence": 0.55,
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "anchor_type": "section",
+          "anchor_value": "rate-1",
+          "page_no": null,
+          "chunk_index": 20
+        }
+      ],
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-3fc03c99a50a237f",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-2d559a925d3f97e4",
+        "selected_snapshot_id": "snap-19459e74989ee72f",
+        "stage_status": "completed",
+        "warning_count": 0,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "extraction_action": "stored",
+          "parsed_document_id": "parsed-9a4bbb1db6ef92ce",
+          "model_execution_id": "modelexec-1e0cbcfe4efbba03",
+          "extracted_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/extracted.json",
+          "metadata_storage_key": "dev/extracted/CA/EQBANK/src-eqbank-html-2d559a925d3f97e4/parsed-9a4bbb1db6ef92ce/metadata.json",
+          "extracted_field_count": 18,
+          "evidence_link_count": 10,
+          "runtime_notes": [],
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "run_state": "completed",
+    "model_execution_count": 2,
+    "usage_record_count": 2,
+    "run_source_item_count": 2,
+    "extracted_draft_count": 2,
+    "source_success_count": 2,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:32:48.600378+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_normalization with timeout 1800s
+{
+  "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+  "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+  "request_id": "req_codex_goal_20260717063150",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "stored_count": 1,
+    "failed_count": 0,
+    "candidate_count": 1,
+    "field_evidence_link_count": 4
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+      "source_document_id": "src-eqbank-html-649d928496e63e48",
+      "snapshot_id": "snap-b38159d88142b3a5",
+      "parsed_document_id": "parsed-a7672e42b2dd1840",
+      "extraction_model_execution_id": "modelexec-910e5c6452058215",
+      "normalization_action": "stored",
+      "candidate_id": "cand-56f5f3c3459835de",
+      "normalization_model_execution_id": "modelexec-e8b106fca03ee57e",
+      "normalized_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/normalized.json",
+      "metadata_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/metadata.json",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.5949,
+      "runtime_notes": [
+        "Supplemented missing GIC rate fields for `AUTO-EQBANK-GIC-be5a6c19ee` from generic supporting source `AUTO-EQBANK-GIC-141a6b5383`.",
+        "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance, description_short.",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+      ],
+      "error_summary": null,
+      "field_evidence_link_count": 4,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cbf364f216ca7014",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "selected_snapshot_id": "snap-b38159d88142b3a5",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "normalization_action": "stored",
+          "candidate_id": "cand-56f5f3c3459835de",
+          "candidate_key": null,
+          "normalization_model_execution_id": "modelexec-e8b106fca03ee57e",
+          "extraction_model_execution_id": "modelexec-910e5c6452058215",
+          "normalized_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/normalized.json",
+          "metadata_storage_key": "dev/normalized/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.5949,
+          "field_evidence_link_count": 4,
+          "runtime_notes": [
+            "Supplemented missing GIC rate fields for `AUTO-EQBANK-GIC-be5a6c19ee` from generic supporting source `AUTO-EQBANK-GIC-141a6b5383`.",
+            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance, description_short.",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label."
+          ],
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "field_evidence_link_count": 4,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:32:59.982955+00:00"
+  }
+}
+[source-collection-runner] launching stage fpds_validation_routing with timeout 1800s
+{
+  "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+  "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+  "request_id": "req_codex_goal_20260717063150",
+  "routing_mode": "phase1",
+  "partial_completion_flag": false,
+  "stats": {
+    "source_total": 1,
+    "queued_count": 1,
+    "auto_validated_count": 0,
+    "failed_count": 0,
+    "review_task_count": 1
+  },
+  "source_results": [
+    {
+      "source_id": "AUTO-EQBANK-GIC-be5a6c19ee",
+      "source_document_id": "src-eqbank-html-649d928496e63e48",
+      "snapshot_id": "snap-b38159d88142b3a5",
+      "parsed_document_id": "parsed-a7672e42b2dd1840",
+      "candidate_id": "cand-56f5f3c3459835de",
+      "candidate_run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+      "validation_action": "review_queued",
+      "validation_model_execution_id": "modelexec-af74d84ca334c543",
+      "validation_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/validation-routing.json",
+      "metadata_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/metadata.json",
+      "review_task_id": "review-df0e24bdfd78cb35",
+      "validation_status": "error",
+      "validation_issue_codes": [
+        "required_field_missing"
+      ],
+      "source_confidence": 0.657,
+      "candidate_state": "in_review",
+      "review_reason_code": "validation_error",
+      "queue_reason_codes": [
+        "validation_error",
+        "required_field_missing",
+        "low_confidence"
+      ],
+      "runtime_notes": [
+        "Supplemented missing GIC rate fields for `AUTO-EQBANK-GIC-be5a6c19ee` from generic supporting source `AUTO-EQBANK-GIC-141a6b5383`.",
+        "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance, description_short.",
+        "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+        "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+      ],
+      "error_summary": null,
+      "run_source_item_record": {
+        "run_source_item_id": "rsi-cbf364f216ca7014",
+        "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+        "source_document_id": "src-eqbank-html-649d928496e63e48",
+        "selected_snapshot_id": "snap-b38159d88142b3a5",
+        "stage_status": "completed",
+        "warning_count": 1,
+        "error_count": 0,
+        "error_summary": null,
+        "stage_metadata": {
+          "validation_action": "review_queued",
+          "candidate_id": "cand-56f5f3c3459835de",
+          "candidate_run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+          "validation_model_execution_id": "modelexec-af74d84ca334c543",
+          "normalization_model_execution_id": "modelexec-e8b106fca03ee57e",
+          "validation_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/validation-routing.json",
+          "metadata_storage_key": "dev/validated/CA/EQBANK/src-eqbank-html-649d928496e63e48/cand-56f5f3c3459835de/metadata.json",
+          "validation_status": "error",
+          "validation_issue_codes": [
+            "required_field_missing"
+          ],
+          "source_confidence": 0.657,
+          "candidate_state": "in_review",
+          "review_reason_code": "validation_error",
+          "queue_reason_codes": [
+            "validation_error",
+            "required_field_missing",
+            "low_confidence"
+          ],
+          "review_task_id": "review-df0e24bdfd78cb35",
+          "runtime_notes": [
+            "Supplemented missing GIC rate fields for `AUTO-EQBANK-GIC-be5a6c19ee` from generic supporting source `AUTO-EQBANK-GIC-141a6b5383`.",
+            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: deposit_insurance, description_short.",
+            "Subtype could not be mapped confidently and was normalized to `other` while preserving source_subtype_label.",
+            "Candidate routed to review in `phase1` mode with primary reason `validation_error`."
+          ],
+          "correlation_id": "corr_s2F7nVCqO5I5nTCD",
+          "request_id": "req_codex_goal_20260717063150"
+        }
+      }
+    }
+  ],
+  "runtime": {
+    "env_file": "D:\\10 Development\\10 \uac1c\uc778\ud504\ub85c\uc81d\ud2b8\\70. Mybank\\workspace\\.env.dev",
+    "loaded_env_key_count": 51,
+    "persist_db": true,
+    "trigger_type": "admin_source_collection",
+    "triggered_by": "codex@local",
+    "routing_mode": "phase1",
+    "database_schema": "public",
+    "storage_driver": "s3"
+  },
+  "persistence": {
+    "run_id": "run_20260717_063150_eqbank_gic_collect_2zQ8AaTC",
+    "run_state": "completed",
+    "candidate_count": 1,
+    "review_task_count": 1,
+    "review_queued_count": 1,
+    "auto_validated_count": 0,
+    "model_execution_count": 1,
+    "usage_record_count": 1,
+    "run_source_item_count": 1,
+    "source_success_count": 1,
+    "source_failure_count": 0,
+    "partial_completion_flag": false,
+    "completed_at": "2026-07-17T06:33:09.651340+00:00"
+  }
+}
+[source-collection-runner] run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC superseded 1 older logical duplicate review(s)
+[source-collection-runner] run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC completed downstream stages
+[source-catalog-runner] finished run run_20260717_063150_eqbank_gic_collect_2zQ8AaTC

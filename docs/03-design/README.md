@@ -1,13 +1,14 @@
 # FPDS Design Docs
 
 Status: Active design index
-Last updated: 2026-04-22
+Last updated: 2026-07-16
 
 Use this file to avoid opening every design doc.
 
 ## Core Runtime Design
 
 - `domain-model-canonical-schema.md`: canonical fields, validation, and taxonomy
+- `financial-product-field-contract.md`: cross-bank field types, units, field notes, evidence merge, and collection verification
 - `workflow-state-ingestion-design.md`: ingestion workflow stages and state model
 - `review-run-publish-audit-state-design.md`: review, run, publish, and audit lifecycle
 - `api-interface-contracts.md`: public, admin, internal, and external interface contracts

@@ -412,7 +412,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_validation_routing_accepts_display_money_strings_for_numeric_fields(self) -> None:
+    def test_validation_routing_rejects_display_strings_for_canonical_numeric_fields(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-display-money")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -452,7 +452,8 @@ class ValidationRoutingServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             self.assertNotIn("invalid_numeric_range", source_result.validation_issue_codes)
-            self.assertEqual(source_result.validation_status, "pass")
+            self.assertIn("invalid_field_type", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_status, "error")
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -511,7 +512,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_golden_contract_deposit_candidate_auto_validates_despite_profile_source_conflict(self) -> None:
+    def test_legacy_profile_candidate_does_not_bypass_source_conflict_or_type_contract(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-golden-contract")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -540,16 +541,16 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "auto_validated")
-            self.assertEqual(source_result.validation_status, "pass")
-            self.assertEqual(source_result.validation_issue_codes, [])
-            self.assertGreaterEqual(source_result.source_confidence, 0.82)
-            self.assertEqual(source_result.candidate_state, "auto_validated")
-            self.assertIsNone(source_result.review_task_record)
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertIn("invalid_field_type", source_result.validation_issue_codes)
+            self.assertIn("conflicting_evidence", source_result.validation_issue_codes)
+            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertIsNotNone(source_result.review_task_record)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_big5_deposit_golden_fixture_rows_auto_validate_under_phase1_contract(self) -> None:
+    def test_legacy_big5_fixture_rows_cannot_all_auto_validate_as_live_candidates(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-golden-fixture")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -581,10 +582,9 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             self.assertEqual(len(result.source_results), 98)
-            self.assertTrue(all(item.validation_action == "auto_validated" for item in result.source_results))
-            self.assertTrue(all(item.validation_status == "pass" for item in result.source_results))
-            self.assertTrue(all(item.validation_issue_codes == [] for item in result.source_results))
-            self.assertTrue(all(item.source_confidence >= 0.82 for item in result.source_results if item.source_confidence is not None))
+            self.assertTrue(any(item.validation_action == "review_queued" for item in result.source_results))
+            self.assertTrue(any(item.validation_status == "error" for item in result.source_results))
+            self.assertTrue(any("invalid_field_type" in item.validation_issue_codes for item in result.source_results))
         finally:
             rmtree(temp_path, ignore_errors=True)
 

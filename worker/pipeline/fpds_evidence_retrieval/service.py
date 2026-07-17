@@ -87,7 +87,8 @@ class EvidenceRetrievalService:
                 ),
                 key=lambda item: (-item.score, item.chunk_index, item.evidence_chunk_id),
             )
-            selected = [item for item in ranked if item.score > 0][: request.max_matches_per_field]
+            match_limit = max(request.max_matches_per_field, 12) if field_name == "term_rate_table" else request.max_matches_per_field
+            selected = [item for item in ranked if item.score > 0][:match_limit]
             matches.extend(selected)
 
         return EvidenceRetrievalResult(

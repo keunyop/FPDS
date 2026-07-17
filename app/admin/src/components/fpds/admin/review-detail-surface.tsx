@@ -852,6 +852,12 @@ function FieldReviewRow({
           {effectiveDiffers ? (
             <p className="mt-1 break-words text-sm leading-6 text-foreground">Current approved value: {formatValue(item.effective_value)}</p>
           ) : null}
+          {trace?.mapping.field_note ? (
+            <p className="mt-2 break-words text-xs leading-5 text-muted-foreground">
+              <sup className="mr-1 font-semibold text-foreground">*</sup>
+              {trace.mapping.field_note}
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", item.evidence_count > 0 ? "bg-success-soft text-success" : "bg-muted text-muted-foreground")}>

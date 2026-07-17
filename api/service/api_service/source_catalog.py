@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `
 from api_service.errors import SourceRegistryError
 from api_service.product_types import (
     canonicalize_product_type_code,
+    expected_fields_for_product_type,
     load_product_type_definitions_map,
     require_product_type_definition,
 )
@@ -1979,7 +1980,17 @@ def _generate_sources_from_homepage(
                 supporting_links.append((1, link))
 
     unique_detail_links = _dedupe_scored_links(detail_links)[:_DISCOVERY_DETAIL_LINK_MAX]
-    unique_supporting_links = _dedupe_scored_links(supporting_links)[:_DISCOVERY_SUPPORTING_LINK_MAX]
+    unique_supporting_links = [
+        item
+        for item in _dedupe_scored_links(supporting_links)
+        if _link_is_relevant_supporting_source(
+            product_type=product_type,
+            discovery_product_type=discovery_product_type,
+            product_type_definition=product_type_definition,
+            normalized_url=item[1].normalized_url,
+            anchor_text=item[1].anchor_text,
+        )
+    ][:_DISCOVERY_SUPPORTING_LINK_MAX]
     unique_pdf_links = _dedupe_scored_links(pdf_links)[:_DISCOVERY_PDF_LINK_MAX]
     seed_detail_hints = _load_seed_detail_hints(
         bank_code=bank_code,
@@ -2167,6 +2178,54 @@ def _generate_sources_from_homepage(
         if ai_supporting_count:
             discovery_notes.append(
                 f"Preserved {ai_supporting_count} AI-classified supporting HTML source(s) for evidence merging."
+            )
+        deterministic_supporting_count = 0
+        for candidate in html_candidates:
+            if not candidate.supporting_signal:
+                continue
+            if candidate.normalized_url in promoted_detail_urls or candidate.normalized_url in promoted_supporting_urls:
+                continue
+            if not _link_is_relevant_supporting_source(
+                product_type=product_type,
+                discovery_product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=candidate.normalized_url,
+                anchor_text=candidate.anchor_text,
+            ):
+                continue
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=candidate.normalized_url,
+                    raw_url=candidate.raw_url,
+                    source_name=candidate.source_name_hint or _generated_link_name(
+                        bank_name,
+                        product_type_label,
+                        candidate.anchor_text,
+                        fallback="support",
+                        normalized_url=candidate.normalized_url,
+                    ),
+                    discovery_role="supporting_html",
+                    priority="P2",
+                    purpose=f"Deterministic supporting source for {product_type_label}",
+                    expected_fields=candidate.expected_fields_hint or expected_fields,
+                    discovery_metadata={
+                        "selection_path": "deterministic_supporting_fallback",
+                        "selection_confidence": "medium",
+                        "selection_reason_codes": ["supporting_keyword_match"],
+                        "candidate_origin": candidate.origin,
+                        "heuristic_score": candidate.heuristic_score,
+                    },
+                )
+            )
+            promoted_supporting_urls.add(candidate.normalized_url)
+            deterministic_supporting_count += 1
+        if deterministic_supporting_count:
+            discovery_notes.append(
+                f"Preserved {deterministic_supporting_count} deterministically relevant supporting HTML source(s) for evidence merging."
             )
         for _, link in unique_supporting_links:
             if link.normalized_url in promoted_detail_urls:
@@ -3757,20 +3816,33 @@ def _link_is_relevant_supporting_source(
 ) -> bool:
     fingerprint = f"{normalized_url} {anchor_text}".lower()
     signal_product_type = discovery_product_type or product_type
+    normalized_path = urlparse(normalized_url).path.lower().rstrip("/")
+    generic_deposit_rate_page = (
+        _canonical_product_type_code(signal_product_type) in {"savings", "gic"}
+        and normalized_path.rsplit("/", 1)[-1] in {"rate", "rates", "interest-rate", "interest-rates"}
+        and not any(
+            segment in normalized_path.split("/")
+            for segment in ("business", "commercial", "mortgage", "mortgages", "loan", "loans", "credit-card", "credit-cards")
+        )
+    )
+    if generic_deposit_rate_page:
+        return True
     if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
         return False
     if _source_scope_exclusion_reason(product_type=signal_product_type, fingerprint=fingerprint):
         return False
+    has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
     if _has_unrelated_product_type_signal(product_type=signal_product_type, fingerprint=fingerprint):
         return False
-    has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
     has_product_signal = _score_product_link(
         product_type=signal_product_type,
         product_type_definition=product_type_definition,
         normalized_url=normalized_url,
         anchor_text=anchor_text,
     ) > 0
-    return has_product_signal or (has_supporting_signal and _has_supporting_product_context_signal(fingerprint))
+    return has_product_signal or (
+        has_supporting_signal and _has_supporting_product_context_signal(fingerprint)
+    )
 
 
 def _has_supporting_product_context_signal(fingerprint: str) -> bool:
@@ -4050,7 +4122,10 @@ def _product_type_discovery_profile(product_type: str, product_type_definition: 
 
 def _product_type_expected_fields(product_type_definition: dict[str, Any]) -> list[str]:
     fields = [str(item).strip() for item in product_type_definition.get("expected_fields", []) if str(item).strip()]
-    return fields or ["product_name", "description_short", "standard_rate", "monthly_fee", "notes"]
+    product_type_code = str(product_type_definition.get("product_type_code") or "").strip()
+    product_family = str(product_type_definition.get("product_family") or "deposit").strip().lower()
+    baseline = list(expected_fields_for_product_type(product_type_code=product_type_code, product_family=product_family)) if product_type_code else []
+    return list(dict.fromkeys([*fields, *baseline])) or ["product_name", "description_short", "standard_rate", "monthly_fee", "notes"]
 
 
 def _product_type_label(product_type_definition: dict[str, Any]) -> str:

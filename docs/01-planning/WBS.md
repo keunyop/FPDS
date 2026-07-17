@@ -286,7 +286,7 @@ Based on:
 | 5.2 | Completed | Chequing parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
 | 5.3 | Completed | Savings parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-24 |
 | 5.4 | Completed | GIC/Term parser 확장 | product type coverage | AI/Data | 5.1 | 2026-04-27 |
-| 5.5 | Later | per-bank normalization rule 보강 | bank별 merge 규칙, edge-case 정리, 회귀 검증 | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-04-30 |
+| 5.5 | Completed | cross-bank normalization and field-contract hardening | typed comparable fields, evidence-scoped merge, field notes, edge-case guards, live recollection | Backend, AI/Data | 5.2, 5.3, 5.4 | 2026-07-16 |
 | 5.6 | Completed | aggregate dataset 생성 | KPI/ranking/scatter 원천 데이터 | Backend | 1.7.2 | 2026-04-22 |
 | 5.7 | Completed | public products API 구현 | grid/filter/sort 조회 API | Backend | 1.5.1 | 2026-04-24 |
 | 5.8 | Completed | dashboard APIs 구현 | summary/ranking/scatter API | Backend | 5.6 | 2026-04-25 |
@@ -331,6 +331,7 @@ Done signal:
 
 Approved follow-up note:
 - on `2026-04-13`, the Product Owner explicitly deferred implementation of `5.5` so `5.6` aggregate dataset generation could proceed first
+- on `2026-07-16`, the Product Owner explicitly resumed and approved `5.5`; the completed slice enforces a cross-bank field type/unit contract, adds field-level notes, generalizes product-scoped official supporting-source merge, removes live Golden-profile overrides, and verifies representative EQ Bank and CIBC Admin-path recollections
 
 ## WBS 6. BX-PF Publish Readiness and Release Hardening
 

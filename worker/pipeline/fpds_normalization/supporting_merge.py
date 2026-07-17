@@ -47,6 +47,7 @@ _SUPPORTING_ROLE_FIELDS = {
     "savings_rate_table",
     "savings_account_rates",
     "rate_tiers",
+    "term_rate_table",
     "standard_rate",
     "public_display_rate",
     "promotional_rate",
@@ -176,7 +177,7 @@ def _build_generic_support_supplement(
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
     terms = _target_terms_from_artifact(base_artifact)
-    if not terms:
+    if not terms and product_type_family != "gic":
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
     matches = list(supporting_artifact.get("retrieval_result", {}).get("matches", []))
@@ -205,6 +206,7 @@ def _build_generic_support_supplement(
         matches=matches,
         terms=terms,
         existing_fields=existing_fields,
+        allow_family_table_aggregation=_is_generic_gic_family_artifact(base_artifact),
     )
 
 
@@ -312,6 +314,7 @@ def _build_generic_gic_rate_supplement(
     matches: list[dict[str, object]],
     terms: tuple[str, ...],
     existing_fields: dict[str, dict[str, object]],
+    allow_family_table_aggregation: bool = False,
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
     desired_fields = ("standard_rate", "public_display_rate", "base_12_month_rate", "term_rate_table")
     if all(
@@ -320,6 +323,13 @@ def _build_generic_gic_rate_supplement(
     ):
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
+    structured_matches = [
+        item
+        for item in matches
+        if str(item.get("field_name")) == "term_rate_table"
+        and not _gic_structured_match_is_cross_product(str(item.get("evidence_text_excerpt", "")))
+        and bool(_extract_generic_gic_rate_values(str(item.get("evidence_text_excerpt", ""))).get("term_rate_table"))
+    ]
     match = _find_generic_support_match(
         matches=matches,
         terms=terms,
@@ -338,13 +348,18 @@ def _build_generic_gic_rate_supplement(
             "minimum_guaranteed_return",
             "maximum_return",
             "rate_tiers",
+            "term_rate_table",
         ),
         require_percentage=True,
+        allow_structured_gic_table=True,
     )
     if match is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    rate_values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
+    if allow_family_table_aggregation and structured_matches:
+        match, rate_values = _aggregate_gic_family_rate_matches(structured_matches)
+    else:
+        rate_values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
     if not rate_values:
         return {
             "field_updates": {},
@@ -362,6 +377,70 @@ def _build_generic_gic_rate_supplement(
         extraction_method="generic_supporting_gic_rate_merge",
         runtime_note=f"Supplemented missing GIC rate fields for `{target_source_id}` from generic supporting source `{support_source_id}`.",
     )
+
+
+def _aggregate_gic_family_rate_matches(
+    matches: list[dict[str, object]],
+) -> tuple[dict[str, object], dict[str, object]]:
+    rows_by_key: dict[tuple[int | str, str], dict[str, object]] = {}
+    representative_match = matches[0]
+    representative_size = 0
+    for match in matches:
+        values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
+        rows = [dict(row) for row in values.get("term_rate_table", []) if isinstance(row, dict)]
+        if len(rows) > representative_size:
+            representative_match = match
+            representative_size = len(rows)
+        for row in rows:
+            duration_key = row.get("term_length_days")
+            if not isinstance(duration_key, int):
+                duration_key = str(row.get("term_label") or "")
+            key = (duration_key, str(row.get("rate") or ""))
+            rows_by_key.setdefault(key, row)
+
+    rows = sorted(
+        rows_by_key.values(),
+        key=lambda row: (
+            int(row["term_length_days"]) if isinstance(row.get("term_length_days"), int) else 10**9,
+            str(row.get("term_label") or ""),
+        ),
+    )
+    if not rows:
+        return representative_match, {}
+    one_year_row = next(
+        (
+            row
+            for row in rows
+            if row.get("term_length_days") in {360, 365} or row.get("term_label") in {"12 month", "12 months", "1 year"}
+        ),
+        rows[0],
+    )
+    one_year_rate = str(one_year_row["rate"])
+    return representative_match, {
+        "standard_rate": one_year_rate,
+        "public_display_rate": one_year_rate,
+        "base_12_month_rate": one_year_rate,
+        "term_rate_table": rows,
+    }
+
+
+def _gic_structured_match_is_cross_product(excerpt: str) -> bool:
+    lowered = excerpt.lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "notice savings account",
+            "cash savings account",
+            "high interest savings",
+            "chequing account",
+            "checking account",
+            "personal account",
+            "joint account",
+            "us dollar account",
+            "credit card",
+            "mortgage",
+        )
+    ) and not any(marker in lowered for marker in ("gic", "term deposit"))
 
 
 def _build_generic_field_updates(
@@ -413,6 +492,7 @@ def _find_generic_support_match(
     preferred_fields: tuple[str, ...],
     require_percentage: bool = False,
     require_money: bool = False,
+    allow_structured_gic_table: bool = False,
 ) -> dict[str, object] | None:
     ranked: list[tuple[float, dict[str, object]]] = []
     preferred_field_set = set(preferred_fields)
@@ -431,7 +511,12 @@ def _find_generic_support_match(
                 )
             )
         )
-        if not any(term in haystack for term in terms):
+        structured_gic_table = (
+            allow_structured_gic_table
+            and field_name == "term_rate_table"
+            and bool(_extract_generic_gic_rate_values(excerpt).get("term_rate_table"))
+        )
+        if not any(term in haystack for term in terms) and not structured_gic_table:
             continue
         if require_percentage and not _extract_all_percentages(excerpt):
             continue
@@ -444,6 +529,8 @@ def _find_generic_support_match(
             score = 0.0
         if field_name in preferred_field_set:
             score += 0.15
+        if structured_gic_table:
+            score += 0.35
         score += min(0.25, sum(0.05 for term in terms if term in haystack))
         ranked.append((score, match))
     if not ranked:
@@ -500,6 +587,21 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
             and not _is_institution_only_target_term(item)
         )
     )
+
+
+def _is_generic_gic_family_artifact(base_artifact: dict[str, object]) -> bool:
+    field_records = _field_record_map([dict(item) for item in base_artifact.get("extracted_fields", [])])
+    product_name = str(field_records.get("product_name", {}).get("candidate_value") or "").strip()
+    if not product_name:
+        return False
+    identity_segment = re.split(r"\s*(?:\||-|–|—)\s*", product_name, maxsplit=1)[0]
+    normalized_identity = _normalize_text(identity_segment)
+    return normalized_identity in {
+        "gic",
+        "gics",
+        "guaranteed investment certificate",
+        "guaranteed investment certificates",
+    }
 
 
 def _is_institution_only_target_term(value: str) -> bool:
@@ -601,7 +703,27 @@ def _is_invalid_gic_rate_record(field_name: str, record: dict[str, object]) -> b
     if field_name not in {"standard_rate", "public_display_rate", "base_12_month_rate"}:
         return False
     value = _to_decimal(str(record.get("candidate_value") or ""))
-    return value is None or value <= 0
+    if value is None or value <= 0:
+        return True
+    evidence_context = str(record.get("evidence_text_excerpt") or "")
+    lowered_context = evidence_context.lower()
+    other_product_context = (
+        any(
+            marker in lowered_context
+            for marker in (
+                "personal account",
+                "joint account",
+                "savings account",
+                "chequing account",
+                "checking account",
+                "credit card",
+                "mortgage",
+            )
+        )
+        and "gic" not in lowered_context
+        and "term deposit" not in lowered_context
+    )
+    return other_product_context or canonical_deposit_rate_suppression_reason(value=value, context=evidence_context) is not None
 
 
 def _extract_generic_monthly_fee_values(excerpt: str) -> dict[str, str]:

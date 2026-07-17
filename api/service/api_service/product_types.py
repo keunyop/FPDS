@@ -29,6 +29,28 @@ _GENERIC_EXPECTED_FIELDS = (
     "eligibility_text",
     "notes",
 )
+_DEPOSIT_EXPECTED_FIELDS_BY_TYPE = {
+    "chequing": (
+        "product_name", "description_short", "monthly_fee", "public_display_fee", "fee_waiver_condition",
+        "minimum_balance", "included_transactions", "unlimited_transactions_flag", "interac_e_transfer_included",
+        "overdraft_available", "cheque_book_info", "student_plan_flag", "newcomer_plan_flag",
+        "eligibility_text", "application_method", "deposit_insurance", "notes",
+    ),
+    "savings": (
+        "product_name", "description_short", "standard_rate", "base_12_month_rate", "public_display_rate",
+        "promotional_rate", "promotional_period_text", "introductory_rate_flag", "monthly_fee", "minimum_balance",
+        "interest_calculation_method", "interest_payment_frequency", "tiered_rate_flag", "tier_definition_text",
+        "withdrawal_limit_text", "registered_flag", "term_rate_table", "eligibility_text", "application_method",
+        "deposit_insurance", "notes",
+    ),
+    "gic": (
+        "product_name", "description_short", "standard_rate", "base_12_month_rate", "public_display_rate",
+        "promotional_rate", "minimum_deposit", "term_length_text", "term_length_days", "term_rate_table",
+        "redeemable_flag", "non_redeemable_flag", "compounding_frequency", "payout_option",
+        "registered_plan_supported", "eligibility_text", "application_method", "post_maturity_interest_rate",
+        "tax_benefits", "deposit_insurance", "notes",
+    ),
+}
 _SUPPORTED_PRODUCT_FAMILIES = {"deposit", "lending"}
 _LENDING_EXPECTED_FIELDS_BY_TYPE = {
     "credit-card": (
@@ -917,7 +939,16 @@ def _infer_product_family(*, product_type_code: str, display_name: str, descript
 def _default_expected_fields_for_product_type(*, product_type_code: str, product_family: str) -> tuple[str, ...]:
     if product_family == "lending":
         return _LENDING_EXPECTED_FIELDS_BY_TYPE.get(product_type_code, _LENDING_EXPECTED_FIELDS_BY_TYPE["personal-loan"])
+    if product_type_code in _DEPOSIT_EXPECTED_FIELDS_BY_TYPE:
+        return _DEPOSIT_EXPECTED_FIELDS_BY_TYPE[product_type_code]
     return _GENERIC_EXPECTED_FIELDS
+
+
+def expected_fields_for_product_type(*, product_type_code: str, product_family: str) -> tuple[str, ...]:
+    return _default_expected_fields_for_product_type(
+        product_type_code=canonicalize_product_type_code(product_type_code),
+        product_family=product_family,
+    )
 
 
 def _slugify_product_type_code(value: str) -> str:

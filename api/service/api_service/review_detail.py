@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 import json
 from typing import Any
 from typing import TYPE_CHECKING
@@ -26,6 +27,18 @@ MODEL_EXECUTION_STAGE_ORDER = {
     "normalization": 1,
     "validation_routing": 2,
 }
+_DECIMAL_OVERRIDE_FIELDS = {
+    "monthly_fee", "public_display_fee", "minimum_balance", "minimum_deposit", "standard_rate",
+    "base_12_month_rate", "promotional_rate", "public_display_rate", "highest_rate", "annual_fee",
+    "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "mortgage_rate", "interest_rate",
+}
+_INTEGER_OVERRIDE_FIELDS = {"term_length_days", "included_transactions"}
+_BOOLEAN_OVERRIDE_FIELDS = {
+    "introductory_rate_flag", "tiered_rate_flag", "registered_flag", "redeemable_flag",
+    "non_redeemable_flag", "registered_plan_supported", "unlimited_transactions_flag",
+    "interac_e_transfer_included", "overdraft_available", "student_plan_flag", "newcomer_plan_flag", "secured_flag",
+}
+_JSON_OVERRIDE_FIELDS = {"term_rate_table"}
 REVIEW_FIELD_PRIORITY = (
     "product_name",
     "public_display_rate",
@@ -1378,10 +1391,6 @@ def _find_current_product(
           AND cp.product_family = %(product_family)s
           AND cp.product_type = %(product_type)s
           AND lower(cp.product_name) = lower(%(product_name)s)
-          AND (
-              cp.subtype_code IS NOT DISTINCT FROM %(subtype_code)s
-              OR %(subtype_code)s IS NULL
-          )
         ORDER BY cp.updated_at DESC
         LIMIT 1
         """,
@@ -1391,7 +1400,6 @@ def _find_current_product(
             "product_family": review_row["product_family"],
             "product_type": review_row["product_type"],
             "product_name": _approved_product_name(review_row=review_row, approved_payload=approved_payload),
-            "subtype_code": review_row.get("subtype_code"),
         },
     ).fetchone()
 
@@ -1645,6 +1653,10 @@ def _serialize_field_mapping(value: Any) -> dict[str, Any]:
         "evidence_chunk_id": _string_or_none(mapping.get("evidence_chunk_id")),
         "normalization_method": _string_or_none(mapping.get("normalization_method")),
         "source_subtype_label": _string_or_none(mapping.get("source_subtype_label")),
+        "field_contract_version": _string_or_none(mapping.get("field_contract_version")),
+        "canonical_value_type": _string_or_none(mapping.get("canonical_value_type")),
+        "canonical_unit": _string_or_none(mapping.get("canonical_unit")),
+        "field_note": _string_or_none(mapping.get("field_note")),
     }
 
 
@@ -1676,11 +1688,60 @@ def _normalize_override_payload(*, override_payload: dict[str, Any] | None, base
                 continue
             normalized[field_name] = normalized_product_name
             continue
-        normalized_value = _normalize_json_value(value)
+        normalized_value = _normalize_typed_override_value(field_name=field_name, value=value)
         if base_payload.get(field_name) == normalized_value:
             continue
         normalized[field_name] = normalized_value
     return normalized
+
+
+def _normalize_typed_override_value(*, field_name: str, value: Any) -> Any:
+    if value is None or value == "":
+        return None
+    if field_name in _DECIMAL_OVERRIDE_FIELDS:
+        if isinstance(value, bool):
+            raise _invalid_override_type(field_name, "number")
+        normalized = str(value).replace(",", "").replace("$", "").replace("%", "").strip()
+        try:
+            decimal_value = Decimal(normalized)
+        except (InvalidOperation, ValueError):
+            raise _invalid_override_type(field_name, "number") from None
+        return float(decimal_value)
+    if field_name in _INTEGER_OVERRIDE_FIELDS:
+        if isinstance(value, bool):
+            raise _invalid_override_type(field_name, "integer")
+        try:
+            return int(str(value).strip())
+        except ValueError:
+            raise _invalid_override_type(field_name, "integer") from None
+    if field_name in _BOOLEAN_OVERRIDE_FIELDS or field_name.endswith("_flag"):
+        if isinstance(value, bool):
+            return value
+        lowered = str(value).strip().lower()
+        if lowered in {"true", "yes", "1"}:
+            return True
+        if lowered in {"false", "no", "0"}:
+            return False
+        raise _invalid_override_type(field_name, "boolean")
+    if field_name in _JSON_OVERRIDE_FIELDS:
+        parsed = value
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError:
+                raise _invalid_override_type(field_name, "JSON array") from None
+        if not isinstance(parsed, list):
+            raise _invalid_override_type(field_name, "JSON array")
+        return _normalize_json_value(parsed)
+    return _normalize_json_value(value)
+
+
+def _invalid_override_type(field_name: str, expected: str) -> ReviewTaskError:
+    return ReviewTaskError(
+        status_code=422,
+        code="invalid_field_type",
+        message=f"{field_name} must be submitted as {expected}.",
+    )
 
 
 def _normalize_json_value(value: Any) -> Any:

@@ -25,12 +25,13 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-15`:
+As of `2026-07-16`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
+- cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
 Read before coding:
@@ -63,6 +64,21 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-16 - Cross-Bank Product Field Contract And Official Recollection
+
+- WBS: `5.5`, `4.3`, `5.15`, cross-bank collection quality hardening
+- Status: done
+- Goal: compare actual FPDS Admin candidates with current official bank pages, correct semantic and type errors with reusable rules, and verify the result through fresh Admin-path recollection.
+- Why now: the development DB contained `49` active canonical records with `34` products carrying `36` field-type violations. Representative candidates also showed severe semantic errors: CIBC EasyBuilder's `20%` annual withdrawal privilege was stored as an interest rate, an overdraft service-fee waiver was stored as a chequing account fee, audience/navigation text became product flags, EQ GIC stored a compound sentence where a numeric rate belonged, supporting evidence could point to the target page instead of the source actually used, static Golden profiles overwrote live facts, and subtype changes could create duplicate products.
+- Outcome: added the executable field type/unit contract for deposit and lending fields, DB registry defaults, coercion and `invalid_field_type` validation, typed term-rate parsing, reviewer-visible `field_notes`, and type-safe manual overrides. Generic safety rules now reject withdrawal/redemption/prepayment, cashback, equity, down-payment, service-fee, cross-product application, audience, navigation, and unresolved-template contamination. Official supporting pages are filtered before the bounded source cap; relevant split GIC tables can be reconstructed and deduplicated while excluding savings/nearby-product rows. Every merged field retains the supporting source-document id. Golden product expansion is fixture-only and no longer overwrites or validates live collection. Canonical continuity ignores subtype drift for the same stable bank/family/type/product identity.
+- Official comparison: EQ Notice Savings official rates are `2.35%` for 10-day notice and `2.75%` for 30-day notice. EQ GIC official rates effective June 11, 2026 are represented as 13 typed rows from 3 months through 10 years. CIBC EasyBuilder officially requires `$2,500` total (`$500` in each of five 1-to-5-year terms) and permits withdrawal of `20%` of the initial investment each year; that withdrawal value must never be an annual rate.
+- Live verification: EQ GIC collection `collection_CSQ3guXCsbw4xhTa` produced candidate `cand-56f5f3c3459835de` with numeric `3.3%` representative/12-month rates and the exact 13-row official schedule; all four schedule/rate evidence links point to the official EQ rates page. Its inaccessible minimum-deposit fact remains `required_field_missing` in review rather than guessed. EQ Savings collection `collection_mAs5hMUDPfqCsNUk` produced approved candidate `cand-192c48fa466f7805` with numeric `2.35%` and only the official 10/30-day rows. CIBC GIC collection `collection_mVqp5f4m9z0NLLmk` completed `22/22` sources and produced seven product candidates with numeric minimum deposits and boolean redeemability; no candidate stored `20` as a rate. Final CIBC collection `collection_pQ8lvZqTMm43_BSk` completed with eight candidates and no source failure. Every candidate retained numeric money and boolean redeemability types, no rate field contained `20`, and the cross-product bank-account registration text was removed. The remaining online/branch application text was verified in the product's official `How to invest` section. Unresolved client-rendered CIBC rates remain `required_field_missing` in review and were not guessed or published.
+- Key files: `worker/pipeline/fpds_field_contract.py`, `fpds_rate_safety.py`, `fpds_extraction/service.py`, `fpds_normalization/service.py`, `fpds_normalization/supporting_merge.py`, `fpds_evidence_retrieval/service.py`, `fpds_validation_routing/service.py`, `api/service/api_service/product_types.py`, `source_catalog.py`, `review_detail.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `db/migrations/0024_deposit_field_contract_defaults.sql`, `docs/03-design/financial-product-field-contract.md`.
+- Decisions: the current official page and evidence lineage outrank stale Golden fixture prose. A comparable scalar never contains explanatory prose. If a current official value is dynamic, unresolved, inaccessible, or ambiguous, omit it and retain review rather than infer it. Bank-specific matching is used only to identify official source boundaries; the safety, typing, merge, evidence, and note rules apply across banks and registered product types.
+- Verification: Worker full suite `142` passed; API full suite `203` passed; focused extraction/normalization suite `98` passed. Repo doctor and foundation baseline passed. Admin typecheck/build passed with `23` generated pages; Public typecheck/build passed with `7` generated pages. Migration `0024` was applied to dev (`3` product-type rows and `167` active catalog rows updated, one history row inserted).
+- Known issues: official pages that render rates through unresolved client-side placeholders or omit an accessible fact correctly remain in review. EQ GIC minimum deposit is one such current fetched-source limitation. Review is intentional and does not block other typed, evidence-backed facts from being compared.
+- Next step: use the normal Review Queue for intentionally unresolved official values; future collection failures should add a regression case to the executable contract and evidence-scoped merge baseline before any narrower bank exception.
 
 ## 2026-07-15 - Cross-Product Collection Accuracy And Concise Review Decisions
 

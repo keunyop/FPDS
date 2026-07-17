@@ -462,6 +462,102 @@ class SourceCatalogTests(unittest.TestCase):
             )
         )
 
+    def test_deposit_supporting_sources_accept_official_generic_rate_page(self) -> None:
+        self.assertTrue(
+            _link_is_relevant_supporting_source(
+                product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic"),
+                    "display_name": "GIC",
+                    "description": "Guaranteed investment certificate terms and rates.",
+                    "discovery_keywords": ["gic", "term deposit"],
+                },
+                normalized_url="https://www.examplebank.ca/rates",
+                anchor_text="Compare all accounts",
+            )
+        )
+
+    def test_homepage_discovery_preserves_generic_deposit_rates_as_supporting_evidence(self) -> None:
+        detail_url = "https://www.examplebank.ca/personal/investments/gics"
+        rates_url = "https://www.examplebank.ca/rates"
+        homepage_links = [
+            SimpleNamespace(
+                normalized_url=detail_url,
+                resolved_url=detail_url,
+                anchor_text="GICs",
+                source_type="html",
+            ),
+            SimpleNamespace(
+                normalized_url=rates_url,
+                resolved_url=rates_url,
+                anchor_text="Rates",
+                source_type="html",
+            ),
+            *[
+                SimpleNamespace(
+                    normalized_url=f"https://www.examplebank.ca/help/service-{index}",
+                    resolved_url=f"https://www.examplebank.ca/help/service-{index}",
+                    anchor_text=f"Service help {index}",
+                    source_type="html",
+                )
+                for index in range(9)
+            ],
+        ]
+        ai_result = AiParallelScoringResult(
+            scores={
+                detail_url: AiParallelCandidateScore(
+                    candidate_url=detail_url,
+                    predicted_role="detail",
+                    relevance_score=9.0,
+                    confidence_band="high",
+                    reason_codes=["product_type_semantic_match"],
+                    short_rationale="Official GIC detail page.",
+                ),
+                rates_url: AiParallelCandidateScore(
+                    candidate_url=rates_url,
+                    predicted_role="irrelevant",
+                    relevance_score=2.0,
+                    confidence_band="medium",
+                    reason_codes=["generic_rates_page"],
+                    short_rationale="Generic rates page.",
+                ),
+            },
+            notes=[],
+        )
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=8,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "pricing_or_feature_signal"],
+            page_title="GICs",
+            primary_heading="GICs",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value="<html></html>"),
+            patch("api_service.source_catalog._extract_allowed_links", return_value=homepage_links),
+            patch("api_service.source_catalog._score_candidate_links_with_ai", return_value=ai_result),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="TEST",
+                bank_name="Test Bank",
+                country_code="CA",
+                product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic"),
+                    "description": "Guaranteed investment certificates with term rates.",
+                    "discovery_keywords": ["gic", "term deposit"],
+                },
+                homepage_url="https://www.examplebank.ca/",
+                source_language="en",
+            )
+
+        rates_row = next(item for item in result.rows if item["normalized_url"] == rates_url)
+        self.assertEqual(rates_row["discovery_role"], "supporting_html")
+        self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "deterministic_supporting_fallback")
+
     def test_create_bank_profile_auto_generates_bank_code(self) -> None:
         connection = _QueuedConnection([None, None])
 

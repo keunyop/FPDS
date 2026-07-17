@@ -6,6 +6,7 @@ from hashlib import sha256
 import json
 import re
 
+from worker.pipeline.fpds_field_contract import value_matches_contract
 from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
 
 from .models import (
@@ -21,6 +22,7 @@ _ERROR_ISSUE_CODES = {
     "required_field_missing",
     "invalid_taxonomy_code",
     "invalid_numeric_range",
+    "invalid_field_type",
     "invalid_term_value",
     "inconsistent_cross_field_logic",
 }
@@ -38,20 +40,11 @@ _NUMERIC_RANGE_FIELDS = {
 _ANNUAL_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
-_DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS = (
-    "bank_name",
-    "product_name",
-    "product_page_url",
-    "signup_amount",
-    "eligibility",
-    "application_method",
-    "deposit_insurance",
-)
-_DEPOSIT_GOLDEN_RATE_FIELDS = ("highest_rate", "base_12_month_rate")
 _SUMMARY_MESSAGES = {
     "required_field_missing": "One or more required fields are missing.",
     "invalid_taxonomy_code": "Product taxonomy did not match the active registry.",
     "invalid_numeric_range": "A numeric value was outside the allowed range.",
+    "invalid_field_type": "A field value did not match the canonical JSON type.",
     "invalid_term_value": "The term value was not valid for canonical storage.",
     "conflicting_evidence": "Multiple evidence links disagree on the same field value.",
     "ambiguous_mapping": "A field could not be mapped with enough certainty.",
@@ -472,6 +465,9 @@ def _compute_validation_issue_codes(
         if field_name not in _RATE_FIELDS and decimal_value < 0:
             issues.add("invalid_numeric_range")
 
+    if any(not value_matches_contract(field_name, value) for field_name, value in candidate_payload.items()):
+        issues.add("invalid_field_type")
+
     term_length_days = candidate_payload.get("term_length_days")
     if term_length_days not in {None, ""}:
         integer_value = _as_int(term_length_days)
@@ -480,18 +476,13 @@ def _compute_validation_issue_codes(
 
     product_type_family = _canonical_product_type_family(product_type)
     requiredness_type = product_type_family or product_type
-    golden_contract_candidate = _meets_deposit_golden_contract(
-        candidate_record=candidate_record,
-        candidate_payload=candidate_payload,
-        dynamic_product_type=dynamic_product_type,
-    )
-    if requiredness_type == "chequing" and not golden_contract_candidate:
+    if requiredness_type == "chequing":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.add("required_field_missing")
-    if requiredness_type == "savings" and not golden_contract_candidate:
+    if requiredness_type == "savings":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.add("required_field_missing")
-    if requiredness_type == "gic" and not golden_contract_candidate:
+    if requiredness_type == "gic":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.add("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
@@ -520,7 +511,7 @@ def _compute_validation_issue_codes(
     conflicting_values: dict[str, set[str]] = {}
     for link in field_evidence_links:
         conflicting_values.setdefault(link.field_name, set()).add(link.candidate_value.strip())
-    if not golden_contract_candidate and any(len(values) > 1 for values in conflicting_values.values()):
+    if any(len(values) > 1 for values in conflicting_values.values()):
         issues.add("conflicting_evidence")
 
     lowered_notes = " ".join(note.lower() for note in runtime_notes)
@@ -536,10 +527,6 @@ def _compute_validation_issue_codes(
         )
     ):
         issues.add("partial_source_failure")
-
-    if golden_contract_candidate:
-        issues.discard("required_field_missing")
-        issues.discard("conflicting_evidence")
 
     return sorted(issues)
 
@@ -567,46 +554,6 @@ def _has_meaningful_value(value: object) -> bool:
     return value not in (None, "", [], {})
 
 
-def _meets_deposit_golden_contract(
-    *,
-    candidate_record: dict[str, object],
-    candidate_payload: dict[str, object],
-    dynamic_product_type: bool,
-) -> bool:
-    if dynamic_product_type:
-        return False
-    product_type = _string_or_none(candidate_record.get("product_type"))
-    if _canonical_product_type_family(product_type) not in {"chequing", "savings", "gic"}:
-        return False
-
-    required_identity = (
-        candidate_record.get("country_code"),
-        candidate_record.get("bank_code"),
-        candidate_record.get("product_family"),
-        candidate_record.get("product_type"),
-        candidate_record.get("product_name"),
-        candidate_record.get("currency"),
-        candidate_payload.get("status"),
-        candidate_payload.get("last_verified_at"),
-    )
-    if any(value in {None, ""} for value in required_identity):
-        return False
-    if not _looks_like_timestamp(_string_or_none(candidate_payload.get("last_verified_at"))):
-        return False
-    if any(field_name not in candidate_payload for field_name in _DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS):
-        return False
-
-    tags = candidate_payload.get("tags")
-    if not isinstance(tags, list) or not tags:
-        return False
-    term_rates = candidate_payload.get("term_rates")
-    if not isinstance(term_rates, list):
-        return False
-    if any(field_name not in candidate_payload for field_name in _DEPOSIT_GOLDEN_RATE_FIELDS):
-        return False
-    return True
-
-
 def _compute_source_confidence(
     *,
     candidate_record: dict[str, object],
@@ -631,13 +578,6 @@ def _compute_source_confidence(
     completeness = sum(1 for item in required_fields if item not in {None, ""}) / len(required_fields)
     product_type_family = _canonical_product_type_family(product_type)
     requiredness_type = product_type_family or product_type
-    golden_contract_candidate = _meets_deposit_golden_contract(
-        candidate_record=candidate_record,
-        candidate_payload=candidate_payload,
-        dynamic_product_type=dynamic_product_type,
-    )
-    if golden_contract_candidate:
-        completeness = 1.0
     if requiredness_type == "chequing" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
         completeness = min(1.0, completeness + 0.10)
     if requiredness_type == "savings" and any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
@@ -674,8 +614,6 @@ def _compute_source_confidence(
         score -= 0.15
     if "partial_source_failure" in validation_issue_codes:
         score -= 0.08
-    if golden_contract_candidate and validation_status == "pass" and not validation_issue_codes:
-        score = max(score, 0.88)
     if dynamic_product_type:
         score = min(score - 0.08, 0.72)
     return round(max(0.0, min(0.99, score)), 4)

@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-14`:
+As of `2026-07-16`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -41,6 +41,7 @@ As of `2026-07-14`:
 - `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification
 - `WBS 5.4` GIC or term parser expansion is now complete with GIC-specific extraction fields, normalization-time term and cross-field validation alignment, and unit verification
+- `WBS 5.5` cross-bank normalization hardening is now complete with an executable type/unit contract, reviewer-visible field notes, evidence-scoped official supporting-source merge, general percentage and navigation false-positive guards, fixture-only Golden profiles, and representative Admin-path recollection verification
 - `WBS 5.6` aggregate dataset generation is now complete with persisted aggregate refresh snapshots plus projection, metric, ranking, and scatter source datasets for the approved public vocabulary
 - `WBS 5.7` public products API is now complete with anonymous `/api/public/products` and `/api/public/filters` routes backed by the latest successful aggregate projection snapshot, shared filter vocabulary, sort options, pagination, localized labels, and freshness metadata
 - `WBS 5.8` dashboard APIs are now complete with anonymous `/api/public/dashboard-summary`, `/api/public/dashboard-rankings`, and `/api/public/dashboard-scatter` routes that reuse the latest successful aggregate projection snapshot for request-time filtered summary, ranking, and scatter responses plus methodology and freshness context

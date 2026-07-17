@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_mAs5hMUDPfqCsNUk",
+  "correlation_id": "corr_AA122fNkhb08xqQP",
+  "request_id": "req_codex_goal_20260717063505",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260717_063505_eqbank_savings_collect_aMvljsc8",
+      "catalog_item_id": "catalog-ca-eqbank-savings",
+      "bank_code": "EQBANK",
+      "bank_name": "EQ Bank (Equitable Bank)",
+      "country_code": "CA",
+      "product_type": "savings",
+      "source_catalog_product_type": "savings",
+      "product_family": "deposit",
+      "source_language": "en",
+      "homepage_url": "https://www.eqbank.ca/",
+      "normalized_homepage_url": "https://www.eqbank.ca/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

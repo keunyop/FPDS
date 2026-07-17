@@ -18,8 +18,10 @@ from worker.pipeline.fpds_normalization.persistence import (
 )
 from worker.pipeline.fpds_normalization.service import (
     NormalizationService,
+    _build_field_evidence_link_records,
     _clean_product_context_fields,
     _extract_rate_percentages,
+    _normalize_term_rate_table,
     _rate_evidence_is_account_context,
 )
 from worker.pipeline.fpds_normalization.storage import (
@@ -33,6 +35,42 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_term_rate_text_normalizes_to_typed_rows(self) -> None:
+        rows = _normalize_term_rate_table("1 Year 3.30%, 5 Years 4.00%")
+
+        self.assertEqual(
+            rows,
+            [
+                {"term_label": "1 Year", "term_length_days": 365, "rate": 3.3, "minimum_deposit": None, "notes": None},
+                {"term_label": "5 Years", "term_length_days": 1825, "rate": 4.0, "minimum_deposit": None, "notes": None},
+            ],
+        )
+
+    def test_evidence_link_keeps_supporting_source_document(self) -> None:
+        link = NormalizationEvidenceLink(
+            field_name="standard_rate",
+            candidate_value="3.30",
+            evidence_chunk_id="chunk-support",
+            evidence_text_excerpt="1 Year 3.30%",
+            source_document_id="source-support",
+            source_snapshot_id="snapshot-support",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Rates",
+            page_no=None,
+            chunk_index=1,
+        )
+
+        records = _build_field_evidence_link_records(
+            candidate_id="candidate-target",
+            normalized_values_for_links={"standard_rate": 3.3},
+            source_document_id="source-target",
+            evidence_links=[link],
+        )
+
+        self.assertEqual(records[0]["source_document_id"], "source-support")
+
     def test_gic_rate_rejects_nearby_personal_account_direct_deposit_rate(self) -> None:
         context = (
             "Everyday Banking Personal Account Rates Earn 2.75% interest. "
@@ -106,6 +144,25 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertNotIn("mortgage_rate", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
         self.assertIn("incorrectly mapped as product data", notes[0])
+
+    def test_gic_context_cleanup_suppresses_cross_product_account_application(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example GIC",
+            "application_method": "Apply for a bank account. You must be registered for Online Banking. Need to register?",
+        }
+        normalized_values = dict(payload)
+        mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+
+        _clean_product_context_fields(
+            product_type_family="gic",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+        )
+
+        self.assertNotIn("application_method", payload)
+        self.assertNotIn("application_method", normalized_values)
+        self.assertNotIn("application_method", mapping_metadata)
 
     def test_lending_cleanup_rejects_rate_and_term_fields_from_unrelated_context(self) -> None:
         payload: dict[str, object] = {
@@ -641,6 +698,7 @@ class NormalizationServiceTests(unittest.TestCase):
                         "source_id": "BMO-GIC-002",
                         "product_type": "gic",
                         "discovery_role": "supporting_html",
+                        "product_profile_expansion_mode": "fixture",
                     },
                 }
             )
@@ -662,12 +720,46 @@ class NormalizationServiceTests(unittest.TestCase):
                 and item.normalized_candidate_record["product_name"] == "BMO AIR MILES GIC"
             )
             profile_candidate = profile_result.normalized_candidate_record
-            self.assertEqual(profile_candidate["candidate_payload"]["highest_rate"], "0.250%")
+            self.assertEqual(profile_candidate["candidate_payload"]["highest_rate"], 0.25)
             self.assertEqual(profile_candidate["candidate_payload"]["term_rates"][0]["term"], "364 days")
             self.assertEqual(profile_result.validation_status, "pass")
             self.assertNotIn("required_field_missing", profile_result.validation_issue_codes)
             self.assertNotIn("conflicting_evidence", profile_result.validation_issue_codes)
             self.assertGreaterEqual(profile_result.source_confidence, 0.82)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_live_admin_source_does_not_expand_dated_fixture_profiles(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-live-profile-disabled")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(storage_config=storage_config, object_store=build_object_store(storage_config))
+            input_item = _build_gic_input()
+            input_item = NormalizationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "BMO-GIC-002",
+                    "bank_code": "BMO",
+                    "normalized_source_url": "https://www.bmo.com/main/personal/investments/gic/gic-rates/",
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "source_id": "BMO-GIC-002",
+                        "product_type": "gic",
+                        "discovery_role": "detail",
+                    },
+                }
+            )
+
+            result = service.normalize_inputs(run_id="run-live-profile-disabled", inputs=[input_item])
+
+            self.assertEqual(len(result.source_results), 1)
+            self.assertNotIn("Expanded deposit product profile", " ".join(result.source_results[0].runtime_notes))
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -710,6 +802,7 @@ class NormalizationServiceTests(unittest.TestCase):
                         "product_type": "gic",
                         "discovery_role": "detail",
                         "product_type_name": "GIC",
+                        "product_profile_expansion_mode": "fixture",
                     },
                     "extracted_fields": extracted_fields,
                     "evidence_links": evidence_links,
@@ -765,6 +858,7 @@ class NormalizationServiceTests(unittest.TestCase):
                         "product_type": "gic",
                         "discovery_role": "supporting_html",
                         "expected_fields": ["fee_schedule"],
+                        "product_profile_expansion_mode": "fixture",
                     },
                 }
             )
@@ -803,6 +897,7 @@ class NormalizationServiceTests(unittest.TestCase):
                         "discovery_role": "supporting_html",
                         "expected_fields": ["product_variants", "minimum_guaranteed_return", "maximum_return"],
                         "product_type_name": "GIC",
+                        "product_profile_expansion_mode": "fixture",
                     },
                 }
             )
@@ -840,6 +935,7 @@ class NormalizationServiceTests(unittest.TestCase):
                         "product_type": "chequing",
                         "discovery_role": "detail",
                         "expected_fields": ["product_name", "monthly_fee"],
+                        "product_profile_expansion_mode": "fixture",
                     },
                     "extracted_fields": [
                         NormalizationExtractedField(**{**field.__dict__, "candidate_value": "RBC"})
@@ -1581,6 +1677,59 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
+
+    def test_generic_gic_family_page_accepts_scoped_structured_rate_table(self) -> None:
+        unrelated_rate = _field_dict("standard_rate", "2.75", "decimal", 0.98, evidence_chunk_id="chunk-nav-rate")
+        unrelated_rate["evidence_text_excerpt"] = "Personal Account bonus interest rate 2.75%"
+        unrelated_display_rate = _field_dict("public_display_rate", "2.75", "decimal", 0.98, evidence_chunk_id="chunk-nav-rate")
+        unrelated_display_rate["evidence_text_excerpt"] = "Personal Account bonus interest rate 2.75%"
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict("product_name", "GICs | Example Bank", "string", 0.88),
+                unrelated_rate,
+                unrelated_display_rate,
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="term_rate_table",
+                        anchor_value="notice-savings",
+                        excerpt="10 Day Notice Savings Account 2.35% 30 Day Notice Savings Account 2.75%",
+                    ),
+                    _match_dict(
+                        field_name="term_rate_table",
+                        anchor_value="short-terms",
+                        excerpt="Rate 3 Month 2.50% 6 Month 2.75% 9 Month 3.00%",
+                    ),
+                    _match_dict(
+                        field_name="term_rate_table",
+                        anchor_value="long-terms",
+                        excerpt="Rate 1 Year 3.30% 2 Year 3.55% 5 Year 4.00% 5 Years 4.00%",
+                    ),
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-GIC-detail",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-GIC-rates": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.30")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.30")
+        self.assertEqual(fields_by_name["base_12_month_rate"]["candidate_value"], "3.30")
+        self.assertEqual(
+            [row["rate"] for row in fields_by_name["term_rate_table"]["candidate_value"]],
+            ["2.50", "2.75", "3.00", "3.30", "3.55", "4.00"],
+        )
+        self.assertEqual(fields_by_name["term_rate_table"]["source_document_id"], "src-support-001")
 
     def test_generic_gic_support_replaces_zero_placeholder_rates_for_bank_prefixed_title(self) -> None:
         zero_rows = [

@@ -126,6 +126,8 @@ Current boundary:
 - generic BMO footer/navigation text such as `Important banking info` is suppressed before it can populate canonical fields such as notes or interest calculation method
 - dynamic product extraction now suppresses obvious cross-product navigation chunks before deriving product titles or long-text fields, so `gic-term-deposit` candidates do not promote chequing or card menu text as product evidence
 - operator-defined product extraction and normalization are bounded to the registered `expected_fields`; the AI may not introduce deposit aliases or unrelated fields into lending/card candidates, and percentage prompts explicitly separate interest rates from cashback, rewards, prepayment, equity, and down-payment values
+- all comparable fields use the executable cross-bank type and unit contract in `fpds_field_contract.py`; annual rates are numeric percentage points, money is numeric in product currency, flags are booleans, and term-rate schedules are structured arrays
+- withdrawal, redemption, encashment, and prepayment percentages are rejected as annual rates, while overdraft service-fee waivers and cross-product audience or navigation mentions are rejected as account facts
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -146,10 +148,13 @@ What `WBS 3.6` stores today:
 - GIC rate fallback rejects account/direct-deposit percentages from navigation or footer evidence, and footer/company navigation is not accepted as deposit-insurance evidence
 - dynamic lending/card validation checks a concise product-type priority set instead of reporting every optional expected field as required; these candidates remain review-first and are never auto-published by this fallback
 - extraction overlays selected registry metadata onto persisted source-document metadata so shared support URLs, such as BMO savings and chequing rate pages, keep the current run's product type and expected fields
+- supporting official rate pages are ranked before the bounded source cap, and split GIC-family schedules can be reconstructed across a bounded set of relevant chunks while filtering savings or unrelated-product rows
+- normalized candidates retain concise `field_notes` for qualified comparable values and preserve the actual supporting source document id on each merged `field_evidence_link`
+- static Golden product profiles are fixture-only and require explicit `product_profile_expansion_mode=fixture`; live collection cannot use them to replace evidence or bypass validation
 
 Current boundary:
 - normalization now persists `normalized_candidate` and candidate-level evidence links
-- supporting-source merge is still narrow and explicit; it currently covers selected TD, BMO, and Scotia savings rate supplementation, selective `TD-SAV-008` interest-rule replacement, and `TD-SAV-007`-based suppression of misleading zero-fee waiver text rather than a general multi-source product merge
+- supporting-source merge includes the original explicit TD, BMO, and Scotia rules plus a generic product-scoped deposit-family path for official detail/rate pages; it remains bounded by bank, family, type, source role, and product-boundary evidence
 - canonical upsert, change assessment, and publish preparation still belong to later stages
 
 What `WBS 3.7` stores today:

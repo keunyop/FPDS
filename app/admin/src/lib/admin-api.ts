@@ -540,6 +540,10 @@ export type ReviewEvidenceLink = {
     evidence_chunk_id: string | null;
     normalization_method: string | null;
     source_subtype_label: string | null;
+    field_contract_version: string | null;
+    canonical_value_type: string | null;
+    canonical_unit: string | null;
+    field_note: string | null;
   };
   model_execution_id: string | null;
   anchor_label: string;

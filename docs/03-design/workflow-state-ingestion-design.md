@@ -208,6 +208,7 @@ Source Documents:
   - `required_field_missing`
   - `invalid_taxonomy_code`
   - `invalid_numeric_range`
+  - `invalid_field_type`
   - `invalid_term_value`
   - `conflicting_evidence`
   - `ambiguous_mapping`
@@ -221,7 +222,7 @@ Source Documents:
   - Prototype에서는 모든 candidate를 review queue로 보낸다.
   - Phase 1에서는 config 기반 auto-approve를 허용한다.
   - active `FORCE_REVIEW_ISSUE_CODES`에 걸리거나 warning confidence floor를 넘지 못하면 review 강제다.
-  - Canada Big 5 deposit golden-pass candidate는 golden fixture field contract를 만족하면 profile/source-list evidence conflict만으로 review 강제하지 않는다.
+  - Golden fixture는 명시적 fixture mode의 회귀 테스트에만 사용하며 live candidate의 evidence conflict, requiredness, type validation, confidence 또는 review routing을 우회하지 않는다.
 - 출력:
   - review task 또는 approval marker
 - 저장물:

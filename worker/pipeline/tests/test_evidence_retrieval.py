@@ -71,6 +71,40 @@ class EvidenceRetrievalServiceTests(unittest.TestCase):
         self.assertEqual(result.matches[0].evidence_chunk_id, "chunk-fee-001")
         self.assertGreater(result.matches[0].score, result.matches[1].score)
 
+    def test_term_rate_table_keeps_bounded_extra_matches_for_split_tables(self) -> None:
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id=f"chunk-term-{index}",
+                parsed_document_id="parsed-split-rates",
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value="term-rates",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=f"Term {index + 1} Year Rate {2.0 + index / 10:.2f}%",
+                retrieval_metadata={},
+                source_document_id="src-split-rates",
+                source_snapshot_id="snap-split-rates",
+                bank_code="BANK",
+                country_code="CA",
+                source_type="html",
+            )
+            for index in range(10)
+        ]
+        request = EvidenceRetrievalRequest(
+            correlation_id="corr-split-rates",
+            run_id="run-split-rates",
+            parsed_document_id="parsed-split-rates",
+            field_names=["term_rate_table"],
+            metadata_filters=MetadataFilters(),
+            retrieval_mode="metadata-only",
+            max_matches_per_field=3,
+        )
+
+        result = self.service.retrieve(request=request, candidates=candidates)
+
+        self.assertEqual(len(result.matches), 10)
+
     def test_percentage_only_rate_card_value_outranks_generic_rate_prose(self) -> None:
         candidates = [
             EvidenceChunkCandidate(

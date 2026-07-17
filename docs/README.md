@@ -57,6 +57,7 @@ Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
 - `docs/03-design/domain-model-canonical-schema.md`
+- `docs/03-design/financial-product-field-contract.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/review-run-publish-audit-state-design.md`
 - `docs/03-design/api-interface-contracts.md`

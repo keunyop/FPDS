@@ -12,6 +12,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.pipeline.fpds_field_contract import canonical_value_type, field_contract_payload
 from worker.pipeline.fpds_evidence_retrieval.models import (
     EvidenceChunkCandidate,
     EvidenceMatch,
@@ -750,6 +751,7 @@ def _extract_from_matches(
     matches: list[EvidenceMatch],
     candidate_map: dict[str, EvidenceChunkCandidate],
 ) -> ExtractedFieldCandidate | None:
+    extracted_options: list[tuple[int, float, ExtractedFieldCandidate]] = []
     for match in matches:
         if match.evidence_chunk_id not in candidate_map:
             continue
@@ -762,7 +764,7 @@ def _extract_from_matches(
         if candidate_value is None:
             continue
         confidence = round(min(0.99, max(0.55, match.score)), 4)
-        return ExtractedFieldCandidate(
+        extracted_field = ExtractedFieldCandidate(
             field_name=field_name,
             candidate_value=candidate_value,
             value_type=value_type,
@@ -782,6 +784,13 @@ def _extract_from_matches(
                 "matched_keywords": match.match_metadata.get("matched_keywords", []),
             },
         )
+        if field_name == "term_rate_table" and isinstance(candidate_value, list):
+            extracted_options.append((len(candidate_value), match.score, extracted_field))
+            continue
+        return extracted_field
+    if extracted_options:
+        extracted_options.sort(key=lambda item: (item[0], item[1]), reverse=True)
+        return extracted_options[0][2]
     return None
 
 
@@ -1479,6 +1488,7 @@ def _extract_dynamic_fields_with_ai(
                 "product_type_name": context.source_metadata.get("product_type_name"),
                 "product_type_description": context.source_metadata.get("product_type_description"),
                 "expected_fields": list(context.source_metadata.get("expected_fields", [])),
+                "field_contract": field_contract_payload(ai_requested_fields),
                 "requested_fields": ai_requested_fields,
                 "candidate_chunks": [
                     {
@@ -1503,6 +1513,7 @@ def _extract_dynamic_fields_with_ai(
             continue
         candidate = candidate_map[evidence_chunk_id]
         candidate_value = _coerce_ai_candidate_value(
+            field_name=field_name,
             value=str(item.get("candidate_value") or ""),
             value_type=str(item.get("value_type") or "string"),
         )
@@ -1512,7 +1523,7 @@ def _extract_dynamic_fields_with_ai(
             ExtractedFieldCandidate(
                 field_name=field_name,
                 candidate_value=candidate_value,
-                value_type=str(item.get("value_type") or "string"),
+                value_type=canonical_value_type(field_name, str(item.get("value_type") or "string")),
                 confidence=round(min(0.99, max(0.5, float(item.get("confidence") or 0.75))), 4),
                 extraction_method="openai_dynamic_extractor",
                 source_document_id=context.source_document_id,
@@ -1535,10 +1546,11 @@ def _extract_dynamic_fields_with_ai(
     return extracted_fields, notes, usage
 
 
-def _coerce_ai_candidate_value(*, value: str, value_type: str) -> object | None:
+def _coerce_ai_candidate_value(*, field_name: str, value: str, value_type: str) -> object | None:
     normalized = value.strip()
     if not normalized:
         return None
+    value_type = canonical_value_type(field_name, value_type)
     if value_type == "decimal":
         return _normalize_decimal(normalized.strip("%$ ").replace(",", ""))
     if value_type == "integer":
@@ -1593,6 +1605,12 @@ def _extract_money_value(
     lowered: str,
 ) -> str | None:
     if field_name in {"monthly_fee", "public_display_fee"}:
+        if (
+            "overdraft protection" in lowered
+            and any(token in lowered for token in ("monthly fixed fee", "overdraft fee", "service fee"))
+            and not any(token in lowered for token in ("account monthly fee", "monthly account fee", "monthly plan fee"))
+        ):
+            return None
         product_monthly_fee = _extract_bmo_chequing_product_monthly_fee(context=context, text=text)
         if product_monthly_fee is not None:
             return product_monthly_fee
@@ -1958,14 +1976,34 @@ def _extract_boolean_flag(
             return True
         return None
     if field_name == "student_plan_flag":
-        if _has_student_plan_context(lowered=lowered, anchor=anchor):
+        if (
+            _source_identity_has_audience(context=context, audience_terms=("student", "youth"))
+            or any(term in anchor for term in ("student", "youth"))
+        ) and _has_student_plan_context(lowered=lowered, anchor=anchor):
             return True
         return None
     if field_name == "newcomer_plan_flag":
-        if _has_newcomer_plan_context(lowered=lowered, anchor=anchor):
+        if (
+            _source_identity_has_audience(context=context, audience_terms=("newcomer", "new to canada"))
+            or any(term in anchor for term in ("newcomer", "new-to-canada", "new to canada"))
+        ) and _has_newcomer_plan_context(lowered=lowered, anchor=anchor):
             return True
         return None
     return None
+
+
+def _source_identity_has_audience(*, context: ExtractionDocumentContext, audience_terms: tuple[str, ...]) -> bool:
+    identity_text = " ".join(
+        str(value or "")
+        for value in (
+            context.source_metadata.get("product_name"),
+            context.source_metadata.get("source_name"),
+            context.source_metadata.get("product_key"),
+            context.source_metadata.get("page_title"),
+            context.source_metadata.get("normalized_source_url"),
+        )
+    ).lower()
+    return any(term in identity_text for term in audience_terms)
 
 
 def _has_student_plan_context(*, lowered: str, anchor: str) -> bool:
@@ -2207,6 +2245,16 @@ def _extract_application_method(text: str) -> str | None:
     normalized = _normalize_text(text)
     for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
         lowered = raw_sentence.lower()
+        if any(
+            marker in lowered
+            for marker in (
+                "must be registered for online",
+                "need to register",
+                "sign on to online banking",
+                "sign in to online banking",
+            )
+        ):
+            continue
         has_action = any(token in lowered for token in ("apply", "open an account", "open account", "purchase", "book an appointment"))
         has_channel = any(token in lowered for token in ("online", "branch", "mobile app", "phone", "appointment"))
         if has_action and has_channel:

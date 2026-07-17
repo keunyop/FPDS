@@ -4,6 +4,7 @@ import unittest
 
 from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items
 from api_service.review_detail import (
+    ReviewTaskError,
     _available_actions,
     _build_diff_summary,
     _build_field_trace_groups,
@@ -204,6 +205,21 @@ class ReviewDetailTests(unittest.TestCase):
             },
         )
 
+    def test_normalize_override_payload_enforces_canonical_rate_type(self) -> None:
+        normalized = _normalize_override_payload(
+            override_payload={"standard_rate": "3.30%"},
+            base_payload={"standard_rate": None},
+        )
+
+        self.assertEqual(normalized, {"standard_rate": 3.3})
+
+        with self.assertRaises(ReviewTaskError) as raised:
+            _normalize_override_payload(
+                override_payload={"standard_rate": "1 Year 3.30%, 5 Years 4.00%"},
+                base_payload={"standard_rate": None},
+            )
+        self.assertEqual(raised.exception.code, "invalid_field_type")
+
     def test_changed_field_names_and_diff_summary_cover_edit_preview(self) -> None:
         changed_fields = _changed_field_names(
             before={"monthly_fee": 5, "notes": None},
@@ -269,12 +285,18 @@ class ReviewDetailTests(unittest.TestCase):
                 "extraction_confidence": 0.84,
                 "evidence_chunk_id": "chunk-fee",
                 "normalization_method": "heuristic_canonical_mapping",
+                "field_contract_version": "2026-07-16",
+                "canonical_value_type": "decimal",
+                "canonical_unit": "currency_amount",
+                "field_note": "Fee may be waived when the minimum balance is maintained.",
             }
         )
 
         self.assertEqual(field_mapping["source_field_name"], "monthly_fee")
         self.assertEqual(field_mapping["normalized_value"], 0)
         self.assertEqual(field_mapping["extraction_confidence"], 0.84)
+        self.assertEqual(field_mapping["canonical_value_type"], "decimal")
+        self.assertEqual(field_mapping["field_note"], "Fee may be waived when the minimum balance is maintained.")
 
     def test_build_field_trace_groups_keeps_non_empty_list_values(self) -> None:
         groups = _build_field_trace_groups(

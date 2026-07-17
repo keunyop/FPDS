@@ -22,7 +22,7 @@ class ProductProfile:
 
 
 def expand_profile_product_inputs(item: NormalizationInput) -> list[NormalizationInput]:
-    if not _is_admin_registry_source(item):
+    if not _profile_expansion_enabled(item):
         return []
     profiles = _profiles_for_item(item)
     if not profiles:
@@ -31,7 +31,7 @@ def expand_profile_product_inputs(item: NormalizationInput) -> list[Normalizatio
 
 
 def should_suppress_unprofiled_profile_input(item: NormalizationInput) -> bool:
-    if not _is_admin_registry_source(item):
+    if not _profile_expansion_enabled(item):
         return False
     return any(_profile_matches_bank_and_type(item=item, profile=profile) for profile in _load_product_profiles())
 
@@ -63,8 +63,10 @@ def _product_type_for_item(item: NormalizationInput) -> str:
     return str(item.source_metadata.get("product_type") or item.schema_context.get("product_type") or "").strip().lower()
 
 
-def _is_admin_registry_source(item: NormalizationInput) -> bool:
-    return any(key in item.source_metadata for key in ("discovery_role", "expected_fields", "product_type_name"))
+def _profile_expansion_enabled(item: NormalizationInput) -> bool:
+    """Keep dated product profiles as explicit QA fixtures, never live collection truth."""
+
+    return str(item.source_metadata.get("product_profile_expansion_mode") or "").strip().lower() == "fixture"
 
 
 def _build_profile_input(*, item: NormalizationInput, profile: ProductProfile) -> NormalizationInput:
