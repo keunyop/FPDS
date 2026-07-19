@@ -1,0 +1,97 @@
+{
+  "registry_version": "2026-07-17",
+  "bank_code": "HAVENTREE",
+  "country_code": "CA",
+  "product_type": "gic",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.haventreebank.com"
+  ],
+  "entry_source_id": "AUTO-HAVENTREE-GIC-ed804a8f6a",
+  "sources": [
+    {
+      "source_id": "AUTO-HAVENTREE-GIC-ed804a8f6a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official Haventree Bank URL with a product-specific /accounts/gic path and copy describing a named GIC product, fixed term, principal protection, and maturity returns.",
+      "url": "https://www.haventreebank.com/accounts/gic",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "HAVENTREE BANK",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Get a 4.00%* rate on our 2-year GICs! haventree bank Why choose a GIC? Invest in steady growth. 4.00%* Plant your money in a GIC today! See today's GIC rates GIC calculator Advantages Considerations Built for everyday life and everything ahead.",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official Haventree Bank URL with a product-specific /accounts/gic path and copy describing a named GIC product, fixed term, principal protection, and maturity returns.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

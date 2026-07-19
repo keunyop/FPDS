@@ -1,0 +1,943 @@
+{
+  "registry_version": "2026-07-17",
+  "bank_code": "HAVENTREE",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "haventreebank.com"
+  ],
+  "entry_source_id": "AUTO-HAVENTREE-MOR-1a9c66293d",
+  "sources": [
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-1a9c66293d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Explicitly names a Convertible Mortgage and states its 12-month term and conversion-without-penalty feature.",
+      "url": "https://www.haventreebank.com/en-CA/mortgages/convertible",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "HAVENTREE BANK",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Convertible Mortgage",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explicitly names a Convertible Mortgage and states its 12-month term and conversion-without-penalty feature.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 8,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-976aebcf1e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The URL indicates a second-mortgage product, but the supplied label conflicts by describing a Convertible Mortgage; verify page content or redirects.",
+      "url": "https://www.haventreebank.com/mortgages/second-mortgage",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "HAVENTREE BANK",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Second Mortgage",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "low",
+        "ai_short_rationale": "The URL indicates a second-mortgage product, but the supplied label conflicts by describing a Convertible Mortgage; verify page content or redirects.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "insufficient_evidence",
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-b5c3f2c0e4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Canonical-language variant of the clear fixed-rate mortgage product page.",
+      "url": "https://www.haventreebank.com/mortgages/fixed-rate",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "HAVENTREE BANK",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Fixed-rate mortgages",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Canonical-language variant of the clear fixed-rate mortgage product page.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 8,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-2e56b18622",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker service page rather than a named mortgage product.",
+      "url": "https://www.haventreebank.com/mortgage-brokers",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker service page rather than a named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-538dee6b4b",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Calculator supporting mortgage evaluation; it does not describe one named mortgage product.",
+      "url": "https://www.haventreebank.com/en-CA/mortgages/pre-payment-calculator",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Calculator supporting mortgage evaluation; it does not describe one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-6acad725f3",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage servicing-document resource page; it supports existing borrowers rather than describing one product.",
+      "url": "https://www.haventreebank.com/en-CA/resources/mortgage-service-documents",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage servicing-document resource page; it supports existing borrowers rather than describing one product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-718565653e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Business-development contact page for brokers, unrelated to product-detail extraction.",
+      "url": "https://www.haventreebank.com/en-CA/mortgage-brokers/find-a-bdm",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Business-development contact page for brokers, unrelated to product-detail extraction.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-7ac40d3e81",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage-focused homepage with broad navigation and product discovery, but it does not describe one named mortgage product.",
+      "url": "https://www.haventreebank.com/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_self_detail_candidate",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage-focused homepage with broad navigation and product discovery, but it does not describe one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-7ec45eaca8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker contact and support page, not an individual mortgage product.",
+      "url": "https://www.haventreebank.com/mortgage-brokers/find-a-bdm",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker contact and support page, not an individual mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-b74bd68fd1",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker-facing category or service page, not an individual mortgage product.",
+      "url": "https://www.haventreebank.com/en-CA/mortgage-brokers",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker-facing category or service page, not an individual mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-e7d656fa2a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker-discovery and application support page, not an individual mortgage product.",
+      "url": "https://www.haventreebank.com/en-CA/mortgages/find-a-broker",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker-discovery and application support page, not an individual mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-f958c97770",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker loyalty-program page, not a residential mortgage product detail page.",
+      "url": "https://www.haventreebank.com/mortgage-brokers/elite-loyalty-program",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker loyalty-program page, not a residential mortgage product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-fd5b8369b8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broker-discovery page rather than a mortgage product detail page.",
+      "url": "https://www.haventreebank.com/mortgages/find-a-broker",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broker-discovery page rather than a mortgage product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-3905342670",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deterministic supporting source for Mortgage",
+      "url": "https://www.haventreebank.com/en-CA/mortgages/fixed-rate",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "deterministic_supporting_fallback",
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-6f4cbac01d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deterministic supporting source for Mortgage",
+      "url": "https://www.haventreebank.com/en-CA/mortgages/improvements-mortgage",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "deterministic_supporting_fallback",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HAVENTREE-MOR-b3e2d1007f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deterministic supporting source for Mortgage",
+      "url": "https://www.haventreebank.com/mortgages/improvements-mortgage",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "deterministic_supporting_fallback",
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    }
+  ]
+}

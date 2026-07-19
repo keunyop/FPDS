@@ -1,0 +1,32 @@
+{
+  "collection_id": "collection_dU--lSIPAvSR8CmP",
+  "correlation_id": "corr_Lq6Ih_TYgfy03br0",
+  "request_id": "req_codex_goal_20260717224503",
+  "trigger_type": "admin_source_catalog_collection",
+  "triggered_by": "codex@local",
+  "actor": {
+    "user_id": "codex-admin-collection-test",
+    "email": "codex@local",
+    "display_name": "Codex Admin Collection Test",
+    "role": "admin"
+  },
+  "groups": [
+    {
+      "run_id": "run_20260717_224503_haventree_mortgage_collect_bgNizH_q",
+      "catalog_item_id": "catalog-ca-haventree-mortgage",
+      "bank_code": "HAVENTREE",
+      "bank_name": "Haventree Bank",
+      "country_code": "CA",
+      "product_type": "mortgage",
+      "source_catalog_product_type": "mortgage",
+      "product_family": "lending",
+      "source_language": "en",
+      "homepage_url": "https://www.haventreebank.com/",
+      "normalized_homepage_url": "https://www.haventreebank.com/",
+      "selected_source_ids": [],
+      "target_source_ids": [],
+      "included_source_ids": [],
+      "included_sources": []
+    }
+  ]
+}

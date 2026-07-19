@@ -20,6 +20,48 @@ from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, bui
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_term_rate_table_pairs_rate_first_haventree_rows_without_shifting(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-HAVENTREE-GIC-001",
+            parsed_document_id="parsed-haventree-gic-rates",
+            source_document_id="src-haventree-gic-rates",
+            snapshot_id="snap-haventree-gic-rates",
+            bank_code="HAVENTREE",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic", "product_name": "Short Term GIC"},
+        )
+        excerpt = (
+            "Rate Term 0.20% 1 month 0.25% 2 months 2.50% 3 months "
+            "2.70% 6 months 2.85% 9 months 3.33% 1 year "
+            "4.00% 2 years 3.85% 3 years 3.89% 4 years 4.00% 5 years"
+        )
+
+        table, value_type, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="term_rate_table",
+            excerpt=excerpt,
+            anchor_value="rates",
+        )
+
+        self.assertEqual(value_type, "json")
+        self.assertEqual(
+            [(row["term_label"], row["rate"]) for row in table],
+            [
+                ("1 month", "0.20"),
+                ("2 months", "0.25"),
+                ("3 months", "2.50"),
+                ("6 months", "2.70"),
+                ("9 months", "2.85"),
+                ("1 year", "3.33"),
+                ("2 years", "4.00"),
+                ("3 years", "3.85"),
+                ("4 years", "3.89"),
+                ("5 years", "4.00"),
+            ],
+        )
+
     def test_term_rate_table_uses_most_complete_grounded_match(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-GIC-RATES",

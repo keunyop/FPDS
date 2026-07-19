@@ -46,6 +46,8 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 5. Reject cross-product navigation, nearby product tables, calculators, unresolved templates, marketing percentages, and service-fee waivers that do not describe the product field.
 6. Preserve the supporting source document id on every merged field link.
 7. If an official value is unavailable or genuinely ambiguous, omit it and route the candidate to review; do not infer it.
+8. For term-rate tables, support both adjacent `term -> rate` and `rate -> term` layouts and select the orientation with more complete grounded pairs; never shift a rate from one row onto the next term.
+9. A page containing multiple named product sections is not one canonical product. Preserve its evidence for review, mark the product boundary ambiguous, and do not publish a composite candidate.
 
 ## Runtime Validation
 

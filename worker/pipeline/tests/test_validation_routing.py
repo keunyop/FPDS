@@ -116,6 +116,53 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_multi_product_family_overview_cannot_auto_validate_as_one_product(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-product-boundary")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_metadata": {
+                        **input_item.source_metadata,
+                        "discovery_metadata": {
+                            "selection_reason_codes": ["multi_product_family_overview"]
+                        },
+                    },
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-boundary-001",
+                inputs=[input_item],
+                taxonomy_registry={"savings": {"standard", "high_interest", "youth", "foreign_currency", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="auto",
+                    auto_approve_min_confidence=0.0,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes=set(),
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "error")
+            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertIn("ambiguous_product_boundary", source_result.validation_issue_codes)
+            self.assertIn("ambiguous_product_boundary", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_chequing_package_subtype_passes_when_registry_contains_package(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-chequing-package")
         try:

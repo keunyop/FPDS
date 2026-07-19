@@ -56,6 +56,8 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "prepay up to",
     "prepayment privilege",
     "prepayment amount",
+    "prepayment option",
+    "prepayment allowance",
     "original mortgage amount",
     "original principal each year",
     "home equity",

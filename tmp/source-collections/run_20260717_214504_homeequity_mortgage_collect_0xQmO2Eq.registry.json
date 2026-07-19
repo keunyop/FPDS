@@ -1,0 +1,240 @@
+{
+  "registry_version": "2026-07-17",
+  "bank_code": "HOMEEQUITY",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.homeequitybank.ca"
+  ],
+  "entry_source_id": "AUTO-HOMEEQUITY-MOR-2b9ebb0175",
+  "sources": [
+    {
+      "source_id": "AUTO-HOMEEQUITY-MOR-2b9ebb0175",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official /products/ URL explicitly names the CHIP Reverse Mortgage, making it the strongest candidate for a single mortgage product detail page.",
+      "url": "https://www.homeequitybank.ca/products/chip-reverse-mortgage/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "CHIP Reverse Mortgage | HomeEquity Bank | HomeEquity Bank CHIP Reverse Mortgage | HomeEquity Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "CHIP Reverse Mortgage",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official /products/ URL explicitly names the CHIP Reverse Mortgage, making it the strongest candidate for a single mortgage product detail page.",
+        "page_evidence_score": 8,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 1,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HOMEEQUITY-MOR-43f11db6ac",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Clearly targets a CHIP reverse mortgage estimate, but the URL and call-to-action indicate an estimate or application flow rather than a page describing one named mortgage product.",
+      "url": "https://www.homeequitybank.ca/get-free-reverse-mortgage-estimate-chip/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clearly targets a CHIP reverse mortgage estimate, but the URL and call-to-action indicate an estimate or application flow rather than a page describing one named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HOMEEQUITY-MOR-1fd128fbd6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.homeequitybank.ca/wp-content/uploads/Understanding-Your-Mortgage-Security_FINAL_March-19-2025.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-HOMEEQUITY-MOR-c9e09e0db9",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.homeequitybank.ca/wp-content/uploads/Mortgage-Relief-Measures_Final_June-16-2025.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

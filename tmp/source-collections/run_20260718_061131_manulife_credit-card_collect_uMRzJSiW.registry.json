@@ -1,0 +1,593 @@
+{
+  "registry_version": "2026-07-18",
+  "bank_code": "MANULIFE",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "manulifebank.ca"
+  ],
+  "entry_source_id": "AUTO-MANULIFE-CRE-f7a88de880",
+  "sources": [
+    {
+      "source_id": "AUTO-MANULIFE-CRE-f7a88de880",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Dedicated URL for Manulife's Cash Back Credit Card and highly likely to contain product features, rates, fees, and application information.",
+      "url": "https://www.manulifebank.ca/personal-banking/credit-cards/cash-back-credit-card.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Credit Cards | Manulife Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Choose a credit card that\u2019s right for you",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Dedicated URL for Manulife's Cash Back Credit Card and highly likely to contain product features, rates, fees, and application information.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 1,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence",
+          "multi_product_family_overview"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "multi_product_family_overview"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-4e0cddaea2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General educational-content hub; it does not describe one credit-card product.",
+      "url": "https://www.manulifebank.ca/personal-banking/plan-and-learn.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General educational-content hub; it does not describe one credit-card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-a179993948",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General personal-finance article category, not a credit-card product page.",
+      "url": "https://www.manulifebank.ca/personal-banking/plan-and-learn/personal-finance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General personal-finance article category, not a credit-card product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-3edf8ed09e",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-visa-platinum-card-cardholder-agreement.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-625ac071a3",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-bank-visa-platinum-insurance-coverage-summary_ab0896e.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-8e9053e53d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-bank-visa-infinite-insurance-coverage-summary_ab0897e.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-9a141cd926",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-money-plus-visa-platinum-card-rates-fees.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-a2db095dd8",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-bank-visa-infinite-benefits-guide.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-d876fbc091",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-visa-infinite-card-rates-fees.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-ddd87ecda6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/content/dam/manulife-bank/en_ca/images/campaign/all-in-banking/190018_All-In_Banking_Travel_Insurance_Certificate_AODA_v1.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-MANULIFE-CRE-eb338a81ca",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-visa-infinite-card-cardholder-agreement.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

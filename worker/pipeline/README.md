@@ -127,6 +127,7 @@ Current boundary:
 - dynamic product extraction now suppresses obvious cross-product navigation chunks before deriving product titles or long-text fields, so `gic-term-deposit` candidates do not promote chequing or card menu text as product evidence
 - operator-defined product extraction and normalization are bounded to the registered `expected_fields`; the AI may not introduce deposit aliases or unrelated fields into lending/card candidates, and percentage prompts explicitly separate interest rates from cashback, rewards, prepayment, equity, and down-payment values
 - all comparable fields use the executable cross-bank type and unit contract in `fpds_field_contract.py`; annual rates are numeric percentage points, money is numeric in product currency, flags are booleans, and term-rate schedules are structured arrays
+- term-rate extraction evaluates adjacent `term -> rate` and `rate -> term` row orientations, chooses the more complete grounded pairing, and preserves the established term-first behavior on ties so a rate-first table cannot shift every rate onto the next term
 - withdrawal, redemption, encashment, and prepayment percentages are rejected as annual rates, while overdraft service-fee waivers and cross-product audience or navigation mentions are rejected as account facts
 
 What `WBS 3.6` stores today:
@@ -144,6 +145,7 @@ What `WBS 3.6` stores today:
 - chequing subtype inference now aligns to the approved taxonomy: `standard`, `package`, `interest_bearing`, `premium`, `other`
 - normalization and validation now also align GIC term and redeemability rules at candidate creation time so missing deposit or term values, invalid term lengths, and conflicting redeemability flags are surfaced before review routing
 - shared candidate cleanup now removes wrong-type flag values, unresolved template tokens, duplicated/whole-page field copy, short `Document ...` navigation labels, payment-frequency values misused as interest frequency, and numeric term values that conflict with the published term text
+- lending cleanup also removes account-fee text mapped as loan payments or fees, short multi-marker navigation mapped as security, prose-only loan amounts, and product titles mapped as prepayment privileges; the same rules are surfaced in Review diagnosis for already-persisted candidates
 - lending cleanup also requires concise duration-shaped amortization values, actual periodic payment-frequency values, and concise prepayment terms; removes calculator/estimate output from eligibility; and suppresses numeric rate fields when their own evidence is an unresolved template or describes cashback, prepayment, equity, down payment, or loan-to-value instead of interest
 - GIC rate fallback rejects account/direct-deposit percentages from navigation or footer evidence, and footer/company navigation is not accepted as deposit-insurance evidence
 - dynamic lending/card validation checks a concise product-type priority set instead of reporting every optional expected field as required; these candidates remain review-first and are never auto-published by this fallback
@@ -159,6 +161,7 @@ Current boundary:
 
 What `WBS 3.7` stores today:
 - validation/routing JSON artifact per source candidate in object storage
+- discovery metadata marked `multi_product_family_overview` produces `ambiguous_product_boundary`, an error-level review route that prevents one normalized proposal from representing several distinct products
 - metadata JSON artifact with candidate state, review reason, and review task id
 - updated `normalized_candidate` validation fields and `candidate_state`
 - validation routing treats dynamic-product runtime notes such as "no grounded product details" as `partial_source_failure`, preventing weak source captures from appearing as clean `pass` review tasks

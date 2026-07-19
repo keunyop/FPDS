@@ -19,6 +19,7 @@ def build_review_diagnosis(
     field_issues = _candidate_field_issues(
         candidate_payload=candidate_payload,
         source_metadata=source_metadata or {},
+        product_type=product_type,
     )
     suspect_fields = list(field_issues)
     affected_fields = [
@@ -46,6 +47,13 @@ def build_review_diagnosis(
             category="non_product_source",
             headline="This source does not appear to be a product detail page.",
             recommended_action="reject",
+            affected_fields=[],
+        )
+    if "ambiguous_product_boundary" in validation_issue_codes or _source_has_multi_product_boundary(source_metadata or {}):
+        return _diagnosis(
+            category="ambiguous_product_boundary",
+            headline="This page contains multiple products that cannot be safely reviewed as one proposal.",
+            recommended_action="defer",
             affected_fields=[],
         )
     if suspect_fields:
@@ -102,6 +110,7 @@ def build_review_field_items(
     field_issues = _candidate_field_issues(
         candidate_payload=candidate_payload,
         source_metadata=source_metadata or {},
+        product_type=product_type,
     )
     for field_name in field_names:
         agent_value = candidate_payload.get(field_name)
@@ -138,6 +147,21 @@ def _diagnosis(*, category: str, headline: str, recommended_action: str, affecte
         "recommended_action": recommended_action,
         "affected_fields": affected_fields,
     }
+
+
+def _source_has_multi_product_boundary(source_metadata: dict[str, Any]) -> bool:
+    discovery_metadata = source_metadata.get("discovery_metadata")
+    if not isinstance(discovery_metadata, dict):
+        return False
+    reason_codes = {
+        str(code).strip().lower()
+        for code in [
+            *list(discovery_metadata.get("selection_reason_codes") or []),
+            *list(discovery_metadata.get("page_evidence_reason_codes") or []),
+        ]
+        if str(code).strip()
+    }
+    return "multi_product_family_overview" in reason_codes
 
 
 def _field_count_label(count: int, *, expected: bool = False) -> str:
@@ -193,11 +217,12 @@ def _candidate_field_issues(
     *,
     candidate_payload: dict[str, Any],
     source_metadata: dict[str, Any],
+    product_type: str | None = None,
 ) -> dict[str, str]:
     issues = {
         field_name: reason
         for field_name, value in candidate_payload.items()
-        if (reason := _suspect_reason(field_name=field_name, value=value)) is not None
+        if (reason := _suspect_reason(field_name=field_name, value=value, product_type=product_type)) is not None
     }
     if _term_days_conflict(candidate_payload):
         issues["term_length_days"] = "cross_field_conflict"
@@ -208,19 +233,43 @@ def _candidate_field_issues(
     return issues
 
 
-def _suspect_reason(*, field_name: str, value: Any) -> str | None:
+def _suspect_reason(*, field_name: str, value: Any, product_type: str | None = None) -> str | None:
     if field_name.endswith("_flag") or field_name in {"secured_flag", "redeemable_flag"}:
         if value is not None and not isinstance(value, bool):
             return "invalid_type"
     if not isinstance(value, str):
         return None
     normalized = " ".join(value.lower().split())
+    if field_name == "product_name" and re.match(r"^(?:see|view|check)\b.{0,50}\brates?\b", normalized):
+        return "cta_copy"
     if re.search(r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\])", normalized):
         return "unresolved_placeholder"
     if normalized in {"home", "go to main content", "skip to main content", "document go to main content", "document skip to main content", "learn more", "read more"}:
         return "navigation_copy"
     if normalized.startswith("document ") and len(normalized.split()) <= 4:
         return "navigation_copy"
+    if product_type in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        if field_name == "monthly_payment_text" and re.fullmatch(
+            r"monthly fees?\s*(?:free|\$?0(?:\.00)?)", normalized
+        ):
+            return "cross_product_copy"
+        if field_name == "fees_text" and normalized in {"monthly fees free", "monthly fee free"}:
+            return "cross_product_copy"
+        if field_name == "loan_amount_text" and len(normalized) > 100 and re.search(
+            r"(?:\$|\b\d[\d,.]*\b|\bminimum\b|\bmaximum\b|\bup to\b)", normalized
+        ) is None:
+            return "non_value_copy"
+        if field_name == "security_requirement":
+            short_navigation_markers = (
+                "document", "rates", "contact us", "search", "login", "log in", "go to homepage", "online banking"
+            )
+            if sum(marker in normalized for marker in short_navigation_markers) >= 3:
+                return "navigation_copy"
+        if field_name == "prepayment_privileges" and not any(
+            marker in normalized
+            for marker in ("prepay", "pre-pay", "prepayment", "pre-payment", "repay", "penalty", "privilege")
+        ):
+            return "non_value_copy"
     navigation_markers = (
         "main navigation",
         "online banking",
@@ -385,7 +434,7 @@ def _product_name_conflicts_with_source(*, candidate_payload: dict[str, Any], so
 
 def _source_is_non_product_page(source_metadata: dict[str, Any]) -> bool:
     source_url = str(source_metadata.get("normalized_source_url") or "").lower()
-    return any(
+    if any(
         marker in source_url
         for marker in (
             "/resource-centre/",
@@ -397,7 +446,20 @@ def _source_is_non_product_page(source_metadata: dict[str, Any]) -> bool:
             "/manage-mortgage",
             "/manage-my-mortgage",
         )
-    )
+    ):
+        return True
+    discovery_metadata = source_metadata.get("discovery_metadata")
+    if not isinstance(discovery_metadata, dict):
+        return False
+    reason_codes = {
+        str(code).strip().lower()
+        for code in [
+            *list(discovery_metadata.get("selection_reason_codes") or []),
+            *list(discovery_metadata.get("page_evidence_reason_codes") or []),
+        ]
+        if str(code).strip()
+    }
+    return bool(reason_codes.intersection({"non_product_editorial_page", "non_product_service_flow"}))
 
 
 def _review_field_sort_key(item: dict[str, Any]) -> tuple[int, int, str]:

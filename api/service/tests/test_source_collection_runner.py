@@ -398,6 +398,42 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         self.assertEqual(payload["product_family"], "lending")
         self.assertEqual(payload["sources"][0]["product_family"], "lending")
 
+    def test_build_registry_payload_treats_www_and_apex_hosts_as_bank_bounded_equivalents(self) -> None:
+        payload = source_collection_runner._build_registry_payload(
+            {
+                "bank_code": "RBC",
+                "country_code": "CA",
+                "product_type": "savings",
+                "source_language": "en",
+                "included_sources": [
+                    {
+                        "source_id": "RBC-SAV-001",
+                        "priority": "P0",
+                        "seed_source_flag": True,
+                        "source_type": "html",
+                        "discovery_role": "entry",
+                        "purpose": "discovery",
+                        "source_url": "https://www.rbcroyalbank.com/accounts/",
+                        "expected_fields": ["product_name"],
+                        "source_language": "en",
+                    },
+                    {
+                        "source_id": "RBC-SAV-002",
+                        "priority": "P0",
+                        "seed_source_flag": True,
+                        "source_type": "html",
+                        "discovery_role": "detail",
+                        "purpose": "detail",
+                        "source_url": "https://rbcroyalbank.com/accounts/savings/",
+                        "expected_fields": ["product_name", "standard_rate"],
+                        "source_language": "en",
+                    },
+                ],
+            }
+        )
+
+        self.assertEqual(payload["allowed_domains"], ["rbcroyalbank.com"])
+
     def test_run_stage_raises_clear_error_when_worker_stage_times_out(self) -> None:
         with (
             patch("api_service.source_collection_runner.shutil.which", return_value="uv"),

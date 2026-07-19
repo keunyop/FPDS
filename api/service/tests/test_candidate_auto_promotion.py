@@ -66,6 +66,7 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
             "status": "active",
         },
         "discovery_role": "detail",
+        "source_metadata": {},
     }
 
 
@@ -207,6 +208,45 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(candidate_update_call["reason_code"], "non_product_page_title")
         audit_call = next(params for sql, params in connection.calls if "candidate_auto_promotion_skipped" in sql)
         self.assertEqual(audit_call["new_state"], "rejected")
+
+    def test_multi_product_family_candidate_is_queued_before_canonical_promotion(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_metadata"] = {
+            "discovery_metadata": {"page_evidence_reason_codes": ["multi_product_family_overview"]}
+        }
+        connection = _Connection(
+            [_policy_rows(), [candidate], None, {"review_task_id": "review-boundary"}, None]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
+        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
+    def test_non_product_service_source_is_rejected_before_canonical_promotion(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_metadata"] = {
+            "discovery_metadata": {"page_evidence_reason_codes": ["non_product_service_flow"]}
+        }
+        connection = _Connection([_policy_rows(), [candidate], None, None])
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "non_product_service_flow")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
+
+    def test_rate_cta_candidate_name_is_not_promoted(self) -> None:
+        candidate = _candidate_row()
+        candidate["product_name"] = "See today's GIC rates"
+        connection = _Connection([_policy_rows(), [candidate], None, None])
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "non_product_page_title")
 
     def test_supporting_source_candidate_is_rejected_before_canonical_promotion(self) -> None:
         candidate = _candidate_row()

@@ -1,0 +1,310 @@
+{
+  "registry_version": "2026-07-17",
+  "bank_code": "FNBC",
+  "country_code": "CA",
+  "product_type": "personal-loan",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "www.fnbc.ca"
+  ],
+  "entry_source_id": "AUTO-FNBC-PER-94e13be736",
+  "sources": [
+    {
+      "source_id": "AUTO-FNBC-PER-94e13be736",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly names personal loans and sits in the bank's personal borrowing section, strongly indicating the official product detail page or product-family page.",
+      "url": "https://www.fnbc.ca/personal/borrowing/personal-loans",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Personal Loans | First Nations Bank of Canada",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Personal Loans",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly names personal loans and sits in the bank's personal borrowing section, strongly indicating the official product detail page or product-family page.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-FNBC-PER-4d1caed69a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "This is the general personal banking hub and may link to borrowing products, but it is not specific to one personal loan.",
+      "url": "https://www.fnbc.ca/personal",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "This is the general personal banking hub and may link to borrowing products, but it is not specific to one personal loan.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-FNBC-PER-587693fd4f",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A calculator can support loan research but is explicitly a tool rather than a named personal-loan product detail page.",
+      "url": "https://www.fnbc.ca/loan-calculator",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A calculator can support loan research but is explicitly a tool rather than a named personal-loan product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-FNBC-PER-5147fb282c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Financial planning advice may discuss borrowing generally, but it is not a personal-loan product page.",
+      "url": "https://www.fnbc.ca/personal/advice/financial-planning",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Financial planning advice may discuss borrowing generally, but it is not a personal-loan product page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-FNBC-PER-8eca9e4b2a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A general forms and documents repository may contain loan-related application materials, but it does not itself describe one named personal-loan product.",
+      "url": "https://www.fnbc.ca/forms-and-documents",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "A general forms and documents repository may contain loan-related application materials, but it does not itself describe one named personal-loan product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

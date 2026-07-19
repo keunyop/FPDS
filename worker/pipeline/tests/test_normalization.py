@@ -223,6 +223,29 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["amortization_text"], "Up to 30 years")
         self.assertIn("must have at least 20% equity", str(payload["eligibility_text"]))
 
+    def test_lending_cleanup_suppresses_cross_product_and_non_value_fields(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Personal Loan",
+            "fees_text": "Monthly fees Free",
+            "monthly_payment_text": "Monthly fees Free",
+            "loan_amount_text": "Home renovations can make your space work better for your family and help you plan for future projects.",
+            "security_requirement": "Document Rates Contact us Search Login Go to homepage",
+            "prepayment_privileges": "CHIP Reverse Mortgage",
+        }
+        normalized_values = dict(payload)
+        mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+
+        _clean_product_context_fields(
+            product_type_family="personal-loan",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+        )
+
+        self.assertEqual(payload, {"product_name": "Example Personal Loan"})
+        self.assertEqual(normalized_values, {"product_name": "Example Personal Loan"})
+        self.assertEqual(mapping_metadata, {"product_name": {"normalized_value": "Example Personal Loan"}})
+
     def test_normalizes_candidate_and_field_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-service")
         try:

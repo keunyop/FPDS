@@ -1907,7 +1907,7 @@ def _generate_sources_from_homepage(
             )
     for link in homepage_links:
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-        if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+        if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
             continue
         if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
             continue
@@ -1960,7 +1960,7 @@ def _generate_sources_from_homepage(
             continue
         for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-            if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
                 continue
             if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
                 continue
@@ -3108,6 +3108,8 @@ def _detail_rejection_reason(
         "registered_plan_wrapper",
         "other_product_type",
         "non_product_or_investor_page",
+        "non_product_editorial_page",
+        "non_product_service_flow",
     ):
         if reason in reason_codes:
             return reason
@@ -3492,6 +3494,12 @@ def _score_page_evidence(
         product_type=product_type,
         fingerprint=" ".join([raw_url, title_text, primary_heading]).lower(),
     )
+    multi_product_family_overview = _looks_like_multi_product_family_overview(
+        product_type=product_type,
+        title_text=title_text,
+        primary_heading=primary_heading,
+        secondary_headings=parser.secondary_headings,
+    )
 
     score = 0
     reason_codes: list[str] = []
@@ -3521,6 +3529,8 @@ def _score_page_evidence(
         negative_hits += 2
         reason_codes.append(scope_exclusion_reason)
         reason_codes.append("insufficient_evidence")
+    if multi_product_family_overview:
+        reason_codes.append("multi_product_family_overview")
     if not title_match and not primary_heading_match and not body_match and attribute_hits == 0:
         reason_codes.append("insufficient_evidence")
 
@@ -3542,8 +3552,8 @@ class _PageSignalParser(HTMLParser):
         self._tag_stack: list[str] = []
         self._ignore_depth = 0
         self._title_parts: list[str] = []
-        self._h1_parts: list[str] = []
-        self._h2_parts: list[str] = []
+        self._h1_groups: list[list[str]] = []
+        self._secondary_heading_groups: list[list[str]] = []
         self.body_chunks: list[str] = []
 
     @property
@@ -3552,11 +3562,15 @@ class _PageSignalParser(HTMLParser):
 
     @property
     def primary_heading(self) -> str:
-        return _collapse_whitespace(" ".join(self._h1_parts))
+        return _collapse_whitespace(" ".join(self._h1_groups[0])) if self._h1_groups else ""
 
     @property
     def secondary_headings(self) -> list[str]:
-        return [_collapse_whitespace(" ".join(self._h2_parts))] if self._h2_parts else []
+        return [
+            heading
+            for parts in self._secondary_heading_groups
+            if (heading := _collapse_whitespace(" ".join(parts)))
+        ]
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         normalized = tag.lower()
@@ -3564,6 +3578,10 @@ class _PageSignalParser(HTMLParser):
             self._ignore_depth += 1
             return
         self._tag_stack.append(normalized)
+        if normalized == "h1":
+            self._h1_groups.append([])
+        elif normalized in {"h2", "h3"}:
+            self._secondary_heading_groups.append([])
 
     def handle_endtag(self, tag: str) -> None:
         normalized = tag.lower()
@@ -3584,9 +3602,13 @@ class _PageSignalParser(HTMLParser):
         if "title" in self._tag_stack:
             self._title_parts.append(text)
         elif "h1" in self._tag_stack:
-            self._h1_parts.append(text)
+            if not self._h1_groups:
+                self._h1_groups.append([])
+            self._h1_groups[-1].append(text)
         elif "h2" in self._tag_stack or "h3" in self._tag_stack:
-            self._h2_parts.append(text)
+            if not self._secondary_heading_groups:
+                self._secondary_heading_groups.append([])
+            self._secondary_heading_groups[-1].append(text)
         else:
             self.body_chunks.append(text)
 
@@ -3603,6 +3625,64 @@ def _term_hits(text: str, terms: list[str]) -> int:
 def _distinct_term_hits(text: str, terms: list[str]) -> int:
     fingerprint = text.lower()
     return len({term for term in terms if term and term in fingerprint})
+
+
+def _looks_like_multi_product_family_overview(
+    *,
+    product_type: str,
+    title_text: str,
+    primary_heading: str,
+    secondary_headings: list[str],
+) -> bool:
+    normalized_type = _canonical_product_type_code(product_type)
+    generic_identity_terms = {
+        "chequing": ("chequing", "chequing accounts", "checking", "checking accounts"),
+        "savings": ("savings", "savings accounts", "saving accounts"),
+        "gic": ("gic", "gics", "term deposit", "term deposits", "guaranteed investment certificates"),
+        "credit-card": ("credit card", "credit cards"),
+        "mortgage": ("mortgage", "mortgages", "mortgage solutions", "mortgage products"),
+        "personal-loan": ("personal loan", "personal loans"),
+        "line-of-credit": ("line of credit", "lines of credit"),
+    }.get(normalized_type)
+    if generic_identity_terms is None:
+        return False
+
+    heading_identity = _collapse_whitespace(primary_heading).lower().strip(" .:-|")
+    title_identity = _collapse_whitespace(title_text.split("|", 1)[0]).lower().strip(" .:-|")
+    if heading_identity not in generic_identity_terms and title_identity not in generic_identity_terms:
+        return False
+
+    variant_terms = {
+        "chequing": ("chequing", "checking", "student", "newcomer", "unlimited", "premium", "everyday"),
+        "savings": ("savings", "saving", "notice", "youth", "student", "high interest", "premium", "us dollar", "usd"),
+        "gic": (
+            "gic",
+            "term deposit",
+            "redeemable",
+            "non-redeemable",
+            "non redeemable",
+            "cashable",
+            "non-cashable",
+            "non cashable",
+            "long-term",
+            "long term",
+            "short-term",
+            "short term",
+            "market-linked",
+            "market linked",
+            "wait and see",
+        ),
+        "credit-card": ("credit card", "visa", "mastercard", "cash back", "rewards"),
+        "mortgage": ("mortgage", "fixed-rate", "fixed rate", "convertible", "rental", "improvements", "second mortgage"),
+        "personal-loan": ("loan",),
+        "line-of-credit": ("line of credit", "home equity", "student", "professional"),
+    }[normalized_type]
+    variant_headings = {
+        _collapse_whitespace(heading).lower()
+        for heading in secondary_headings
+        if any(term in _collapse_whitespace(heading).lower() for term in variant_terms)
+    }
+    return len(variant_headings) >= 2
 
 
 def _negative_term_hits(text: str) -> int:
@@ -3827,12 +3907,14 @@ def _link_is_relevant_supporting_source(
     )
     if generic_deposit_rate_page:
         return True
-    if any(keyword in fingerprint for keyword in _EXCLUDED_LINK_KEYWORDS):
+    if _has_excluded_link_signal(normalized_url=normalized_url, anchor_text=anchor_text):
         return False
     if _source_scope_exclusion_reason(product_type=signal_product_type, fingerprint=fingerprint):
         return False
     has_supporting_signal = any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS)
     if _has_unrelated_product_type_signal(product_type=signal_product_type, fingerprint=fingerprint):
+        return False
+    if _has_unrelated_product_path_signal(product_type=signal_product_type, normalized_url=normalized_url):
         return False
     has_product_signal = _score_product_link(
         product_type=signal_product_type,
@@ -3866,12 +3948,59 @@ def _has_supporting_product_context_signal(fingerprint: str) -> bool:
     )
 
 
+def _has_excluded_link_signal(*, normalized_url: str, anchor_text: str) -> bool:
+    path_and_query = " ".join(
+        part
+        for part in (urlparse(normalized_url).path.lower(), urlparse(normalized_url).query.lower())
+        if part
+    )
+    if any(keyword in path_and_query for keyword in _EXCLUDED_LINK_KEYWORDS):
+        return True
+    normalized_anchor = _collapse_whitespace(anchor_text).lower().strip(" .:-|")
+    if not normalized_anchor:
+        return False
+    exact_action_labels = {
+        "login",
+        "log in",
+        "sign in",
+        "apply",
+        "apply now",
+        "open account",
+        "open an account",
+        "compare",
+        "compare now",
+        "view offer",
+        "special offer",
+    }
+    if normalized_anchor in exact_action_labels:
+        return True
+    return len(normalized_anchor) <= 80 and bool(
+        re.match(r"^(?:login|log in|sign in|apply now|open (?:an )?account|compare(?: now)?)\b", normalized_anchor)
+    )
+
+
 def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -> bool:
     exclusions = _PRODUCT_TYPE_EXCLUSION_KEYWORDS.get(product_type, ())
     if not any(keyword in fingerprint for keyword in exclusions):
         return False
     product_terms = _product_type_keywords({"product_type_code": product_type, "display_name": product_type, "discovery_keywords": [product_type]})
     return not any(term and term in fingerprint for term in product_terms)
+
+
+def _has_unrelated_product_path_signal(*, product_type: str, normalized_url: str) -> bool:
+    normalized_type = _canonical_product_type_code(product_type)
+    if normalized_type not in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        return False
+    path_segments = {segment for segment in urlparse(normalized_url).path.lower().split("/") if segment}
+    if not path_segments.intersection({"account", "accounts", "bank-account", "bank-accounts"}):
+        return False
+    expected_path_terms = {
+        "credit-card": {"credit-card", "credit-cards", "cards"},
+        "mortgage": {"mortgage", "mortgages"},
+        "personal-loan": {"loan", "loans", "personal-loan", "personal-loans"},
+        "line-of-credit": {"line-of-credit", "lines-of-credit"},
+    }[normalized_type]
+    return path_segments.isdisjoint(expected_path_terms)
 
 
 def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> str | None:
@@ -3894,6 +4023,11 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "/manage-mortgage",
             "/manage-my-mortgage",
         )
+    ):
+        return "non_product_service_flow"
+    if _looks_like_mortgage_advice_or_servicing_flow(
+        product_type=product_type,
+        fingerprint=normalized_fingerprint,
     ):
         return "non_product_service_flow"
     if any(
@@ -3924,6 +4058,40 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
     if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return "other_product_type"
     return None
+
+
+def _looks_like_mortgage_advice_or_servicing_flow(*, product_type: str, fingerprint: str) -> bool:
+    if _canonical_product_type_code(product_type) != "mortgage":
+        return False
+    mortgage_flow_path = any(
+        token in fingerprint
+        for token in (
+            "/mortgage/refinance",
+            "/mortgages/refinance",
+            "/mortgage/renewal",
+            "/mortgages/renewal",
+        )
+    )
+    if not mortgage_flow_path:
+        return False
+    advice_or_servicing_signal = any(
+        phrase in fingerprint
+        for phrase in (
+            "thinking about",
+            "should i ",
+            "when should",
+            "why refinance",
+            "reasons to refinance",
+            "understanding refinancing",
+            "how refinancing works",
+            "what does refinancing",
+            "what is refinancing",
+            "mortgage servicing",
+            "contact an account manager",
+            "talk to an account manager",
+        )
+    )
+    return advice_or_servicing_signal
 
 
 def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str) -> str:

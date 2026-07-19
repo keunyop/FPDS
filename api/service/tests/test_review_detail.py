@@ -140,6 +140,61 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["recommended_action"], "reject")
         self.assertEqual(diagnosis["affected_fields"], [])
 
+    def test_review_diagnosis_rejects_source_marked_as_service_flow(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "mortgage_rate"],
+            candidate_payload={"product_name": "Mortgage refinance"},
+            validation_status="error",
+            validation_issue_codes=["required_field_missing"],
+            product_type="mortgage",
+            source_metadata={
+                "discovery_metadata": {"page_evidence_reason_codes": ["non_product_service_flow"]}
+            },
+        )
+
+        self.assertEqual(diagnosis["category"], "non_product_source")
+        self.assertEqual(diagnosis["recommended_action"], "reject")
+
+    def test_review_diagnosis_defers_multi_product_family_page(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "standard_rate", "term_length_text"],
+            candidate_payload={"product_name": "Term Deposits", "standard_rate": 3.33, "term_length_text": "1 year"},
+            validation_status="error",
+            validation_issue_codes=["ambiguous_product_boundary"],
+            product_type="gic",
+            source_metadata={
+                "discovery_metadata": {"selection_reason_codes": ["multi_product_family_overview"]}
+            },
+        )
+
+        self.assertEqual(diagnosis["category"], "ambiguous_product_boundary")
+        self.assertEqual(diagnosis["recommended_action"], "defer")
+
+    def test_review_diagnosis_flags_lending_cross_product_and_cta_copy(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "interest_rate", "loan_amount_text"],
+            candidate_payload={
+                "product_name": "See today's personal loan rates",
+                "fees_text": "Monthly fees Free",
+                "monthly_payment_text": "Monthly fees Free",
+                "security_requirement": "Document Rates Contact us Search Login Go to homepage",
+                "prepayment_privileges": "CHIP Reverse Mortgage",
+            },
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="personal-loan",
+        )
+
+        self.assertEqual(diagnosis["category"], "suspect_fields")
+        self.assertEqual(diagnosis["recommended_action"], "edit_approve")
+        self.assertEqual(
+            {item["field_name"] for item in diagnosis["affected_fields"]},
+            {"product_name", "interest_rate", "loan_amount_text", "fees_text", "monthly_payment_text", "security_requirement", "prepayment_privileges"},
+        )
+
     def test_optional_expected_fields_do_not_force_edit(self) -> None:
         diagnosis = build_review_diagnosis(
             source_role="detail",

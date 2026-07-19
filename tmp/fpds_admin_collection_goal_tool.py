@@ -39,7 +39,7 @@ COMPARE_FIELDS = (
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="FPDS admin collection golden-match helper.")
+    parser = argparse.ArgumentParser(description="FPDS admin collection audit and recollection helper.")
     parser.add_argument("--env-file", default=".env.dev")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -47,6 +47,7 @@ def main() -> int:
     launch_parser = subparsers.add_parser("launch")
     launch_parser.add_argument("--only-bank", action="append", default=[])
     launch_parser.add_argument("--only-product-type", action="append", default=[])
+    launch_parser.add_argument("--scope", action="append", default=[], help="Exact BANK:product-type scope; repeatable.")
 
     poll_parser = subparsers.add_parser("poll")
     poll_parser.add_argument("--collection-id", required=True)
@@ -69,7 +70,14 @@ def main() -> int:
         _print_json(load_state(settings))
         return 0
     if args.command == "launch":
-        _print_json(launch_collection(settings, only_banks=args.only_bank, only_product_types=args.only_product_type))
+        _print_json(
+            launch_collection(
+                settings,
+                only_banks=args.only_bank,
+                only_product_types=args.only_product_type,
+                exact_scopes=args.scope,
+            )
+        )
         return 0
     if args.command == "poll":
         _print_json(_brief_status(load_collection_status(settings, collection_id=args.collection_id), brief=args.brief))
@@ -97,11 +105,29 @@ def load_state(settings: Settings) -> dict[str, Any]:
         }
 
 
-def launch_collection(settings: Settings, *, only_banks: list[str], only_product_types: list[str]) -> dict[str, Any]:
+def launch_collection(
+    settings: Settings,
+    *,
+    only_banks: list[str],
+    only_product_types: list[str],
+    exact_scopes: list[str] | None = None,
+) -> dict[str, Any]:
     only_bank_set = {item.strip().upper() for item in only_banks if item.strip()}
     only_product_type_set = {item.strip().lower() for item in only_product_types if item.strip()}
+    exact_scope_set: set[tuple[str, str]] = set()
+    for raw_scope in exact_scopes or []:
+        bank_code, separator, product_type = raw_scope.partition(":")
+        if not separator or not bank_code.strip() or not product_type.strip():
+            raise ValueError(f"Invalid --scope {raw_scope!r}; expected BANK:product-type.")
+        exact_scope_set.add((bank_code.strip().upper(), product_type.strip().lower()))
     with open_connection(settings) as connection:
         rows = _active_catalog_rows(connection)
+        if exact_scope_set:
+            rows = [
+                row
+                for row in rows
+                if (str(row["bank_code"]).upper(), str(row["product_type"]).lower()) in exact_scope_set
+            ]
         if only_bank_set:
             rows = [row for row in rows if str(row["bank_code"]).upper() in only_bank_set]
         if only_product_type_set:
@@ -290,8 +316,7 @@ def _active_catalog_rows(connection: Any) -> list[dict[str, Any]]:
             JOIN bank AS b
               ON b.bank_code = sci.bank_code
             JOIN product_type_registry AS ptr
-              ON ptr.product_family = 'deposit'
-             AND ptr.product_type_code = sci.product_type
+              ON ptr.product_type_code = sci.product_type
             WHERE sci.status = 'active'
               AND b.status = 'active'
               AND ptr.status = 'active'
@@ -313,8 +338,7 @@ def _registered_scope(connection: Any) -> dict[str, Any]:
         """
         SELECT product_type_code, display_name, status
         FROM product_type_registry
-        WHERE product_family = 'deposit'
-        ORDER BY display_name, product_type_code
+        ORDER BY product_family, display_name, product_type_code
         """
     ).fetchall()
     catalog_rows = _active_catalog_rows(connection)
@@ -488,7 +512,11 @@ def _run_is_final(row: dict[str, Any]) -> bool:
         return True
     if run_state != "completed":
         return False
-    return bool(row["validation_done"]) or row["pipeline_stage"] == "validation_routing"
+    return (
+        bool(row["validation_done"])
+        or row["pipeline_stage"] == "validation_routing"
+        or row["discovery_status"] in {"no_detail_sources_discovered", "materialization_failed"}
+    )
 
 
 def _iso(value: Any) -> str | None:

@@ -24,6 +24,7 @@ from api_service.source_catalog import (
     _dedupe_detail_rows_by_product_identity,
     _extract_allowed_links,
     _generate_bank_code,
+    _has_excluded_link_signal,
     _invoke_openai_parallel_scorer,
     _link_is_relevant_supporting_source,
     _looks_like_javascript_shell,
@@ -94,6 +95,28 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_link_exclusion_does_not_reject_product_copy_containing_offers(self) -> None:
+        self.assertFalse(
+            _has_excluded_link_signal(
+                normalized_url="https://www.examplebank.ca/mortgages/fixed-rate",
+                anchor_text="Fixed-rate mortgage offers stable payments through the term of your mortgage.",
+            )
+        )
+
+    def test_link_exclusion_still_rejects_action_and_promotion_flows(self) -> None:
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://www.examplebank.ca/mortgages/apply",
+                anchor_text="Start your mortgage application",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://www.examplebank.ca/mortgages/fixed-rate",
+                anchor_text="Apply now",
+            )
+        )
+
     def test_editorial_resource_page_is_out_of_product_candidate_scope(self) -> None:
         self.assertEqual(
             _source_scope_exclusion_reason(
@@ -447,6 +470,68 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("other_product_type", result.page_evidence_reason_codes)
         self.assertGreaterEqual(result.negative_signal_count, 2)
 
+    def test_page_evidence_keeps_first_h1_as_primary_identity(self) -> None:
+        detail_html = """
+        <html><head><title>Example Savings Account</title></head><body>
+          <h1>Example Savings Account</h1>
+          <h1>Open an account today</h1>
+          <p>Earn interest with no monthly fee.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/accounts/example-savings",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+
+        self.assertEqual(result.primary_heading, "Example Savings Account")
+
+    def test_generic_term_deposit_page_marks_multi_product_boundary(self) -> None:
+        detail_html = """
+        <html><head><title>Term Deposits | Example Bank</title></head><body>
+          <h1>Term Deposits</h1>
+          <h2>Long-Term Non-Redeemable Term Deposit</h2>
+          <p>One to five year terms with a minimum deposit.</p>
+          <h2>Long-Term Redeemable Term Deposit</h2>
+          <p>Redeemable terms and rates.</p>
+          <h2>Short-Term Redeemable Term Deposit</h2>
+          <p>Terms from 30 to 365 days.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/investing/term-deposits",
+                fetch_policy=SimpleNamespace(),
+                product_type="gic",
+                product_type_definition=_product_type_definition("gic"),
+            )
+
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_mortgage_refinance_advice_page_is_not_product_detail(self) -> None:
+        detail_html = """
+        <html><head><title>Thinking about refinancing?</title></head><body>
+          <h1>Thinking about refinancing your mortgage?</h1>
+          <h2>Reasons to refinance</h2>
+          <p>Talk to an Account Manager to understand how refinancing works.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/en-CA/mortgages/refinance",
+                fetch_policy=SimpleNamespace(),
+                product_type="mortgage",
+                product_type_definition=_product_type_definition("mortgage"),
+            )
+
+        self.assertIn("non_product_service_flow", result.page_evidence_reason_codes)
+        self.assertGreaterEqual(result.negative_signal_count, 2)
+
     def test_lending_supporting_sources_accept_rate_pages_with_product_context(self) -> None:
         self.assertTrue(
             _link_is_relevant_supporting_source(
@@ -459,6 +544,16 @@ class SourceCatalogTests(unittest.TestCase):
                 },
                 normalized_url="https://www.examplebank.ca/mortgages/rates",
                 anchor_text="Mortgage rates",
+            )
+        )
+
+    def test_lending_supporting_sources_reject_unrelated_bank_account_path(self) -> None:
+        self.assertFalse(
+            _link_is_relevant_supporting_source(
+                product_type="mortgage",
+                product_type_definition=_product_type_definition("mortgage"),
+                normalized_url="https://www.examplebank.ca/accounts/everyday-growth-account",
+                anchor_text="Everyday Growth Account Terms and Conditions",
             )
         )
 

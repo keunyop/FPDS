@@ -1274,6 +1274,11 @@ def _clean_product_context_fields(
                     value=value,
                     product_type_family=product_type_family,
                 )
+                or _looks_like_non_value_lending_field(
+                    field_name=field_name,
+                    value=value,
+                    product_type_family=product_type_family,
+                )
                 or _looks_like_broad_page_copy(field_name=field_name, value=value)
             )
         if should_suppress:
@@ -1498,6 +1503,43 @@ def _looks_like_invalid_application_method(
         )
         if targets_bank_account and not mentions_current_product:
             return True
+    return False
+
+
+def _looks_like_non_value_lending_field(
+    *,
+    field_name: str,
+    value: str,
+    product_type_family: str | None,
+) -> bool:
+    if product_type_family not in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        return False
+    normalized = " ".join(value.lower().split())
+    if field_name == "monthly_payment_text" and re.fullmatch(
+        r"monthly fees?\s*(?:free|\$?0(?:\.00)?)", normalized
+    ):
+        return True
+    if field_name == "fees_text" and normalized in {"monthly fees free", "monthly fee free"}:
+        return True
+    if field_name == "loan_amount_text" and len(normalized) > 100:
+        return re.search(r"(?:\$|\b\d[\d,.]*\b|\bminimum\b|\bmaximum\b|\bup to\b)", normalized) is None
+    if field_name == "security_requirement":
+        navigation_markers = (
+            "document",
+            "rates",
+            "contact us",
+            "search",
+            "login",
+            "log in",
+            "go to homepage",
+            "online banking",
+        )
+        return sum(marker in normalized for marker in navigation_markers) >= 3
+    if field_name == "prepayment_privileges":
+        return not any(
+            marker in normalized
+            for marker in ("prepay", "pre-pay", "prepayment", "pre-payment", "repay", "penalty", "privilege")
+        )
     return False
 
 

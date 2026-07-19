@@ -34,6 +34,7 @@ _NON_PRODUCT_NAME_PATTERNS = (
     re.compile(r"^save smarter\b", re.IGNORECASE),
     re.compile(r"^banking for\b", re.IGNORECASE),
     re.compile(r"^a\s+(chequing|checking|bank)\s+account\b", re.IGNORECASE),
+    re.compile(r"^(?:see|view|check)\b.{0,50}\brates?\b", re.IGNORECASE),
 )
 
 
@@ -153,6 +154,56 @@ def promote_auto_validated_candidates(
                     "action": "rejected",
                     "discovery_role": discovery_role or None,
                 }
+            )
+            continue
+        non_product_source_reason = _non_product_source_reason(row.get("source_metadata"))
+        if non_product_source_reason is not None:
+            _mark_candidate_auto_rejected(
+                connection,
+                candidate_id=candidate_id,
+                reason_code=non_product_source_reason,
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="rejected",
+                reason_code=non_product_source_reason,
+                reason_text="Candidate source metadata identifies a non-product editorial or servicing page.",
+                event_payload={"source_confidence": float(row["source_confidence"])},
+            )
+            skipped_items.append(
+                {"candidate_id": candidate_id, "skip_reason": non_product_source_reason, "action": "rejected"}
+            )
+            continue
+        if _has_ambiguous_product_boundary(row.get("source_metadata")):
+            reason_code = "ambiguous_product_boundary"
+            review_task_id = _queue_candidate_for_review(
+                connection,
+                row=row,
+                queue_reason_code=reason_code,
+                issue_codes=[reason_code],
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="in_review",
+                reason_code=reason_code,
+                reason_text="Candidate source contains multiple product sections that cannot be safely auto-promoted as one product.",
+                review_task_id=review_task_id,
+                event_payload={"source_confidence": float(row["source_confidence"])},
+            )
+            skipped_items.append(
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
             )
             continue
         product_name_skip_reason = _non_product_name_skip_reason(str(row.get("product_name") or ""))
@@ -310,7 +361,8 @@ def _load_candidate_rows(
             nc.validation_issue_codes,
             nc.source_confidence,
             nc.candidate_payload,
-            sd.source_metadata ->> 'discovery_role' AS discovery_role
+            sd.source_metadata ->> 'discovery_role' AS discovery_role,
+            sd.source_metadata AS source_metadata
         FROM normalized_candidate AS nc
         JOIN source_document AS sd
           ON sd.source_document_id = nc.source_document_id
@@ -336,6 +388,42 @@ def _load_candidate_rows(
         params,
     ).fetchall()
     return [dict(row) for row in rows]
+
+
+def _has_ambiguous_product_boundary(source_metadata: object) -> bool:
+    metadata = source_metadata if isinstance(source_metadata, dict) else {}
+    discovery_metadata = metadata.get("discovery_metadata")
+    if not isinstance(discovery_metadata, dict):
+        return False
+    reason_codes = {
+        str(code).strip().lower()
+        for code in [
+            *list(discovery_metadata.get("selection_reason_codes") or []),
+            *list(discovery_metadata.get("page_evidence_reason_codes") or []),
+        ]
+        if str(code).strip()
+    }
+    return "multi_product_family_overview" in reason_codes
+
+
+def _non_product_source_reason(source_metadata: object) -> str | None:
+    metadata = source_metadata if isinstance(source_metadata, dict) else {}
+    discovery_metadata = metadata.get("discovery_metadata")
+    if not isinstance(discovery_metadata, dict):
+        return None
+    reason_codes = {
+        str(code).strip().lower()
+        for code in [
+            *list(discovery_metadata.get("selection_reason_codes") or []),
+            *list(discovery_metadata.get("page_evidence_reason_codes") or []),
+        ]
+        if str(code).strip()
+    }
+    if "non_product_service_flow" in reason_codes:
+        return "non_product_service_flow"
+    if "non_product_editorial_page" in reason_codes:
+        return "non_product_editorial_page"
+    return None
 
 
 def _load_auto_promotion_policy(connection: Connection) -> dict[str, Any]:

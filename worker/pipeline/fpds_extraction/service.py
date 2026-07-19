@@ -147,6 +147,12 @@ _TERM_RATE_ROW_RE = re.compile(
     r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
     re.IGNORECASE,
 )
+_RATE_TERM_ROW_RE = re.compile(
+    r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%"
+    r"(?P<body>[^%\n\r]{0,120}?)"
+    r"(?P<term>\d{1,3}\s*(?:days|months|years|day|month|year))\b",
+    re.IGNORECASE,
+)
 _WHITESPACE_RE = re.compile(r"\s+")
 _CANONICAL_PRODUCT_TYPES = {"chequing", "savings", "gic"}
 _TERM_CONTEXT_KEYWORDS = (
@@ -2200,13 +2206,42 @@ def _extract_term_rate_table(text: str) -> list[dict[str, object]] | None:
     normalized = _normalize_text(text)
     if not normalized:
         return None
+    minimum_deposit = _extract_first_money_value(normalized)
+    term_first_rows = _extract_term_rate_rows(
+        normalized=normalized,
+        row_pattern=_TERM_RATE_ROW_RE,
+        minimum_deposit=minimum_deposit,
+    )
+    rate_first_rows = _extract_term_rate_rows(
+        normalized=normalized,
+        row_pattern=_RATE_TERM_ROW_RE,
+        minimum_deposit=minimum_deposit,
+    )
+    # Prefer the orientation that produces the most complete adjacent pairs. A
+    # rate-first table otherwise makes the term-first pattern shift every rate
+    # forward by one row. Ties intentionally preserve the established
+    # term-first behavior.
+    rows = rate_first_rows if len(rate_first_rows) > len(term_first_rows) else term_first_rows
+    return rows[:24] or None
+
+
+def _extract_term_rate_rows(
+    *,
+    normalized: str,
+    row_pattern: re.Pattern[str],
+    minimum_deposit: str | None,
+) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     seen: set[tuple[str, str]] = set()
-    minimum_deposit = _extract_first_money_value(normalized)
-    for match in _TERM_RATE_ROW_RE.finditer(normalized):
+    for match in row_pattern.finditer(normalized):
         term_label = _normalize_text(match.group("term")).lower()
         rate = _normalize_decimal(match.group("rate"))
-        window = _rate_percentage_context_window(text=normalized, start=match.start("rate"), end=match.end("rate"), radius=140)
+        window = _rate_percentage_context_window(
+            text=normalized,
+            start=match.start("rate"),
+            end=match.end("rate"),
+            radius=140,
+        )
         if canonical_deposit_rate_suppression_reason(value=rate, context=window) is not None:
             continue
         key = (term_label, rate)
@@ -2223,7 +2258,7 @@ def _extract_term_rate_table(text: str) -> list[dict[str, object]] | None:
                 "notes": None,
             }
         )
-    return rows[:24] or None
+    return rows
 
 
 def _extract_first_money_value(text: str) -> str | None:

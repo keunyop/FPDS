@@ -19,6 +19,7 @@ from .models import (
 from .storage import ValidationRoutingStorageConfig
 
 _ERROR_ISSUE_CODES = {
+    "ambiguous_product_boundary",
     "required_field_missing",
     "invalid_taxonomy_code",
     "invalid_numeric_range",
@@ -41,6 +42,7 @@ _ANNUAL_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate"
 _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _SUMMARY_MESSAGES = {
+    "ambiguous_product_boundary": "The source page contains multiple product sections that cannot be safely merged into one product.",
     "required_field_missing": "One or more required fields are missing.",
     "invalid_taxonomy_code": "Product taxonomy did not match the active registry.",
     "invalid_numeric_range": "A numeric value was outside the allowed range.",
@@ -140,6 +142,7 @@ class ValidationRoutingService:
                 taxonomy_registry=taxonomy_registry,
                 dynamic_product_type=dynamic_product_type,
                 expected_fields=[str(field_name) for field_name in item.source_metadata.get("expected_fields", [])],
+                source_metadata=item.source_metadata,
             )
             validation_status = _resolve_validation_status(validation_issue_codes)
             source_confidence = _compute_source_confidence(
@@ -418,8 +421,21 @@ def _compute_validation_issue_codes(
     taxonomy_registry: dict[str, set[str]],
     dynamic_product_type: bool = False,
     expected_fields: list[str] | None = None,
+    source_metadata: dict[str, object] | None = None,
 ) -> list[str]:
     issues = set(str(item) for item in candidate_record.get("validation_issue_codes", []))
+    discovery_metadata = (source_metadata or {}).get("discovery_metadata")
+    if isinstance(discovery_metadata, dict):
+        discovery_reason_codes = {
+            str(code).strip().lower()
+            for code in [
+                *list(discovery_metadata.get("selection_reason_codes") or []),
+                *list(discovery_metadata.get("page_evidence_reason_codes") or []),
+            ]
+            if str(code).strip()
+        }
+        if "multi_product_family_overview" in discovery_reason_codes:
+            issues.add("ambiguous_product_boundary")
 
     required_identity = {
         "country_code": candidate_record.get("country_code"),
@@ -631,6 +647,7 @@ def _route_candidate(
     if validation_status == "error":
         queue_reason_codes.append("validation_error")
     for code in (
+        "ambiguous_product_boundary",
         "required_field_missing",
         "conflicting_evidence",
         "ambiguous_mapping",

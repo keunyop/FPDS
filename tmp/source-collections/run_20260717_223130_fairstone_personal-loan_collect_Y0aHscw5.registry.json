@@ -1,0 +1,90 @@
+{
+  "registry_version": "2026-07-17",
+  "bank_code": "FAIRSTONE",
+  "country_code": "CA",
+  "product_type": "personal-loan",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "fairstone.ca"
+  ],
+  "entry_source_id": "AUTO-FAIRSTONE-PER-757d293f3a",
+  "sources": [
+    {
+      "source_id": "AUTO-FAIRSTONE-PER-757d293f3a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The title explicitly identifies personal loans and provides a $500\u2013$60,000 borrowing range, indicating a strong match to the requested personal-loan product. As the bank homepage, it may also contain broader promotional or navigational content, but it is likely the primary public product landing page.",
+      "url": "https://www.fairstone.ca/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Fairstone | Personal Loans & Quick Loans From $500-$60,000",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Quick personal loans $500-$60,000",
+        "candidate_origin": "homepage_self_detail_candidate",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The title explicitly identifies personal loans and provides a $500\u2013$60,000 borrowing range, indicating a strong match to the requested personal-loan product. As the bank homepage, it may also contain broader promotional or navigational content, but it is likely the primary public product landing page.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 3,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    }
+  ]
+}

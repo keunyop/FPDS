@@ -39,6 +39,20 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
                     "non_annual_return_context",
                 )
 
+    def test_fnbc_prepayment_option_and_allowance_percentages_are_not_rates(self) -> None:
+        for context in (
+            "Choose a 20% prepayment option on your FNBC mortgage.",
+            "The mortgage includes a prepayment allowance of 15% each year.",
+        ):
+            with self.subTest(context=context):
+                self.assertEqual(
+                    canonical_deposit_rate_suppression_reason(
+                        value="20" if "20%" in context else "15",
+                        context=context,
+                    ),
+                    "non_annual_return_context",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

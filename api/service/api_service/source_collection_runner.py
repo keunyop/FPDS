@@ -500,10 +500,10 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
     product_family = str(group.get("product_family") or entry_source.get("product_family") or "deposit")
     allowed_domains = sorted(
         {
-            hostname
+            allowed_domain
             for item in sources
-            for hostname in [_hostname(str(item["source_url"]))]
-            if hostname
+            for allowed_domain in [_registry_allowed_domain(str(item["source_url"]))]
+            if allowed_domain
         }
     )
     return {
@@ -570,6 +570,14 @@ def _source_args(source_ids: list[str]) -> list[str]:
 
 def _hostname(url: str) -> str | None:
     return urlparse(url).hostname
+
+
+def _registry_allowed_domain(url: str) -> str | None:
+    hostname = _hostname(url)
+    if not hostname:
+        return None
+    normalized = hostname.lower().rstrip(".")
+    return normalized.removeprefix("www.")
 
 
 def _resolve_env_file() -> Path | None:

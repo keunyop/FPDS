@@ -1,0 +1,773 @@
+{
+  "registry_version": "2026-07-18",
+  "bank_code": "LAURENTIAN",
+  "country_code": "CA",
+  "product_type": "line-of-credit",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "laurentianbank.ca"
+  ],
+  "entry_source_id": "AUTO-LAURENTIAN-LIN-c417404d3b",
+  "sources": [
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-c417404d3b",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Explicitly names a student line of credit and is located in the personal lending section, strongly indicating a dedicated product page.",
+      "url": "https://www.laurentianbank.ca/en/personal/lending/student-line-of-credit",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Student line of credit | Lending | Laurentian Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "STUDENT LINE OF CREDIT",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explicitly names a student line of credit and is located in the personal lending section, strongly indicating a dedicated product page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-1edf29d246",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Advice hub rather than a named line-of-credit product page.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Advice hub rather than a named line-of-credit product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-20e6f7b4eb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Online-banking sign-up instructions are service support content, not a lending product page.",
+      "url": "https://www.laurentianbank.ca/en/help-and-faq/lbcdirect",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Online-banking sign-up instructions are service support content, not a lending product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-4f8a5d62ba",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Budgeting education article, not a product detail page.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/how-to-make-your-budget",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Budgeting education article, not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-69e49edd59",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational tax article with no indication of a line-of-credit product.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/5-ways-to-avoid-paying-more-than-your-fair-share-of-taxes",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational tax article with no indication of a line-of-credit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-6c9d47f4a5",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Generic help and FAQ hub; it may contain navigation or supporting information but does not describe one line-of-credit product.",
+      "url": "https://www.laurentianbank.ca/en/help-and-faq",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Generic help and FAQ hub; it may contain navigation or supporting information but does not describe one line-of-credit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-76da41fceb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General financial advice article, not a named line-of-credit product.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/benefits-consolidating-assets",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General financial advice article, not a named line-of-credit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-78e0f275da",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Regulatory and deposit-insurance information, not a line-of-credit product page.",
+      "url": "https://www.laurentianbank.ca/en/personal/cdic-deposit-insurance",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Regulatory and deposit-insurance information, not a line-of-credit product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-7a76823ef8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General financial wellness article unrelated to a specific line of credit.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/healthy-finances-mean-peace-of-mind",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General financial wellness article unrelated to a specific line of credit.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-8c0c7253fd",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Savings education video, not a named lending product.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/video-5-mistakes-to-avoid-how-to-save-money",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Savings education video, not a named lending product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-8cbf084426",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Retirement-planning advice is unrelated to a line of credit.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/retirement-planning",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Retirement-planning advice is unrelated to a line of credit.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-e3efe76330",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Savings advice article, not a line-of-credit detail page.",
+      "url": "https://www.laurentianbank.ca/en/personal/advice/automatic-savings",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 0.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Savings advice article, not a line-of-credit detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-07aebdbb33",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Auto-generated supporting source for Line of Credit",
+      "url": "https://www.laurentianbank.ca/en/personal/rates/lending",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "supporting_only",
+        "heuristic_score": -1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "low",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-LAURENTIAN-LIN-fcae18b768",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "The URL and label do not indicate a line-of-credit product detail page; it appears to be a help or informational page.",
+      "url": "https://www.laurentianbank.ca/en/help-and-faq/acquisition",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "The URL and label do not indicate a line-of-credit product detail page; it appears to be a help or informational page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}
