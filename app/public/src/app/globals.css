@@ -97,6 +97,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     font-variant-numeric: tabular-nums;
     min-height: 100vh;
+    overflow-x: clip;
   }
 
   a {
@@ -111,5 +112,21 @@
 
   ::selection {
     background: rgb(67 56 202 / 0.18);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

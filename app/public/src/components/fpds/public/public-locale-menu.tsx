@@ -49,7 +49,7 @@ export function PublicLocaleMenu({
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={copy.nav.localeLabel}
-            className={cn("h-9 rounded-full border-border bg-card px-3 text-xs shadow-sm", triggerClassName)}
+            className={cn("h-10 rounded-full border-border bg-card px-3 text-xs shadow-sm", triggerClassName)}
             size="sm"
             variant="outline"
           >

@@ -42,13 +42,35 @@ export function ProductCompareWorkspace({ filters, locale, products }: ProductCo
 
   return (
     <section className="grid gap-4" aria-labelledby="compare-products-title">
-      <ComparePanel
-        filters={filters}
-        locale={locale}
-        onClear={() => setSelectedIds([])}
-        onRemove={(productId) => setSelectedIds((current) => current.filter((id) => id !== productId))}
-        products={selectedProducts}
-      />
+      <div className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 sm:items-center">
+        <div className="min-w-0">
+          <h2 id="compare-products-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <GitCompareArrows className="size-4 text-primary" aria-hidden="true" />
+            {copy.compare.title}
+          </h2>
+          <p className="mt-1 hidden text-xs leading-5 text-muted-foreground sm:block">{copy.compare.subtitle}</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <span className="rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-semibold text-muted-foreground tabular-nums">
+            {copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}
+          </span>
+          {selectedProducts.length ? (
+            <Button onClick={() => setSelectedIds([])} size="sm" type="button" variant="ghost">
+              <X className="size-4" aria-hidden="true" />
+              {copy.compare.clear}
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      {selectedProducts.length ? (
+        <ComparePanel
+          filters={filters}
+          locale={locale}
+          onRemove={(productId) => setSelectedIds((current) => current.filter((id) => id !== productId))}
+          products={selectedProducts}
+        />
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {products.map((product) => {
@@ -93,6 +115,7 @@ function ProductCompareCard({
 }) {
   const copy = getPublicMessages(locale);
   const metrics = buildComparisonMetrics(product, locale);
+  const [primaryMetric, ...secondaryMetrics] = metrics;
   const tags = product.target_customer_tag_labels.slice(0, 2);
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
@@ -105,21 +128,14 @@ function ProductCompareCard({
     >
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-            {product.product_url ? (
-              <Button asChild variant="outline" size="xs" className="shrink-0">
-                <a href={product.product_url} target="_blank" rel="noreferrer">
-                  {copy.common.bankPage}
-                  <ExternalLink className="size-3" aria-hidden="true" />
-                </a>
-              </Button>
-            ) : null}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+              <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
+            </div>
+            <span className="inline-flex rounded-full bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">{product.product_type_label}</span>
           </div>
           <div className="min-w-0">
-            <CardDescription className="mb-2">
-              <span className="inline-flex rounded-md bg-primary/5 px-2 py-1 text-[11px] font-semibold uppercase text-primary">{product.product_type_label}</span>
-            </CardDescription>
             <CardTitle className="text-lg leading-snug">
               <Link className="break-words hover:text-primary" href={detailHref}>
                 {product.product_name}
@@ -139,13 +155,19 @@ function ProductCompareCard({
         ) : null}
       </CardHeader>
       <CardContent className="pt-0">
-        <dl className="grid gap-2 sm:grid-cols-3">
-          {metrics.map((metric, index) => (
-            <div key={metric.label} className={cn("min-h-24 rounded-lg border p-3", index === 0 ? "border-primary/25 bg-primary/5" : "border-border bg-muted/30")}>
-              <dt className="text-xs font-medium text-muted-foreground">{metric.label}</dt>
-              <dd className="mt-2 break-words text-lg font-semibold tabular-nums leading-tight text-foreground">{metric.value}</dd>
-            </div>
-          ))}
+        <dl className="overflow-hidden rounded-xl border border-border/80">
+          <div className="bg-primary/5 px-4 py-3">
+            <dt className="text-xs font-semibold text-primary">{primaryMetric.label}</dt>
+            <dd className="mt-1 break-words text-2xl font-semibold leading-tight text-foreground tabular-nums">{primaryMetric.value}</dd>
+          </div>
+          <div className="grid grid-cols-2 divide-x divide-border/70 border-t border-border/70 bg-muted/15">
+            {secondaryMetrics.map((metric) => (
+              <div className="min-w-0 px-3 py-3" key={metric.label}>
+                <dt className="text-[11px] font-medium text-muted-foreground">{metric.label}</dt>
+                <dd className="mt-1 break-words text-sm font-semibold leading-snug text-foreground tabular-nums">{metric.value}</dd>
+              </div>
+            ))}
+          </div>
         </dl>
         <div className="mt-4 flex flex-col gap-2 border-t border-border/70 pt-3 sm:flex-row sm:items-center sm:justify-between">
           <Button disabled={compareDisabled} onClick={onToggle} size="sm" type="button" variant={selected ? "default" : "outline"} className="justify-center">
@@ -166,50 +188,50 @@ function ProductCompareCard({
 function ComparePanel({
   filters,
   locale,
-  onClear,
   onRemove,
   products
 }: {
   filters: ProductGridPageFilters;
   locale: string;
-  onClear: () => void;
   onRemove: (productId: string) => void;
   products: PublicProduct[];
 }) {
   const copy = getPublicMessages(locale);
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm" aria-labelledby="compare-products-title">
-      <div className="grid gap-3 border-b border-border/70 bg-muted/25 px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-        <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm font-medium text-primary">
-            <GitCompareArrows className="size-4" aria-hidden="true" />
-            {copy.compare.eyebrow}
-          </p>
-          <h2 id="compare-products-title" className="mt-1 text-xl font-semibold leading-tight text-foreground">
-            {copy.compare.title}
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{copy.compare.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          <span className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            {copy.compare.selectedCount.replace("{count}", String(products.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}
-          </span>
-          {products.length ? (
-            <Button onClick={onClear} size="sm" type="button" variant="outline">
-              <X className="size-4" aria-hidden="true" />
-              {copy.compare.clear}
-            </Button>
-          ) : null}
-        </div>
+    <section className="overflow-hidden rounded-xl border border-primary/20 bg-card shadow-sm" aria-label={copy.compare.title}>
+      <div className="grid gap-3 p-3 md:hidden">
+        {products.map((product) => (
+          <article className="rounded-xl border border-border bg-background p-3" key={product.product_id}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+                <div className="min-w-0">
+                  <Link className="break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
+                    {product.product_name}
+                  </Link>
+                  <p className="mt-1 text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
+                </div>
+              </div>
+              <button className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button" aria-label={copy.compare.remove}>
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2">
+              <CompareFact label={copy.grid.metricDisplayRate} value={formatRate(product.public_display_rate, locale)} />
+              <CompareFact label={copy.grid.metricMonthlyFee} value={formatCurrency(product.public_display_fee, product.currency, locale)} />
+              <CompareFact label={copy.compare.entryAmount} value={formatEntryAmount(product, locale)} />
+              <CompareFact label={copy.grid.metricTerm} value={formatTerm(product.term_length_days, locale)} />
+            </dl>
+          </article>
+        ))}
       </div>
-      {products.length ? (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[58rem] text-left text-sm">
+
+      <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[52rem] text-left text-sm">
             <thead className="border-b border-border bg-background text-xs font-medium text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">{copy.compare.tableProduct}</th>
-                <th className="px-4 py-3">{copy.compare.tableWhy}</th>
                 <th className="px-4 py-3">{copy.grid.metricDisplayRate}</th>
                 <th className="px-4 py-3">{copy.grid.metricMonthlyFee}</th>
                 <th className="px-4 py-3">{copy.compare.entryAmount}</th>
@@ -228,7 +250,7 @@ function ComparePanel({
                         <Link className="break-words font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
                           {product.product_name}
                         </Link>
-                        <p className="mt-1 text-xs font-medium text-muted-foreground">{product.product_type_label}</p>
+                        <p className="mt-1 text-xs font-medium text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
                         <button className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button">
                           <X className="size-3" aria-hidden="true" />
                           {copy.compare.remove}
@@ -236,7 +258,6 @@ function ComparePanel({
                       </div>
                     </div>
                   </td>
-                  <td className="max-w-56 px-4 py-3 align-top leading-6 text-muted-foreground">{buildComparisonReason(product, locale)}</td>
                   <td className="px-4 py-3 align-top font-semibold tabular-nums text-foreground">{formatRate(product.public_display_rate, locale)}</td>
                   <td className="px-4 py-3 align-top tabular-nums text-foreground">{formatCurrency(product.public_display_fee, product.currency, locale)}</td>
                   <td className="px-4 py-3 align-top tabular-nums text-foreground">{formatEntryAmount(product, locale)}</td>
@@ -258,14 +279,17 @@ function ComparePanel({
               ))}
             </tbody>
           </table>
-        </div>
-      ) : (
-        <div className="px-4 py-6">
-          <p className="text-sm font-medium text-foreground">{copy.compare.emptyTitle}</p>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{copy.compare.emptyBody}</p>
-        </div>
-      )}
+      </div>
     </section>
+  );
+}
+
+function CompareFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-muted/30 px-3 py-2">
+      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
+      <dd className="mt-1 break-words text-sm font-semibold text-foreground tabular-nums">{value}</dd>
+    </div>
   );
 }
 
@@ -322,26 +346,6 @@ function loanMetricLabel(field: "rateType" | "term", locale: string) {
     ja: { rateType: "金利タイプ", term: "期間" }
   };
   return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
-}
-
-function buildComparisonReason(product: PublicProduct, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (product.public_display_fee === 0) {
-    return copy.compare.reasonNoMonthlyFee;
-  }
-  if (product.product_type === "chequing" && product.public_display_fee !== null) {
-    return copy.compare.reasonFeeKnown;
-  }
-  if (product.product_type === "gic" && product.public_display_rate !== null && product.term_length_days !== null) {
-    return copy.compare.reasonTermRate;
-  }
-  if (product.public_display_rate !== null) {
-    return copy.compare.reasonRateKnown;
-  }
-  if (product.minimum_deposit !== null || product.minimum_balance !== null) {
-    return copy.compare.reasonLowEntry;
-  }
-  return product.product_highlight_badge_label ?? product.subtype_label ?? copy.compare.reasonFallback;
 }
 
 function buildProductDetailHref(filters: ProductGridPageFilters, productId: string) {

@@ -79,9 +79,6 @@ type PublicMessages = {
     sortLastChange: string;
     sortBankName: string;
     sortProductName: string;
-    topFiveDefaultTitle: string;
-    topFiveSubtitle: string;
-    topFiveTitle: string;
   };
   detail: {
     backToList: string;
@@ -207,7 +204,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noOptions: "No options",
       noRecentChange: "No recent change",
       noSuccessfulSnapshot: "No successful public snapshot is available yet.",
-      notDisclosed: "Not disclosed",
+      notDisclosed: "Unavailable",
       bankPage: "Bank page",
       more: "More",
       open: "Open",
@@ -217,10 +214,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "Verified"
     },
     grid: {
-      pageTitle: "FPDS Deposit",
-      pageDescription: "Filterable deposit product catalog.",
-      title: "Deposit catalog",
-      description: "Filter active chequing, savings, and GIC products from the latest public snapshot.",
+      pageTitle: "FPDS Deposits",
+      pageDescription: "Compare Canadian chequing, savings, and GIC products.",
+      title: "Compare deposits",
+      description: "Chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
       compareDetails: "Compare details",
       productCount: "{count} products",
@@ -237,13 +234,13 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       direction: "Direction",
       resultSummary: "Results",
       searchConditions: "Search conditions",
-      noActiveFilters: "Full Canada public scope.",
+      noActiveFilters: "All available products",
       noResultTitle: "No products matched this scope.",
       noResultBody: "Clear filters or return to the dashboard for a broader market view.",
       retryTitle: "Products could not load.",
       retryBody: "The public API is not reachable.",
       retryButton: "Retry products",
-      openDashboard: "Open home",
+      openDashboard: "Home",
       metricMonthlyFee: "Monthly fee",
       metricMinBalance: "Min. balance",
       metricMinDeposit: "Min. deposit",
@@ -262,9 +259,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "Last change",
       sortBankName: "Bank",
       sortProductName: "Product",
-      topFiveDefaultTitle: "Top 5 products",
-      topFiveSubtitle: "Ranked with the current filters and sort condition.",
-      topFiveTitle: "Top 5 by {sort}"
     },
     detail: {
       backToList: "Back to deposit list",
@@ -274,7 +268,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       keyConditions: "Key conditions",
       officialPage: "Open official bank page",
       productFacts: "Product facts",
-      similarProducts: "Similar products",
+      similarProducts: "More from this bank",
       sourceLanguage: "Source language",
       termRates: "Rates by term",
       whatToCheck: "What to check"
@@ -282,12 +276,12 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     dashboard: {
       pageTitle: "FPDS Home",
       pageDescription: "Public financial product comparison snapshot.",
-      title: "Financial product choices, made clear",
+      title: "Compare the market, then the product",
       description: "",
-      marketGreeting: "FPDS has collected {products} public products from {banks} banks across {countries} country so you can compare available coverage in one place.",
-      kpiSubtitle: "Current search scope",
+      marketGreeting: "Compare {products} deposit products from {banks} banks in the latest public snapshot.",
+      kpiSubtitle: "Deposit market snapshot",
       composition: "Market composition",
-      compositionSubtitle: "Active product coverage by bank and product type.",
+      compositionSubtitle: "Share of deposit products in the current snapshot.",
       productsByBank: "Products by bank",
       productsByType: "Products by type",
       comparisonMap: "Comparison map",
@@ -332,7 +326,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     compare: {
       eyebrow: "Side-by-side",
       title: "Compare up to 4 products",
-      subtitle: "Select products from this result page to compare the public fields that matter before opening an official bank page.",
+      subtitle: "Choose product cards to compare available public fields.",
       select: "Compare",
       selected: "Selected",
       selectedCount: "{count}/{limit} selected",
@@ -357,15 +351,15 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       pageTitle: "FPDS Methodology",
       pageDescription: "Public data notes and metric boundaries.",
       title: "Methodology",
-      description: "How FPDS prepares the public Canada deposit-product view.",
+      description: "What the public snapshot includes, excludes, and may leave unavailable.",
       sections: [
         {
           title: "Snapshot source",
-          body: "Public pages read from the latest successful aggregate snapshot, not live bank pages."
+          body: "Public pages use the latest successful aggregate snapshot, not live bank pages."
         },
         {
           title: "Metric eligibility",
-          body: "Rates, fees, balances, deposits, and terms are shown only when the canonical public field is available."
+          body: "A rate, fee, amount, or term appears only when its approved public field is available."
         },
         {
           title: "Product text",
@@ -402,7 +396,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noOptions: "옵션 없음",
       noRecentChange: "최근 변경 없음",
       noSuccessfulSnapshot: "아직 사용 가능한 공개 스냅샷이 없습니다.",
-      notDisclosed: "미공개",
+      notDisclosed: "정보 없음",
       bankPage: "은행 페이지",
       more: "더보기",
       open: "열기",
@@ -412,10 +406,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "검증"
     },
     grid: {
-      pageTitle: "FPDS 상품",
-      pageDescription: "캐나다 예금 상품 카탈로그입니다.",
-      title: "상품 카탈로그",
-      description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품을 필터링합니다.",
+      pageTitle: "FPDS 예금",
+      pageDescription: "캐나다 입출금, 저축, GIC 상품을 비교합니다.",
+      title: "예금 비교",
+      description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품입니다.",
       currentScope: "현재 범위",
       compareDetails: "상세 비교",
       productCount: "{count}개 상품",
@@ -432,13 +426,13 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       direction: "방향",
       resultSummary: "결과",
       searchConditions: "검색조건",
-      noActiveFilters: "캐나다 전체 공개 범위입니다.",
+      noActiveFilters: "전체 상품",
       noResultTitle: "현재 범위에 맞는 상품이 없습니다.",
       noResultBody: "필터를 해제하거나 대시보드에서 더 넓은 시장을 확인하세요.",
       retryTitle: "상품을 불러오지 못했습니다.",
       retryBody: "공개 API에 연결할 수 없습니다.",
       retryButton: "상품 다시 불러오기",
-      openDashboard: "대시보드 열기",
+      openDashboard: "홈",
       metricMonthlyFee: "월 수수료",
       metricMinBalance: "최소 잔액",
       metricMinDeposit: "최소 예치금",
@@ -457,9 +451,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "최근 변경",
       sortBankName: "은행",
       sortProductName: "상품",
-      topFiveDefaultTitle: "상위 5개 상품",
-      topFiveSubtitle: "현재 필터와 정렬 조건을 기준으로 보여줍니다.",
-      topFiveTitle: "{sort} 기준 상위 5개"
     },
     detail: {
       backToList: "예금 목록으로 돌아가기",
@@ -469,7 +460,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       keyConditions: "주요 조건",
       officialPage: "은행 공식 페이지 열기",
       productFacts: "상품 정보",
-      similarProducts: "비슷한 상품",
+      similarProducts: "이 은행의 다른 상품",
       sourceLanguage: "원문 언어",
       termRates: "기간별 금리",
       whatToCheck: "확인할 내용"
@@ -477,12 +468,12 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     dashboard: {
       pageTitle: "FPDS 대시보드",
       pageDescription: "공개 금융상품 비교 스냅샷입니다.",
-      title: "금융상품 선택을 더 명확하게",
+      title: "시장부터 보고, 상품을 비교하세요",
       description: "최신 공개 스냅샷 기준으로 현재 상품 범위를 빠르게 비교합니다.",
-      marketGreeting: "FPDS는 {countries}개 국가의 {banks}개 은행에서 {products}개 공개 상품을 수집해 현재 제공 범위를 한곳에서 비교할 수 있게 정리했습니다.",
-      kpiSubtitle: "현재 공개 범위",
+      marketGreeting: "최신 공개 스냅샷에서 {banks}개 은행의 예금 상품 {products}개를 비교하세요.",
+      kpiSubtitle: "예금 시장 스냅샷",
       composition: "시장 구성",
-      compositionSubtitle: "은행과 상품 유형별 활성 상품 커버리지입니다.",
+      compositionSubtitle: "현재 스냅샷의 은행별 예금 상품 비중입니다.",
       productsByBank: "은행별 상품",
       productsByType: "유형별 상품",
       comparisonMap: "비교 맵",
@@ -527,7 +518,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     compare: {
       eyebrow: "나란히 비교",
       title: "최대 4개 상품 비교",
-      subtitle: "이 결과 페이지의 상품을 선택해 공식 은행 페이지를 열기 전에 중요한 공개 필드를 비교하세요.",
+      subtitle: "상품 카드에서 선택해 제공된 공개 필드를 비교하세요.",
       select: "비교",
       selected: "선택됨",
       selectedCount: "{count}/{limit}개 선택",
@@ -552,15 +543,15 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       pageTitle: "FPDS 방법론",
       pageDescription: "공개 데이터 기준과 지표 경계입니다.",
       title: "방법론",
-      description: "FPDS가 캐나다 예금 상품 공개 화면을 준비하는 방식입니다.",
+      description: "공개 스냅샷에 포함되는 정보, 제외되는 정보, 정보가 없을 때의 기준입니다.",
       sections: [
         {
           title: "스냅샷 기준",
-          body: "공개 화면은 은행 페이지를 실시간으로 읽지 않고 최신 성공 aggregate 스냅샷을 사용합니다."
+          body: "공개 화면은 은행 페이지를 실시간으로 읽지 않고 최신 성공 집계 스냅샷을 사용합니다."
         },
         {
           title: "지표 포함 기준",
-          body: "금리, 수수료, 잔액, 예치금, 기간은 공개 canonical 필드가 있을 때만 표시합니다."
+          body: "금리, 수수료, 금액, 기간은 승인된 공개 필드가 있을 때만 표시합니다."
         },
         {
           title: "상품 텍스트",
@@ -582,7 +573,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     nav: {
       dashboard: "ホーム",
       products: "預金",
-      methodology: "方法",
+      methodology: "データ基準",
       loan: "ローン",
       localeLabel: "言語"
     },
@@ -597,7 +588,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noOptions: "選択肢なし",
       noRecentChange: "最近の変更なし",
       noSuccessfulSnapshot: "利用できる公開スナップショットはまだありません。",
-      notDisclosed: "非公開",
+      notDisclosed: "情報なし",
       bankPage: "銀行ページ",
       more: "もっと見る",
       open: "開く",
@@ -607,10 +598,10 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "確認"
     },
     grid: {
-      pageTitle: "FPDS 商品",
-      pageDescription: "カナダ預金商品のカタログです。",
-      title: "商品カタログ",
-      description: "最新の公開スナップショットから chequing、savings、GIC 商品を絞り込みます。",
+      pageTitle: "FPDS 預金",
+      pageDescription: "カナダの当座、普通預金、GIC 商品を比較します。",
+      title: "預金を比較",
+      description: "最新の公開スナップショットにある当座、普通預金、GIC 商品です。",
       currentScope: "現在の範囲",
       compareDetails: "詳細比較",
       productCount: "{count} 件の商品",
@@ -627,13 +618,13 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       direction: "方向",
       resultSummary: "結果",
       searchConditions: "検索条件",
-      noActiveFilters: "カナダ全体の公開範囲です。",
+      noActiveFilters: "すべての商品",
       noResultTitle: "現在の範囲に一致する商品はありません。",
       noResultBody: "フィルターを解除するか、ダッシュボードで広い市場を確認してください。",
       retryTitle: "商品を読み込めませんでした。",
       retryBody: "公開 API に接続できません。",
       retryButton: "商品を再読み込み",
-      openDashboard: "ダッシュボードを開く",
+      openDashboard: "ホーム",
       metricMonthlyFee: "月額手数料",
       metricMinBalance: "最低残高",
       metricMinDeposit: "最低預入額",
@@ -652,9 +643,6 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       sortLastChange: "最近の変更",
       sortBankName: "銀行",
       sortProductName: "商品",
-      topFiveDefaultTitle: "上位5件の商品",
-      topFiveSubtitle: "現在のフィルターと並び順に基づいて表示します。",
-      topFiveTitle: "{sort} の上位5件"
     },
     detail: {
       backToList: "預金一覧に戻る",
@@ -664,7 +652,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       keyConditions: "主な条件",
       officialPage: "銀行公式ページを開く",
       productFacts: "商品情報",
-      similarProducts: "類似商品",
+      similarProducts: "この銀行の他の商品",
       sourceLanguage: "ソース言語",
       termRates: "期間別金利",
       whatToCheck: "確認ポイント"
@@ -672,12 +660,12 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     dashboard: {
       pageTitle: "FPDS ダッシュボード",
       pageDescription: "公開金融商品の比較スナップショットです。",
-      title: "金融商品選びをわかりやすく",
+      title: "市場を見てから、商品を比較",
       description: "最新の公開スナップショットをもとに現在の掲載範囲をすばやく比較します。",
-      marketGreeting: "FPDS は {countries} か国、{banks} 行、{products} 件の公開商品を収集し、現在の掲載範囲を 1 か所で比較できるように整理しています。",
-      kpiSubtitle: "現在の公開範囲",
+      marketGreeting: "最新の公開スナップショットで {banks} 行の預金商品 {products} 件を比較できます。",
+      kpiSubtitle: "預金市場スナップショット",
       composition: "市場構成",
-      compositionSubtitle: "銀行別、商品タイプ別の有効商品数です。",
+      compositionSubtitle: "現在のスナップショットにおける銀行別の預金商品比率です。",
       productsByBank: "銀行別商品",
       productsByType: "タイプ別商品",
       comparisonMap: "比較マップ",
@@ -722,7 +710,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     compare: {
       eyebrow: "横並び比較",
       title: "最大4件の商品を比較",
-      subtitle: "この結果ページの商品を選び、公式銀行ページを開く前に重要な公開フィールドを比較できます。",
+      subtitle: "商品カードから選び、利用できる公開項目を比較します。",
       select: "比較",
       selected: "選択済み",
       selectedCount: "{count}/{limit} 件選択",
@@ -744,18 +732,18 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "比較可能な公開フィールドがあります。"
     },
     methodology: {
-      pageTitle: "FPDS 方法",
+      pageTitle: "FPDS データ基準",
       pageDescription: "公開データの基準と指標の境界です。",
-      title: "方法",
-      description: "FPDS がカナダ預金商品の公開画面を作る方法です。",
+      title: "データ基準",
+      description: "公開スナップショットに含む情報、除外する情報、情報がない場合の扱いです。",
       sections: [
         {
           title: "スナップショット",
-          body: "公開画面は銀行ページをリアルタイムで読まず、最新の成功 aggregate スナップショットを使います。"
+          body: "公開画面は銀行ページをリアルタイムで読まず、最新の成功集計スナップショットを使います。"
         },
         {
           title: "指標の対象",
-          body: "金利、手数料、残高、預入額、期間は公開 canonical フィールドがある場合だけ表示します。"
+          body: "金利、手数料、金額、期間は承認済みの公開項目がある場合だけ表示します。"
         },
         {
           title: "商品テキスト",
@@ -802,9 +790,9 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
   }
   return {
     pageTitle: "FPDS Loan",
-    pageDescription: "Filterable loan product catalog.",
-    title: "Loan catalog",
-    description: "Filter active mortgage, personal loan, and line of credit products from the latest public snapshot.",
+    pageDescription: "Compare Canadian mortgage, personal loan, and line of credit products.",
+    title: "Compare loans",
+    description: "Mortgage, personal loan, and line of credit products from the latest public snapshot.",
   };
 }
 

@@ -209,6 +209,20 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - The aggregate snapshot may include lending only from review-approved canonical products. Candidates, deferred products, and raw evidence remain unavailable to the Public surface.
 - Deposit-only purpose cards and deposit amount/fee bucket controls are not shown in the Loan catalog.
 
+### 10.9 Current Public Catalog Simplification
+
+Product Owner direction on `2026-07-18` supersedes the earlier visible Top 5, repeated purpose-entry, hidden bank-name, and always-expanded comparison presentation decisions while preserving the API, canonical-data, locale, and evidence boundaries:
+
+- Deposit and Loan catalog heroes expose only catalog identity, one short scope sentence, result count, and fixed-format freshness date.
+- Search conditions are progressively disclosed and open automatically when filters are active. Deposit-only amount, fee, and term filters remain absent from Loan.
+- Active scope and visible sort actions share one compact toolbar; the main result cards are the only catalog ranking/list presentation, so no duplicate Top 5 request or block is rendered.
+- Each card exposes bank identity, product type, product name, one dominant type-aware metric, and at most two secondary facts. Visible bank names are retained because a remote or lazy logo alone is not a reliable identity cue.
+- Cards expose Compare and Details. The official product-page action remains on detail and in the selected comparison, avoiding three competing actions on every list card.
+- Before a selection, comparison is a compact count/control row. After selection, mobile comparison cards and a desktop comparison table expose only grounded public fields; the synthetic reason-to-compare field is removed.
+- Product detail presents three primary facts, one available-facts section, applicable calculator or term-rate content, and one compact snapshot disclosure linked to Methodology. Recommendation-like `Best fit` language and duplicated key-condition summaries are not used.
+- EN/KO/JA UI labels remain localized while source-derived product content remains in its source language.
+- Production browser QA covers `1440px`, `768px`, and exact `390px` layouts for Home, Deposit, Loan, selected comparison, and product detail without horizontal document overflow.
+
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 
 - `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`
@@ -224,7 +238,7 @@ These boundaries are the baseline for `5.6` aggregate projection generation and 
 |---|---|
 | Dashboard Metrics | `docs/03-design/insight-dashboard-metric-definition.md` |
 | Visualization Rules | `docs/03-design/product-type-visualization-principles.md` |
-| Cross-Filter Choreography | `5.11` |
+| Cross-Filter Choreography | `5.11` completed baseline |
 | Localization Ops | `docs/03-design/localization-governance-and-fallback-policy.md` |
 
 ---
@@ -234,4 +248,4 @@ These boundaries are the baseline for `5.6` aggregate projection generation and 
 - `5.7`: public products API 구현
 - `5.9`: Product Grid UI 구현
 - `5.11`: grid/dashboard cross-filter 적용
-- `5.14`: responsive QA 수행
+- `5.14`: responsive QA completed on `2026-07-18`

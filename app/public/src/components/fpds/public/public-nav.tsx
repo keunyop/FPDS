@@ -21,7 +21,7 @@ export function PublicNav() {
   ];
 
   return (
-    <nav className="flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1 text-sm shadow-sm" aria-label="Public navigation">
+    <nav className="flex max-w-full items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 text-sm shadow-sm" aria-label="Public navigation">
       {navItems.map((item) => {
         const active = item.href ? pathname === item.href || (item.href === "/dashboard" && pathname === "/") : false;
         const Icon = item.icon;
@@ -33,7 +33,7 @@ export function PublicNav() {
             key={item.href}
             href={href}
             className={cn(
-              "inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-3 font-medium transition-colors",
               active ? "bg-secondary text-secondary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >

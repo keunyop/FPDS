@@ -1,0 +1,1157 @@
+{
+  "registry_version": "2026-07-19",
+  "bank_code": "NATIONAL",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "nbc.ca"
+  ],
+  "entry_source_id": "AUTO-NATIONAL-MOR-f85d25a705",
+  "sources": [
+    {
+      "source_id": "AUTO-NATIONAL-MOR-f85d25a705",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Clearly targets a specific mortgage offering for self-employed borrowers and is likely to contain eligibility and application details.",
+      "url": "https://www.nbc.ca/personal/mortgages/self-employed.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Self-employed Mortgage Loan | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Mortgage for the self\u2011employed",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Clearly targets a specific mortgage offering for self-employed borrowers and is likely to contain eligibility and application details.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 1,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-16c27fe8e8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage renewal payment calculator, not a financial product detail page.",
+      "url": "https://www.nbc.ca/personal/mortgages/calculators/renewal-payments.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage renewal payment calculator, not a financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-279d9449d4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Home-buying guidance and tools page.",
+      "url": "https://www.nbc.ca/personal/mortgages/tips-tools/buying-home.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Home-buying guidance and tools page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-388e2622bc",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational refinancing article.",
+      "url": "https://www.nbc.ca/personal/advice/home/remortage-your-house.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational refinancing article.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-5aabb2e0f7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "First-time homebuyer guidance page, not a named mortgage product.",
+      "url": "https://www.nbc.ca/personal/mortgages/tips-tools/buying-home/first-buy.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "First-time homebuyer guidance page, not a named mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-6a91518ddb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage rate table or rates hub; useful supporting evidence but not a single named product detail page.",
+      "url": "https://www.nbc.ca/personal/mortgages/rates.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage rate table or rates hub; useful supporting evidence but not a single named product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-6cdd4d05a7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage insurance information or ancillary service page, not the mortgage product itself.",
+      "url": "https://www.nbc.ca/personal/mortgages/insurance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage insurance information or ancillary service page, not the mortgage product itself.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-756b60514c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational pre-approval article, not a product detail page.",
+      "url": "https://www.nbc.ca/personal/advice/home/how-to-get-pre-approved-mortgage.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational pre-approval article, not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-7dba2fef10",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational comparison article about mortgage rate types.",
+      "url": "https://www.nbc.ca/personal/advice/home/fixed-or-variable-rate-a-question-of-monthly-mortgage-payments.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational comparison article about mortgage rate types.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-8a71eb2449",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Government home-buying plan information rather than a National Bank mortgage product.",
+      "url": "https://www.nbc.ca/personal/mortgages/hbp.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Government home-buying plan information rather than a National Bank mortgage product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-c0bca7a02e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Rent-versus-buy calculator and educational tool.",
+      "url": "https://www.nbc.ca/personal/mortgages/calculators/rent-or-buy.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Rent-versus-buy calculator and educational tool.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-c3df6cb293",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage advisor contact or selection page, not a product detail page.",
+      "url": "https://www.nbc.ca/personal/mortgages/advisors.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage advisor contact or selection page, not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-d430d4575e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Borrowing-capacity calculator.",
+      "url": "https://www.nbc.ca/personal/mortgages/calculators/borrowing-capacity.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Borrowing-capacity calculator.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-e63e92add5",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage payment calculator, not a named product page.",
+      "url": "https://www.nbc.ca/personal/mortgages/calculators/payments.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Mortgage payment calculator, not a named product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-338c24ed8d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage-switch or transfer service page rather than a standalone product detail page.",
+      "url": "https://www.nbc.ca/personal/mortgages/transfer.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Mortgage-switch or transfer service page rather than a standalone product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-8824a4d858",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Refinancing application or service flow; mortgage-relevant but not clearly a named product detail page.",
+      "url": "https://www.nbc.ca/personal/mortgages/refinancing.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Refinancing application or service flow; mortgage-relevant but not clearly a named product detail page.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-d120efb796",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Mortgage renewal journey or service page; relevant to mortgages but not clearly a standalone named product.",
+      "url": "https://www.nbc.ca/personal/mortgages/renewal.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Mortgage renewal journey or service page; relevant to mortgages but not clearly a standalone named product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-d9766a2a36",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Appears to explain ways to pay a mortgage faster rather than describe one named mortgage product.",
+      "url": "https://www.nbc.ca/personal/mortgages/pay-faster.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Appears to explain ways to pay a mortgage faster rather than describe one named mortgage product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-351f8e0b2e",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/pdf-form-particuliers-ang-protege.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-3a18f9bcce",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/pdf-form-autres-que-professionnels-ang-protege.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-MOR-f93e67a3b5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Mortgage",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/pdf-faq-autres-que-professionnels-ang.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "mortgage_rate",
+        "rate_type",
+        "term_length_text",
+        "amortization_text",
+        "payment_frequency",
+        "prepayment_privileges",
+        "eligibility_text",
+        "application_method",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Mortgage",
+      "product_type_description": "Canadian residential mortgage products, including fixed-rate, variable-rate, refinance, renewal, switch, and home-equity-adjacent mortgage products when treated as mortgage products by the bank.",
+      "discovery_keywords": [
+        "mortgages",
+        "mortgage rates",
+        "fixed rate mortgage",
+        "variable rate mortgage",
+        "amortization",
+        "prepayment privileges",
+        "mortgage renewal",
+        "mortgage refinance",
+        "home equity"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

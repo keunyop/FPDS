@@ -9,6 +9,7 @@ import {
 } from "@/lib/public-api";
 import {
   buildDashboardSearchParams,
+  DEPOSIT_PRODUCT_TYPES,
   parseDashboardPageFilters,
   type DashboardPageFilters
 } from "@/lib/public-query";
@@ -38,7 +39,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   let apiUnavailable = false;
 
   try {
-    const search = buildDashboardSearchParams(filters);
+    const dashboardScope = filters.productTypes.length
+      ? filters
+      : { ...filters, productTypes: [...DEPOSIT_PRODUCT_TYPES] };
+    const search = buildDashboardSearchParams(dashboardScope);
     const [summaryResponse, rankingsResponse] = await Promise.all([
       fetchPublicDashboardSummary(search),
       fetchPublicDashboardRankings(search)
@@ -46,7 +50,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     summary = summaryResponse;
     rankings = rankingsResponse;
 
-    const scatterFilters = buildScatterFilters(filters);
+    const scatterFilters = buildScatterFilters(dashboardScope);
     if (scatterFilters) {
       try {
         scatter = await fetchPublicDashboardScatter(buildDashboardSearchParams(scatterFilters));

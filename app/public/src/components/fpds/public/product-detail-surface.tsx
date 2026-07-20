@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ExternalLink, FileText, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -59,7 +59,6 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
   const backToCatalog = product.product_family === "lending" ? loanLabel("back", filters.locale) : copy.detail.backToList;
   const metricCards = buildMetricCards(product, filters.locale);
   const detailFacts = buildDetailFacts(product, filters.locale);
-  const decisionItems = buildDecisionItems(product, filters.locale);
   const disclosureDate = formatIsoDate(product.last_verified_at ?? detail.freshness.refreshed_at);
   const similarHref = buildPublicHref(catalogPath, {
     ...filters,
@@ -79,12 +78,13 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
           </Link>
         </Button>
 
-        <section className="rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_55%,#eefbf7_100%)] p-4 shadow-sm md:p-6">
+        <section className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm md:p-6">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
               <div className="min-w-0 flex-1">
-                <h1 className="break-words text-3xl font-semibold leading-tight text-foreground md:text-4xl">{product.product_name}</h1>
+                <p className="text-sm font-semibold text-muted-foreground">{product.bank_name}</p>
+                <h1 className="mt-1 break-words text-3xl font-semibold leading-tight text-foreground md:text-4xl">{product.product_name}</h1>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge>{product.product_type_label}</Badge>
                   {product.subtype_label ? <Badge muted>{product.subtype_label}</Badge> : null}
@@ -119,25 +119,9 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
 
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           <div className="grid gap-4">
-            {product.product_family === "deposit" ? (
-              <InterestCalculator
-                currency={product.currency}
-                locale={filters.locale}
-                minimumBalance={product.minimum_balance}
-                minimumDeposit={product.minimum_deposit}
-                productType={product.product_type}
-                rate={product.public_display_rate}
-                termLengthDays={product.term_length_days}
-              />
-            ) : null}
-
             <Card className="border-border/80 shadow-sm">
               <CardHeader>
-                <CardDescription className="flex items-center gap-2">
-                  <FileText className="size-4" aria-hidden="true" />
-                  {copy.detail.productFacts}
-                </CardDescription>
-                <CardTitle className="text-base">{copy.grid.resultSummary}</CardTitle>
+                <CardTitle className="text-base">{copy.detail.productFacts}</CardTitle>
               </CardHeader>
               <CardContent>
                 <dl className="grid gap-4 sm:grid-cols-2">
@@ -153,18 +137,17 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
           </div>
 
           <div className="grid gap-4">
-            <Card className="border-border/80 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">{copy.detail.keyConditions}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-4">
-                  {decisionItems.map((fact) => (
-                    <Fact key={fact.label} label={fact.label} value={fact.value} />
-                  ))}
-                </dl>
-              </CardContent>
-            </Card>
+            {product.product_family === "deposit" && product.public_display_rate !== null ? (
+              <InterestCalculator
+                currency={product.currency}
+                locale={filters.locale}
+                minimumBalance={product.minimum_balance}
+                minimumDeposit={product.minimum_deposit}
+                productType={product.product_type}
+                rate={product.public_display_rate}
+                termLengthDays={product.term_length_days}
+              />
+            ) : null}
 
             <Card className="border-border/80 bg-muted/20 shadow-sm">
               <CardHeader>
@@ -172,6 +155,9 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
               </CardHeader>
               <CardContent>
                 <p className="text-xs leading-5 text-muted-foreground">{buildDisclosure(disclosureDate, filters.locale)}</p>
+                <Button asChild className="mt-3" size="sm" variant="outline">
+                  <Link href={buildPublicHref("/methodology", filters)}>{copy.nav.methodology}</Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -271,25 +257,6 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
   return facts;
 }
 
-function buildDecisionItems(product: PublicProduct, locale: string) {
-  const facts: DetailFact[] = [];
-  if (product.product_family === "lending") {
-    addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);
-    addFact(facts, loanLabel("term", locale), product.term_length_text, locale);
-    addFact(facts, loanLabel("prepayment", locale), product.prepayment_privileges, locale);
-    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
-    return facts.slice(0, 4);
-  }
-  addFact(facts, detailLabel("bestFor", locale), buildKeyDetail(product, locale), locale);
-  addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
-  addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
-  addFact(facts, detailLabel("depositInsurance", locale), product.deposit_insurance, locale);
-  if (!facts.length) {
-    facts.push({ label: detailLabel("bestFor", locale), value: getPublicMessages(locale).common.notDisclosed });
-  }
-  return facts.slice(0, 4);
-}
-
 function buildKeyDetail(product: PublicProduct, locale: string) {
   const copy = getPublicMessages(locale);
   return product.product_highlight_badge_label ?? product.subtype_label ?? product.target_customer_tag_labels[0] ?? copy.common.notDisclosed;
@@ -355,7 +322,6 @@ function detailLabel(key: string, locale: string) {
   const labels: Record<string, string> = {
     applicationMethod: "Application method",
     base12MonthRate: "Base rate, 12 months",
-    bestFor: "Best fit signal",
     customerTags: "Customer tags",
     depositAmount: "Entry amount",
     depositInsurance: "Deposit insurance",
@@ -371,7 +337,6 @@ function detailLabel(key: string, locale: string) {
     const koLabels: Record<string, string> = {
       applicationMethod: "가입 방법",
       base12MonthRate: "기본금리(12개월)",
-      bestFor: "적합 신호",
       customerTags: "고객 태그",
       depositAmount: "가입 금액",
       depositInsurance: "예금자 보호",
@@ -389,7 +354,6 @@ function detailLabel(key: string, locale: string) {
     const jaLabels: Record<string, string> = {
       applicationMethod: "申込方法",
       base12MonthRate: "12か月基準金利",
-      bestFor: "適合シグナル",
       customerTags: "顧客タグ",
       depositAmount: "加入金額",
       depositInsurance: "預金保険",
@@ -479,10 +443,10 @@ function formatIsoDate(value: string | null) {
 
 function buildDisclosure(date: string, locale: string) {
   if (locale === "ko") {
-    return `제공되는 정보는 ${date}에 은행 홈페이지에 공시된 내용으로 작성되었으며, 금융상품 광고가 아닙니다. 실제 상품 가입 시점에 변동될 수 있으므로 가입 전 반드시 다시 확인하시기 바랍니다. 본 페이지는 대가 관계 없이 정보제공 목적으로 자체 제작한 게시물입니다. 최신 정보 업데이트에 최선을 다하고 있으며, 해당 금융사 홈페이지 등에서 상품 정보와 이용 조건을 확인하고 신청하시기 바랍니다.`;
+    return `${date} 기준 공개 스냅샷입니다. 금리와 가입 조건은 변경될 수 있으므로 신청 전 은행 공식 페이지에서 다시 확인하세요.`;
   }
   if (locale === "ja") {
-    return `表示情報は ${date} 時点の銀行ウェブサイト開示内容に基づきます。金融商品の広告ではありません。実際の申込時には条件が変わる可能性があるため、申込前に必ず金融機関の公式ページで商品情報、条件、申込方法を確認してください。`;
+    return `${date} 時点の公開スナップショットです。金利や申込条件は変更される場合があるため、申込前に銀行の公式ページで再確認してください。`;
   }
-  return `Provided information is based on bank website disclosures as of ${date}. It is not a financial product advertisement. Product terms may change by the actual signup time, so confirm again before applying. FPDS prepared this page independently for information only and without compensation. FPDS works to keep information current, but users should verify product details, conditions, and applications on the financial institution website.`;
+  return `Public snapshot as of ${date}. Rates and eligibility can change, so confirm them on the bank's official page before applying.`;
 }

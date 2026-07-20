@@ -1,0 +1,1594 @@
+{
+  "registry_version": "2026-07-19",
+  "bank_code": "NATIONAL",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "nbc.ca",
+    "rewards.nbc.ca"
+  ],
+  "entry_source_id": "AUTO-NATIONAL-CRE-1622c10364",
+  "sources": [
+    {
+      "source_id": "AUTO-NATIONAL-CRE-1622c10364",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "World Elite is a named Mastercard product; the income field also signals an application and eligibility detail page.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/world-elite.html#notes-item-f16c5a7cb0",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "World Elite Mastercard | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 2,
+        "primary_heading": "World Elite Mastercard",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "World Elite is a named Mastercard product; the income field also signals an application and eligibility detail page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-48ed3a760a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Syncro is a named National Bank Mastercard product and this product-specific URL is highly likely to contain card details.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/syncro.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Syncro Mastercard credit card | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 2,
+        "primary_heading": "Syncro Mastercard credit card",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Syncro is a named National Bank Mastercard product and this product-specific URL is highly likely to contain card details.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-540b392c07",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "No-fee Mastercard path likely describes a specific no-annual-fee card and its pricing/features.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/no-fee.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "No Annual Fee Mastercard Credit Cards | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "No annual fee Mastercard credit cards",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "No-fee Mastercard path likely describes a specific no-annual-fee card and its pricing/features.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-d5658d322a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Cash-back Mastercard path strongly suggests a specific cash-back credit-card product or product landing detail.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/cashback.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mastercard Cashback Credit Cards | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Cashback Mastercard credit cards",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Cash-back Mastercard path strongly suggests a specific cash-back credit-card product or product landing detail.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 3,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-edfe895f9a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Product-specific Platinum Mastercard URL, likely an individual rewards credit-card detail page despite the generic extracted label.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/platinum.html?wcmmode=disabled#notes-item-5d83461a47",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Promotion National Bank Platinum Mastercard credit card | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Platinum Mastercard",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Product-specific Platinum Mastercard URL, likely an individual rewards credit-card detail page despite the generic extracted label.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-0c5b2cd180",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Insurance information page associated with cards, not a standalone credit-card detail page.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/insurance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Insurance information page associated with cards, not a standalone credit-card detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-42b2ec7774",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Explains additional or joint-card functionality rather than presenting a standalone credit-card product.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/joint.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explains additional or joint-card functionality rather than presenting a standalone credit-card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-456be4ea2d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General feature information likely spanning multiple cards.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/features.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General feature information likely spanning multiple cards.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-4d9a050d71",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational credit-use article with no single named product.",
+      "url": "https://www.nbc.ca/personal/advice/credit/6-smart-ways-to-use-your-credit-card.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational credit-use article with no single named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-5bd50bf4da",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Experiences and promotional benefits page, not a card product.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/priceless.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Experiences and promotional benefits page, not a card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-9a9936c02e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "External rewards redemption page, not a credit-card product detail page.",
+      "url": "https://rewards.nbc.ca/point-in-cash",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "External rewards redemption page, not a credit-card product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-aa66ed21d8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Explains rewards-point redemption and does not identify one card product.",
+      "url": "https://rewards.nbc.ca/rewards-points",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explains rewards-point redemption and does not identify one card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-b9f61406bb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Rewards-plan information page supporting card products, not one named credit card.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/rewards-program.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Rewards-plan information page supporting card products, not one named credit card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-c8c9b80eb2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General rewards portal, unrelated to a single credit-card product page.",
+      "url": "https://rewards.nbc.ca/",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General rewards portal, unrelated to a single credit-card product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-ede96b3891",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General Mastercard benefits page, not a single named card.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/benefits.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General Mastercard benefits page, not a single named card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-f5b3e3bae4",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Travel advice article; it does not describe one named card.",
+      "url": "https://www.nbc.ca/personal/advice/credit/reasons-use-credit-card-travel.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Travel advice article; it does not describe one named card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-fa4ab764d7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational article about maximizing rewards, not a named credit-card product.",
+      "url": "https://www.nbc.ca/personal/advice/credit/how-maximize-credit-card-rewards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational article about maximizing rewards, not a named credit-card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-840e18f1ed",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Travel-card category or benefits page may link to products, but the generic travel path does not clearly identify one named card.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/travel.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Travel-card category or benefits page may link to products, but the generic travel path does not clearly identify one named card.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "hub_page_not_detail",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-c8ccbeb8be",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Rewards-focused page likely covering benefits or rewards options across cards rather than a single card.",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/rewards.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Rewards-focused page likely covering benefits or rewards options across cards rather than a single card.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-47171545d2",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/ppo_form_summary_terms_conditions_credit_card.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-58e3e05fce",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/agreement-mastercard-personal.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-917073dcc0",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/sommaire-assurance-32044-en-voyage-we.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-95d2c1fe65",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/sommaire-assurance-31970-en-voyage-platine.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-a6866171b6",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/echo-cashback-rules.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-b20c2a72b2",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/rewards-plan-30464-002.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-bb1256dd3c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/rewards-plan-30463-002.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-CRE-c3694a539f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/echo-cashback-rewards.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

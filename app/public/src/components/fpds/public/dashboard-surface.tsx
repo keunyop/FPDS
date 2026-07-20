@@ -1,9 +1,8 @@
-import { ArrowUpRight, Building2, ExternalLink, FilterX, PackageCheck, RefreshCw, Search, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Building2, ExternalLink, FilterX, Landmark, PackageCheck, PiggyBank, RefreshCw, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
-import { CompositionBarChart, PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
-import { PurposeEntryPoints } from "@/components/fpds/public/purpose-entry-points";
+import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
@@ -36,6 +35,7 @@ type CompositionLinkItem = CompositionChartItem & {
 export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, summary }: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
+  const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
   const clearHref = buildPublicHref("/dashboard", {
     ...filters,
     bankCodes: [],
@@ -78,7 +78,10 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   const activeChips = buildScopeChips(filters, summary);
   const bankComposition = buildBankComposition(filters, summary);
   const productTypeLinks = buildProductTypeDashboardLinks(filters, summary);
-  const decisionWidgets = rankings.widgets.filter((widget) => widget.ranking_key !== "recently_changed_30d");
+  const depositComparisonScope = summary.breakdowns.products_by_product_type.every((item) => ["chequing", "gic", "savings"].includes(item.product_type));
+  const decisionWidgets = depositComparisonScope
+    ? rankings.widgets.filter((widget) => widget.ranking_key !== "recently_changed_30d")
+    : [];
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
   const marketGreeting = formatPublicMessage(copy.dashboard.marketGreeting, {
     banks: formatCount(banksInScope, filters.locale),
@@ -89,15 +92,22 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
       <div className="flex flex-col gap-6">
-        <section className="grid gap-6 rounded-xl border border-border/80 bg-[linear-gradient(135deg,#ffffff_0%,#f7f9ff_52%,#eafaf6_100%)] p-5 shadow-sm md:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)] lg:items-end">
+        <section className="grid gap-6 overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-sm md:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)] lg:items-end">
           <div className="max-w-3xl">
-            <h1 className="text-4xl font-semibold leading-[1.05] text-foreground md:text-5xl">{copy.dashboard.title}</h1>
+            <p className="text-sm font-semibold text-primary">{copy.dashboard.kpiSubtitle}</p>
+            <h1 className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-5xl">{copy.dashboard.title}</h1>
             <p className="mt-4 text-base leading-7 text-muted-foreground md:text-lg">{marketGreeting}</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Button asChild>
                 <Link href={productsHref}>
-                  <Search className="size-4" aria-hidden="true" />
-                  {copy.dashboard.openProducts}
+                  <PiggyBank className="size-4" aria-hidden="true" />
+                  {copy.nav.products}
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href={loansHref}>
+                  <Landmark className="size-4" aria-hidden="true" />
+                  {copy.nav.loan}
                 </Link>
               </Button>
               {activeChips.length ? (
@@ -115,8 +125,6 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
             <MetricCard icon={PackageCheck} label={copy.dashboard.visibleProducts} tone="primary" value={formatCount(totalProducts, filters.locale)} />
           </div>
         </section>
-
-        <PurposeEntryPoints filters={filters} locale={filters.locale} />
 
         {activeChips.length ? (
           <section aria-label={copy.grid.currentScope} className="flex flex-wrap gap-2 rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
@@ -147,8 +155,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
               <CardDescription>{copy.dashboard.compositionSubtitle}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {bankComposition.length ? <CompositionBarChart items={bankComposition} /> : <EmptyPanel text={copy.dashboard.noRankingWidgets} />}
-              <CompositionLinks items={bankComposition} />
+              {bankComposition.length ? <CoverageBars items={bankComposition} /> : <EmptyPanel text={copy.dashboard.noRankingWidgets} />}
             </CardContent>
           </Card>
         </section>
@@ -249,9 +256,12 @@ function RankingCards({
               {item.rank}
             </span>
             <BankLogo bankCode={item.bank_code} bankName={item.bank_name} size="sm" />
-            <Link className="min-w-0 break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, item.product_id)}>
-              {item.product_name}
-            </Link>
+            <div className="min-w-0">
+              <Link className="break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, item.product_id)}>
+                {item.product_name}
+              </Link>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.bank_name}</p>
+            </div>
             <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <span className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground tabular-nums">
                 {formatMetricValue(item.metric_value, item.metric_unit, locale)}
@@ -269,6 +279,24 @@ function RankingCards({
         ))}
       </div>
     </section>
+  );
+}
+
+function CoverageBars({ items }: { items: CompositionLinkItem[] }) {
+  return (
+    <div className="grid gap-3">
+      {items.map((item) => (
+        <Link className="group grid gap-1.5" href={item.href} key={item.key}>
+          <span className="flex items-center justify-between gap-3 text-sm">
+            <span className="truncate font-medium text-foreground group-hover:text-primary">{item.label}</span>
+            <span className="shrink-0 text-xs font-semibold text-muted-foreground tabular-nums">{item.count}</span>
+          </span>
+          <span className="h-2 overflow-hidden rounded-full bg-muted">
+            <span className="block h-full rounded-full bg-primary/75 transition-colors group-hover:bg-primary" style={{ width: `${Math.max(4, Math.min(100, item.share_percent))}%` }} />
+          </span>
+        </Link>
+      ))}
+    </div>
   );
 }
 

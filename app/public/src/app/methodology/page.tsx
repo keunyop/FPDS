@@ -37,10 +37,13 @@ export default async function MethodologyPage({ searchParams }: MethodologyPageP
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild>
-              <Link href={buildPublicHref("/dashboard", filters)}>{copy.nav.dashboard}</Link>
+              <Link href={buildPublicHref("/products", filters)}>{copy.nav.products}</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={buildPublicHref("/products", filters)}>{copy.nav.products}</Link>
+              <Link href={buildPublicHref("/loans", filters)}>{copy.nav.loan}</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href={buildPublicHref("/dashboard", filters)}>{copy.nav.dashboard}</Link>
             </Button>
           </div>
         </section>

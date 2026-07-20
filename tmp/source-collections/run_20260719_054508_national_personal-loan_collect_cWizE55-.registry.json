@@ -1,0 +1,647 @@
+{
+  "registry_version": "2026-07-19",
+  "bank_code": "NATIONAL",
+  "country_code": "CA",
+  "product_type": "personal-loan",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "nbc.ca"
+  ],
+  "entry_source_id": "AUTO-NATIONAL-PER-2d6dcfad8c",
+  "sources": [
+    {
+      "source_id": "AUTO-NATIONAL-PER-2d6dcfad8c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "A named vehicle-loan product, which is explicitly included within the personal-loan definition.",
+      "url": "https://www.nbc.ca/personal/borrowing/car.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Car Loans, Apply Online! | National Bank Icon electric car",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Car loans",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A named vehicle-loan product, which is explicitly included within the personal-loan definition.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-49a3b3b08f",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Directly targets National Bank personal loans and is likely the main product page describing borrowing options and application details.",
+      "url": "https://www.nbc.ca/personal/borrowing/loan.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Personal loans | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Personal loans",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Directly targets National Bank personal loans and is likely the main product page describing borrowing options and application details.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "multi_product_family_overview"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence",
+          "multi_product_family_overview"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-12b44e6baf",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Budgeting guidance may support borrowing decisions but is not a personal-loan product detail page.",
+      "url": "https://www.nbc.ca/personal/advice/budget.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Budgeting guidance may support borrowing decisions but is not a personal-loan product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-14a000cb3e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "An educational credit article about loan decisions rather than an application or product detail page.",
+      "url": "https://www.nbc.ca/personal/advice/credit/should-i-pursue-a-no-credit-check-loan.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "An educational credit article about loan decisions rather than an application or product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-3df22c58cb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General advice hub that may contain relevant education but does not describe one named loan product.",
+      "url": "https://www.nbc.ca/personal/advice.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General advice hub that may contain relevant education but does not describe one named loan product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-ec62189ab7",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Broad personal-banking landing page with no indication that it describes one personal-loan product.",
+      "url": "https://www.nbc.ca/personal.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Broad personal-banking landing page with no indication that it describes one personal-loan product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-f4cb17e06a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Loan-related calculator useful for evaluation, but it does not represent a standalone financial product detail page.",
+      "url": "https://www.nbc.ca/forms/financing/prepayment-charges-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Loan-related calculator useful for evaluation, but it does not represent a standalone financial product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "pricing_or_feature_signal",
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-f4f79ba446",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Related to protection for borrowing, but it is ancillary loan insurance rather than a personal-loan product page.",
+      "url": "https://www.nbc.ca/personal/borrowing/insurance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Related to protection for borrowing, but it is ancillary loan insurance rather than a personal-loan product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-09401fbbbe",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Personal Loan",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/pdf-faq-autres-que-professionnels-ang.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-9b78dbcdcf",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Personal Loan",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/assurance/pdf-faq-particuliers-ang.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-PER-a447712ffd",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Personal Loan",
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/agreement-mastercard-personal.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

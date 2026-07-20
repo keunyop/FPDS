@@ -15,11 +15,11 @@ function HeaderContent() {
   const copy = getPublicMessages(locale);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 shadow-[0_1px_18px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/92 shadow-[0_1px_18px_rgba(15,23,42,0.04)] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 md:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center justify-between gap-4">
           <Link href={buildLocaleHref("/dashboard", searchParams, locale)} className="flex items-center gap-3">
-            <span className="flex size-8 items-center justify-center rounded-md border border-primary/20 bg-primary text-primary-foreground shadow-sm">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <ChartNoAxesColumnIncreasing className="size-4" aria-hidden="true" />
             </span>
             <span className="block text-xl font-semibold text-foreground">

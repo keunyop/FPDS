@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-16`:
+As of `2026-07-18`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -51,6 +51,7 @@ As of `2026-07-16`:
 - `WBS 5.11` grid/dashboard cross-filter is now complete with URL-based shared-scope sibling navigation plus dashboard drill-in links back into the Product Grid from breakdowns, rankings, and scatter points
 - `WBS 5.12` locale rollout is now complete with EN/KO/JA query-param locale support across the public Product Grid and Insight Dashboard plus the protected admin shell and login surfaces
 - `WBS 5.13` freshness/metric note wording is now complete with locale-aware public methodology/freshness coverage on `/methodology`, concise dashboard data notes on `/dashboard`, and clarified snapshot/metric/exclusion messaging for the public surface
+- `WBS 5.14` responsive QA is now complete with a simplified Public Home/catalog/detail hierarchy, progressively disclosed filters, selection-led comparison, compact methodology access, and production-rendered desktop/tablet/exact-390px verification across Deposit and Loan routes
 - `WBS 5.15` source registry admin MVP is now complete with DB-backed bank and source-catalog management, source-detail generation during collection, a bank-centered `/admin/banks` workflow for bank setup plus initial coverage and bulk collection, compatibility redirects for `/admin/source-catalog`, and read-only `/admin/sources` operator routes
 - the first vector-assisted retrieval bootstrap is now implemented with a pgvector `evidence_chunk_embedding` side table, deterministic local evidence-chunk embeddings for dev/test, metadata-first vector ranking, and metadata-only fallback when vector rows are unavailable
 - the live admin runtime now uses a Shadcnblocks-based FPDS admin UI foundation with a compact shell, operator login, redesigned protected overview, live run diagnostics, canonical change chronology, append-only audit history, and a protected usage observability route
@@ -69,7 +70,7 @@ As of `2026-07-16`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth, session handling, and approval-gated signup requests
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, `/admin/signup`, protected `/admin`, and session-aware route gating
-- a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for the public Product Grid, `/products/[productId]` for public product detail, and `/methodology` for public metric/data-boundary notes
+- a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for Deposit, `/loans` for approved retail lending, `/products/[productId]` for public product detail, and `/methodology` for public metric/data-boundary notes
 - a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface

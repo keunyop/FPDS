@@ -190,6 +190,15 @@ Implemented public main-screen copy simplification on `2026-06-11`:
 - the public `/dashboard` route no longer renders the snapshot eyebrow label, the purpose-entry explanatory subtitle, or the compact trust cue block for scope, snapshot freshness, and official-bank confirmation
 - the purpose entry still keeps the dashboard metric contract unchanged and uses existing Product Grid filters/sorts
 
+Implemented current Public Home hierarchy on `2026-07-18`:
+- Home now states that its market overview is the latest Deposit snapshot and gives Deposit and Loan equal, direct catalog actions; it no longer uses repeated purpose-entry cards.
+- The default dashboard API request is explicitly scoped to the approved Deposit product types so headline counts, deposit rankings, and bank-share composition describe one coherent market rather than mixing unlike Deposit and Loan products.
+- The visible headline remains limited to Banks and Visible products. The deposit interest-rate ranking is shown only for a deposit-compatible scope, and visible bank names accompany brand marks.
+- Products by bank uses server-rendered share bars instead of a client-only chart, preserving useful composition information during initial render and reducing empty space.
+- Like-for-like scatter remains available only for an explicitly selected supported product type with sufficient public numeric fields; no cross-family score or recommendation is inferred.
+- Methodology is linked from the compact footer and product disclosure rather than repeated inside the Home content.
+- This is a presentation/scoping update only. The dashboard API metric, ranking, scatter, freshness, and public evidence-boundary contracts remain unchanged.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

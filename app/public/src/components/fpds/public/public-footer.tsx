@@ -3,59 +3,24 @@
 import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, type ReactNode } from "react";
+import { Suspense } from "react";
 
 import { PublicLocaleMenu } from "@/components/fpds/public/public-locale-menu";
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams } from "@/lib/public-query";
-import { cn } from "@/lib/utils";
 
-const FOOTER_COPY: Record<
-  PublicLocale,
-  {
-    brandNote: string;
-    coverage: string;
-    data: string;
-    explore: string;
-    legalNote: string;
-    planned: string;
-    aggregate: string;
-    evidenceBoundary: string;
-    productTypes: string;
-  }
-> = {
+const FOOTER_COPY: Record<PublicLocale, { brandNote: string; legalNote: string }> = {
   en: {
-    brandNote: "Public financial product data for bank comparison.",
-    coverage: "Coverage",
-    data: "Data",
-    explore: "Explore",
-    legalNote: "Source evidence and internal review traces stay private.",
-    planned: "Planned",
-    aggregate: "Aggregate fields",
-    evidenceBoundary: "Evidence boundary",
-    productTypes: "Product types"
+    brandNote: "Comparable public financial product data.",
+    legalNote: "Information may change. Confirm rates and conditions on the bank's official page."
   },
   ko: {
-    brandNote: "은행 비교를 위한 공개 금융상품 데이터입니다.",
-    coverage: "커버리지",
-    data: "데이터",
-    explore: "탐색",
-    legalNote: "원문 증거와 내부 검토 trace는 공개하지 않습니다.",
-    planned: "예정",
-    aggregate: "집계 필드",
-    evidenceBoundary: "증거 경계",
-    productTypes: "상품 유형"
+    brandNote: "비교 가능한 공개 금융상품 데이터.",
+    legalNote: "정보는 변경될 수 있습니다. 가입 전 은행 공식 페이지에서 금리와 조건을 확인하세요."
   },
   ja: {
-    brandNote: "銀行比較のための公開金融商品データです。",
-    coverage: "掲載範囲",
-    data: "データ",
-    explore: "探す",
-    legalNote: "原文証拠と内部レビュー trace は公開しません。",
-    planned: "予定",
-    aggregate: "集計フィールド",
-    evidenceBoundary: "証拠の境界",
-    productTypes: "商品タイプ"
+    brandNote: "比較できる公開金融商品データ。",
+    legalNote: "情報は変更される場合があります。申込前に銀行の公式ページで金利と条件を確認してください。"
   }
 };
 
@@ -67,45 +32,34 @@ function FooterContent() {
   const dashboardHref = buildScopedPublicHrefFromSearchParams("/dashboard", searchParams);
   const productsHref = buildScopedPublicHrefFromSearchParams("/products", searchParams);
   const loansHref = buildScopedPublicHrefFromSearchParams("/loans", searchParams);
+  const methodologyHref = buildScopedPublicHrefFromSearchParams("/methodology", searchParams);
 
   return (
-    <footer className="border-t border-border/80 bg-card/80">
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(16rem,0.9fr)_minmax(0,1.6fr)]">
-          <div className="max-w-sm">
-            <Link href={dashboardHref} className="inline-flex items-center gap-3">
-              <span className="flex size-8 items-center justify-center rounded-md border border-primary/20 bg-primary text-primary-foreground shadow-sm">
+    <footer className="border-t border-border/80 bg-card">
+      <div className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-3">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                 <ChartNoAxesColumnIncreasing className="size-4" aria-hidden="true" />
               </span>
               <span className="text-lg font-semibold text-foreground">{copy.shell.brand}</span>
             </Link>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">{footerCopy.brandNote}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{footerCopy.brandNote}</p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-3">
-            <FooterGroup title={footerCopy.explore}>
-              <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
-              <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
-              <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
-            </FooterGroup>
-            <FooterGroup title={footerCopy.coverage}>
-              <FooterLink href={productsHref}>{copy.dashboard.banksInScope}</FooterLink>
-              <FooterLink href={productsHref}>{copy.dashboard.visibleProducts}</FooterLink>
-              <FooterLink href={productsHref}>{footerCopy.productTypes}</FooterLink>
-            </FooterGroup>
-            <FooterGroup title={footerCopy.data}>
-              <FooterText>{footerCopy.aggregate}</FooterText>
-              <FooterText>{footerCopy.evidenceBoundary}</FooterText>
-            </FooterGroup>
-          </div>
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium" aria-label="Footer navigation">
+            <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
+            <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
+            <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
+            <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
+          </nav>
         </div>
 
-        <div className="mt-8 flex flex-col gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <PublicLocaleMenu align="start" className="flex" triggerClassName="w-full justify-between sm:w-auto" />
+        <div className="mt-5 flex flex-col gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-3xl text-xs leading-5 text-muted-foreground">{footerCopy.legalNote}</p>
+          <PublicLocaleMenu align="end" className="flex shrink-0" triggerClassName="w-full justify-between sm:w-auto" />
         </div>
-
-        <div className="mt-4 text-xs text-muted-foreground">© FPDS 2026</div>
       </div>
     </footer>
   );
@@ -113,29 +67,16 @@ function FooterContent() {
 
 export function PublicFooter() {
   return (
-    <Suspense fallback={<div className="h-28 border-t border-border/80 bg-card/80" aria-hidden="true" />}>
+    <Suspense fallback={<div className="h-24 border-t border-border/80 bg-card" aria-hidden="true" />}>
       <FooterContent />
     </Suspense>
   );
 }
 
-function FooterGroup({ children, title }: Readonly<{ children: ReactNode; title: string }>) {
+function FooterLink({ children, href }: Readonly<{ children: React.ReactNode; href: string }>) {
   return (
-    <div>
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      <div className="mt-3 grid gap-2">{children}</div>
-    </div>
-  );
-}
-
-function FooterLink({ children, href }: Readonly<{ children: ReactNode; href: string }>) {
-  return (
-    <Link className="text-sm text-muted-foreground transition-colors hover:text-foreground" href={href}>
+    <Link className="inline-flex min-h-11 items-center text-muted-foreground transition-colors hover:text-foreground" href={href}>
       {children}
     </Link>
   );
-}
-
-function FooterText({ children, className }: Readonly<{ children: ReactNode; className?: string }>) {
-  return <span className={cn("text-sm text-muted-foreground", className)}>{children}</span>;
 }

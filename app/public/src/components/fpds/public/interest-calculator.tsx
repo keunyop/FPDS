@@ -28,9 +28,10 @@ export function InterestCalculator({
   const startingAmount = firstFiniteNumber(minimumDeposit, minimumBalance, 10000);
   const [amount, setAmount] = useState(String(Math.max(0, startingAmount)));
   const parsedAmount = Number(amount.replace(/,/g, ""));
+  const validAmount = Number.isFinite(parsedAmount) && parsedAmount >= 0 ? parsedAmount : null;
   const annualRate = Number.isFinite(rate ?? NaN) ? Number(rate) : null;
   const termYears = productType === "gic" && Number.isFinite(termLengthDays) && termLengthDays ? termLengthDays / 365 : 1;
-  const estimatedInterest = annualRate === null || !Number.isFinite(parsedAmount) ? null : parsedAmount * (annualRate / 100) * termYears;
+  const estimatedInterest = annualRate === null || validAmount === null ? null : validAmount * (annualRate / 100) * termYears;
   const labels = useMemo(() => calculatorLabels(locale), [locale]);
 
   return (
@@ -50,6 +51,7 @@ export function InterestCalculator({
             inputMode="decimal"
             min="0"
             onChange={(event) => setAmount(event.target.value)}
+            step="0.01"
             type="number"
             value={amount}
           />
@@ -92,14 +94,14 @@ function calculatorLabels(locale: string) {
   }
   if (locale === "ja") {
     return {
-      amount: "Deposit amount",
-      eyebrow: "Interest calculator",
-      interest: "Estimated interest",
-      note: "Simple estimate using the displayed annual rate. Actual interest, compounding, tax, and eligibility can differ at signup.",
-      notAvailable: "n/a",
-      rate: "Rate",
-      term: "Term",
-      title: "Estimate interest",
+      amount: "預入金額",
+      eyebrow: "利息計算",
+      interest: "予想利息",
+      note: "表示年利による単純な概算です。実際の利息、複利、税金、申込条件は異なる場合があります。",
+      notAvailable: "未公開",
+      rate: "金利",
+      term: "期間",
+      title: "利息を概算",
     };
   }
   return {
@@ -127,7 +129,7 @@ function formatCurrency(value: number, currency: string, locale: string) {
 
 function formatTermYears(termYears: number, locale: string) {
   if (!Number.isFinite(termYears) || termYears <= 0) {
-    return "1 year";
+    return locale === "ko" ? "1년" : locale === "ja" ? "1年" : "1 year";
   }
   const value = Number.isInteger(termYears) ? String(termYears) : termYears.toFixed(2).replace(/\.?0+$/, "");
   if (locale === "ko" || locale === "ja") {

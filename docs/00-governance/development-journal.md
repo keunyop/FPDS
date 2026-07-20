@@ -25,9 +25,10 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-17`:
+As of `2026-07-18`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
+- Public Home, Deposit, Loan, comparison, detail, methodology access, and responsive QA were simplified and verified against the live aggregate snapshot; `WBS 5.14` is complete
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
@@ -65,6 +66,20 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-18 - FPDS Public Essential-Information UX And Responsive QA
+
+- WBS: `5.9`, `5.10`, `5.12`, `5.13`, `5.14`
+- Status: done
+- Goal: analyze the complete FPDS Public experience and reduce it to the information an anonymous financial-product user needs to choose Deposit or Loan, compare grounded public fields, and know what to recheck on the official bank page.
+- Why now: the live catalog stacked repeated purpose cards, a duplicate Top 5 request/list, filters, sort, an empty comparison panel, and result cards before users reached the core products. Detail repeated similar facts and used recommendation-adjacent wording. The active Stripe benchmark called for clearer hierarchy, progressive disclosure, compact states, and stronger responsive verification.
+- Outcome: Home now opens with one coherent Deposit snapshot, direct Deposit/Loan actions, two headline counts, a deposit-compatible ranking, and server-rendered bank-share bars. Deposit and Loan catalogs now show result count/freshness, progressively disclosed filters, one active-scope/sort toolbar, and a single card list. Each card exposes visible bank identity, one primary metric, at most two secondary facts, Compare, and Details. Comparison remains a compact counter until selection, then shows mobile cards and a desktop table without synthetic reason-to-compare text. Detail presents three primary facts, one available-facts section, applicable calculator/term-rate content, official verification, and Methodology without duplicate key-condition or `Best fit` panels. The footer is now a compact Home/Deposit/Loan/Methodology navigation and verification surface. Japanese calculator labels were completed; visible focus, reduced-motion handling, 44px navigation/locale controls, and horizontal-overflow protection were added.
+- Not done: no Public API, canonical product, aggregate refresh, evidence trace, recommendation model, eligibility score, account-opening flow, or product scope was added or changed. Not every benchmark pattern was adopted; FPDS keeps its own domain comparison, freshness, methodology, and public/private evidence boundaries.
+- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `product-grid-surface.tsx`, `product-compare-workspace.tsx`, `product-detail-surface.tsx`, `interest-calculator.tsx`, shared public shell components, `app/public/src/lib/public-locale.ts`, public route pages and styles, `app/public/README.md`, the active Product Grid and Insight Dashboard design docs, root `README.md`, and `docs/01-planning/WBS.md`.
+- Decisions: the old Top 5 catalog block and shared purpose-entry component were removed instead of hidden. Visible bank names were restored because logos can be delayed or unavailable. Official bank actions remain on detail, selected comparison, and dashboard ranking rather than competing with Compare and Details on every catalog card. Home defaults its data request to approved Deposit types so deposit rankings and counts remain semantically coherent while Loan remains a first-class entry. ISO freshness dates are retained for stable cross-locale scanning.
+- Verification: relevant API regression tests passed (`9`). Public typecheck and production build passed; the repository foundation entrypoint then passed repo doctor, foundation validation, Admin typecheck/build (`23` generated pages), and Public typecheck/build (`7` generated pages). Live-data production route smoke checks returned HTTP `200` for nine EN/KO/JA Home, Deposit, Loan, detail, and Methodology URLs. Chromium production QA covered `1440x1000`, `768x1024`, and exact `390x844` viewports for Home, Deposit, Loan, selected comparison, and Japanese detail; all reported document width equal to viewport width, no runtime errors, and comparison changed from `0/4` to `1/4` after selection.
+- Known issues: the current aggregate can contain distinct canonical records with the same visible bank/product name; the Public UI intentionally does not deduplicate or reinterpret canonical data. Some non-Big-5 logos still depend on official remote assets, so visible bank text and the existing code fallback remain required.
+- Next step: Product Owner visual review of the completed Public experience; any further change should be a new, bounded product or data-quality slice rather than reopening responsive QA by default.
 
 ## 2026-07-17 - Multi-Bank Source And Review Queue Accuracy Hardening
 

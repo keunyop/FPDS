@@ -1,0 +1,770 @@
+{
+  "registry_version": "2026-07-19",
+  "bank_code": "NATIONAL",
+  "country_code": "CA",
+  "product_type": "gic",
+  "product_family": "deposit",
+  "source_language": "en",
+  "allowed_domains": [
+    "nbc.ca"
+  ],
+  "entry_source_id": "AUTO-NATIONAL-GIC-761031d941",
+  "sources": [
+    {
+      "source_id": "AUTO-NATIONAL-GIC-761031d941",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The URL explicitly identifies GIC and is located in National Bank's personal savings and investments section, strongly indicating a dedicated GIC product page.",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Guaranteed Investment Certificate (GIC) | National Bank",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Guaranteed Investment Certificate (GIC)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL explicitly identifies GIC and is located in National Bank's personal savings and investments section, strongly indicating a dedicated GIC product page.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-1b78436ee9",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Emergency-fund guidance is financial education, not a GIC product detail page.",
+      "url": "https://www.nbc.ca/personal/advice/taxes-and-income/emergency-fund.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Emergency-fund guidance is financial education, not a GIC product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-2c01e88c8c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "T5 tax-slip information may be relevant to investment income, including some GIC contexts, but it is not a GIC product page.",
+      "url": "https://www.nbc.ca/personal/help-centre/savings-investment/products/t5-slip.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "T5 tax-slip information may be relevant to investment income, including some GIC contexts, but it is not a GIC product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-4046ed312a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Tax-slip mailing information is ancillary support content and does not describe a GIC.",
+      "url": "https://www.nbc.ca/personal/help-centre/savings-investment/saving-plans/tax-slips-mailing-date.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Tax-slip mailing information is ancillary support content and does not describe a GIC.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-67be41ff68",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Information about registered accounts may support registered GIC research, but it is not a dedicated GIC product page.",
+      "url": "https://www.nbc.ca/personal/advice/savings-investment/registered-accounts.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Information about registered accounts may support registered GIC research, but it is not a dedicated GIC product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-8049abb967",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A portfolio-statement help article is not a GIC product detail page.",
+      "url": "https://www.nbc.ca/personal/help-centre/savings-investment/basics/portfolio-statement.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A portfolio-statement help article is not a GIC product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-bdb0695e87",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General banking advice and transaction information, not a GIC product page.",
+      "url": "https://www.nbc.ca/personal/advice/banking.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General banking advice and transaction information, not a GIC product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-c2d893508a",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "An educational page about registered versus non-registered plans; it may support GIC eligibility or registration context but does not describe one named GIC product.",
+      "url": "https://www.nbc.ca/personal/help-centre/savings-investment/saving-plans/difference-between-registered-and-non-registered-plans.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "An educational page about registered versus non-registered plans; it may support GIC eligibility or registration context but does not describe one named GIC product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-c6d7dea291",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A budgeting calculator may sit in the savings section but does not describe or price a GIC.",
+      "url": "https://www.nbc.ca/forms/savings-investments/online-budget-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A budgeting calculator may sit in the savings section but does not describe or price a GIC.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-d02307b9ab",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A general investment-education article that may provide context but does not describe one named GIC.",
+      "url": "https://www.nbc.ca/personal/advice/savings-investment/how-to-invest-money.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A general investment-education article that may provide context but does not describe one named GIC.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-d9804e2ebf",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A portfolio-solutions page is investment-related but appears to describe portfolio options rather than one named GIC.",
+      "url": "https://www.nbc.ca/personal/savings-investments/solutions/portfolios.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A portfolio-solutions page is investment-related but appears to describe portfolio options rather than one named GIC.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-NATIONAL-GIC-eee6c27583",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General bank-account terms and conditions do not describe a GIC product.",
+      "url": "https://www.nbc.ca/personal/help-centre/bank-account/how-it-works/terms-conditions-of-account.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "minimum_deposit",
+        "term_length_text",
+        "term_length_days",
+        "term_rate_table",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "deposit",
+      "product_type_name": "GIC",
+      "product_type_description": "Guaranteed investment certificate and term deposit products.",
+      "discovery_keywords": [
+        "gic",
+        "guaranteed investment certificate",
+        "term deposit",
+        "maturity",
+        "redeemable",
+        "minimum deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General bank-account terms and conditions do not describe a GIC product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    }
+  ]
+}
