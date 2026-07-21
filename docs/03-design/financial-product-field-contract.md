@@ -1,7 +1,7 @@
 # Financial Product Field Contract
 
 Status: Active
-Last updated: 2026-07-16
+Last updated: 2026-07-19
 
 ## Purpose
 
@@ -48,6 +48,13 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 7. If an official value is unavailable or genuinely ambiguous, omit it and route the candidate to review; do not infer it.
 8. For term-rate tables, support both adjacent `term -> rate` and `rate -> term` layouts and select the orientation with more complete grounded pairs; never shift a rate from one row onto the next term.
 9. A page containing multiple named product sections is not one canonical product. Preserve its evidence for review, mark the product boundary ambiguous, and do not publish a composite candidate.
+10. A promotion with an explicit end date earlier than the collection date is historical evidence, not a current rate. Remove its rate fields before merging a current official rate source; if no current value is available, omit the rate and route to review.
+11. Supporting merge is missing-value-only after unsafe or expired detail values are removed. Current official rate evidence may replace an expired detail-page promotion, but it must not silently replace a different current product value without a boundary-safe rule.
+12. Extraction artifacts used for a normalization run must belong to that same `run_id`; a failed current source must never fall back to an older successful extraction as if it were current evidence.
+13. Fields whose evidence anchor identifies another-products or related-products content are cross-product context and must be omitted, including boolean or structured fields that are not caught by prose cleanup.
+14. Credit-card fees and fixed rates require an adjacent matching label. Secondary/additional-card fees are not the primary annual fee; unresolved template values and variable `prime + margin` expressions remain omitted unless the contract gains a typed variable-rate representation.
+15. A current official GIC family table may declare `%` once in its column heading instead of after every value. Parse only a bounded GIC-rate section, prefer the annual column for the canonical one-year comparison rate, preserve variant context in term-row notes, and leave `term_length_days` empty for duration ranges such as `30-59 days`.
+16. Evidence rejected as expired, cross-product, or semantically mismatched cannot be reintroduced by a later generic fallback in the same normalization pass.
 
 ## Runtime Validation
 

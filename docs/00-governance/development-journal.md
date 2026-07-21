@@ -25,7 +25,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-18`:
+As of `2026-07-19`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - Public Home, Deposit, Loan, comparison, detail, methodology access, and responsive QA were simplified and verified against the live aggregate snapshot; `WBS 5.14` is complete
@@ -34,6 +34,7 @@ As of `2026-07-18`:
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
 - latest source/review hardening blocks multi-product family composites, fixes rate-first schedule pairing and `www`/apex redirects, excludes service/advice and cross-product sources, verified named Haventree mortgage discovery, and completed the approved audited retraction of two unsafe historical candidates
+- the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
 Read before coding:
@@ -66,6 +67,21 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-19 - Official-Source Collection Accuracy And Recollection Hardening
+
+- WBS: `5.5`, `5.15`, `4.2`, `4.3`, collection accuracy and operator safety
+- Status: done
+- Goal: inspect live Admin Runs, generated Sources, Review Queue, candidates, evidence, and canonical products; compare suspicious values with current official bank sources; fix reusable causes; and prove the result through fresh Admin-path recollection.
+- Why now: collection `collection_DRxrNFAAo17sGnfh` ended with 35 terminal runs, 32 partial runs, 126 source items, 14 candidates, and 12 queued reviews. Oaken Savings had auto-published an expired November 2023 sitewide 6% GIC banner as a current savings rate; Oaken Commercial GIC entered retail scope; two National card-family pages became fake products; National HISA inherited adjacent-product tier copy; CIBC prepayment percentages were published as mortgage rates; and an FNBC family page had produced a composite term-deposit product.
+- Outcome: explicit offer-end dates now suppress expired rate-sensitive fields before merge and cannot be reintroduced by generic evidence fallback. Normalization reads extraction artifacts from the same run only, current savings/GIC column-header tables are parsed without requiring a `%` suffix on every cell, GIC ranges retain their labels without a false single duration, adjacent-product anchors are removed across field types, and credit-card rate/fee cleanup requires matching label adjacency while leaving variable/template pricing omitted. Retail discovery applies commercial hard vetoes, inactivates stale generated details on rediscovery, recognizes explicit plural family identities without treating the uncountable word `savings` as plural, and keeps lending families evidence-only. Encrypted official PDFs now have the required `cryptography` runtime.
+- Data correction: supported candidate-safety remediation inactivated CIBC products `prod_H2A99WRqC_AK3npK` and `prod_IYB7_vDv7p0z54fs` plus FNBC product `prod_IAR52dJ--SkqWats`; aggregate request `aggreq_jTseDoiOOAY5Zhnx` completed. Four additional false/historical candidates (`cand-ef46b94fefa2e0e7`, `cand-45fc86ed3194b6fb`, `cand-74f812c1b789b2e9`, `cand-ab0a9ff702be7474`) were rejected with `candidate_safety_retracted` audit events. The Oaken commercial generated detail is now inactive with `hard_scope_exclusion:non_consumer_business_page`.
+- Recollection: `collection_NRUF920YsoPw070r` finished 4/4 runs. Interrupted-process retries created duplicate logical candidates, but the normal supersession path rejected the older duplicates; National HISA auto-published 0.55% with no false tier/description fields, National produced only the three named cards, and Oaken Savings updated canonical `prod_dBPQvs2khfvFrkt8` to version 3 at 2.80% using the official current rate table effective June 30, 2026. Final GIC collection `collection_nLTuniu3FKGL63x8` finished with one retail candidate `cand-1b153052c5603a40`: 3.35% one-year comparison rate, 13 grounded long/short/cashable rows, six range rows with no invented single duration, no 6% row, and no commercial candidate. It remains in Review because a family overview is intentionally an ambiguous canonical boundary.
+- Official comparison: Oaken Savings and GIC facts were checked against `https://www.oaken.com/en-ca/oaken-savings-account/`, `https://www.oaken.com/en-ca/savings-account-rates/`, and `https://www.oaken.com/en-ca/gic-rates/`. National HISA and named-card identity/field context were checked against `https://www.nbc.ca/personal/savings-investments/accounts/high-interest.html` and the official Platinum, Syncro, and World Elite pages. Current dynamic placeholders and variable prime-based expressions remain omitted/reviewable rather than converted into unsupported fixed values.
+- Key files: `worker/pipeline/fpds_rate_safety.py`, normalization service/supporting merge/persistence/CLI, `api/service/api_service/source_catalog.py`, their regression tests, `pyproject.toml`, `uv.lock`, root `README.md`, and the active field-contract/discovery/source-policy docs.
+- Verification: Worker `193/193` and API `220/220` unit tests passed. The foundation entrypoint passed repo doctor and baseline validation, then Admin typecheck/build (`23` pages) and Public typecheck/build (`7` pages). Live DB audit confirmed all representative runs terminal, current Oaken Savings at 2.80%, GIC rate evidence linked to the official `/gic-rates` section, retracted products inactive, commercial source inactive, and aggregate requests completed.
+- Known issues: three `rewards.nbc.ca` supporting pages remain blocked by the explicit fetch allowlist and one Oaken `open-an-investment` support page remains unavailable; neither is candidate-producing or needed for the verified fields. National Syncro/World Elite dynamic pricing remains in Review because the captured HTML exposes unresolved templates/variable rates. The Oaken GIC family remains review-first by design. No allowlist widening or product-boundary guess was made.
+- Next step: an operator may review the nine genuinely reviewable queued items, especially whether Oaken GIC variants should become separate canonical products. Any host allowlist expansion should be a separately approved security decision.
 
 ## 2026-07-18 - FPDS Public Essential-Information UX And Responsive QA
 

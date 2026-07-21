@@ -4,7 +4,10 @@ import json
 import re
 from decimal import Decimal, InvalidOperation
 
-from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
+from worker.pipeline.fpds_rate_safety import (
+    canonical_deposit_rate_suppression_reason,
+    expired_promotional_offer_end_date,
+)
 
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _TERM_RATE_ROW_RE = re.compile(
@@ -66,6 +69,16 @@ _SUPPORTING_ROLE_FIELDS = {
     "minimum_guaranteed_return",
     "maximum_return",
 }
+_EXPIRY_SENSITIVE_FIELDS = {
+    "standard_rate",
+    "public_display_rate",
+    "base_12_month_rate",
+    "promotional_rate",
+    "promotional_period_text",
+    "introductory_rate_flag",
+    "effective_date",
+    "term_rate_table",
+}
 
 
 def supporting_source_ids_for_target(source_id: str) -> tuple[str, ...]:
@@ -88,6 +101,11 @@ def merge_supporting_artifacts(
     extracted_fields = merged_artifact["extracted_fields"]
     evidence_links = merged_artifact["evidence_links"]
     runtime_notes = merged_artifact["runtime_notes"]
+    _remove_expired_offer_fields(
+        extracted_fields=extracted_fields,
+        evidence_links=evidence_links,
+        runtime_notes=runtime_notes,
+    )
     field_records = _field_record_map(extracted_fields)
 
     if missing_support_source_ids:
@@ -162,6 +180,29 @@ def merge_supporting_artifacts(
     return merged_artifact
 
 
+def _remove_expired_offer_fields(
+    *,
+    extracted_fields: list[dict[str, object]],
+    evidence_links: list[dict[str, object]],
+    runtime_notes: list[str],
+) -> None:
+    expired_fields = {
+        str(record.get("field_name") or "")
+        for record in extracted_fields
+        if str(record.get("field_name") or "") in _EXPIRY_SENSITIVE_FIELDS
+        and expired_promotional_offer_end_date(str(record.get("evidence_text_excerpt") or "")) is not None
+    }
+    if not expired_fields:
+        return
+    for field_name in sorted(expired_fields):
+        _remove_field(extracted_fields, evidence_links, field_name)
+    runtime_notes.append(
+        "Suppressed fields backed by an explicitly expired promotional offer before supporting-source merge: "
+        + ", ".join(f"`{field_name}`" for field_name in sorted(expired_fields))
+        + "."
+    )
+
+
 def _build_generic_support_supplement(
     *,
     target_source_id: str,
@@ -221,7 +262,8 @@ def _build_generic_savings_rate_supplement(
     if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")):
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    match = _find_generic_support_match(
+    current_table_match = _find_current_savings_rate_table_match(matches)
+    match = current_table_match or _find_generic_support_match(
         matches=matches,
         terms=terms,
         preferred_fields=(
@@ -240,7 +282,14 @@ def _build_generic_savings_rate_supplement(
     if match is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    rate_values = _extract_generic_rate_values(str(match.get("evidence_text_excerpt", "")))
+    if current_table_match is not None:
+        current_rate = _extract_current_savings_account_rate(str(match.get("evidence_text_excerpt", "")))
+        rate_values = {
+            "standard_rate": _format_decimal(current_rate),
+            "public_display_rate": _format_decimal(current_rate),
+        } if current_rate is not None else {}
+    else:
+        rate_values = _extract_generic_rate_values(str(match.get("evidence_text_excerpt", "")))
     if not rate_values:
         return {
             "field_updates": {},
@@ -323,6 +372,11 @@ def _build_generic_gic_rate_supplement(
     ):
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
+    current_table_match = (
+        _find_current_gic_rate_table_match(matches)
+        if allow_family_table_aggregation
+        else None
+    )
     structured_matches = [
         item
         for item in matches
@@ -330,7 +384,7 @@ def _build_generic_gic_rate_supplement(
         and not _gic_structured_match_is_cross_product(str(item.get("evidence_text_excerpt", "")))
         and bool(_extract_generic_gic_rate_values(str(item.get("evidence_text_excerpt", ""))).get("term_rate_table"))
     ]
-    match = _find_generic_support_match(
+    match = current_table_match or _find_generic_support_match(
         matches=matches,
         terms=terms,
         preferred_fields=(
@@ -356,7 +410,9 @@ def _build_generic_gic_rate_supplement(
     if match is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    if allow_family_table_aggregation and structured_matches:
+    if current_table_match is not None:
+        rate_values = _extract_current_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
+    elif allow_family_table_aggregation and structured_matches:
         match, rate_values = _aggregate_gic_family_rate_matches(structured_matches)
     else:
         rate_values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
@@ -501,6 +557,8 @@ def _find_generic_support_match(
         if field_name not in preferred_field_set and field_name not in _SUPPORTING_ROLE_FIELDS:
             continue
         excerpt = str(match.get("evidence_text_excerpt", ""))
+        if expired_promotional_offer_end_date(excerpt) is not None:
+            continue
         haystack = _normalize_text(
             " ".join(
                 str(item or "")
@@ -537,6 +595,182 @@ def _find_generic_support_match(
         return None
     ranked.sort(key=lambda item: item[0], reverse=True)
     return ranked[0][1]
+
+
+def _find_current_savings_rate_table_match(matches: list[dict[str, object]]) -> dict[str, object] | None:
+    ranked: list[tuple[float, dict[str, object]]] = []
+    for match in matches:
+        excerpt = str(match.get("evidence_text_excerpt", ""))
+        identity_context = _normalize_text(
+            " ".join(
+                str(value or "")
+                for value in (match.get("field_name"), match.get("anchor_value"), excerpt[:180])
+            )
+        )
+        if "savings" not in identity_context or "rate" not in identity_context or "competitor" in identity_context:
+            continue
+        if expired_promotional_offer_end_date(excerpt) is not None:
+            continue
+        if _extract_current_savings_account_rate(excerpt) is None:
+            continue
+        try:
+            score = float(match.get("score", 0.0))
+        except (TypeError, ValueError):
+            score = 0.0
+        ranked.append((score, match))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked[0][1]
+
+
+def _find_current_gic_rate_table_match(matches: list[dict[str, object]]) -> dict[str, object] | None:
+    ranked: list[tuple[float, dict[str, object]]] = []
+    for match in matches:
+        excerpt = str(match.get("evidence_text_excerpt", ""))
+        identity_context = _normalize_text(
+            " ".join(
+                str(value or "")
+                for value in (match.get("field_name"), match.get("anchor_value"), excerpt[:220])
+            )
+        )
+        if "gic" not in identity_context or "rate" not in identity_context:
+            continue
+        if expired_promotional_offer_end_date(excerpt) is not None:
+            continue
+        if not _extract_current_gic_rate_values(excerpt):
+            continue
+        try:
+            score = float(match.get("score", 0.0))
+        except (TypeError, ValueError):
+            score = 0.0
+        if "current" in identity_context:
+            score += 0.2
+        ranked.append((score, match))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked[0][1]
+
+
+def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
+    normalized = _normalize_text(excerpt.replace("–", "-").replace("—", "-"))
+    if "gic" not in normalized or "term" not in normalized:
+        return {}
+    if not re.search(r"(?:annual|rate)\s*\(%\)", normalized, flags=re.IGNORECASE):
+        return {}
+
+    rows: list[dict[str, object]] = []
+    long_term_match = re.search(
+        r"long[ -]?term\s+gics?\s+term\s+annual\s*\(%\)\s+semi\s+annual\s*\(%\)\s+monthly\s*\(%\)"
+        r"(?P<table>.*?)long[ -]?term\s+gics?\s+are",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if long_term_match is not None:
+        for match in re.finditer(
+            r"(?P<term>\d{1,2}\s+(?:month|months|year|years))\s+"
+            r"(?P<annual>\d{1,2}(?:\.\d{1,4})?)\s+"
+            r"(?P<semi>\d{1,2}(?:\.\d{1,4})?)\s+"
+            r"(?P<monthly>\d{1,2}(?:\.\d{1,4})?)",
+            long_term_match.group("table"),
+            flags=re.IGNORECASE,
+        ):
+            term_label = _normalize_text(match.group("term"))
+            rows.append(
+                {
+                    "term_label": term_label,
+                    "term_length_days": _term_label_to_days(term_label),
+                    "rate": _format_decimal(_to_decimal(match.group("annual"))),
+                    "minimum_deposit": None,
+                    "notes": "Long-term GIC annual interest rate",
+                }
+            )
+
+    short_term_match = re.search(
+        r"short[ -]?term\s+gics?\s+term\s+rate\s*\(%\)(?P<table>.*?)short[ -]?term\s+gics?\s+are",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if short_term_match is not None:
+        for match in re.finditer(
+            r"(?P<start>\d{1,3})\s+(?:-|to\s+)?(?P<end>\d{1,3})\s+days\s+"
+            r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)",
+            short_term_match.group("table"),
+            flags=re.IGNORECASE,
+        ):
+            term_label = f"{match.group('start')}-{match.group('end')} days"
+            rows.append(
+                {
+                    "term_label": term_label,
+                    "term_length_days": None,
+                    "rate": _format_decimal(_to_decimal(match.group("rate"))),
+                    "minimum_deposit": None,
+                    "notes": "Short-term non-redeemable GIC rate",
+                }
+            )
+
+    cashable_match = re.search(
+        r"cashable\s+gics?\s+term\s+after\s+30\s+days\s*\(%\)"
+        r"(?:\s+after\s+90\s+days\s*\(%\))?(?P<table>.*?)cashable\s+gics?\s+require",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if cashable_match is not None:
+        match = re.search(
+            r"(?P<term>\d{1,2}\s+(?:month|months|year|years))\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)",
+            cashable_match.group("table"),
+            flags=re.IGNORECASE,
+        )
+        if match is not None:
+            term_label = _normalize_text(match.group("term"))
+            rows.append(
+                {
+                    "term_label": term_label,
+                    "term_length_days": _term_label_to_days(term_label),
+                    "rate": _format_decimal(_to_decimal(match.group("rate"))),
+                    "minimum_deposit": None,
+                    "notes": "Cashable GIC rate after the stated waiting period",
+                }
+            )
+
+    if not rows:
+        return {}
+    one_year_row = next(
+        (
+            row
+            for row in rows
+            if row.get("term_length_days") in {360, 365}
+            and str(row.get("notes")) == "Long-term GIC annual interest rate"
+        ),
+        rows[0],
+    )
+    one_year_rate = str(one_year_row["rate"])
+    return {
+        "standard_rate": one_year_rate,
+        "public_display_rate": one_year_rate,
+        "base_12_month_rate": one_year_rate,
+        "term_rate_table": rows,
+    }
+
+
+def _extract_current_savings_account_rate(excerpt: str) -> Decimal | None:
+    normalized = _normalize_text(excerpt)
+    if re.search(r"(?:current\s+)?rate\s*\(%\)", normalized, flags=re.IGNORECASE) is None:
+        return None
+    lines = [_WHITESPACE_RE.sub(" ", line).strip() for line in excerpt.splitlines() if line.strip()]
+    for index, line in enumerate(lines[:-1]):
+        if line.lower() != "savings account":
+            continue
+        value = _to_decimal(lines[index + 1])
+        if value is not None and Decimal("0") < value < Decimal("25"):
+            return value
+    inline_match = re.search(
+        r"(?:current\s+)?rate\s*\(%\)\s+savings\s+account\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)\b",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    return _to_decimal(inline_match.group("rate")) if inline_match is not None else None
 
 
 def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, ...]:
@@ -596,6 +830,7 @@ def _is_generic_gic_family_artifact(base_artifact: dict[str, object]) -> bool:
         return False
     identity_segment = re.split(r"\s*(?:\||-|–|—)\s*", product_name, maxsplit=1)[0]
     normalized_identity = _normalize_text(identity_segment)
+    normalized_identity = re.sub(r"\s*\(\s*gics?\s*\)\s*$", "", normalized_identity).strip()
     return normalized_identity in {
         "gic",
         "gics",

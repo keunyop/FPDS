@@ -1608,6 +1608,17 @@ def _materialize_sources_for_catalog_item(
         discovery_notes.append(
             f"Deactivated {rejected_detail_count} previously generated detail source(s) that failed current detail-page validation."
         )
+    hard_scope_excluded_count = 0
+    if generation_result.detail_source_ids:
+        hard_scope_excluded_count = _deactivate_hard_scope_excluded_generated_detail_sources(
+            connection,
+            bank_code=bank_code,
+            product_type=product_type,
+        )
+    if hard_scope_excluded_count:
+        discovery_notes.append(
+            f"Deactivated {hard_scope_excluded_count} previously generated detail source(s) with deterministic hard-scope exclusions."
+        )
     persisted_rows = _upsert_source_registry_rows(connection, generated_rows) if generated_rows else []
     _persist_source_catalog_usage_records(
         connection,
@@ -1653,6 +1664,67 @@ def _deactivate_rejected_generated_detail_sources(
             "bank_code": bank_code,
             "product_type_scope": _product_type_scope_codes(product_type),
             "normalized_urls": rejected_urls,
+        },
+    )
+    return max(0, int(result.rowcount or 0))
+
+
+def _deactivate_hard_scope_excluded_generated_detail_sources(
+    connection: Connection,
+    *,
+    bank_code: str,
+    product_type: str,
+) -> int:
+    rows = connection.execute(
+        """
+        SELECT source_id, normalized_url, source_name, discovery_metadata
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND discovery_role = 'detail'
+          AND status = 'active'
+          AND seed_source_flag = false
+          AND source_id LIKE 'AUTO-%%'
+        """,
+        {
+            "bank_code": bank_code,
+            "product_type_scope": _product_type_scope_codes(product_type),
+        },
+    ).fetchall()
+    excluded_ids: list[str] = []
+    exclusion_reasons: set[str] = set()
+    for raw_row in rows:
+        row = dict(raw_row)
+        metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
+        fingerprint = " ".join(
+            str(value or "")
+            for value in (
+                row.get("normalized_url"),
+                row.get("source_name"),
+                metadata.get("page_title"),
+                metadata.get("primary_heading"),
+            )
+        )
+        reason = _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint)
+        if reason is None:
+            continue
+        excluded_ids.append(str(row["source_id"]))
+        exclusion_reasons.add(reason)
+    if not excluded_ids:
+        return 0
+    result = connection.execute(
+        """
+        UPDATE source_registry_item
+        SET
+            status = 'inactive',
+            updated_at = %(updated_at)s,
+            change_reason = %(change_reason)s
+        WHERE source_id = ANY(%(source_ids)s)
+        """,
+        {
+            "updated_at": utc_now(),
+            "change_reason": "hard_scope_exclusion:" + ",".join(sorted(exclusion_reasons)),
+            "source_ids": sorted(set(excluded_ids)),
         },
     )
     return max(0, int(result.rowcount or 0))
@@ -3104,6 +3176,7 @@ def _detail_rejection_reason(
 ) -> str:
     reason_codes = set(page_evidence.page_evidence_reason_codes)
     for reason in (
+        "multi_product_family_overview",
         "non_consumer_business_page",
         "registered_plan_wrapper",
         "other_product_type",
@@ -3186,6 +3259,11 @@ def _candidate_promotes_to_detail(
     ai_unavailable: bool = False,
     allow_family_overview: bool = False,
 ) -> bool:
+    if (
+        "multi_product_family_overview" in page_evidence.page_evidence_reason_codes
+        and not allow_family_overview
+    ):
+        return False
     if allow_family_overview and _deposit_family_overview_can_be_detail(
         candidate=candidate,
         ai_score=ai_score,
@@ -3649,7 +3727,21 @@ def _looks_like_multi_product_family_overview(
 
     heading_identity = _collapse_whitespace(primary_heading).lower().strip(" .:-|")
     title_identity = _collapse_whitespace(title_text.split("|", 1)[0]).lower().strip(" .:-|")
-    if heading_identity not in generic_identity_terms and title_identity not in generic_identity_terms:
+    exact_generic_identity = heading_identity in generic_identity_terms or title_identity in generic_identity_terms
+    plural_identity_terms = {
+        "chequing": ("chequing accounts", "checking accounts"),
+        "savings": ("savings accounts", "saving accounts"),
+        "gic": ("gics", "term deposits", "guaranteed investment certificates"),
+        "credit-card": ("credit cards",),
+        "mortgage": ("mortgages", "mortgage solutions", "mortgage products"),
+        "personal-loan": ("personal loans",),
+        "line-of-credit": ("lines of credit",),
+    }[normalized_type]
+    plural_family_identity = any(
+        term in heading_identity or term in title_identity
+        for term in plural_identity_terms
+    )
+    if not exact_generic_identity and not plural_family_identity:
         return False
 
     variant_terms = {
@@ -4039,6 +4131,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "/business",
             "business banking",
             "/commercial-banking",
+            "/commercial/",
             "commercial banking",
             "/corporate-banking",
             "corporate banking",
@@ -4048,6 +4141,11 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "business mortgage",
             "business account",
             "business gic",
+            "commercial gic",
+            "commercial deposit",
+            "commercial mortgage",
+            "commercial loan",
+            "commercial account",
         )
     ):
         return "non_consumer_business_page"

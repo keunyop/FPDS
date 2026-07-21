@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-18`:
+As of `2026-07-19`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -31,6 +31,7 @@ As of `2026-07-18`:
 - Multi-bank collection/review hardening now treats `www` and apex redirects as the same bounded bank host, recovers confirmed product details from navigation-wide negative terms, collapses same-product locale/host aliases and byte-identical target snapshots, preserves end-to-end source failures in final Runs summaries, suppresses navigation/marketing copy from candidate fields, and gives Queue/detail one problem-first diagnosis with a Public-detail-style candidate product summary, inline field correction, and evidence.
 - Cross-product collection QA now keeps dynamic candidates inside their registered field contract, rejects cashback/prepayment/equity or unresolved-template numbers as rates, removes wrong-type booleans, duplicated page copy, footer navigation, and term conflicts, and records bounded candidate-score plus rejection summaries in Runs. Official single-product homepages may be detail candidates, while high-confidence deposit family overviews can feed review-first collection without widening retail scope to business, editorial, or service-flow pages. Review Detail opens only flagged fields by default, keeps other collected values collapsed, and puts optional decision notes behind disclosure.
 - Collection accuracy hardening now treats generic multi-product family pages as an explicit product-boundary error, blocks them from canonical auto-promotion, pairs both term-first and rate-first schedules without row shifts, canonicalizes bounded `www`/apex redirects, and rejects advice/service pages plus unrelated account supporting paths. Product-card copy containing words such as `offers` no longer hides legitimate detail links; exact action/promo flows remain excluded.
+- Current-evidence hardening now removes explicitly expired promotional rates before current official supporting-rate merge, isolates normalization artifacts to the active run, rejects commercial pages from retail collection, treats plural multi-variant lending pages as evidence-only, excludes adjacent-product fields by evidence anchor, parses current GIC tables whose percentage unit is declared only in the column header, preserves range terms without inventing a single duration, and includes the PDF crypto runtime needed for encrypted official documents.
 - Public now has separate Deposit and Loan catalog routes. Loan accepts review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products through the same aggregate snapshot and public-only data boundary; candidates that still require review remain non-public.
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context

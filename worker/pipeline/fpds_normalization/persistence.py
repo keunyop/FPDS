@@ -160,6 +160,7 @@ COMMIT;
     def load_latest_extraction_artifacts(
         self,
         *,
+        run_id: str,
         source_document_ids: list[str],
     ) -> list[NormalizationArtifactLookup]:
         if not source_document_ids:
@@ -188,6 +189,7 @@ FROM (
       ON sd.source_document_id = me.source_document_id
     WHERE me.stage_name = 'extraction'
       AND me.execution_status = 'completed'
+      AND me.run_id = :'run_id'
       AND me.source_document_id IN (
         SELECT jsonb_array_elements_text(:'source_document_ids_json'::jsonb)
       )
@@ -196,7 +198,10 @@ FROM (
 """
         output = self._execute(
             sql,
-            variables={"source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True)},
+            variables={
+                "run_id": run_id,
+                "source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True),
+            },
         )
         payload = json.loads(output or "[]")
         return [NormalizationArtifactLookup(**item) for item in payload]

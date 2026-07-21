@@ -21,7 +21,10 @@ from worker.pipeline.fpds_field_contract import (
     mapping_contract_metadata,
     value_matches_contract,
 )
-from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
+from worker.pipeline.fpds_rate_safety import (
+    canonical_deposit_rate_suppression_reason,
+    expired_promotional_offer_end_date,
+)
 
 from .models import (
     NormalizationEvidenceLink,
@@ -503,6 +506,7 @@ def _normalize_candidate(
             runtime_notes=runtime_notes,
         )
 
+    evidence_links_for_output = list(item.evidence_links)
     _clean_product_context_fields(
         product_type_family=product_type_family,
         candidate_payload=candidate_payload,
@@ -510,12 +514,23 @@ def _normalize_candidate(
         field_mapping_metadata=field_mapping_metadata,
         runtime_notes=runtime_notes,
         evidence_context_by_field={
-            field_name: field.evidence_text_excerpt or ""
+            field_name: " ".join(
+                part
+                for part in (field.anchor_value or "", field.evidence_text_excerpt or "")
+                if part
+            )
             for field_name, field in extracted_by_field.items()
         },
     )
+    _apply_credit_card_labeled_fallback(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
     alias_field = _apply_product_type_aliases(product_type_family=product_type_family, candidate_payload=candidate_payload, runtime_notes=runtime_notes)
-    evidence_links_for_output = list(item.evidence_links)
     if alias_field is not None and candidate_payload.get("minimum_deposit") not in {None, ""}:
         normalized_values_for_links["minimum_deposit"] = candidate_payload["minimum_deposit"]
         field_mapping_metadata["minimum_deposit"] = {
@@ -842,11 +857,94 @@ def _apply_rate_evidence_fallback(
     )
 
 
+def _apply_credit_card_labeled_fallback(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    if product_type_family != "credit-card":
+        return
+
+    field_labels = {
+        "purchase_interest_rate": r"(?:current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate)",
+        "balance_transfer_rate": r"(?:interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "cash_advance_rate": r"(?:cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+    }
+    supplemented: list[str] = []
+    for field_name, label_pattern in field_labels.items():
+        if candidate_payload.get(field_name) not in {None, ""}:
+            continue
+        match = _find_fixed_credit_card_rate_evidence(
+            evidence_links=evidence_links_for_output,
+            label_pattern=label_pattern,
+        )
+        if match is None:
+            continue
+        evidence_link, rate = match
+        candidate_payload[field_name] = rate
+        normalized_values_for_links[field_name] = rate
+        field_mapping_metadata[field_name] = {
+            "source_field_name": evidence_link.field_name,
+            "normalized_value": rate,
+            "normalization_method": "credit_card_labeled_rate_fallback",
+            "evidence_chunk_id": evidence_link.evidence_chunk_id,
+            **mapping_contract_metadata(field_name),
+        }
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name=field_name,
+                candidate_value=_stringify(rate),
+                evidence_chunk_id=evidence_link.evidence_chunk_id,
+                evidence_text_excerpt=evidence_link.evidence_text_excerpt,
+                source_document_id=evidence_link.source_document_id,
+                source_snapshot_id=evidence_link.source_snapshot_id,
+                citation_confidence=min(0.9, evidence_link.citation_confidence),
+                model_execution_id=evidence_link.model_execution_id,
+                anchor_type=evidence_link.anchor_type,
+                anchor_value=evidence_link.anchor_value,
+                page_no=evidence_link.page_no,
+                chunk_index=evidence_link.chunk_index,
+            )
+        )
+        supplemented.append(field_name)
+    if supplemented:
+        runtime_notes.append(
+            "Supplemented fixed credit-card rates only from explicit adjacent field labels: "
+            + ", ".join(sorted(supplemented))
+            + "."
+        )
+
+
+def _find_fixed_credit_card_rate_evidence(
+    *,
+    evidence_links: list[NormalizationEvidenceLink],
+    label_pattern: str,
+) -> tuple[NormalizationEvidenceLink, float] | None:
+    for link in evidence_links:
+        text = str(link.evidence_text_excerpt or "")
+        for match in re.finditer(
+            rf"{label_pattern}(?P<between>[\s\S]{{0,150}}?)(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            local_context = (match.group("between") + text[match.end("rate"):match.end("rate") + 50]).lower()
+            if re.search(r"(?:\+\s*(?:the\s+)?(?:bank\s+)?prime|prime\s+rate)", local_context):
+                continue
+            return link, float(match.group("rate"))
+    return None
+
+
 def _find_rate_evidence_fallback_match(
     evidence_links: list[NormalizationEvidenceLink],
 ) -> NormalizationEvidenceLink | None:
     ranked: list[tuple[int, float, NormalizationEvidenceLink]] = []
     for link in evidence_links:
+        if expired_promotional_offer_end_date(link.evidence_text_excerpt) is not None:
+            continue
         percentages = _extract_rate_percentages(link.evidence_text_excerpt)
         if not percentages:
             continue
@@ -909,6 +1007,8 @@ def _rate_field_suppression_reason(
     field: NormalizationExtractedField,
     product_type_family: str | None = None,
 ) -> str | None:
+    if field_name == "term_rate_table" and expired_promotional_offer_end_date(field.evidence_text_excerpt) is not None:
+        return "expired_promotional_offer"
     if field_name not in _RATE_FIELDS:
         return None
     generic_reason = canonical_deposit_rate_suppression_reason(
@@ -1254,6 +1354,11 @@ def _clean_product_context_fields(
             field_name=field_name,
             value=value,
             context=evidence_context,
+        ) or _looks_like_other_product_section(context=evidence_context) or _looks_like_credit_card_field_mismatch(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+            product_type_family=product_type_family,
         )
         if isinstance(value, str):
             should_suppress = should_suppress or (
@@ -1295,6 +1400,27 @@ def _clean_product_context_fields(
             + ", ".join(sorted(suppressed_fields))
             + "."
         )
+
+    if product_type_family == "credit-card" and isinstance(candidate_payload.get("eligibility_text"), str):
+        eligibility = str(candidate_payload["eligibility_text"])
+        cleaned_eligibility = re.sub(
+            r"\s+(?:to\s+qualify|to\s+take\s+advantage),?\s+you\s+must\s+not\s+"
+            r"(?:currently\s+)?(?:hold|have)[\s\S]{0,160}?past\s+\d+\s+months?\.?",
+            "",
+            eligibility,
+            flags=re.IGNORECASE,
+        ).strip()
+        if cleaned_eligibility != eligibility and cleaned_eligibility:
+            candidate_payload["eligibility_text"] = cleaned_eligibility
+            if normalized_values_for_links is not None:
+                normalized_values_for_links["eligibility_text"] = cleaned_eligibility
+            if field_mapping_metadata is not None and "eligibility_text" in field_mapping_metadata:
+                metadata = dict(field_mapping_metadata["eligibility_text"] or {})
+                metadata["normalized_value"] = cleaned_eligibility
+                metadata["normalization_method"] = "credit_card_offer_eligibility_cleanup"
+                field_mapping_metadata["eligibility_text"] = metadata
+            if runtime_notes is not None:
+                runtime_notes.append("Removed acquisition-offer history conditions from ongoing card eligibility.")
 
     duplicated_fields = _duplicated_page_copy_fields(candidate_payload)
     for field_name in duplicated_fields:
@@ -1359,7 +1485,17 @@ def _clean_product_context_fields(
 
 def _looks_like_navigation_contamination(value: str) -> bool:
     normalized = " ".join(value.lower().split())
-    if normalized in {"home", "go to main content", "skip to main content", "document go to main content", "document skip to main content", "learn more", "read more"}:
+    if normalized in {
+        "home",
+        "go to main content",
+        "go to page content",
+        "skip to main content",
+        "document go to main content",
+        "document go to page content",
+        "document skip to main content",
+        "learn more",
+        "read more",
+    }:
         return True
     if any(marker in normalized for marker in ("go to main content", "skip to main content")) and len(normalized) < 120:
         return True
@@ -1402,6 +1538,67 @@ def _looks_like_navigation_contamination(value: str) -> bool:
         "accessibility",
     )
     return sum(marker in normalized for marker in navigation_markers) >= 3
+
+
+def _looks_like_other_product_section(*, context: str) -> bool:
+    normalized = " ".join(context.lower().replace("-", " ").replace("_", " ").split())
+    return any(
+        marker in normalized
+        for marker in (
+            "our other products",
+            "our other investment products",
+            "other banking products",
+            "related products",
+        )
+    )
+
+
+def _looks_like_credit_card_field_mismatch(
+    *,
+    field_name: str,
+    value: object,
+    context: str,
+    product_type_family: str | None,
+) -> bool:
+    if product_type_family != "credit-card":
+        return False
+    normalized_context = " ".join(context.lower().split())
+    if field_name == "annual_fee" and str(value).strip() in {"0", "0.0", "0.00"}:
+        secondary_zero = re.search(
+            r"annual fee for (?:the )?(?:authorized|additional|secondary|second) (?:card|cardholder)[^$]{0,35}\$\s*0\b",
+            normalized_context,
+        )
+        primary_zero = re.search(
+            r"annual fee(?: for (?:the )?(?:primary )?cardholder)?[^$\n]{0,30}\$\s*0\b",
+            context,
+            flags=re.IGNORECASE,
+        )
+        return secondary_zero is not None and primary_zero is None
+    if field_name in {"purchase_interest_rate", "balance_transfer_rate", "cash_advance_rate"}:
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError):
+            return True
+        labels = {
+            "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\))",
+            "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+            "cash_advance_rate": r"(?:cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        }
+        value_pattern = re.escape(f"{numeric_value:g}")
+        match = re.search(
+            rf"{labels[field_name]}[\s\S]{{0,150}}?{value_pattern}\s*%",
+            context,
+            flags=re.IGNORECASE,
+        )
+        if match is None:
+            return True
+        local_context = context[match.start():match.end() + 50].lower()
+        return re.search(r"(?:\+\s*(?:the\s+)?(?:bank\s+)?prime|prime\s+rate)", local_context) is not None
+    if field_name == "rewards_summary":
+        low_rate_identity = any(marker in normalized_context for marker in ("lowest rate card", "low-interest credit card", "pay off your balance faster"))
+        rewards_evidence = any(marker in normalized_context for marker in ("reward", "points", "cash back", "cashback"))
+        return low_rate_identity and not rewards_evidence
+    return False
 
 
 def _looks_like_non_value_rate(*, field_name: str, value: str) -> bool:
@@ -1521,9 +1718,25 @@ def _looks_like_non_value_lending_field(
         return True
     if field_name == "fees_text" and normalized in {"monthly fees free", "monthly fee free"}:
         return True
+    if field_name == "fees_text" and any(
+        marker in normalized for marker in ("penalty free", "penalty-free", "without penalty", "prepay", "repay")
+    ) and not any(marker in normalized for marker in ("fee", "$")):
+        return True
+    if field_name == "monthly_payment_text" and any(
+        marker in normalized for marker in ("calculate", "calculator", "see how much", "estimate your")
+    ) and not re.search(r"(?:\$|\b\d[\d,.]*\b|weekly|biweekly|bi-weekly|monthly)", normalized):
+        return True
     if field_name == "loan_amount_text" and len(normalized) > 100:
         return re.search(r"(?:\$|\b\d[\d,.]*\b|\bminimum\b|\bmaximum\b|\bup to\b)", normalized) is None
-    if field_name == "security_requirement":
+    if field_name in {"security_requirement", "collateral_text"}:
+        if normalized in {
+            "security requirement",
+            "security requirements",
+            "collateral",
+            "what collateral is required",
+            "is collateral required",
+        }:
+            return True
         navigation_markers = (
             "document",
             "rates",
@@ -2148,6 +2361,8 @@ def _set_field_note(field_mapping_metadata: dict[str, object], field_name: str, 
 
 
 def _term_label_to_days(term_label: str) -> int | None:
+    if re.search(r"\d{1,3}\s*(?:-|–|—|to)\s*\d{1,3}\s*days?\b", term_label, flags=re.IGNORECASE):
+        return None
     match = re.search(r"(?<!\d)(\d{1,3})\s*(day|days|month|months|year|years)\b", term_label, flags=re.IGNORECASE)
     if match is None:
         return None

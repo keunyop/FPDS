@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 import unittest
 
 from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
@@ -52,6 +53,30 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
                     ),
                     "non_annual_return_context",
                 )
+
+    def test_expired_promotional_offer_is_not_a_current_rate(self) -> None:
+        context = (
+            "Special rate 6.00% for a 1 Year GIC. "
+            "Terms and conditions apply. Offer valid from Nov 1 to Nov 30, 2023."
+        )
+
+        self.assertEqual(
+            canonical_deposit_rate_suppression_reason(
+                value="6.00",
+                context=context,
+                reference_date=date(2026, 7, 19),
+            ),
+            "expired_promotional_offer",
+        )
+
+    def test_offer_that_has_not_ended_remains_eligible(self) -> None:
+        self.assertIsNone(
+            canonical_deposit_rate_suppression_reason(
+                value="4.25",
+                context="Special interest rate 4.25%. Offer valid until December 31, 2026.",
+                reference_date=date(2026, 7, 19),
+            )
+        )
 
 
 if __name__ == "__main__":

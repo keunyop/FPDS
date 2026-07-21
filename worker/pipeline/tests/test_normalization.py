@@ -18,6 +18,7 @@ from worker.pipeline.fpds_normalization.persistence import (
 )
 from worker.pipeline.fpds_normalization.service import (
     NormalizationService,
+    _apply_credit_card_labeled_fallback,
     _build_field_evidence_link_records,
     _clean_product_context_fields,
     _extract_rate_percentages,
@@ -45,6 +46,15 @@ class NormalizationServiceTests(unittest.TestCase):
                 {"term_label": "5 Years", "term_length_days": 1825, "rate": 4.0, "minimum_deposit": None, "notes": None},
             ],
         )
+
+    def test_term_rate_range_does_not_collapse_to_range_end(self) -> None:
+        rows = _normalize_term_rate_table(
+            [{"term_label": "30-59 days", "term_length_days": None, "rate": "1.00", "notes": "Short-term GIC"}]
+        )
+
+        self.assertEqual(rows[0]["term_label"], "30-59 days")
+        self.assertIsNone(rows[0]["term_length_days"])
+        self.assertEqual(rows[0]["rate"], 1.0)
 
     def test_evidence_link_keeps_supporting_source_document(self) -> None:
         link = NormalizationEvidenceLink(
@@ -164,6 +174,104 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertNotIn("application_method", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
 
+    def test_savings_cleanup_suppresses_navigation_and_other_product_section_fields(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example High Interest Savings Account",
+            "description_short": "Go to page content",
+            "standard_rate": 0.55,
+            "tiered_rate_flag": True,
+            "tier_definition_text": "Cash Advantage Solution tiers apply.",
+        }
+        normalized_values = dict(payload)
+        mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+            evidence_context_by_field={
+                "tiered_rate_flag": "our-other-investment-products Cash Advantage Solution tiers",
+                "tier_definition_text": "our-other-investment-products Cash Advantage Solution tiers",
+            },
+        )
+
+        self.assertEqual(
+            payload,
+            {"product_name": "Example High Interest Savings Account", "standard_rate": 0.55},
+        )
+        self.assertNotIn("tiered_rate_flag", normalized_values)
+        self.assertNotIn("tier_definition_text", mapping_metadata)
+
+    def test_credit_card_cleanup_rejects_secondary_fee_unlabeled_rate_and_offer_eligibility(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Low Rate Mastercard",
+            "annual_fee": 0.0,
+            "purchase_interest_rate": 22.49,
+            "rewards_summary": "Up to $900 in travel discounts.",
+            "eligibility_text": (
+                "Minimum annual income: $80,000. Subject to credit approval. "
+                "To take advantage, you must not currently hold, or have held this card in the past 24 months."
+            ),
+        }
+        contexts = {
+            "annual_fee": "Annual fee ${price} Annual fee for the authorized cardholder $0",
+            "purchase_interest_rate": "Annual interest rate example $500 $3,000 22.49% 20.99%",
+            "rewards_summary": "Our lowest rate card helps you pay off your balance faster. Travel discount banner.",
+        }
+
+        _clean_product_context_fields(
+            product_type_family="credit-card",
+            candidate_payload=payload,
+            evidence_context_by_field=contexts,
+        )
+
+        self.assertNotIn("annual_fee", payload)
+        self.assertNotIn("purchase_interest_rate", payload)
+        self.assertNotIn("rewards_summary", payload)
+        self.assertEqual(
+            payload["eligibility_text"],
+            "Minimum annual income: $80,000. Subject to credit approval.",
+        )
+
+    def test_credit_card_fallback_uses_only_fixed_rates_adjacent_to_labels(self) -> None:
+        excerpt = (
+            "Annual fee for the cardholder $0 first year, $70/year thereafter. "
+            "Purchase rate 20.99%. Balance transfers and cash advances 22.49%."
+        )
+        source_link = NormalizationEvidenceLink(
+            field_name="annual_fee",
+            candidate_value="70",
+            evidence_chunk_id="chunk-card",
+            evidence_text_excerpt=excerpt,
+            source_document_id="source-card",
+            source_snapshot_id="snapshot-card",
+            citation_confidence=0.92,
+            model_execution_id="model-card",
+            anchor_type="section",
+            anchor_value="card-at-a-glance",
+            page_no=None,
+            chunk_index=1,
+        )
+        payload: dict[str, object] = {"product_name": "Example Platinum Mastercard", "annual_fee": 70.0}
+        normalized_values = dict(payload)
+        mapping_metadata: dict[str, object] = {}
+        evidence_links = [source_link]
+
+        _apply_credit_card_labeled_fallback(
+            product_type_family="credit-card",
+            candidate_payload=payload,
+            field_mapping_metadata=mapping_metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=evidence_links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["purchase_interest_rate"], 20.99)
+        self.assertEqual(payload["balance_transfer_rate"], 22.49)
+        self.assertEqual(payload["cash_advance_rate"], 22.49)
+        self.assertEqual(len(evidence_links), 4)
+
     def test_lending_cleanup_rejects_rate_and_term_fields_from_unrelated_context(self) -> None:
         payload: dict[str, object] = {
             "product_name": "Example Mortgage",
@@ -231,6 +339,9 @@ class NormalizationServiceTests(unittest.TestCase):
             "loan_amount_text": "Home renovations can make your space work better for your family and help you plan for future projects.",
             "security_requirement": "Document Rates Contact us Search Login Go to homepage",
             "prepayment_privileges": "CHIP Reverse Mortgage",
+            "collateral_text": "What collateral is required",
+            "application_method": "Open a bank account online",
+            "monthly_payment_text": "Calculate your payment",
         }
         normalized_values = dict(payload)
         mapping_metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
@@ -1606,6 +1717,134 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "1.60")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "1.60")
 
+    def test_generic_supporting_merge_ignores_expired_offer_and_uses_current_rate_match(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "Example Savings Account", "string", 0.88),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="promotional_rate",
+                        anchor_value="old-offer",
+                        excerpt=(
+                            "Example Savings Account special rate 6.00%. "
+                            "Offer valid from Nov 1 to Nov 30, 2023."
+                        ),
+                    ),
+                    _match_dict(
+                        field_name="account_interest_rates",
+                        anchor_value="current-rates",
+                        excerpt=(
+                            "Savings account rates\nType\nCurrent rate (%)\n"
+                            "Savings Account\n2.80\nTFSA Savings Account\n2.80\n"
+                            "The rates in the table have been in effect since June 30, 2026."
+                        ),
+                    ),
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-SAV-detail",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-SAV-rates": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "2.80")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "2.80")
+
+    def test_rate_fallback_does_not_reintroduce_expired_evidence(self) -> None:
+        expired_link = NormalizationEvidenceLink(
+            field_name="standard_rate",
+            candidate_value="6.00",
+            evidence_chunk_id="chunk-expired",
+            evidence_text_excerpt=(
+                "Special rate 6.00% for 1 Year GIC. "
+                "Offer valid from Nov 1 to Nov 30, 2023."
+            ),
+            source_document_id="source-expired",
+            source_snapshot_id="snapshot-expired",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="old-offer",
+            page_no=None,
+            chunk_index=1,
+        )
+        payload: dict[str, object] = {"product_name": "Example Savings Account"}
+
+        from worker.pipeline.fpds_normalization.service import _apply_rate_evidence_fallback
+
+        _apply_rate_evidence_fallback(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata={},
+            normalized_values_for_links={},
+            evidence_links_for_output=[expired_link],
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload, {"product_name": "Example Savings Account"})
+
+    def test_expired_detail_rates_are_removed_before_current_supporting_rate_merge(self) -> None:
+        expired_excerpt = (
+            "We're celebrating our anniversary with a special rate 6.00% for a 1 Year GIC. "
+            "Offer valid from Nov 1 to Nov 30, 2023."
+        )
+        expired_fields = [
+            _field_dict("standard_rate", "6.00", "decimal", 0.95),
+            _field_dict("public_display_rate", "6.00", "decimal", 0.95),
+            _field_dict("promotional_rate", "6.00", "decimal", 0.95),
+            _field_dict(
+                "term_rate_table",
+                [{"term_label": "1 year", "term_length_days": 365, "rate": "6.00"}],
+                "json",
+                0.90,
+            ),
+        ]
+        for field in expired_fields:
+            field["evidence_text_excerpt"] = expired_excerpt
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "Example Savings Account", "string", 0.88),
+                *expired_fields,
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="account_interest_rates",
+                        anchor_value="current-rates",
+                        excerpt="Example Savings Account current annual interest rate 2.80%",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-SAV-detail",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-SAV-rates": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "2.80")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "2.80")
+        self.assertNotIn("promotional_rate", fields_by_name)
+        self.assertNotIn("term_rate_table", fields_by_name)
+        self.assertIn("explicitly expired promotional offer", " ".join(merged["runtime_notes"]))
+
     def test_generic_supporting_merge_handles_generated_chequing_fee_source(self) -> None:
         base_artifact = {
             "schema_context": {"product_type": "chequing"},
@@ -1753,6 +1992,65 @@ class SupportingMergeTests(unittest.TestCase):
             ["2.50", "2.75", "3.00", "3.30", "3.55", "4.00"],
         )
         self.assertEqual(fields_by_name["term_rate_table"]["source_document_id"], "src-support-001")
+
+    def test_generic_gic_family_page_parses_current_column_header_rate_table(self) -> None:
+        expired_context = (
+            "Special rate 6.00% 1 Year GIC. "
+            "Offer valid from Nov 1 to Nov 30, 2023."
+        )
+        expired_rate = _field_dict("standard_rate", "6.00", "decimal", 0.91, evidence_chunk_id="chunk-expired")
+        expired_rate["evidence_text_excerpt"] = expired_context
+        expired_display = _field_dict("public_display_rate", "6.00", "decimal", 0.91, evidence_chunk_id="chunk-expired")
+        expired_display["evidence_text_excerpt"] = expired_context
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict("product_name", "Guaranteed Investment Certificates (GICs)", "string", 0.88),
+                expired_rate,
+                expired_display,
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="minimum_deposit",
+                        anchor_value="our-gic-rates",
+                        excerpt=(
+                            "Our GIC rates\nYou'll find all of our current GIC rates here.\n"
+                            "Long Term GICs\nTerm\nAnnual (%)\nSemi Annual (%)\nMonthly (%)\n"
+                            "1 Year\n3.35\n3.30\n3.25\n18 Months\n3.45\n3.40\n3.35\n"
+                            "2 Years\n3.65\n3.60\n3.55\n3 Years\n3.70\n3.65\n3.60\n"
+                            "4 Years\n3.75\n3.70\n3.65\n5 Years\n4.00\n3.95\n3.90\n"
+                            "Long-term GICs are non-redeemable and require a minimum deposit of $1,000.\n"
+                            "Short Term GICs\nTerm\nRate (%)\n30-59 Days\n1.00\n60-89 Days\n1.00\n"
+                            "90-119 Days\n1.00\n120-179 Days\n1.00\n180-269 Days\n2.25\n"
+                            "270-364 Days\n2.70\nShort-term GICs are non-redeemable.\n"
+                            "Cashable GICs\nTerm\nAfter 30 Days (%)\nAfter 90 Days (%)\n1 Year\n2.25\n"
+                            "Cashable GICs require a minimum deposit of $1,000."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-OAKEN-GIC-detail",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-OAKEN-GIC-rates": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.35")
+        self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.35")
+        self.assertEqual(fields_by_name["base_12_month_rate"]["candidate_value"], "3.35")
+        rows = fields_by_name["term_rate_table"]["candidate_value"]
+        self.assertEqual(len(rows), 13)
+        self.assertEqual(rows[0]["notes"], "Long-term GIC annual interest rate")
+        self.assertEqual(rows[-1]["rate"], "2.25")
+        self.assertIn("Cashable GIC", rows[-1]["notes"])
 
     def test_generic_gic_support_replaces_zero_placeholder_rates_for_bank_prefixed_title(self) -> None:
         zero_rows = [
@@ -2490,10 +2788,11 @@ class NormalizationPersistenceTests(unittest.TestCase):
             command_runner=runner,
         )
 
-        result = repository.load_latest_extraction_artifacts(source_document_ids=["src-001"])
+        result = repository.load_latest_extraction_artifacts(run_id="run-001", source_document_ids=["src-001"])
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].parsed_document_id, "parsed-001")
+        self.assertEqual(runner.last_variables()["run_id"], "run-001")
         self.assertEqual(json.loads(runner.last_variables()["source_document_ids_json"]), ["src-001"])
 
     def test_persist_normalization_result_updates_candidate_and_links(self) -> None:

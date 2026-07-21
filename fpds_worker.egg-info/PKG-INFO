@@ -5,6 +5,7 @@ Summary: FPDS worker pipeline baseline for discovery, snapshot, parsing, and chu
 Requires-Python: >=3.12
 Description-Content-Type: text/markdown
 Requires-Dist: beautifulsoup4<5,>=4.12
+Requires-Dist: cryptography>=3.1
 Requires-Dist: pypdf<7,>=5
 
 # FPDS Workspace

@@ -20,6 +20,7 @@ from api_service.source_catalog import (
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
+    _deactivate_hard_scope_excluded_generated_detail_sources,
     _deactivate_rejected_generated_detail_sources,
     _dedupe_detail_rows_by_product_identity,
     _extract_allowed_links,
@@ -139,6 +140,15 @@ class SourceCatalogTests(unittest.TestCase):
                 fingerprint="https://www.examplebank.ca/mortgages/switch-mortgage.html",
             ),
             "non_product_service_flow",
+        )
+
+    def test_commercial_product_page_is_out_of_retail_candidate_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint="https://www.examplebank.ca/en-ca/commercial/ Oaken Commercial GICs",
+            ),
+            "non_consumer_business_page",
         )
 
     def test_javascript_shell_detection_requires_explicit_rendering_marker(self) -> None:
@@ -511,6 +521,79 @@ class SourceCatalogTests(unittest.TestCase):
             )
 
         self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_plural_credit_card_category_marks_multi_product_boundary(self) -> None:
+        detail_html = """
+        <html><head><title>No Annual Fee Mastercard Credit Cards | Example Bank</title></head><body>
+          <h1>No annual fee Mastercard credit cards</h1>
+          <h2>Cashback Mastercard</h2>
+          <p>No annual fee with cash back rewards.</p>
+          <h2>Rewards Mastercard</h2>
+          <p>No annual fee with travel rewards.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/credit-cards/no-fee",
+                fetch_policy=SimpleNamespace(),
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+            )
+
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+        candidate = HomepageCandidate(
+            normalized_url="https://www.examplebank.ca/credit-cards/no-fee",
+            raw_url="https://www.examplebank.ca/credit-cards/no-fee",
+            anchor_text="No annual fee credit cards",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=candidate.normalized_url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="A credit-card category page.",
+        )
+        self.assertFalse(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=result,
+                allow_family_overview=False,
+            )
+        )
+
+    def test_named_high_interest_savings_detail_is_not_a_family_overview(self) -> None:
+        detail_html = """
+        <html><head><title>High Interest Savings Account (HISA) | Example Bank</title></head><body>
+          <h1>High Interest Savings Account</h1>
+          <h2>Saving made easy</h2>
+          <p>Earn 0.55% interest paid monthly.</p>
+          <h2>Our other investment products</h2>
+          <h3>Cash Advantage Solution</h3>
+          <h3>Guaranteed investment certificates</h3>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/savings/high-interest",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+
+        self.assertNotIn("multi_product_family_overview", result.page_evidence_reason_codes)
 
     def test_mortgage_refinance_advice_page_is_not_product_detail(self) -> None:
         detail_html = """
@@ -1277,6 +1360,10 @@ class SourceCatalogTests(unittest.TestCase):
                     }
                 ],
             ) as upsert_rows,
+            patch(
+                "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
+                return_value=0,
+            ),
         ):
             result = _materialize_sources_for_catalog_item(
                 connection,
@@ -1352,6 +1439,10 @@ class SourceCatalogTests(unittest.TestCase):
                 ),
             ),
             patch("api_service.source_catalog._upsert_source_registry_rows", return_value=[]),
+            patch(
+                "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
+                return_value=0,
+            ),
         ):
             result = _materialize_sources_for_catalog_item(
                 connection,
@@ -1438,6 +1529,10 @@ class SourceCatalogTests(unittest.TestCase):
                 "api_service.source_catalog._upsert_source_registry_rows",
                 side_effect=lambda _connection, rows: rows,
             ) as upsert_rows,
+            patch(
+                "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
+                return_value=0,
+            ),
         ):
             result = _materialize_sources_for_catalog_item(
                 connection,
@@ -1929,6 +2024,42 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("seed_source_flag = false", sql)
         self.assertIn("source_id LIKE 'AUTO-%%'", sql)
         self.assertEqual(len(params["normalized_urls"]), 2)
+
+    def test_deactivates_existing_generated_detail_with_hard_retail_scope_exclusion(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-OAKEN-GIC-commercial",
+                        "normalized_url": "https://oaken.com/en-ca/commercial",
+                        "source_name": "Oaken Commercial GICs",
+                        "discovery_metadata": {
+                            "page_title": "Commercial GICs - Organization Savings",
+                            "primary_heading": "Oaken Commercial GICs",
+                        },
+                    },
+                    {
+                        "source_id": "AUTO-OAKEN-GIC-personal",
+                        "normalized_url": "https://oaken.com/en-ca/guaranteed-investment-certificate",
+                        "source_name": "Oaken Personal GICs",
+                        "discovery_metadata": {"primary_heading": "Guaranteed Investment Certificates"},
+                    },
+                ],
+                1,
+            ]
+        )
+
+        count = _deactivate_hard_scope_excluded_generated_detail_sources(
+            connection,
+            bank_code="OAKEN",
+            product_type="gic",
+        )
+
+        self.assertEqual(count, 1)
+        update_sql, update_params = connection.calls[1]
+        self.assertIn("status = 'inactive'", update_sql)
+        self.assertEqual(update_params["source_ids"], ["AUTO-OAKEN-GIC-commercial"])
+        self.assertIn("non_consumer_business_page", update_params["change_reason"])
 
     def test_page_evidence_does_not_treat_product_cta_copy_as_negative(self) -> None:
         detail_html = """

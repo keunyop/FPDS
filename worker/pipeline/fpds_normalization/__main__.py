@@ -86,7 +86,10 @@ def main() -> int:
         started_at=_utc_now_iso(),
     )
 
-    lookups = repository.load_latest_extraction_artifacts(source_document_ids=lookup_source_document_ids)
+    lookups = repository.load_latest_extraction_artifacts(
+        run_id=args.run_id,
+        source_document_ids=lookup_source_document_ids,
+    )
     lookup_by_source_document_id = {item.source_document_id: item for item in lookups}
     missing_source_ids = [
         source_id
