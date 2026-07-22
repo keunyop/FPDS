@@ -1,7 +1,7 @@
 # Financial Product Field Contract
 
 Status: Active
-Last updated: 2026-07-19
+Last updated: 2026-07-21
 
 ## Purpose
 
@@ -55,6 +55,12 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 14. Credit-card fees and fixed rates require an adjacent matching label. Secondary/additional-card fees are not the primary annual fee; unresolved template values and variable `prime + margin` expressions remain omitted unless the contract gains a typed variable-rate representation.
 15. A current official GIC family table may declare `%` once in its column heading instead of after every value. Parse only a bounded GIC-rate section, prefer the annual column for the canonical one-year comparison rate, preserve variant context in term-row notes, and leave `term_length_days` empty for duration ranges such as `30-59 days`.
 16. Evidence rejected as expired, cross-product, or semantically mismatched cannot be reintroduced by a later generic fallback in the same normalization pass.
+17. A scalar term duration must equal a duration explicitly stated by the evidence. When text publishes a range, a numeric duration may match a declared boundary but must never reinterpret months as days or select an unrelated guarantee period.
+18. Application fields must describe the current product. Government-aid instructions, business-account opening actions, adjacent vehicle-loan actions, and other section-scoped CTAs are omitted when their evidence identifies a different product or service.
+19. Security and collateral fields require explicit security semantics such as secured, unsecured, collateral, guarantor, lien, pledge, or down payment. A product heading or marketing slogan is not evidence that a product is secured or unsecured.
+20. A list of available interest-payment or payout frequencies cannot become one scalar option. Preserve a single value only when the evidence states that value as the governing choice for the product; otherwise omit it or use a future typed multi-option field.
+21. A promotion's `valid until`, end, or expiry date is not the product's `effective_date`. Until an explicit offer-end field is part of the canonical contract, omit that date rather than changing its meaning.
+22. When a current official GIC rate section publishes the same minimum deposit for the included variants, place it on each applicable term row and expose the common scalar `minimum_deposit`; do not borrow a registered-plan minimum from another section.
 
 ## Runtime Validation
 

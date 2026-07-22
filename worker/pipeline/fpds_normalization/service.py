@@ -1359,6 +1359,12 @@ def _clean_product_context_fields(
             value=value,
             context=evidence_context,
             product_type_family=product_type_family,
+        ) or _looks_like_unsupported_security_value(
+            field_name=field_name,
+            context=evidence_context,
+        ) or _looks_like_offer_end_mapped_as_effective_date(
+            field_name=field_name,
+            context=evidence_context,
         )
         if isinstance(value, str):
             should_suppress = should_suppress or (
@@ -1378,6 +1384,7 @@ def _clean_product_context_fields(
                     field_name=field_name,
                     value=value,
                     product_type_family=product_type_family,
+                    context=evidence_context,
                 )
                 or _looks_like_non_value_lending_field(
                     field_name=field_name,
@@ -1640,12 +1647,24 @@ def _looks_like_unresolved_placeholder(value: str) -> bool:
 
 
 def _looks_like_wrong_frequency_context(*, field_name: str, value: str, context: str) -> bool:
-    if field_name not in {"compounding_frequency", "interest_payment_frequency"}:
+    if field_name not in {"compounding_frequency", "interest_payment_frequency", "payout_option"}:
         return False
     normalized_value = value.strip().lower()
+    normalized_context = " ".join(context.lower().split())
+    option_markers = {
+        "monthly": r"\bmonthly\b",
+        "quarterly": r"\bquarterly\b",
+        "semi-annually": r"\bsemi[- ]annually\b",
+        "annually": r"\bannually\b|\bannual interest\b",
+        "at_maturity": r"\bat maturity\b",
+    }
+    stated_options = {
+        name for name, pattern in option_markers.items() if re.search(pattern, normalized_context)
+    }
+    if len(stated_options) >= 2 and normalized_value in stated_options:
+        return True
     if normalized_value not in {"weekly", "biweekly", "bi-weekly", "monthly", "semi-monthly"}:
         return False
-    normalized_context = " ".join(context.lower().split())
     return "payment frequency" in normalized_context and not any(
         marker in normalized_context
         for marker in ("interest payment", "interest is paid", "interest compounded", "interest compounds")
@@ -1676,10 +1695,12 @@ def _looks_like_invalid_application_method(
     field_name: str,
     value: str,
     product_type_family: str | None,
+    context: str = "",
 ) -> bool:
     if field_name != "application_method":
         return False
     normalized = " ".join(value.lower().split())
+    normalized_context = " ".join(context.lower().replace("_", " ").split())
     if any(
         marker in normalized
         for marker in (
@@ -1700,7 +1721,52 @@ def _looks_like_invalid_application_method(
         )
         if targets_bank_account and not mentions_current_product:
             return True
+    combined = f"{normalized_context} {normalized}"
+    if product_type_family == "line-of-credit" and any(
+        marker in combined
+        for marker in ("government-guaranteed student loan", "government guaranteed student loan", "ministère", "student aid office")
+    ):
+        return True
+    if product_type_family == "mortgage" and any(
+        marker in combined for marker in ("open an account online", "business account", "business banking account")
+    ) and "apply for a mortgage" not in normalized:
+        return True
+    if product_type_family == "personal-loan" and re.search(r"\bcar loans?\b", combined) and not re.search(
+        r"\bpersonal loans?\b", normalized
+    ):
+        return True
     return False
+
+
+def _looks_like_unsupported_security_value(*, field_name: str, context: str) -> bool:
+    if field_name not in {"secured_flag", "security_requirement", "collateral_text"}:
+        return False
+    normalized = " ".join(context.lower().split())
+    return not any(
+        marker in normalized
+        for marker in (
+            "secured",
+            "unsecured",
+            "security requirement",
+            "collateral",
+            "guarantor",
+            "co-signer",
+            "cosigner",
+            "pledge",
+            "lien",
+            "down payment",
+        )
+    )
+
+
+def _looks_like_offer_end_mapped_as_effective_date(*, field_name: str, context: str) -> bool:
+    if field_name != "effective_date":
+        return False
+    normalized = " ".join(context.lower().split())
+    return any(
+        marker in normalized
+        for marker in ("offer valid until", "offer ends", "offer expires", "promotion ends", "promotion expires")
+    )
 
 
 def _looks_like_non_value_lending_field(
@@ -1718,6 +1784,8 @@ def _looks_like_non_value_lending_field(
         return True
     if field_name == "fees_text" and normalized in {"monthly fees free", "monthly fee free"}:
         return True
+    if field_name == "fees_text" and not any(marker in normalized for marker in ("fee", "charge", "cost")):
+        return True
     if field_name == "fees_text" and any(
         marker in normalized for marker in ("penalty free", "penalty-free", "without penalty", "prepay", "repay")
     ) and not any(marker in normalized for marker in ("fee", "$")):
@@ -1725,6 +1793,8 @@ def _looks_like_non_value_lending_field(
     if field_name == "monthly_payment_text" and any(
         marker in normalized for marker in ("calculate", "calculator", "see how much", "estimate your")
     ) and not re.search(r"(?:\$|\b\d[\d,.]*\b|weekly|biweekly|bi-weekly|monthly)", normalized):
+        return True
+    if field_name == "monthly_payment_text" and not re.search(r"\b(?:payment|payments|repayment|repay)\b", normalized):
         return True
     if field_name == "loan_amount_text" and len(normalized) > 100:
         return re.search(r"(?:\$|\b\d[\d,.]*\b|\bminimum\b|\bmaximum\b|\bup to\b)", normalized) is None
@@ -1817,8 +1887,8 @@ def _suppress_inconsistent_term_length(
         return
     minimum_days = min(durations)
     maximum_days = max(durations)
-    tolerance = max(7, round(minimum_days * 0.08))
-    if minimum_days - tolerance <= numeric_days <= maximum_days + max(7, round(maximum_days * 0.08)):
+    boundary_tolerances = [max(7, round(duration * 0.08)) for duration in durations]
+    if any(abs(numeric_days - duration) <= tolerance for duration, tolerance in zip(durations, boundary_tolerances)):
         return
     candidate_payload.pop("term_length_days", None)
     if normalized_values_for_links is not None:
@@ -1857,7 +1927,29 @@ def _looks_like_non_value_eligibility(*, field_name: str, value: str) -> bool:
         marker in normalized
         for marker in ("must ", "requires ", "eligible if", "at least", "minimum ", "resident", "income", "credit score")
     )
-    return calculator_cta or estimate_output or len(normalized) < 120 and (
+    eligibility_criteria = any(
+        marker in normalized
+        for marker in (
+            "must ",
+            "requires ",
+            "eligible if",
+            "at least",
+            "minimum ",
+            "resident",
+            "income",
+            "credit score",
+            "age of majority",
+            "canadian citizen",
+        )
+    )
+    rate_or_insurance_card = not eligibility_criteria and (
+        "%" in normalized or "eligible for cdic coverage" in normalized or "deposit insurance" in normalized
+    )
+    generic_marketing = not eligibility_criteria and any(
+        marker in normalized
+        for marker in ("great option when you need", "focus on your", "make it happen", "hassle-free")
+    )
+    return calculator_cta or estimate_output or rate_or_insurance_card or generic_marketing or len(normalized) < 120 and (
         normalized.startswith("and ")
         or "we understand that" in normalized
         or normalized in {"learn more", "get started", "contact us"}

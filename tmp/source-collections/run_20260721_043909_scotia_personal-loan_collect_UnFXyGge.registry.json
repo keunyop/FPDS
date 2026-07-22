@@ -1,0 +1,687 @@
+{
+  "registry_version": "2026-07-21",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "personal-loan",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "scotiabank.com"
+  ],
+  "entry_source_id": "AUTO-SCOTIA-PER-1fab86d6f8",
+  "sources": [
+    {
+      "source_id": "AUTO-SCOTIA-PER-1fab86d6f8",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "A named auto-financing program likely describing a specific vehicle-loan offering.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/auto-finance-program.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Car loans for newcomers to Canada | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "StartRight auto finance program",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "A named auto-financing program likely describing a specific vehicle-loan offering.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 2,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-2e55e0e489",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names a specific auto-loan product category and is a plausible installment-loan detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/auto-loan.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Auto Financing - Car Loans in Canada | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Auto loans",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names a specific auto-loan product category and is a plausible installment-loan detail page.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-4ab84134b9",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names a specific vehicle-loan product, which fits the broader personal and installment-loan definition.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/recreational-vehicle-loan.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Recreational Vehicle Loan (RV) | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "Recreational vehicle (RV) loan",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names a specific vehicle-loan product, which fits the broader personal and installment-loan definition.",
+        "page_evidence_score": 4,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-076e4dbbd0",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational vehicle-buying guidance, not a loan product detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/how-to-choose-a-vehicle.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational vehicle-buying guidance, not a loan product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-0ee9ef6bc6",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant loans hub containing multiple products, but not a single named personal-loan detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant loans hub containing multiple products, but not a single named personal-loan detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-24154dfb8d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General borrowing advice rather than a named loan offering.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/borrowing-basics/lower-your-overall-cost-borrowing.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General borrowing advice rather than a named loan offering.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-3d8f3c7f10",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Glossary content supports loan research but does not describe a named loan product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/auto-loan-glossary.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Glossary content supports loan research but does not describe a named loan product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-8d79895798",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant to auto loans but is explicitly a payment calculator.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/auto-loan/auto-loan-payment-calculator.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "pricing_or_feature_signal",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant to auto loans but is explicitly a payment calculator.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "pricing_or_feature_signal",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-b2048a1173",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational comparison content that may support vehicle-loan research but is not product detail.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/borrowing-basics/loan-vs-lease-decision.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational comparison content that may support vehicle-loan research but is not product detail.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-e955f1547c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General borrowing education, not a personal-loan product page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/borrowing-basics/building-a-good-credit-history.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General borrowing education, not a personal-loan product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-PER-fe1e1d2576",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A product-selection flow or hub, not a single named personal-loan page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/help-me-choose-master.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "loan_amount_text",
+        "term_length_text",
+        "monthly_payment_text",
+        "security_requirement",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Personal Loan",
+      "product_type_description": "Canadian personal loan products, including unsecured loans, car or vehicle loans, RRSP loans, home improvement loans, and other installment-loan variants.",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A product-selection flow or hub, not a single named personal-loan page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    }
+  ]
+}

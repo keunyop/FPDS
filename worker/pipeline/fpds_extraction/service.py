@@ -1291,6 +1291,9 @@ def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
     product_type = _infer_product_type(context)
     if product_type in _CANONICAL_PRODUCT_TYPES:
         return False
+    discovery_role = str(context.source_metadata.get("discovery_role") or "").strip().lower()
+    if discovery_role in {"supporting_html", "supporting_pdf", "linked_pdf", "entry"}:
+        return False
     return bool(context.source_metadata.get("product_type_dynamic", True))
 
 
@@ -1674,6 +1677,14 @@ def _extract_money_value(
             ),
         ):
             return "0.00"
+        reversed_label_match = re.search(
+            r"(?:minimum(?:\s+of)?\s+\$\s*(?P<leading>\d[\d,]*(?:\.\d{1,2})?)\s+(?:deposit|investment)"
+            r"|\$\s*(?P<trailing>\d[\d,]*(?:\.\d{1,2})?)\s+minimum\s+(?:deposit|investment))",
+            text,
+            flags=re.IGNORECASE,
+        )
+        if reversed_label_match is not None:
+            return _normalize_decimal((reversed_label_match.group("leading") or reversed_label_match.group("trailing")).replace(",", ""))
         return _extract_money_near_labels(
             text=text,
             label_patterns=(

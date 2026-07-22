@@ -1,0 +1,1027 @@
+{
+  "registry_version": "2026-07-21",
+  "bank_code": "TANGERINE",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "tangerine.ca"
+  ],
+  "entry_source_id": "AUTO-TANGERINE-CRE-564378ef86",
+  "sources": [
+    {
+      "source_id": "AUTO-TANGERINE-CRE-564378ef86",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names a specific Tangerine Rewards World Elite Mastercard product.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/world-elite-mastercard",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Tangerine\u00ae Rewards World Elite\u00ae* Mastercard\u00ae* | Tangerine",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 5,
+        "primary_heading": "Tangerine Rewards World Elite \u00ae* Mastercard \u00ae*",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names a specific Tangerine Rewards World Elite Mastercard product.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 9,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-a3134d0301",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "French-language URL explicitly names the Tangerine Rewards World Elite Mastercard product.",
+      "url": "https://www.tangerine.ca/fr/particuliers/depenses/carte-de-credit/mastercard-world-elite-recompenses-tangerine",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Mastercard\u1d39\u1d30 World Elite\u1d39\u1d30* R\u00e9compenses Tangerine\u1d39\u1d30* | Tangerine",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 1,
+        "primary_heading": "Mastercard MD World Elite MD* R\u00e9compenses Tangerine",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language URL explicitly names the Tangerine Rewards World Elite Mastercard product.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 1,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-ad36cf3a72",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Clearly identifies a single named Tangerine credit-card product and is likely to contain product terms and features.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/money-back-credit-card",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Cash Back Credit Card: Bonus 10% Cash Back for 2 months* | Tangerine",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Money-Back Credit Card",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clearly identifies a single named Tangerine credit-card product and is likely to contain product terms and features.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 7,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-dec7bffa1c",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Names a specific Tangerine Money-Back World Mastercard product.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/world-credit-card",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Tangerine\u00ae Money-Back World Mastercard* Cash Back Rewards Credit Card\u00b9\u2070 | Tangerine",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 3,
+        "primary_heading": "Tangerine Money-Back World Mastercard",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Names a specific Tangerine Money-Back World Mastercard product.",
+        "page_evidence_score": 5,
+        "selection_confidence": "medium",
+        "negative_signal_count": 2,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-56c0c8802d",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A credit tool that may support card applications, but it is not a credit-card product page.",
+      "url": "https://www.tangerine.ca/en/personal/borrow/credit-score-checker",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A credit tool that may support card applications, but it is not a credit-card product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-9c04b89b64",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Official benefits and features page for the credit-card family, not one named card.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/benefits-features",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official benefits and features page for the credit-card family, not one named card.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-ad49234f93",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General tools hub rather than a named credit-card detail page.",
+      "url": "https://www.tangerine.ca/en/tools-and-calculators",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General tools hub rather than a named credit-card detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-deb2fc7a92",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Official credit-card legal terms document, useful as supporting evidence but not a product detail page.",
+      "url": "https://www.tangerine.ca/en/legal/credit-card-cardholder-agreement",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official credit-card legal terms document, useful as supporting evidence but not a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-e745c1d651",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Official credit-card category hub, but it is not a single named card product detail page.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 8.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official credit-card category hub, but it is not a single named card product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-ea45d13608",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language credit-card benefits and features page, not a single named product page.",
+      "url": "https://www.tangerine.ca/fr/particuliers/depenses/carte-de-credit/avantages-caracteristiques",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language credit-card benefits and features page, not a single named product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-eb36e59270",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "French-language cash-back calculator, not a named credit-card product detail page.",
+      "url": "https://www.tangerine.ca/fr/particuliers/depenses/carte-de-credit/calculatrice-de-remise-en-argent",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "pricing_or_feature_signal",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "French-language cash-back calculator, not a named credit-card product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "pricing_or_feature_signal",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-12d90ffaec",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Ancillary benefits page associated with credit-card offerings, but no single named product is identified.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/shell-benefits",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Ancillary benefits page associated with credit-card offerings, but no single named product is identified.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-74d82cb76a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deterministic supporting source for Credit Card",
+      "url": "https://www.tangerine.ca/en/thejuice/spend/how-to-earn-scene-plus-points-faster",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "deterministic_supporting_fallback",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-90a7296a1c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Deterministic supporting source for Credit Card",
+      "url": "https://www.tangerine.ca/en/thejuice/spend/how-to-save-money-on-gas-canada",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "deterministic_supporting_fallback",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_keyword_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-f56951f41a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Credit-card feature or eligibility-support page about merchant category codes, not a named card.",
+      "url": "https://www.tangerine.ca/en/personal/spend/credit-cards/merchant-category-codes",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Credit-card feature or eligibility-support page about merchant category codes, not a named card.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-23208b0288",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.tangerine.ca/content/dam/tangerine/en/pdfs/credit-card-cardholder-agreement/6-Final_Tangerine_world_ecci-sm_en_10-07-2024.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 0,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-TANGERINE-CRE-27a5337d89",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.tangerine.ca/content/dam/tangerine/en/pdfs/credit-card-cardholder-agreement/5_Tangerine_Money-Back_Rewards_Program_Terms_and_Conditions_FINAL.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

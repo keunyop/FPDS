@@ -17,8 +17,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from api_service.config import Settings
+from api_service.candidate_safety_remediation import retract_invalid_candidates
 from api_service.db import open_connection
+from api_service.review_detail import load_review_task_detail
+from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.source_catalog import start_source_catalog_collection
+from api_service.source_catalog import _deactivate_rejected_generated_detail_sources
+from worker.pipeline.fpds_normalization.supporting_merge import _extract_current_gic_rate_values
 
 GOLDEN_PATH = REPO_ROOT / "worker" / "pipeline" / "tests" / "fixtures" / "golden" / "canada_big5_deposit_products_golden_2026-05-23.json"
 COMPARE_FIELDS = (
@@ -44,6 +49,27 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("state")
+    public_audit_parser = subparsers.add_parser("public-audit")
+    public_audit_parser.add_argument("--product-id", action="append", default=[])
+    aggregate_audit_parser = subparsers.add_parser("aggregate-audit")
+    aggregate_audit_parser.add_argument("--snapshot-id", required=True)
+    aggregate_audit_parser.add_argument("--product-id", action="append", default=[])
+    remediate_parser = subparsers.add_parser("remediate")
+    remediate_parser.add_argument("--candidate-id", action="append", required=True)
+    remediate_parser.add_argument("--reason-code", required=True)
+    remediate_parser.add_argument("--reason-text", required=True)
+    deactivate_parser = subparsers.add_parser("deactivate-generated-detail")
+    deactivate_parser.add_argument("--bank-code", required=True)
+    deactivate_parser.add_argument("--product-type", required=True)
+    deactivate_parser.add_argument("--url", action="append", required=True)
+    gic_check_parser = subparsers.add_parser("gic-evidence-check")
+    gic_check_parser.add_argument("--review-task-id", required=True)
+    audit_parser = subparsers.add_parser("audit")
+    audit_parser.add_argument("--collection-id", action="append", default=[])
+    audit_parser.add_argument("--brief", action="store_true")
+    review_parser = subparsers.add_parser("review")
+    review_parser.add_argument("--review-task-id", required=True)
+    review_parser.add_argument("--section", choices=("all", "candidate", "candidate-summary", "evidence", "source"), default="all")
     launch_parser = subparsers.add_parser("launch")
     launch_parser.add_argument("--only-bank", action="append", default=[])
     launch_parser.add_argument("--only-product-type", action="append", default=[])
@@ -68,6 +94,101 @@ def main() -> int:
 
     if args.command == "state":
         _print_json(load_state(settings))
+        return 0
+    if args.command == "public-audit":
+        _print_json(load_public_safety_audit(settings, product_ids=args.product_id))
+        return 0
+    if args.command == "aggregate-audit":
+        _print_json(
+            load_aggregate_audit(
+                settings,
+                snapshot_id=args.snapshot_id,
+                product_ids=args.product_id,
+            )
+        )
+        return 0
+    if args.command == "remediate":
+        with open_connection(settings) as connection:
+            result = retract_invalid_candidates(
+                connection,
+                candidate_ids=args.candidate_id,
+                reason_code=args.reason_code,
+                reason_text=args.reason_text,
+                actor={"actor_type": "system", "role": "admin", "display_name": "FPDS accuracy remediation"},
+                request_context={
+                    "request_id": f"accuracy-remediation-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}",
+                    "user_agent": "fpds-admin-collection-goal-tool",
+                },
+            )
+        _print_json(result)
+        return 0
+    if args.command == "deactivate-generated-detail":
+        with open_connection(settings) as connection:
+            count = _deactivate_rejected_generated_detail_sources(
+                connection,
+                bank_code=args.bank_code,
+                product_type=args.product_type,
+                normalized_urls=args.url,
+            )
+        _print_json({"deactivated_count": count, "urls": args.url})
+        return 0
+    if args.command == "gic-evidence-check":
+        with open_connection(settings) as connection:
+            detail = load_review_task_detail(connection, review_task_id=args.review_task_id, actor_role="admin")
+        results = []
+        for link in (detail or {}).get("evidence_links", []):
+            values = _extract_current_gic_rate_values(str(link.get("evidence_text_excerpt") or ""))
+            if values:
+                results.append(values)
+        _print_json({"review_task_id": args.review_task_id, "parsed_tables": results})
+        return 0
+    if args.command == "audit":
+        audit = load_accuracy_audit(settings, collection_ids=args.collection_id)
+        _print_json(_brief_accuracy_audit(audit) if args.brief else audit)
+        return 0
+    if args.command == "review":
+        with open_connection(settings) as connection:
+            detail = load_review_task_detail(
+                connection,
+                review_task_id=args.review_task_id,
+                actor_role="admin",
+            )
+        if not detail:
+            raise RuntimeError(f"Review task not found: {args.review_task_id}")
+        if args.section == "candidate-summary":
+            detail = {
+                "review_task": detail["review_task"],
+                "candidate": {
+                    key: detail["candidate"][key]
+                    for key in (
+                        "source_document_id", "bank_code", "bank_name", "product_family", "product_type",
+                        "subtype_code", "product_name", "candidate_state", "validation_status",
+                        "validation_issue_codes", "source_confidence", "review_reason_code", "candidate_payload",
+                    )
+                },
+                "review_diagnosis": detail["review_diagnosis"],
+                "source_context": detail["source_context"],
+            }
+        elif args.section == "candidate":
+            detail = {
+                "review_task": detail["review_task"],
+                "candidate": detail["candidate"],
+                "review_diagnosis": detail["review_diagnosis"],
+                "source_context": detail["source_context"],
+            }
+        elif args.section == "evidence":
+            detail = {
+                "review_task": detail["review_task"],
+                "evidence_summary": detail["evidence_summary"],
+                "evidence_links": detail["evidence_links"],
+            }
+        elif args.section == "source":
+            detail = {
+                "review_task": detail["review_task"],
+                "source_context": detail["source_context"],
+                "model_executions": detail["model_executions"],
+            }
+        _print_json(detail)
         return 0
     if args.command == "launch":
         _print_json(
@@ -103,6 +224,345 @@ def load_state(settings: Settings) -> dict[str, Any]:
             "artifact_counts": _artifact_counts(connection),
             "latest_collections": _latest_collections(connection),
         }
+
+
+def load_public_safety_audit(settings: Settings, *, product_ids: list[str]) -> dict[str, Any]:
+    with open_connection(settings) as connection:
+        params = {"product_ids": product_ids}
+        rows = connection.execute(
+            """
+            SELECT
+                cp.product_id,
+                cp.bank_code,
+                cp.product_type,
+                cp.product_name,
+                cp.status,
+                cp.current_version_no,
+                pv.product_version_id,
+                pv.approved_candidate_id,
+                nc.candidate_state,
+                sd.normalized_source_url,
+                cp.current_snapshot_payload
+            FROM canonical_product AS cp
+            JOIN product_version AS pv
+              ON pv.product_id = cp.product_id
+             AND pv.version_no = cp.current_version_no
+            LEFT JOIN normalized_candidate AS nc
+              ON nc.candidate_id = pv.approved_candidate_id
+            LEFT JOIN source_document AS sd
+              ON sd.source_document_id = nc.source_document_id
+            WHERE cp.status = 'active'
+              AND (cardinality(%(product_ids)s::text[]) = 0 OR cp.product_id = ANY(%(product_ids)s))
+            ORDER BY cp.bank_code, cp.product_type, cp.product_name, cp.product_id
+            """,
+            params,
+        ).fetchall()
+        products = [_json_safe_row(row) for row in rows]
+        duplicate_groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
+        for product in products:
+            key = (
+                str(product["bank_code"]),
+                str(product["product_type"]),
+                " ".join(str(product["product_name"]).casefold().split()),
+                str(product.get("normalized_source_url") or "").rstrip("/"),
+            )
+            duplicate_groups.setdefault(key, []).append(product)
+        duplicates = [group for group in duplicate_groups.values() if len(group) > 1]
+        numeric_fields = (
+            "standard_rate", "public_display_rate", "base_12_month_rate", "promotional_rate",
+            "annual_fee", "monthly_fee", "public_display_fee", "minimum_balance", "minimum_deposit",
+            "interest_rate", "mortgage_rate", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate",
+        )
+        violations: list[dict[str, Any]] = []
+        for product in products:
+            payload = dict(product.get("current_snapshot_payload") or {})
+            for field_name in numeric_fields:
+                value = payload.get(field_name)
+                if value is None or isinstance(value, (int, float)) and not isinstance(value, bool):
+                    continue
+                violations.append(
+                    {
+                        "product_id": product["product_id"],
+                        "approved_candidate_id": product["approved_candidate_id"],
+                        "bank_code": product["bank_code"],
+                        "product_type": product["product_type"],
+                        "product_name": product["product_name"],
+                        "field_name": field_name,
+                        "value": value,
+                    }
+                )
+        return {
+            "active_product_count": len(products),
+            "products": products if product_ids else [],
+            "duplicate_groups": duplicates,
+            "numeric_type_violation_count": len(violations),
+            "numeric_type_violation_product_count": len({item["product_id"] for item in violations}),
+            "numeric_type_violations": violations,
+        }
+
+
+def load_aggregate_audit(
+    settings: Settings,
+    *,
+    snapshot_id: str,
+    product_ids: list[str],
+) -> dict[str, Any]:
+    with open_connection(settings) as connection:
+        refresh = connection.execute(
+            """
+            SELECT
+                snapshot_id,
+                refresh_status,
+                country_code,
+                refresh_scope,
+                attempted_at,
+                refreshed_at,
+                stale_flag,
+                error_summary,
+                refresh_metadata
+            FROM aggregate_refresh_run
+            WHERE snapshot_id = %(snapshot_id)s
+            """,
+            {"snapshot_id": snapshot_id},
+        ).fetchone()
+        counts = connection.execute(
+            """
+            SELECT
+                COUNT(*) AS projection_count,
+                COUNT(*) FILTER (WHERE status = 'active') AS active_projection_count,
+                COUNT(*) FILTER (WHERE status <> 'active') AS inactive_projection_count
+            FROM public_product_projection
+            WHERE snapshot_id = %(snapshot_id)s
+            """,
+            {"snapshot_id": snapshot_id},
+        ).fetchone()
+        selected = connection.execute(
+            """
+            SELECT snapshot_id, product_id, bank_code, product_type, product_name, status
+            FROM public_product_projection
+            WHERE snapshot_id = %(snapshot_id)s
+              AND product_id = ANY(%(product_ids)s)
+            ORDER BY product_id
+            """,
+            {"snapshot_id": snapshot_id, "product_ids": product_ids},
+        ).fetchall()
+    return {
+        "refresh": _json_safe_row(refresh) if refresh else None,
+        "projection_counts": _json_safe_row(counts),
+        "selected_products": [_json_safe_row(row) for row in selected],
+    }
+
+
+def load_accuracy_audit(settings: Settings, *, collection_ids: list[str]) -> dict[str, Any]:
+    with open_connection(settings) as connection:
+        queue = load_review_queue(
+            connection,
+            filters=normalize_review_queue_filters(
+                states=("queued", "deferred"),
+                bank_code=None,
+                product_type=None,
+                validation_status=None,
+                created_from=None,
+                created_to=None,
+                search=None,
+                sort_by="priority",
+                sort_order="desc",
+                page=1,
+                page_size=200,
+            ),
+        )
+        review_items = []
+        for item in queue["items"]:
+            detail = load_review_task_detail(
+                connection,
+                review_task_id=item["review_task_id"],
+                actor_role="admin",
+            )
+            if not detail:
+                continue
+            evidence_sources_by_field: dict[str, list[str]] = {}
+            for evidence in detail["evidence_links"]:
+                field_name = str(evidence["field_name"])
+                source_url = str(evidence.get("source_url") or "")
+                if source_url and source_url not in evidence_sources_by_field.setdefault(field_name, []):
+                    evidence_sources_by_field[field_name].append(source_url)
+            review_items.append(
+                {
+                    **item,
+                    "candidate_payload": detail["candidate"]["candidate_payload"],
+                    "source_context": detail["source_context"],
+                    "evidence_sources_by_field": evidence_sources_by_field,
+                    "evidence_summary": detail["evidence_summary"],
+                }
+            )
+
+        selected_collection_ids = [item.strip() for item in collection_ids if item.strip()]
+        if not selected_collection_ids:
+            selected_collection_ids = [
+                str(row["collection_id"])
+                for row in _latest_collections(connection)
+            ]
+        run_rows = connection.execute(
+            """
+            SELECT
+                ir.run_id,
+                ir.run_state,
+                ir.source_scope_count,
+                ir.source_success_count,
+                ir.source_failure_count,
+                ir.candidate_count,
+                ir.review_queued_count,
+                ir.partial_completion_flag,
+                ir.error_summary,
+                ir.run_metadata ->> 'collection_id' AS collection_id,
+                ir.run_metadata ->> 'bank_code' AS bank_code,
+                ir.run_metadata ->> 'product_type' AS product_type,
+                ir.started_at,
+                ir.completed_at
+            FROM ingestion_run AS ir
+            WHERE ir.run_metadata ->> 'collection_id' = ANY(%(collection_ids)s)
+            ORDER BY ir.started_at, ir.run_id
+            """,
+            {"collection_ids": selected_collection_ids},
+        ).fetchall()
+        run_source_failure_rows = connection.execute(
+            """
+            SELECT
+                ir.run_metadata ->> 'collection_id' AS collection_id,
+                rsi.run_id,
+                ir.run_metadata ->> 'bank_code' AS bank_code,
+                ir.run_metadata ->> 'product_type' AS product_type,
+                sd.normalized_source_url,
+                COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') AS discovery_role,
+                rsi.stage_status,
+                rsi.error_summary,
+                rsi.stage_metadata
+            FROM run_source_item AS rsi
+            JOIN ingestion_run AS ir
+              ON ir.run_id = rsi.run_id
+            JOIN source_document AS sd
+              ON sd.source_document_id = rsi.source_document_id
+            WHERE ir.run_metadata ->> 'collection_id' = ANY(%(collection_ids)s)
+              AND (
+                  rsi.error_count > 0
+                  OR rsi.error_summary IS NOT NULL
+                  OR rsi.stage_status IN ('failed', 'partial')
+              )
+            ORDER BY ir.started_at, rsi.run_id, sd.normalized_source_url
+            """,
+            {"collection_ids": selected_collection_ids},
+        ).fetchall()
+        candidate_rows = connection.execute(
+            """
+            SELECT
+                ir.run_metadata ->> 'collection_id' AS collection_id,
+                nc.candidate_id,
+                nc.run_id,
+                nc.candidate_state,
+                nc.validation_status,
+                nc.validation_issue_codes,
+                nc.source_confidence,
+                nc.bank_code,
+                nc.product_type,
+                nc.product_name,
+                nc.candidate_payload,
+                sd.normalized_source_url,
+                COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') AS discovery_role
+            FROM normalized_candidate AS nc
+            JOIN ingestion_run AS ir
+              ON ir.run_id = nc.run_id
+            JOIN source_document AS sd
+              ON sd.source_document_id = nc.source_document_id
+            WHERE ir.run_metadata ->> 'collection_id' = ANY(%(collection_ids)s)
+            ORDER BY ir.started_at, nc.bank_code, nc.product_type, nc.product_name, nc.candidate_id
+            """,
+            {"collection_ids": selected_collection_ids},
+        ).fetchall()
+    return {
+        "collection_ids": selected_collection_ids,
+        "runs": [_serialize_accuracy_run(row) for row in run_rows],
+        "run_source_failures": [_json_safe_row(row) for row in run_source_failure_rows],
+        "candidates": [_json_safe_row(row) for row in candidate_rows],
+        "active_review_summary": queue["summary"],
+        "active_reviews": review_items,
+    }
+
+
+def _brief_accuracy_audit(audit: dict[str, Any]) -> dict[str, Any]:
+    runs = list(audit["runs"])
+    return {
+        "collection_ids": audit["collection_ids"],
+        "run_summary": {
+            "run_count": len(runs),
+            "partial_count": sum(1 for row in runs if row["partial_completion_flag"]),
+            "source_scope_count": sum(int(row["source_scope_count"]) for row in runs),
+            "source_success_count": sum(int(row["source_success_count"]) for row in runs),
+            "source_failure_count": sum(int(row["source_failure_count"]) for row in runs),
+            "candidate_count": sum(int(row["candidate_count"]) for row in runs),
+            "review_queued_count": sum(int(row["review_queued_count"]) for row in runs),
+        },
+        "partial_or_failed_runs": [
+            {
+                key: row[key]
+                for key in (
+                    "collection_id", "run_id", "bank_code", "product_type", "source_scope_count",
+                    "source_success_count", "source_failure_count", "candidate_count",
+                    "review_queued_count", "error_summary",
+                )
+            }
+            for row in runs
+            if row["partial_completion_flag"] or row["run_state"] != "completed"
+        ],
+        "run_source_failures": [
+            {
+                key: row.get(key)
+                for key in (
+                    "collection_id", "run_id", "bank_code", "product_type", "normalized_source_url",
+                    "discovery_role", "stage_status", "error_summary",
+                )
+            }
+            for row in audit["run_source_failures"]
+        ],
+        "candidates": [
+            {
+                "collection_id": row["collection_id"],
+                "candidate_id": row["candidate_id"],
+                "run_id": row["run_id"],
+                "bank_code": row["bank_code"],
+                "product_type": row["product_type"],
+                "product_name": row["product_name"],
+                "candidate_state": row["candidate_state"],
+                "validation_status": row["validation_status"],
+                "validation_issue_codes": row["validation_issue_codes"],
+                "source_confidence": row["source_confidence"],
+                "source_url": row["normalized_source_url"],
+                "discovery_role": row["discovery_role"],
+                "payload_fields": sorted(str(key) for key in dict(row["candidate_payload"] or {})),
+            }
+            for row in audit["candidates"]
+        ],
+        "active_review_summary": audit["active_review_summary"],
+        "active_reviews": [
+            {
+                "review_task_id": row["review_task_id"],
+                "candidate_id": row["candidate_id"],
+                "run_id": row["run_id"],
+                "bank_code": row["bank_code"],
+                "product_type": row["product_type"],
+                "product_name": row["product_name"],
+                "review_state": row["review_state"],
+                "candidate_state": row["candidate_state"],
+                "validation_status": row["validation_status"],
+                "validation_issue_codes": row["validation_issue_codes"],
+                "queue_reason_code": row["queue_reason_code"],
+                "diagnosis": row["review_diagnosis"],
+                "source_url": row["source_context"].get("source_url"),
+                "source_role": row["source_role"],
+                "payload_fields": sorted(str(key) for key in row["candidate_payload"]),
+            }
+            for row in audit["active_reviews"]
+        ],
+    }
 
 
 def launch_collection(
@@ -504,6 +964,29 @@ def _serialize_run(row: dict[str, Any]) -> dict[str, Any]:
         "started_at": _iso(row["started_at"]),
         "completed_at": _iso(row["completed_at"]),
     }
+
+
+def _serialize_accuracy_run(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "collection_id": str(row["collection_id"]),
+        "run_id": str(row["run_id"]),
+        "bank_code": str(row["bank_code"]),
+        "product_type": str(row["product_type"]),
+        "run_state": str(row["run_state"]),
+        "source_scope_count": int(row["source_scope_count"] or 0),
+        "source_success_count": int(row["source_success_count"] or 0),
+        "source_failure_count": int(row["source_failure_count"] or 0),
+        "candidate_count": int(row["candidate_count"] or 0),
+        "review_queued_count": int(row["review_queued_count"] or 0),
+        "partial_completion_flag": bool(row["partial_completion_flag"]),
+        "error_summary": row["error_summary"],
+        "started_at": _iso(row["started_at"]),
+        "completed_at": _iso(row["completed_at"]),
+    }
+
+
+def _json_safe_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {str(key): value for key, value in dict(row).items()}
 
 
 def _run_is_final(row: dict[str, Any]) -> bool:

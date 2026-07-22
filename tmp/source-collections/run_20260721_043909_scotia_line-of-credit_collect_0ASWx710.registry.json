@@ -1,0 +1,874 @@
+{
+  "registry_version": "2026-07-21",
+  "bank_code": "SCOTIA",
+  "country_code": "CA",
+  "product_type": "line-of-credit",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "hello.scotiabank.com",
+    "scotiabank.com",
+    "startright.scotiabank.com"
+  ],
+  "entry_source_id": "AUTO-SCOTIA-LIN-244c8c9cfd",
+  "sources": [
+    {
+      "source_id": "AUTO-SCOTIA-LIN-244c8c9cfd",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official page for a named student line-of-credit product, directly matching the requested product type.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/line-of-credit/scotialine-personal-line-of-credit-students.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Student Line of Credit - ScotiaLine | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab Previous Next Previous Next",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 9,
+        "primary_heading": "ScotiaLine \u00ae Personal Line of Credit for Students",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official page for a named student line-of-credit product, directly matching the requested product type.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 8,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-3f877e7eef",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official detail page for a named STEP ScotiaLine personal line-of-credit product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/total-equity-plan/scotialine-personal-line-of-credit-step.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotiabank Personal Line of Credit (STEP) | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "ScotiaLine \u00ae Personal Line of Credit (STEP)",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official detail page for a named STEP ScotiaLine personal line-of-credit product.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-4674eeb637",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official page for the named Scotia RSP catch-up line-of-credit product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/line-of-credit/rsp-catch-up-line-of-credit.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotiabank RSP line of credit | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Scotia RSP Catch-Up \u00ae Line of Credit",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official page for the named Scotia RSP catch-up line-of-credit product.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-5295a47382",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Official named ScotiaLine personal line-of-credit product page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/line-of-credit/scotialine-personal-line-of-credit.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Scotiabank Personal Line Of Credit | Scotiabank Canada opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab opens in a new tab",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "ScotiaLine \u00ae Personal Line of Credit",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Official named ScotiaLine personal line-of-credit product page.",
+        "page_evidence_score": 7,
+        "selection_confidence": "high",
+        "negative_signal_count": 1,
+        "attribute_signal_count": 5,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "insufficient_evidence"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal",
+          "insufficient_evidence"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-4c191ba6e9",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Product-specific prequalification or application flow, not a standalone product description page.",
+      "url": "https://hello.scotiabank.com/lending/prequalification?productCode=VIC&subProductCode=RG&source=111I&language=en",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Product-specific prequalification or application flow, not a standalone product description page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-5abd664077",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Student advice hub, not a specific line-of-credit product page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/advice-plus/planning-for-life/advice-for-students.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Student advice hub, not a specific line-of-credit product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-61427dc534",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Generic lines-of-credit category or overview page, not a single named product detail page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/line-of-credit.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Generic lines-of-credit category or overview page, not a single named product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-79cbcb0386",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Educational borrowing article rather than a named financial product page.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/borrowing-basics/building-a-good-credit-history.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Educational borrowing article rather than a named financial product page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-7fcd39e139",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "General banking education page about credit scores, not a line of credit.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-your-way/digital-banking-guide/banking-basics/credit-score.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "General banking education page about credit scores, not a line of credit.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-af0cfc4be2",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Product-selection or comparison tool that may cover lines of credit but does not describe one named product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines/help-me-choose-master.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Product-selection or comparison tool that may cover lines of credit but does not describe one named product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-b026b24ebd",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Loans-and-lines category hub that may link to products but does not describe one named line of credit.",
+      "url": "https://www.scotiabank.com/ca/en/personal/loans-lines.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 6,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 5.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Loans-and-lines category hub that may link to products but does not describe one named line of credit.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-cb8ad4e837",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Relevant to the ScotiaLine product but is an application or sign-in flow rather than a product detail page.",
+      "url": "https://hello.scotiabank.com/lending/acknowledge?productCode=VIC&subProductCode=RG&source=111I&language=en",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ],
+        "heuristic_score": 8,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 6.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Relevant to the ScotiaLine product but is an application or sign-in flow rather than a product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-ee9a1d5dff",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Digital banking guide hub unrelated to a named line-of-credit product.",
+      "url": "https://www.scotiabank.com/ca/en/personal/bank-your-way/digital-banking-guide/most-common.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Digital banking guide hub unrelated to a named line-of-credit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "hub_page_not_detail",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SCOTIA-LIN-5491903228",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Appears to describe a credit-limit program or eligibility benefit for newcomers, without clear evidence of a named line-of-credit product.",
+      "url": "https://startright.scotiabank.com/ca/en/higher-credit-limit-for-newcomers-to-canada.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "insufficient_evidence"
+        ],
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 3.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "medium",
+        "ai_short_rationale": "Appears to describe a credit-limit program or eligibility benefit for newcomers, without clear evidence of a named line-of-credit product.",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "insufficient_evidence"
+        ]
+      }
+    }
+  ]
+}

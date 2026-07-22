@@ -1,0 +1,649 @@
+{
+  "registry_version": "2026-07-21",
+  "bank_code": "SIMPLII",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "online.simplii.com",
+    "simplii.com"
+  ],
+  "entry_source_id": "AUTO-SIMPLII-CRE-8c931a84ce",
+  "sources": [
+    {
+      "source_id": "AUTO-SIMPLII-CRE-8c931a84ce",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Product-specific URL for Simplii\u2019s Cash Back Visa credit card; highly likely to contain the named card\u2019s features, rates, fees, eligibility, and application details.",
+      "url": "https://www.simplii.com/en/credit-cards/cash-back-visa.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Simplii Financial Cash Back Visa Card | Simplii Financial",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Simplii Financial\u2122 Cash Back Visa* Card",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Product-specific URL for Simplii\u2019s Cash Back Visa credit card; highly likely to contain the named card\u2019s features, rates, fees, eligibility, and application details.",
+        "page_evidence_score": 6,
+        "selection_confidence": "medium",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 6,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-5214ccfeda",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Generic forms and downloads hub; it may contain supporting documents but is not itself a named credit-card detail page.",
+      "url": "https://www.simplii.com/en/forms-downloads.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "insufficient_evidence",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Generic forms and downloads hub; it may contain supporting documents but is not itself a named credit-card detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "insufficient_evidence",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-b745d450ff",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Credit-card-related fraud and protection information; it does not describe one named credit-card product.",
+      "url": "https://www.simplii.com/en/preventing-fraud/debit-and-credit-card-fraud.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Credit-card-related fraud and protection information; it does not describe one named credit-card product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-bcd63b840b",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Clearly related to applying for the Cash Back Visa, but it is an online banking/sign-on application flow rather than the public product detail page.",
+      "url": "https://online.simplii.com/ebm-resources/public/simplii/online-banking/client/index.html#/auth/signon?redirect=credit-card",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ],
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 7.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Clearly related to applying for the Cash Back Visa, but it is an online banking/sign-on application flow rather than the public product detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-0a0a75a33c",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/simplii-cardholder-agreement-sf-001018v1lnt-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-69f496b39f",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend3-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-74259aea9e",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend2-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-762ad25cb1",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/SF-0021018v1INT.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 3,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-91dd2fa68a",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/cibc-investment-account-information-and-disclosures-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-d494900c57",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/cash-back-visa-benefits-guide.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 4,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-f688cdec17",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend1-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-CRE-f9837b5aa5",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Credit Card",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/forms/product-summary-for-creditor-insurance-for-simplii-personal-lines-of-credit.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "annual_fee",
+        "purchase_interest_rate",
+        "cash_advance_rate",
+        "balance_transfer_rate",
+        "rewards_summary",
+        "eligibility_text",
+        "application_method",
+        "credit_limit_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Credit Card",
+      "product_type_description": "Canadian retail credit cards, including rewards, cash back, low-interest, no-fee, student, newcomer, travel, and business-card variants when banks publish them in the same retail credit-card family.",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

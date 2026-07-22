@@ -2527,6 +2527,13 @@ def _build_homepage_self_candidate(
     identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
     if _term_hits(identity_text, identity_terms) == 0:
         return None
+    canonical_product_type = _canonical_product_type_code(product_type)
+    if canonical_product_type == "gic" and re.search(
+        r"\b(?:\d{1,3}\s*(?:day|days|month|months|year|years)|special|promotional|promo)\b",
+        identity_text,
+        flags=re.IGNORECASE,
+    ):
+        return None
     fingerprint = f"{normalized_homepage_url} {identity_text}".lower()
     if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint):
         return None

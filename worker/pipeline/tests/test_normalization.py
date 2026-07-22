@@ -174,6 +174,76 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertNotIn("application_method", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
 
+    def test_lending_cleanup_suppresses_adjacent_ctas_slogans_and_offer_end_dates(self) -> None:
+        cases = (
+            (
+                "line-of-credit",
+                {"application_method": "Steps to follow Apply online with the Ministère."},
+                {"application_method": "government-guaranteed-student-loans Student aid office Steps to follow"},
+            ),
+            (
+                "mortgage",
+                {"application_method": "You're in business now. Open an account online."},
+                {"application_method": "Business accounts Open an account online"},
+            ),
+            (
+                "personal-loan",
+                {
+                    "application_method": "Car loans Apply for a car loan online.",
+                    "security_requirement": "Car loans Hit the road with hassle-free financing",
+                    "monthly_payment_text": "Pay less interest with a variable rate adjusted monthly.",
+                    "fees_text": "We'll donate $25 to a conservation charity.",
+                    "effective_date": "2026-11-04",
+                },
+                {
+                    "application_method": "Car loans Apply online",
+                    "security_requirement": "Car loans Hit the road with hassle-free financing",
+                    "monthly_payment_text": "Variable interest rate adjusted monthly",
+                    "fees_text": "Donate $25 to a conservation charity",
+                    "effective_date": "Offer valid until November 4, 2026",
+                },
+            ),
+        )
+
+        for product_type_family, payload, contexts in cases:
+            with self.subTest(product_type_family=product_type_family):
+                _clean_product_context_fields(
+                    product_type_family=product_type_family,
+                    candidate_payload=payload,
+                    evidence_context_by_field=contexts,
+                )
+                self.assertEqual(payload, {})
+
+    def test_gic_cleanup_suppresses_rate_card_eligibility_and_multi_option_scalars(self) -> None:
+        payload: dict[str, object] = {
+            "eligibility_text": "3.65% 2-Year GIC Eligible for CDIC coverage",
+            "compounding_frequency": "annually",
+            "payout_option": "at_maturity",
+        }
+        option_context = "Interest may be paid monthly, semi-annually, annually or at maturity."
+
+        _clean_product_context_fields(
+            product_type_family="gic",
+            candidate_payload=payload,
+            evidence_context_by_field={
+                "eligibility_text": "2-Year GIC rate card eligible for CDIC coverage",
+                "compounding_frequency": option_context,
+                "payout_option": option_context,
+            },
+        )
+
+        self.assertEqual(payload, {})
+
+    def test_term_days_must_match_a_declared_range_boundary(self) -> None:
+        payload: dict[str, object] = {
+            "term_length_text": "12-month minimum, up to 96 months",
+            "term_length_days": 96,
+        }
+
+        _clean_product_context_fields(product_type_family="personal-loan", candidate_payload=payload)
+
+        self.assertEqual(payload, {"term_length_text": "12-month minimum, up to 96 months"})
+
     def test_savings_cleanup_suppresses_navigation_and_other_product_section_fields(self) -> None:
         payload: dict[str, object] = {
             "product_name": "Example High Interest Savings Account",
@@ -1808,6 +1878,8 @@ class SupportingMergeTests(unittest.TestCase):
                 "json",
                 0.90,
             ),
+            _field_dict("term_length_text", "1 year", "string", 0.90),
+            _field_dict("term_length_days", 365, "integer", 0.90),
         ]
         for field in expired_fields:
             field["evidence_text_excerpt"] = expired_excerpt
@@ -1843,6 +1915,8 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "2.80")
         self.assertNotIn("promotional_rate", fields_by_name)
         self.assertNotIn("term_rate_table", fields_by_name)
+        self.assertNotIn("term_length_text", fields_by_name)
+        self.assertNotIn("term_length_days", fields_by_name)
         self.assertIn("explicitly expired promotional offer", " ".join(merged["runtime_notes"]))
 
     def test_generic_supporting_merge_handles_generated_chequing_fee_source(self) -> None:
@@ -2029,7 +2103,7 @@ class SupportingMergeTests(unittest.TestCase):
                             "90-119 Days\n1.00\n120-179 Days\n1.00\n180-269 Days\n2.25\n"
                             "270-364 Days\n2.70\nShort-term GICs are non-redeemable.\n"
                             "Cashable GICs\nTerm\nAfter 30 Days (%)\nAfter 90 Days (%)\n1 Year\n2.25\n"
-                            "Cashable GICs require a minimum deposit of $1,000."
+                            "Cashable GICs require an initial investment of $1,000."
                         ),
                     )
                 ]
@@ -2046,10 +2120,13 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.35")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.35")
         self.assertEqual(fields_by_name["base_12_month_rate"]["candidate_value"], "3.35")
+        self.assertEqual(fields_by_name["minimum_deposit"]["candidate_value"], "1000.00")
         rows = fields_by_name["term_rate_table"]["candidate_value"]
         self.assertEqual(len(rows), 13)
         self.assertEqual(rows[0]["notes"], "Long-term GIC annual interest rate")
+        self.assertEqual(rows[0]["minimum_deposit"], "1000.00")
         self.assertEqual(rows[-1]["rate"], "2.25")
+        self.assertEqual(rows[-1]["minimum_deposit"], "1000.00")
         self.assertIn("Cashable GIC", rows[-1]["notes"])
 
     def test_generic_gic_support_replaces_zero_placeholder_rates_for_bank_prefixed_title(self) -> None:

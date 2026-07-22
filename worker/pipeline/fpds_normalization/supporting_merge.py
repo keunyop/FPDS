@@ -78,6 +78,8 @@ _EXPIRY_SENSITIVE_FIELDS = {
     "introductory_rate_flag",
     "effective_date",
     "term_rate_table",
+    "term_length_text",
+    "term_length_days",
 }
 
 
@@ -365,7 +367,7 @@ def _build_generic_gic_rate_supplement(
     existing_fields: dict[str, dict[str, object]],
     allow_family_table_aggregation: bool = False,
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
-    desired_fields = ("standard_rate", "public_display_rate", "base_12_month_rate", "term_rate_table")
+    desired_fields = ("standard_rate", "public_display_rate", "base_12_month_rate", "minimum_deposit", "term_rate_table")
     if all(
         field_name in existing_fields and not _is_invalid_gic_rate_record(field_name, existing_fields[field_name])
         for field_name in desired_fields
@@ -668,6 +670,9 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
         flags=re.IGNORECASE,
     )
     if long_term_match is not None:
+        long_term_minimum = _extract_gic_section_minimum(
+            _gic_section(normalized, start_pattern=r"long[ -]?term\s+gics?", end_pattern=r"short[ -]?term\s+gics?")
+        )
         for match in re.finditer(
             r"(?P<term>\d{1,2}\s+(?:month|months|year|years))\s+"
             r"(?P<annual>\d{1,2}(?:\.\d{1,4})?)\s+"
@@ -682,7 +687,7 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
                     "term_label": term_label,
                     "term_length_days": _term_label_to_days(term_label),
                     "rate": _format_decimal(_to_decimal(match.group("annual"))),
-                    "minimum_deposit": None,
+                    "minimum_deposit": long_term_minimum,
                     "notes": "Long-term GIC annual interest rate",
                 }
             )
@@ -693,6 +698,9 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
         flags=re.IGNORECASE,
     )
     if short_term_match is not None:
+        short_term_minimum = _extract_gic_section_minimum(
+            _gic_section(normalized, start_pattern=r"short[ -]?term\s+gics?", end_pattern=r"cashable\s+gics?")
+        )
         for match in re.finditer(
             r"(?P<start>\d{1,3})\s+(?:-|to\s+)?(?P<end>\d{1,3})\s+days\s+"
             r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)",
@@ -705,7 +713,7 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
                     "term_label": term_label,
                     "term_length_days": None,
                     "rate": _format_decimal(_to_decimal(match.group("rate"))),
-                    "minimum_deposit": None,
+                    "minimum_deposit": short_term_minimum,
                     "notes": "Short-term non-redeemable GIC rate",
                 }
             )
@@ -717,6 +725,9 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
         flags=re.IGNORECASE,
     )
     if cashable_match is not None:
+        cashable_minimum = _extract_gic_section_minimum(
+            normalized[cashable_match.start(): cashable_match.end() + 360]
+        )
         match = re.search(
             r"(?P<term>\d{1,2}\s+(?:month|months|year|years))\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)",
             cashable_match.group("table"),
@@ -729,7 +740,7 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
                     "term_label": term_label,
                     "term_length_days": _term_label_to_days(term_label),
                     "rate": _format_decimal(_to_decimal(match.group("rate"))),
-                    "minimum_deposit": None,
+                    "minimum_deposit": cashable_minimum,
                     "notes": "Cashable GIC rate after the stated waiting period",
                 }
             )
@@ -746,12 +757,47 @@ def _extract_current_gic_rate_values(excerpt: str) -> dict[str, object]:
         rows[0],
     )
     one_year_rate = str(one_year_row["rate"])
-    return {
+    populated_minimums = {
+        str(row["minimum_deposit"])
+        for row in rows
+        if row.get("minimum_deposit") not in {None, ""}
+    }
+    if len(populated_minimums) == 1:
+        common_minimum = next(iter(populated_minimums))
+        for row in rows:
+            if row.get("minimum_deposit") in {None, ""}:
+                row["minimum_deposit"] = common_minimum
+    result: dict[str, object] = {
         "standard_rate": one_year_rate,
         "public_display_rate": one_year_rate,
         "base_12_month_rate": one_year_rate,
         "term_rate_table": rows,
     }
+    if len(populated_minimums) == 1:
+        result["minimum_deposit"] = next(iter(populated_minimums))
+    return result
+
+
+def _extract_gic_section_minimum(section_text: str) -> str | None:
+    match = re.search(
+        r"(?:minimum\s+(?:deposit|investment)(?:\s+of)?|(?:deposit|investment)\s+minimum|initial\s+investment(?:\s+of)?)\s*\$\s*"
+        r"(?P<amount>\d[\d,]*(?:\.\d{1,2})?)",
+        section_text,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    amount = _to_decimal(match.group("amount").replace(",", ""))
+    return _format_decimal(amount) if amount is not None else None
+
+
+def _gic_section(normalized: str, *, start_pattern: str, end_pattern: str) -> str:
+    match = re.search(
+        rf"{start_pattern}(?P<section>[\s\S]*?)(?={end_pattern}|$)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    return match.group(0) if match is not None else ""
 
 
 def _extract_current_savings_account_rate(excerpt: str) -> Decimal | None:

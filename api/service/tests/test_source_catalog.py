@@ -193,6 +193,20 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertIsNone(candidate)
 
+    def test_term_specific_gic_homepage_promo_is_not_a_detail_candidate(self) -> None:
+        candidate = _build_homepage_self_candidate(
+            product_type="gic",
+            product_type_definition=_product_type_definition("gic"),
+            homepage_url="https://www.examplebank.ca/",
+            normalized_homepage_url="https://www.examplebank.ca/",
+            homepage_html=(
+                "<html><head><title>1 Year GIC | Example Bank</title></head>"
+                "<body><h1>Earn more with our 1 Year GIC</h1></body></html>"
+            ),
+        )
+
+        self.assertIsNone(candidate)
+
     def test_detail_identity_dedupe_collapses_locale_aliases(self) -> None:
         base = {
             "bank_code": "B2B",

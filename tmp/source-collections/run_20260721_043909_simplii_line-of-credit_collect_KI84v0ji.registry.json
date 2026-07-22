@@ -1,0 +1,441 @@
+{
+  "registry_version": "2026-07-21",
+  "bank_code": "SIMPLII",
+  "country_code": "CA",
+  "product_type": "line-of-credit",
+  "product_family": "lending",
+  "source_language": "en",
+  "allowed_domains": [
+    "online.simplii.com",
+    "simplii.com"
+  ],
+  "entry_source_id": "AUTO-SIMPLII-LIN-0a4f755bed",
+  "sources": [
+    {
+      "source_id": "AUTO-SIMPLII-LIN-0a4f755bed",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "The URL path and page label identify a specific Simplii Personal Line of Credit product, strongly indicating the official public detail page.",
+      "url": "https://www.simplii.com/en/borrowing/personal-line-of-credit.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "page_title": "Personal Line of Credit | Borrowing | Simplii Financial",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "heuristic_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Borrowing Personal Line of Credit",
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL path and page label identify a specific Simplii Personal Line of Credit product, strongly indicating the official public detail page.",
+        "page_evidence_score": 9,
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 4,
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-1b9300bd90",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "A general forms and downloads resource page may support applications but does not describe one named line-of-credit product.",
+      "url": "https://www.simplii.com/en/forms-downloads.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 1.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "A general forms and downloads resource page may support applications but does not describe one named line-of-credit product.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-918465bebb",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Creditor insurance may relate to borrowing products, but it is an ancillary insurance page rather than a line-of-credit detail page.",
+      "url": "https://www.simplii.com/en/borrowing/creditor-insurance.html",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ],
+        "heuristic_score": 1,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 2.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Creditor insurance may relate to borrowing products, but it is an ancillary insurance page rather than a line-of-credit detail page.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "supporting_terms_or_rates_page",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-e71e15e44e",
+      "priority": "P1",
+      "seed_source_flag": false,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "The label directly references applying for a Personal Line of Credit, but the URL is an online sign-on/application flow rather than a public page describing the named product and its features.",
+      "url": "https://online.simplii.com/ebm-resources/public/client/web/index.html#/apply/plc",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "ai_supporting_role",
+        "ai_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ],
+        "heuristic_score": 7,
+        "candidate_origin": "homepage_or_hub_link",
+        "ai_parallel_score": 4.0,
+        "ai_predicted_role": "supporting_html",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The label directly references applying for a Personal Line of Credit, but the URL is an online sign-on/application flow rather than a public page describing the named product and its features.",
+        "selection_confidence": "high",
+        "selection_reason_codes": [
+          "promo_or_apply_flow",
+          "product_type_semantic_match",
+          "not_product_detail"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-18b01c78e2",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Line of Credit",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend1-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-26b42ced7d",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Line of Credit",
+      "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/forms/product-summary-for-creditor-insurance-for-simplii-personal-lines-of-credit.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 5,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-5b6d07eb14",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Line of Credit",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend3-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    },
+    {
+      "source_id": "AUTO-SIMPLII-LIN-eaa3650d81",
+      "priority": "P2",
+      "seed_source_flag": false,
+      "source_type": "pdf",
+      "discovery_role": "linked_pdf",
+      "purpose": "Auto-generated linked PDF source for Line of Credit",
+      "url": "https://www.simplii.com/content/dam/personal_banking/investments/pdfs/mutual_funds/reporting_and_governance/cibc-sp-amend2-en.pdf",
+      "expected_fields": [
+        "product_name",
+        "description_short",
+        "interest_rate",
+        "credit_limit_text",
+        "secured_flag",
+        "collateral_text",
+        "minimum_payment_text",
+        "eligibility_text",
+        "application_method",
+        "fees_text",
+        "notes"
+      ],
+      "source_language": "en",
+      "product_family": "lending",
+      "product_type_name": "Line of Credit",
+      "product_type_description": "Canadian personal lines of credit, including unsecured, student, professional student, and home-equity lines of credit.",
+      "discovery_keywords": [
+        "lines of credit",
+        "line of credit",
+        "home equity line of credit",
+        "student line of credit",
+        "personal line of credit",
+        "credit limit",
+        "variable interest rate",
+        "minimum payment"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "discovery_metadata": {
+        "selection_path": "linked_pdf",
+        "heuristic_score": 2,
+        "candidate_origin": "homepage_or_hub_link",
+        "selection_confidence": "medium",
+        "selection_reason_codes": [
+          "supporting_pdf_signal"
+        ]
+      }
+    }
+  ]
+}

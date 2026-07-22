@@ -15,11 +15,58 @@ from worker.pipeline.fpds_extraction.service import (
     _append_rate_fallback_fields,
     _extract_candidate_value,
     _extract_from_matches,
+    _uses_dynamic_product_type,
 )
 from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, build_object_store
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_minimum_deposit_accepts_money_before_investment_label(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-GIC-001",
+            parsed_document_id="parsed-001",
+            source_document_id="src-001",
+            snapshot_id="snap-001",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "gic"},
+        )
+
+        value, value_type, _, _ = _extract_candidate_value(
+            context=context,
+            field_name="minimum_deposit",
+            excerpt="All GICs require a $500 minimum investment.",
+            anchor_value="minimum investment",
+        )
+
+        self.assertEqual(value_type, "decimal")
+        self.assertEqual(value, "500.00")
+
+    def test_dynamic_ai_is_limited_to_candidate_producing_detail_sources(self) -> None:
+        base = dict(
+            source_id="AUTO-BANK-LOAN-001",
+            parsed_document_id="parsed-001",
+            source_document_id="src-001",
+            snapshot_id="snap-001",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+        )
+        detail = ExtractionDocumentContext(
+            **base,
+            source_metadata={"product_type": "personal-loan", "product_type_dynamic": True, "discovery_role": "detail"},
+        )
+        supporting = ExtractionDocumentContext(
+            **base,
+            source_metadata={"product_type": "personal-loan", "product_type_dynamic": True, "discovery_role": "supporting_html"},
+        )
+
+        self.assertTrue(_uses_dynamic_product_type(detail))
+        self.assertFalse(_uses_dynamic_product_type(supporting))
+
     def test_term_rate_table_pairs_rate_first_haventree_rows_without_shifting(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-HAVENTREE-GIC-001",

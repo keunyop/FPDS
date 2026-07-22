@@ -1,0 +1,56 @@
+[source-catalog-runner] starting run run_20260721_041021_pcfin_chequing_collect_EJhlxxm8 for PCFIN chequing
+[source-catalog-runner] finished run run_20260721_041021_pcfin_chequing_collect_EJhlxxm8
+[source-catalog-runner] starting run run_20260721_041021_pcfin_credit-card_collect_NqgIiojw for PCFIN credit-card
+[source-catalog-runner] finished run run_20260721_041021_pcfin_credit-card_collect_NqgIiojw
+[source-catalog-runner] starting run run_20260721_041021_pcfin_gic_collect_aOtlv2Br for PCFIN gic
+[source-catalog-runner] finished run run_20260721_041021_pcfin_gic_collect_aOtlv2Br
+[source-catalog-runner] starting run run_20260721_041021_pcfin_line-of-credit_collect_MfaziFmd for PCFIN line-of-credit
+[source-catalog-runner] finished run run_20260721_041021_pcfin_line-of-credit_collect_MfaziFmd
+[source-catalog-runner] starting run run_20260721_041021_pcfin_mortgage_collect_mrGmvo5y for PCFIN mortgage
+[source-catalog-runner] finished run run_20260721_041021_pcfin_mortgage_collect_mrGmvo5y
+[source-catalog-runner] starting run run_20260721_041021_pcfin_personal-loan_collect_uf_wwSk5 for PCFIN personal-loan
+[source-catalog-runner] finished run run_20260721_041021_pcfin_personal-loan_collect_uf_wwSk5
+[source-catalog-runner] starting run run_20260721_041021_pcfin_savings_collect_kfWKvhr8 for PCFIN savings
+[source-catalog-runner] finished run run_20260721_041021_pcfin_savings_collect_kfWKvhr8
+[source-catalog-runner] starting run run_20260721_041021_peoples_chequing_collect_-HEwba5g for PEOPLES chequing
+[source-catalog-runner] finished run run_20260721_041021_peoples_chequing_collect_-HEwba5g
+[source-catalog-runner] starting run run_20260721_041021_peoples_credit-card_collect_ktrBAReE for PEOPLES credit-card
+[source-catalog-runner] finished run run_20260721_041021_peoples_credit-card_collect_ktrBAReE
+[source-catalog-runner] starting run run_20260721_041021_peoples_gic_collect_u3F46V1j for PEOPLES gic
+[source-catalog-runner] finished run run_20260721_041021_peoples_gic_collect_u3F46V1j
+[source-catalog-runner] starting run run_20260721_041021_peoples_line-of-credit_collect_yA-po09L for PEOPLES line-of-credit
+[source-catalog-runner] finished run run_20260721_041021_peoples_line-of-credit_collect_yA-po09L
+[source-catalog-runner] starting run run_20260721_041021_peoples_mortgage_collect_v3tUsvBp for PEOPLES mortgage
+[source-catalog-runner] finished run run_20260721_041021_peoples_mortgage_collect_v3tUsvBp
+[source-catalog-runner] starting run run_20260721_041021_peoples_personal-loan_collect_geprHpZD for PEOPLES personal-loan
+[source-catalog-runner] finished run run_20260721_041021_peoples_personal-loan_collect_geprHpZD
+[source-catalog-runner] starting run run_20260721_041021_peoples_savings_collect_9RqgST3g for PEOPLES savings
+[source-catalog-runner] finished run run_20260721_041021_peoples_savings_collect_9RqgST3g
+[source-catalog-runner] starting run run_20260721_041021_rfa_chequing_collect_nsUk1NAu for RFA chequing
+[source-catalog-runner] finished run run_20260721_041021_rfa_chequing_collect_nsUk1NAu
+[source-catalog-runner] starting run run_20260721_041021_rfa_credit-card_collect_veevuS0W for RFA credit-card
+[source-catalog-runner] finished run run_20260721_041021_rfa_credit-card_collect_veevuS0W
+[source-catalog-runner] starting run run_20260721_041021_rfa_gic_collect_UUOdOXWF for RFA gic
+[source-catalog-runner] finished run run_20260721_041021_rfa_gic_collect_UUOdOXWF
+[source-catalog-runner] starting run run_20260721_041021_rfa_line-of-credit_collect_0HM7LH-Q for RFA line-of-credit
+[source-catalog-runner] finished run run_20260721_041021_rfa_line-of-credit_collect_0HM7LH-Q
+[source-catalog-runner] starting run run_20260721_041021_rfa_mortgage_collect_urHVcZ7U for RFA mortgage
+[source-catalog-runner] finished run run_20260721_041021_rfa_mortgage_collect_urHVcZ7U
+[source-catalog-runner] starting run run_20260721_041021_rfa_personal-loan_collect_l5_Zv5NJ for RFA personal-loan
+[source-catalog-runner] finished run run_20260721_041021_rfa_personal-loan_collect_l5_Zv5NJ
+[source-catalog-runner] starting run run_20260721_041021_rfa_savings_collect_gO0OlpI0 for RFA savings
+[source-catalog-runner] finished run run_20260721_041021_rfa_savings_collect_gO0OlpI0
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_chequing_collect_6gJ2mTbZ for ROGERSBANK chequing
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_chequing_collect_6gJ2mTbZ
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_credit-card_collect_gLXWrwXN for ROGERSBANK credit-card
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_credit-card_collect_gLXWrwXN
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_gic_collect_RpeCbECj for ROGERSBANK gic
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_gic_collect_RpeCbECj
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_line-of-credit_collect_mgESIaRa for ROGERSBANK line-of-credit
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_line-of-credit_collect_mgESIaRa
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_mortgage_collect_ACu4JvYr for ROGERSBANK mortgage
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_mortgage_collect_ACu4JvYr
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_personal-loan_collect_j31ydWf_ for ROGERSBANK personal-loan
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_personal-loan_collect_j31ydWf_
+[source-catalog-runner] starting run run_20260721_041021_rogersbank_savings_collect_LNYvnvh7 for ROGERSBANK savings
+[source-catalog-runner] finished run run_20260721_041021_rogersbank_savings_collect_LNYvnvh7
