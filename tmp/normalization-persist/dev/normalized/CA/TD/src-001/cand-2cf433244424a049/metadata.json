@@ -9,6 +9,8 @@
   "validation_status": "pass",
   "validation_issue_codes": [],
   "source_confidence": 0.785,
-  "field_evidence_link_count": 3,
-  "runtime_notes": []
+  "field_evidence_link_count": 4,
+  "runtime_notes": [
+    "Aligned `public_display_rate` to grounded `standard_rate` value `1.25`."
+  ]
 }

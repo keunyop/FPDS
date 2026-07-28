@@ -23,13 +23,19 @@ from api_service.source_catalog import (
     _deactivate_hard_scope_excluded_generated_detail_sources,
     _deactivate_rejected_generated_detail_sources,
     _dedupe_detail_rows_by_product_identity,
+    _dedupe_generated_source_rows,
     _extract_allowed_links,
     _generate_bank_code,
     _has_excluded_link_signal,
+    _authoritative_catalog_detail_bonus,
+    _ai_supporting_source_is_relevant,
     _invoke_openai_parallel_scorer,
     _link_is_relevant_supporting_source,
+    _looks_like_credit_card_detail_path,
+    _looks_like_secondary_catalog_hub,
     _looks_like_javascript_shell,
     _ordered_detail_candidates,
+    _page_is_audience_offer_hub,
     _promote_detail_candidates,
     _product_type_discovery_profile,
     _record_catalog_audit_event,
@@ -37,7 +43,10 @@ from api_service.source_catalog import (
     _score_candidate_links_with_ai,
     _score_page_evidence,
     _score_product_link,
+    _seed_supporting_hint_is_relevant,
+    _suppress_family_overviews_when_named_details_exist,
     _upsert_source_registry_rows,
+    _url_locale_conflicts_source_language,
     create_bank_profile,
     delete_bank_profile,
     create_source_catalog_item,
@@ -96,6 +105,93 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_seed_supporting_hints_remain_subject_to_current_scope_policy(self) -> None:
+        definition = _product_type_definition("gic")
+        self.assertFalse(
+            _seed_supporting_hint_is_relevant(
+                product_type="gic",
+                discovery_product_type=None,
+                product_type_definition=definition,
+                hint={
+                    "source_url": "https://www.examplebank.ca/investments/gic-calculator/",
+                    "source_name": "GIC calculator",
+                    "purpose": "Estimate GIC growth",
+                    "expected_fields": ["gic_rate_table"],
+                },
+            )
+        )
+        self.assertFalse(
+            _seed_supporting_hint_is_relevant(
+                product_type="gic",
+                discovery_product_type=None,
+                product_type_definition=definition,
+                hint={
+                    "source_url": "https://www.examplebank.ca/open-an-investment?productCode=gic",
+                    "source_name": "Open an investment",
+                    "purpose": "Application flow",
+                },
+            )
+        )
+        self.assertTrue(
+            _seed_supporting_hint_is_relevant(
+                product_type="gic",
+                discovery_product_type=None,
+                product_type_definition=definition,
+                hint={
+                    "source_url": "https://www.examplebank.ca/investments/gic-rates/",
+                    "source_name": "GIC rates",
+                    "purpose": "Official GIC rate table",
+                    "expected_fields": ["gic_rate_table"],
+                },
+            )
+        )
+
+    def test_seed_supporting_hints_reject_branded_blog_paths(self) -> None:
+        definition = _product_type_definition("gic")
+        self.assertFalse(
+            _seed_supporting_hint_is_relevant(
+                product_type="gic",
+                discovery_product_type=None,
+                product_type_definition=definition,
+                hint={
+                    "source_url": "https://www.examplebank.ca/oaken-blog/why-invest-in-a-gic/",
+                    "source_name": "Example Bank GIC article",
+                    "purpose": "Supporting GIC information",
+                    "expected_fields": ["gic_rate_table"],
+                },
+            )
+        )
+
+    def test_product_specific_personal_path_can_remain_supporting_evidence(self) -> None:
+        definition = _product_type_definition("gic")
+        self.assertTrue(
+            _seed_supporting_hint_is_relevant(
+                product_type="gic",
+                discovery_product_type=None,
+                product_type_definition=definition,
+                hint={
+                    "source_url": "https://www.examplebank.ca/en-ca/personal/",
+                    "source_name": "Personal non-registered GICs",
+                    "purpose": "Official personal GIC product information",
+                    "expected_fields": ["gic_rate_table"],
+                },
+            )
+        )
+
+    def test_deposit_supporting_filter_rejects_mutual_fund_governance_pdf(self) -> None:
+        definition = _product_type_definition("gic")
+        self.assertFalse(
+            _link_is_relevant_supporting_source(
+                product_type="gic",
+                product_type_definition=definition,
+                normalized_url=(
+                    "https://www.examplebank.ca/content/dam/investments/pdfs/mutual_funds/"
+                    "reporting_and_governance/fund-amendment.pdf"
+                ),
+                anchor_text="Investment reporting and governance amendment",
+            )
+        )
+
     def test_link_exclusion_does_not_reject_product_copy_containing_offers(self) -> None:
         self.assertFalse(
             _has_excluded_link_signal(
@@ -111,10 +207,144 @@ class SourceCatalogTests(unittest.TestCase):
                 anchor_text="Start your mortgage application",
             )
         )
+
+    def test_ai_supporting_source_rejects_low_relevance_general_advice(self) -> None:
+        self.assertFalse(
+            _ai_supporting_source_is_relevant(
+                AiParallelCandidateScore(
+                    candidate_url="https://www.examplebank.ca/advice",
+                    predicted_role="supporting_html",
+                    relevance_score=1.0,
+                    confidence_band="medium",
+                    reason_codes=["insufficient_evidence"],
+                    short_rationale="General advice with no named product facts.",
+                )
+            )
+        )
+        self.assertTrue(
+            _ai_supporting_source_is_relevant(
+                AiParallelCandidateScore(
+                    candidate_url="https://www.examplebank.ca/savings/rates",
+                    predicted_role="supporting_html",
+                    relevance_score=7.0,
+                    confidence_band="high",
+                    reason_codes=["supporting_terms_or_rates_page", "pricing_or_feature_signal"],
+                    short_rationale="Official current savings rate table.",
+                )
+            )
+        )
+
+    def test_calculator_is_not_collected_as_product_supporting_evidence(self) -> None:
+        self.assertFalse(
+            _link_is_relevant_supporting_source(
+                product_type="gic",
+                product_type_definition=_product_type_definition("gic"),
+                normalized_url="https://www.examplebank.ca/investments/calculators/gic-calculator.html",
+                anchor_text="GIC calculator",
+            )
+        )
+
+    def test_servicing_and_editorial_pages_are_not_supporting_product_evidence(self) -> None:
+        definition = _product_type_definition("credit-card")
+        for path, anchor_text in (
+            ("credit-cards/activate-your-credit-card.html", "Activate your credit card"),
+            ("credit-cards/manage-your-credit-card/welcome-kits.html", "Credit card welcome kits"),
+            ("digital-banking-guide/credit-cards.html", "Digital banking guide - credit cards"),
+            ("advice-plus/posts/student-credit-cards.html", "Student credit card advice"),
+        ):
+            with self.subTest(path=path):
+                self.assertFalse(
+                    _link_is_relevant_supporting_source(
+                        product_type="credit-card",
+                        product_type_definition=definition,
+                        normalized_url=f"https://www.examplebank.ca/{path}",
+                        anchor_text=anchor_text,
+                    )
+                )
+
+    def test_onboarding_and_forms_repositories_are_not_product_evidence(self) -> None:
+        definition = _product_type_definition("gic")
+        for url, anchor_text in (
+            (
+                "https://www.examplebank.ca/banking/join-bank/international-student-gic.html",
+                "International student GIC application",
+            ),
+            ("https://www.examplebank.ca/forms-downloads.html", "Investment forms and downloads"),
+        ):
+            with self.subTest(url=url):
+                self.assertFalse(
+                    _link_is_relevant_supporting_source(
+                        product_type="gic",
+                        product_type_definition=definition,
+                        normalized_url=url,
+                        anchor_text=anchor_text,
+                    )
+                )
+
+    def test_gic_editorial_and_investment_fund_pages_are_not_supporting_evidence(self) -> None:
+        definition = _product_type_definition("gic")
+        for url, anchor_text in (
+            (
+                "https://www.examplebank.ca/en/thejuice/save/a-beginners-guide-to-gics",
+                "A beginner's guide to GICs",
+            ),
+            (
+                "https://www.examplebank.ca/en/personal/invest/non-registered-funds",
+                "Non-registered investment funds and GIC options",
+            ),
+        ):
+            with self.subTest(url=url):
+                self.assertFalse(
+                    _link_is_relevant_supporting_source(
+                        product_type="gic",
+                        product_type_definition=definition,
+                        normalized_url=url,
+                        anchor_text=anchor_text,
+                    )
+                )
+
+    def test_audience_offer_landing_page_is_not_a_second_product_detail(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="savings",
+                fingerprint=(
+                    "https://www.examplebank.ca/en/young-adults/saving-accounts.html "
+                    "Saving Account Offer for Young Adults Step into your saving era with 4.50% interest"
+                ),
+            ),
+            "non_product_service_flow",
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="chequing",
+                fingerprint=(
+                    "https://www.examplebank.ca/en/young-adults/student-chequing.html "
+                    "Student Chequing Account"
+                ),
+            )
+        )
         self.assertTrue(
             _has_excluded_link_signal(
                 normalized_url="https://www.examplebank.ca/mortgages/fixed-rate",
                 anchor_text="Apply now",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://www.examplebank.ca/open-an-investment?productCode=gic-non-reg",
+                anchor_text="Open an investment",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://www.examplebank.ca/open-an-account",
+                anchor_text="",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://hello.examplebank.ca/lending/prequalification",
+                anchor_text="Start your application for a personal line of credit",
             )
         )
 
@@ -133,6 +363,78 @@ class SourceCatalogTests(unittest.TestCase):
             )
         )
 
+    def test_educational_slug_patterns_are_out_of_product_scope(self) -> None:
+        for path in (
+            "savings-accounts/what-is-a-savings-account",
+            "savings-accounts/what-are-the-different-types-of-savings-accounts",
+            "savings-accounts/how-does-interest-work-on-a-savings-account",
+            "savings-accounts/how-to-choose-the-best-savings-account-for-me",
+            "bank-accounts/chequing-vs-savings-account",
+            "savings-accounts/rules-of-savings",
+            "bank-accounts/getting-started",
+            "savings-accounts/emergency-fund",
+            "bank-accounts/multiple-bank-accounts",
+        ):
+            with self.subTest(path=path):
+                self.assertEqual(
+                    _source_scope_exclusion_reason(
+                        product_type="savings",
+                        fingerprint=f"https://www.examplebank.ca/{path} savings account guide",
+                    ),
+                    "non_product_editorial_page",
+                )
+
+    def test_relationship_rewards_program_is_not_savings_or_gic_evidence(self) -> None:
+        for product_type in ("savings", "gic"):
+            with self.subTest(product_type=product_type):
+                self.assertEqual(
+                    _source_scope_exclusion_reason(
+                        product_type=product_type,
+                        fingerprint="https://www.examplebank.ca/bank-accounts/value-program.html rewards and fee rebates",
+                    ),
+                    "other_product_type",
+                )
+
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="chequing",
+                fingerprint="https://www.examplebank.ca/bank-accounts/value-program.html monthly fee rebate",
+            )
+        )
+
+    def test_explicit_deposit_product_slug_outranks_shared_navigation_copy(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="savings",
+                fingerprint=(
+                    "https://www.examplebank.ca/en/bank-accounts/no-fee-chequing.html "
+                    "No Fee Chequing Account navigation High Interest Savings"
+                ),
+            ),
+            "other_product_type",
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="savings",
+                fingerprint=(
+                    "https://www.examplebank.ca/en/bank-accounts/high-interest-savings.html "
+                    "High Interest Savings Account navigation No Fee Chequing"
+                ),
+            )
+        )
+
+    def test_savings_and_gic_exclude_generic_transfer_and_mutual_fund_support(self) -> None:
+        for product_type, url, expected in (
+            ("savings", "https://www.examplebank.ca/en/banking/e-transfer.html", "non_product_service_flow"),
+            ("gic", "https://www.examplebank.ca/en/global-money-transfer.html", "non_product_service_flow"),
+            ("savings", "https://www.examplebank.ca/en/overlays/mutual-funds-types.html", "other_product_type"),
+        ):
+            with self.subTest(product_type=product_type, url=url):
+                self.assertEqual(
+                    _source_scope_exclusion_reason(product_type=product_type, fingerprint=url),
+                    expected,
+                )
+
     def test_mortgage_management_flow_is_out_of_product_candidate_scope(self) -> None:
         self.assertEqual(
             _source_scope_exclusion_reason(
@@ -142,6 +444,36 @@ class SourceCatalogTests(unittest.TestCase):
             "non_product_service_flow",
         )
 
+    def test_internal_shadow_site_is_out_of_public_product_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="savings",
+                fingerprint=(
+                    "https://www.examplebank.ca/content/internal/ca/en/shadow-site/"
+                    "personal/bank-accounts/services.html"
+                ),
+            ),
+            "non_product_service_flow",
+        )
+
+    def test_internal_cms_product_alias_is_out_of_public_product_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="chequing",
+                fingerprint=(
+                    "https://www.examplebank.ca/content/site/ca/en/personal/bank-accounts/"
+                    "chequing-accounts/preferred-package.html"
+                ),
+            ),
+            "non_product_service_flow",
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="chequing",
+                fingerprint="https://www.examplebank.ca/content/dam/legal/chequing-terms.pdf",
+            )
+        )
+
     def test_commercial_product_page_is_out_of_retail_candidate_scope(self) -> None:
         self.assertEqual(
             _source_scope_exclusion_reason(
@@ -149,6 +481,54 @@ class SourceCatalogTests(unittest.TestCase):
                 fingerprint="https://www.examplebank.ca/en-ca/commercial/ Oaken Commercial GICs",
             ),
             "non_consumer_business_page",
+        )
+        for fingerprint in (
+            "https://www.examplebank.ca/credit-cards/all-credit-cards/corporate-classic-plus-card.html Corporate Classic Plus Visa Card",
+            "https://www.examplebank.ca/credit-cards/all-credit-cards/bizline-visa-card.html CIBC bizline Visa Card",
+        ):
+            with self.subTest(fingerprint=fingerprint):
+                self.assertEqual(
+                    _source_scope_exclusion_reason(
+                        product_type="credit-card",
+                        fingerprint=fingerprint,
+                    ),
+                    "non_consumer_business_page",
+                )
+
+    def test_authoritative_card_catalog_details_receive_budget_priority(self) -> None:
+        detail_url = "https://www.examplebank.ca/credit-cards/all-credit-cards/dividend-visa-card.html"
+        entry_url = "https://www.examplebank.ca/credit-cards/all-credit-cards.html"
+        base_score = 8
+
+        self.assertEqual(
+            _authoritative_catalog_detail_bonus(
+                product_type="credit-card",
+                normalized_url=detail_url,
+                base_score=base_score,
+                parent_url=entry_url,
+                seed_entry_url=entry_url,
+            ),
+            6,
+        )
+        self.assertEqual(
+            _authoritative_catalog_detail_bonus(
+                product_type="credit-card",
+                normalized_url=detail_url,
+                base_score=base_score,
+                parent_url="https://www.examplebank.ca/credit-cards/cash-back-cards.html",
+                seed_entry_url=entry_url,
+            ),
+            0,
+        )
+        self.assertEqual(
+            _authoritative_catalog_detail_bonus(
+                product_type="credit-card",
+                normalized_url="https://www.examplebank.ca/credit-cards/cash-back-cards.html",
+                base_score=base_score,
+                parent_url=entry_url,
+                seed_entry_url=entry_url,
+            ),
+            0,
         )
 
     def test_javascript_shell_detection_requires_explicit_rendering_marker(self) -> None:
@@ -244,6 +624,188 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(len(duplicate_urls), 1)
         self.assertIn(duplicate_urls[0], deduped[0]["alias_urls"])
 
+    def test_detail_identity_dedupe_collapses_retired_url_returning_same_product(self) -> None:
+        base = {
+            "bank_code": "BANK",
+            "product_type": "chequing",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "priority": "P1",
+            "seed_source_flag": False,
+            "discovery_metadata": {
+                # A retired product URL can return the replacement product even
+                # when the seed-name/type scorer no longer recognizes the URL.
+                "product_identity_match": False,
+                "page_title": "Smart Account | Example Bank",
+                "primary_heading": "Smart Account",
+                "attribute_signal_count": 4,
+                "negative_signal_count": 0,
+                "page_evidence_reason_codes": ["pricing_or_feature_signal"],
+            },
+        }
+        rows = [
+            {
+                **base,
+                "source_id": "AUTO-BANK-CHQ-A",
+                "source_url": "https://example.test/accounts/smart-account",
+                "normalized_url": "https://example.test/accounts/smart-account",
+                "alias_urls": [],
+            },
+            {
+                **base,
+                "source_id": "AUTO-BANK-CHQ-B",
+                "source_url": "https://example.test/accounts/retired-plus-account",
+                "normalized_url": "https://example.test/accounts/retired-plus-account",
+                "alias_urls": [],
+            },
+        ]
+
+        deduped, duplicate_urls = _dedupe_detail_rows_by_product_identity(rows)
+
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(duplicate_urls, ["https://example.test/accounts/retired-plus-account"])
+        self.assertIn(duplicate_urls[0], deduped[0]["alias_urls"])
+
+    def test_final_generated_row_dedupe_rechecks_identical_returned_detail_identity(self) -> None:
+        base = {
+            "bank_code": "BANK",
+            "product_type": "chequing",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "priority": "P0",
+            "discovery_metadata": {
+                "product_identity_match": False,
+                "page_title": "Smart Account | Example Bank",
+                "primary_heading": "Smart Account",
+                "attribute_signal_count": 4,
+                "negative_signal_count": 0,
+                "page_evidence_reason_codes": ["pricing_or_feature_signal"],
+            },
+        }
+        rows = [
+            {**base, "source_id": "SMART", "source_url": "https://example.test/smart", "normalized_url": "https://example.test/smart", "alias_urls": []},
+            {**base, "source_id": "SMART-PLUS", "source_url": "https://example.test/smart-plus", "normalized_url": "https://example.test/smart-plus", "alias_urls": []},
+        ]
+
+        deduped = _dedupe_generated_source_rows(rows)
+
+        self.assertEqual(len(deduped), 1)
+        self.assertIn("https://example.test/smart-plus", deduped[0]["alias_urls"])
+
+    def test_locale_and_audience_offer_hubs_do_not_become_detail_products(self) -> None:
+        self.assertTrue(
+            _url_locale_conflicts_source_language(
+                normalized_url="https://example.test/fr/comptes/compte-intelli",
+                source_language="en",
+            )
+        )
+        self.assertFalse(
+            _url_locale_conflicts_source_language(
+                normalized_url="https://example.test/ca/en/accounts/smart",
+                source_language="en-CA",
+            )
+        )
+        self.assertTrue(
+            _page_is_audience_offer_hub(
+                PageEvidenceAssessment(
+                    page_evidence_score=4,
+                    page_evidence_reason_codes=["product_type_semantic_match"],
+                    page_title="CIBC Smart Account for Apprentices | CIBC",
+                    primary_heading="Apprentice Banking Offers",
+                    heading_match=False,
+                    attribute_signal_count=4,
+                    negative_signal_count=0,
+                    product_identity_match=False,
+                )
+            )
+        )
+
+    def test_detail_identity_dedupe_keeps_weak_unconfirmed_pages_separate(self) -> None:
+        base = {
+            "bank_code": "BANK",
+            "product_type": "chequing",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "priority": "P1",
+            "seed_source_flag": False,
+            "discovery_metadata": {
+                "product_identity_match": False,
+                "page_title": "Banking offer | Example Bank",
+                "primary_heading": "Banking offer",
+                "attribute_signal_count": 1,
+                "negative_signal_count": 0,
+                "page_evidence_reason_codes": ["pricing_or_feature_signal"],
+            },
+            "alias_urls": [],
+        }
+        rows = [
+            {**base, "source_id": "A", "source_url": "https://example.test/a", "normalized_url": "https://example.test/a"},
+            {**base, "source_id": "B", "source_url": "https://example.test/b", "normalized_url": "https://example.test/b"},
+        ]
+
+        deduped, duplicate_urls = _dedupe_detail_rows_by_product_identity(rows)
+
+        self.assertEqual(len(deduped), 2)
+        self.assertEqual(duplicate_urls, [])
+
+    def test_detail_identity_dedupe_keeps_generic_strong_pages_separate(self) -> None:
+        base = {
+            "bank_code": "BANK",
+            "product_type": "chequing",
+            "source_type": "html",
+            "discovery_role": "detail",
+            "priority": "P1",
+            "seed_source_flag": False,
+            "discovery_metadata": {
+                "product_identity_match": False,
+                "page_title": "Personal Chequing Account | Bank",
+                "primary_heading": "Personal Chequing Account",
+                "attribute_signal_count": 4,
+                "negative_signal_count": 0,
+                "page_evidence_reason_codes": ["pricing_or_feature_signal"],
+            },
+            "alias_urls": [],
+        }
+        rows = [
+            {**base, "source_id": "A", "source_url": "https://example.test/a", "normalized_url": "https://example.test/a"},
+            {**base, "source_id": "B", "source_url": "https://example.test/b", "normalized_url": "https://example.test/b"},
+        ]
+
+        deduped, duplicate_urls = _dedupe_detail_rows_by_product_identity(rows)
+
+        self.assertEqual(len(deduped), 2)
+        self.assertEqual(duplicate_urls, [])
+
+    def test_family_overview_becomes_supporting_when_named_details_exist(self) -> None:
+        family = {
+            "normalized_url": "https://example.test/gics",
+            "discovery_metadata": {
+                "page_evidence_reason_codes": ["product_identity_signal"],
+                "ai_predicted_role": "supporting_html",
+                "ai_reason_codes": ["product_type_semantic_match", "hub_page_not_detail"],
+            },
+        }
+        named = {
+            "normalized_url": "https://example.test/gics/non-redeemable",
+            "discovery_metadata": {"page_evidence_reason_codes": ["product_identity_signal"]},
+        }
+
+        retained, suppressed_urls = _suppress_family_overviews_when_named_details_exist([family, named])
+
+        self.assertEqual(retained, [named])
+        self.assertEqual(suppressed_urls, ["https://example.test/gics"])
+
+    def test_family_overview_remains_fallback_without_named_details(self) -> None:
+        family = {
+            "normalized_url": "https://example.test/gics",
+            "discovery_metadata": {"page_evidence_reason_codes": ["multi_product_family_overview"]},
+        }
+
+        retained, suppressed_urls = _suppress_family_overviews_when_named_details_exist([family])
+
+        self.assertEqual(retained, [family])
+        self.assertEqual(suppressed_urls, [])
+
     def test_extract_allowed_links_accepts_www_and_apex_aliases_only(self) -> None:
         html = """
         <a href="https://bridgewaterbank.ca/personal/savings">Savings</a>
@@ -325,13 +887,85 @@ class SourceCatalogTests(unittest.TestCase):
             short_rationale="Official GIC product page.",
         )
         evidence = PageEvidenceAssessment(
-            page_evidence_score=3,
+            page_evidence_score=2,
             page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "pricing_or_feature_signal"],
             page_title="Guaranteed Investment Certificates",
             primary_heading="Lock in your GIC rate",
             heading_match=True,
             attribute_signal_count=3,
             negative_signal_count=2,
+            product_identity_match=True,
+        )
+
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_high_confidence_named_card_survives_trademark_mojibake_and_nav_noise(self) -> None:
+        url = "https://www.examplebank.ca/credit-cards/visa/student-no-fee-card.html"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Student no-fee Visa card",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=9.5,
+            confidence_band="high",
+            reason_codes=["named_product_detail"],
+            short_rationale="Official named credit-card detail page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=0,
+            page_evidence_reason_codes=["product_type_semantic_match", "pricing_or_feature_signal"],
+            page_title="Scotia Momentum No-Fee Visa Card (for students)",
+            primary_heading="Scotia Momentum㈢ No-Fee Visa* Card (for students)",
+            heading_match=False,
+            attribute_signal_count=1,
+            negative_signal_count=2,
+            product_identity_match=False,
+        )
+
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_high_confidence_singular_card_shell_is_kept_for_downstream_rendering(self) -> None:
+        url = "https://www.examplebank.ca/credit-cards/visa/student-value-card.html"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Student Value Visa Card",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=9.5,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "named_product_detail"],
+            short_rationale="Official named credit-card detail page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=0,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "product_type_semantic_match"],
+            page_title="Student Value Visa Card | Example Bank",
+            primary_heading="Student Value Visa Card",
+            heading_match=True,
+            attribute_signal_count=0,
+            negative_signal_count=0,
             product_identity_match=True,
         )
 
@@ -439,6 +1073,28 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertGreater(score, 0)
 
+    def test_singular_card_paths_outrank_category_and_no_fee_is_not_supporting_identity(self) -> None:
+        definition = _product_type_definition("credit-card")
+        detail_url = "https://www.examplebank.ca/credit-cards/american-express/no-fee-amex-card.html"
+        category_url = "https://www.examplebank.ca/credit-cards/no-annual-fee.html"
+
+        detail_score = _score_product_link(
+            product_type="credit-card",
+            product_type_definition=definition,
+            normalized_url=detail_url,
+            anchor_text="No-Fee American Express Card",
+        )
+        category_score = _score_product_link(
+            product_type="credit-card",
+            product_type_definition=definition,
+            normalized_url=category_url,
+            anchor_text="No annual fee credit cards",
+        )
+
+        self.assertTrue(_looks_like_credit_card_detail_path(product_type="credit-card", normalized_url=detail_url))
+        self.assertFalse(_looks_like_credit_card_detail_path(product_type="credit-card", normalized_url=category_url))
+        self.assertGreater(detail_score, category_score)
+
     def test_lending_product_type_discovery_profiles_are_recognized(self) -> None:
         self.assertEqual(_product_type_discovery_profile("credit_card", _product_type_definition("credit-card")), "credit-card")
         self.assertEqual(_product_type_discovery_profile("mortgages", _product_type_definition("mortgage")), "mortgage")
@@ -513,6 +1169,50 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertEqual(result.primary_heading, "Example Savings Account")
 
+    def test_product_titled_cross_sell_application_step_cannot_become_detail(self) -> None:
+        detail_html = """
+        <html><head><title>Growth Savings Account | Example Bank</title></head><body>
+          <h1>Consider adding a Chequing account by selecting one of the products below:</h1>
+          <p>No thanks, continue with my current application.</p>
+          <h2>Unlimited Chequing Account</h2>
+          <p>Monthly fee and account benefits.</p>
+        </body></html>
+        """
+        raw_url = "https://www.examplebank.ca/accounts/bundles/growth-savings-account"
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            evidence = _score_page_evidence(
+                raw_url=raw_url,
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+
+        self.assertIn("non_product_service_flow", evidence.page_evidence_reason_codes)
+        candidate = HomepageCandidate(
+            normalized_url=raw_url,
+            raw_url=raw_url,
+            anchor_text="Growth Savings Account",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=raw_url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="Title names a savings product.",
+        )
+        self.assertFalse(
+            _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence)
+        )
+
     def test_generic_term_deposit_page_marks_multi_product_boundary(self) -> None:
         detail_html = """
         <html><head><title>Term Deposits | Example Bank</title></head><body>
@@ -529,6 +1229,54 @@ class SourceCatalogTests(unittest.TestCase):
         with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
             result = _score_page_evidence(
                 raw_url="https://www.examplebank.ca/investing/term-deposits",
+                fetch_policy=SimpleNamespace(),
+                product_type="gic",
+                product_type_definition=_product_type_definition("gic"),
+            )
+
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_plural_bank_account_benefits_page_marks_chequing_multi_product_boundary(self) -> None:
+        detail_html = """
+        <html><head><title>Senior Benefits on Bank Accounts | Example Bank</title></head><body>
+          <h1>Senior Benefits on Bank Accounts</h1>
+          <h2>Smart Account</h2>
+          <p>No monthly fee and unlimited transactions for eligible seniors.</p>
+          <h2>Everyday Chequing Account</h2>
+          <p>18 included transactions and a lower monthly fee.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/bank-accounts/senior-benefits",
+                fetch_policy=SimpleNamespace(),
+                product_type="chequing",
+                product_type_definition=_product_type_definition("chequing"),
+            )
+
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_gic_category_list_marks_multi_product_boundary_without_secondary_headings(self) -> None:
+        detail_html = """
+        <html><head><title>Guaranteed-Return GICs | Example Bank</title></head><body>
+          <h1>Guaranteed-Return GICs</h1>
+          <p>Select Category</p>
+          <ul>
+            <li>Non-Redeemable GIC</li>
+            <li>Redeemable GIC</li>
+            <li>One-Year Cashable GIC</li>
+            <li>RateAdvantage GIC</li>
+            <li>U.S. Dollar Term Deposit</li>
+            <li>Income Builder GIC</li>
+          </ul>
+          <p>Choose a term and minimum investment.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/investments/guaranteed-return-gics",
                 fetch_policy=SimpleNamespace(),
                 product_type="gic",
                 product_type_definition=_product_type_definition("gic"),
@@ -587,6 +1335,92 @@ class SourceCatalogTests(unittest.TestCase):
             )
         )
 
+    def test_high_confidence_named_card_survives_plural_seo_title_and_cross_sell_headings(self) -> None:
+        detail_html = """
+        <html><head><title>Momentum Visa Infinite Card - Travel Credit Cards | Example Bank</title></head><body>
+          <h1>Momentum Visa Infinite Card</h1>
+          <p>Earn rewards with a $120 annual fee and a 20.99% purchase rate.</p>
+          <h2>Cashback Mastercard</h2>
+          <h2>Rewards Mastercard</h2>
+        </body></html>
+        """
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/credit-cards/momentum-visa-infinite",
+                fetch_policy=SimpleNamespace(),
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+            )
+        self.assertIn("multi_product_family_overview", evidence.page_evidence_reason_codes)
+        candidate = HomepageCandidate(
+            normalized_url="https://www.examplebank.ca/credit-cards/momentum-visa-infinite",
+            raw_url="https://www.examplebank.ca/credit-cards/momentum-visa-infinite",
+            anchor_text="Momentum Visa Infinite Card",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=candidate.normalized_url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="A named card detail page.",
+        )
+        self.assertTrue(
+            _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence)
+        )
+
+    def test_confirmed_named_card_does_not_require_exceptionally_high_ai_score(self) -> None:
+        detail_html = """
+        <html><head><title>Momentum Visa Infinite Card - Cash Back Credit Cards | Example Bank</title></head><body>
+          <h1>Momentum Visa Infinite Card</h1>
+          <p>Annual fee $120. Purchase interest rate 20.99%. Cash advance rate 22.99%.</p>
+          <h2>Other Visa credit cards</h2>
+          <h3>Cashback Mastercard</h3>
+          <h3>Rewards Mastercard</h3>
+        </body></html>
+        """
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/credit-cards/visa/momentum-visa-infinite",
+                fetch_policy=SimpleNamespace(),
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+            )
+        self.assertIn("multi_product_family_overview", evidence.page_evidence_reason_codes)
+        candidate = HomepageCandidate(
+            normalized_url="https://www.examplebank.ca/credit-cards/visa/momentum-visa-infinite",
+            raw_url="https://www.examplebank.ca/credit-cards/visa/momentum-visa-infinite",
+            anchor_text="Momentum Visa Infinite Card",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=candidate.normalized_url,
+            predicted_role="detail",
+            relevance_score=5.5,
+            confidence_band="medium",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="A named card detail page with explicit fees and rates.",
+        )
+
+        self.assertTrue(
+            _candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence)
+        )
+
     def test_named_high_interest_savings_detail_is_not_a_family_overview(self) -> None:
         detail_html = """
         <html><head><title>High Interest Savings Account (HISA) | Example Bank</title></head><body>
@@ -608,6 +1442,45 @@ class SourceCatalogTests(unittest.TestCase):
             )
 
         self.assertNotIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_educational_hisa_page_with_named_account_is_a_family_overview(self) -> None:
+        family_html = """
+        <html><head><title>High Interest Savings Account | Example Bank</title></head><body>
+          <h1>High Interest Savings Account</h1>
+          <h2>What is a high interest savings account?</h2>
+          <p>A HISA is a type of savings account that offers higher rates than a traditional one.</p>
+          <h2>Savings Amplifier Account</h2>
+          <p>Open account. Earn a 4.75% promotional rate for 120 days.</p>
+        </body></html>
+        """
+
+        with patch("api_service.source_catalog.fetch_text", return_value=family_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/savings/high-interest-savings-account",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
+
+    def test_marketing_titled_savings_catalog_marks_multi_product_boundary(self) -> None:
+        family_html = """
+        <html><head><title>Open a Savings Account Online | Example Bank</title></head><body>
+          <h1>Save for tomorrow, starting today</h1>
+          <h2>High Interest Savings Account</h2>
+          <h2>Money Master Savings Account</h2>
+          <h2>U.S. Dollar Savings Account</h2>
+        </body></html>
+        """
+        with patch("api_service.source_catalog.fetch_text", return_value=family_html):
+            result = _score_page_evidence(
+                raw_url="https://www.examplebank.ca/accounts/savings",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+        self.assertIn("multi_product_family_overview", result.page_evidence_reason_codes)
 
     def test_mortgage_refinance_advice_page_is_not_product_detail(self) -> None:
         detail_html = """
@@ -666,6 +1539,36 @@ class SourceCatalogTests(unittest.TestCase):
                 },
                 normalized_url="https://www.examplebank.ca/rates",
                 anchor_text="Compare all accounts",
+            )
+        )
+
+    def test_gic_supporting_sources_reject_general_bank_account_fee_changes(self) -> None:
+        self.assertFalse(
+            _link_is_relevant_supporting_source(
+                product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic"),
+                    "display_name": "GIC",
+                    "description": "Guaranteed investment certificate terms and rates.",
+                    "discovery_keywords": ["gic", "term deposit"],
+                },
+                normalized_url="https://www.examplebank.ca/bank-accounts/account-fees-changes.html",
+                anchor_text="Changes to Bank Account Fees and Services",
+            )
+        )
+
+    def test_gic_supporting_sources_accept_general_deposit_investment_terms(self) -> None:
+        self.assertTrue(
+            _link_is_relevant_supporting_source(
+                product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic"),
+                    "display_name": "GIC",
+                    "description": "Guaranteed investment certificate terms and rates.",
+                    "discovery_keywords": ["gic", "term deposit"],
+                },
+                normalized_url="https://www.examplebank.ca/legal/terms-for-deposit-investments.pdf",
+                anchor_text="Terms and disclosure for deposit investments",
             )
         )
 
@@ -749,6 +1652,60 @@ class SourceCatalogTests(unittest.TestCase):
         rates_row = next(item for item in result.rows if item["normalized_url"] == rates_url)
         self.assertEqual(rates_row["discovery_role"], "supporting_html")
         self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "deterministic_supporting_fallback")
+
+    def test_product_faq_minimum_is_supporting_evidence_not_a_detail_candidate(self) -> None:
+        detail_url = "https://www.examplebank.ca/investments/gic"
+        faq_url = "https://www.examplebank.ca/en/faq/minimum-balance-needed-to-open-a-gic"
+        entry_html = (
+            f'<a href="{detail_url}">Guaranteed Investment</a>'
+            f'<a href="{faq_url}">What is the minimum balance needed to open a GIC?</a>'
+        )
+        detail_evidence = PageEvidenceAssessment(
+            page_evidence_score=8,
+            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match", "pricing_or_feature_signal"],
+            page_title="Guaranteed Investment",
+            primary_heading="Guaranteed Investment",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+        ai_result = AiParallelScoringResult(
+            scores={
+                detail_url: AiParallelCandidateScore(
+                    candidate_url=detail_url,
+                    predicted_role="detail",
+                    relevance_score=9.0,
+                    confidence_band="high",
+                    reason_codes=["product_type_semantic_match"],
+                    short_rationale="Official GIC detail page.",
+                )
+            },
+            notes=[],
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", return_value=entry_html),
+            patch("api_service.source_catalog._score_candidate_links_with_ai", return_value=ai_result),
+            patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="TEST",
+                bank_name="Test Bank",
+                country_code="CA",
+                product_type="gic",
+                product_type_definition={
+                    **_product_type_definition("gic"),
+                    "description": "Guaranteed investment certificates with rates, terms, and minimum deposits.",
+                    "discovery_keywords": ["gic", "guaranteed investment", "minimum balance"],
+                },
+                homepage_url="https://www.examplebank.ca/investments",
+                source_language="en",
+            )
+
+        faq_rows = [item for item in result.rows if item["normalized_url"] == faq_url]
+        self.assertEqual(len(faq_rows), 1)
+        self.assertEqual(faq_rows[0]["discovery_role"], "supporting_html")
+        self.assertNotIn(faq_url, {item["normalized_url"] for item in result.rows if item["discovery_role"] == "detail"})
 
     def test_create_bank_profile_auto_generates_bank_code(self) -> None:
         connection = _QueuedConnection([None, None])
@@ -1753,6 +2710,92 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
 
+    def test_generate_sources_from_homepage_expands_secondary_product_category_hub(self) -> None:
+        homepage_url = "https://www.examplebank.ca/"
+        entry_url = "https://www.examplebank.ca/personal/credit-cards"
+        category_url = "https://www.examplebank.ca/personal/credit-cards/cash-back-cards.html"
+        detail_url = "https://www.examplebank.ca/personal/credit-cards/all-credit-cards/dividend-visa-infinite-card.html"
+        pages = {
+            homepage_url: '<a href="/personal/credit-cards">Credit cards</a>',
+            entry_url: '<a href="/personal/credit-cards/cash-back-cards.html">Cash back cards</a>',
+            category_url: (
+                '<a href="/personal/credit-cards/all-credit-cards/dividend-visa-infinite-card.html">'
+                "Dividend Visa Infinite Card</a>"
+            ),
+            detail_url: (
+                "<html><head><title>Dividend Visa Infinite Card</title></head><body>"
+                "<h1>Dividend Visa Infinite Card</h1><p>$120 annual fee. Purchase interest rate 21.99%.</p>"
+                "</body></html>"
+            ),
+        }
+
+        def fake_fetch(url: str, _policy: object) -> str:
+            return pages[url]
+
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=fake_fetch),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=entry_url),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        detail_url: AiParallelCandidateScore(
+                            candidate_url=detail_url,
+                            predicted_role="detail",
+                            relevance_score=9.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                            short_rationale="Official individual credit-card detail page.",
+                        )
+                    },
+                    notes=["AI parallel scorer evaluated secondary-hub candidates."],
+                ),
+            ),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="EXAMPLE",
+                bank_name="Example Bank",
+                country_code="CA",
+                product_type="credit-card",
+                product_type_definition={
+                    **_product_type_definition("credit-card"),
+                    "description": "Credit cards with annual fees, purchase rates, cash advance rates, and rewards.",
+                    "discovery_keywords": ["credit card", "visa", "mastercard", "annual fee"],
+                    "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"],
+                },
+                homepage_url=homepage_url,
+                source_language="en",
+            )
+
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertIn(detail_url, {item["normalized_url"] for item in detail_rows})
+        self.assertTrue(any("secondary product-category hub" in note for note in result.discovery_notes))
+
+    def test_secondary_catalog_hub_detection_is_plural_and_excludes_operational_pages(self) -> None:
+        self.assertTrue(
+            _looks_like_secondary_catalog_hub(
+                product_type="credit-card",
+                normalized_url="https://www.examplebank.ca/credit-cards/travel-rewards-cards.html",
+                anchor_text="Travel rewards cards",
+            )
+        )
+        self.assertFalse(
+            _looks_like_secondary_catalog_hub(
+                product_type="credit-card",
+                normalized_url="https://www.examplebank.ca/credit-cards/dividend-visa-infinite-card.html",
+                anchor_text="Dividend Visa Infinite Card",
+            )
+        )
+        self.assertFalse(
+            _looks_like_secondary_catalog_hub(
+                product_type="credit-card",
+                normalized_url="https://www.examplebank.ca/credit-cards/compare-cards.html",
+                anchor_text="Compare credit cards",
+            )
+        )
+
     def test_strong_page_evidence_override_applies_across_product_types(self) -> None:
         cases = [
             {
@@ -2492,6 +3535,8 @@ class SourceCatalogTests(unittest.TestCase):
         detail_rows = [item for item in result.rows if item["source_id"] in {"CIBC-CHQ-002", "CIBC-CHQ-003"}]
         self.assertTrue(all(item["discovery_metadata"]["selection_path"] == "seed_hint_ai_unavailable_low_page_evidence" for item in detail_rows))
         self.assertTrue(all(item["discovery_metadata"]["ai_unavailable"] for item in detail_rows))
+        self.assertTrue(all("fee_waiver_condition" in item["expected_fields"] for item in detail_rows))
+        self.assertTrue(all("minimum_balance" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(any("Deterministic homepage discovery fallback" in note for note in result.discovery_notes))
 
     def test_generate_sources_from_homepage_keeps_cibc_seed_details_when_ai_scores_but_page_evidence_is_weak(self) -> None:

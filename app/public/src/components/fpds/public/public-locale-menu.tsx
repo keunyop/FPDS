@@ -49,7 +49,7 @@ export function PublicLocaleMenu({
         <DropdownMenuTrigger asChild>
           <Button
             aria-label={copy.nav.localeLabel}
-            className={cn("h-10 rounded-full border-border bg-card px-3 text-xs shadow-sm", triggerClassName)}
+            className={cn("h-11 rounded-full border-border bg-card px-3 text-xs shadow-sm", triggerClassName)}
             size="sm"
             variant="outline"
           >
@@ -65,7 +65,7 @@ export function PublicLocaleMenu({
           {options.map((option) => {
             const active = option === locale;
             return (
-              <DropdownMenuItem asChild className="min-h-9 cursor-pointer px-2.5" key={option}>
+              <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-2.5" key={option}>
                 <Link href={buildLocaleHref(pathname, searchParams, option)}>
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <span className="w-7 text-xs font-semibold uppercase text-muted-foreground">{option}</span>

@@ -3,7 +3,7 @@
 import { Calculator } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 type InterestCalculatorProps = {
@@ -41,7 +41,7 @@ export function InterestCalculator({
           <Calculator className="size-4" aria-hidden="true" />
           {labels.eyebrow}
         </CardDescription>
-        <CardTitle className="text-base">{labels.title}</CardTitle>
+        <h2 className="text-base font-semibold">{labels.title}</h2>
       </CardHeader>
       <CardContent className="grid gap-4">
         <label className="grid gap-2 text-sm">

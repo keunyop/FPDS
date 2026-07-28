@@ -1,20 +1,34 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 import { PublicFooter } from "@/components/fpds/public/public-footer";
 import { PublicHeader } from "@/components/fpds/public/public-header";
+import { PublicLocaleSync } from "@/components/fpds/public/public-locale-sync";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FPDS",
-  description: "FPDS deposit product catalog"
+  title: {
+    default: "FPDS — Verified financial product records",
+    template: "%s — FPDS"
+  },
+  description: "Compare reviewed public facts for Canadian deposit and loan products."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(()=>{const l=new URLSearchParams(location.search).get('locale');document.documentElement.lang=l==='ko'||l==='ja'?l:'en'})()"
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-background text-foreground">
+        <Suspense fallback={null}>
+          <PublicLocaleSync />
+        </Suspense>
         <div className="relative isolate min-h-screen">
           <PublicHeader />
           <div className="min-h-[calc(100vh-4rem)]">{children}</div>

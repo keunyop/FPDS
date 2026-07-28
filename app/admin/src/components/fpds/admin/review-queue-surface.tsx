@@ -261,14 +261,14 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
       label: copy.warningsErrors,
       value: String((validationCounts.warning ?? 0) + (validationCounts.error ?? 0)),
       note: copy.needsAttention,
-      tone: "success" as const,
+      tone: "warning" as const,
       icon: TriangleAlert,
     },
   ];
 
   return (
-    <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+    <section className="grid min-w-0 gap-4">
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.headerDescription}
@@ -281,21 +281,18 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
         items={statItems}
       />
 
-      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersEyebrow}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.controlsTitle}</h2>
-          </div>
-
+      <article className="min-w-0 rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col gap-1 border-b border-border pb-3 sm:flex-row sm:items-baseline sm:justify-between">
+          <h2 className="text-base font-semibold text-foreground">{copy.controlsTitle}</h2>
+          <p className="text-xs text-muted-foreground">{copy.filtersEyebrow}</p>
         </div>
 
-        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-6 grid min-w-0 gap-5">
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.5fr_repeat(5,minmax(0,1fr))]">
-            <label className="grid min-w-0 gap-2 text-sm">
+        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-4 grid min-w-0 gap-4">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.7fr)_repeat(5,minmax(8rem,1fr))]">
+            <label className="grid min-w-0 gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -303,10 +300,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               />
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.bank}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.bankCode}
                 name="bank_code"
               >
@@ -319,10 +316,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.productType}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.productType}
                 name="product_type"
               >
@@ -335,10 +332,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.validation}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.validationStatus}
                 name="validation_status"
               >
@@ -351,10 +348,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.sortBy}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.sortBy}
                 name="sort_by"
               >
@@ -366,10 +363,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.order}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.sortOrder}
                 name="sort_order"
               >
@@ -379,13 +376,13 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
             </label>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr_auto]">
-            <fieldset className="grid gap-2 text-sm">
+          <div className="grid gap-3 lg:grid-cols-[minmax(18rem,1.5fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
+            <fieldset className="grid gap-1.5 text-sm">
               <legend className="font-medium text-foreground">{copy.reviewStates}</legend>
               <div className="flex flex-wrap gap-2">
                 {REVIEW_STATES.map((state) => (
                   <label
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm text-foreground"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30"
                     key={state}
                   >
                     <input
@@ -401,20 +398,20 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </div>
             </fieldset>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.createdFrom}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.createdFrom}
                 name="created_from"
                 type="date"
               />
             </label>
 
-            <label className="grid gap-2 text-sm">
+            <label className="grid gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.createdTo}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.createdTo}
                 name="created_to"
                 type="date"

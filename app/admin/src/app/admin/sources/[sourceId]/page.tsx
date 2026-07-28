@@ -34,7 +34,12 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
   }
 
   if (!session || apiUnavailable) {
-    return <AdminApiUnavailable title="Source detail could not load." />;
+    const unavailableTitle = locale === "ko"
+      ? "소스 상세 화면을 불러올 수 없습니다."
+      : locale === "ja"
+        ? "ソース詳細を読み込めませんでした。"
+        : "Source detail could not load.";
+    return <AdminApiUnavailable locale={locale} title={unavailableTitle} />;
   }
 
   if (!detail) {

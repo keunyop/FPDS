@@ -36,7 +36,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
   }
 
   if (!session || !health || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Dashboard health could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "대시보드 상태를 불러올 수 없습니다." : locale === "ja" ? "ダッシュボード状態を読み込めません。" : "Dashboard health could not load."} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

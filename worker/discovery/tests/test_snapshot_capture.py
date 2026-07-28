@@ -27,9 +27,13 @@ class SnapshotCaptureTests(unittest.TestCase):
 
         responses = {
             html_source.resolved_url: _fetched_response(
-                body=b"<html><body>Every Day Savings</body></html>",
-                content_type="text/html",
+                body=b"%PDF-1.4 browser-rendered Every Day Savings",
+                content_type="application/pdf",
                 final_url=html_source.resolved_url,
+                headers={
+                    "x-fpds-fetch-method": "browser_pdf_fallback",
+                    "x-fpds-browser-executable": "msedge.exe",
+                },
             ),
             pdf_source.resolved_url: _fetched_response(
                 body=b"%PDF-1.4 fake td fee schedule",
@@ -120,6 +124,9 @@ class SnapshotCaptureTests(unittest.TestCase):
             self.assertTrue(str(item.run_source_item_record["run_source_item_id"]).startswith("rsi-"))
             self.assertTrue(str(item.object_storage_key).startswith("dev/snapshots/CA/TD/"))
         self.assertEqual(stored_results[0].run_source_item_record["warning_count"], 1)
+        self.assertEqual(stored_results[0].source_snapshot_record["response_metadata"]["fetch_method"], "browser_pdf_fallback")
+        self.assertEqual(stored_results[0].source_snapshot_record["response_metadata"]["browser_executable"], "msedge.exe")
+        self.assertEqual(stored_results[1].source_snapshot_record["response_metadata"]["fetch_method"], "direct_https")
 
     def test_capture_reuses_existing_snapshot_when_fingerprint_matches(self) -> None:
         source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-007"))
@@ -237,13 +244,15 @@ class SnapshotCaptureTests(unittest.TestCase):
         self.assertEqual(attempts["count"], 1)
 
 
-def _fetched_response(*, body: bytes, content_type: str, final_url: str) -> FetchedResponse:
+def _fetched_response(
+    *, body: bytes, content_type: str, final_url: str, headers: dict[str, str] | None = None
+) -> FetchedResponse:
     return FetchedResponse(
         body=body,
         final_url=final_url,
         content_type=content_type,
         status_code=200,
-        headers={},
+        headers=headers or {},
         fetched_at="2026-04-09T00:00:00+00:00",
         redirect_count=0,
     )

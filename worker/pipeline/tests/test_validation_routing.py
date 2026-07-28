@@ -14,7 +14,7 @@ from worker.pipeline.fpds_validation_routing.persistence import (
     PsqlValidationRoutingRepository,
     ValidationRoutingDatabaseConfig,
 )
-from worker.pipeline.fpds_validation_routing.service import ValidationRoutingService
+from worker.pipeline.fpds_validation_routing.service import ValidationRoutingService, _compute_validation_issue_codes
 from worker.pipeline.fpds_validation_routing.storage import (
     ValidationRoutingStorageConfig,
     build_object_store,
@@ -24,6 +24,160 @@ _GOLDEN_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden" / "canada_b
 
 
 class ValidationRoutingServiceTests(unittest.TestCase):
+    def test_dynamic_rate_without_direct_field_evidence_is_not_publishable(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "SCOTIA",
+                "product_family": "credit",
+                "product_type": "line-of-credit",
+                "subtype_code": "personal",
+                "product_name": "ScotiaLine Personal Line of Credit",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-23T00:00:00+00:00",
+                "interest_rate": 20.0,
+                "interest_rate_summary": "Variable interest rate based on Scotiabank Prime.",
+            },
+            field_evidence_links=[],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("no direct field evidence" in note for note in runtime_notes))
+
+    def test_dynamic_gic_rate_mechanism_satisfies_final_rate_requiredness(self) -> None:
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "gic",
+                "subtype_code": "redeemable",
+                "product_name": "Prime-Linked GIC",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-22T00:00:00+00:00",
+                "minimum_deposit": 5000,
+                "term_length_text": "1 year",
+                "interest_rate_summary": "Variable interest rate linked to changes in Prime.",
+            },
+            field_evidence_links=[],
+            runtime_notes=[],
+            taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+        )
+
+        self.assertNotIn("required_field_missing", issues)
+
+    def test_multi_term_gic_table_satisfies_final_term_requiredness(self) -> None:
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "gic",
+                "subtype_code": "non_redeemable",
+                "product_name": "Multi-Term GIC",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-23T00:00:00+00:00",
+                "minimum_deposit": 1000,
+                "standard_rate": 2.7,
+                "term_rate_table": [
+                    {"term_label": "1 year", "term_length_days": 365, "rate": 2.7},
+                    {"term_label": "2 years", "term_length_days": 730, "rate": 2.8},
+                ],
+            },
+            field_evidence_links=[],
+            runtime_notes=[],
+            taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
+        )
+
+        self.assertNotIn("required_field_missing", issues)
+
+    def test_savings_promotion_without_ongoing_rate_requires_final_review(self) -> None:
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "savings",
+                "subtype_code": "standard",
+                "product_name": "Promotional Savings Account",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-23T00:00:00+00:00",
+                "promotional_rate": 4.6,
+                "public_display_rate": 4.6,
+            },
+            field_evidence_links=[],
+            runtime_notes=[],
+            taxonomy_registry={"savings": {"standard", "other"}},
+        )
+
+        self.assertIn("required_field_missing", issues)
+
+        grounded_issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "savings",
+                "subtype_code": "standard",
+                "product_name": "Tiered Promotional Savings Account",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-23T00:00:00+00:00",
+                "promotional_rate": 4.6,
+                "public_display_rate": 4.6,
+                "regular_interest_rate": 0.3,
+            },
+            field_evidence_links=[],
+            runtime_notes=[],
+            taxonomy_registry={"savings": {"standard", "other"}},
+        )
+        self.assertNotIn("required_field_missing", grounded_issues)
+
+        missing_with_list_issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "savings",
+                "subtype_code": "standard",
+                "product_name": "Savings Account Without a Public Rate",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-07-23T00:00:00+00:00",
+                "target_customer_tags": [],
+            },
+            field_evidence_links=[],
+            runtime_notes=[],
+            taxonomy_registry={"savings": {"standard", "other"}},
+        )
+        self.assertIn("required_field_missing", missing_with_list_issues)
+
     def test_prototype_routes_candidate_to_review_task(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-service")
         try:
@@ -197,6 +351,218 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             self.assertEqual(source_result.validation_action, "auto_validated")
         finally:
             rmtree(temp_path, ignore_errors=True)
+
+    def test_chequing_standard_and_public_fees_cannot_silently_disagree(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload["monthly_fee"] = 12.95
+        candidate_payload["public_display_fee"] = 30.0
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_chequing_fee_waiver_threshold_must_match_minimum_balance(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload["minimum_balance"] = 0.0
+        candidate_payload["fee_waiver_condition"] = (
+            "Monthly fee 16.95 is waived to 0.00 with a 4000.00 minimum balance."
+        )
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_implausible_retail_monthly_fee_cannot_auto_validate(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload.update({"monthly_fee": 500.0, "public_display_fee": 500.0})
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("invalid_numeric_range", issues)
+
+    def test_premium_credit_card_annual_fee_is_not_treated_as_monthly_fee(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_record["product_type"] = "credit-card"
+        candidate_record["product_family"] = "credit"
+        candidate_record["subtype_code"] = "premium"
+        candidate_record["product_name"] = "Example Infinite Privilege Card"
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload["product_name"] = candidate_record["product_name"]
+        candidate_payload["annual_fee"] = 599.0
+        candidate_payload.pop("monthly_fee", None)
+        candidate_payload.pop("public_display_fee", None)
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"credit-card": {"standard", "premium", "student", "other"}},
+            source_metadata={"product_type": "credit-card"},
+        )
+
+        self.assertNotIn("invalid_numeric_range", issues)
+
+    def test_profile_specific_numeric_extensions_cannot_bypass_range_validation(self) -> None:
+        input_item = _build_chequing_input()
+        for field_name, value in (("regular_interest_rate", 60.0), ("transaction_fee", 500.0)):
+            with self.subTest(field_name=field_name):
+                candidate_record = dict(input_item.normalized_candidate_record)
+                candidate_payload = dict(candidate_record["candidate_payload"])
+                candidate_payload[field_name] = value
+                candidate_record["candidate_payload"] = candidate_payload
+                issues = _compute_validation_issue_codes(
+                    candidate_record=candidate_record,
+                    candidate_payload=candidate_payload,
+                    field_evidence_links=input_item.field_evidence_links,
+                    runtime_notes=[],
+                    taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+                    source_metadata=input_item.source_metadata,
+                )
+                self.assertIn("invalid_numeric_range", issues)
+
+    def test_chequing_finite_transaction_count_cannot_claim_unlimited_transactions(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload["included_transactions"] = 3
+        candidate_payload["unlimited_transactions_flag"] = True
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_no_fee_chequing_name_cannot_carry_positive_monthly_fee(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_record["product_name"] = "No Fee Chequing Account"
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload.update({"monthly_fee": 100.0, "public_display_fee": 100.0})
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"chequing": {"standard", "package", "interest_bearing", "premium", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_public_display_rate_cannot_be_lower_than_promotional_rate(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_record["product_type"] = "savings"
+        candidate_record["subtype_code"] = "high_interest"
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload.update({"promotional_rate": 4.6, "public_display_rate": 4.05})
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"savings": {"standard", "high_interest", "youth", "foreign_currency", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_gic_public_rate_cannot_be_lower_than_any_term_row(self) -> None:
+        input_item = _build_gic_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload.update(
+            {
+                "standard_rate": 0.0,
+                "public_display_rate": 2.0,
+                "term_rate_table": [
+                    {"term_label": "1 year", "term_length_days": 365, "rate": 2.0},
+                    {"term_label": "5 years", "term_length_days": 1825, "rate": 3.65},
+                ],
+            }
+        )
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"gic": {"non_redeemable", "redeemable", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+
+    def test_advertised_promotional_total_cannot_equal_only_the_bonus_component(self) -> None:
+        input_item = _build_chequing_input()
+        candidate_record = dict(input_item.normalized_candidate_record)
+        candidate_record["product_type"] = "savings"
+        candidate_record["subtype_code"] = "high_interest"
+        candidate_payload = dict(candidate_record["candidate_payload"])
+        candidate_payload.update(
+            {
+                "interest_rate_summary": "Special offer: earn up to 5.00% for the first 3 months.",
+                "promotional_rate": 2.8,
+                "public_display_rate": 2.8,
+            }
+        )
+        candidate_record["candidate_payload"] = candidate_payload
+
+        issues = _compute_validation_issue_codes(
+            candidate_record=candidate_record,
+            candidate_payload=candidate_payload,
+            field_evidence_links=input_item.field_evidence_links,
+            runtime_notes=[],
+            taxonomy_registry={"savings": {"standard", "high_interest", "youth", "foreign_currency", "other"}},
+            source_metadata=input_item.source_metadata,
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
 
     def test_canonical_subtype_missing_from_active_registry_adds_operator_sync_context(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-chequing-package-missing-registry")

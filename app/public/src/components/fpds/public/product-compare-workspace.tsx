@@ -6,8 +6,7 @@ import { useMemo, useState } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -22,6 +21,7 @@ type ProductCompareWorkspaceProps = {
 
 export function ProductCompareWorkspace({ filters, locale, products }: ProductCompareWorkspaceProps) {
   const copy = getPublicMessages(locale);
+  const designCopy = getPublicDesignCopy(locale);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const selectedProducts = useMemo(
     () => selectedIds.map((productId) => products.find((product) => product.product_id === productId)).filter((product): product is PublicProduct => Boolean(product)),
@@ -42,18 +42,20 @@ export function ProductCompareWorkspace({ filters, locale, products }: ProductCo
 
   return (
     <section className="grid gap-4" aria-labelledby="compare-products-title">
-      <div className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3 sm:items-center">
+      <div className="sticky top-16 z-20 flex items-start justify-between gap-3 border-y border-foreground/15 bg-background/95 px-1 py-3 backdrop-blur-xl sm:items-center">
         <div className="min-w-0">
           <h2 id="compare-products-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <GitCompareArrows className="size-4 text-primary" aria-hidden="true" />
             {copy.compare.title}
           </h2>
-          <p className="mt-1 hidden text-xs leading-5 text-muted-foreground sm:block">{copy.compare.subtitle}</p>
+          <p className="mt-1 hidden text-xs leading-5 text-muted-foreground sm:block">{designCopy.compareDifferences}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
-          <span className="rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-semibold text-muted-foreground tabular-nums">
-            {copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}
-          </span>
+          <div className="flex items-center gap-1" aria-label={copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}>
+            {Array.from({ length: MAX_COMPARE_PRODUCTS }).map((_, index) => (
+              <span className={cn("h-2.5 w-7 rounded-full transition-colors", index < selectedProducts.length ? "bg-maple" : "bg-muted")} key={index} aria-hidden="true" />
+            ))}
+          </div>
           {selectedProducts.length ? (
             <Button onClick={() => setSelectedIds([])} size="sm" type="button" variant="ghost">
               <X className="size-4" aria-hidden="true" />
@@ -120,27 +122,29 @@ function ProductCompareCard({
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
-    <Card
+    <article
       className={cn(
-        "h-full gap-3 overflow-hidden border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-primary/15",
-        selected && "border-primary/35 ring-1 ring-primary/20"
+        "relative h-full overflow-hidden border border-foreground/15 bg-card/80 transition-[border-color,transform,box-shadow] hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-[0_12px_30px_rgba(28,39,35,0.08)]",
+        "before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-verification/55",
+        product.product_family === "lending" && "before:bg-loan/70",
+        selected && "border-maple/45 shadow-[0_0_0_1px_rgba(195,74,63,0.2)] before:bg-maple"
       )}
     >
-      <CardHeader className="pb-2">
+      <div className="px-5 pb-2 pt-5">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
             </div>
-            <span className="inline-flex rounded-full bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">{product.product_type_label}</span>
+            <span className="inline-flex rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{product.product_type_label}</span>
           </div>
           <div className="min-w-0">
-            <CardTitle className="text-lg leading-snug">
-              <Link className="break-words hover:text-primary" href={detailHref}>
+            <h2 className="text-lg font-semibold leading-snug tracking-[-0.02em]">
+              <Link className="inline-flex min-h-11 items-center break-words hover:text-primary" href={detailHref}>
                 {product.product_name}
               </Link>
-            </CardTitle>
+            </h2>
           </div>
         </div>
         {product.product_highlight_badge_label || tags.length ? (
@@ -153,16 +157,16 @@ function ProductCompareCard({
             ))}
           </div>
         ) : null}
-      </CardHeader>
-      <CardContent className="pt-0">
-        <dl className="overflow-hidden rounded-xl border border-border/80">
-          <div className="bg-primary/5 px-4 py-3">
-            <dt className="text-xs font-semibold text-primary">{primaryMetric.label}</dt>
-            <dd className="mt-1 break-words text-2xl font-semibold leading-tight text-foreground tabular-nums">{primaryMetric.value}</dd>
+      </div>
+      <div className="px-5 pb-5">
+        <dl className="border-y border-border">
+          <div className="py-4">
+            <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-verification">{primaryMetric.label}</dt>
+            <dd className="mt-1 break-words font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums">{primaryMetric.value}</dd>
           </div>
-          <div className="grid grid-cols-2 divide-x divide-border/70 border-t border-border/70 bg-muted/15">
+          <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
             {secondaryMetrics.map((metric) => (
-              <div className="min-w-0 px-3 py-3" key={metric.label}>
+              <div className="min-w-0 py-3 first:pr-3 last:pl-3" key={metric.label}>
                 <dt className="text-[11px] font-medium text-muted-foreground">{metric.label}</dt>
                 <dd className="mt-1 break-words text-sm font-semibold leading-snug text-foreground tabular-nums">{metric.value}</dd>
               </div>
@@ -170,18 +174,18 @@ function ProductCompareCard({
           </div>
         </dl>
         <div className="mt-4 flex flex-col gap-2 border-t border-border/70 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button disabled={compareDisabled} onClick={onToggle} size="sm" type="button" variant={selected ? "default" : "outline"} className="justify-center">
+          <Button aria-pressed={selected} disabled={compareDisabled} onClick={onToggle} size="sm" type="button" variant={selected ? "default" : "outline"} className="min-h-11 justify-center rounded-full px-4">
             {selected ? <Check className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}
             {selected ? copy.compare.selected : copy.compare.select}
           </Button>
-          <Link className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80" href={detailHref}>
+          <Link className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80" href={detailHref}>
             {copy.grid.compareDetails}
             <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
         </div>
         {compareDisabled ? <p className="mt-2 text-xs leading-5 text-muted-foreground">{copy.compare.limit}</p> : null}
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }
 
@@ -197,12 +201,26 @@ function ComparePanel({
   products: PublicProduct[];
 }) {
   const copy = getPublicMessages(locale);
+  const designCopy = getPublicDesignCopy(locale);
+  const rowsByProduct = products.map((product) => buildCompareRows(product, locale));
+  const differingKeys = new Set(
+    rowsByProduct[0]
+      ?.filter((row) => {
+        const values = new Set(rowsByProduct.map((rows) => rows.find((candidate) => candidate.key === row.key)?.value ?? copy.common.notDisclosed));
+        return values.size > 1;
+      })
+      .map((row) => row.key) ?? []
+  );
 
   return (
-    <section className="overflow-hidden rounded-xl border border-primary/20 bg-card shadow-sm" aria-label={copy.compare.title}>
-      <div className="grid gap-3 p-3 md:hidden">
-        {products.map((product) => (
-          <article className="rounded-xl border border-border bg-background p-3" key={product.product_id}>
+    <section className="scroll-mt-32 border-y border-maple/30 bg-card/70 px-3 py-4 md:px-4" aria-label={copy.compare.title}>
+      <div className="mb-4 flex flex-col gap-1 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-maple">{copy.compare.title}</p>
+        <p className="text-xs leading-5 text-muted-foreground">{designCopy.compareBoundary}</p>
+      </div>
+      <div className={cn("grid gap-3 md:grid-cols-2", products.length === 3 ? "xl:grid-cols-3" : products.length >= 4 ? "xl:grid-cols-4" : "")}>
+        {products.map((product, productIndex) => (
+          <article className="border border-border bg-background/75 p-4" key={product.product_id}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
@@ -213,84 +231,50 @@ function ComparePanel({
                   <p className="mt-1 text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
                 </div>
               </div>
-              <button className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button" aria-label={copy.compare.remove}>
+              <button className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button" aria-label={`${copy.compare.remove}: ${product.product_name}`}>
                 <X className="size-4" aria-hidden="true" />
               </button>
             </div>
-            <dl className="mt-3 grid grid-cols-2 gap-2">
-              <CompareFact label={copy.grid.metricDisplayRate} value={formatRate(product.public_display_rate, locale)} />
-              <CompareFact label={copy.grid.metricMonthlyFee} value={formatCurrency(product.public_display_fee, product.currency, locale)} />
-              <CompareFact label={copy.compare.entryAmount} value={formatEntryAmount(product, locale)} />
-              <CompareFact label={copy.grid.metricTerm} value={formatTerm(product.term_length_days, locale)} />
+            <dl className="mt-4 divide-y divide-border border-y border-border">
+              {rowsByProduct[productIndex].map((row) => (
+                <CompareFact different={differingKeys.has(row.key)} key={row.key} label={row.label} value={row.value} />
+              ))}
             </dl>
+            {product.product_url ? (
+              <Button asChild variant="outline" className="mt-4 min-h-11 w-full rounded-full">
+                <a href={product.product_url} target="_blank" rel="noreferrer">
+                  {copy.detail.officialPage}
+                  <ExternalLink className="size-3.5" aria-hidden="true" />
+                </a>
+              </Button>
+            ) : null}
           </article>
         ))}
-      </div>
-
-      <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[52rem] text-left text-sm">
-            <thead className="border-b border-border bg-background text-xs font-medium text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">{copy.compare.tableProduct}</th>
-                <th className="px-4 py-3">{copy.grid.metricDisplayRate}</th>
-                <th className="px-4 py-3">{copy.grid.metricMonthlyFee}</th>
-                <th className="px-4 py-3">{copy.compare.entryAmount}</th>
-                <th className="px-4 py-3">{copy.grid.metricTerm}</th>
-                <th className="px-4 py-3">{copy.compare.application}</th>
-                <th className="px-4 py-3">{copy.compare.officialPage}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr className="border-b border-border/70 last:border-0" key={product.product_id}>
-                  <td className="px-4 py-3 align-top">
-                    <div className="flex min-w-52 gap-3">
-                      <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-                      <div className="min-w-0">
-                        <Link className="break-words font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
-                          {product.product_name}
-                        </Link>
-                        <p className="mt-1 text-xs font-medium text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
-                        <button className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button">
-                          <X className="size-3" aria-hidden="true" />
-                          {copy.compare.remove}
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-top font-semibold tabular-nums text-foreground">{formatRate(product.public_display_rate, locale)}</td>
-                  <td className="px-4 py-3 align-top tabular-nums text-foreground">{formatCurrency(product.public_display_fee, product.currency, locale)}</td>
-                  <td className="px-4 py-3 align-top tabular-nums text-foreground">{formatEntryAmount(product, locale)}</td>
-                  <td className="px-4 py-3 align-top text-foreground">{formatTerm(product.term_length_days, locale)}</td>
-                  <td className="max-w-56 px-4 py-3 align-top leading-6 text-muted-foreground">{product.application_method ?? copy.common.notDisclosed}</td>
-                  <td className="px-4 py-3 align-top">
-                    {product.product_url ? (
-                      <Button asChild variant="outline" size="xs">
-                        <a href={product.product_url} target="_blank" rel="noreferrer">
-                          {copy.common.open}
-                          <ExternalLink className="size-3" aria-hidden="true" />
-                        </a>
-                      </Button>
-                    ) : (
-                      <span className="text-muted-foreground">{copy.common.notDisclosed}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
       </div>
     </section>
   );
 }
 
-function CompareFact({ label, value }: { label: string; value: string }) {
+function CompareFact({ different, label, value }: { different: boolean; label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-muted/30 px-3 py-2">
+    <div className={cn("px-2 py-3", different && "bg-accent/45")}>
       <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 break-words text-sm font-semibold text-foreground tabular-nums">{value}</dd>
     </div>
   );
+}
+
+function buildCompareRows(product: PublicProduct, locale: string) {
+  const copy = getPublicMessages(locale);
+  const typeAware = buildComparisonMetrics(product, locale);
+  return [
+    { key: "type", label: copy.grid.productTypes, value: product.product_type_label },
+    { key: "primary", label: typeAware[0].label, value: typeAware[0].value },
+    { key: "secondary", label: typeAware[1].label, value: typeAware[1].value },
+    { key: "tertiary", label: typeAware[2].label, value: typeAware[2].value },
+    { key: "entry", label: copy.compare.entryAmount, value: formatEntryAmount(product, locale) },
+    { key: "application", label: copy.compare.application, value: product.application_method ?? copy.common.notDisclosed },
+  ];
 }
 
 function Badge({ children, muted = false }: { children: string; muted?: boolean }) {

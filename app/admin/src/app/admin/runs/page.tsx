@@ -40,7 +40,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
   }
 
   if (!session || !runs || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Run diagnostics could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "실행 진단을 불러올 수 없습니다." : locale === "ja" ? "実行診断を読み込めません。" : "Run diagnostics could not load."} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

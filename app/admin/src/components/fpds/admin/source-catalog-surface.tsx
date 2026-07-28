@@ -16,7 +16,7 @@ import type {
   SourceCatalogListResponse,
   ProductTypeItem,
 } from "@/lib/admin-api";
-import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 
 export type SourceCatalogPageFilters = {
   q: string;
@@ -47,6 +47,13 @@ const CATALOG_COPY = {
     generatedSources: "Generated sources",
     active: "Active",
     selected: "Selected",
+    inactive: "Inactive",
+    coverage: "Coverage",
+    sourceReadiness: "Status and sources",
+    lastUpdated: "Last updated",
+    action: "Action",
+    openDetails: "Open details",
+    selectCoverage: (name: string, productType: string) => `Select ${name} ${productType}`,
     search: "Search",
     searchPlaceholder: "bank or catalog item id",
     bank: "Bank",
@@ -97,6 +104,13 @@ const CATALOG_COPY = {
     generatedSources: "생성된 소스",
     active: "활성",
     selected: "선택됨",
+    inactive: "비활성",
+    coverage: "Coverage",
+    sourceReadiness: "상태 및 소스",
+    lastUpdated: "최근 변경",
+    action: "작업",
+    openDetails: "상세 열기",
+    selectCoverage: (name: string, productType: string) => `${name} ${productType} 선택`,
     search: "검색",
     searchPlaceholder: "은행 또는 catalog item id",
     bank: "은행",
@@ -146,6 +160,13 @@ const CATALOG_COPY = {
     generatedSources: "生成済みソース",
     active: "有効",
     selected: "選択中",
+    inactive: "無効",
+    coverage: "Coverage",
+    sourceReadiness: "状態とソース",
+    lastUpdated: "最終更新",
+    action: "操作",
+    openDetails: "詳細を開く",
+    selectCoverage: (name: string, productType: string) => `${name} ${productType} を選択`,
     search: "検索",
     searchPlaceholder: "銀行または catalog item id",
     bank: "銀行",
@@ -217,6 +238,18 @@ export function SourceCatalogSurface({
     setCatalogDialogOpen(Boolean(activeCatalogItemId && activeCatalogDetail));
     setCatalogDialogDetail(activeCatalogDetail);
   }, [activeCatalogItemId, activeCatalogDetail]);
+
+  useEffect(() => {
+    if (collectPending) {
+      document.body.dataset.adminMutationPending = "true";
+    } else {
+      delete document.body.dataset.adminMutationPending;
+    }
+
+    return () => {
+      delete document.body.dataset.adminMutationPending;
+    };
+  }, [collectPending]);
 
   function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/source-catalog", params, locale);
@@ -338,16 +371,20 @@ export function SourceCatalogSurface({
   }
 
   return (
-    <section className="grid gap-6">
-      <AdminTableAutoRefresh />
+    <section
+      aria-busy={collectPending}
+      className="grid gap-5"
+      data-admin-dirty={selectedCatalogItemIds.length > 0 ? "true" : undefined}
+    >
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         actions={
           <>
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAddModal} type="button">
               {copy.addCoverage}
             </button>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
+            <Link className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
               {copy.viewGeneratedSources}
             </Link>
           </>
@@ -357,94 +394,104 @@ export function SourceCatalogSurface({
         title={copy.title}
       />
 
-      <article className="grid gap-4 md:grid-cols-4">
-        <StatCard label={copy.catalogItems} value={String(catalog.summary.total_items)} />
-        <StatCard label={copy.generatedSources} value={String(catalog.summary.generated_source_count)} />
-        <StatCard label={copy.active} value={String(catalog.summary.status_counts.active ?? 0)} />
-        <StatCard label={copy.selected} value={String(selectedCatalogItemIds.length)} />
+      <article className="grid overflow-hidden rounded-lg border border-border bg-card md:grid-cols-4" aria-label={copy.currentScope}>
+        <StatCell label={copy.catalogItems} value={String(catalog.summary.total_items)} />
+        <StatCell label={copy.generatedSources} value={String(catalog.summary.generated_source_count)} />
+        <StatCell label={copy.active} value={String(catalog.summary.status_counts.active ?? 0)} />
+        <StatCell label={copy.selected} value={String(selectedCatalogItemIds.length)} />
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <form action={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))_auto]">
+      <article className="rounded-lg border border-border bg-card p-4">
+        <form action={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)} className="grid gap-3 lg:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))_auto]">
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
-            <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
+            <input className="h-10 rounded-md border border-input bg-card px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <BankSelect allLabel={copy.all} defaultValue={filters.bankCode} label={copy.bank} name="bank_code" options={catalog.facets.bank_options} />
           <SelectField allLabel={copy.all} label={copy.productType} options={catalog.facets.product_types} defaultValue={filters.productType} name="product_type" />
           <SelectField allLabel={copy.all} label={copy.status} options={catalog.facets.statuses} defaultValue={filters.status} name="status" />
           <div className="flex items-end gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" type="submit">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" type="submit">
               {copy.apply}
             </button>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
+            <Link className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" href={buildAdminHref("/admin/source-catalog", new URLSearchParams(), locale)}>
               {copy.reset}
             </Link>
           </div>
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.coverageList}</p>
+            <h2 className="text-base font-semibold text-foreground">{copy.coverageList}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{copy.catalogItemCount(catalog.items.length)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+            <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
               {copy.addCoverage}
             </button>
-            <button className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-70" disabled={collectPending || selectedCatalogItemIds.length === 0} onClick={handleCollect} type="button">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60" disabled={collectPending || selectedCatalogItemIds.length === 0} onClick={handleCollect} type="button">
               {collectPending ? copy.launching : copy.collectSelected(selectedCatalogItemIds.length)}
             </button>
           </div>
         </div>
 
-        {message ? <p className="mx-6 mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="mx-6 mt-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+        {message ? <p aria-live="polite" className="mx-4 mt-4 rounded-md border border-success/25 bg-success/10 px-4 py-3 text-sm text-success" role="status">{message}</p> : null}
+        {error ? <p aria-live="assertive" className="mx-4 mt-4 rounded-md border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">{error}</p> : null}
 
-        <div className="overflow-x-auto px-6 py-5">
-          <table className="min-w-[940px] table-fixed border-separate border-spacing-0">
+        <p className="sr-only" id="source-catalog-table-description">{copy.description}</p>
+        <div aria-label={copy.coverageList} className="overflow-x-auto" role="region" tabIndex={0}>
+          <table aria-describedby="source-catalog-table-description" className="min-w-[920px] table-fixed border-separate border-spacing-0">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.select}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.productType}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.homepage}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.generatedSources}</th>
+              <tr className="text-left text-xs text-muted-foreground">
+                <th className="w-14 border-b border-border px-4 py-3 font-semibold">{copy.select}</th>
+                <th className="w-[36%] border-b border-border px-4 py-3 font-semibold">{copy.coverage}</th>
+                <th className="w-[20%] border-b border-border px-4 py-3 font-semibold">{copy.sourceReadiness}</th>
+                <th className="w-[20%] border-b border-border px-4 py-3 font-semibold">{copy.lastUpdated}</th>
+                <th className="border-b border-border px-4 py-3 font-semibold">{copy.action}</th>
               </tr>
             </thead>
             <tbody>
               {catalog.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={6}>
+                  <td className="px-4 py-10 text-center text-sm text-muted-foreground" colSpan={5}>
                     {copy.noRows}
                   </td>
                 </tr>
               ) : (
                 catalog.items.map((item) => (
                   <tr className="align-top text-sm" key={item.catalog_item_id}>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <input checked={selectedCatalogItemIds.includes(item.catalog_item_id)} className="h-4 w-4 rounded border-border text-primary focus:ring-primary" onChange={(event) => toggleCatalogItem(item.catalog_item_id, event.target.checked)} type="checkbox" />
+                    <td className="border-b border-border/70 px-4 py-4">
+                      <input aria-label={copy.selectCoverage(item.bank_name, item.product_type)} checked={selectedCatalogItemIds.includes(item.catalog_item_id)} className="h-4 w-4 rounded border-border text-primary focus:ring-primary" onChange={(event) => toggleCatalogItem(item.catalog_item_id, event.target.checked)} type="checkbox" />
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4">
+                    <td className="border-b border-border/70 px-4 py-4">
                       <button className="bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openDetailModal(item.catalog_item_id)} type="button">
-                        {item.bank_name}
+                        {item.bank_name} · {item.product_type}
                       </button>
-                      <p className="mt-1 text-sm text-muted-foreground">{item.bank_code}</p>
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.product_type}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.status}</td>
-                    <td className="border-b border-border/70 px-3 py-4">
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">{item.bank_code} · {item.catalog_item_id}</p>
                       {item.homepage_url ? (
-                        <a className="text-primary underline-offset-4 hover:underline" href={item.homepage_url} rel="noreferrer" target="_blank">
+                        <a className="mt-2 block max-w-md truncate text-xs text-primary underline-offset-4 hover:underline" href={item.homepage_url} rel="noreferrer" target="_blank">
                           {item.homepage_url}
                         </a>
                       ) : (
-                        <span className="text-muted-foreground">{copy.missing}</span>
+                        <span className="mt-2 block text-xs text-muted-foreground">{copy.homepage}: {copy.missing}</span>
                       )}
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
+                    <td className="border-b border-border/70 px-4 py-4">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${item.status === "active" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+                        {item.status === "active" ? copy.active : copy.inactive}
+                      </span>
+                      <p className="mt-2 text-sm text-foreground">{copy.generatedSources}: <span className="font-mono font-semibold">{item.generated_source_count}</span></p>
+                    </td>
+                    <td className="border-b border-border/70 px-4 py-4 text-sm text-muted-foreground">
+                      {formatAdminDateTimeValue(item.updated_at, copy.missing)}
+                    </td>
+                    <td className="border-b border-border/70 px-4 py-4">
+                      <button className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={() => openDetailModal(item.catalog_item_id)} type="button">
+                        {copy.openDetails}
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -535,12 +582,12 @@ function buildCatalogCollectMessage(
     .join(" ");
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCell({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-lg border border-border/80 bg-white p-4">
+    <div className="border-b border-border p-4 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
-    </article>
+      <p className="mt-1 font-mono text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+    </div>
   );
 }
 
@@ -560,7 +607,7 @@ function BankSelect({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option.bank_code} value={option.bank_code}>
@@ -588,7 +635,7 @@ function SelectField({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>

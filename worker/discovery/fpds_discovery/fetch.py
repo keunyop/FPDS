@@ -3,6 +3,7 @@ from __future__ import annotations
 import ipaddress
 import os
 from pathlib import Path
+import re
 import shutil
 import socket
 import subprocess
@@ -69,7 +70,11 @@ class DiscoveryFetchPolicy:
             timeout_seconds = 90
         raw_browser_domains = os.getenv(
             "FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS",
-            "bmo.com,www.bmo.com",
+            (
+                "bmo.com,www.bmo.com,cibc.com,www.cibc.com,"
+                "rbcroyalbank.com,www.rbcroyalbank.com,"
+                "simplii.com,www.simplii.com,tangerine.ca,www.tangerine.ca"
+            ),
         )
         browser_fallback_domains = tuple(
             dict.fromkeys(
@@ -125,7 +130,7 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
             headers = {key.lower(): value for key, value in response.headers.items()}
             content_type = response.headers.get_content_type() or "application/octet-stream"
             status_code = getattr(response, "status", 200)
-            return FetchedResponse(
+            fetched_response = FetchedResponse(
                 body=response.read(),
                 final_url=final_url,
                 content_type=content_type,
@@ -134,6 +139,27 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
                 fetched_at=datetime.now(UTC).isoformat(),
                 redirect_count=redirect_handler.redirect_count,
             )
+            if _should_try_browser_rendered_rate_fallback(fetched_response, policy):
+                try:
+                    return _fetch_response_via_browser(final_url, policy)
+                except Exception as exc:
+                    # A successful, auditable direct snapshot is still preferable
+                    # to turning a best-effort rendering enhancement into a source
+                    # failure. Preserve the failed attempt as operator-visible
+                    # metadata so an incomplete rate page is explainable.
+                    fallback_error = re.sub(r"\s+", " ", str(exc)).strip()[:500]
+                    return FetchedResponse(
+                        **{
+                            **fetched_response.__dict__,
+                            "headers": {
+                                **fetched_response.headers,
+                                "x-fpds-browser-fallback-attempted": "true",
+                                "x-fpds-browser-fallback-error": fallback_error or exc.__class__.__name__,
+                                "x-fpds-browser-fallback-error-type": exc.__class__.__name__,
+                            },
+                        }
+                    )
+            return fetched_response
     except urllib.error.HTTPError as exc:
         if _should_try_browser_fallback(normalized_url, policy, exc):
             return _fetch_response_via_browser(normalized_url, policy)
@@ -235,6 +261,57 @@ def _should_try_browser_fallback(url: str, policy: DiscoveryFetchPolicy, exc: Ex
         reason = exc.reason
         return isinstance(reason, (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError))
     return False
+
+
+def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy: DiscoveryFetchPolicy) -> bool:
+    """Render allowlisted pages whose direct HTML leaves rates unresolved.
+
+    This is deliberately bounded to configured browser-fallback domains. It
+    covers both explicit rate pages with no numeric rates and product pages
+    that expose a recognizable server-side rate placeholder instead of the
+    customer-visible value. It avoids bank- or product-specific values while
+    recovering dynamic pricing evidence for any allowlisted institution.
+    """
+
+    if not response.content_type.lower().startswith(("text/html", "application/xhtml+xml")):
+        return False
+    parsed = urlparse(response.final_url)
+    hostname = (parsed.hostname or "").lower()
+    if not hostname or not policy.browser_fallback_domains:
+        return False
+    if not host_matches_allowed_domains(hostname, policy.browser_fallback_domains):
+        return False
+    decoded = response.body.decode(_get_charset(response.headers.get("content-type", "")), errors="replace")
+    visible_text = re.sub(r"<[^>]+>", " ", decoded)
+    lowered = visible_text.lower()
+    unresolved_rate_placeholder = bool(
+        re.search(r"\brds\s*%?\s*rate\s*\[", lowered)
+        or re.search(r"\bpublished\s*\([^)]*\)\s*\([^)]*#o\d+#", lowered)
+        or re.search(r"\{\{\s*(?:purchase|cash|annual|interest)?[_\s-]*rate\b", lowered)
+        or re.search(r"\[\[[^\]]{0,120}(?:rate|apr)[^\]]*\]\]", lowered)
+        or re.search(
+            r"<datacode\b[^>]*\bdata-code\s*=\s*[\"'][^\"']*(?:rate|apr)[^\"']*[\"']",
+            decoded,
+            flags=re.IGNORECASE,
+        )
+        or re.search(
+            r"\\u003cdatacode\b.{0,400}?\bdata-code\s*=\s*\\?[\"'][^\"']*(?:rate|apr)",
+            decoded,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+    )
+    if unresolved_rate_placeholder:
+        return True
+    normalized_path = parsed.path.lower().replace("_", "-")
+    if not any(marker in normalized_path for marker in ("interest-rate", "interest-rates", "/rates", "rate-sheet")):
+        return False
+    if not any(marker in lowered for marker in ("interest rate", "annual percentage rate", "rates")):
+        return False
+    has_numeric_rate = bool(
+        re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s*%", visible_text)
+        or re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s+per\s+cent\b", visible_text, flags=re.IGNORECASE)
+    )
+    return not has_numeric_rate
 
 
 def _fetch_response_via_browser(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:

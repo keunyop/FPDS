@@ -52,11 +52,30 @@ _EXCLUDED_LINK_KEYWORDS = (
     "signin",
     "secure",
     "apply",
+    "application",
+    "prequalification",
     "open-account",
+    "open-an-account",
     "openaccount",
+    "open-an-investment",
+    "open-investment",
+    "investment-application",
     "promo",
     "offer",
     "compare",
+    "calculator",
+    "selector",
+    "activate-your",
+    "manage-your",
+    "welcome-kit",
+    "order-supplementary",
+    "acknowledge",
+    "digital-banking-guide",
+    "advice-plus",
+    "award-winning",
+    "forms-downloads",
+    "forms-and-downloads",
+    "tips",
     "modern-slavery",
     "human-trafficking",
     "privacy",
@@ -328,12 +347,14 @@ _DISCOVERY_PROFILE_TERMS = {
     ),
 }
 _PAGE_EVIDENCE_MINIMUM_SCORE = 4
-_DISCOVERY_DETAIL_LINK_MAX = 24
-_DISCOVERY_SUPPORTING_LINK_MAX = 8
+_DISCOVERY_DETAIL_LINK_MAX = 36
+_DISCOVERY_SUPPORTING_LINK_MAX = 12
 _DISCOVERY_PDF_LINK_MAX = 8
 _DISCOVERY_HUB_PAGE_MAX = 5
-_AI_DISCOVERY_MAX_CANDIDATES = 24
-_PAGE_EVIDENCE_MAX_CANDIDATES = 16
+_DISCOVERY_SECONDARY_HUB_PAGE_MAX = 8
+_AI_DISCOVERY_MAX_CANDIDATES = 48
+_PAGE_EVIDENCE_MAX_CANDIDATES = 32
+_AUTHORITATIVE_CATALOG_DETAIL_BONUS = 6
 
 
 @dataclass(frozen=True)
@@ -1957,6 +1978,7 @@ def _generate_sources_from_homepage(
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
     hub_pages: list[tuple[int, str, str]] = []
+    secondary_hub_pages: list[tuple[int, str, str]] = []
     discovery_notes: list[str] = []
     if discovery_product_type != product_type:
         discovery_notes.append(
@@ -1989,6 +2011,13 @@ def _generate_sources_from_homepage(
             normalized_url=link.normalized_url,
             anchor_text=link.anchor_text,
         )
+        if _is_product_fact_support_link(
+            normalized_url=link.normalized_url,
+            anchor_text=link.anchor_text,
+            product_score=score,
+        ):
+            supporting_links.append((max(score, 1), link))
+            continue
         if link.source_type == "pdf":
             if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                 pdf_links.append((score, link))
@@ -2012,6 +2041,14 @@ def _generate_sources_from_homepage(
         normalized_homepage_url=normalized_homepage_url,
         product_type=discovery_product_type,
     )
+    if seed_entry_url is not None and _has_excluded_link_signal(
+        normalized_url=seed_entry_url,
+        anchor_text="",
+    ):
+        discovery_notes.append(
+            f"Ignored excluded seed entry URL {seed_entry_url}; product discovery continued from official catalog links."
+        )
+        seed_entry_url = None
     if seed_entry_url is not None:
         seed_score = _score_catalog_hub_link(
             product_type=discovery_product_type,
@@ -2042,6 +2079,20 @@ def _generate_sources_from_homepage(
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
             )
+            score += _authoritative_catalog_detail_bonus(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                base_score=score,
+                parent_url=normalized_page_url,
+                seed_entry_url=seed_entry_url,
+            )
+            if _is_product_fact_support_link(
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+                product_score=score,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
             if link.source_type == "pdf":
                 if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                     pdf_links.append((score, link))
@@ -2050,6 +2101,58 @@ def _generate_sources_from_homepage(
                 detail_links.append((score, link))
             elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
                 supporting_links.append((1, link))
+            if _looks_like_secondary_catalog_hub(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                secondary_hub_pages.append((max(score, 1), link.normalized_url, link.resolved_url))
+
+    visited_hub_urls = {normalized_homepage_url, *(item[1] for item in unique_hub_pages)}
+    expanded_secondary_hub_count = 0
+    for _score, normalized_page_url, resolved_page_url in _dedupe_page_candidates(secondary_hub_pages)[
+        :_DISCOVERY_SECONDARY_HUB_PAGE_MAX
+    ]:
+        if normalized_page_url in visited_hub_urls:
+            continue
+        visited_hub_urls.add(normalized_page_url)
+        try:
+            page_html = fetch_text(resolved_page_url, fetch_policy)
+        except Exception as exc:
+            discovery_notes.append(f"Secondary hub page fetch was unavailable for {normalized_page_url}: {exc}")
+            continue
+        expanded_secondary_hub_count += 1
+        for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
+            fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
+            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+                continue
+            if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
+                continue
+            score = _score_product_link(
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            )
+            if _is_product_fact_support_link(
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+                product_score=score,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
+            if link.source_type == "pdf":
+                if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+                    pdf_links.append((score, link))
+                continue
+            if score > 0:
+                detail_links.append((score, link))
+            elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+                supporting_links.append((1, link))
+    if expanded_secondary_hub_count:
+        discovery_notes.append(
+            f"Expanded {expanded_secondary_hub_count} bounded secondary product-category hub page(s) for detail coverage."
+        )
 
     unique_detail_links = _dedupe_scored_links(detail_links)[:_DISCOVERY_DETAIL_LINK_MAX]
     unique_supporting_links = [
@@ -2172,6 +2275,13 @@ def _generate_sources_from_homepage(
             normalized_url = normalize_source_url(str(hint["source_url"]))
             if normalized_url in promoted_detail_urls or normalized_url in promoted_supporting_urls:
                 continue
+            if not _seed_supporting_hint_is_relevant(
+                product_type=product_type,
+                discovery_product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                hint=hint,
+            ):
+                continue
             discovery_role = str(hint.get("discovery_role") or "supporting_html")
             source_rows.append(
                 _build_generated_source_row(
@@ -2201,6 +2311,8 @@ def _generate_sources_from_homepage(
         for candidate in html_candidates:
             ai_score = ai_result.scores.get(candidate.normalized_url)
             if ai_score is None or ai_score.predicted_role != "supporting_html":
+                continue
+            if not _ai_supporting_source_is_relevant(ai_score):
                 continue
             if candidate.normalized_url in promoted_detail_urls or candidate.normalized_url in promoted_supporting_urls:
                 continue
@@ -2422,6 +2534,14 @@ def _build_html_candidates(
     by_url: dict[str, HomepageCandidate] = {}
     for score, link in [*detail_links, *supporting_links]:
         supporting_signal = any(keyword in f"{link.normalized_url} {link.anchor_text}".lower() for keyword in _SUPPORTING_KEYWORDS)
+        if _looks_like_credit_card_detail_path(
+            product_type=scoring_product_type,
+            normalized_url=str(link.normalized_url),
+        ):
+            # `no-fee` is a product attribute in a card slug, not evidence that
+            # the page is a fee schedule. Keep likely singular card pages in
+            # the detail pool when bounded candidate/page-evidence caps apply.
+            supporting_signal = False
         candidate = HomepageCandidate(
             normalized_url=str(link.normalized_url),
             raw_url=str(link.resolved_url),
@@ -3037,7 +3157,15 @@ def _promote_detail_candidates(
     seed_low_evidence_fallback_count = 0
     evaluated = 0
     rejection_counts: Counter[str] = Counter()
+    rejection_diagnostics: list[str] = []
     for candidate in _ordered_detail_candidates(candidates=candidates, ai_scores=ai_scores):
+        if _url_locale_conflicts_source_language(
+            normalized_url=candidate.normalized_url,
+            source_language=source_language,
+        ):
+            rejected_detail_urls.append(candidate.normalized_url)
+            rejection_counts["source_language_mismatch"] += 1
+            continue
         ai_score = ai_scores.get(candidate.normalized_url)
         if ai_score and ai_score.predicted_role == "irrelevant" and not _candidate_is_seed_backed(candidate):
             rejected_detail_urls.append(candidate.normalized_url)
@@ -3096,7 +3224,19 @@ def _promote_detail_candidates(
                 ):
                     if not _candidate_is_seed_backed(candidate):
                         rejected_detail_urls.append(candidate.normalized_url)
-                    rejection_counts[_detail_rejection_reason(ai_score=ai_score, page_evidence=page_evidence)] += 1
+                    rejection_reason = _detail_rejection_reason(ai_score=ai_score, page_evidence=page_evidence)
+                    rejection_counts[rejection_reason] += 1
+                    if len(rejection_diagnostics) < 8:
+                        rejection_diagnostics.append(
+                            "Rejected detail "
+                            f"{candidate.normalized_url}: reason={rejection_reason}; "
+                            f"ai={ai_score.predicted_role if ai_score else 'missing'}/"
+                            f"{ai_score.relevance_score if ai_score else 'n/a'}; "
+                            f"page_score={page_evidence.page_evidence_score}; "
+                            f"title={page_evidence.page_title or 'missing'}; "
+                            f"h1={page_evidence.primary_heading or 'missing'}; "
+                            f"page_reasons={','.join(page_evidence.page_evidence_reason_codes)}."
+                        )
                     continue
                 metadata = _build_detail_discovery_metadata(
                     candidate=candidate,
@@ -3137,7 +3277,7 @@ def _promote_detail_candidates(
                 if ai_score and ai_score.short_rationale
                 else f"Auto-generated {product_type_label} detail source from bank homepage"
             ),
-            expected_fields=candidate.expected_fields_hint or expected_fields,
+            expected_fields=list(dict.fromkeys([*candidate.expected_fields_hint, *expected_fields])),
             discovery_metadata=metadata,
         )
         if candidate.seed_source_id:
@@ -3149,6 +3289,11 @@ def _promote_detail_candidates(
         rejected_detail_urls.extend(duplicate_detail_urls)
         notes.append(
             f"Collapsed {len(duplicate_detail_urls)} same-product locale or host alias page(s) into canonical detail sources."
+        )
+    detail_rows, suppressed_family_urls = _suppress_family_overviews_when_named_details_exist(detail_rows)
+    if suppressed_family_urls:
+        notes.append(
+            f"Kept {len(suppressed_family_urls)} multi-product family overview page(s) as supporting evidence because named detail pages were available."
         )
     promoted_count = len(detail_rows)
     if promoted_count:
@@ -3169,6 +3314,7 @@ def _promote_detail_candidates(
             + ", ".join(f"{reason}={count}" for reason, count in sorted(rejection_counts.items()))
             + "."
         )
+    notes.extend(rejection_diagnostics)
     return (
         detail_rows,
         _dedupe_preserve_order(rejected_detail_urls),
@@ -3212,7 +3358,53 @@ def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple
         metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
         page_title = " ".join(str(metadata.get("page_title") or "").lower().split())
         primary_heading = " ".join(str(metadata.get("primary_heading") or "").lower().split())
-        if not metadata.get("product_identity_match") or not page_title or not primary_heading:
+        identity_tokens = set(re.findall(r"[a-z0-9]+", f"{page_title} {primary_heading}"))
+        generic_identity_tokens = {
+            "account",
+            "accounts",
+            "bank",
+            "banking",
+            "card",
+            "cards",
+            "credit",
+            "chequing",
+            "checking",
+            "savings",
+            "saving",
+            "gic",
+            "gics",
+            "mortgage",
+            "mortgages",
+            "loan",
+            "loans",
+            "line",
+            "of",
+            "personal",
+            "product",
+            "products",
+            "service",
+            "services",
+            "offer",
+            "offers",
+            "the",
+            *re.findall(r"[a-z0-9]+", str(row.get("bank_code") or "").lower()),
+            *re.findall(r"[a-z0-9]+", str(row.get("product_type") or "").lower()),
+        }
+        distinctive_returned_identity = bool(identity_tokens - generic_identity_tokens)
+        strong_returned_identity = bool(
+            page_title
+            and primary_heading
+            and distinctive_returned_identity
+            and int(metadata.get("attribute_signal_count") or 0) >= 2
+            and int(metadata.get("negative_signal_count") or 0) == 0
+            and not {
+                "multi_product_family_overview",
+                "non_product_or_investor_page",
+                "non_product_editorial_page",
+                "non_product_service_flow",
+            }.intersection(_coerce_reason_codes(metadata.get("page_evidence_reason_codes") or []))
+        )
+        if (not metadata.get("product_identity_match") and not strong_returned_identity) or not page_title or not primary_heading:
             unkeyed.append(row)
             continue
         identity = (str(row["bank_code"]), str(row["product_type"]), page_title, primary_heading)
@@ -3234,6 +3426,25 @@ def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple
         by_identity[identity] = preferred
         duplicate_urls.append(str(duplicate["normalized_url"]))
     return [*by_identity.values(), *unkeyed], _dedupe_preserve_order(duplicate_urls)
+
+
+def _suppress_family_overviews_when_named_details_exist(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    def is_family_overview(row: dict[str, Any]) -> bool:
+        metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
+        page_reasons = _coerce_reason_codes(metadata.get("page_evidence_reason_codes") or [])
+        ai_reasons = _coerce_reason_codes(metadata.get("ai_reason_codes") or [])
+        return "multi_product_family_overview" in page_reasons or (
+            metadata.get("ai_predicted_role") == "supporting_html"
+            and "hub_page_not_detail" in ai_reasons
+        )
+
+    named_rows = [row for row in rows if not is_family_overview(row)]
+    if not named_rows:
+        return rows, []
+    family_rows = [row for row in rows if is_family_overview(row)]
+    return named_rows, [str(row.get("normalized_url") or "") for row in family_rows if row.get("normalized_url")]
 
 
 def _ordered_detail_candidates(*, candidates: list[HomepageCandidate], ai_scores: dict[str, AiParallelCandidateScore]) -> list[HomepageCandidate]:
@@ -3266,11 +3477,26 @@ def _candidate_promotes_to_detail(
     ai_unavailable: bool = False,
     allow_family_overview: bool = False,
 ) -> bool:
-    if (
-        "multi_product_family_overview" in page_evidence.page_evidence_reason_codes
-        and not allow_family_overview
-    ):
+    if _page_is_audience_offer_hub(page_evidence):
         return False
+    if "non_product_service_flow" in page_evidence.page_evidence_reason_codes:
+        return False
+    if "multi_product_family_overview" in page_evidence.page_evidence_reason_codes and not allow_family_overview:
+        specific_singular_identity = _page_has_specific_singular_product_identity(page_evidence)
+        named_detail_override = specific_singular_identity and (
+            (
+                ai_score is not None
+                and ai_score.predicted_role == "detail"
+                and ai_score.relevance_score >= 8.0
+                and ai_score.confidence_band == "high"
+            )
+            or _candidate_has_confirmed_product_identity(
+                ai_score=ai_score,
+                page_evidence=page_evidence,
+            )
+        )
+        if not named_detail_override:
+            return False
     if allow_family_overview and _deposit_family_overview_can_be_detail(
         candidate=candidate,
         ai_score=ai_score,
@@ -3308,6 +3534,29 @@ def _candidate_promotes_to_detail(
             and page_evidence.negative_signal_count == 0
         )
     return candidate.heuristic_score > 0 or strong_page_detail_signal
+
+
+def _page_has_specific_singular_product_identity(page_evidence: PageEvidenceAssessment) -> bool:
+    heading = _collapse_whitespace(str(page_evidence.primary_heading or "")).lower()
+    title = _collapse_whitespace(str(page_evidence.page_title or "").split("|", 1)[0]).lower()
+    if not heading or not title:
+        return False
+    generic_plural_markers = (
+        "chequing accounts", "checking accounts", "savings accounts", "gics", "term deposits",
+        "credit cards", "mortgages", "personal loans", "lines of credit", "mortgage products",
+    )
+    if any(marker in heading for marker in generic_plural_markers):
+        return False
+    if heading in title or title in heading:
+        return True
+    ignored_tokens = {
+        "american", "amex", "bank", "canada", "card", "cards", "credit", "express",
+        "for", "mastercard", "scotia", "scotiabank", "student", "students", "the", "visa",
+    }
+    heading_tokens = set(re.findall(r"[a-z0-9]+", heading)) - ignored_tokens
+    title_tokens = set(re.findall(r"[a-z0-9]+", title)) - ignored_tokens
+    shared_tokens = heading_tokens.intersection(title_tokens)
+    return bool(shared_tokens) and len(shared_tokens) >= max(1, min(len(heading_tokens), len(title_tokens)) - 1)
 
 
 def _deposit_family_overview_can_be_detail(
@@ -3377,11 +3626,30 @@ def _high_confidence_detail_overrides_low_page_score(
         )
     ):
         return False
+    named_title_and_heading = _page_has_specific_singular_product_identity(page_evidence)
     return (
-        page_evidence.product_identity_match
-        and (page_evidence.heading_match or "title_semantic_match" in reason_codes)
-        and page_evidence.page_evidence_score >= 3
-    )
+        (
+            page_evidence.product_identity_match
+            and (page_evidence.heading_match or "title_semantic_match" in reason_codes)
+            and page_evidence.page_evidence_score >= 2
+            and page_evidence.attribute_signal_count >= 2
+        )
+        or (
+            named_title_and_heading
+            and "product_type_semantic_match" in reason_codes
+            and (
+                page_evidence.attribute_signal_count >= 1
+                or (
+                    ai_score.relevance_score >= 9.0
+                    and page_evidence.negative_signal_count == 0
+                    and _looks_like_credit_card_detail_path(
+                        product_type="credit-card",
+                        normalized_url=candidate.normalized_url,
+                    )
+                )
+            )
+        )
+    ) and page_evidence.negative_signal_count <= 2
 
 
 def _candidate_has_confirmed_product_identity(
@@ -3438,6 +3706,17 @@ def _ai_supporting_override_allowed(ai_score: AiParallelCandidateScore) -> bool:
         for code in normalized_reason_codes
     )
     return ai_score.relevance_score >= 4.0 and ai_score.confidence_band != "low" and not has_veto
+
+
+def _ai_supporting_source_is_relevant(ai_score: AiParallelCandidateScore) -> bool:
+    reasons = set(_coerce_reason_codes(ai_score.reason_codes))
+    if ai_score.predicted_role != "supporting_html" or ai_score.confidence_band == "low":
+        return False
+    if reasons.intersection({"not_product_detail", "non_product_editorial_page", "non_product_service_flow", "promo_or_apply_flow"}):
+        return False
+    if "insufficient_evidence" in reasons and ai_score.relevance_score < 4.0:
+        return False
+    return True
 
 
 def _build_detail_discovery_metadata(
@@ -3508,6 +3787,8 @@ def _selection_path(*, candidate: HomepageCandidate, ai_score: AiParallelCandida
 
 
 def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> bool:
+    if _page_is_audience_offer_hub(page_evidence):
+        return True
     if page_evidence.negative_signal_count <= 0:
         return False
     fingerprint = " ".join(
@@ -3534,6 +3815,41 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
             "non_product_service_flow",
         )
     )
+
+
+def _url_locale_conflicts_source_language(*, normalized_url: str, source_language: str) -> bool:
+    """Reject a clearly different locale path from an otherwise allowed domain."""
+
+    requested = str(source_language or "").strip().lower().replace("_", "-").split("-", 1)[0]
+    if not requested:
+        return False
+    known_languages = {"en", "fr", "es", "de", "it", "pt", "zh", "ja", "ko"}
+    for segment in [item for item in urlparse(normalized_url).path.lower().split("/") if item][:3]:
+        locale = segment.replace("_", "-").split("-", 1)[0]
+        if locale in known_languages:
+            return locale != requested
+    return False
+
+
+def _page_is_audience_offer_hub(page_evidence: PageEvidenceAssessment) -> bool:
+    """Identify audience benefits/offer hubs that mention accounts but are not one product."""
+
+    heading = _collapse_whitespace(str(page_evidence.primary_heading or "")).lower().strip(" .:-|")
+    title = _collapse_whitespace(str(page_evidence.page_title or "").split("|", 1)[0]).lower().strip(" .:-|")
+    if any(
+        marker in heading
+        for marker in (
+            "banking offers",
+            "banking for foreign workers",
+            "benefits on bank accounts",
+            "bank account benefits",
+        )
+    ):
+        return True
+    return any(
+        marker in title
+        for marker in ("banking for foreign workers", "senior benefits on bank accounts")
+    ) and not any(marker in heading for marker in (" chequing account", " checking account", " savings account"))
 
 
 def _coerce_reason_codes(values: list[str]) -> list[str]:
@@ -3584,6 +3900,7 @@ def _score_page_evidence(
         title_text=title_text,
         primary_heading=primary_heading,
         secondary_headings=parser.secondary_headings,
+        body_text=" ".join(parser.body_chunks),
     )
 
     score = 0
@@ -3718,10 +4035,11 @@ def _looks_like_multi_product_family_overview(
     title_text: str,
     primary_heading: str,
     secondary_headings: list[str],
+    body_text: str = "",
 ) -> bool:
     normalized_type = _canonical_product_type_code(product_type)
     generic_identity_terms = {
-        "chequing": ("chequing", "chequing accounts", "checking", "checking accounts"),
+        "chequing": ("chequing", "chequing accounts", "checking", "checking accounts", "bank accounts"),
         "savings": ("savings", "savings accounts", "saving accounts"),
         "gic": ("gic", "gics", "term deposit", "term deposits", "guaranteed investment certificates"),
         "credit-card": ("credit card", "credit cards"),
@@ -3734,9 +4052,23 @@ def _looks_like_multi_product_family_overview(
 
     heading_identity = _collapse_whitespace(primary_heading).lower().strip(" .:-|")
     title_identity = _collapse_whitespace(title_text.split("|", 1)[0]).lower().strip(" .:-|")
+    if normalized_type == "savings":
+        full_body = _collapse_whitespace(" ".join([*secondary_headings, body_text])).lower()
+        educational_hisa = (
+            "high interest savings account" in heading_identity
+            and "what is a high interest savings account" in full_body
+            and "type of savings account" in full_body
+        )
+        named_savings_heading = any(
+            "account" in _collapse_whitespace(heading).lower()
+            and "high interest savings account" not in _collapse_whitespace(heading).lower()
+            for heading in secondary_headings
+        )
+        if educational_hisa and named_savings_heading:
+            return True
     exact_generic_identity = heading_identity in generic_identity_terms or title_identity in generic_identity_terms
     plural_identity_terms = {
-        "chequing": ("chequing accounts", "checking accounts"),
+        "chequing": ("chequing accounts", "checking accounts", "bank accounts"),
         "savings": ("savings accounts", "saving accounts"),
         "gic": ("gics", "term deposits", "guaranteed investment certificates"),
         "credit-card": ("credit cards",),
@@ -3748,11 +4080,24 @@ def _looks_like_multi_product_family_overview(
         term in heading_identity or term in title_identity
         for term in plural_identity_terms
     )
-    if not exact_generic_identity and not plural_family_identity:
+    action_family_identity = any(
+        re.search(pattern, identity)
+        for identity in (heading_identity, title_identity)
+        for pattern in (
+            rf"\b(?:open|compare|choose|find|explore|discover)\b.{{0,45}}\b{re.escape(plural_term)}\b"
+            for plural_term in plural_identity_terms
+        )
+    )
+    if normalized_type == "savings" and any(
+        phrase in heading_identity or phrase in title_identity
+        for phrase in ("save for tomorrow", "starting today", "savings goals")
+    ):
+        action_family_identity = True
+    if not exact_generic_identity and not plural_family_identity and not action_family_identity:
         return False
 
     variant_terms = {
-        "chequing": ("chequing", "checking", "student", "newcomer", "unlimited", "premium", "everyday"),
+        "chequing": ("account", "chequing", "checking", "student", "newcomer", "unlimited", "premium", "everyday"),
         "savings": ("savings", "saving", "notice", "youth", "student", "high interest", "premium", "us dollar", "usd"),
         "gic": (
             "gic",
@@ -3781,7 +4126,29 @@ def _looks_like_multi_product_family_overview(
         for heading in secondary_headings
         if any(term in _collapse_whitespace(heading).lower() for term in variant_terms)
     }
-    return len(variant_headings) >= 2
+    if len(variant_headings) >= 2:
+        return True
+
+    normalized_body = _collapse_whitespace(body_text).lower()
+    category_match = re.search(r"\bselect\s+categor(?:y|ies)\b", normalized_body)
+    if category_match is None:
+        return False
+    category_window = normalized_body[category_match.end():category_match.end() + 1400]
+    category_variant_terms = {
+        "chequing": ("student", "newcomer", "unlimited", "premium", "everyday"),
+        "savings": ("notice", "youth", "student", "high interest", "premium", "u.s. dollar", "us dollar"),
+        "gic": (
+            "non-redeemable", "non redeemable", "redeemable", "cashable", "rateadvantage",
+            "u.s. dollar term", "us dollar term", "income builder", "market-linked", "market linked",
+            "marketsmart", "interest-linked", "interest linked",
+        ),
+        "credit-card": ("visa", "mastercard", "cash back", "rewards", "low interest"),
+        "mortgage": ("fixed rate", "variable rate", "open mortgage", "closed mortgage"),
+        "personal-loan": ("auto loan", "personal loan", "student loan", "recreational vehicle"),
+        "line-of-credit": ("home equity", "student", "professional", "personal line"),
+    }[normalized_type]
+    category_variants = {term for term in category_variant_terms if term in category_window}
+    return len(category_variants) >= 2
 
 
 def _negative_term_hits(text: str) -> int:
@@ -3840,6 +4207,67 @@ def _score_catalog_hub_link(
     return score
 
 
+def _looks_like_secondary_catalog_hub(
+    *,
+    product_type: str,
+    normalized_url: str,
+    anchor_text: str,
+) -> bool:
+    """Recognize bounded product-category pages that can lead to detail pages.
+
+    Many institutions place individual products two links below the configured
+    entry page (catalog -> category -> product).  Keep this deliberately
+    structural: plural product-family language is required and operational,
+    application, legal, and rate-only destinations are excluded.
+    """
+
+    fingerprint = f"{normalized_url} {anchor_text}".lower()
+    if _has_excluded_link_signal(normalized_url=normalized_url, anchor_text=anchor_text):
+        return False
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint):
+        return False
+    if infer_source_type(normalized_url) == "pdf":
+        return False
+    if any(
+        marker in fingerprint
+        for marker in (
+            "agreement", "apply", "calculator", "disclosure", "fees-at-a-glance",
+            "interest-rates", "legal", "manage", "service-fee", "terms", "welcome-kit",
+        )
+    ):
+        return False
+
+    path_segments = [segment.lower() for segment in urlparse(normalized_url).path.split("/") if segment]
+    if not path_segments:
+        return False
+    terminal = re.sub(r"\.(?:html?|aspx?)$", "", path_segments[-1])
+    terminal_words = terminal.replace("_", "-").replace("%20", "-")
+    anchor = _collapse_whitespace(anchor_text).lower()
+    normalized_type = _canonical_product_type_code(product_type)
+    plural_markers = {
+        "chequing": ("accounts", "bank-accounts", "chequing-accounts", "checking-accounts"),
+        "savings": ("accounts", "saving-accounts", "savings-accounts"),
+        "gic": ("gics", "term-deposits", "guaranteed-investment-certificates"),
+        "credit-card": ("cards", "credit-cards"),
+        "mortgage": ("mortgages", "mortgage-products", "mortgage-solutions"),
+        "personal-loan": ("loans", "personal-loans"),
+        "line-of-credit": ("lines-of-credit", "credit-lines"),
+    }.get(normalized_type, ())
+    anchor_markers = {
+        "chequing": ("bank accounts", "chequing accounts", "checking accounts"),
+        "savings": ("saving accounts", "savings accounts"),
+        "gic": ("gics", "term deposits", "guaranteed investment certificates"),
+        "credit-card": ("credit cards", "cards"),
+        "mortgage": ("mortgages", "mortgage products", "mortgage solutions"),
+        "personal-loan": ("loans", "personal loans"),
+        "line-of-credit": ("lines of credit", "credit lines"),
+    }.get(normalized_type, ())
+    return any(
+        terminal_words == marker or terminal_words.endswith(f"-{marker}")
+        for marker in plural_markers
+    ) or any(marker in anchor for marker in anchor_markers)
+
+
 def _build_generated_source_row(
     *,
     bank_code: str,
@@ -3883,8 +4311,11 @@ def _build_generated_source_row(
 
 
 def _dedupe_generated_source_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    detail_rows = [item for item in rows if str(item.get("discovery_role")) == "detail"]
+    non_detail_rows = [item for item in rows if str(item.get("discovery_role")) != "detail"]
+    detail_rows, _ = _dedupe_detail_rows_by_product_identity(detail_rows)
     by_scope: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-    for item in rows:
+    for item in [*detail_rows, *non_detail_rows]:
         scope = (
             str(item["bank_code"]),
             str(item["product_type"]),
@@ -3942,10 +4373,76 @@ def _score_product_link(
     normalized_product_type = _canonical_product_type_code(product_type).replace("-", " ")
     if normalized_product_type and normalized_product_type in fingerprint:
         score += 1
+    card_detail_path = _looks_like_credit_card_detail_path(
+        product_type=product_type,
+        normalized_url=normalized_url,
+    )
+    if card_detail_path:
+        score += 6
     for keyword in _SUPPORTING_KEYWORDS:
-        if keyword in fingerprint:
+        if keyword in fingerprint and not (card_detail_path and keyword in {"fee", "fees"}):
             score -= 1
     return score
+
+
+def _authoritative_catalog_detail_bonus(
+    *,
+    product_type: str,
+    normalized_url: str,
+    base_score: int,
+    parent_url: str,
+    seed_entry_url: str | None,
+) -> int:
+    """Keep named products from the registered catalog entry ahead of secondary-hub noise."""
+
+    if (
+        base_score <= 0
+        or not seed_entry_url
+        or normalize_source_url(parent_url) != normalize_source_url(seed_entry_url)
+    ):
+        return 0
+    if _looks_like_credit_card_detail_path(
+        product_type=product_type,
+        normalized_url=normalized_url,
+    ):
+        return _AUTHORITATIVE_CATALOG_DETAIL_BONUS
+    return 0
+
+
+def _looks_like_credit_card_detail_path(*, product_type: str, normalized_url: str) -> bool:
+    """Recognize a bounded singular-card URL shape without bank-specific slugs."""
+
+    if _canonical_product_type_code(product_type) != "credit-card":
+        return False
+    segments = [segment.lower() for segment in urlparse(normalized_url).path.split("/") if segment]
+    try:
+        root_index = next(index for index, segment in enumerate(segments) if segment in {"credit-card", "credit-cards"})
+    except StopIteration:
+        return False
+    tail = segments[root_index + 1 :]
+    if not tail:
+        return False
+    terminal = re.sub(r"\.(?:html?|aspx?)$", "", tail[-1])
+    generic_terminal = {
+        "all", "cards", "cash-back", "compare", "credit-cards", "low-interest", "no-annual-fee",
+        "rewards", "sceneplus", "student", "students", "travel", "types",
+    }
+    non_product_terminal_markers = (
+        "activate", "agreement", "apply", "calculator", "disclosure", "fees-at-a-glance",
+        "interest-rates", "manage", "rates", "service-fee", "terms", "welcome-kit",
+    )
+    if (
+        terminal in generic_terminal
+        or terminal.endswith("-cards")
+        or any(marker in terminal for marker in non_product_terminal_markers)
+    ):
+        return False
+    networks = {"american-express", "amex", "mastercard", "visa"}
+    return (
+        len(tail) >= 2 and tail[-2] in networks
+        or len(tail) >= 1
+        and bool(re.search(r"(?:card|visa|mastercard|amex|american-express)", terminal))
+    )
 
 
 def _generated_link_name(
@@ -4015,6 +4512,22 @@ def _link_is_relevant_supporting_source(
         return False
     if _has_unrelated_product_path_signal(product_type=signal_product_type, normalized_url=normalized_url):
         return False
+    if _canonical_product_type_code(signal_product_type) == "gic" and not any(
+        marker in fingerprint
+        for marker in (
+            "gic",
+            "guaranteed investment",
+            "guaranteed-investment",
+            "term deposit",
+            "term-deposit",
+            "deposit investment",
+            "deposit-investment",
+        )
+    ):
+        # General bank-account fee/service pages are useful to transactional
+        # deposits, but are not evidence for fixed-term deposit products. A
+        # generic deposit rate page was handled explicitly above.
+        return False
     has_product_signal = _score_product_link(
         product_type=signal_product_type,
         product_type_definition=product_type_definition,
@@ -4026,12 +4539,78 @@ def _link_is_relevant_supporting_source(
     )
 
 
+def _is_product_fact_support_link(*, normalized_url: str, anchor_text: str, product_score: int) -> bool:
+    """Keep narrow official FAQ/help facts as evidence, never as product candidates."""
+
+    if product_score <= 0:
+        return False
+    path = urlparse(normalized_url).path.lower()
+    if not any(marker in path for marker in ("/faq/", "/faqs/", "/help/", "/help-centre/", "/help-center/")):
+        return False
+    fingerprint = f"{normalized_url} {anchor_text}".lower()
+    return any(
+        marker in fingerprint
+        for marker in (
+            "minimum balance",
+            "minimum deposit",
+            "minimum investment",
+            "minimum amount",
+            "fees",
+            "interest paid",
+            "interest rate",
+            "eligible",
+            "eligibility",
+            "withdraw",
+            "redeem",
+            "maturity",
+        )
+    )
+
+
+def _seed_supporting_hint_is_relevant(
+    *,
+    product_type: str,
+    discovery_product_type: str | None,
+    product_type_definition: dict[str, Any],
+    hint: dict[str, Any],
+) -> bool:
+    """Apply current scope policy to curated hints as well as discovered links.
+
+    Seed files are durable discovery hints, not an exemption from later source
+    safety improvements. This prevents retired action flows, calculators and
+    editorial pages from remaining active indefinitely solely because they
+    were once listed in a registry seed.
+    """
+
+    source_url = normalize_source_url(str(hint.get("source_url") or ""))
+    if not source_url:
+        return False
+    anchor_text = " ".join(
+        str(value or "").strip()
+        for value in (
+            hint.get("source_name"),
+            hint.get("purpose"),
+            " ".join(str(item) for item in (hint.get("expected_fields") or [])),
+        )
+        if str(value or "").strip()
+    )
+    return _link_is_relevant_supporting_source(
+        product_type=product_type,
+        discovery_product_type=discovery_product_type,
+        product_type_definition=product_type_definition,
+        normalized_url=source_url,
+        anchor_text=anchor_text,
+    )
+
+
 def _has_supporting_product_context_signal(fingerprint: str) -> bool:
     return any(
         keyword in fingerprint
         for keyword in (
             "bank-account",
             "bank accounts",
+            "deposit-investment",
+            "deposit investment",
             "credit-card",
             "credit cards",
             "mortgage",
@@ -4048,6 +4627,16 @@ def _has_supporting_product_context_signal(fingerprint: str) -> bool:
 
 
 def _has_excluded_link_signal(*, normalized_url: str, anchor_text: str) -> bool:
+    hostname = str(urlparse(normalized_url).hostname or "").lower()
+    if hostname.startswith(("help.", "support.")):
+        return True
+    path_segments = {
+        segment
+        for segment in urlparse(normalized_url).path.lower().split("/")
+        if segment
+    }
+    if any(segment == "join" or segment.startswith("join-") for segment in path_segments):
+        return True
     path_and_query = " ".join(
         part
         for part in (urlparse(normalized_url).path.lower(), urlparse(normalized_url).query.lower())
@@ -4073,8 +4662,12 @@ def _has_excluded_link_signal(*, normalized_url: str, anchor_text: str) -> bool:
     }
     if normalized_anchor in exact_action_labels:
         return True
-    return len(normalized_anchor) <= 80 and bool(
-        re.match(r"^(?:login|log in|sign in|apply now|open (?:an )?account|compare(?: now)?)\b", normalized_anchor)
+    return len(normalized_anchor) <= 120 and bool(
+        re.match(
+            r"^(?:login|log in|sign in|apply now|start (?:your|an?) application|"
+            r"open (?:an )?account|compare(?: now)?)\b",
+            normalized_anchor,
+        )
     )
 
 
@@ -4104,6 +4697,72 @@ def _has_unrelated_product_path_signal(*, product_type: str, normalized_url: str
 
 def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> str | None:
     normalized_fingerprint = fingerprint.lower()
+    source_url = normalized_fingerprint.split(" ", 1)[0]
+    source_path = urlparse(source_url).path.lower()
+    source_slug = source_path.rstrip("/").rsplit("/", 1)[-1]
+    canonical_type = _canonical_product_type_code(product_type)
+    explicit_slug_types = {
+        "chequing": any(marker in source_slug for marker in ("chequing", "checking")),
+        "savings": any(marker in source_slug for marker in ("savings", "saving")),
+        "gic": any(marker in source_slug for marker in ("gic", "term-deposit", "term_deposit")),
+    }
+    explicit_other_types = {key for key, matched in explicit_slug_types.items() if matched and key != canonical_type}
+    if canonical_type in explicit_slug_types and explicit_other_types and not explicit_slug_types[canonical_type]:
+        # A page's own slug is stronger identity evidence than global nav copy.
+        # This prevents a chequing detail page from becoming a savings detail
+        # merely because the common header also links to savings products.
+        return "other_product_type"
+    if "/content/" in normalized_fingerprint and "/content/dam/" not in normalized_fingerprint:
+        # Public product pages can expose their Adobe/enterprise CMS backing
+        # URL as a link. The CMS path is an alias of the canonical public page,
+        # not a second source identity or product.
+        return "non_product_service_flow"
+    if re.search(r"\boffers?\b", normalized_fingerprint) and any(
+        marker in normalized_fingerprint
+        for marker in (
+            "/young-adults/",
+            "/campaign/",
+            "/campaigns/",
+            "/promotion/",
+            "/promotions/",
+        )
+    ):
+        # Audience/campaign landing pages can describe an existing product and
+        # its temporary acquisition rate, but they are not a second product.
+        return "non_product_service_flow"
+    if any(
+        marker in normalized_fingerprint
+        for marker in (
+            "consider adding a ",
+            "selecting one of the products below",
+            "continue with my current application",
+        )
+    ) and any(
+        marker in normalized_fingerprint
+        for marker in ("/bundles/", "/apply/", "/application/")
+    ):
+        # Some acquisition journeys retain the selected product name in the
+        # browser title while the H1/body has already advanced to a cross-sell
+        # step.  They are application state, not a second product detail page.
+        return "non_product_service_flow"
+    if _canonical_product_type_code(product_type) in {"chequing", "savings", "gic"} and any(
+        keyword in normalized_fingerprint
+        for keyword in (
+            "/mutual_funds/",
+            "/mutual-funds/",
+            "/mutual-funds-",
+            "reporting_and_governance",
+            "reporting-and-governance",
+            "simplified-prospectus",
+            "fund-facts",
+        )
+    ):
+        return "other_product_type"
+    if canonical_type in {"savings", "gic"} and any(
+        marker in source_path
+        for marker in ("/e-transfer", "/global-money-transfer", "/money-transfer")
+    ):
+        return "non_product_service_flow"
     if any(
         keyword in normalized_fingerprint
         for keyword in (
@@ -4111,12 +4770,42 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "/resource-center/",
             "/articles/",
             "/blog/",
+            "/thejuice/",
         )
     ):
         return "non_product_editorial_page"
+    editorial_path_segments = {
+        segment
+        for segment in urlparse(normalized_fingerprint.split(" ", 1)[0]).path.lower().split("/")
+        if segment
+    }
+    if any(
+        segment == "blog"
+        or segment.endswith("-blog")
+        or segment.startswith("blog-")
+        or segment.startswith(("what-is-", "what-are-", "how-does-", "how-to-choose-", "rules-of-"))
+        or "-vs-" in segment
+        or segment in {"getting-started", "emergency-fund", "multiple-bank-accounts"}
+        for segment in editorial_path_segments
+    ):
+        return "non_product_editorial_page"
+    if _canonical_product_type_code(product_type) in {"savings", "gic"} and any(
+        segment.startswith(("value-program", "rewards-program", "relationship-program"))
+        for segment in editorial_path_segments
+    ):
+        return "other_product_type"
+    if _canonical_product_type_code(product_type) == "gic" and any(
+        keyword in normalized_fingerprint
+        for keyword in (
+            "/personal/invest/non-registered-funds",
+            "/personal/invest mutual funds",
+        )
+    ):
+        return "other_product_type"
     if any(
         keyword in normalized_fingerprint
         for keyword in (
+            "/shadow-site/",
             "/switch-mortgage",
             "/switch-your-mortgage",
             "/manage-mortgage",
@@ -4153,6 +4842,16 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "commercial mortgage",
             "commercial loan",
             "commercial account",
+        )
+    ):
+        return "non_consumer_business_page"
+    if _canonical_product_type_code(product_type) == "credit-card" and any(
+        keyword in normalized_fingerprint
+        for keyword in (
+            "/corporate-",
+            " corporate ",
+            "/bizline",
+            " bizline ",
         )
     ):
         return "non_consumer_business_page"

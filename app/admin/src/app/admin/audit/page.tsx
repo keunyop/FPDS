@@ -38,7 +38,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
   }
 
   if (!session || !auditLog || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Audit history could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "감사 이력을 불러올 수 없습니다." : locale === "ja" ? "監査履歴を読み込めません。" : "Audit history could not load."} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

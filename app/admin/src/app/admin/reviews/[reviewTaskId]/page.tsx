@@ -36,7 +36,12 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
   }
 
   if (!session || apiUnavailable) {
-    return <AdminApiUnavailable title="Review detail could not load." />;
+    const unavailableTitle = {
+      en: "Review detail could not load.",
+      ko: "검토 상세를 불러오지 못했습니다.",
+      ja: "レビュー詳細を読み込めませんでした。",
+    }[locale];
+    return <AdminApiUnavailable title={unavailableTitle} />;
   }
 
   if (!detail) {
@@ -55,7 +60,7 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
         role: session.user.role,
       }}
     >
-      <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} />
+      <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
     </ApplicationShell5>
   );
 }

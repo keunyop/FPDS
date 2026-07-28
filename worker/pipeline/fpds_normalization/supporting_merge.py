@@ -5,13 +5,14 @@ import re
 from decimal import Decimal, InvalidOperation
 
 from worker.pipeline.fpds_rate_safety import (
+    bounded_rate_evidence_context,
     canonical_deposit_rate_suppression_reason,
     expired_promotional_offer_end_date,
 )
 
 _PERCENT_RE = re.compile(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%")
 _TERM_RATE_ROW_RE = re.compile(
-    r"(?P<term>\d{1,3}\s*(?:days?|months?|years?))\b"
+    r"(?P<term>\d{1,3}(?:\.\d{1,2})?\s*(?:days?|months?|years?))\b"
     r"(?P<body>[^%\n\r]{0,120}?)"
     r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
     re.IGNORECASE,
@@ -68,6 +69,8 @@ _SUPPORTING_ROLE_FIELDS = {
     "product_comparison_rows",
     "minimum_guaranteed_return",
     "maximum_return",
+    "minimum_deposit",
+    "minimum_balance",
 }
 _EXPIRY_SENSITIVE_FIELDS = {
     "standard_rate",
@@ -223,7 +226,15 @@ def _build_generic_support_supplement(
     if not terms and product_type_family != "gic":
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    matches = list(supporting_artifact.get("retrieval_result", {}).get("matches", []))
+    target_currency = _target_currency_from_artifact(base_artifact)
+    matches = [
+        match
+        for match in supporting_artifact.get("retrieval_result", {}).get("matches", [])
+        if _support_match_currency_is_compatible(
+            target_currency=target_currency,
+            match=match,
+        )
+    ]
     if not matches:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
@@ -236,13 +247,30 @@ def _build_generic_support_supplement(
             existing_fields=existing_fields,
         )
     if product_type_family == "savings":
-        return _build_generic_savings_rate_supplement(
+        rate_result = _build_generic_savings_rate_supplement(
             target_source_id=target_source_id,
             support_source_id=support_source_id,
             matches=matches,
             terms=terms,
             existing_fields=existing_fields,
         )
+        fee_result = _build_generic_savings_fee_supplement(
+            target_source_id=target_source_id,
+            support_source_id=support_source_id,
+            matches=matches,
+            terms=terms,
+            existing_fields={
+                **existing_fields,
+                **dict(rate_result["field_updates"]),
+            },
+        )
+        for key in ("field_updates", "evidence_updates"):
+            rate_result[key] = {**dict(rate_result[key]), **dict(fee_result[key])}
+        rate_result["runtime_notes"] = [
+            *list(rate_result["runtime_notes"]),
+            *list(fee_result["runtime_notes"]),
+        ]
+        return rate_result
     return _build_generic_gic_rate_supplement(
         target_source_id=target_source_id,
         support_source_id=support_source_id,
@@ -261,10 +289,12 @@ def _build_generic_savings_rate_supplement(
     terms: tuple[str, ...],
     existing_fields: dict[str, dict[str, object]],
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
-    if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")):
+    existing_tier = existing_fields.get("tier_definition_text")
+    has_useful_tier = existing_tier is not None and _is_useful_savings_tier_record(existing_tier)
+    if all(field_name in existing_fields for field_name in ("standard_rate", "public_display_rate")) and has_useful_tier:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
-    current_table_match = _find_current_savings_rate_table_match(matches)
+    current_table_match = _find_current_savings_rate_table_match(matches, terms=terms)
     match = current_table_match or _find_generic_support_match(
         matches=matches,
         terms=terms,
@@ -285,13 +315,30 @@ def _build_generic_savings_rate_supplement(
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
     if current_table_match is not None:
-        current_rate = _extract_current_savings_account_rate(str(match.get("evidence_text_excerpt", "")))
+        current_rate = _extract_current_savings_account_rate(
+            str(match.get("evidence_text_excerpt", "")), terms=terms
+        )
         rate_values = {
             "standard_rate": _format_decimal(current_rate),
             "public_display_rate": _format_decimal(current_rate),
         } if current_rate is not None else {}
     else:
         rate_values = _extract_generic_rate_values(str(match.get("evidence_text_excerpt", "")))
+    rate_excerpt = str(match.get("evidence_text_excerpt", ""))
+    tier_summary = _extract_savings_balance_tier_summary(rate_excerpt)
+    if tier_summary is not None:
+        lowered_rate_excerpt = _normalize_text(rate_excerpt)
+        if not any(
+            marker in lowered_rate_excerpt
+            for marker in ("boosted rate", "bonus rate", "promotional rate", "promo rate")
+        ):
+            tier_rates = _extract_all_percentages(rate_excerpt)
+            if tier_rates:
+                highest_tier_rate = _format_decimal(max(tier_rates))
+                rate_values["standard_rate"] = highest_tier_rate
+                rate_values["public_display_rate"] = highest_tier_rate
+        rate_values["tier_definition_text"] = tier_summary
+        rate_values["tiered_rate_flag"] = True
     if not rate_values:
         return {
             "field_updates": {},
@@ -311,6 +358,43 @@ def _build_generic_savings_rate_supplement(
     )
 
 
+def _build_generic_savings_fee_supplement(
+    *,
+    target_source_id: str,
+    support_source_id: str,
+    matches: list[dict[str, object]],
+    terms: tuple[str, ...],
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    if all(field_name in existing_fields for field_name in ("monthly_fee", "public_display_fee")):
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    match = _find_generic_support_match(
+        matches=matches,
+        terms=terms,
+        preferred_fields=("monthly_fee", "public_display_fee", "account_fee_table", "fees_text"),
+        require_money=True,
+    )
+    if match is None:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    fee_values = _extract_generic_monthly_fee_values(
+        str(match.get("evidence_text_excerpt", "")),
+        terms=terms,
+    )
+    if not fee_values:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    return _build_generic_field_updates(
+        support_source_id=support_source_id,
+        match=match,
+        field_values=fee_values,
+        existing_fields=existing_fields,
+        extraction_method="generic_supporting_savings_fee_merge",
+        runtime_note=(
+            f"Supplemented missing savings fee fields for `{target_source_id}` "
+            f"from generic supporting source `{support_source_id}`."
+        ),
+    )
+
+
 def _build_generic_chequing_fee_supplement(
     *,
     target_source_id: str,
@@ -319,9 +403,6 @@ def _build_generic_chequing_fee_supplement(
     terms: tuple[str, ...],
     existing_fields: dict[str, dict[str, object]],
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
-    if any(field_name in existing_fields for field_name in ("monthly_fee", "public_display_fee", "fee_waiver_condition")):
-        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
-
     match = _find_generic_support_match(
         matches=matches,
         terms=terms,
@@ -335,27 +416,57 @@ def _build_generic_chequing_fee_supplement(
         ),
         require_money=True,
     )
-    if match is None:
-        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
-
-    fee_values = _extract_generic_monthly_fee_values(str(match.get("evidence_text_excerpt", "")))
-    if not fee_values:
-        return {
-            "field_updates": {},
-            "evidence_updates": {},
-            "runtime_notes": [
+    result: dict[str, dict[str, dict[str, object]] | list[str]] = {
+        "field_updates": {},
+        "evidence_updates": {},
+        "runtime_notes": [],
+    }
+    if match is not None:
+        fee_values = _extract_generic_monthly_fee_values(
+            str(match.get("evidence_text_excerpt", "")),
+            terms=terms,
+        )
+        if fee_values:
+            fee_result = _build_generic_field_updates(
+                support_source_id=support_source_id,
+                match=match,
+                field_values=fee_values,
+                existing_fields=existing_fields,
+                extraction_method="generic_supporting_chequing_fee_merge",
+                runtime_note=f"Supplemented missing chequing fee fields for `{target_source_id}` from generic supporting source `{support_source_id}`.",
+            )
+            result["field_updates"].update(fee_result["field_updates"])
+            result["evidence_updates"].update(fee_result["evidence_updates"])
+            result["runtime_notes"].extend(fee_result["runtime_notes"])
+        elif not all(field_name in existing_fields for field_name in ("monthly_fee", "public_display_fee")):
+            result["runtime_notes"].append(
                 f"Generic chequing support source `{support_source_id}` matched `{target_source_id}`, but no canonical-safe monthly fee was found."
-            ],
-        }
+            )
 
-    return _build_generic_field_updates(
-        support_source_id=support_source_id,
-        match=match,
-        field_values=fee_values,
-        existing_fields=existing_fields,
-        extraction_method="generic_supporting_chequing_fee_merge",
-        runtime_note=f"Supplemented missing chequing fee fields for `{target_source_id}` from generic supporting source `{support_source_id}`.",
-    )
+    if "unlimited_transactions_flag" not in existing_fields:
+        unlimited_match = _find_target_unlimited_transaction_match(matches=matches, terms=terms)
+        if unlimited_match is not None:
+            result["field_updates"]["unlimited_transactions_flag"] = _build_support_field(
+                field_name="unlimited_transactions_flag",
+                candidate_value=True,
+                value_type="boolean",
+                match=unlimited_match,
+                extraction_method="generic_supporting_unlimited_transaction_merge",
+                field_metadata={
+                    "supporting_source_id": support_source_id,
+                    "supporting_merge": True,
+                    "generic_supporting_merge": True,
+                },
+            )
+            result["evidence_updates"]["unlimited_transactions_flag"] = _build_support_link(
+                field_name="unlimited_transactions_flag",
+                candidate_value=True,
+                match=unlimited_match,
+            )
+            result["runtime_notes"].append(
+                f"Supplemented an explicit account-wide unlimited-transaction flag for `{target_source_id}` from generic supporting source `{support_source_id}`."
+            )
+    return result
 
 
 def _build_generic_gic_rate_supplement(
@@ -373,6 +484,13 @@ def _build_generic_gic_rate_supplement(
         for field_name in desired_fields
     ):
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    minimum_result = _build_generic_gic_minimum_supplement(
+        target_source_id=target_source_id,
+        support_source_id=support_source_id,
+        matches=matches,
+        existing_fields=existing_fields,
+    )
 
     current_table_match = (
         _find_current_gic_rate_table_match(matches)
@@ -407,10 +525,10 @@ def _build_generic_gic_rate_supplement(
             "term_rate_table",
         ),
         require_percentage=True,
-        allow_structured_gic_table=True,
+        allow_structured_gic_table=allow_family_table_aggregation,
     )
     if match is None:
-        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+        return minimum_result
 
     if current_table_match is not None:
         rate_values = _extract_current_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
@@ -419,15 +537,13 @@ def _build_generic_gic_rate_supplement(
     else:
         rate_values = _extract_generic_gic_rate_values(str(match.get("evidence_text_excerpt", "")))
     if not rate_values:
-        return {
-            "field_updates": {},
-            "evidence_updates": {},
-            "runtime_notes": [
-                f"Generic GIC support source `{support_source_id}` matched `{target_source_id}`, but the rate evidence did not contain a numeric percentage."
-            ],
-        }
+        minimum_result["runtime_notes"] = [
+            *list(minimum_result["runtime_notes"]),
+            f"Generic GIC support source `{support_source_id}` matched `{target_source_id}`, but the rate evidence did not contain a numeric percentage."
+        ]
+        return minimum_result
 
-    return _build_generic_field_updates(
+    rate_result = _build_generic_field_updates(
         support_source_id=support_source_id,
         match=match,
         field_values=rate_values,
@@ -435,6 +551,77 @@ def _build_generic_gic_rate_supplement(
         extraction_method="generic_supporting_gic_rate_merge",
         runtime_note=f"Supplemented missing GIC rate fields for `{target_source_id}` from generic supporting source `{support_source_id}`.",
     )
+    for key in ("field_updates", "evidence_updates"):
+        rate_result[key] = {**dict(rate_result[key]), **dict(minimum_result[key])}
+    rate_result["runtime_notes"] = [
+        *list(rate_result["runtime_notes"]),
+        *list(minimum_result["runtime_notes"]),
+    ]
+    return rate_result
+
+
+def _build_generic_gic_minimum_supplement(
+    *,
+    target_source_id: str,
+    support_source_id: str,
+    matches: list[dict[str, object]],
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    """Merge only an explicit product-wide GIC minimum; never infer one from fees or examples."""
+
+    if "minimum_deposit" in existing_fields:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    match = next(
+        (
+            item
+            for item in matches
+            if _explicit_product_wide_gic_minimum(
+                str(item.get("evidence_text_excerpt") or "")
+            )
+            is not None
+        ),
+        None,
+    )
+    if match is None:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    minimum = _explicit_product_wide_gic_minimum(
+        str(match.get("evidence_text_excerpt") or "")
+    )
+    if minimum is None:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    return _build_generic_field_updates(
+        support_source_id=support_source_id,
+        match=match,
+        field_values={"minimum_deposit": _format_decimal(minimum)},
+        existing_fields=existing_fields,
+        extraction_method="generic_supporting_gic_minimum_merge",
+        runtime_note=(
+            f"Supplemented an explicit product-wide GIC minimum for `{target_source_id}` "
+            f"from generic supporting source `{support_source_id}`."
+        ),
+    )
+
+
+def _explicit_product_wide_gic_minimum(excerpt: str) -> Decimal | None:
+    normalized = _normalize_text(excerpt)
+    if not re.search(r"\b(?:gic|guaranteed investment certificate)s?\b", normalized, flags=re.IGNORECASE):
+        return None
+    zero_patterns = (
+        r"\bno\s+minimum\s+(?:balance|deposit|investment)\s+(?:is\s+)?required\s+to\s+(?:open|purchase|invest\s+in)\s+(?:(?:a|an|any|our|this|the)\s+)?(?:[a-z][a-z&.-]*\s+){0,4}(?:gic|guaranteed investment certificate)s?\b",
+        r"\b(?:gic|guaranteed investment certificate)s?\b.{0,80}\b(?:minimum\s+(?:balance|deposit|investment)|(?:balance|deposit|investment)\s+minimum)\b.{0,30}\b(?:none|no\s+minimum|\$\s*0(?:\.00)?)\b",
+        r"\b(?:none|no\s+minimum|\$\s*0(?:\.00)?)\b.{0,30}\b(?:minimum\s+(?:balance|deposit|investment)|(?:balance|deposit|investment)\s+minimum)\b.{0,80}\b(?:gic|guaranteed investment certificate)s?\b",
+    )
+    if any(re.search(pattern, normalized, flags=re.IGNORECASE) for pattern in zero_patterns):
+        return Decimal("0")
+    numeric_patterns = (
+        r"\b(?:all|any|our)\s+(?:gic|guaranteed investment certificate)s?\b.{0,100}\b(?:minimum\s+(?:deposit|investment)|initial\s+investment)\s+(?:of|is|:)\s*\$\s*(?P<amount>\d[\d,]*(?:\.\d{1,2})?)",
+        r"\b(?:minimum\s+(?:deposit|investment)|initial\s+investment)\s+(?:of|is|:)\s*\$\s*(?P<amount>\d[\d,]*(?:\.\d{1,2})?).{0,100}\b(?:for\s+)?(?:all|any|our)\s+(?:gic|guaranteed investment certificate)s?\b",
+    )
+    for pattern in numeric_patterns:
+        match = re.search(pattern, normalized, flags=re.IGNORECASE)
+        if match is not None:
+            return _to_decimal(match.group("amount").replace(",", ""))
+    return None
 
 
 def _aggregate_gic_family_rate_matches(
@@ -513,9 +700,21 @@ def _build_generic_field_updates(
     field_updates: dict[str, dict[str, object]] = {}
     evidence_updates: dict[str, dict[str, object]] = {}
     for field_name, candidate_value in field_values.items():
-        if field_name in existing_fields and not _is_invalid_gic_rate_record(field_name, existing_fields[field_name]):
-            continue
-        value_type = "json" if field_name == "term_rate_table" else "decimal"
+        if field_name in existing_fields:
+            replace_invalid_savings_tier = (
+                field_name == "tier_definition_text"
+                and not _is_useful_savings_tier_record(existing_fields[field_name])
+            )
+            if not replace_invalid_savings_tier and not _is_invalid_gic_rate_record(field_name, existing_fields[field_name]):
+                continue
+        if field_name == "term_rate_table":
+            value_type = "json"
+        elif field_name == "tier_definition_text" or field_name == "fee_waiver_condition":
+            value_type = "string"
+        elif field_name == "tiered_rate_flag":
+            value_type = "boolean"
+        else:
+            value_type = "decimal"
         field_updates[field_name] = _build_support_field(
             field_name=field_name,
             candidate_value=candidate_value,
@@ -599,7 +798,55 @@ def _find_generic_support_match(
     return ranked[0][1]
 
 
-def _find_current_savings_rate_table_match(matches: list[dict[str, object]]) -> dict[str, object] | None:
+def _find_target_unlimited_transaction_match(
+    *,
+    matches: list[dict[str, object]],
+    terms: tuple[str, ...],
+) -> dict[str, object] | None:
+    ranked: list[tuple[int, float, dict[str, object]]] = []
+    for match in matches:
+        excerpt = str(match.get("evidence_text_excerpt", ""))
+        normalized = _normalize_text(excerpt)
+        unlimited_matches = list(
+            re.finditer(
+                r"\bunlimited\s+(?:(?:no\s+fee|free)\s+)?(?:everyday\s+banking\s+|monthly\s+|banking\s+)?transactions?\b",
+                normalized,
+                flags=re.IGNORECASE,
+            )
+        )
+        if not unlimited_matches:
+            continue
+        best_distance: int | None = None
+        for unlimited_match in unlimited_matches:
+            window_start = max(0, unlimited_match.start() - 180)
+            window_end = min(len(normalized), unlimited_match.end() + 180)
+            window = normalized[window_start:window_end]
+            if any(term in window for term in terms):
+                best_distance = min(
+                    (
+                        abs(window.find(term) + window_start - unlimited_match.start())
+                        for term in terms
+                        if term in window
+                    ),
+                    default=180,
+                )
+                break
+        if best_distance is None:
+            continue
+        try:
+            score = float(match.get("score", 0.0))
+        except (TypeError, ValueError):
+            score = 0.0
+        ranked.append((-best_distance, score, match))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return ranked[0][2]
+
+
+def _find_current_savings_rate_table_match(
+    matches: list[dict[str, object]], *, terms: tuple[str, ...]
+) -> dict[str, object] | None:
     ranked: list[tuple[float, dict[str, object]]] = []
     for match in matches:
         excerpt = str(match.get("evidence_text_excerpt", ""))
@@ -613,7 +860,7 @@ def _find_current_savings_rate_table_match(matches: list[dict[str, object]]) -> 
             continue
         if expired_promotional_offer_end_date(excerpt) is not None:
             continue
-        if _extract_current_savings_account_rate(excerpt) is None:
+        if _extract_current_savings_account_rate(excerpt, terms=terms) is None:
             continue
         try:
             score = float(match.get("score", 0.0))
@@ -800,23 +1047,63 @@ def _gic_section(normalized: str, *, start_pattern: str, end_pattern: str) -> st
     return match.group(0) if match is not None else ""
 
 
-def _extract_current_savings_account_rate(excerpt: str) -> Decimal | None:
+def _extract_current_savings_account_rate(
+    excerpt: str, *, terms: tuple[str, ...] = ()
+) -> Decimal | None:
     normalized = _normalize_text(excerpt)
     if re.search(r"(?:current\s+)?rate\s*\(%\)", normalized, flags=re.IGNORECASE) is None:
         return None
     lines = [_WHITESPACE_RE.sub(" ", line).strip() for line in excerpt.splitlines() if line.strip()]
     for index, line in enumerate(lines[:-1]):
-        if line.lower() != "savings account":
+        normalized_line = _normalize_text(line)
+        target_match = (
+            any(_savings_identity_term_matches_line(term=term, line=normalized_line) for term in terms)
+            if terms
+            else normalized_line == "savings account"
+        )
+        if not target_match:
             continue
-        value = _to_decimal(lines[index + 1])
+        inline_value = next(iter(_extract_all_percentages(line)), None)
+        value = inline_value if inline_value is not None else _to_decimal(lines[index + 1])
         if value is not None and Decimal("0") < value < Decimal("25"):
             return value
+    if terms:
+        for term in terms:
+            if term in {"savings", "savings account", "saving account"}:
+                continue
+            targeted_match = re.search(
+                rf"\b{re.escape(term)}\b.{{0,80}}?(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%?",
+                normalized,
+                flags=re.IGNORECASE,
+            )
+            if targeted_match is None:
+                continue
+            value = _to_decimal(targeted_match.group("rate"))
+            if value is not None and Decimal("0") < value < Decimal("25"):
+                return value
+        if any(term in {"savings account", "saving account"} for term in terms):
+            inline_generic_match = re.search(
+                r"(?:current\s+)?rate\s*\(%\)\s+savings\s+account\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)\b",
+                normalized,
+                flags=re.IGNORECASE,
+            )
+            if inline_generic_match is not None:
+                value = _to_decimal(inline_generic_match.group("rate"))
+                if value is not None and Decimal("0") < value < Decimal("25"):
+                    return value
+        return None
     inline_match = re.search(
         r"(?:current\s+)?rate\s*\(%\)\s+savings\s+account\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)\b",
         normalized,
         flags=re.IGNORECASE,
     )
     return _to_decimal(inline_match.group("rate")) if inline_match is not None else None
+
+
+def _savings_identity_term_matches_line(*, term: str, line: str) -> bool:
+    if term in {"savings", "savings account", "saving account"}:
+        return line == term
+    return term in line
 
 
 def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, ...]:
@@ -857,6 +1144,9 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
             expanded.add(simplified.replace("gics", "gic"))
         if "deposits" in simplified:
             expanded.add(re.sub(r"\bdeposits\b", "deposit", simplified))
+        if any(marker in candidate for marker in ("u.s. dollar", "u s dollar", "us dollar", "usd")):
+            suffix = "savings account" if "savings" in candidate else "account"
+            expanded.update({f"us$ {suffix}", f"usd {suffix}", f"us dollar {suffix}"})
 
     return tuple(
         item
@@ -867,6 +1157,56 @@ def _target_terms_from_artifact(base_artifact: dict[str, object]) -> tuple[str, 
             and not _is_institution_only_target_term(item)
         )
     )
+
+
+def _target_currency_from_artifact(base_artifact: dict[str, object]) -> str | None:
+    field_records = _field_record_map([dict(item) for item in base_artifact.get("extracted_fields", [])])
+    value = str(field_records.get("currency", {}).get("candidate_value") or "").strip().upper()
+    return value if re.fullmatch(r"[A-Z]{3}", value) else None
+
+
+def _support_match_currency_is_compatible(
+    *,
+    target_currency: str | None,
+    match: dict[str, object],
+) -> bool:
+    """Keep product supplements from crossing an explicitly named currency.
+
+    CAD is commonly implicit on Canadian product pages, while foreign-currency
+    products state their currency in the title, anchor, or excerpt.  A match
+    that explicitly names a different currency is therefore unsafe even when
+    the rest of its product title is a substring of the target title.
+    """
+
+    if target_currency is None:
+        return True
+    haystack = _normalize_text(
+        " ".join(
+            str(item or "")
+            for item in (
+                match.get("anchor_value"),
+                match.get("evidence_text_excerpt"),
+            )
+        )
+    )
+    detected: set[str] = set()
+    currency_markers = {
+        "USD": (
+            r"\bu\.?\s*s\.?\s*d\b",
+            r"\bu\.?\s*s\.?\s*\$",
+            r"\bu\.?\s*s\.?\s+dollars?\b",
+            r"\bunited states dollars?\b",
+        ),
+        "EUR": (r"\beuros?\b", r"\beur\b"),
+        "GBP": (r"\bbritish pounds?\b", r"\bpounds? sterling\b", r"\bgbp\b"),
+        "HKD": (r"\bhong kong dollars?\b", r"\bhkd\b"),
+        "CNY": (r"\bchinese yuan\b", r"\brenminbi\b", r"\bcny\b", r"\brmb\b"),
+        "JPY": (r"\bjapanese yen\b", r"\bjpy\b"),
+    }
+    for currency, patterns in currency_markers.items():
+        if any(re.search(pattern, haystack, flags=re.IGNORECASE) for pattern in patterns):
+            detected.add(currency)
+    return not detected or target_currency in detected
 
 
 def _is_generic_gic_family_artifact(base_artifact: dict[str, object]) -> bool:
@@ -957,16 +1297,20 @@ def _extract_generic_gic_rate_values(excerpt: str) -> dict[str, object]:
 
 
 def _term_label_to_days(term_label: str) -> int | None:
-    match = re.fullmatch(r"(\d{1,3})\s*(day|days|month|months|year|years)", term_label)
+    match = re.fullmatch(r"(\d{1,3}(?:\.\d{1,2})?)\s*(day|days|month|months|year|years)", term_label)
     if match is None:
         return None
-    value = int(match.group(1))
+    value = Decimal(match.group(1))
     unit = match.group(2)
     if unit.startswith("day"):
-        return value
-    if unit.startswith("month"):
-        return value * 30
-    return value * 365
+        days = value
+    elif unit.startswith("month"):
+        days = value * Decimal("30")
+    else:
+        days = value * Decimal("365")
+    if days != days.to_integral_value():
+        days = (days + Decimal("0.5")).to_integral_value()
+    return int(days)
 
 
 def _is_invalid_gic_rate_record(field_name: str, record: dict[str, object]) -> bool:
@@ -1007,19 +1351,199 @@ def _is_invalid_gic_rate_record(field_name: str, record: dict[str, object]) -> b
     return other_product_context or canonical_deposit_rate_suppression_reason(value=value, context=evidence_context) is not None
 
 
-def _extract_generic_monthly_fee_values(excerpt: str) -> dict[str, str]:
+def _extract_generic_monthly_fee_values(
+    excerpt: str,
+    *,
+    terms: tuple[str, ...] = (),
+) -> dict[str, object]:
+    comparison_values = _extract_target_comparison_monthly_fee(excerpt, terms=terms)
+    if comparison_values:
+        return comparison_values
     if _mentions_no_fee(excerpt):
         return {"monthly_fee": "0.00", "public_display_fee": "0.00"}
     lowered = _normalize_text(excerpt)
-    monthly_fee_match = re.search(
-        r"(?:monthly fee|account fee|fee)\D{0,80}\$\s?([0-9][0-9,]*(?:\.\d{1,2})?)",
-        lowered,
+    patterns = (
+        r"(?:monthly\s+(?:account\s+|plan\s+)?fee|account\s+fee)\s*(?:is|of|:)?\s*\$\s?(?P<fee>[0-9][0-9,]*(?:\.\d{1,2})?)",
+        r"\$\s?(?P<fee>[0-9][0-9,]*(?:\.\d{1,2})?)\s*(?:/\s*month|per\s+month|monthly)(?:\s+(?:account|plan))?\s+fee",
+    )
+    for pattern in patterns:
+        for monthly_fee_match in re.finditer(pattern, lowered, flags=re.IGNORECASE):
+            if terms:
+                local_context = lowered[
+                    max(0, monthly_fee_match.start() - 260) : min(len(lowered), monthly_fee_match.end() + 260)
+                ]
+                if not any(term and term in local_context for term in terms):
+                    continue
+            value = monthly_fee_match.group("fee").replace(",", "")
+            try:
+                if Decimal(value) > Decimal("500"):
+                    continue
+            except InvalidOperation:
+                continue
+            return {"monthly_fee": value, "public_display_fee": value}
+    return {}
+
+
+def _extract_target_comparison_monthly_fee(
+    excerpt: str,
+    *,
+    terms: tuple[str, ...],
+) -> dict[str, object]:
+    """Map a horizontal comparison-table fee row to the target product column.
+
+    Flattened HTML commonly lists all product headings first and all values
+    second.  Reading the first `$0` anywhere in that chunk reverses a
+    balance-qualified waiver or a neighbouring audience price into the base
+    fee.  The product-heading order and fee-entry order provide a conservative,
+    bank-independent column mapping.
+    """
+
+    # PDF text extraction sometimes substitutes the decimal point in a money
+    # value with U+FFFD (for example, ``$30�95``). Restore only the narrow
+    # digit + replacement + exactly-two-decimals shape; do not broadly rewrite
+    # punctuation or adjacent footnote digits.
+    normalized = _normalize_text(
+        re.sub(r"(?<=\d)\ufffd(?=\d{2}(?:\D|$))", ".", excerpt)
+    )
+    fee_label = re.search(
+        r"\bmonthly\s+(?:account\s+|plan\s+)?fees?(?:\d{1,2})?\b",
+        normalized,
+    )
+    if fee_label is None or not terms:
+        return {}
+    header = normalized[: fee_label.start()]
+    target_matches = [
+        (header.find(term), term)
+        for term in terms
+        if term and header.find(term) >= 0
+    ]
+    if not target_matches:
+        return {}
+    target_position, target_term = max(target_matches, key=lambda item: len(item[1]))
+    target_end = target_position + len(target_term)
+    heading_markers = list(
+        re.finditer(
+            r"\b(?:chequing|checking|banking|bank)\s+account\b|\bbanking\s+plan\b|\b(?:banking\s+)?package\b",
+            header,
+            flags=re.IGNORECASE,
+        )
+    )
+    if len(heading_markers) < 2:
+        # A single named product followed by prose is a detail-style excerpt,
+        # not a horizontal comparison table. Let the direct labelled-fee
+        # parser handle it so a later waiver balance cannot become the fee.
+        return {}
+    target_index = next(
+        (
+            index
+            for index, marker in enumerate(heading_markers)
+            if marker.end() >= target_end and marker.end() - target_end <= 32
+        ),
+        None,
+    )
+    if target_index is None:
+        return {}
+
+    row = normalized[fee_label.end() :]
+    next_row_markers = [
+        marker
+        for marker in (
+            re.search(r"\bmonthly\s+fees?\s+for\s+seniors?\b", row),
+            re.search(r"\bseniors?[’']?\s+discount\b", row),
+            re.search(r"\bminimum\s+daily\s+(?:closing\s+)?balance\b", row),
+            re.search(r"\bno\.\s+of\s+debit\s+transactions\b", row),
+        )
+        if marker is not None
+    ]
+    if next_row_markers:
+        row = row[: min(marker.start() for marker in next_row_markers)]
+    entry_pattern = re.compile(
+        r"\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s*"
+        r"(?:or\s+\$\s*0(?:\.00)?\s*\((?P<waiver>[^)]{0,700})\)"
+        r"|\((?P<condition>[^)]{0,700})\)"
+        r"|(?=\s*\$|\s*$))",
         flags=re.IGNORECASE,
     )
-    if monthly_fee_match is not None:
-        value = monthly_fee_match.group(1).replace(",", "")
-        return {"monthly_fee": value, "public_display_fee": value}
-    return {}
+    entries: list[tuple[str, str | None]] = []
+    for entry in entry_pattern.finditer(row):
+        fee = entry.group("fee").replace(",", "")
+        context = entry.group("waiver") or entry.group("condition")
+        entries.append((fee, context))
+    if target_index >= len(entries):
+        return {}
+
+    fee, condition = entries[target_index]
+    values: dict[str, object] = {
+        "monthly_fee": fee,
+        "public_display_fee": fee,
+    }
+    if condition:
+        balance_match = re.search(
+            r"minimum\s+(?:daily\s+)?(?:account\s+)?balance(?:\s+of)?\s+\$\s*(?P<balance>\d[\d,]*(?:\.\d{1,2})?)",
+            condition,
+            flags=re.IGNORECASE,
+        )
+        if balance_match is not None:
+            balance = balance_match.group("balance").replace(",", "")
+            values["minimum_balance"] = balance
+            values["fee_waiver_condition"] = (
+                f"Monthly fee {fee} is waived to 0.00 with a {balance} minimum balance."
+            )
+        elif any(
+            marker in condition.lower()
+            for marker in (
+                "guaranteed income supplement",
+                "beneficiary",
+                "registered disability savings plan",
+                "indigenous",
+                "newcomer",
+            )
+        ):
+            cleaned_condition = _normalize_text(condition).strip(" .")
+            values["fee_waiver_condition"] = (
+                f"Monthly fee {fee} is waived to 0.00 if {cleaned_condition}."
+            )[:500]
+    return values
+
+
+def _extract_savings_balance_tier_summary(excerpt: str) -> str | None:
+    normalized = _normalize_text(excerpt)
+    if "daily closing balance" not in normalized or "%" not in normalized:
+        return None
+    balance_pattern = re.compile(
+        r"(?P<label>\$\s*\d[\d,]*(?:\.\d+)?\s+(?:to\s+\$?\s*\d[\d,]*(?:\.\d+)?|and\s+over))",
+        flags=re.IGNORECASE,
+    )
+    balance_matches = list(balance_pattern.finditer(normalized))
+    if len(balance_matches) < 2:
+        return None
+    rows: list[tuple[str, tuple[str, ...]]] = []
+    distinct_rates: set[str] = set()
+    for index, balance_match in enumerate(balance_matches):
+        end = balance_matches[index + 1].start() if index + 1 < len(balance_matches) else len(normalized)
+        rates = tuple(
+            match.group(1)
+            for match in re.finditer(r"(?<![\d.])(\d{1,2}(?:\.\d{1,4})?)\s*%", normalized[balance_match.end() : end])
+        )
+        if not rates:
+            continue
+        label = re.sub(r"\s+", " ", balance_match.group("label")).strip()
+        rows.append((label, rates[:2]))
+        distinct_rates.update(rates[:2])
+    if len(rows) < 2 or len(distinct_rates) < 2:
+        return None
+    has_dual_columns = "boosted rate" in normalized and "standard posted rate" in normalized
+    rendered_rows = [
+        f"{label}: {' / '.join(f'{rate}%' for rate in rates)}"
+        for label, rates in rows
+    ]
+    suffix = " (Boosted Rate / Standard Posted Rate)" if has_dual_columns else ""
+    return "Balance tiers: " + "; ".join(rendered_rows) + suffix + "."
+
+
+def _is_useful_savings_tier_record(record: dict[str, object]) -> bool:
+    value = str(record.get("candidate_value") or "")
+    return "$" in value and "%" in value and "balance" in value.lower()
 
 
 def _extract_money_amounts(excerpt: str) -> list[str]:
@@ -1031,7 +1555,16 @@ def _extract_money_amounts(excerpt: str) -> list[str]:
 
 def _mentions_no_fee(excerpt: str) -> bool:
     lowered = _normalize_text(excerpt)
-    return any(token in lowered for token in ("no monthly fee", "monthly fee $0", "$0 monthly fee", "no fee", "fees no fees"))
+    return any(
+        token in lowered
+        for token in (
+            "no monthly fee",
+            "no monthly account fee",
+            "no monthly plan fee",
+            "monthly fee $0",
+            "$0 monthly fee",
+        )
+    )
 
 
 def _canonical_product_type_family(product_type: str | None) -> str | None:
@@ -1066,16 +1599,31 @@ def _build_current_rate_supplement(
     rate_values = _extract_rate_values_from_match(target_source_id=target_source_id, match=rate_table_match)
     if not rate_values:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    tier_summary = _extract_savings_balance_tier_summary(
+        str(rate_table_match.get("evidence_text_excerpt", ""))
+    )
+    if tier_summary is not None:
+        rate_values["tier_definition_text"] = tier_summary
+        rate_values["tiered_rate_flag"] = True
 
     field_updates: dict[str, dict[str, object]] = {}
     evidence_updates: dict[str, dict[str, object]] = {}
     for field_name, candidate_value in rate_values.items():
-        if field_name in existing_fields:
+        if field_name in existing_fields and not (
+            field_name == "tier_definition_text"
+            and not _is_useful_savings_tier_record(existing_fields[field_name])
+        ):
             continue
+        if field_name == "tier_definition_text":
+            value_type = "string"
+        elif field_name == "tiered_rate_flag":
+            value_type = "boolean"
+        else:
+            value_type = "decimal"
         field_updates[field_name] = _build_support_field(
             field_name=field_name,
             candidate_value=candidate_value,
-            value_type="decimal",
+            value_type=value_type,
             match=rate_table_match,
             extraction_method="supporting_rate_table_merge",
             field_metadata={
@@ -1566,9 +2114,11 @@ def _extract_scotia_money_master_rate_values(excerpt: str) -> dict[str, str]:
 def _extract_all_percentages(excerpt: str) -> list[Decimal]:
     values: list[Decimal] = []
     for match in _PERCENT_RE.finditer(excerpt):
-        window_start = max(0, match.start() - 90)
-        window_end = min(len(excerpt), match.end() + 90)
-        window = excerpt[window_start:window_end]
+        window = bounded_rate_evidence_context(
+            excerpt,
+            value_start=match.start(),
+            value_end=match.end(),
+        )
         if canonical_deposit_rate_suppression_reason(value=match.group(1), context=window) is not None:
             continue
         decimal_value = _to_decimal(match.group(1))

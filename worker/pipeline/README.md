@@ -128,8 +128,10 @@ Current boundary:
 - operator-defined product extraction and normalization are bounded to the registered `expected_fields`; the AI may not introduce deposit aliases or unrelated fields into lending/card candidates, and percentage prompts explicitly separate interest rates from cashback, rewards, prepayment, equity, and down-payment values
 - dynamic AI extraction is limited to candidate-producing detail sources; entry, supporting HTML/PDF, and linked-PDF sources remain evidence-only and use deterministic extraction, reducing latency and preventing support-page prose from being treated as a standalone product draft
 - all comparable fields use the executable cross-bank type and unit contract in `fpds_field_contract.py`; annual rates are numeric percentage points, money is numeric in product currency, flags are booleans, and term-rate schedules are structured arrays
-- term-rate extraction evaluates adjacent `term -> rate` and `rate -> term` row orientations, chooses the more complete grounded pairing, and preserves the established term-first behavior on ties so a rate-first table cannot shift every rate onto the next term
+- source-profile numeric extensions such as `regular_interest_rate`, `smart_interest_rate`, and `transaction_fee` follow the same typed rate/money contract; exact-label evidence-wide recovery may fill a missed value but cannot substitute a nearby rate, fee, or evidence paragraph
+- term-rate extraction evaluates adjacent `term -> rate` and `rate -> term` row orientations, chooses the more complete grounded pairing, and resolves ties from the first term/rate order in the document so duplicated rendered values cannot shift every rate onto the next term. When parallel `Rate` and `APY` headers are explicit, comparable rows use APY and retain that qualifier in row notes
 - withdrawal, redemption, encashment, and prepayment percentages are rejected as annual rates, while overdraft service-fee waivers and cross-product audience or navigation mentions are rejected as account facts
+- flattened account-fee rows now recognize footnote-separated `Transaction Fee ... $X each` and `Additional Transactions ... $X each` values, while explicit multi-step qualification evidence outranks a nearby promotional summary
 
 What `WBS 3.6` stores today:
 - normalized candidate JSON artifact per source candidate in object storage
@@ -148,13 +150,20 @@ What `WBS 3.6` stores today:
 - shared candidate cleanup now removes wrong-type flag values, unresolved template tokens, duplicated/whole-page field copy, short `Document ...` navigation labels, payment-frequency values misused as interest frequency, and numeric term values that conflict with the published term text
 - lending cleanup also removes account-fee text mapped as loan payments or fees, short multi-marker navigation mapped as security, prose-only loan amounts, and product titles mapped as prepayment privileges; the same rules are surfaced in Review diagnosis for already-persisted candidates
 - lending cleanup also requires concise duration-shaped amortization values, actual periodic payment-frequency values, and concise prepayment terms; removes calculator/estimate output from eligibility; and suppresses numeric rate fields when their own evidence is an unresolved template or describes cashback, prepayment, equity, down payment, or loan-to-value instead of interest
+- lending cleanup requires `minimum_payment_text` to contain actual payment, repayment, minimum-payment, or interest-only semantics, so a product/category heading cannot survive as an operator-facing repayment term
 - lending cleanup now requires evidence-backed security semantics, rejects adjacent-product and government-program application CTAs, and suppresses marketing copy mapped as repayment or eligibility; a scalar term duration must match a duration stated in the source instead of falling numerically somewhere inside a published range
 - GIC cleanup removes term scalars backed only by an expired promotion, does not collapse a list of payment/payout options to one value, rejects rate cards mapped as customer eligibility, and carries a common current minimum deposit into applicable official term-table rows
 - promotion end dates are not stored as product `effective_date`; `valid until`, expiry, and offer-end evidence stays omitted until the canonical contract provides a distinct field
 - GIC rate fallback rejects account/direct-deposit percentages from navigation or footer evidence, and footer/company navigation is not accepted as deposit-insurance evidence
+- percentage fallbacks use one shared bounded context window across extraction, normalization, and supporting merge so market scenarios, cumulative/index returns, fees, principal-access percentages, and fund performance cannot lose their governing semantics near a percentage
+- savings/GIC normalization aligns `public_display_rate` to at least the grounded regular or promotional rate and validation rejects a lower display value; a legal-example bonus component therefore cannot replace the official total promotional rate
+- after ordinary retrieval, evidence-wide recovery may fill only strongly labelled monthly account fees and explicit finite monthly/debit counts. It retains conditional-zero, duration, balance, and named-other-product guards and links the recovered field to the exact missed chunk
+- derived product titles become the target identity for remaining fields; excerpts that explicitly name a different bank product are skipped unless the target is present in the same bounded evidence
 - dynamic lending/card validation checks a concise product-type priority set instead of reporting every optional expected field as required; these candidates remain review-first and are never auto-published by this fallback
 - extraction overlays selected registry metadata onto persisted source-document metadata so shared support URLs, such as BMO savings and chequing rate pages, keep the current run's product type and expected fields
 - supporting official rate pages are ranked before the bounded source cap, and split GIC-family schedules can be reconstructed across a bounded set of relevant chunks while filtering savings or unrelated-product rows
+- generic supporting merge maps horizontal comparison-table columns to the target product identity, keeps recurring fees separate from conditional zero outcomes and balance thresholds, preserves material balance-tier summaries, and supplements only explicit account-wide unlimited-transaction facts
+- normalization reduces broad fee tables and repeated application controls to decision-ready transaction rules and channels, and removes audience cross-sells, switching-service CTAs, award copy, and incomplete fragments from product descriptions
 - normalized candidates retain concise `field_notes` for qualified comparable values and preserve the actual supporting source document id on each merged `field_evidence_link`
 - static Golden product profiles are fixture-only and require explicit `product_profile_expansion_mode=fixture`; live collection cannot use them to replace evidence or bypass validation
 
@@ -199,6 +208,16 @@ Current boundary:
 
 Reliability note:
 - DB-backed worker stages now run `psql` with `ON_ERROR_STOP=1` so SQL errors abort the stage instead of being reported as false-positive success
+- percentage fields now require their exact numeric `%` token in the linked evidence excerpt; market/index returns, fund metrics, FX/conversion percentages, calculator scenarios, and unresolved dynamic templates are omitted instead of becoming deposit rates
+- rate extraction distinguishes regular, time/eligibility-limited promotional totals, and ongoing conditional bonus totals. Public display may use the grounded advertised total, while the standard field remains the regular rate and ambiguous components stay review-routed
+- monthly/public fee values require direct base-fee wording and must agree when both are present; conditional waivers, maxima, transaction charges, and adjacent-product fees cannot be promoted into the monthly scalar
+- foreign-currency product identity is carried into normalization rather than defaulting every Canadian source to CAD, and product-scoped field ranking prevents nearby product sections from lending their rate, fee, transaction, or term values
+- dollar, euro, and pound fee/waiver amounts share the same numeric parser; separately worded balance waivers can recover both the base fee condition and threshold without turning the waived zero into the base fee
+- an explicitly advertised promotional total can supplement an already-grounded regular rate, while an ongoing `regular + extra bonus` disclosure aligns public display to the grounded sum without misclassifying it as a time-limited promotion
+- shared legal copy that publishes registered and non-registered promotions in parallel is selected sentence-by-sentence against the target product identity; a registered product cannot inherit a non-registered period and a standard or foreign-currency product cannot inherit a registered period
+- withdrawal limits require actual constraint semantics such as a count, fee, availability restriction, maximum, or minimum; calculator assumptions, tax explanations, and cross-sell prose mentioning withdrawals are not product limits
+- a recurring fee disclosed as `$X or $0` with a minimum daily account balance keeps `$X` as the comparable fee and records the zero as a waiver condition plus balance; legacy seed field hints cannot prevent those contract fields from being requested
+- audience flags require the target page/product identity to name that audience; related student, newcomer, senior, or trades sections on a general account page cannot tag the base product. Footnote glyphs between a finite transaction count and `included each month` are tolerated, and a fee-waiver balance scalar is aligned to its explicit positive threshold
 
 Run all worker tests:
 

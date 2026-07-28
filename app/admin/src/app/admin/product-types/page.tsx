@@ -43,7 +43,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
   }
 
   if (!session || !productTypes || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Product type registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "상품 유형 레지스트리를 불러올 수 없습니다." : locale === "ja" ? "商品タイプレジストリを読み込めません。" : "Product type registry could not load."} />;
   }
 
   return (

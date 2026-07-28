@@ -241,6 +241,9 @@ class SnapshotCaptureService:
             attempt_count += 1
             try:
                 fetched = self.fetcher(source.resolved_url, self.fetch_policy)
+                fetch_warning_count = len(preflight_issues) + int(
+                    fetched.headers.get("x-fpds-browser-fallback-attempted") == "true"
+                )
                 checksum = _build_checksum(fetched.body)
                 fingerprint = _build_fingerprint(fetched.body, fetched.content_type)
                 known = known_snapshots.get((source.source_document_id, fingerprint))
@@ -253,7 +256,7 @@ class SnapshotCaptureService:
                         request_id=request_id,
                         fetched=fetched,
                         known=known,
-                        preflight_warning_count=len(preflight_issues),
+                        preflight_warning_count=fetch_warning_count,
                         preflight_status=preflight_status,
                         preflight_issue_codes=preflight_issue_codes,
                     )
@@ -306,7 +309,7 @@ class SnapshotCaptureService:
                         source=source,
                         snapshot_id=snapshot_id,
                         stage_status="completed",
-                        warning_count=len(preflight_issues),
+                        warning_count=fetch_warning_count,
                         error_count=0,
                         error_summary=None,
                         stage_metadata={
@@ -451,6 +454,11 @@ def _build_response_metadata(
         "etag": fetched.headers.get("etag"),
         "last_modified": fetched.headers.get("last-modified"),
         "cache_control": fetched.headers.get("cache-control"),
+        "fetch_method": fetched.headers.get("x-fpds-fetch-method") or "direct_https",
+        "browser_executable": fetched.headers.get("x-fpds-browser-executable"),
+        "browser_fallback_attempted": fetched.headers.get("x-fpds-browser-fallback-attempted") == "true",
+        "browser_fallback_error_type": fetched.headers.get("x-fpds-browser-fallback-error-type"),
+        "browser_fallback_error": fetched.headers.get("x-fpds-browser-fallback-error"),
         "attempt_count": attempt_count,
     }
 

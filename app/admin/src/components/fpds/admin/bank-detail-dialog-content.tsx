@@ -207,7 +207,7 @@ export function BankDetailDialogContent({
       </div>
 
       {message ? (
-        <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p aria-live="polite" className="border-l-4 border-success bg-success-soft px-4 py-3 text-sm text-success" role="status">
           {message}
         </p>
       ) : null}
@@ -218,9 +218,9 @@ export function BankDetailDialogContent({
       ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <section className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
+        <section className="border border-border bg-card p-5">
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">
               {copy.bankProfile}
             </p>
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -323,7 +323,7 @@ export function BankDetailDialogContent({
 function ReadonlySummary({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
@@ -365,7 +365,7 @@ function BankLogoPreview({
         )}
       </span>
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Logo preview</p>
+        <p className="text-xs font-medium text-muted-foreground">Logo preview</p>
         <p className="mt-1 truncate text-sm font-medium text-foreground">{bankName}</p>
       </div>
     </div>

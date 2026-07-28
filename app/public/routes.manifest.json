@@ -22,6 +22,12 @@
       "resource_key": "public_navigation.products"
     },
     {
+      "route": "/loans",
+      "route_id": "public.loans",
+      "shell_dir": "route-shells/products",
+      "resource_key": "public_navigation.loans"
+    },
+    {
       "route": "/dashboard",
       "route_id": "public.dashboard",
       "shell_dir": "route-shells/dashboard",

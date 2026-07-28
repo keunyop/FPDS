@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Activity, ChevronRight, Gauge, ShieldCheck, UserCheck } from "lucide-react";
+import { Activity, ArrowUpRight, Gauge, ShieldCheck, UserCheck } from "lucide-react";
 
 import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { SignupRequestReviewPanel } from "@/components/fpds/admin/signup-request-review-panel";
 import {
   fetchAdminSession,
@@ -23,9 +24,15 @@ const OVERVIEW_COPY = {
     apiUnavailableBlocked: "Protected navigation, operator context, and authenticated workflow surfaces.",
     breadcrumb: ["Overview", "Dashboard"],
     greetingFallback: "there",
-    greetingPrefix: "Hello",
+    briefingTitle: "Operations briefing",
+    signedInAs: "Signed in as",
     subtitle: "Review the items that need attention, then jump to the owning surface.",
-    sessionVerified: "Session verified",
+    controlFlow: "Operational attention",
+    controlFlowDescription: "Signals follow the operating path from execution and review to public serving.",
+    attentionSignals: "attention signals",
+    openSurface: "Open surface",
+    clear: "Clear",
+    unavailableState: "Unavailable",
     blocked: "Blocked",
     reviewQueue: "Review queue",
     reviewQueueHint: "Queued or deferred",
@@ -49,9 +56,15 @@ const OVERVIEW_COPY = {
     apiUnavailableBlocked: "보호된 navigation, operator context, 인증된 workflow 화면.",
     breadcrumb: ["개요", "Dashboard"],
     greetingFallback: "운영자",
-    greetingPrefix: "안녕하세요",
+    briefingTitle: "운영 브리핑",
+    signedInAs: "로그인",
     subtitle: "주의가 필요한 항목만 확인하고 담당 화면으로 이동하세요.",
-    sessionVerified: "Session 확인됨",
+    controlFlow: "운영 주의 항목",
+    controlFlowDescription: "실행과 검토에서 공개 제공 상태까지 운영 흐름 순서로 신호를 보여줍니다.",
+    attentionSignals: "개 주의 신호",
+    openSurface: "화면 열기",
+    clear: "정상",
+    unavailableState: "확인 불가",
     blocked: "차단됨",
     reviewQueue: "검토 대기열",
     reviewQueueHint: "대기 또는 보류",
@@ -75,9 +88,15 @@ const OVERVIEW_COPY = {
     apiUnavailableBlocked: "保護された navigation、operator context、認証済み workflow 画面。",
     breadcrumb: ["概要", "Dashboard"],
     greetingFallback: "operator",
-    greetingPrefix: "こんにちは",
+    briefingTitle: "運用ブリーフィング",
+    signedInAs: "ログイン",
     subtitle: "対応が必要な項目を確認し、担当画面へ移動してください。",
-    sessionVerified: "Session 確認済み",
+    controlFlow: "運用上の注意",
+    controlFlowDescription: "実行と審査から公開提供まで、運用フローに沿ってシグナルを表示します。",
+    attentionSignals: "件の注意シグナル",
+    openSurface: "画面を開く",
+    clear: "正常",
+    unavailableState: "確認不可",
     blocked: "ブロック中",
     reviewQueue: "審査キュー",
     reviewQueueHint: "待機または保留",
@@ -102,9 +121,15 @@ const OVERVIEW_COPY = {
     apiUnavailableBlocked: string;
     breadcrumb: readonly [string, string];
     greetingFallback: string;
-    greetingPrefix: string;
+    briefingTitle: string;
+    signedInAs: string;
     subtitle: string;
-    sessionVerified: string;
+    controlFlow: string;
+    controlFlowDescription: string;
+    attentionSignals: string;
+    openSurface: string;
+    clear: string;
+    unavailableState: string;
     blocked: string;
     reviewQueue: string;
     reviewQueueHint: string;
@@ -172,7 +197,6 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   const displayName = activeSession.user.display_name.trim() || activeSession.user.login_id || copy.greetingFallback;
-  const firstName = displayName.split(/\s+/)[0] || copy.greetingFallback;
   const reviewCount = reviewQueue?.summary.active_items ?? null;
   const runAttentionCount = runs ? (runs.summary.state_counts.failed ?? 0) + runs.summary.partial_items : null;
   const dashboardIssueCount = dashboardHealth
@@ -180,28 +204,31 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
     : null;
   const pendingSignupCount = activeSession.user.role === "admin" ? (signupRequests?.summary.pending_items ?? null) : null;
 
-  const metricItems = [
-    {
-      label: copy.reviewQueue,
-      value: formatCount(reviewCount, copy.unavailable),
-      hint: copy.reviewQueueHint,
-      tone: reviewCount && reviewCount > 0 ? "warning" : "neutral",
-      icon: UserCheck,
-      href: buildAdminHref("/admin/reviews", reviewQueueLinkParams(), locale),
-    },
+  const attentionItems = [
     {
       label: copy.runAttention,
       value: formatCount(runAttentionCount, copy.unavailable),
       hint: copy.runAttentionHint,
-      tone: runAttentionCount && runAttentionCount > 0 ? "warning" : "neutral",
+      needsAttention: runAttentionCount !== null && runAttentionCount > 0,
+      available: runAttentionCount !== null,
       icon: Activity,
       href: buildAdminHref("/admin/runs", runLinkParams(), locale),
+    },
+    {
+      label: copy.reviewQueue,
+      value: formatCount(reviewCount, copy.unavailable),
+      hint: copy.reviewQueueHint,
+      needsAttention: reviewCount !== null && reviewCount > 0,
+      available: reviewCount !== null,
+      icon: UserCheck,
+      href: buildAdminHref("/admin/reviews", reviewQueueLinkParams(), locale),
     },
     {
       label: copy.dashboardHealth,
       value: dashboardIssueCount === null ? copy.unavailable : dashboardIssueCount === 0 ? copy.healthy : copy.needsAttention,
       hint: copy.dashboardHealthHint,
-      tone: dashboardIssueCount && dashboardIssueCount > 0 ? "warning" : "success",
+      needsAttention: dashboardIssueCount !== null && dashboardIssueCount > 0,
+      available: dashboardIssueCount !== null,
       icon: Gauge,
       href: buildAdminHref("/admin/health/dashboard", new URLSearchParams(), locale),
     },
@@ -209,11 +236,13 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       label: activeSession.user.role === "admin" ? copy.signupRequests : copy.role,
       value: activeSession.user.role === "admin" ? formatCount(pendingSignupCount, copy.unavailable) : activeSession.user.role,
       hint: activeSession.user.role === "admin" ? copy.signupRequestsHint : copy.roleHint,
-      tone: pendingSignupCount && pendingSignupCount > 0 ? "warning" : "neutral",
+      needsAttention: activeSession.user.role === "admin" && pendingSignupCount !== null && pendingSignupCount > 0,
+      available: activeSession.user.role !== "admin" || pendingSignupCount !== null,
       icon: ShieldCheck,
       href: buildAdminHref("/admin", new URLSearchParams(), locale),
     },
   ] as const;
+  const attentionSignalCount = attentionItems.filter((item) => item.needsAttention).length;
 
   return (
     <ApplicationShell5
@@ -226,49 +255,83 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
         role: activeSession.user.role,
       }}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-8">
-        <header className="grid gap-4">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <span>{copy.breadcrumb[0]}</span>
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            <span className="font-medium text-foreground">{copy.breadcrumb[1]}</span>
-          </nav>
+      <div className="mx-auto grid w-full max-w-7xl gap-6">
+        <AdminPageHeader
+          badges={
+            <span className="inline-flex min-h-8 items-center gap-2 border border-border bg-card px-2.5 text-xs font-semibold text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+              {copy.signedInAs} {displayName} · {activeSession.user.role}
+            </span>
+          }
+          description={copy.subtitle}
+          path={copy.breadcrumb}
+          title={copy.briefingTitle}
+        />
 
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section aria-labelledby="operational-attention-title">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{copy.greetingPrefix}, {firstName} 👋</h1>
-              <p className="mt-2 text-sm text-muted-foreground">{copy.subtitle}</p>
+              <h2 className="text-lg font-semibold tracking-[-0.01em] text-foreground" id="operational-attention-title">
+                {copy.controlFlow}
+              </h2>
+              <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">{copy.controlFlowDescription}</p>
             </div>
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-success/20 bg-success-soft px-3 py-1 text-xs font-medium text-success">
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              {copy.sessionVerified}
-            </div>
+            <p className="font-mono text-xs font-semibold text-muted-foreground">
+              {attentionSignalCount} {copy.attentionSignals}
+            </p>
           </div>
-        </header>
 
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Overview metrics">
-          {metricItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                className="group rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary/40 hover:bg-muted/40"
-                href={item.href}
-                key={item.label}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
+          <div className="mt-4 grid overflow-hidden rounded-lg border border-border bg-card md:grid-cols-2 xl:grid-cols-4">
+            {attentionItems.map((item) => {
+              const Icon = item.icon;
+              const stateLabel = !item.available
+                ? copy.unavailableState
+                : item.needsAttention
+                  ? copy.needsAttention
+                  : copy.clear;
+
+              return (
+                <Link
+                  className="group min-w-0 border-b border-border p-4 transition-colors last:border-b-0 hover:bg-accent/45 md:border-r md:even:border-r-0 xl:border-b-0 xl:even:border-r xl:last:border-r-0"
+                  href={item.href}
+                  key={item.label}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Icon
+                        className={
+                          !item.available
+                            ? "h-4 w-4 text-muted-foreground"
+                            : item.needsAttention
+                              ? "h-4 w-4 text-warning"
+                              : "h-4 w-4 text-success"
+                        }
+                        aria-hidden="true"
+                      />
+                      <p className="truncate text-xs font-semibold text-muted-foreground">{item.label}</p>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
                   </div>
-                  <Icon
-                    className={item.tone === "warning" ? "h-5 w-5 text-warning" : item.tone === "success" ? "h-5 w-5 text-success" : "h-5 w-5 text-muted-foreground"}
-                    aria-hidden="true"
-                  />
-                </div>
-                <p className="mt-3 text-xs text-muted-foreground">{item.hint}</p>
-              </Link>
-            );
-          })}
+                  <p className="mt-4 break-words font-mono text-xl font-semibold tracking-[-0.02em] text-foreground">{item.value}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+                    <span className="text-muted-foreground">{item.hint}</span>
+                    <span
+                      className={
+                        !item.available
+                          ? "font-semibold text-muted-foreground"
+                          : item.needsAttention
+                            ? "font-semibold text-warning"
+                            : "font-semibold text-success"
+                      }
+                    >
+                      {stateLabel}
+                    </span>
+                  </div>
+                  <span className="sr-only">{copy.openSurface}</span>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
         {activeSession.user.role === "admin" && signupRequests && signupRequests.items.length > 0 ? (

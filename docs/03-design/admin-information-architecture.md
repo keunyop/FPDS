@@ -141,6 +141,24 @@ All admin surfaces should share:
 - broader scheduler or refresh governance remains a later source-operations slice
 - `Product Type Management` is now the operator-owned registry surface for product type definitions used by bank coverage selection and homepage-first discovery
 
+### 5.5 Shipped Evidence-Operations Composition
+
+- the desktop module bar and mobile bottom navigation are route links, not
+  sidebar-group toggles; both preserve locale and expose current location
+- the Overview signature is the real-data Operational Attention Rail, ordered
+  from run attention to review workload, Public snapshot health, and access
+  requests
+- route composition follows `attention / current state -> diagnosis -> guarded
+  action`; filters and technical context do not displace the first useful work
+- dense relationships use joined summary bands, dividers, chronology, lifecycle
+  strips, and bounded tables; cards are reserved for semantic groups
+- safe auto-refresh is part of the shell contract: its live/paused/last-refresh
+  state is visible and it pauses for editing, dirty forms, dialogs, hidden
+  windows, and in-progress mutations
+- the cool mineral canvas, deep operational frame, restrained teal action, and
+  centralized semantic status palette distinguish Admin from the warm Public
+  verified-record composition while preserving shared truth and state meaning
+
 ---
 
 ## 6. Global Search and Cross-Surface Drilldown
@@ -444,10 +462,17 @@ Minimum information:
 
 ### 9.1 Responsive Rules
 
-- desktop-first layout
+- desktop-first layout with a persistent sidebar and sticky decision/context
+  rails only where they materially shorten repeated operator movement
 - review detail and source detail may use split-pane layouts on desktop
-- tablet/mobile may collapse heavy diagnostic panes into tabs or stacked sections
-- state badges, confidence, validation status, and role/status controls must remain visible on smaller screens
+- tablet/mobile collapse heavy diagnostic panes into stacked sections,
+  progressive disclosure, or a dedicated work-card representation
+- dense desktop tables remain inside labelled, keyboard-focusable horizontal
+  scroll regions instead of widening the document
+- state badges, confidence, validation status, and role/status controls remain
+  visible on smaller screens
+- interactive targets are at least 40px in compact Admin contexts; anonymous
+  authentication controls use 44px
 
 ### 9.2 Localization Rules
 
@@ -499,6 +524,7 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-07-27 | Recorded the shipped Admin evidence-operations composition, real route navigation, Operational Attention Rail, safe visible auto-refresh, bounded responsive tables/work cards, and compact target baseline |
 | 2026-07-15 | Refined Review to product-aware requiredness and concrete suspect-field types; only flagged fields open by default, other values and optional audit notes stay collapsed, and source facts no longer duplicate product identity or AI explanation |
 | 2026-04-06 | Initial admin information architecture baseline created for WBS 1.7.4 |
 | 2026-04-13 | Added Audit Log as an operations surface with drilldown rules distinct from canonical change history |

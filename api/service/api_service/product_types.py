@@ -32,7 +32,7 @@ _GENERIC_EXPECTED_FIELDS = (
 _DEPOSIT_EXPECTED_FIELDS_BY_TYPE = {
     "chequing": (
         "product_name", "description_short", "monthly_fee", "public_display_fee", "fee_waiver_condition",
-        "minimum_balance", "included_transactions", "unlimited_transactions_flag", "interac_e_transfer_included",
+        "minimum_balance", "included_transactions", "transaction_fee", "unlimited_transactions_flag", "interac_e_transfer_included",
         "overdraft_available", "cheque_book_info", "student_plan_flag", "newcomer_plan_flag",
         "eligibility_text", "application_method", "deposit_insurance", "notes",
     ),
@@ -46,6 +46,7 @@ _DEPOSIT_EXPECTED_FIELDS_BY_TYPE = {
     "gic": (
         "product_name", "description_short", "standard_rate", "base_12_month_rate", "public_display_rate",
         "promotional_rate", "minimum_deposit", "term_length_text", "term_length_days", "term_rate_table",
+        "interest_rate_summary",
         "redeemable_flag", "non_redeemable_flag", "compounding_frequency", "payout_option",
         "registered_plan_supported", "eligibility_text", "application_method", "post_maturity_interest_rate",
         "tax_benefits", "deposit_insurance", "notes",
@@ -83,6 +84,7 @@ _LENDING_EXPECTED_FIELDS_BY_TYPE = {
         "product_name",
         "description_short",
         "interest_rate",
+        "interest_rate_summary",
         "loan_amount_text",
         "term_length_text",
         "monthly_payment_text",
@@ -96,6 +98,7 @@ _LENDING_EXPECTED_FIELDS_BY_TYPE = {
         "product_name",
         "description_short",
         "interest_rate",
+        "interest_rate_summary",
         "credit_limit_text",
         "secured_flag",
         "collateral_text",

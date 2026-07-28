@@ -6,8 +6,11 @@ from hashlib import sha256
 import json
 import re
 
-from worker.pipeline.fpds_field_contract import value_matches_contract
-from worker.pipeline.fpds_rate_safety import canonical_deposit_rate_suppression_reason
+from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
+from worker.pipeline.fpds_rate_safety import (
+    advertised_promotional_total_rate,
+    canonical_deposit_rate_suppression_reason,
+)
 
 from .models import (
     ValidationEvidenceLink,
@@ -41,6 +44,8 @@ _NUMERIC_RANGE_FIELDS = {
 _ANNUAL_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
+_MAX_MONTHLY_OR_TRANSACTION_FEE = Decimal("500")
+_MAX_ANNUAL_CARD_FEE = Decimal("2000")
 _SUMMARY_MESSAGES = {
     "ambiguous_product_boundary": "The source page contains multiple product sections that cannot be safely merged into one product.",
     "required_field_missing": "One or more required fields are missing.",
@@ -463,7 +468,17 @@ def _compute_validation_issue_codes(
     if not _looks_like_timestamp(_string_or_none(candidate_payload.get("last_verified_at"))):
         issues.add("required_field_missing")
 
-    for field_name in _NUMERIC_RANGE_FIELDS:
+    numeric_fields = set(_NUMERIC_RANGE_FIELDS) | {
+        field_name
+        for field_name in candidate_payload
+        if (contract := field_contract(field_name)) is not None and contract.value_type == "decimal"
+    }
+    directly_evidenced_fields = {
+        str(link.field_name).strip()
+        for link in field_evidence_links
+        if str(link.field_name).strip() and str(link.candidate_value).strip()
+    }
+    for field_name in numeric_fields:
         value = candidate_payload.get(field_name)
         if value in {None, ""}:
             continue
@@ -471,15 +486,73 @@ def _compute_validation_issue_codes(
         if decimal_value is None:
             issues.add("invalid_numeric_range")
             continue
-        if field_name in _ANNUAL_RATE_FIELDS and (
+        contract = field_contract(field_name)
+        is_annual_rate = field_name in _ANNUAL_RATE_FIELDS or (
+            contract is not None and contract.unit == "percentage_points" and field_name != "highest_rate"
+        )
+        is_rate = field_name in _RATE_FIELDS or (contract is not None and contract.unit == "percentage_points")
+        is_fee = field_name in _FEE_FIELDS or (
+            contract is not None and contract.unit == "currency_amount" and field_name.endswith("_fee")
+        )
+        if is_annual_rate and (
             decimal_value < Decimal("0")
             or canonical_deposit_rate_suppression_reason(value=decimal_value) is not None
         ):
             issues.add("invalid_numeric_range")
         if field_name == "highest_rate" and not (Decimal("0") <= decimal_value <= Decimal("100")):
             issues.add("invalid_numeric_range")
-        if field_name not in _RATE_FIELDS and decimal_value < 0:
+        if not is_rate and decimal_value < 0:
             issues.add("invalid_numeric_range")
+        fee_limit = _MAX_ANNUAL_CARD_FEE if field_name == "annual_fee" else _MAX_MONTHLY_OR_TRANSACTION_FEE
+        if is_fee and decimal_value >= fee_limit:
+            issues.add("invalid_numeric_range")
+        if (
+            dynamic_product_type
+            and is_rate
+            and field_name != "highest_rate"
+            and field_name not in directly_evidenced_fields
+        ):
+            issues.add("inconsistent_cross_field_logic")
+            runtime_notes.append(
+                f"Suppressed publication confidence for `{field_name}` because no direct field evidence link exists."
+            )
+
+    public_display_rate = _as_decimal(
+        candidate_payload.get("public_display_rate"), field_name="public_display_rate"
+    )
+    if public_display_rate is not None and any(
+        comparison_rate is not None and public_display_rate < comparison_rate
+        for comparison_rate in (
+            _as_decimal(candidate_payload.get("standard_rate"), field_name="standard_rate"),
+            _as_decimal(candidate_payload.get("promotional_rate"), field_name="promotional_rate"),
+        )
+    ):
+        issues.add("inconsistent_cross_field_logic")
+    if _canonical_product_type_family(product_type) == "gic" and public_display_rate is not None:
+        for row in candidate_payload.get("term_rate_table") or []:
+            if not isinstance(row, dict):
+                continue
+            row_rate = _as_decimal(row.get("rate"), field_name="standard_rate")
+            if row_rate is not None and public_display_rate < row_rate:
+                issues.add("inconsistent_cross_field_logic")
+                break
+
+    advertised_total = next(
+        (
+            value
+            for field_name in ("interest_rate_summary", "promotional_period_text")
+            if (value := advertised_promotional_total_rate(str(candidate_payload.get(field_name) or ""))) is not None
+        ),
+        None,
+    )
+    if advertised_total is not None and any(
+        comparison_rate is not None and comparison_rate != advertised_total
+        for comparison_rate in (
+            _as_decimal(candidate_payload.get("promotional_rate"), field_name="promotional_rate"),
+            public_display_rate,
+        )
+    ):
+        issues.add("inconsistent_cross_field_logic")
 
     if any(not value_matches_contract(field_name, value) for field_name, value in candidate_payload.items()):
         issues.add("invalid_field_type")
@@ -495,15 +568,52 @@ def _compute_validation_issue_codes(
     if requiredness_type == "chequing":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.add("required_field_missing")
+        monthly_fee = _as_decimal(candidate_payload.get("monthly_fee"), field_name="monthly_fee")
+        public_display_fee = _as_decimal(
+            candidate_payload.get("public_display_fee"), field_name="public_display_fee"
+        )
+        if monthly_fee is not None and public_display_fee is not None and monthly_fee != public_display_fee:
+            issues.add("inconsistent_cross_field_logic")
+        waiver_match = re.search(
+            r"\bwith\s+a\s+(?P<balance>\d[\d,]*(?:\.\d{1,2})?)\s+minimum\s+balance\b",
+            str(candidate_payload.get("fee_waiver_condition") or ""),
+            flags=re.IGNORECASE,
+        )
+        minimum_balance = _as_decimal(candidate_payload.get("minimum_balance"))
+        if waiver_match is not None and minimum_balance != _as_decimal(waiver_match.group("balance")):
+            issues.add("inconsistent_cross_field_logic")
+        if re.search(
+            r"\bno[- ]fee\b",
+            str(candidate_record.get("product_name") or candidate_payload.get("product_name") or ""),
+            flags=re.IGNORECASE,
+        ) and any(fee is not None and fee > 0 for fee in (monthly_fee, public_display_fee)):
+            issues.add("inconsistent_cross_field_logic")
+        included_transactions = _as_int(candidate_payload.get("included_transactions"))
+        if _truthy(candidate_payload.get("unlimited_transactions_flag")) and (
+            included_transactions is not None and included_transactions > 0
+        ):
+            issues.add("inconsistent_cross_field_logic")
     if requiredness_type == "savings":
-        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+        if not _has_any_savings_rate(candidate_payload):
+            issues.add("required_field_missing")
+        if (
+            candidate_payload.get("promotional_rate") not in {None, ""}
+            and not _has_ongoing_savings_rate(candidate_payload)
+        ):
             issues.add("required_field_missing")
     if requiredness_type == "gic":
-        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+        if (
+            not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS)
+            and not _has_dynamic_gic_rate_mechanism(candidate_payload)
+        ):
             issues.add("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
             issues.add("required_field_missing")
-        if candidate_payload.get("term_length_days") in {None, ""} and candidate_payload.get("term_length_text") in {None, ""}:
+        if (
+            candidate_payload.get("term_length_days") in {None, ""}
+            and candidate_payload.get("term_length_text") in {None, ""}
+            and not _has_gic_term_evidence(candidate_payload)
+        ):
             issues.add("required_field_missing")
 
     if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
@@ -545,6 +655,72 @@ def _compute_validation_issue_codes(
         issues.add("partial_source_failure")
 
     return sorted(issues)
+
+
+def _has_any_savings_rate(candidate_payload: dict[str, object]) -> bool:
+    return any(
+        value is not None
+        and value != ""
+        and (
+            field_name in _RATE_FIELDS
+            or (
+                field_name.endswith("_rate")
+                and (contract := field_contract(field_name)) is not None
+                and contract.unit == "percentage_points"
+            )
+        )
+        for field_name, value in candidate_payload.items()
+    )
+
+
+def _has_ongoing_savings_rate(candidate_payload: dict[str, object]) -> bool:
+    canonical_fields = ("standard_rate", "base_12_month_rate")
+    if any(candidate_payload.get(field_name) not in {None, ""} for field_name in canonical_fields):
+        return True
+    return any(
+        value is not None
+        and value != ""
+        and field_name.endswith("_rate")
+        and any(marker in field_name for marker in ("regular", "ongoing", "posted"))
+        for field_name, value in candidate_payload.items()
+    )
+
+
+def _has_dynamic_gic_rate_mechanism(candidate_payload: dict[str, object]) -> bool:
+    summary = str(candidate_payload.get("interest_rate_summary") or "").strip().lower()
+    if not summary:
+        return False
+    return any(
+        marker in summary
+        for marker in (
+            "variable interest rate",
+            "variable rate",
+            "variable return",
+            "linked to changes",
+            "linked to the performance",
+            "return is linked",
+            "based on a formula",
+            "rate at time of purchase",
+            "rates available at time of purchase",
+            "current interest rate environment",
+        )
+    )
+
+
+def _has_gic_term_evidence(candidate_payload: dict[str, object]) -> bool:
+    """Accept a structured multi-term table in place of one scalar term."""
+
+    rows = candidate_payload.get("term_rate_table")
+    if not isinstance(rows, list):
+        return False
+    return any(
+        isinstance(row, dict)
+        and (
+            row.get("term_label") not in {None, ""}
+            or row.get("term_length_days") not in {None, ""}
+        )
+        for row in rows
+    )
 
 
 def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:

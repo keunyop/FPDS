@@ -5,6 +5,7 @@ from decimal import Decimal, InvalidOperation
 import re
 
 MAX_CANONICAL_ANNUAL_DEPOSIT_RATE = Decimal("25")
+RATE_EVIDENCE_CONTEXT_RADIUS = 240
 
 _NON_ANNUAL_RETURN_MARKERS = (
     "not an annual rate",
@@ -66,6 +67,65 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "down payment",
     "loan-to-value",
     "loan to value",
+    "access to principal",
+    "access to your principal",
+    "of principal annually",
+    "foreign transaction fee",
+    "for foreign purchases",
+    "purchases with td access card (outside of canada)",
+    "foreign currency conversion",
+    "converted to canadian dollars",
+    "interbank spot rate",
+    "payment card company",
+    "currency conversion fee",
+    "conversion markup",
+    "fx markup",
+    "atm convenience fee",
+    "abm convenience fee",
+    "hypothetical return",
+    "illustrative return",
+    "scenario return",
+    "total return over",
+    "cumulative return",
+    "index moves",
+    "increase in the index",
+    "net asset value",
+    "committed capital",
+    "underlying investment",
+    "underlying funds",
+    "investment strategies",
+    "mutual fund",
+    "management fee",
+    "administration fee",
+    "fixed administration fee",
+    "of each portfolio",
+    "portfolio's value",
+    "portfolio’s value",
+    "portfolio value",
+    "fund's expenses",
+    "funds have seen growth",
+    "annual average compound return",
+    "average compound return",
+    "annualized return",
+    "portfolio return",
+    "annual interest on overdraft",
+    "interest on overdraft",
+    "overdraft interest rate",
+    "overdraft balance",
+    "scenario 1",
+    "scenario 2",
+    "scenario 3",
+    "estimates only",
+    "estimator only",
+    "should not be relied upon",
+    "which of the following",
+    "survey results",
+    "poll results",
+    "survey respondents",
+    "recognizing phishing attempts",
+    "keeping devices secure from hackers",
+    "remembering passwords",
+    "prime rate",
 )
 
 _MONTH_NAME_PATTERN = (
@@ -85,13 +145,36 @@ _EXPLICIT_OFFER_END_PATTERNS = (
         re.IGNORECASE,
     ),
     re.compile(
-        rf"\b(?:offer\s+)?(?:valid\s+until|expires?|ends?|through)\s+"
+        rf"\b(?:offer\s+)?(?:valid\s+until|extended\s+until|expires?|ends?|through)\s+"
         rf"(?P<end>{_MONTH_DAY_PATTERN},?\s+\d{{4}})\b",
         re.IGNORECASE,
     ),
     re.compile(
-        r"\b(?:offer\s+)?(?:valid\s+until|expires?|ends?|through)\s+"
+        r"\b(?:offer\s+)?(?:valid\s+until|extended\s+until|expires?|ends?|through)\s+"
         r"(?P<end>\d{4}-\d{2}-\d{2})\b",
+        re.IGNORECASE,
+    ),
+)
+
+_ADVERTISED_PROMOTIONAL_TOTAL_PATTERNS = (
+    re.compile(
+        r"(?<!extra )(?<!additional )\b(?:promo(?:tional)?\s+interest\s+rate|promotional\s+rate)\s+(?:of\s+)?"
+        r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\btotal(?:\s+annual)?\s+interest\s+rate(?:\s+including\s+(?:the\s+)?promo(?:tional)?(?:\s+interest)?)?"
+        r"\D{0,80}(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:you\s+can\s+)?earn\s+up\s+to\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%"
+        r"\D{0,100}\b(?:for\s+the\s+first|first\s+\d+|limited[- ]time)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bearn\s+(?:a\s+)?savings\s+rate\s+of\s+(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%"
+        r"\D{0,100}\b(?:limited[- ]time|for\s+the\s+first|first\s+\d+)\b",
         re.IGNORECASE,
     ),
 )
@@ -119,6 +202,81 @@ def canonical_deposit_rate_suppression_reason(
         normalized_context,
     ):
         return "non_annual_return_context"
+    if re.search(
+        r"\b(?:access|withdraw|redeem)(?:\s+\w+){0,8}\s+\d{1,3}(?:\.\d+)?\s*%\s+(?:of\s+)?(?:your\s+|the\s+)?principal\b",
+        normalized_context,
+    ):
+        return "non_annual_return_context"
+    if re.search(
+        r"\b\d{1,3}(?:\.\d+)?\s*%\s+(?:foreign\s+)?(?:transaction|conversion|atm|abm)(?:\s+\w+){0,4}\s+(?:fee|markup)\b",
+        normalized_context,
+    ):
+        return "non_annual_return_context"
+    if re.search(
+        r"\b\d{1,3}(?:\.\d+)?\s*%\s+(?:increase\s+)?in\s+the\s+index\b",
+        normalized_context,
+    ):
+        return "non_annual_return_context"
+    return None
+
+
+def bounded_rate_evidence_context(
+    text: str,
+    *,
+    value_start: int,
+    value_end: int,
+    radius: int = RATE_EVIDENCE_CONTEXT_RADIUS,
+) -> str:
+    """Keep enough nearby copy to classify examples and full-term returns safely."""
+
+    window_start = max(0, value_start - radius)
+    window_end = min(len(text), value_end + radius)
+    return text[window_start:window_end]
+
+
+def advertised_promotional_total_rate(context: str | None) -> Decimal | None:
+    """Return a strong, explicitly advertised time-limited total deposit rate."""
+
+    normalized_context = _normalize_context(context)
+    if not normalized_context or not any(
+        marker in normalized_context
+        for marker in (
+            "promo",
+            "for the first",
+            "limited time",
+            "limited-time",
+            "special offer",
+            "welcome offer",
+            "new client offer",
+            "first 3 months",
+            "first three months",
+        )
+    ):
+        return None
+    if expired_promotional_offer_end_date(normalized_context) is not None:
+        return None
+    for pattern in _ADVERTISED_PROMOTIONAL_TOTAL_PATTERNS:
+        match = pattern.search(normalized_context)
+        if match is None:
+            continue
+        value = _to_decimal(match.group("rate"))
+        if value is None:
+            continue
+        if canonical_deposit_rate_suppression_reason(value=value, context=normalized_context) is None:
+            return value
+    generic_duration_match = re.search(
+        r"\bearn(?:\s+(?:a\s+)?(?:special\s+)?savings\s+rate(?:\s+of)?)?\s+"
+        r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%\D{0,80}\bfor\s+\d{1,3}\s+months?\b",
+        normalized_context,
+        flags=re.IGNORECASE,
+    )
+    if generic_duration_match is not None:
+        value = _to_decimal(generic_duration_match.group("rate"))
+        if value is not None and canonical_deposit_rate_suppression_reason(
+            value=value,
+            context=normalized_context,
+        ) is None:
+            return value
     return None
 
 
@@ -130,7 +288,7 @@ def expired_promotional_offer_end_date(
     normalized_context = _normalize_context(context)
     if not normalized_context or not any(
         marker in normalized_context
-        for marker in ("offer valid", "valid until", "offer expires", "offer ends", "expires", "through")
+        for marker in ("offer valid", "valid until", "extended until", "offer expires", "offer ends", "expires", "through")
     ):
         return None
 

@@ -10,7 +10,7 @@
   "candidate_run_id": "run-3603",
   "normalization_model_execution_id": "modelexec-normalize-001",
   "validation_model_execution_id": "modelexec-3172f4c93249d4af",
-  "started_at": "2026-07-15T05:29:16.044860+00:00",
+  "started_at": "2026-07-23T08:00:46.631478+00:00",
   "routing_config": {
     "routing_mode": "prototype",
     "auto_approve_min_confidence": 1.0,
@@ -105,7 +105,7 @@
     {
       "code": "manual_sampling_review",
       "severity": "warning",
-      "summary": "Prototype routing keeps all candidates in review."
+      "summary": "This product type requires a reviewer decision before publication."
     }
   ],
   "review_task_id": "review-134d5e08a0809aa0",

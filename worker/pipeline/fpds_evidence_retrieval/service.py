@@ -16,13 +16,28 @@ _FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "public_display_fee": ("monthly fee", "account fee", "fee"),
     "fee_waiver_condition": ("fee waiver", "waive fee", "waived", "maintain balance"),
     "minimum_balance": ("minimum balance", "maintain balance", "minimum daily balance"),
-    "minimum_deposit": ("minimum deposit", "opening deposit", "deposit amount"),
+    "minimum_deposit": (
+        "minimum deposit",
+        "minimum investment",
+        "opening deposit",
+        "deposit amount",
+        "as little as",
+    ),
     "standard_rate": ("standard rate", "interest rate", "regular rate", "annual rate"),
     "base_12_month_rate": ("12 month", "1 year", "one year", "annual rate", "standard rate", "interest rate"),
     "promotional_rate": ("promotional rate", "bonus rate", "promo rate", "special rate"),
     "public_display_rate": ("interest rate", "rate", "earn", "%"),
     "term_rate_table": ("term", "rate", "interest rate", "%", "months", "years"),
-    "interest_rate_summary": ("interest rate", "savings account rates", "rate", "%"),
+    "interest_rate_summary": (
+        "interest rate",
+        "variable rate",
+        "variable return",
+        "linked to",
+        "rate formula",
+        "rate at time of purchase",
+        "return",
+        "%",
+    ),
     "savings_account_rates": ("savings account rates", "interest rate", "savings amplifier", "savings builder", "premium rate savings", "%"),
     "promotional_period_text": ("promo period", "offer ends", "promotional period", "for the first"),
     "introductory_rate_flag": ("introductory", "promotional", "bonus"),
@@ -216,6 +231,8 @@ def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
         return 0.18
     if "fee" in field_name and ("fee" in excerpt_text or "$" in excerpt_text):
         return 0.18
+    if "balance" in field_name and re.search(r"\bno\s+minimum\s+balance\b", excerpt_text):
+        return 0.5
     if "balance" in field_name and "balance" in excerpt_text:
         return 0.18
     if "eligibility" in field_name and ("eligible" in excerpt_text or "qualify" in excerpt_text):
@@ -246,6 +263,11 @@ def _field_signal_bonus(*, field_name: str, excerpt_text: str) -> float:
         return 0.18
     if "transactions" in field_name and any(token in excerpt_text for token in ("transaction", "debit", "unlimited")):
         return 0.18
+    if "transfer" in field_name and re.search(
+        r"\b(?:free|included|unlimited|no[- ]fee)\b[^.\n]{0,50}\b(?:interac\s+)?e[- ]?transfer",
+        excerpt_text,
+    ):
+        return 0.5
     if "transfer" in field_name and any(token in excerpt_text for token in ("e-transfer", "interac")):
         return 0.18
     if "overdraft" in field_name and "overdraft" in excerpt_text:

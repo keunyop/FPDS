@@ -223,6 +223,38 @@ Product Owner direction on `2026-07-18` supersedes the earlier visible Top 5, re
 - EN/KO/JA UI labels remain localized while source-derived product content remains in its source language.
 - Production browser QA covers `1440px`, `768px`, and exact `390px` layouts for Home, Deposit, Loan, selected comparison, and product detail without horizontal document overflow.
 
+### 10.10 Verified-Record Catalog Presentation
+
+The Public design implementation completed on `2026-07-27` keeps the
+`2026-07-18` information hierarchy and strengthens its financial-record
+identity:
+
+- The catalog hero states the exact Deposit or Loan coverage, visible result
+  count, verification state, and snapshot date in one flat ledger composition.
+- Product records use a family rail: evergreen for Deposit and ochre for Loan.
+  Institution identity, product family, name, one primary fact, and no more than
+  two supporting facts remain the scanning order.
+- Filters, active scope, and sorting read as controls on one record set rather
+  than separate dashboard widgets. Checkbox labels provide the full touch
+  target, including at exact `390px`.
+- Selecting up to four products opens one comparison ledger. Each fact becomes
+  a responsive comparison row with one product cell per selection; two, three,
+  and four selections use the corresponding number of columns where space
+  allows and stack on mobile.
+- Differing available values receive a quiet maple highlight. FPDS does not
+  declare a winner, score suitability, estimate eligibility, or submit an
+  application.
+- Official-bank links belong to the selected comparison and detail page. Raw
+  evidence links, source excerpts, reviewer state, and unapproved candidates
+  remain private.
+- Mobile sorting and dense term-rate data may use bounded internal horizontal
+  scrolling. The document itself must not overflow horizontally.
+- Loading, unavailable/error, no-result, no-selection, stale, fresh, and
+  unavailable-value states use the same typography, border, and semantic-color
+  vocabulary.
+- EN, KO, and JA labels may wrap without clipping. Source-derived bank and
+  product content remains in its source language.
+
 The shared public aggregate vocabulary uses the following approved bucket boundaries:
 
 - `fee_bucket`: `free` for `<= 0 CAD`, `low_fee` for `< 15 CAD`, `high_fee` for `>= 15 CAD`
@@ -248,4 +280,4 @@ These boundaries are the baseline for `5.6` aggregate projection generation and 
 - `5.7`: public products API 구현
 - `5.9`: Product Grid UI 구현
 - `5.11`: grid/dashboard cross-filter 적용
-- `5.14`: responsive QA completed on `2026-07-18`
+- `5.14`: responsive QA refreshed on `2026-07-27` for the verified-record Public design

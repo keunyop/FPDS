@@ -84,8 +84,11 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
     z: point.highlight_badge_code ? 95 : 70
   }));
 
+  const chartLabel = `${scatter.title ?? "Product comparison"}. ${scatter.x_axis.label} by ${scatter.y_axis.label}. ${data.length} products.`;
+
   return (
-    <ChartContainer className="h-72 w-full" config={scatterConfig}>
+    <div>
+    <ChartContainer aria-label={chartLabel} className="h-72 w-full" config={scatterConfig} role="img">
       <ScatterChart margin={{ bottom: 16, left: 4, right: 16, top: 12 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
@@ -93,6 +96,7 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
           dataKey="x_value"
           name={scatter.x_axis.label}
           tick={{ fontSize: 11 }}
+          tickFormatter={(value) => formatAxisValue(Number(value), scatter.x_axis?.unit ?? "")}
           tickLine={false}
           type="number"
         />
@@ -101,6 +105,7 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
           dataKey="y_value"
           name={scatter.y_axis.label}
           tick={{ fontSize: 11 }}
+          tickFormatter={(value) => formatAxisValue(Number(value), scatter.y_axis?.unit ?? "")}
           tickLine={false}
           type="number"
           width={42}
@@ -121,10 +126,10 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
                 <p className="font-medium text-foreground">{point.product_name}</p>
                 <p className="mt-1 text-muted-foreground">{point.bank_name}</p>
                 <p className="mt-2 tabular-nums text-foreground">
-                  {scatter.x_axis?.label}: {point.x_value}
+                  {scatter.x_axis?.label}: {formatAxisValue(point.x_value, scatter.x_axis?.unit ?? "")}
                 </p>
                 <p className="tabular-nums text-foreground">
-                  {scatter.y_axis?.label}: {point.y_value}
+                  {scatter.y_axis?.label}: {formatAxisValue(point.y_value, scatter.y_axis?.unit ?? "")}
                 </p>
               </div>
             );
@@ -133,5 +138,40 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
         <Scatter data={data} dataKey="y_value" fill="var(--color-products)" name="products" />
       </ScatterChart>
     </ChartContainer>
+      <table className="sr-only">
+        <caption>{chartLabel}</caption>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Bank</th>
+            <th>{scatter.x_axis.label}</th>
+            <th>{scatter.y_axis.label}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((point) => (
+            <tr key={point.product_id}>
+              <td>{point.product_name}</td>
+              <td>{point.bank_name}</td>
+              <td>{formatAxisValue(point.x_value, scatter.x_axis?.unit ?? "")}</td>
+              <td>{formatAxisValue(point.y_value, scatter.y_axis?.unit ?? "")}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
+}
+
+function formatAxisValue(value: number, unit: string) {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+  if (unit === "percent") {
+    return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+  }
+  if (unit === "currency") {
+    return `$${new Intl.NumberFormat("en-CA", { maximumFractionDigits: 0 }).format(value)}`;
+  }
+  return new Intl.NumberFormat("en-CA", { maximumFractionDigits: 2 }).format(value);
 }

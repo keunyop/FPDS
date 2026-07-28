@@ -45,7 +45,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
   }
 
   if (!session || !changes || !productTypeList || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Change history could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "변경 이력을 불러올 수 없습니다." : locale === "ja" ? "変更履歴を読み込めません。" : "Change history could not load."} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

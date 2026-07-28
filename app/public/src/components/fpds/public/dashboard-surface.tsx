@@ -1,11 +1,12 @@
-import { ArrowUpRight, Building2, ExternalLink, FilterX, Landmark, PackageCheck, PiggyBank, RefreshCw, type LucideIcon } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, ExternalLink, FilterX, Landmark, PiggyBank, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { PublicFreshness, formatSnapshotDate } from "@/components/fpds/public/public-freshness";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatPublicMessage, getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import {
   type PublicDashboardRankingsResponse,
   type PublicDashboardScatterResponse,
@@ -34,6 +35,7 @@ type CompositionLinkItem = CompositionChartItem & {
 
 export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, summary }: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
+  const designCopy = getPublicDesignCopy(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
   const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
   const clearHref = buildPublicHref("/dashboard", {
@@ -53,7 +55,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Card className="border-destructive/25">
           <CardHeader>
-            <CardTitle>{copy.dashboard.apiUnavailableTitle}</CardTitle>
+            <h1 className="text-lg font-semibold">{copy.dashboard.apiUnavailableTitle}</h1>
             <CardDescription>{copy.dashboard.apiUnavailableBody}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -74,7 +76,6 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
 
   const totalProducts = Number(getMetric(summary, "total_active_products")?.value ?? 0);
   const banksInScope = Number(getMetric(summary, "banks_in_scope")?.value ?? 0);
-  const countriesInScope = 1;
   const activeChips = buildScopeChips(filters, summary);
   const bankComposition = buildBankComposition(filters, summary);
   const productTypeLinks = buildProductTypeDashboardLinks(filters, summary);
@@ -83,28 +84,28 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
     ? rankings.widgets.filter((widget) => widget.ranking_key !== "recently_changed_30d")
     : [];
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
-  const marketGreeting = formatPublicMessage(copy.dashboard.marketGreeting, {
-    banks: formatCount(banksInScope, filters.locale),
-    countries: formatCount(countriesInScope, filters.locale),
-    products: formatCount(totalProducts, filters.locale)
-  });
+  const snapshotDate = formatSnapshotDate(summary.freshness.refreshed_at, copy.common.noDate);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
-      <div className="flex flex-col gap-6">
-        <section className="grid gap-6 overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-sm md:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.52fr)] lg:items-end">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold text-primary">{copy.dashboard.kpiSubtitle}</p>
-            <h1 className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-5xl">{copy.dashboard.title}</h1>
-            <p className="mt-4 text-base leading-7 text-muted-foreground md:text-lg">{marketGreeting}</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <Button asChild>
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
+      <div className="flex flex-col gap-8 md:gap-12">
+        <section className="relative overflow-hidden border-y border-foreground/15 py-8 md:py-12">
+          <div className="ledger-rule pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] opacity-35 lg:block" aria-hidden="true" />
+          <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.72fr)] lg:items-center">
+            <div className="max-w-3xl">
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-verification">{designCopy.homeKicker}</p>
+              <h1 className="text-balance mt-5 max-w-4xl font-display text-[clamp(2.4rem,7vw,6.4rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground md:leading-[0.94] md:tracking-[-0.065em]">
+                {designCopy.homeTitle}
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">{designCopy.homeBody}</p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="min-h-12 rounded-full px-5">
                 <Link href={productsHref}>
                   <PiggyBank className="size-4" aria-hidden="true" />
                   {copy.nav.products}
                 </Link>
               </Button>
-              <Button asChild variant="outline">
+                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
                 <Link href={loansHref}>
                   <Landmark className="size-4" aria-hidden="true" />
                   {copy.nav.loan}
@@ -118,21 +119,25 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
                   </Link>
                 </Button>
               ) : null}
+              </div>
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <MetricCard icon={Building2} label={copy.dashboard.banksInScope} tone="success" value={formatCount(banksInScope, filters.locale)} />
-            <MetricCard icon={PackageCheck} label={copy.dashboard.visibleProducts} tone="primary" value={formatCount(totalProducts, filters.locale)} />
+            <SnapshotLedger
+              banks={formatCount(banksInScope, filters.locale)}
+              date={snapshotDate}
+              freshness={summary.freshness}
+              locale={filters.locale}
+              products={formatCount(totalProducts, filters.locale)}
+            />
           </div>
         </section>
 
         {activeChips.length ? (
-          <section aria-label={copy.grid.currentScope} className="flex flex-wrap gap-2 rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
+          <section aria-label={copy.grid.currentScope} className="flex flex-wrap gap-2 border-b border-border pb-5">
             {activeChips.map((chip) => (
               <Link
                 key={chip.key}
                 href={chip.href}
-                className="rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
               >
                 {chip.label}
               </Link>
@@ -140,8 +145,22 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
           </section>
         ) : null}
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-          <div className="space-y-4">
+        <section aria-labelledby="coverage-title">
+          <div className="mb-5 flex items-end justify-between gap-4 border-b border-foreground/15 pb-4">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.coverage}</p>
+              <h2 id="coverage-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground md:text-3xl">{copy.dashboard.composition}</h2>
+            </div>
+            <span className="hidden font-mono text-xs text-muted-foreground sm:block">{designCopy.asOf} {snapshotDate}</span>
+          </div>
+          <div className="grid divide-y divide-border border-y border-border md:grid-cols-2 md:divide-x md:divide-y-0">
+            <CoverageEntry href={productsHref} icon={PiggyBank} label={copy.nav.products} text={designCopy.depositCoverage} tone="deposit" />
+            <CoverageEntry href={loansHref} icon={Landmark} label={copy.nav.loan} text={designCopy.loanCoverage} tone="loan" />
+          </div>
+        </section>
+
+        <section className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:gap-0">
+          <div className="space-y-4 lg:pr-8">
             {decisionWidgets.length ? (
               decisionWidgets.map((widget) => <RankingCards key={widget.ranking_key} filters={filters} locale={filters.locale} productsHref={productsHref} widget={widget} />)
             ) : (
@@ -149,22 +168,22 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
             )}
           </div>
 
-          <Card className="border-border/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg">{copy.dashboard.productsByBank}</CardTitle>
-              <CardDescription>{copy.dashboard.compositionSubtitle}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="border-t border-foreground/15 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <div>
+              <h2 className="text-xl font-semibold tracking-[-0.02em]">{copy.dashboard.productsByBank}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{copy.dashboard.compositionSubtitle}</p>
+            </div>
+            <div className="mt-5 space-y-4">
               {bankComposition.length ? <CoverageBars items={bankComposition} /> : <EmptyPanel text={copy.dashboard.noRankingWidgets} />}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </section>
 
         {hasScatter || filters.productTypes.length === 1 ? (
           <section>
-            <Card className="border-border/80 shadow-sm">
+            <Card className="border-foreground/15 bg-card/70 shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg">{scatter?.title ?? copy.dashboard.comparisonMap}</CardTitle>
+                <h2 className="text-lg font-semibold">{scatter?.title ?? copy.dashboard.comparisonMap}</h2>
                 <CardDescription>{hasScatter ? scatter?.methodology_note ?? copy.dashboard.comparisonSubtitle : copy.dashboard.comparisonSubtitle}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -187,35 +206,81 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   );
 }
 
-function MetricCard({
+function SnapshotLedger({
+  banks,
+  date,
+  freshness,
+  locale,
+  products,
+}: {
+  banks: string;
+  date: string;
+  freshness: PublicDashboardSummaryResponse["freshness"];
+  locale: string;
+  products: string;
+}) {
+  const copy = getPublicMessages(locale);
+  const designCopy = getPublicDesignCopy(locale);
+  const steps = [designCopy.officialRecord, designCopy.reviewedRecord, designCopy.publicSnapshot];
+  return (
+    <aside className="relative min-w-0 border border-foreground/20 bg-card/85 p-5 shadow-[8px_8px_0_rgba(28,39,35,0.06)] backdrop-blur-sm md:p-6 md:shadow-[10px_10px_0_rgba(28,39,35,0.06)]" aria-label={designCopy.recordPath}>
+      <div className="flex flex-col items-start gap-3 border-b border-border pb-4 sm:flex-row sm:justify-between">
+        <div>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.publicSnapshot}</p>
+          <p className="mt-2 font-mono text-xs text-foreground">{date}</p>
+        </div>
+        <PublicFreshness compact freshness={freshness} locale={locale} />
+      </div>
+      <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
+        <div className="py-5 pr-4">
+          <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{products}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.visibleProducts}</p>
+        </div>
+        <div className="py-5 pl-4">
+          <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{banks}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.banksInScope}</p>
+        </div>
+      </div>
+      <ol className="relative mt-5 grid gap-4 before:absolute before:bottom-2 before:left-[0.6875rem] before:top-2 before:w-px before:bg-verification/25">
+        {steps.map((step, index) => (
+          <li className="relative flex items-center gap-3 text-sm" key={step}>
+            <span className="relative z-10 grid size-[1.375rem] shrink-0 place-items-center rounded-full border border-verification/25 bg-verification-soft text-verification">
+              <Check className="size-3" aria-hidden="true" />
+            </span>
+            <span className="font-medium text-foreground">{step}</span>
+            <span className="ml-auto font-mono text-[10px] text-muted-foreground">0{index + 1}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-5 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
+    </aside>
+  );
+}
+
+function CoverageEntry({
+  href,
   icon: Icon,
   label,
+  text,
   tone,
-  value
 }: {
-  icon: LucideIcon;
+  href: string;
+  icon: typeof PiggyBank;
   label: string;
-  tone: "info" | "primary" | "success";
-  value: string;
+  text: string;
+  tone: "deposit" | "loan";
 }) {
-  const toneClassName = {
-    info: "border-info/15 bg-info-soft text-info",
-    primary: "border-primary/15 bg-secondary text-primary",
-    success: "border-success/15 bg-success-soft text-success",
-  }[tone];
-
   return (
-    <Card className="border-border/80 shadow-sm">
-      <CardHeader className="grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
-        <div className="min-w-0">
-          <CardDescription className="truncate">{label}</CardDescription>
-          <CardTitle className="mt-2 break-words text-3xl tabular-nums">{value}</CardTitle>
-        </div>
-        <span className={`flex size-9 items-center justify-center rounded-lg border ${toneClassName}`}>
-          <Icon className="size-4" aria-hidden="true" />
-        </span>
-      </CardHeader>
-    </Card>
+    <Link className="group flex min-h-28 items-center gap-4 px-1 py-5 transition-colors hover:bg-card/60 md:px-5" href={href}>
+      <span className={`grid size-11 shrink-0 place-items-center rounded-full ${tone === "deposit" ? "bg-verification-soft text-deposit" : "bg-accent text-loan"}`}>
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-lg font-semibold text-foreground">{label}</span>
+        <span className="mt-1 block text-sm text-muted-foreground">{text}</span>
+      </span>
+      <ArrowRight className="ml-auto size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" aria-hidden="true" />
+    </Link>
   );
 }
 
@@ -234,10 +299,10 @@ function RankingCards({
   const title = widget.ranking_key === "highest_display_rate" ? copy.dashboard.topInterestRateTitle : widget.title;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm" aria-labelledby={`${widget.ranking_key}-title`}>
-      <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/25 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="overflow-hidden border-y border-foreground/15 bg-card/65" aria-labelledby={`${widget.ranking_key}-title`}>
+      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">{widget.metric_label}</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{widget.metric_label}</p>
           <h2 id={`${widget.ranking_key}-title`} className="mt-1 text-xl font-semibold leading-tight text-foreground">
             {title}
           </h2>
@@ -251,19 +316,19 @@ function RankingCards({
       </div>
       <div className="grid divide-y divide-border/70">
         {widget.items.slice(0, 5).map((item) => (
-          <div className="grid gap-3 px-4 py-3 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:items-center" key={item.product_id}>
+          <div className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:items-center" key={item.product_id}>
             <span className="w-6 text-left text-sm font-semibold text-muted-foreground tabular-nums sm:text-right">
               {item.rank}
             </span>
             <BankLogo bankCode={item.bank_code} bankName={item.bank_name} size="sm" />
             <div className="min-w-0">
-              <Link className="break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, item.product_id)}>
+              <Link className="inline-flex min-h-11 items-center break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, item.product_id)}>
                 {item.product_name}
               </Link>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.bank_name}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-              <span className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground tabular-nums">
+              <span className="border-b-2 border-maple px-2 py-1 text-base font-semibold text-foreground tabular-nums">
                 {formatMetricValue(item.metric_value, item.metric_unit, locale)}
               </span>
               {item.product_url ? (
@@ -286,13 +351,13 @@ function CoverageBars({ items }: { items: CompositionLinkItem[] }) {
   return (
     <div className="grid gap-3">
       {items.map((item) => (
-        <Link className="group grid gap-1.5" href={item.href} key={item.key}>
+        <Link className="group grid min-h-11 content-center gap-1.5" href={item.href} key={item.key}>
           <span className="flex items-center justify-between gap-3 text-sm">
             <span className="truncate font-medium text-foreground group-hover:text-primary">{item.label}</span>
             <span className="shrink-0 text-xs font-semibold text-muted-foreground tabular-nums">{item.count}</span>
           </span>
-          <span className="h-2 overflow-hidden rounded-full bg-muted">
-            <span className="block h-full rounded-full bg-primary/75 transition-colors group-hover:bg-primary" style={{ width: `${Math.max(4, Math.min(100, item.share_percent))}%` }} />
+          <span className="h-1.5 overflow-hidden bg-muted">
+            <span className="block h-full bg-verification/70 transition-colors group-hover:bg-verification" style={{ width: `${Math.max(4, Math.min(100, item.share_percent))}%` }} />
           </span>
         </Link>
       ))}

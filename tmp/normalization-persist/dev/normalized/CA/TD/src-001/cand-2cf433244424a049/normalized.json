@@ -11,7 +11,7 @@
   "parsed_document_id": "parsed-001",
   "extraction_model_execution_id": "modelexec-extract-001",
   "normalization_model_execution_id": "modelexec-6b71532c2cbbb007",
-  "started_at": "2026-07-15T05:29:15.292564+00:00",
+  "started_at": "2026-07-23T08:00:45.633651+00:00",
   "normalized_candidate": {
     "candidate_id": "cand-2cf433244424a049",
     "run_id": "run-001",
@@ -32,13 +32,14 @@
     "validation_issue_codes": [],
     "candidate_payload": {
       "status": "active",
-      "last_verified_at": "2026-07-15T05:29:15.292665+00:00",
+      "last_verified_at": "2026-07-23T08:00:45.633735+00:00",
       "bank_name": "TD Bank",
       "product_name": "TD ePremium Savings Account",
       "description_short": "High-interest savings account.",
       "monthly_fee": 0.0,
       "standard_rate": 1.25,
       "interest_payment_frequency": "monthly",
+      "public_display_rate": 1.25,
       "source_subtype_label": null,
       "subtype_code": "high_interest",
       "target_customer_tags": [],
@@ -52,7 +53,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "product_type": {
         "source_field_name": "product_type",
@@ -61,7 +63,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "country_code": {
         "source_field_name": "country_code",
@@ -70,7 +73,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "bank_code": {
         "source_field_name": "bank_code",
@@ -79,7 +83,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "source_language": {
         "source_field_name": "source_language",
@@ -88,7 +93,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "currency": {
         "source_field_name": "currency",
@@ -97,7 +103,8 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.99,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16"
       },
       "product_name": {
         "source_field_name": "product_name",
@@ -106,7 +113,10 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.88,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "string",
+        "canonical_unit": null
       },
       "description_short": {
         "source_field_name": "description_short",
@@ -115,7 +125,10 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.7,
         "evidence_chunk_id": null,
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "string",
+        "canonical_unit": null
       },
       "monthly_fee": {
         "source_field_name": "monthly_fee",
@@ -124,7 +137,10 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.86,
         "evidence_chunk_id": "chunk-fee",
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "decimal",
+        "canonical_unit": "currency_amount"
       },
       "standard_rate": {
         "source_field_name": "standard_rate",
@@ -133,7 +149,11 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.81,
         "evidence_chunk_id": "chunk-rate",
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "decimal",
+        "canonical_unit": "percentage_points",
+        "field_note": "Stored as percentage points; interest paid monthly."
       },
       "interest_payment_frequency": {
         "source_field_name": "interest_payment_frequency",
@@ -142,7 +162,23 @@
         "extraction_method": "heuristic",
         "extraction_confidence": 0.72,
         "evidence_chunk_id": "chunk-frequency",
-        "normalization_method": "heuristic_canonical_mapping"
+        "normalization_method": "heuristic_canonical_mapping",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "string",
+        "canonical_unit": null
+      },
+      "public_display_rate": {
+        "source_field_name": "standard_rate",
+        "normalized_value": 1.25,
+        "normalization_method": "canonical_public_display_rate_alignment",
+        "value_type": "decimal",
+        "extraction_method": "heuristic",
+        "extraction_confidence": 0.81,
+        "evidence_chunk_id": "chunk-rate",
+        "field_contract_version": "2026-07-16",
+        "canonical_value_type": "decimal",
+        "canonical_unit": "percentage_points",
+        "field_note": "Stored as percentage points; interest paid monthly."
       },
       "subtype_code": {
         "normalized_value": "high_interest",
@@ -182,7 +218,19 @@
       "field_name": "interest_payment_frequency",
       "candidate_value": "monthly",
       "citation_confidence": 0.8
+    },
+    {
+      "field_evidence_link_id": "fel-5ab309fbf06ee397",
+      "candidate_id": "cand-2cf433244424a049",
+      "product_version_id": null,
+      "evidence_chunk_id": "chunk-rate",
+      "source_document_id": "src-001",
+      "field_name": "public_display_rate",
+      "candidate_value": "1.25",
+      "citation_confidence": 0.8
     }
   ],
-  "runtime_notes": []
+  "runtime_notes": [
+    "Aligned `public_display_rate` to grounded `standard_rate` value `1.25`."
+  ]
 }

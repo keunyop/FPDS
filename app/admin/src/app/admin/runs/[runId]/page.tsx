@@ -36,7 +36,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
   }
 
   if (!session || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Run detail could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "실행 상세를 불러올 수 없습니다." : locale === "ja" ? "実行詳細を読み込めません。" : "Run detail could not load."} />;
   }
 
   if (!detail) {

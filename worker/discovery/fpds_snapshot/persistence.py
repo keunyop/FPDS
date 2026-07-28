@@ -279,7 +279,12 @@ ON CONFLICT (source_document_id) DO UPDATE SET
     source_type = EXCLUDED.source_type,
     source_language = EXCLUDED.source_language,
     registry_managed_flag = EXCLUDED.registry_managed_flag,
-    source_metadata = EXCLUDED.source_metadata,
+    source_metadata = CASE
+        WHEN COALESCE(source_document.source_metadata ->> 'discovery_role', '') = 'detail'
+         AND COALESCE(EXCLUDED.source_metadata ->> 'discovery_role', '') <> 'detail'
+        THEN source_document.source_metadata
+        ELSE EXCLUDED.source_metadata
+    END,
     discovered_at = LEAST(source_document.discovered_at, EXCLUDED.discovered_at),
     updated_at = now();
 

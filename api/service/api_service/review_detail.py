@@ -39,6 +39,21 @@ _BOOLEAN_OVERRIDE_FIELDS = {
     "interac_e_transfer_included", "overdraft_available", "student_plan_flag", "newcomer_plan_flag", "secured_flag",
 }
 _JSON_OVERRIDE_FIELDS = {"term_rate_table"}
+_STRING_ARRAY_OVERRIDE_FIELDS = {"target_customer_tags"}
+_RATE_OVERRIDE_FIELDS = {
+    "standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate", "highest_rate"
+}
+_MONTHLY_FEE_OVERRIDE_FIELDS = {"monthly_fee", "public_display_fee"}
+_STRING_OVERRIDE_FIELDS = {
+    "product_name", "description_short", "fee_waiver_condition", "promotional_period_text",
+    "eligibility_text", "application_method", "post_maturity_interest_rate", "tax_benefits",
+    "deposit_insurance", "term_length_text", "interest_calculation_method",
+    "interest_payment_frequency", "tier_definition_text", "withdrawal_limit_text",
+    "compounding_frequency", "payout_option", "cheque_book_info", "notes", "rate_type",
+    "amortization_text", "payment_frequency", "prepayment_privileges", "rewards_summary",
+    "credit_limit_text", "loan_amount_text", "monthly_payment_text", "security_requirement",
+    "collateral_text", "minimum_payment_text", "fees_text",
+}
 REVIEW_FIELD_PRIORITY = (
     "product_name",
     "public_display_rate",
@@ -1681,7 +1696,9 @@ def _normalize_override_payload(*, override_payload: dict[str, Any] | None, base
         if field_name in {"product_id", "candidate_id", "run_id", "review_task_id"}:
             continue
         if field_name == "product_name":
-            normalized_product_name = _normalize_text(str(value)) if value is not None else None
+            if value is not None and not isinstance(value, str):
+                raise _invalid_override_type(field_name, "text")
+            normalized_product_name = _normalize_text(value) if value is not None else None
             if not normalized_product_name:
                 continue
             if base_payload.get(field_name) == normalized_product_name:
@@ -1706,14 +1723,23 @@ def _normalize_typed_override_value(*, field_name: str, value: Any) -> Any:
             decimal_value = Decimal(normalized)
         except (InvalidOperation, ValueError):
             raise _invalid_override_type(field_name, "number") from None
+        if decimal_value < 0:
+            raise _invalid_override_range(field_name)
+        if field_name in _RATE_OVERRIDE_FIELDS and decimal_value >= Decimal("25"):
+            raise _invalid_override_range(field_name)
+        if field_name in _MONTHLY_FEE_OVERRIDE_FIELDS and decimal_value > Decimal("500"):
+            raise _invalid_override_range(field_name)
         return float(decimal_value)
     if field_name in _INTEGER_OVERRIDE_FIELDS:
         if isinstance(value, bool):
             raise _invalid_override_type(field_name, "integer")
         try:
-            return int(str(value).strip())
+            integer_value = int(str(value).strip())
         except ValueError:
             raise _invalid_override_type(field_name, "integer") from None
+        if integer_value < 0:
+            raise _invalid_override_range(field_name)
+        return integer_value
     if field_name in _BOOLEAN_OVERRIDE_FIELDS or field_name.endswith("_flag"):
         if isinstance(value, bool):
             return value
@@ -1733,6 +1759,20 @@ def _normalize_typed_override_value(*, field_name: str, value: Any) -> Any:
         if not isinstance(parsed, list):
             raise _invalid_override_type(field_name, "JSON array")
         return _normalize_json_value(parsed)
+    if field_name in _STRING_ARRAY_OVERRIDE_FIELDS:
+        parsed = value
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError:
+                raise _invalid_override_type(field_name, "JSON string array") from None
+        if not isinstance(parsed, list) or any(not isinstance(item, str) for item in parsed):
+            raise _invalid_override_type(field_name, "JSON string array")
+        return [_normalize_text(item) for item in parsed if _normalize_text(item)]
+    if field_name in _STRING_OVERRIDE_FIELDS:
+        if not isinstance(value, str):
+            raise _invalid_override_type(field_name, "text")
+        return _normalize_text(value)
     return _normalize_json_value(value)
 
 
@@ -1741,6 +1781,14 @@ def _invalid_override_type(field_name: str, expected: str) -> ReviewTaskError:
         status_code=422,
         code="invalid_field_type",
         message=f"{field_name} must be submitted as {expected}.",
+    )
+
+
+def _invalid_override_range(field_name: str) -> ReviewTaskError:
+    return ReviewTaskError(
+        status_code=422,
+        code="invalid_numeric_range",
+        message=f"{field_name} is outside the canonical safe range.",
     )
 
 

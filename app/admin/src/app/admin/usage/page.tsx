@@ -38,7 +38,12 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   }
 
   if (!session || !usage || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="LLM usage visibility could not load." />;
+    const unavailableTitle = locale === "ko"
+      ? "LLM 사용량 화면을 불러올 수 없습니다."
+      : locale === "ja"
+        ? "LLM 使用量画面を読み込めませんでした。"
+        : "LLM usage visibility could not load.";
+    return <AdminApiUnavailable locale={locale} title={unavailableTitle} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
@@ -54,7 +59,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
         role: session.user.role,
       }}
     >
-      <LlmUsageSurface filters={filters} usage={usage} />
+      <LlmUsageSurface filters={filters} locale={locale} usage={usage} />
     </ApplicationShell5>
   );
 }

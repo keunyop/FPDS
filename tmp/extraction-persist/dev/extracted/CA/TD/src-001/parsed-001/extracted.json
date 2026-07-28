@@ -9,7 +9,7 @@
   "model_execution_id": "modelexec-4b034e76c39c9326",
   "agent_name": "fpds-heuristic-extractor",
   "model_id": "heuristic-extractor-v1",
-  "started_at": "2026-07-15T05:29:14.591886+00:00",
+  "started_at": "2026-07-23T08:00:43.689914+00:00",
   "schema_context": {
     "product_family": "deposit",
     "product_type": "savings",
@@ -44,6 +44,11 @@
     "tier_definition_text",
     "withdrawal_limit_text",
     "registered_flag",
+    "included_transactions",
+    "transaction_fee",
+    "additional_transaction_fee",
+    "unlimited_transactions_flag",
+    "interac_e_transfer_included",
     "notes"
   ],
   "retrieval_result": {
@@ -568,6 +573,108 @@
         "chunk_index": 0,
         "match_metadata": {
           "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "included_transactions",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "transaction_fee",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "additional_transaction_fee",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "unlimited_transactions_flag",
+        "score": 0.05,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [],
+          "source_type": "html",
+          "source_language": "en"
+        }
+      },
+      {
+        "evidence_chunk_id": "chunk-001",
+        "field_name": "interac_e_transfer_included",
+        "score": 0.1,
+        "retrieval_mode": "metadata-only",
+        "evidence_text_excerpt": "Interest rate: 1.10%. Interest is paid monthly.",
+        "source_document_id": "src-001",
+        "source_snapshot_id": "snap-001",
+        "model_execution_id": null,
+        "parsed_document_id": "parsed-001",
+        "anchor_type": "section",
+        "anchor_value": "rates",
+        "page_no": null,
+        "chunk_index": 0,
+        "match_metadata": {
+          "matched_keywords": [
+            "e"
+          ],
           "source_type": "html",
           "source_language": "en"
         }

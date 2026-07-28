@@ -13,8 +13,8 @@ type AdminPageHeaderProps = {
 
 export function AdminPageHeader({ actions, badges, description, path, title }: AdminPageHeaderProps) {
   return (
-    <header className="grid gap-4">
-      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+    <header className="grid gap-3 border-b border-border pb-5">
+      <nav aria-label="Breadcrumb" className="flex min-h-6 flex-wrap items-center gap-1.5 text-xs font-medium text-muted-foreground">
         {path.map((segment, index) => (
           <span className="inline-flex items-center gap-1.5" key={`${segment}-${index}`}>
             {index > 0 ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : null}
@@ -23,10 +23,10 @@ export function AdminPageHeader({ actions, badges, description, path, title }: A
         ))}
       </nav>
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h1>
-          {description ? <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p> : null}
+          <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground md:text-3xl">{title}</h1>
+          {description ? <p className="mt-1.5 max-w-3xl text-sm leading-5 text-muted-foreground">{description}</p> : null}
         </div>
         {badges || actions ? (
           <div className="flex shrink-0 flex-wrap items-center gap-2">

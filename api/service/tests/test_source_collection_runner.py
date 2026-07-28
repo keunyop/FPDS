@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import shutil
 import unittest
@@ -339,20 +340,21 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             ["SRC-001", "SRC-002"],
         )
 
-    def test_target_dedupe_keeps_one_byte_identical_snapshot(self) -> None:
+    def test_target_dedupe_only_collapses_same_logical_document_and_checksum(self) -> None:
         retained, duplicates = source_collection_runner._dedupe_target_sources_by_snapshot_checksum(
             snapshot_output={
                 "source_results": [
-                    {"source_id": "SRC-EN", "checksum": "same-content"},
-                    {"source_id": "SRC-DEFAULT", "checksum": "same-content"},
-                    {"source_id": "SRC-OTHER", "checksum": "different-content"},
+                    {"source_id": "SRC-EN", "source_document_id": "doc-shared", "checksum": "same-content"},
+                    {"source_id": "SRC-DEFAULT", "source_document_id": "doc-shared", "checksum": "same-content"},
+                    {"source_id": "SRC-WAF", "source_document_id": "doc-other-url", "checksum": "same-content"},
+                    {"source_id": "SRC-OTHER", "source_document_id": "doc-other", "checksum": "different-content"},
                     {"source_id": "SRC-UNKNOWN", "checksum": None},
                 ]
             },
-            target_source_ids=["SRC-EN", "SRC-DEFAULT", "SRC-OTHER", "SRC-UNKNOWN"],
+            target_source_ids=["SRC-EN", "SRC-DEFAULT", "SRC-WAF", "SRC-OTHER", "SRC-UNKNOWN"],
         )
 
-        self.assertEqual(retained, ["SRC-EN", "SRC-OTHER", "SRC-UNKNOWN"])
+        self.assertEqual(retained, ["SRC-EN", "SRC-WAF", "SRC-OTHER", "SRC-UNKNOWN"])
         self.assertEqual(duplicates, ["SRC-DEFAULT"])
 
     def test_successful_stage_source_ids_supports_non_snapshot_stages(self) -> None:
@@ -445,6 +447,38 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(RuntimeError, "fpds_snapshot timed out after 120 seconds."):
                 source_collection_runner._run_stage("worker.discovery.fpds_snapshot", ["--run-id", "run-001"])
+
+    def test_run_stage_recovers_completed_persistence_output_emitted_before_timeout(self) -> None:
+        completed_output = {
+            "source_results": [{"source_id": "SRC-001", "validation_action": "auto_validated"}],
+            "persistence": {"run_id": "run-001", "run_state": "completed"},
+        }
+        with (
+            patch("api_service.source_collection_runner.shutil.which", return_value="uv"),
+            patch(
+                "api_service.source_collection_runner.subprocess.run",
+                side_effect=subprocess.TimeoutExpired(
+                    cmd=["uv"],
+                    timeout=120,
+                    output=json.dumps(completed_output).encode("utf-8"),
+                ),
+            ),
+            patch.dict("os.environ", {"FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS": "120"}, clear=False),
+        ):
+            recovered = source_collection_runner._run_stage(
+                "worker.pipeline.fpds_validation_routing",
+                ["--run-id", "run-001"],
+            )
+
+        self.assertEqual(recovered, completed_output)
+
+    def test_completed_stage_output_rejects_partial_or_nonterminal_json(self) -> None:
+        self.assertIsNone(source_collection_runner._completed_stage_output('{"source_results": ['))
+        self.assertIsNone(
+            source_collection_runner._completed_stage_output(
+                json.dumps({"source_results": [], "persistence": {"run_state": "started"}})
+            )
+        )
 
     def test_stage_timeout_seconds_from_env_uses_floor_and_default(self) -> None:
         with patch.dict("os.environ", {"FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS": "45"}, clear=False):

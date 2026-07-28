@@ -103,6 +103,16 @@ def field_contract(field_name: str) -> FieldContract | None:
         return FieldContract("boolean")
     if normalized in _JSON_FIELDS:
         return FieldContract("json", "structured_rows")
+    # Source profiles can request institution-specific rate and fee fields
+    # (for example ``regular_interest_rate`` or ``transaction_fee``).  Keep
+    # those extensions under the same numeric/unit contract as the canonical
+    # fields instead of allowing an LLM to persist an evidence paragraph as a
+    # free-form string. Explicit string fields such as ``rate_type`` and
+    # ``fees_text`` are resolved above.
+    if normalized.endswith("_rate"):
+        return FieldContract("decimal", "percentage_points")
+    if normalized.endswith("_fee"):
+        return FieldContract("decimal", "currency_amount")
     return None
 
 

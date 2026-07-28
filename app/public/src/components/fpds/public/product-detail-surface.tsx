@@ -4,9 +4,10 @@ import type { ReactNode } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
+import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductDetailResponse } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ type DetailFact = {
 
 export function ProductDetailSurface({ apiUnavailable, detail, filters }: ProductDetailSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
+  const designCopy = getPublicDesignCopy(filters.locale);
   const productsHref = buildPublicHref("/products", filters);
 
   if (apiUnavailable || !detail) {
@@ -31,7 +33,7 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Card className="border-destructive/25">
           <CardHeader>
-            <CardTitle>{copy.grid.retryTitle}</CardTitle>
+            <h1 className="text-lg font-semibold">{copy.grid.retryTitle}</h1>
             <CardDescription>{copy.grid.retryBody}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -78,13 +80,14 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
           </Link>
         </Button>
 
-        <section className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm md:p-6">
+        <section className="border-y border-foreground/15 py-6 md:py-9">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-muted-foreground">{product.bank_name}</p>
-                <h1 className="mt-1 break-words text-3xl font-semibold leading-tight text-foreground md:text-4xl">{product.product_name}</h1>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{product.bank_name}</p>
+                <h1 className="text-balance mt-2 break-words font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground md:text-6xl">{product.product_name}</h1>
+                {product.description_short ? <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{product.description_short}</p> : null}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge>{product.product_type_label}</Badge>
                   {product.subtype_label ? <Badge muted>{product.subtype_label}</Badge> : null}
@@ -110,28 +113,31 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
             </div>
           </div>
 
-          <dl className="mt-5 grid gap-3 sm:grid-cols-3">
+          <dl className="mt-7 grid border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
             {metricCards.map((metric, index) => (
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
             ))}
           </dl>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <section className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start">
           <div className="grid gap-4">
-            <Card className="border-border/80 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">{copy.detail.productFacts}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-4 sm:grid-cols-2">
+            <section aria-labelledby="product-facts-title">
+              <div className="border-b border-foreground/15 pb-3">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.verified}</p>
+                <h2 id="product-facts-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{designCopy.availableFacts}</h2>
+              </div>
+              <dl className="grid sm:grid-cols-2">
+                <div className="border-b border-border py-4 sm:pr-5">
                   <Fact label={copy.grid.productTypes} value={product.product_type_label} />
-                  {detailFacts.map((fact) => (
-                    <Fact key={fact.label} label={fact.label} value={fact.value} />
-                  ))}
-                </dl>
-              </CardContent>
-            </Card>
+                </div>
+                {detailFacts.map((fact, index) => (
+                  <div className={cn("border-b border-border py-4", index % 2 === 0 ? "sm:pl-5" : "sm:pr-5")} key={fact.label}>
+                    <Fact label={fact.label} value={fact.value} />
+                  </div>
+                ))}
+              </dl>
+            </section>
 
             {termRateRows.length ? <TermRateTable currency={product.currency} locale={filters.locale} rows={termRateRows} /> : null}
           </div>
@@ -149,17 +155,18 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
               />
             ) : null}
 
-            <Card className="border-border/80 bg-muted/20 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">{copy.detail.disclosureTitle}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs leading-5 text-muted-foreground">{buildDisclosure(disclosureDate, filters.locale)}</p>
-                <Button asChild className="mt-3" size="sm" variant="outline">
+            <aside className="border border-foreground/20 bg-card/75 p-5 shadow-[8px_8px_0_rgba(28,39,35,0.05)]">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.officialRecord}</p>
+              <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em]">{copy.detail.disclosureTitle}</h2>
+              <PublicFreshness className="mt-4" freshness={detail.freshness} locale={filters.locale} />
+              <p className="mt-4 text-xs leading-5 text-muted-foreground">{buildDisclosure(disclosureDate, filters.locale)}</p>
+              <div className="mt-4 grid gap-2">
+                <Button asChild className="min-h-11 w-full rounded-full" size="sm" variant="outline">
                   <Link href={buildPublicHref("/methodology", filters)}>{copy.nav.methodology}</Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
+            </aside>
           </div>
         </section>
       </div>
@@ -169,9 +176,9 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
 
 function MetricTile({ highlight, label, value }: { highlight?: boolean; label: string; value: string }) {
   return (
-    <div className={cn("min-h-24 rounded-lg border p-3", highlight ? "border-primary/25 bg-primary/5" : "border-border bg-muted/30")}>
-      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-2 break-words text-2xl font-semibold leading-tight text-foreground tabular-nums">{value}</dd>
+    <div className={cn("min-h-28 px-1 py-5 sm:px-5", highlight && "bg-verification-soft/45")}>
+      <dt className={cn("font-mono text-[10px] font-semibold uppercase tracking-wide", highlight ? "text-verification" : "text-muted-foreground")}>{label}</dt>
+      <dd className="mt-2 break-words font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums">{value}</dd>
     </div>
   );
 }
@@ -237,8 +244,11 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
     addFact(facts, loanLabel("payment", locale), product.payment_frequency, locale);
     addFact(facts, loanLabel("prepayment", locale), product.prepayment_privileges, locale);
     addFact(facts, loanLabel("loanAmount", locale), product.loan_amount_text ?? product.credit_limit_text, locale);
+    addFact(facts, getPublicDesignCopy(locale).monthlyPayment, product.monthly_payment_text, locale);
+    addFact(facts, getPublicDesignCopy(locale).securityRequirement, product.security_requirement, locale);
     addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
     addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
+    addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
     return facts;
   }
   const depositAmount = product.minimum_deposit ?? product.minimum_balance;
@@ -254,6 +264,7 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
   addFact(facts, detailLabel("postMaturityRate", locale), product.post_maturity_interest_rate, locale);
   addFact(facts, detailLabel("taxBenefits", locale), product.tax_benefits, locale);
   addFact(facts, detailLabel("depositInsurance", locale), product.deposit_insurance, locale);
+  addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
   return facts;
 }
 
@@ -290,7 +301,7 @@ function TermRateTable({
   return (
     <Card className="border-border/80 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">{getPublicMessages(locale).detail.termRates}</CardTitle>
+        <h2 className="text-base font-semibold">{getPublicMessages(locale).detail.termRates}</h2>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <table className="w-full min-w-[36rem] text-left text-sm">

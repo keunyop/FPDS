@@ -301,6 +301,7 @@ export function BankRegistrySurface({
 
   async function handleBulkCollect() {
     setBulkPending(true);
+    document.body.dataset.adminMutationPending = "true";
     setMessage(null);
     setError(null);
 
@@ -308,6 +309,7 @@ export function BankRegistrySurface({
     if (catalogItemIds.length === 0) {
       setError(copy.selectBankFirst);
       setBulkPending(false);
+      delete document.body.dataset.adminMutationPending;
       return;
     }
 
@@ -344,12 +346,13 @@ export function BankRegistrySurface({
       setError(copy.collectApiFailed);
     } finally {
       setBulkPending(false);
+      delete document.body.dataset.adminMutationPending;
     }
   }
 
   return (
-    <section className="grid gap-6">
-      <AdminTableAutoRefresh />
+    <section aria-busy={bulkPending} className="grid gap-5">
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.description}
@@ -363,35 +366,35 @@ export function BankRegistrySurface({
         items={statItems}
       />
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="border border-border bg-card p-4">
         <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
-            <input className="h-10 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
+            <input className="h-10 rounded-md border border-input bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <FilterSelect allLabel={copy.all} defaultValue={filters.status} label={copy.status} name="status" options={banks.facets.statuses} />
           <div className="flex items-end gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" type="submit">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" type="submit">
               {copy.apply}
             </button>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
+            <Link className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" href={buildAdminHref("/admin/banks", new URLSearchParams(), locale)}>
               {copy.reset}
             </Link>
           </div>
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="border border-border bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.bankList}</p>
+            <h2 className="text-lg font-semibold text-foreground">{copy.bankList}</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" onClick={openAddModal} type="button">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAddModal} type="button">
               {copy.addBank}
             </button>
             <button
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+               className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={bulkPending}
               onClick={() => void handleBulkCollect()}
               type="button"
@@ -401,19 +404,19 @@ export function BankRegistrySurface({
           </div>
         </div>
         {message ? (
-          <p className="mx-6 mt-5 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <p aria-live="polite" className="mx-4 mt-4 border-l-4 border-success bg-success-soft px-4 py-3 text-sm text-success" role="status">
             {message}
           </p>
         ) : null}
         {error ? (
-          <p className="mx-6 mt-5 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p aria-live="assertive" className="mx-4 mt-4 border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
             {error}
           </p>
         ) : null}
-        <div className="overflow-x-auto px-6 py-5">
+        <div aria-label={copy.bankList} className="overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
           <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              <tr className="text-left text-xs text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">
                   <input
                     aria-label={copy.selectAllBanks}
@@ -623,7 +626,7 @@ function FilterSelect({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>

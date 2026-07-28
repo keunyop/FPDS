@@ -237,9 +237,15 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
   const [retryPending, setRetryPending] = useState(false);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const totalEventErrorCount = detail.error_events.reduce((sum, item) => sum + item.error_count, 0);
+  const hasDestructiveIssue =
+    detail.run.run_status === "failed" ||
+    detail.run.failure_count > 0 ||
+    totalEventErrorCount > 0;
 
   async function handleRetry() {
     setRetryPending(true);
+    document.body.dataset.adminMutationPending = "true";
     setRetryMessage(null);
     setRetryError(null);
     try {
@@ -261,11 +267,12 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
       setRetryError(copy.retryApiFailed);
     } finally {
       setRetryPending(false);
+      delete document.body.dataset.adminMutationPending;
     }
   }
 
   return (
-    <section className="grid gap-6">
+    <section aria-busy={retryPending} className="grid gap-5">
       <AdminPageHeader
         actions={
           <>
@@ -307,8 +314,8 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         title={detail.run.run_id}
       />
 
-      <article className="rounded-lg border border-border/80 bg-background p-4">
-        <div className="grid gap-3 lg:grid-cols-5">
+      <article className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="grid divide-y divide-border md:grid-cols-5 md:divide-x md:divide-y-0">
           <SummaryStat label={copy.sourceItems} value={String(detail.run.source_item_count)} />
           <SummaryStat label={copy.success} value={String(detail.run.success_count)} />
           <SummaryStat label={copy.failure} value={String(detail.run.failure_count)} />
@@ -316,7 +323,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
           <SummaryStat label={copy.reviewQueued} value={String(detail.run.review_queued_count)} />
         </div>
 
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid divide-y divide-border border-t border-border md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
           <SummaryStat label={copy.started} value={formatTimestamp(detail.run.started_at, copy.missing)} />
           <SummaryStat label={copy.completed} value={formatTimestamp(detail.run.completed_at, copy.missing)} />
           <SummaryStat label={copy.trigger} value={toTitleCase(detail.run.trigger_type)} />
@@ -324,34 +331,63 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         </div>
 
         {retryMessage ? (
-          <p className="mt-4 rounded-2xl border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
+          <p aria-live="polite" className="border-t border-success/20 bg-success-soft px-4 py-3 text-sm leading-6 text-success" role="status">
             {retryMessage}
           </p>
         ) : null}
         {retryError ? (
-          <p className="mt-4 rounded-2xl border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+          <p aria-live="assertive" className="border-t border-destructive/20 bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive" role="alert">
             {retryError}
           </p>
         ) : null}
         {!detail.run.retry_action.available && detail.run.run_status === "failed" && !detail.run.retried_by_run_id && detail.run.retry_action.reason ? (
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">{detail.run.retry_action.reason}</p>
+          <p className="border-t border-border px-4 py-3 text-sm leading-6 text-muted-foreground">{detail.run.retry_action.reason}</p>
         ) : null}
       </article>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.16fr)_minmax(20rem,0.84fr)]">
-        <div className="grid gap-6">
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      {detail.run.error_summary || detail.error_events.length > 0 ? (
+        <aside
+          className={cn(
+            "border-l-4 px-4 py-3",
+            hasDestructiveIssue
+              ? "border-destructive bg-destructive/5"
+              : "border-warning bg-warning-soft",
+          )}
+          role={hasDestructiveIssue ? "alert" : "status"}
+        >
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <p className={cn("text-sm font-semibold", hasDestructiveIssue ? "text-destructive" : "text-warning")}>
+              {copy.runSourceIssues}
+            </p>
+            <p className="font-mono text-xs text-muted-foreground">
+              {copy.error(totalEventErrorCount)}
+            </p>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-foreground">
+            {detail.run.error_summary ?? detail.error_events[0]?.summary}
+          </p>
+        </aside>
+      ) : null}
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.16fr)_minmax(20rem,0.84fr)]">
+        <div className="grid gap-5">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.stageSummary}
               title={copy.executionStageStrip}
             />
-            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {detail.stage_summaries.map((item) => (
-                <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.stage_name}>
+            <ol className="mt-4 grid border border-border md:grid-cols-2 xl:grid-cols-3">
+              {detail.stage_summaries.map((item, index) => (
+                <li className="border-b border-border p-4 last:border-b-0 md:border-r md:[&:nth-last-child(-n+2)]:border-b-0 xl:[&:nth-last-child(-n+3)]:border-b-0" key={item.stage_name}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{item.stage_label}</p>
+                    <div className="flex min-w-0 gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sidebar text-xs font-semibold text-sidebar-foreground">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{item.stage_label}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{copy.executionEntries(item.execution_count)}</p>
+                      </div>
                     </div>
                     <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", stageStatusBadgeClasses(item.stage_status))}>
                       {toTitleCase(item.stage_status)}
@@ -363,12 +399,12 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                     <MetaRow label={copy.started} value={formatTimestamp(item.started_at, copy.missing)} />
                     <MetaRow label={copy.completed} value={formatTimestamp(item.completed_at, copy.missing)} />
                   </dl>
-                </div>
+                </li>
               ))}
-            </div>
+            </ol>
           </article>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.sourceProcessing}
               title={copy.perSourceSummary}
@@ -377,9 +413,9 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             {detail.source_items.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noSourceItems}</p>
             ) : (
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 divide-y divide-border border-y border-border">
                 {detail.source_items.map((item) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.source_document_id}>
+                  <div className="py-4" key={item.source_document_id}>
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.source_id}</p>
@@ -409,7 +445,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
                     </dl>
 
                     {item.error_summary ? (
-                      <p className="mt-4 rounded-2xl border border-destructive/15 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+                      <p className="mt-3 border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-sm leading-6 text-destructive">
                         {item.error_summary}
                       </p>
                     ) : null}
@@ -425,7 +461,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             )}
           </article>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.failureSummary}
               title={copy.runSourceIssues}
@@ -434,9 +470,9 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             {detail.error_events.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noIssues}</p>
             ) : (
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 divide-y divide-border border-y border-border">
                 {detail.error_events.map((item, index) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={`${item.scope}-${item.source_document_id ?? index}`}>
+                  <div className="py-4" key={`${item.scope}-${item.source_document_id ?? index}`}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.scope === "run" ? copy.runEvent : item.source_id ?? item.source_document_id ?? copy.sourceEvent}</p>
@@ -462,13 +498,13 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
           </article>
         </div>
 
-        <div className="grid gap-6">
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+        <div className="grid gap-5">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.usageSummary}
               title={copy.modelTokenUsage}
             />
-            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+            <div className="mt-4 grid divide-y divide-border border border-border md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-1 xl:divide-x-0 xl:divide-y">
               <SummaryStat label={copy.usageRecords} value={String(detail.usage_summary.usage_record_count)} />
               <SummaryStat label={copy.modelExecutions} value={String(detail.usage_summary.model_execution_count)} />
               <SummaryStat label={copy.totalTokens} value={detail.usage_summary.total_tokens.toLocaleString("en-CA")} />
@@ -478,9 +514,9 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             {detail.usage_summary.by_stage.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noUsage}</p>
             ) : (
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 divide-y divide-border border-y border-border">
                 {detail.usage_summary.by_stage.map((item) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.stage_name}>
+                  <div className="py-4" key={item.stage_name}>
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-sm font-medium text-foreground">{item.stage_label}</p>
                       <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
@@ -499,7 +535,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             )}
           </article>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.relatedReviews}
               title={copy.reviewWorkload}
@@ -508,9 +544,9 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             {detail.related_review_tasks.length === 0 ? (
               <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noReviews}</p>
             ) : (
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 divide-y divide-border border-y border-border">
                 {detail.related_review_tasks.map((item) => (
-                  <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.review_task_id}>
+                  <div className="py-4" key={item.review_task_id}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <Link className="text-sm font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}>
@@ -534,12 +570,12 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
             )}
           </article>
 
-          <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+          <article className="border border-border bg-card p-5">
             <SectionHeading
               eyebrow={copy.runContext}
               title={copy.retryScope}
             />
-            <div className="mt-6 rounded-2xl border border-border/80 bg-background p-4">
+            <div className="mt-4 border-y border-border py-4">
               <dl className="grid gap-3 text-sm">
                 <MetaRow label={copy.pipelineStage} value={detail.run.pipeline_stage ?? copy.missing} />
                 <MetaRow label={copy.retryOf} value={detail.run.retry_of_run_id ?? copy.missing} />
@@ -547,7 +583,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
               </dl>
 
               {detail.run.error_summary ? (
-                <p className="mt-4 rounded-2xl border border-destructive/15 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+                <p className="mt-3 border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-sm leading-6 text-destructive">
                   {detail.run.error_summary}
                 </p>
               ) : null}
@@ -563,18 +599,18 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
 function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description?: string }) {
   return (
     <div>
-      <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
+      <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+      {description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p> : null}
     </div>
   );
 }
 
 function SummaryStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-background px-4 py-3">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
+    <div className="min-w-0 px-4 py-3">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 truncate font-mono text-sm font-semibold text-foreground">{value}</p>
     </div>
   );
 }

@@ -38,7 +38,7 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
   }
 
   if (!session || !registry || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Source registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "소스 레지스트리를 불러올 수 없습니다." : locale === "ja" ? "ソースレジストリを読み込めません。" : "Source registry could not load."} />;
   }
 
   return (

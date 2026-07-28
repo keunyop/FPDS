@@ -47,7 +47,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   }
 
   if (!session || !queue || !productTypeList || !bankList || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Review queue could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "검토 대기열을 불러올 수 없습니다." : locale === "ja" ? "レビューキューを読み込めません。" : "Review queue could not load."} />;
   }
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";

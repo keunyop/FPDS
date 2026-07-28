@@ -1,5 +1,36 @@
 export type PublicLocale = "en" | "ko" | "ja";
 
+type PublicDesignCopy = {
+  asOf: string;
+  availableFacts: string;
+  compareBoundary: string;
+  compareDifferences: string;
+  coverage: string;
+  depositCoverage: string;
+  evidenceBoundary: string;
+  fresh: string;
+  freshness: string;
+  homeBody: string;
+  homeKicker: string;
+  homeTitle: string;
+  loanCoverage: string;
+  methodologyIntro: string;
+  methodologySteps: Array<{ body: string; label: string; title: string }>;
+  monthlyPayment: string;
+  officialRecord: string;
+  publicSnapshot: string;
+  recordPath: string;
+  recordPathBody: string;
+  reviewedRecord: string;
+  securityRequirement: string;
+  snapshotCoverage: string;
+  sourceChecked: string;
+  sourceLanguage: string;
+  stale: string;
+  unavailable: string;
+  verified: string;
+};
+
 type PublicMessages = {
   localeName: string;
   shell: {
@@ -334,7 +365,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "Clear",
       remove: "Remove",
       emptyTitle: "No products selected yet.",
-      emptyBody: "Use Compare on any product card to build a focused table. FPDS does not score personal eligibility or submit applications.",
+      emptyBody: "Use Compare on any product card to build a focused comparison. FPDS does not score personal eligibility or submit applications.",
       tableProduct: "Product",
       tableWhy: "Why compare",
       entryAmount: "Entry amount",
@@ -368,6 +399,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         {
           title: "Evidence boundary",
           body: "Raw evidence, source excerpts, and internal review traces are not exposed on FPDS."
+        },
+        {
+          title: "Comparison and rankings",
+          body: "Rankings use only eligible public numeric fields. Missing values are excluded, never estimated."
+        },
+        {
+          title: "Freshness and verification",
+          body: "Snapshot status shows when the public dataset was refreshed. Current rates and conditions must still be confirmed with the institution."
         }
       ]
     }
@@ -526,7 +565,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "비우기",
       remove: "제거",
       emptyTitle: "아직 선택한 상품이 없습니다.",
-      emptyBody: "상품 카드의 비교 버튼으로 표를 구성하세요. FPDS는 개인별 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 비교 패널을 구성하세요. FPDS는 개인별 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
       tableProduct: "상품",
       tableWhy: "비교 이유",
       entryAmount: "가입 금액",
@@ -560,6 +599,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         {
           title: "증거 경계",
           body: "원문 증거, 출처 발췌, 내부 검토 trace는 FPDS에 공개하지 않습니다."
+        },
+        {
+          title: "비교와 순위",
+          body: "순위는 조건을 충족한 공개 숫자 필드만 사용합니다. 없는 값은 추정하지 않고 비교에서 제외합니다."
+        },
+        {
+          title: "최신성과 재확인",
+          body: "스냅샷 상태는 공개 데이터가 갱신된 시점을 보여줍니다. 현재 금리와 조건은 금융기관에서 다시 확인해야 합니다."
         }
       ]
     }
@@ -718,7 +765,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "クリア",
       remove: "削除",
       emptyTitle: "まだ商品が選択されていません。",
-      emptyBody: "商品カードの比較ボタンで表を作成します。FPDS は個人別の加入可能性スコアや申込代行を提供しません。",
+      emptyBody: "商品カードの比較ボタンで比較パネルを作成します。FPDS は個人別の加入可能性スコアや申込代行を提供しません。",
       tableProduct: "商品",
       tableWhy: "比較理由",
       entryAmount: "加入金額",
@@ -752,14 +799,134 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         {
           title: "証拠の境界",
           body: "原文証拠、ソース抜粋、内部レビュー trace は FPDS では公開しません。"
+        },
+        {
+          title: "比較とランキング",
+          body: "ランキングは対象となる公開数値項目だけを使います。欠損値は推定せず、比較から除外します。"
+        },
+        {
+          title: "鮮度と再確認",
+          body: "スナップショット状態は公開データの更新時点を示します。現在の金利と条件は金融機関で再確認してください。"
         }
       ]
     }
   }
 };
 
+const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
+  en: {
+    asOf: "As of",
+    availableFacts: "Available product facts",
+    compareBoundary: "FPDS compares published facts. It does not rank what is best for you.",
+    compareDifferences: "Differences are emphasized only where a public field is available.",
+    coverage: "Current coverage",
+    depositCoverage: "Chequing, savings and GIC",
+    evidenceBoundary: "Raw evidence and internal review traces stay private.",
+    fresh: "Current snapshot",
+    freshness: "Snapshot freshness",
+    homeBody: "Orient across the Canadian market, shortlist products with comparable public facts, then confirm current terms with the institution.",
+    homeKicker: "Verified Canadian financial product records",
+    homeTitle: "A changing market, made legible.",
+    loanCoverage: "Mortgage, personal loan and line of credit",
+    methodologyIntro: "How source facts become comparable public records—and where FPDS deliberately stops.",
+    methodologySteps: [
+      { label: "01", title: "Official source", body: "Product facts begin with public institution sources captured by FPDS." },
+      { label: "02", title: "Reviewed record", body: "Only approved public fields enter the comparable product record." },
+      { label: "03", title: "Public snapshot", body: "The latest successful aggregate snapshot powers every public view." },
+      { label: "04", title: "Your verification", body: "Rates and conditions can change. Recheck the institution page before acting." }
+    ],
+    monthlyPayment: "Monthly payment",
+    officialRecord: "Official product record",
+    publicSnapshot: "Public snapshot",
+    recordPath: "From source to shortlist",
+    recordPathBody: "Every visible comparison follows the same bounded record path.",
+    reviewedRecord: "Reviewed fields",
+    securityRequirement: "Security requirement",
+    snapshotCoverage: "products across",
+    sourceChecked: "Official page available",
+    sourceLanguage: "Source language",
+    stale: "Snapshot needs refresh",
+    unavailable: "Snapshot unavailable",
+    verified: "Verified record"
+  },
+  ko: {
+    asOf: "기준일",
+    availableFacts: "확인 가능한 상품 정보",
+    compareBoundary: "FPDS는 공개된 사실을 비교하며, 개인에게 가장 좋은 상품을 순위로 추천하지 않습니다.",
+    compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
+    coverage: "현재 제공 범위",
+    depositCoverage: "입출금·저축·GIC",
+    evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
+    fresh: "최신 스냅샷",
+    freshness: "스냅샷 최신성",
+    homeBody: "캐나다 금융시장을 한눈에 파악하고, 비교 가능한 공개 정보로 후보를 좁힌 뒤, 금융기관 공식 페이지에서 최신 조건을 확인하세요.",
+    homeKicker: "검증된 캐나다 금융상품 기록",
+    homeTitle: "변하는 금융시장을, 읽을 수 있게.",
+    loanCoverage: "모기지·개인대출·신용한도",
+    methodologyIntro: "공식 출처의 정보가 비교 가능한 공개 기록이 되는 과정과 FPDS가 의도적으로 멈추는 경계입니다.",
+    methodologySteps: [
+      { label: "01", title: "공식 출처", body: "금융기관이 공개한 상품 정보에서 기록이 시작됩니다." },
+      { label: "02", title: "검토된 기록", body: "승인된 공개 필드만 비교 가능한 상품 기록에 포함됩니다." },
+      { label: "03", title: "공개 스냅샷", body: "가장 최근 성공한 집계 스냅샷이 모든 공개 화면에 사용됩니다." },
+      { label: "04", title: "사용자 재확인", body: "금리와 조건은 바뀔 수 있으므로 결정 전 공식 페이지를 다시 확인합니다." }
+    ],
+    monthlyPayment: "월 납입액",
+    officialRecord: "공식 상품 기록",
+    publicSnapshot: "공개 스냅샷",
+    recordPath: "출처에서 후보 목록까지",
+    recordPathBody: "모든 비교 정보는 같은 제한된 기록 경로를 따릅니다.",
+    reviewedRecord: "검토된 필드",
+    securityRequirement: "담보 조건",
+    snapshotCoverage: "개 상품 ·",
+    sourceChecked: "공식 페이지 확인 가능",
+    sourceLanguage: "원문 언어",
+    stale: "갱신 필요",
+    unavailable: "스냅샷 없음",
+    verified: "검증된 기록"
+  },
+  ja: {
+    asOf: "基準日",
+    availableFacts: "確認できる商品情報",
+    compareBoundary: "FPDS は公開された事実を比較し、個人に最適な商品をランキングしません。",
+    compareDifferences: "公開項目がある場合だけ差を強調します。",
+    coverage: "現在の掲載範囲",
+    depositCoverage: "当座・普通預金・GIC",
+    evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
+    fresh: "最新スナップショット",
+    freshness: "スナップショットの鮮度",
+    homeBody: "カナダ市場を把握し、比較できる公開情報で候補を絞り、金融機関の公式ページで最新条件を確認してください。",
+    homeKicker: "検証済みカナダ金融商品レコード",
+    homeTitle: "変わる市場を、読み解ける形に。",
+    loanCoverage: "住宅ローン・個人ローン・与信枠",
+    methodologyIntro: "公式情報が比較できる公開レコードになる流れと、FPDS が意図的に設ける境界です。",
+    methodologySteps: [
+      { label: "01", title: "公式ソース", body: "金融機関が公開した商品情報からレコードが始まります。" },
+      { label: "02", title: "レビュー済みレコード", body: "承認された公開項目だけが比較可能な商品レコードに入ります。" },
+      { label: "03", title: "公開スナップショット", body: "最新の成功集計スナップショットがすべての公開画面を支えます。" },
+      { label: "04", title: "利用者の再確認", body: "金利や条件は変わるため、判断前に公式ページで再確認します。" }
+    ],
+    monthlyPayment: "月々の支払額",
+    officialRecord: "公式商品レコード",
+    publicSnapshot: "公開スナップショット",
+    recordPath: "ソースから候補まで",
+    recordPathBody: "すべての比較情報は同じ限定されたレコード経路を通ります。",
+    reviewedRecord: "レビュー済み項目",
+    securityRequirement: "担保条件",
+    snapshotCoverage: "商品・",
+    sourceChecked: "公式ページを確認可能",
+    sourceLanguage: "ソース言語",
+    stale: "更新が必要",
+    unavailable: "スナップショットなし",
+    verified: "検証済みレコード"
+  }
+};
+
 export function getPublicMessages(locale: string): PublicMessages {
   return PUBLIC_MESSAGES[normalizePublicLocale(locale)];
+}
+
+export function getPublicDesignCopy(locale: string): PublicDesignCopy {
+  return PUBLIC_DESIGN_COPY[normalizePublicLocale(locale)];
 }
 
 export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan") {

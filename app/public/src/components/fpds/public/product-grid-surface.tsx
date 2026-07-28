@@ -3,9 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ProductCompareWorkspace } from "@/components/fpds/public/product-compare-workspace";
+import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicMessages } from "@/lib/public-locale";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ type SortOption = {
 
 export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, filters, products }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
+  const designCopy = getPublicDesignCopy(filters.locale);
   const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
   const catalogPath = catalog === "loan" ? "/loans" : "/products";
   const clearHref = buildCatalogHref(catalogPath, {
@@ -45,7 +47,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Card className="border-destructive/25">
           <CardHeader>
-            <CardTitle>{copy.grid.retryTitle}</CardTitle>
+            <h1 className="text-lg font-semibold">{copy.grid.retryTitle}</h1>
             <CardDescription>{copy.grid.retryBody}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -79,23 +81,29 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
       ];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-8">
-      <div className="flex flex-col gap-4">
-        <section className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
-          <div className="grid gap-5 px-5 py-6 md:px-7 md:py-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
+      <div className="flex flex-col gap-5">
+        <section className="border-y border-foreground/15 py-7 md:py-10">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
-              <p className="text-sm font-semibold text-primary">{catalog === "loan" ? copy.nav.loan : copy.nav.products}</p>
-              <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl">{catalogCopy.title}</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{catalogCopy.description}</p>
+              <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${catalog === "loan" ? "text-loan" : "text-deposit"}`}>
+                {catalog === "loan" ? designCopy.loanCoverage : designCopy.depositCoverage}
+              </p>
+              <h1 className="text-balance mt-3 font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground md:text-6xl">{catalogCopy.title}</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{catalogCopy.description}</p>
             </div>
-            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 lg:min-w-72">
-              <CatalogStat label={copy.grid.resultSummary} value={formatPublicMessage(copy.grid.productCount, { count: formatCount(products.total_items, filters.locale) })} />
-              <CatalogStat label={copy.dashboard.freshness} value={formatFreshnessDate(products.freshness.refreshed_at, filters.locale)} />
+            <div className="flex flex-col items-start gap-3 lg:items-end">
+              <p className="font-mono text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">{formatPublicMessage(copy.grid.productCount, { count: formatCount(products.total_items, filters.locale) })}</span>
+                <span className="mx-2" aria-hidden="true">/</span>
+                {designCopy.verified}
+              </p>
+              <PublicFreshness freshness={products.freshness} locale={filters.locale} />
             </div>
           </div>
         </section>
 
-        <Card className="gap-0 overflow-hidden border-border/80 shadow-sm">
+        <section className="overflow-hidden border-y border-border bg-card/55">
           <details className="group" open={activeChips.length > 0}>
             <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-2">
@@ -168,7 +176,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
               </form>
             </CardContent>
           </details>
-        </Card>
+        </section>
 
         <DiscoveryToolbar
           activeChips={activeChips}
@@ -183,7 +191,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
         ) : (
           <Card className="border-dashed">
             <CardHeader>
-              <CardTitle>{copy.grid.noResultTitle}</CardTitle>
+              <h2 className="text-lg font-semibold">{copy.grid.noResultTitle}</h2>
               <CardDescription>{copy.grid.noResultBody}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -218,15 +226,6 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
   );
 }
 
-function CatalogStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-xl border border-border/80 bg-muted/25 px-3 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold leading-snug text-foreground tabular-nums">{value}</p>
-    </div>
-  );
-}
-
 function DiscoveryToolbar({
   activeChips,
   catalogPath,
@@ -243,12 +242,12 @@ function DiscoveryToolbar({
   const copy = getPublicMessages(filters.locale);
 
   return (
-    <section className="grid gap-3 rounded-xl border border-border bg-card px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+    <section className="grid gap-3 border-b border-foreground/15 pb-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         {activeChips.length ? (
           activeChips.map((chip) => (
             <Link
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
               href={chip.href}
               key={`${chip.group}-${chip.value}`}
             >
@@ -260,7 +259,7 @@ function DiscoveryToolbar({
           <span className="text-sm text-muted-foreground">{copy.grid.noActiveFilters}</span>
         )}
         {activeChips.length ? (
-          <Link className="min-h-9 px-2 py-2 text-xs font-medium text-muted-foreground hover:text-foreground" href={clearHref}>
+          <Link className="inline-flex min-h-11 items-center px-2 text-xs font-medium text-muted-foreground hover:text-foreground" href={clearHref}>
             {copy.common.clearAllFilters}
           </Link>
         ) : null}
@@ -293,8 +292,8 @@ function SortLink({ active, children, href }: { active: boolean; children: React
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex min-h-9 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
-        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+        active ? "border-foreground bg-foreground text-background" : "border-border bg-card/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
       )}
       href={href}
     >
@@ -451,16 +450,4 @@ function findLabel(options: Array<{ label: string; value: string }>, value: stri
 
 function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(getIntlLocale(locale), { maximumFractionDigits: 0 }).format(value);
-}
-
-function formatFreshnessDate(value: string | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (!value) {
-    return copy.common.noDate;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10);
-  }
-  return date.toISOString().slice(0, 10);
 }

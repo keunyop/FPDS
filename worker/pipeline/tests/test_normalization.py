@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from shutil import rmtree
 import unittest
@@ -19,11 +20,37 @@ from worker.pipeline.fpds_normalization.persistence import (
 from worker.pipeline.fpds_normalization.service import (
     NormalizationService,
     _apply_credit_card_labeled_fallback,
+    _align_advertised_promotional_total,
+    _align_gic_representative_rates_from_term_table,
+    _align_savings_labeled_header_standard_rate,
+    _align_gic_labeled_posted_and_promotional_rates,
+    _align_minimum_balance_to_fee_waiver,
+    _align_public_display_fee,
+    _align_public_display_rate,
+    _align_promotional_period_from_evidence,
+    _align_ongoing_additive_bonus_total,
     _build_field_evidence_link_records,
+    _clean_chequing_fee_waiver_consistency,
+    _clean_deposit_insurance_value,
+    _complete_gic_term_rate_table_from_split_evidence,
     _clean_product_context_fields,
+    _compute_validation_issue_codes,
     _extract_rate_percentages,
+    _find_dynamic_numeric_evidence_context,
+    _infer_target_customer_tags,
+    _dynamic_numeric_value_is_ungrounded,
+    _looks_like_invalid_application_method,
+    _looks_like_broad_page_copy,
+    _looks_like_non_rate_numeric_context,
+    _looks_like_non_value_description,
+    _looks_like_non_value_eligibility,
+    _looks_like_non_value_rewards,
+    _looks_like_expired_promotional_customer_field,
     _normalize_term_rate_table,
+    _percentage_value_absent_from_evidence,
+    _rate_field_suppression_reason,
     _rate_evidence_is_account_context,
+    _refine_product_name_from_source_metadata,
 )
 from worker.pipeline.fpds_normalization.storage import (
     NormalizationStorageConfig,
@@ -36,6 +63,825 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_incomplete_description_lead_in_is_rejected(self) -> None:
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="With this savings account, your kids have the opportunity to:",
+                product_type_family="savings",
+                product_name="Children's Savings Account",
+            )
+        )
+
+    def test_contact_cta_and_flattened_feature_headings_are_not_descriptions(self) -> None:
+        for value in (
+            "Book now Call us Our banking specialists are ready to answer your questions and can assist you in opening an account 1-866-222-3456.",
+            (
+                "Monthly account fee Enjoy no monthly fee with this account Earn Interest on every U.S. dollar "
+                "Interest calculated daily on every U.S. dollar Foreign Currency Services Competitive exchange rates on U.S."
+            ),
+        ):
+            with self.subTest(value=value):
+                self.assertTrue(
+                    _looks_like_non_value_description(
+                        field_name="description_short",
+                        value=value,
+                        product_type_family="chequing",
+                    )
+                )
+
+    def test_cross_sell_audience_and_account_switching_copy_are_not_descriptions(self) -> None:
+        product_name = "Performance Chequing Account"
+        for value in (
+            "EXPLORE OFFERS Kids & teens Provide kids and teens with financial independence by opening a chequing account with no monthly fees.",
+            (
+                "Manage your pre-authorized payments with a switching service. We make switching to the bank easy. "
+                "Transfer your pre-authorized payments from another financial institution to your new bank account."
+            ),
+        ):
+            with self.subTest(value=value):
+                self.assertTrue(
+                    _looks_like_non_value_description(
+                        field_name="description_short",
+                        value=value,
+                        product_type_family="chequing",
+                        product_name=product_name,
+                    )
+                )
+
+    def test_scotia_legal_offer_and_feature_copy_is_not_customer_value(self) -> None:
+        for value in (
+            "Symbol optional Legal Text Additional fees apply for shared ABM services.",
+            "Set up and make one eligible pre-authorized transaction of at least $50, that recurs for at least 6 months in a row.",
+            "You can open your account online or in branch.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_description(
+                    field_name="description_short",
+                    value=value,
+                    product_type_family="chequing",
+                )
+            )
+        for value in (
+            "Earn up to $1,000 when you bundle an eligible banking package, savings account, and credit card. Review offer details.",
+            "Open your first Momentum PLUS Savings Account Make a deposit into your account. Additional terms apply. See Welcome Bonus Offer Terms.",
+            "Do not need to save Euros Need an account for everyday banking services in currency other than Euros.",
+            "Cash in while you can. Open a No Fee Chequing Account and set up an eligible direct deposit today of $100 or more for 3 straight months.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_description(
+                    field_name="description_short",
+                    value=value,
+                    product_type_family="savings",
+                )
+            )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value=(
+                    "Our International student GIC Program is designed to help you fund your GIC program "
+                    "account before you arrive in Canada and meet visa requirements."
+                ),
+                product_type_family="gic",
+                product_name="Guaranteed Investment Certificates (GIC)",
+            )
+        )
+        self.assertFalse(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value=(
+                    "Our International student GIC Program helps you fund your account before you arrive "
+                    "in Canada and meet visa requirements."
+                ),
+                product_type_family="gic",
+                product_name="International Student GIC Program",
+            )
+        )
+        for value in (
+            "Money Master Account holders in the six months preceding the Offer Period are not eligible for this Bonus.",
+            (
+                "You’re able to earn a guaranteed rate for your entire term. Your interest can compound automatically. "
+                "Eligible for both registered and non-registered plans. Your principal is always guaranteed."
+            ),
+            "You haven’t had a Scotia HISA or Momentum PLUS Savings Account within the last two years. The Promotional Rate applies.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_eligibility(
+                    field_name="eligibility_text",
+                    value=value,
+                    product_name="Savings Account",
+                )
+            )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value=(
+                    "To qualify for this Offer make sure to open a new Platinum credit card account "
+                    "between July 2, 2026 and November 1, 2026."
+                ),
+                product_type_family="credit-card",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_eligibility(
+                field_name="eligibility_text",
+                value=(
+                    "To qualify, open a new No-Fee credit card account between October 31, 2025 "
+                    "and April 30, 2026."
+                ),
+                product_name="No-Fee Credit Card",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_rewards(
+                field_name="rewards_summary",
+                value="Earn up to $3,000 in value in the first 14 months, including 100,000 bonus points.",
+            )
+        )
+        self.assertFalse(
+            _looks_like_non_value_rewards(
+                field_name="rewards_summary",
+                value="Earn 2 points per $1 on eligible purchases, plus a welcome offer.",
+            )
+        )
+        self.assertTrue(
+            _looks_like_expired_promotional_customer_field(
+                field_name="notes",
+                value="The introductory balance-transfer rate is 0.99% for the first 9 months.",
+                context="Special offer: introductory balance-transfer rate.",
+                expired_offer_present=True,
+            )
+        )
+        for value in (
+            "Benefits include free transfers and eligible for overdraft protection.",
+            "The Cash Bonus Bundle Offer applies when clients complete certain qualifying transactions during the Offer Period.",
+            "Account holders receive a waiver of commission on eligible commissionable trades.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_eligibility(
+                    field_name="eligibility_text",
+                    value=value,
+                    product_name="Preferred Package",
+                )
+            )
+
+    def test_product_context_semantics_reject_recommender_cross_sell_reward_and_footnote_noise(self) -> None:
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="Still not sure? Let us help you decide. Answer a few quick questions and we'll recommend the best account.",
+                product_type_family="chequing",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="account fees Learn tips to ensure you find the right account and reduce everyday banking fees.",
+                product_type_family="chequing",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value=(
+                    "Learn tips to ensure you find the right account, including options to help you reduce "
+                    "your everyday banking fees."
+                ),
+                product_type_family="chequing",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_eligibility(
+                field_name="eligibility_text",
+                value="Start with an account, then apply and get approved for any eligible credit card.",
+                product_name="Banking for Foreign Workers",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="Features Details Monthly fee $0 Interest rate 0.550% Monthly savings requirement $200 Eligibility with Plans.",
+                product_type_family="savings",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="High interest savings accounts explained in 2025. We take a deeper look at the benefits and limitations of this account.",
+                product_type_family="savings",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="Earn a 0.50% savings interest rate or a promotional rate when you also open a chequing account.",
+                product_type_family="savings",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value="Get a Canadian and U.S. dollar Savings Account to use at no additional cost.",
+                product_type_family="chequing",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_eligibility(
+                field_name="eligibility_text",
+                value="For example, earn 2x the Points on eligible grocery and gas purchases.",
+                product_name="Blue Rewards Chequing Account",
+            )
+        )
+        self.assertTrue(
+            _looks_like_broad_page_copy(
+                field_name="notes",
+                value="Legal Footnote 1 details Standard daily Points usage limits and terms apply.",
+            )
+        )
+        for value in (
+            "No. You can only receive one monthly fee rebate per bank account.",
+            "legal disclaimer Avion points Earn points once your account is enrolled in a rewards program.",
+            "Your high interest account features Save without the effort.",
+            "An easy way to manage funds Account at a glance Open an account for Canadians.",
+            "With a rewards program, enjoy benefits when you open an eligible bank account.",
+            "Funds are available after redemption, or in the case of Another Income Builder GIC, after its payment date.",
+            "Legal Bug Ability to set up automatic savings and other generic account tools.",
+            "Find a Branch Come see us anytime to open your account.",
+            "Earn 4.60% interest for 3 months. Offer expires October 27, 2026.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_description(
+                    field_name="description_short",
+                    value=value,
+                    product_type_family="chequing",
+                )
+            )
+        for value in (
+            "To apply, you’ll need: A valid ID and your personal information.",
+            "RBC will automatically apply the highest value rebate you are eligible for each month.",
+            "If you already have an eligible account, sign in to activate the Value Program.",
+            "Each account owner is eligible for one fee-waiver.",
+        ):
+            self.assertTrue(
+                _looks_like_non_value_eligibility(
+                    field_name="eligibility_text",
+                    value=value,
+                    product_name="Example Account",
+                )
+            )
+        self.assertTrue(
+            _looks_like_broad_page_copy(
+                field_name="notes",
+                value="Other conditions and exceptions may apply; refer to the account disclosures for full details.",
+            )
+        )
+        self.assertTrue(
+            _looks_like_broad_page_copy(
+                field_name="notes",
+                value="Legal Disclaimer footnote Some limitations apply.",
+            )
+        )
+
+    def test_savings_promotion_without_ongoing_rate_requires_review(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="savings",
+            product_type_family=None,
+            subtype_code="standard",
+            product_name="Promotional Savings Account",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="deposit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={"promotional_rate": 4.6, "public_display_rate": 4.6},
+            evidence_links=[],
+        )
+
+        self.assertIn("required_field_missing", issues)
+
+    def test_dynamic_gic_rate_mechanism_satisfies_rate_requiredness_without_numeric_guess(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="gic",
+            product_type_family=None,
+            subtype_code="redeemable",
+            product_name="Prime-Linked GIC",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="deposit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={
+                "minimum_deposit": 5000,
+                "term_length_text": "1 year",
+                "interest_rate_summary": "Variable interest rate linked to changes in Prime.",
+            },
+            evidence_links=[],
+        )
+
+        self.assertNotIn("required_field_missing", issues)
+
+    def test_multi_term_gic_table_satisfies_term_requiredness_without_scalar_term(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="gic",
+            product_type_family=None,
+            subtype_code="non_redeemable",
+            product_name="Multi-Term GIC",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="deposit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={
+                "minimum_deposit": 1000,
+                "standard_rate": 2.7,
+                "term_rate_table": [
+                    {"term_label": "1 year", "term_length_days": 365, "rate": 2.7},
+                    {"term_label": "2 years", "term_length_days": 730, "rate": 2.8},
+                ],
+            },
+            evidence_links=[],
+        )
+
+        self.assertNotIn("required_field_missing", issues)
+
+    def test_generic_gic_rate_marketing_copy_does_not_satisfy_rate_requiredness(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="gic",
+            product_type_family=None,
+            subtype_code="other",
+            product_name="Special GIC",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="deposit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={
+                "minimum_deposit": 1000,
+                "term_length_text": "1 year",
+                "interest_rate_summary": "Enjoy a competitive interest rate.",
+            },
+            evidence_links=[],
+        )
+
+        self.assertIn("required_field_missing", issues)
+
+    def test_product_name_restores_official_acronym_and_punctuation_formatting(self) -> None:
+        notes: list[str] = []
+        value = _refine_product_name_from_source_metadata(
+            product_name="Rbc U S Personal Account",
+            source_metadata={
+                "discovery_metadata": {
+                    "primary_heading": "RBC U.S. Personal Account",
+                    "page_title": "U.S. Dollar Chequing Account | Example Bank",
+                }
+            },
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(value, "RBC U.S. Personal Account")
+        self.assertIn("Restored official product_name formatting", " ".join(notes))
+
+        notes = []
+        value = _refine_product_name_from_source_metadata(
+            product_name="Example Non-Redeemable GIC",
+            source_metadata={
+                "discovery_metadata": {
+                    "primary_heading": "Example Non-Redeemable GIC ⓘ",
+                    "page_title": "Example Non-Redeemable GIC | Example Bank",
+                }
+            },
+            runtime_notes=notes,
+        )
+        self.assertEqual(value, "Example Non-Redeemable GIC")
+
+    def test_widget_product_name_uses_official_discovery_heading(self) -> None:
+        notes: list[str] = []
+
+        value = _refine_product_name_from_source_metadata(
+            product_name="GIC Tab le",
+            source_metadata={
+                "discovery_metadata": {
+                    "primary_heading": "Tax-Free Guaranteed Investment",
+                    "page_title": "Tax-Free Guaranteed Investment | Example Bank",
+                }
+            },
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(value, "Tax-Free Guaranteed Investment")
+        self.assertIn("Replaced generic product_name", " ".join(notes))
+
+        notes = []
+        value = _refine_product_name_from_source_metadata(
+            product_name="Current GIC interest rates",
+            source_metadata={
+                "discovery_metadata": {
+                    "primary_heading": "Tax-Free Guaranteed Investment",
+                    "page_title": "Tax-Free Guaranteed Investment | Example Bank",
+                }
+            },
+            runtime_notes=notes,
+        )
+        self.assertEqual(value, "Tax-Free Guaranteed Investment")
+
+    def test_marketing_section_product_name_uses_official_discovery_heading(self) -> None:
+        notes: list[str] = []
+        value = _refine_product_name_from_source_metadata(
+            product_name="Benefits Of Banking With TD",
+            source_metadata={
+                "discovery_metadata": {
+                    "primary_heading": "U.S. Daily Interest Chequing Account",
+                    "page_title": "Open a TD U.S. Dollar Account | TD Canada Trust",
+                }
+            },
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(value, "U.S. Daily Interest Chequing Account")
+
+    def test_ongoing_extra_bonus_adds_to_regular_public_rate_without_marking_promo(self) -> None:
+        payload: dict[str, object] = {"standard_rate": 0.01, "public_display_rate": 0.01}
+        metadata: dict[str, object] = {}
+        normalized_values: dict[str, object] = dict(payload)
+        links = [
+            NormalizationEvidenceLink(
+                field_name="public_display_rate",
+                candidate_value="0.01",
+                evidence_chunk_id="chunk-smart-savings",
+                evidence_text_excerpt=(
+                    "Monthly account fee $0. Regular interest rate 0.01%. "
+                    "Bonus interest rate - Earn an extra 0.49% interest if enrolled in a Smart Savings Tool."
+                ),
+                source_document_id="src-001",
+                source_snapshot_id="snap-001",
+                citation_confidence=0.99,
+                model_execution_id=None,
+                anchor_type="section",
+                anchor_value="At a glance",
+                page_no=None,
+                chunk_index=1,
+            )
+        ]
+        notes: list[str] = []
+
+        _align_ongoing_additive_bonus_total(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["standard_rate"], 0.01)
+        self.assertEqual(payload["public_display_rate"], 0.5)
+        self.assertNotIn("promotional_rate", payload)
+        self.assertEqual(metadata["public_display_rate"]["normalization_method"], "ongoing_additive_bonus_total_alignment")
+
+    def test_gic_exact_posted_and_promotional_labels_repair_truncated_rate(self) -> None:
+        payload: dict[str, object] = {
+            "standard_rate": 0.0,
+            "public_display_rate": 0.0,
+            "term_rate_table": [
+                {"term_label": "1 year", "term_length_days": 365, "rate": 2.0}
+            ],
+        }
+        metadata: dict[str, object] = {}
+        normalized_values: dict[str, object] = dict(payload)
+        source_link = NormalizationEvidenceLink(
+            field_name="standard_rate",
+            candidate_value="0.0",
+            evidence_chunk_id="chunk-variable-gic",
+            evidence_text_excerpt=(
+                "CIBC Variable Rate GIC Promotional Rate 00% on a 1-year GIC. "
+                "2.00% 1-year CIBC Variable Rate GIC. Posted rate: 1.75%."
+            ),
+            source_document_id="src-variable-gic",
+            source_snapshot_id="snap-variable-gic",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="rates",
+            page_no=None,
+            chunk_index=2,
+        )
+        links = [source_link]
+
+        _align_gic_labeled_posted_and_promotional_rates(
+            product_type_family="gic",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["standard_rate"], 1.75)
+        self.assertEqual(payload["promotional_rate"], 2.0)
+        self.assertEqual(payload["public_display_rate"], 2.0)
+        self.assertTrue(payload["introductory_rate_flag"])
+
+    def test_cleaner_removes_promotion_mapped_as_standard_rate(self) -> None:
+        payload: dict[str, object] = {
+            "standard_rate": 4.5,
+            "promotional_rate": 4.5,
+            "public_display_rate": 4.5,
+        }
+        normalized_values = dict(payload)
+        mapping = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+        evidence = "Earn 4.50% for 5 months with this New Client offer."
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping,
+            evidence_context_by_field={field_name: evidence for field_name in payload},
+            evidence_excerpt_by_field={field_name: evidence for field_name in payload},
+        )
+
+        self.assertNotIn("standard_rate", payload)
+        self.assertEqual(payload["promotional_rate"], 4.5)
+        self.assertEqual(payload["public_display_rate"], 4.5)
+
+    def test_product_header_standard_rate_survives_adjacent_promotional_offer(self) -> None:
+        evidence = (
+            "Savings Account 0.30% Interest rate $0 Monthly fee $0 Minimum balance "
+            "Limited-time offer Earn 4.50% for 5 months."
+        )
+        payload: dict[str, object] = {
+            "standard_rate": 0.3,
+            "promotional_rate": 4.5,
+            "public_display_rate": 4.5,
+        }
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            evidence_context_by_field={field_name: evidence for field_name in payload},
+            evidence_excerpt_by_field={
+                "standard_rate": evidence,
+                "promotional_rate": evidence,
+                "public_display_rate": evidence,
+            },
+        )
+
+        self.assertEqual(payload["standard_rate"], 0.3)
+        self.assertEqual(payload["promotional_rate"], 4.5)
+
+    def test_account_copy_cleanup_keeps_only_decision_ready_channels_and_transaction_rule(self) -> None:
+        payload = {
+            "product_name": "Example Every Day Savings Account",
+            "description_short": (
+                "No transfer fee to send money. Pay your friends back or chip in for pizza using a transfer. "
+                "Additional account benefits Enjoy online statements."
+            ),
+            "withdrawal_limit_text": (
+                "Account Fees Monthly Fee $0 Transactions included per month 2 1 "
+                "Additional Transactions 2 $3.00 each Free Transfers Unlimited Foreign ATM Fee $5.00 each"
+            ),
+            "application_method": (
+                "Secure Open online Get account Book an appointment Meet with a banking specialist in person "
+                "at the branch closest to you."
+            ),
+        }
+        normalized_values = dict(payload)
+        metadata = {field_name: {} for field_name in payload}
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=metadata,
+            runtime_notes=[],
+            evidence_context_by_field={},
+            evidence_excerpt_by_field={},
+        )
+
+        self.assertNotIn("description_short", payload)
+        self.assertEqual(
+            payload["withdrawal_limit_text"],
+            "1 transaction per month included; additional transactions cost $3.00 each.",
+        )
+        self.assertEqual(payload["application_method"], "Online or at a branch.")
+
+    def test_savings_cleanup_removes_offer_eligibility_award_copy_and_calculator_prose(self) -> None:
+        payload: dict[str, object] = {
+            "description_short": "Confidently save with Ratehub's best RRSP savings account.",
+            "eligibility_text": (
+                "The Tangerine New Client Two Rate Savings Offer is available to new clients who have a "
+                "Client Number created during the offer period and open an Eligible Savings Account within 60 days."
+            ),
+            "interest_calculation_method": (
+                "Estimator only. Calculations are estimates based on the current interest rate of 0.30%, "
+                "based on interest calculated daily and paid monthly, assuming no withdrawals."
+            ),
+        }
+        normalized_values = dict(payload)
+        metadata = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=metadata,
+        )
+
+        self.assertEqual(
+            payload,
+            {"interest_calculation_method": "Interest is calculated daily and paid monthly."},
+        )
+        self.assertEqual(
+            metadata["interest_calculation_method"]["normalization_method"],
+            "daily_monthly_interest_method_cleanup",
+        )
+
+    def test_cleaner_rejects_direct_deposit_threshold_mapped_as_monthly_fee(self) -> None:
+        payload: dict[str, object] = {"monthly_fee": 100.0, "public_display_fee": 100.0}
+        normalized_values = dict(payload)
+        mapping = {field_name: {"normalized_value": value} for field_name, value in payload.items()}
+        evidence = (
+            "Open a No Fee Chequing Account and set up an eligible direct deposit today of "
+            "$100 or more for 3 straight months. Plus, you'll pay no monthly fees."
+        )
+
+        _clean_product_context_fields(
+            product_type_family="chequing",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping,
+            evidence_context_by_field={field_name: evidence for field_name in payload},
+            evidence_excerpt_by_field={field_name: evidence for field_name in payload},
+        )
+
+        self.assertNotIn("monthly_fee", payload)
+        self.assertNotIn("public_display_fee", payload)
+
+    def test_percentage_value_requires_exact_grounding_in_its_evidence(self) -> None:
+        self.assertTrue(
+            _percentage_value_absent_from_evidence(
+                field_name="interest_rate",
+                value=20.0,
+                context="Very competitive secured rates. Minimum payments could be as low as interest only 2.",
+            )
+        )
+        for value, context in (
+            (1.0, "Get a lower interest rate of Prime + 1% for your line of credit."),
+            (0.5, "Interest at Scotiabank prime plus 0.50% will accrue monthly."),
+            (0.0, "No interest is payable on this chequing account."),
+        ):
+            with self.subTest(value=value):
+                self.assertFalse(
+                    _percentage_value_absent_from_evidence(
+                        field_name="interest_rate",
+                        value=value,
+                        context=context,
+                    )
+                )
+
+    def test_dynamic_numeric_fields_require_exact_unit_bearing_evidence(self) -> None:
+        prime_margin_link = NormalizationEvidenceLink(
+            field_name="interest_rate_summary",
+            candidate_value="Scotiabank Prime + 1%",
+            evidence_chunk_id="chunk-prime-margin",
+            evidence_text_excerpt="Get a lower interest rate of Scotiabank Prime + 1% for your line of credit.",
+            source_document_id="doc-loc",
+            source_snapshot_id="snap-loc",
+            citation_confidence=0.95,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Interest rate",
+            page_no=None,
+            chunk_index=0,
+        )
+        margin_context = _find_dynamic_numeric_evidence_context(
+            field_name="interest_rate",
+            value=1.0,
+            evidence_links=[prime_margin_link],
+        )
+
+        self.assertIn("Prime + 1%", margin_context)
+        self.assertTrue(
+            _looks_like_non_rate_numeric_context(
+                field_name="interest_rate",
+                value=1.0,
+                context=margin_context,
+            )
+        )
+        self.assertTrue(
+            _dynamic_numeric_value_is_ungrounded(
+                field_name="interest_rate",
+                value=20.0,
+                context="",
+                dynamic_field_names={"interest_rate"},
+            )
+        )
+
+        deposit_link = NormalizationEvidenceLink(
+            **{
+                **prime_margin_link.__dict__,
+                "field_name": "minimum_deposit",
+                "candidate_value": "$1,000",
+                "evidence_chunk_id": "chunk-minimum-deposit",
+                "evidence_text_excerpt": "A minimum deposit of $1,000 is required.",
+            }
+        )
+        self.assertIn(
+            "$1,000",
+            _find_dynamic_numeric_evidence_context(
+                field_name="minimum_deposit",
+                value=1000,
+                evidence_links=[deposit_link],
+            ),
+        )
+
+    def test_cleaner_removes_ungrounded_percentage_value(self) -> None:
+        payload: dict[str, object] = {"interest_rate": 20.0}
+        normalized_values: dict[str, object] = dict(payload)
+        mapping = {"interest_rate": {"normalized_value": 20.0}}
+        notes: list[str] = []
+
+        _clean_product_context_fields(
+            product_type_family="line-of-credit",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping,
+            runtime_notes=notes,
+            evidence_context_by_field={
+                "interest_rate": "Very competitive secured rates. Minimum payments could be as low as interest only 2."
+            },
+            evidence_excerpt_by_field={
+                "interest_rate": "Very competitive secured rates. Minimum payments could be as low as interest only 2."
+            },
+        )
+
+        self.assertNotIn("interest_rate", payload)
+        self.assertNotIn("interest_rate", normalized_values)
+        self.assertNotIn("interest_rate", mapping)
+        self.assertTrue(any("ungrounded" in note for note in notes))
+
+    def test_dynamic_numeric_field_without_direct_evidence_is_removed_even_without_percentage_check(self) -> None:
+        payload: dict[str, object] = {"interest_rate": 20.0}
+        _clean_product_context_fields(
+            product_type_family="line-of-credit",
+            candidate_payload=payload,
+            evidence_context_by_field={"interest_rate": ""},
+            evidence_excerpt_by_field={"interest_rate": ""},
+            dynamic_field_names={"interest_rate"},
+            enforce_percentage_evidence_grounding=False,
+        )
+        self.assertNotIn("interest_rate", payload)
+
+    def test_implausible_monthly_account_fee_routes_to_validation_error(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="chequing",
+            product_type_family="chequing",
+            subtype_code="standard",
+            product_name="Basic Bank Account",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="deposit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={"monthly_fee": 4000.0},
+            evidence_links=[],
+        )
+        self.assertIn("invalid_numeric_range", issues)
+
+    def test_premium_credit_card_annual_fee_uses_an_annual_not_monthly_limit(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="credit-card",
+            product_type_family="credit-card",
+            subtype_code="premium",
+            product_name="Example Infinite Privilege Card",
+            country_code="CA",
+            bank_code="BANK",
+            product_family="credit",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={"annual_fee": 599.0},
+            evidence_links=[],
+        )
+        self.assertNotIn("invalid_numeric_range", issues)
+
+    def test_profile_specific_numeric_extensions_share_rate_and_fee_range_guards(self) -> None:
+        common = {
+            "product_type": "savings",
+            "product_type_family": "savings",
+            "subtype_code": "high_interest",
+            "product_name": "High Interest Savings Account",
+            "country_code": "CA",
+            "bank_code": "BANK",
+            "product_family": "deposit",
+            "source_language": "en",
+            "currency": "CAD",
+            "evidence_links": [],
+        }
+        for payload in ({"regular_interest_rate": 60.0}, {"transaction_fee": 500.0}):
+            with self.subTest(payload=payload):
+                issues = _compute_validation_issue_codes(candidate_payload=payload, **common)
+                self.assertIn("invalid_numeric_range", issues)
+
     def test_term_rate_text_normalizes_to_typed_rows(self) -> None:
         rows = _normalize_term_rate_table("1 Year 3.30%, 5 Years 4.00%")
 
@@ -45,6 +891,82 @@ class NormalizationServiceTests(unittest.TestCase):
                 {"term_label": "1 Year", "term_length_days": 365, "rate": 3.3, "minimum_deposit": None, "notes": None},
                 {"term_label": "5 Years", "term_length_days": 1825, "rate": 4.0, "minimum_deposit": None, "notes": None},
             ],
+        )
+
+    def test_multi_term_gic_uses_disclosed_one_year_rate_as_standard_comparison(self) -> None:
+        payload = {
+            "standard_rate": 2.55,
+            "base_12_month_rate": 3.65,
+            "public_display_rate": 3.65,
+            "term_rate_table": [
+                {"term_label": "90 Day", "term_length_days": 90, "rate": 2.55},
+                {"term_label": "1 Year", "term_length_days": 365, "rate": 3.15},
+                {"term_label": "5 Year", "term_length_days": 1825, "rate": 3.65},
+            ],
+        }
+        metadata: dict[str, object] = {}
+        values: dict[str, object] = {}
+        notes: list[str] = []
+
+        _align_gic_representative_rates_from_term_table(
+            product_type_family="gic",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=values,
+            evidence_links_for_output=[],
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["standard_rate"], 3.15)
+        self.assertEqual(payload["base_12_month_rate"], 3.15)
+        self.assertEqual(payload["public_display_rate"], 3.65)
+        self.assertTrue(any("12-month" in note for note in notes))
+
+    def test_savings_header_rate_replaces_unrelated_prime_rate(self) -> None:
+        payload = {"standard_rate": 4.45, "promotional_rate": 4.6, "public_display_rate": 4.6}
+        metadata: dict[str, object] = {}
+        values: dict[str, object] = {}
+        notes: list[str] = []
+        links = [
+            NormalizationEvidenceLink(
+                field_name="monthly_fee",
+                candidate_value="0",
+                evidence_chunk_id="chunk-header",
+                evidence_text_excerpt=(
+                    "RSP Savings Account Save for retirement. 0.30% Interest rate "
+                    "$0 Monthly fee $0 Minimum balance Limited-time offer Earn 4.60% for 5 months."
+                ),
+                source_document_id="source-detail",
+                source_snapshot_id="snapshot-detail",
+                citation_confidence=0.95,
+                model_execution_id=None,
+                anchor_type="heading",
+                anchor_value="RSP Savings Account",
+                page_no=None,
+                chunk_index=0,
+            )
+        ]
+
+        _align_savings_labeled_header_standard_rate(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["standard_rate"], 0.3)
+        self.assertEqual(payload["promotional_rate"], 4.6)
+        self.assertEqual(payload["public_display_rate"], 4.6)
+        self.assertEqual(metadata["standard_rate"]["normalization_method"], "savings_labeled_header_standard_rate_alignment")
+
+    def test_fractional_year_term_normalizes_without_becoming_five_year(self) -> None:
+        rows = _normalize_term_rate_table("1 Year 3.15%, 1.5 Year 3.25%, 5 Years 3.65%")
+
+        self.assertEqual(
+            [(row["term_label"], row["term_length_days"], row["rate"]) for row in rows],
+            [("1 Year", 365, 3.15), ("1.5 Year", 548, 3.25), ("5 Years", 1825, 3.65)],
         )
 
     def test_term_rate_range_does_not_collapse_to_range_end(self) -> None:
@@ -92,6 +1014,747 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertFalse(_rate_evidence_is_account_context(value="4.10", context="1 year GIC rate 4.10%"))
         self.assertEqual(_extract_rate_percentages(context, product_type_family="gic"), [])
         self.assertEqual([float(value) for value in _extract_rate_percentages(context, product_type_family="savings")], [2.75])
+
+    def test_rate_fallback_rejects_market_scenario_return_with_distant_context_marker(self) -> None:
+        context = (
+            "RBC Equity-Linked GIC Scenario 1: Market is Up. The reference value of the underlying index "
+            "is measured at the start and end of the five-year term. In this illustrative example, the "
+            "index moves from 100 to 120 and the depositor receives the original principal plus a 20% "
+            "return on the investment at maturity."
+        )
+
+        self.assertGreater(context.index("20%") - context.index("Scenario 1"), 90)
+        self.assertEqual(_extract_rate_percentages(context, product_type_family="gic"), [])
+
+    def test_public_display_rate_uses_total_promo_instead_of_bonus_component(self) -> None:
+        promo_link = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="4.6",
+            evidence_chunk_id="chunk-promo",
+            evidence_text_excerpt=(
+                "Regular Interest Rate 0.55% plus Bonus Interest Rate 4.05%; "
+                "the Promotional Interest Rate would be 4.60% per annum."
+            ),
+            source_document_id="source-promo",
+            source_snapshot_id="snapshot-promo",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Offer",
+            page_no=None,
+            chunk_index=2,
+        )
+        stale_display_link = NormalizationEvidenceLink(
+            field_name="public_display_rate",
+            candidate_value="4.05",
+            evidence_chunk_id="chunk-bonus",
+            evidence_text_excerpt="The Bonus Interest Rate is 4.05% per annum.",
+            source_document_id="source-bonus",
+            source_snapshot_id="snapshot-bonus",
+            citation_confidence=0.8,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Legal",
+            page_no=None,
+            chunk_index=3,
+        )
+        payload: dict[str, object] = {"promotional_rate": 4.6, "public_display_rate": 4.05}
+        links = [promo_link, stale_display_link]
+
+        _align_public_display_rate(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata={},
+            normalized_values_for_links={},
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["public_display_rate"], 4.6)
+        display_links = [link for link in links if link.field_name == "public_display_rate"]
+        self.assertEqual(len(display_links), 1)
+        self.assertEqual(display_links[0].evidence_chunk_id, "chunk-promo")
+
+    def test_split_gic_page_row_completes_table_and_drives_highest_display_rate(self) -> None:
+        first_page = NormalizationEvidenceLink(
+            field_name="standard_rate",
+            candidate_value="2.55",
+            evidence_chunk_id="chunk-page-2",
+            evidence_text_excerpt="Current GIC interest rates Term Rate 90 Day 2.55%",
+            source_document_id="source-gic",
+            source_snapshot_id="snapshot-gic",
+            citation_confidence=0.98,
+            model_execution_id=None,
+            anchor_type="page",
+            anchor_value="page-2",
+            page_no=2,
+            chunk_index=2,
+        )
+        remaining_page = NormalizationEvidenceLink(
+            field_name="term_rate_table",
+            candidate_value="table",
+            evidence_chunk_id="chunk-page-3",
+            evidence_text_excerpt="180 Day 2.65% 1 Year 3.15% 1.5 Year 3.25% 5 Year 3.65%",
+            source_document_id="source-gic",
+            source_snapshot_id="snapshot-gic",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="page",
+            anchor_value="page-3",
+            page_no=3,
+            chunk_index=3,
+        )
+        payload: dict[str, object] = {
+            "standard_rate": 2.55,
+            "public_display_rate": 2.55,
+            "term_rate_table": [
+                {"term_label": "180 day", "term_length_days": 180, "rate": 2.65},
+                {"term_label": "1 year", "term_length_days": 365, "rate": 3.15},
+                {"term_label": "1.5 year", "term_length_days": 548, "rate": 3.25},
+                {"term_label": "5 year", "term_length_days": 1825, "rate": 3.65},
+            ],
+        }
+        normalized_values = dict(payload)
+        metadata: dict[str, object] = {}
+        links = [first_page, remaining_page]
+        notes: list[str] = []
+
+        _complete_gic_term_rate_table_from_split_evidence(
+            product_type_family="gic",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+        _align_public_display_rate(
+            product_type_family="gic",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["term_rate_table"][0]["term_label"], "90 day")
+        self.assertEqual(payload["term_rate_table"][2]["term_label"], "1 year")
+        self.assertEqual(payload["public_display_rate"], 3.65)
+        self.assertEqual(metadata["term_rate_table"]["normalization_method"], "split_evidence_term_table_completion")
+        self.assertEqual(
+            {link.evidence_chunk_id for link in links if link.field_name == "term_rate_table"},
+            {"chunk-page-2", "chunk-page-3"},
+        )
+
+    def test_missing_gic_table_is_recovered_only_from_exact_product_evidence(self) -> None:
+        target_link = NormalizationEvidenceLink(
+            field_name="minimum_deposit",
+            candidate_value="500",
+            evidence_chunk_id="chunk-target-table",
+            evidence_text_excerpt=(
+                "Example Non-Redeemable GIC Terms and rates Minimum investment of $500 "
+                "Term Rate 1 year 2.70% 2 years 2.75% 3 years 2.85% 4 years 3.00% 5 years 3.10%"
+            ),
+            source_document_id="source-target",
+            source_snapshot_id="snapshot-target",
+            citation_confidence=0.98,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="terms-and-rates",
+            page_no=None,
+            chunk_index=3,
+        )
+        sibling_link = NormalizationEvidenceLink(
+            field_name="standard_rate",
+            candidate_value="4.10",
+            evidence_chunk_id="chunk-sibling-table",
+            evidence_text_excerpt="Example USD GIC Term Rate 1 year 3.90% 5 years 4.10%",
+            source_document_id="source-sibling",
+            source_snapshot_id="snapshot-sibling",
+            citation_confidence=0.95,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="terms-and-rates",
+            page_no=None,
+            chunk_index=4,
+        )
+        payload: dict[str, object] = {
+            "product_name": "Example Non-Redeemable GIC ⓘ",
+            "standard_rate": 2.7,
+            "minimum_deposit": 500,
+        }
+        normalized_values = dict(payload)
+        metadata: dict[str, object] = {}
+        links = [target_link, sibling_link]
+        notes: list[str] = []
+
+        _complete_gic_term_rate_table_from_split_evidence(
+            product_type_family="gic",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual([row["rate"] for row in payload["term_rate_table"]], [2.7, 2.75, 2.85, 3.0, 3.1])
+        self.assertEqual(
+            {link.evidence_chunk_id for link in links if link.field_name == "term_rate_table"},
+            {"chunk-target-table"},
+        )
+
+    def test_gic_legal_fee_and_rate_calculator_copy_are_not_descriptions(self) -> None:
+        for description in (
+            (
+                "Fair fees mean they are disclosed in advance. Registered Accounts have no fees while your funds "
+                "are with us. If you transfer your funds, a fee will apply."
+            ),
+            (
+                "180 Day 2.65% 270 Day 3.00% 1 Year 3.15% 1.5 Year 3.25% 5 Year 3.65% "
+                "GIC Interest Calculator See how much interest you'll earn in your GIC."
+            ),
+            "You may provide us with instructions as to what to do with your GIC proceeds upon maturity.",
+        ):
+            payload = {"product_name": "Example GIC", "description_short": description}
+            _clean_product_context_fields(product_type_family="gic", candidate_payload=payload)
+            self.assertNotIn("description_short", payload)
+
+        acquisition = {
+            "product_name": "Example Non-Redeemable GIC",
+            "description_short": (
+                "A personal bank account to fund your Investment Account Need an account? "
+                "Apply for a personal bank account Meet with us or call us."
+            ),
+            "deposit_insurance": (
+                "Get started Meet with us Call us Find a banking centre "
+                "Example Bank is a member of Canada Deposit Insurance Corporation (CDIC)."
+            ),
+        }
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=acquisition)
+        self.assertNotIn("description_short", acquisition)
+        self.assertEqual(
+            acquisition["deposit_insurance"],
+            "Example Bank is a member of Canada Deposit Insurance Corporation (CDIC).",
+        )
+
+        flattened = {
+            "product_name": "Example Savings Account",
+            "description_short": (
+                "Open an Accountfor Canadians. Set up an account that makes iteasier to save, "
+                "and enjoy thechance to growand manage funds atany time."
+            ),
+        }
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=flattened)
+        self.assertEqual(
+            flattened["description_short"],
+            "Open an Account for Canadians. Set up an account that makes it easier to save, "
+            "and enjoy the chance to grow and manage funds at any time.",
+        )
+
+        channel_and_offer_copy = (
+            "You can open this account online via Online Banking or in person at a branch. "
+            "If you open it online, the bank may ask you to verify your ID at a branch."
+        )
+        current_acquisition_offer = (
+            "Open an Unlimited Banking Account and Get a New Tablet. Offer Ends November 2, 2026. "
+            "Qualifying Criteria and other Conditions Apply."
+        )
+        for description in (channel_and_offer_copy, current_acquisition_offer):
+            payload = {"product_name": "Example Banking Account", "description_short": description}
+            _clean_product_context_fields(product_type_family="chequing", candidate_payload=payload)
+            self.assertNotIn("description_short", payload)
+
+        truncated_eligibility = {
+            "product_name": "Example Banking Account",
+            "eligibility_text": (
+                "Example Benefits is the way we describe all of the powerful benefits you can get just by having an eligible"
+            ),
+        }
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=truncated_eligibility)
+        self.assertNotIn("eligibility_text", truncated_eligibility)
+
+        sibling_audience = {
+            "product_name": "High Interest Savings Account",
+            "description_short": (
+                "Savings Accounts for Kids. It’s never too early for kids to start saving. "
+                "A children’s savings account can help kids develop smart money habits."
+            ),
+        }
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=sibling_audience)
+        self.assertNotIn("description_short", sibling_audience)
+
+    def test_public_display_fee_uses_directly_grounded_monthly_fee(self) -> None:
+        monthly_link = NormalizationEvidenceLink(
+            field_name="monthly_fee",
+            candidate_value="4.0",
+            evidence_chunk_id="chunk-target-fee",
+            evidence_text_excerpt="Practical Chequing Account $4 per month. Includes 12 transactions.",
+            source_document_id="source-practical",
+            source_snapshot_id="snapshot-practical",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="fees",
+            page_no=None,
+            chunk_index=2,
+        )
+        wrong_display_link = NormalizationEvidenceLink(
+            field_name="public_display_fee",
+            candidate_value="17.95",
+            evidence_chunk_id="chunk-comparison",
+            evidence_text_excerpt="Performance Chequing Account $17.95 per month.",
+            source_document_id="source-practical",
+            source_snapshot_id="snapshot-practical",
+            citation_confidence=0.7,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="comparison",
+            page_no=None,
+            chunk_index=5,
+        )
+        payload: dict[str, object] = {"monthly_fee": 4.0, "public_display_fee": 17.95}
+        links = [monthly_link, wrong_display_link]
+
+        _align_public_display_fee(
+            product_type_family="chequing",
+            candidate_payload=payload,
+            field_mapping_metadata={},
+            normalized_values_for_links={},
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["public_display_fee"], 4.0)
+        display_links = [link for link in links if link.field_name == "public_display_fee"]
+        self.assertEqual(len(display_links), 1)
+        self.assertEqual(display_links[0].evidence_chunk_id, "chunk-target-fee")
+
+    def test_adjacent_plan_fee_waiver_cannot_set_target_minimum_balance(self) -> None:
+        payload: dict[str, object] = {
+            "monthly_fee": 4.0,
+            "minimum_balance": 4000.0,
+            "fee_waiver_condition": (
+                "Monthly fee 17.95 is waived to 0.00 with a 4000.00 minimum balance."
+            ),
+        }
+        links = [
+            NormalizationEvidenceLink(
+                field_name=field_name,
+                candidate_value=str(value),
+                evidence_chunk_id="chunk-comparison",
+                evidence_text_excerpt=(
+                    "Practical $4 per month. Performance $17.95 or $0 with a $4,000 minimum balance."
+                ),
+                source_document_id="source-practical",
+                source_snapshot_id="snapshot-practical",
+                citation_confidence=0.75,
+                model_execution_id=None,
+                anchor_type="section",
+                anchor_value="comparison",
+                page_no=None,
+                chunk_index=5,
+            )
+            for field_name, value in (
+                ("minimum_balance", 4000.0),
+                ("fee_waiver_condition", payload["fee_waiver_condition"]),
+            )
+        ]
+
+        _clean_chequing_fee_waiver_consistency(
+            product_type_family="chequing",
+            candidate_payload=payload,
+            field_mapping_metadata={
+                "minimum_balance": {},
+                "fee_waiver_condition": {},
+            },
+            normalized_values_for_links={
+                "minimum_balance": 4000.0,
+                "fee_waiver_condition": payload["fee_waiver_condition"],
+            },
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertNotIn("minimum_balance", payload)
+        self.assertNotIn("fee_waiver_condition", payload)
+        self.assertEqual(links, [])
+
+    def test_conditional_zero_is_aligned_to_waiver_disclosures_positive_base_fee(self) -> None:
+        payload: dict[str, object] = {
+            "monthly_fee": 0.0,
+            "public_display_fee": 0.0,
+            "minimum_balance": 6000.0,
+            "fee_waiver_condition": (
+                "Monthly fee 30.95 is waived to 0.00 with a 6000.00 minimum balance."
+            ),
+        }
+        waiver_link = NormalizationEvidenceLink(
+            field_name="fee_waiver_condition",
+            candidate_value=str(payload["fee_waiver_condition"]),
+            evidence_chunk_id="chunk-fee-table",
+            evidence_text_excerpt=(
+                "Monthly fee $30.95 or $0 with a minimum daily account balance of $6,000."
+            ),
+            source_document_id="source-fees",
+            source_snapshot_id="snapshot-fees",
+            citation_confidence=0.82,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="fees",
+            page_no=None,
+            chunk_index=2,
+        )
+        metadata = {"monthly_fee": {}, "public_display_fee": {}}
+        normalized_values = {"monthly_fee": 0.0, "public_display_fee": 0.0}
+        links = [waiver_link]
+
+        _clean_chequing_fee_waiver_consistency(
+            product_type_family="chequing",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["monthly_fee"], 30.95)
+        self.assertEqual(payload["public_display_fee"], 30.95)
+        self.assertEqual(metadata["monthly_fee"]["normalization_method"], "conditional_zero_base_fee_alignment")
+        self.assertEqual(
+            {link.field_name for link in links},
+            {"fee_waiver_condition", "monthly_fee", "public_display_fee"},
+        )
+
+    def test_fee_waiver_threshold_repairs_zero_balance_and_audience_copy_does_not_tag_product(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "CIBC Smart Account",
+            "monthly_fee": 16.95,
+            "minimum_balance": 0.0,
+            "fee_waiver_condition": (
+                "Monthly fee 16.95 is waived to 0.00 with a 4000.00 minimum balance."
+            ),
+            "eligibility_text": "Students and newcomers can receive separate account benefits.",
+        }
+        normalized_values = {"minimum_balance": 0.0}
+        metadata = {"minimum_balance": {}}
+        notes: list[str] = []
+
+        _align_minimum_balance_to_fee_waiver(
+            product_type_family="chequing",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=[],
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["minimum_balance"], 4000.0)
+        self.assertEqual(normalized_values["minimum_balance"], 4000.0)
+        self.assertEqual(_infer_target_customer_tags(payload), [])
+        self.assertTrue(
+            _looks_like_non_value_eligibility(
+                field_name="eligibility_text",
+                value="Skilled trades Take advantage of offers and perks for eligible tradespeople",
+            )
+        )
+        self.assertTrue(
+            _looks_like_non_value_eligibility(
+                field_name="eligibility_text",
+                value="Qualifying actions apply",
+            )
+        )
+        for non_eligibility in (
+            "Give us a call Eligible for CDIC Insurance 1 Regular Interest is calculated daily",
+            "How to apply Talk to an advisor",
+            (
+                "Open a Money Master Savings Account and/or a new eligible Credit Card Account "
+                "and complete certain qualifying transactions/conditions"
+            ),
+            "Open a No Fee Chequing Account and set up an eligible direct deposit of $100 for 3 straight months",
+        ):
+            with self.subTest(non_eligibility=non_eligibility):
+                self.assertTrue(
+                    _looks_like_non_value_eligibility(
+                        field_name="eligibility_text",
+                        value=non_eligibility,
+                    )
+                )
+
+        payload = {
+            "description_short": (
+                "Accounts No Fee Chequing Account Accounts No Fee Chequing Account Welcome Offer"
+            )
+        }
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=payload)
+        self.assertEqual(payload, {})
+        for breadcrumb in (
+            "Accounts High Interest Savings Account Accounts Savings Account",
+            "Accounts Simplii Financial USD Savings Account Accounts Simplii Financial USD Savings Account",
+        ):
+            payload = {"description_short": breadcrumb}
+            _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+            self.assertEqual(payload, {})
+
+    def test_advertised_promotional_total_outranks_additive_components(self) -> None:
+        total_link = NormalizationEvidenceLink(
+            field_name="interest_rate_summary",
+            candidate_value="Earn up to 5.00% for the first 3 months.",
+            evidence_chunk_id="chunk-total",
+            evidence_text_excerpt=(
+                "Scotia High Interest Savings Account. Special offer. "
+                "You can earn up to 5.00% for the first 3 months."
+            ),
+            source_document_id="source-hisa",
+            source_snapshot_id="snapshot-hisa",
+            citation_confidence=0.92,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Special offer",
+            page_no=None,
+            chunk_index=1,
+        )
+        component_link = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="2.8",
+            evidence_chunk_id="chunk-components",
+            evidence_text_excerpt=(
+                "For the first 3 months you'll earn both the Promotional rate of 2.80% "
+                "and Regular interest rate of up to 2.20%."
+            ),
+            source_document_id="source-hisa",
+            source_snapshot_id="snapshot-hisa",
+            citation_confidence=0.9,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="About the offer",
+            page_no=None,
+            chunk_index=2,
+        )
+        payload: dict[str, object] = {"promotional_rate": 2.8, "public_display_rate": 2.8}
+        links = [total_link, component_link]
+
+        _align_advertised_promotional_total(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata={},
+            normalized_values_for_links={},
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["standard_rate"], 2.2)
+        self.assertEqual(payload["promotional_rate"], 5.0)
+        self.assertEqual(payload["public_display_rate"], 5.0)
+        linked = {link.field_name: link for link in links}
+        self.assertEqual(linked["standard_rate"].evidence_chunk_id, "chunk-components")
+        self.assertEqual(linked["promotional_rate"].evidence_chunk_id, "chunk-total")
+        self.assertEqual(linked["public_display_rate"].evidence_chunk_id, "chunk-total")
+
+    def test_additive_promotional_components_form_grounded_total_without_total_copy(self) -> None:
+        component_link = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="2.80",
+            evidence_chunk_id="chunk-components-only",
+            evidence_text_excerpt=(
+                "For the first 3 months you'll earn both the Promotional rate of 2.80% "
+                "and Regular interest rate of up to 2.20%. The promo rate is on top of the regular rate."
+            ),
+            source_document_id="source-hisa",
+            source_snapshot_id="snapshot-hisa",
+            citation_confidence=0.93,
+            model_execution_id=None,
+            anchor_type="section",
+            anchor_value="About the offer",
+            page_no=None,
+            chunk_index=2,
+        )
+        payload: dict[str, object] = {"standard_rate": 2.2, "promotional_rate": 2.8, "public_display_rate": 2.8}
+        links = [component_link]
+
+        _align_advertised_promotional_total(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata={},
+            normalized_values_for_links={},
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["standard_rate"], 2.2)
+        self.assertEqual(payload["promotional_rate"], 5.0)
+        self.assertEqual(payload["public_display_rate"], 5.0)
+
+    def test_promotional_total_does_not_remain_as_savings_standard_rate(self) -> None:
+        promotional_link = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="4.75",
+            evidence_chunk_id="chunk-promotional-only",
+            evidence_text_excerpt="Limited time offer. Earn up to 4.75% for the first 3 months.",
+            source_document_id="source-promotional-only",
+            source_snapshot_id="snapshot-promotional-only",
+            citation_confidence=0.94,
+            model_execution_id=None,
+            anchor_type="heading",
+            anchor_value="Limited time offer",
+            page_no=None,
+            chunk_index=1,
+        )
+        standard_link = replace(promotional_link, field_name="standard_rate")
+        payload: dict[str, object] = {
+            "standard_rate": 4.75,
+            "promotional_rate": 4.75,
+            "public_display_rate": 4.75,
+        }
+        normalized_values = dict(payload)
+        mapping = {"standard_rate": {"normalized_value": 4.75}}
+        links = [standard_link, promotional_link]
+
+        _align_advertised_promotional_total(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata=mapping,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=[],
+        )
+
+        self.assertNotIn("standard_rate", payload)
+        self.assertNotIn("standard_rate", normalized_values)
+        self.assertNotIn("standard_rate", {link.field_name for link in links})
+        self.assertEqual(mapping["standard_rate"]["suppressed_reason"], "promotional_rate_not_ongoing_rate")
+
+    def test_savings_customer_copy_cleanup_keeps_only_explicit_withdrawal_charge(self) -> None:
+        payload: dict[str, object] = {
+            "deposit_insurance": (
+                "More account information Summary of account fees Savings account interest rates "
+                "Canada Deposit Insurance Corporation Regulatory information"
+            ),
+            "notes": "For alternate solutions to help you with everyday banking, ask us or visit our website.",
+            "withdrawal_limit_text": (
+                "benefits No monthly account fees No-fee transfers Earn interest on every dollar "
+                "Access money anytime - $5 service charge per debit transaction"
+            ),
+        }
+
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+
+        self.assertEqual(payload, {"withdrawal_limit_text": "$5 service charge per debit transaction."})
+
+    def test_repeated_application_cta_is_reduced_to_channel_and_phone(self) -> None:
+        payload: dict[str, object] = {
+            "application_method": (
+                "Apply by signing on to online banking or calling us at 1-888-723-8881 Opens your phone app. "
+                "Apply by signing on to online banking or calling us at Opens your phone app. Sign on"
+            )
+        }
+
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=payload)
+
+        self.assertEqual(
+            payload["application_method"],
+            "Apply by signing on to online banking or calling us at 1-888-723-8881.",
+        )
+
+    def test_promotional_rate_uses_registered_or_non_registered_labeled_value(self) -> None:
+        evidence = (
+            "The 4.60% Registered Promotional Rate will apply to Applicable Registered Savings Accounts "
+            "for 153 days (5 months). The 4.50% Non-Registered Promotional Rate will apply to Eligible "
+            "Savings Accounts for 153 days (5 months)."
+        )
+        for product_name, expected in (
+            ("RIF Savings Account", 4.6),
+            ("RSP Savings Account", 4.6),
+            ("Savings Account", 4.5),
+            ("U.S. Dollar Savings Account", 4.5),
+        ):
+            with self.subTest(product_name=product_name):
+                link = NormalizationEvidenceLink(
+                    field_name="promotional_rate",
+                    candidate_value="4.6",
+                    evidence_chunk_id="chunk-two-rates",
+                    evidence_text_excerpt=evidence,
+                    source_document_id="source-savings",
+                    source_snapshot_id="snapshot-savings",
+                    citation_confidence=0.9,
+                    model_execution_id=None,
+                    anchor_type="section",
+                    anchor_value="Legal Stuff",
+                    page_no=None,
+                    chunk_index=5,
+                )
+                payload: dict[str, object] = {
+                    "product_name": product_name,
+                    "promotional_rate": 4.6,
+                    "public_display_rate": 4.6,
+                }
+                links = [link]
+
+                _align_advertised_promotional_total(
+                    product_type_family="savings",
+                    candidate_payload=payload,
+                    field_mapping_metadata={},
+                    normalized_values_for_links={},
+                    evidence_links_for_output=links,
+                    runtime_notes=[],
+                )
+
+                self.assertEqual(payload["promotional_rate"], expected)
+                self.assertEqual(payload["public_display_rate"], expected)
+
+    def test_savings_welcome_offer_is_not_a_term_rate_table(self) -> None:
+        field = NormalizationExtractedField(
+            field_name="term_rate_table",
+            candidate_value=[{"term_label": "3 months", "term_length_days": 90, "rate": 2.8}],
+            value_type="json",
+            confidence=0.9,
+            extraction_method="heuristic",
+            source_document_id="source-hisa",
+            source_snapshot_id="snapshot-hisa",
+            evidence_chunk_id="chunk-components",
+            evidence_text_excerpt=(
+                "Earn 4.50% for 5 months. New Client offer terms apply."
+            ),
+            anchor_type="section",
+            anchor_value="Offer",
+            page_no=None,
+            chunk_index=2,
+            field_metadata={},
+        )
+
+        self.assertEqual(
+            _rate_field_suppression_reason(
+                field_name="term_rate_table",
+                field=field,
+                product_type_family="savings",
+            ),
+            "savings_promotional_period_not_term_rate",
+        )
+
+    def test_prime_margin_is_not_normalized_as_complete_lending_rate(self) -> None:
+        field = NormalizationExtractedField(
+            field_name="interest_rate",
+            candidate_value="1.0",
+            value_type="decimal",
+            confidence=0.9,
+            extraction_method="ai_schema",
+            source_document_id="source-loc",
+            source_snapshot_id="snapshot-loc",
+            evidence_chunk_id="chunk-loc-rate",
+            evidence_text_excerpt="A lower interest rate of Prime + 1%.",
+            anchor_type="section",
+            anchor_value="rates",
+            page_no=None,
+            chunk_index=2,
+            field_metadata={},
+        )
+
+        self.assertEqual(
+            _rate_field_suppression_reason(
+                field_name="interest_rate",
+                field=field,
+                product_type_family=None,
+            ),
+            "reference_rate_margin_not_total_rate",
+        )
 
     def test_product_context_cleanup_suppresses_navigation_and_marketing_rate_copy(self) -> None:
         payload: dict[str, object] = {
@@ -153,7 +1816,7 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertNotIn("minimum_payment_text", payload)
         self.assertNotIn("mortgage_rate", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
-        self.assertIn("incorrectly mapped as product data", notes[0])
+        self.assertIn("ungrounded", notes[0])
 
     def test_gic_context_cleanup_suppresses_cross_product_account_application(self) -> None:
         payload: dict[str, object] = {
@@ -173,6 +1836,257 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertNotIn("application_method", payload)
         self.assertNotIn("application_method", normalized_values)
         self.assertNotIn("application_method", mapping_metadata)
+
+    def test_chequing_cleanup_rejects_compare_label_expired_offer_and_comparison_table_as_copy(self) -> None:
+        payload: dict[str, object] = {
+            "description_short": "Compare Account",
+            "application_method": (
+                "Monthly fee $0 Transactions included per month Unlimited Interest calculated on Every dollar "
+                "Paper or Online Statement Free Secure Open account Compare Account"
+            ),
+        }
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=payload)
+        self.assertEqual(payload, {})
+
+        expired = {
+            "description_short": (
+                "The Student Banking Package is extended until June 29, 2026 and no longer requires auto-deposit."
+            )
+        }
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=expired)
+        self.assertEqual(expired, {})
+
+    def test_multi_term_gic_cleanup_rejects_sibling_audience_and_single_term_scalar(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Guaranteed Investment Certificates (GIC)",
+            "eligibility_text": "Arrive in Canada and meet visa requirements",
+            "application_method": (
+                "Interest rates GIC/RGIC term Rate (%) APY (%) 1 year 2.90% 2 year 3.00% "
+                "3 year 3.20% Resources Sign on About our GICs About our registered GICs Legal "
+                "How to apply for this account Apply by signing on to online banking"
+            ),
+            "term_length_days": 365,
+            "term_length_text": "1 year",
+            "term_rate_table": [
+                {"term_label": "1 year", "term_length_days": 365, "rate": 2.9},
+                {"term_label": "2 years", "term_length_days": 730, "rate": 3.0},
+            ],
+        }
+
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=payload)
+
+        self.assertNotIn("eligibility_text", payload)
+        self.assertNotIn("application_method", payload)
+        self.assertNotIn("term_length_days", payload)
+        self.assertNotIn("term_length_text", payload)
+        self.assertEqual(len(payload["term_rate_table"]), 2)
+
+        student_payload = {
+            "product_name": "International Student GIC Program",
+            "eligibility_text": "Arrive in Canada and meet visa requirements",
+        }
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=student_payload)
+        self.assertIn("eligibility_text", student_payload)
+
+    def test_gic_cleanup_rejects_transaction_account_fields_fragments_and_sibling_tax_copy(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "RSP Guaranteed Investment",
+            "monthly_fee": 0,
+            "public_display_fee": 0,
+            "withdrawal_limit_text": "Unlimited withdrawals",
+            "description_short": "(GIC)",
+            "tax_benefits": "Earn tax-free interest in a TFSA without paying tax on withdrawals.",
+        }
+
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=payload)
+
+        self.assertEqual(
+            payload,
+            {
+                "product_name": "RSP Guaranteed Investment",
+                "monthly_fee": 0,
+                "public_display_fee": 0,
+            },
+        )
+
+        truncated = {"description_short": "Grow your savings safely and predictably. With a"}
+        _clean_product_context_fields(product_type_family="gic", candidate_payload=truncated)
+        self.assertEqual(truncated, {})
+
+        savings_noise = {
+            "product_name": "RIF Savings Account",
+            "eligibility_text": "The Offer is only applicable where the eligible new Client is the Primary Account Holder.",
+            "tax_benefits": "Try a 4.60% promotional rate boost for five months.",
+            "deposit_insurance": "Contact us ABM locator Rates Careers Community Get our app Example Bank is a CDIC member.",
+        }
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=savings_noise)
+        self.assertEqual(savings_noise, {"product_name": "RIF Savings Account"})
+
+    def test_duplicate_marketing_copy_is_kept_only_as_description(self) -> None:
+        sentence = (
+            "Get a savings account that offers tiered interest rates for higher balances and helps you earn more as you save."
+        )
+        payload = {
+            "description_short": sentence,
+            "eligibility_text": sentence,
+            "tier_definition_text": sentence + ".",
+        }
+
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+
+        self.assertEqual(payload, {"description_short": sentence})
+
+    def test_savings_description_cleanup_suppresses_offer_copy_and_trims_cross_sell(self) -> None:
+        offer_only = {
+            "product_name": "High Interest Savings Account",
+            "description_short": (
+                "New to Example Bank? Open a savings account and get this special interest rate for 5 months. "
+                "Already a client? You can still get this offer during your first 60 days."
+            ),
+        }
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=offer_only)
+        self.assertNotIn("description_short", offer_only)
+
+        limitation = (
+            "You can't make cash deposits or withdrawals, and there is no ATM or point-of-sale access. "
+            "Try our No Fee Chequing Account for day-to-day banking."
+        )
+        payload = {"product_name": "USD Savings Account", "description_short": limitation}
+        normalized_values = dict(payload)
+        mapping_metadata = {"description_short": {"normalized_value": limitation}}
+        notes: list[str] = []
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mapping_metadata,
+            runtime_notes=notes,
+        )
+
+        expected = "You can't make cash deposits or withdrawals, and there is no ATM or point-of-sale access."
+        self.assertEqual(payload["description_short"], expected)
+        self.assertEqual(normalized_values["description_short"], expected)
+        self.assertEqual(mapping_metadata["description_short"]["normalization_method"], "cross_product_description_cleanup")
+        self.assertIn("cross-product", " ".join(notes))
+
+    def test_savings_cleanup_rejects_application_faq_description_and_compacts_online_channel(self) -> None:
+        description = (
+            "Yes, you can. If you’re an existing bank customer, you can sign in to Online Banking "
+            "to add the Premium Savings Account."
+        )
+        application = (
+            "Open an account online If you already have a chequing account, you can apply for an "
+            "account online in as little as 7 minutes."
+        )
+        payload: dict[str, object] = {
+            "product_name": "Premium Savings Account",
+            "description_short": description,
+            "application_method": application,
+        }
+
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+
+        self.assertNotIn("description_short", payload)
+        self.assertEqual(payload["application_method"], "Online.")
+
+    def test_application_channel_cleanup_recognizes_online_and_banking_centre(self) -> None:
+        payload = {
+            "application_method": "How to open an account: Online or at a CIBC Banking Centre Opens a new window."
+        }
+
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=payload)
+
+        self.assertEqual(payload["application_method"], "Online or at a branch.")
+
+    def test_application_channel_cleanup_compacts_short_single_channel_ctas(self) -> None:
+        online_payload = {
+            "application_method": "Open an account online Apply for an account online in as little as 7 minutes."
+        }
+        branch_payload = {
+            "application_method": "You can also apply for the account in person at your nearest branch."
+        }
+
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=online_payload)
+        _clean_product_context_fields(product_type_family="chequing", candidate_payload=branch_payload)
+
+        self.assertEqual(online_payload["application_method"], "Online.")
+        self.assertEqual(branch_payload["application_method"], "At a branch.")
+
+    def test_plan_dependent_account_fee_is_not_normalized_as_zero(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Premium Savings Account",
+            "monthly_fee": 0.0,
+            "public_display_fee": 0.0,
+        }
+        evidence = (
+            "What are the fees for the Premium Savings Account? This will depend on the bank Plan "
+            "for the paired chequing account. What type of savings accounts does the bank offer? "
+            "Basic Savings has no monthly fees."
+        )
+
+        _clean_product_context_fields(
+            product_type_family="savings",
+            candidate_payload=payload,
+            evidence_context_by_field={"monthly_fee": evidence, "public_display_fee": evidence},
+        )
+
+        self.assertEqual(payload, {"product_name": "Premium Savings Account"})
+
+    def test_savings_cleanup_rejects_hard_limit_truncated_description(self) -> None:
+        payload = {
+            "product_name": "Builder Savings Account",
+            "description_short": (
+                "Get a bonus interest rate for adding funds every month and enjoy one eligible debit transaction "
+                "at no cost while using transfers to another account and several other account features that are "
+                "flattened from a comparison card before the parser cuts the final Intera"
+            ),
+        }
+
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+
+        self.assertEqual(payload, {"product_name": "Builder Savings Account"})
+
+    def test_promotional_period_is_recovered_only_from_rate_linked_evidence(self) -> None:
+        evidence = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="4.6",
+            evidence_chunk_id="chunk-promo",
+            evidence_text_excerpt=(
+                "Earn 4.60% interest on eligible deposits. Open an account and get this special interest rate "
+                "for 5 months. Existing clients qualify only in their first 60 days."
+            ),
+            source_document_id="source-promo",
+            source_snapshot_id="snapshot-promo",
+            citation_confidence=0.9,
+            model_execution_id="model-promo",
+            anchor_type="section",
+            anchor_value="welcome-offer",
+            page_no=None,
+            chunk_index=3,
+        )
+        payload: dict[str, object] = {"promotional_rate": 4.6}
+        normalized_values = dict(payload)
+        mapping_metadata: dict[str, object] = {}
+        links = [evidence]
+        notes: list[str] = []
+
+        _align_promotional_period_from_evidence(
+            candidate_payload=payload,
+            field_mapping_metadata=mapping_metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["promotional_period_text"], "5 months")
+        self.assertIs(payload["introductory_rate_flag"], True)
+        self.assertEqual(normalized_values["promotional_period_text"], "5 months")
+        self.assertEqual(mapping_metadata["promotional_period_text"]["evidence_chunk_id"], "chunk-promo")
+        self.assertEqual(
+            {link.field_name for link in links},
+            {"promotional_rate", "promotional_period_text", "introductory_rate_flag"},
+        )
 
     def test_lending_cleanup_suppresses_adjacent_ctas_slogans_and_offer_end_dates(self) -> None:
         cases = (
@@ -342,6 +2256,39 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["cash_advance_rate"], 22.49)
         self.assertEqual(len(evidence_links), 4)
 
+    def test_credit_card_fallback_accepts_cash_interest_rate_label(self) -> None:
+        excerpt = "Purchase interest rate 21.75%. Cash interest rate 22.49% (21.99% for Quebec residents)."
+        source_link = NormalizationEvidenceLink(
+            field_name="product_name",
+            candidate_value="Example Cashback Mastercard",
+            evidence_chunk_id="chunk-card-rates",
+            evidence_text_excerpt=excerpt,
+            source_document_id="source-card",
+            source_snapshot_id="snapshot-card",
+            citation_confidence=0.96,
+            model_execution_id="model-card",
+            anchor_type="section",
+            anchor_value="card-at-a-glance",
+            page_no=1,
+            chunk_index=0,
+        )
+        payload: dict[str, object] = {"product_name": "Example Cashback Mastercard"}
+        normalized_values = dict(payload)
+        mapping_metadata: dict[str, object] = {}
+        evidence_links = [source_link]
+
+        _apply_credit_card_labeled_fallback(
+            product_type_family="credit-card",
+            candidate_payload=payload,
+            field_mapping_metadata=mapping_metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=evidence_links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["purchase_interest_rate"], 21.75)
+        self.assertEqual(payload["cash_advance_rate"], 22.49)
+
     def test_lending_cleanup_rejects_rate_and_term_fields_from_unrelated_context(self) -> None:
         payload: dict[str, object] = {
             "product_name": "Example Mortgage",
@@ -427,6 +2374,25 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(normalized_values, {"product_name": "Example Personal Loan"})
         self.assertEqual(mapping_metadata, {"product_name": {"normalized_value": "Example Personal Loan"}})
 
+    def test_line_of_credit_cleanup_requires_payment_semantics_for_minimum_payment_text(self) -> None:
+        payload: dict[str, object] = {
+            "product_name": "Example Student Line of Credit",
+            "minimum_payment_text": "Student lines of credit",
+        }
+
+        _clean_product_context_fields(product_type_family="line-of-credit", candidate_payload=payload)
+
+        self.assertEqual(payload, {"product_name": "Example Student Line of Credit"})
+
+        supported: dict[str, object] = {
+            "minimum_payment_text": "Make interest-only payments while you are in school.",
+        }
+        _clean_product_context_fields(product_type_family="line-of-credit", candidate_payload=supported)
+        self.assertEqual(
+            supported["minimum_payment_text"],
+            "Make interest-only payments while you are in school.",
+        )
+
     def test_normalizes_candidate_and_field_evidence_links(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-service")
         try:
@@ -459,7 +2425,8 @@ class NormalizationServiceTests(unittest.TestCase):
             self.assertEqual(candidate["subtype_code"], "high_interest")
             self.assertEqual(candidate["candidate_payload"]["monthly_fee"], 0.0)
             self.assertEqual(candidate["candidate_payload"]["standard_rate"], 1.25)
-            self.assertEqual(len(source_result.field_evidence_link_records), 3)
+            self.assertEqual(candidate["candidate_payload"]["public_display_rate"], 1.25)
+            self.assertEqual(len(source_result.field_evidence_link_records), 4)
 
             normalized_path = temp_path / Path(str(source_result.normalized_storage_key).replace("/", "\\"))
             metadata_path = temp_path / Path(str(source_result.metadata_storage_key).replace("/", "\\"))
@@ -1555,6 +3522,37 @@ class NormalizationServiceTests(unittest.TestCase):
                     },
                     "schema_context": {"product_family": "deposit", "product_type": "gic-term-deposit"},
                     "extracted_fields": dynamic_fields,
+                    "evidence_links": [
+                        NormalizationEvidenceLink(
+                            **{
+                                **link.__dict__,
+                                "candidate_value": candidate_value,
+                                "evidence_text_excerpt": evidence_text_excerpt,
+                            }
+                        )
+                        for link, candidate_value, evidence_text_excerpt in (
+                            (
+                                _evidence("minimum_deposit", "$1,000", "chunk-gic-minimum"),
+                                "$1,000",
+                                "The minimum investment is $1,000.",
+                            ),
+                            (
+                                _evidence("monthly_fee", "No fees", "chunk-gic-fee"),
+                                "No fees",
+                                "No monthly fees apply.",
+                            ),
+                            (
+                                _evidence("public_display_fee", "No fees", "chunk-gic-fee"),
+                                "No fees",
+                                "No monthly fees apply.",
+                            ),
+                            (
+                                _evidence("public_display_rate", "4.25%", "chunk-gic-rate"),
+                                "4.25%",
+                                "Earn 4.25% annually.",
+                            ),
+                        )
+                    ],
                 }
             )
 
@@ -1756,6 +3754,79 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertTrue(fields_by_name["standard_rate"]["field_metadata"]["generic_supporting_merge"])
 
+    def test_generic_savings_support_supplements_exact_product_monthly_fee(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "Example US Dollar Savings Account", "string", 0.9),
+                _field_dict("standard_rate", "0.25", "decimal", 0.9),
+                _field_dict("public_display_rate", "0.25", "decimal", 0.9),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="fees_text",
+                        anchor_value="fees-and-details",
+                        excerpt=(
+                            "Example US Dollar Savings Account earns interest on your balance "
+                            "and has no monthly account fee."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-SAV-usd",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-SAV-fees": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "0.00")
+        self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "0.00")
+        self.assertIn("Supplemented missing savings fee fields", " ".join(merged["runtime_notes"]))
+
+    def test_generic_savings_support_does_not_borrow_distant_sibling_fee(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "Premium Rate Savings Account", "string", 0.9),
+                _field_dict("standard_rate", "0.01", "decimal", 0.9),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="fees_text",
+                        anchor_value="banking-agreements-and-fees",
+                        excerpt=(
+                            "Performance Chequing Account has a monthly fee of $17.95 and a $4,000 waiver. "
+                            + "General plan information. " * 40
+                            + "Interac transfers also extend to Premium Rate Savings Account customers."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-SAV-premium",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-SAV-fees": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("monthly_fee", fields_by_name)
+        self.assertNotIn("public_display_fee", fields_by_name)
+
     def test_generic_supporting_merge_accepts_generated_savings_rate_table_fields(self) -> None:
         base_artifact = {
             "schema_context": {"product_type": "savings"},
@@ -1812,7 +3883,7 @@ class SupportingMergeTests(unittest.TestCase):
                         anchor_value="current-rates",
                         excerpt=(
                             "Savings account rates\nType\nCurrent rate (%)\n"
-                            "Savings Account\n2.80\nTFSA Savings Account\n2.80\n"
+                            "Example Savings Account\n2.80\nTFSA Savings Account\n2.80\n"
                             "The rates in the table have been in effect since June 30, 2026."
                         ),
                     ),
@@ -1934,7 +4005,10 @@ class SupportingMergeTests(unittest.TestCase):
                     _match_dict(
                         field_name="monthly_fee",
                         anchor_value="basic-plus-bank-account",
-                        excerpt="Basic Plus Bank Account Monthly fee $11.95 Included transactions 25",
+                        excerpt=(
+                            "Basic Plus Bank Account Monthly fee $11.95, waived with a $3,000 "
+                            "minimum daily closing balance. Included transactions 25"
+                        ),
                     )
                 ]
             }
@@ -1949,6 +4023,131 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "11.95")
         self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "11.95")
+
+    def test_generic_chequing_support_does_not_treat_waiver_balance_or_credit_as_fee(self) -> None:
+        for excerpt in (
+            "Basic Bank Account monthly account fee is waived with a minimum daily closing balance of $4,000.",
+            "Student Banking Advantage Plan includes a $60 annual safety deposit box credit.",
+        ):
+            with self.subTest(excerpt=excerpt):
+                base_artifact = {
+                    "schema_context": {"product_type": "chequing"},
+                    "extracted_fields": [_field_dict("product_name", "Basic Bank Account", "string", 0.88)],
+                    "evidence_links": [],
+                    "runtime_notes": [],
+                }
+                supporting_artifact = {
+                    "retrieval_result": {
+                        "matches": [
+                            _match_dict(
+                                field_name="account_comparison_rows",
+                                anchor_value="basic-bank-account",
+                                excerpt=excerpt,
+                            )
+                        ]
+                    }
+                }
+                merged = merge_supporting_artifacts(
+                    target_source_id="AUTO-BANK-CHE-basic",
+                    base_artifact=base_artifact,
+                    supporting_artifacts={"AUTO-BANK-CHE-comparison": supporting_artifact},
+                )
+                fields = {item["field_name"] for item in merged["extracted_fields"]}
+                self.assertNotIn("monthly_fee", fields)
+                self.assertNotIn("public_display_fee", fields)
+
+    def test_generic_savings_rate_table_requires_target_product_identity(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [_field_dict("product_name", "USD Savings Account", "string", 0.88)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="current-rates",
+                        excerpt="Regular Savings Account current annual interest rate 0.30%",
+                    )
+                ]
+            }
+        }
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-BANK-SAV-usd",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-BANK-SAV-rates": supporting_artifact},
+        )
+        fields = {item["field_name"] for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields)
+        self.assertNotIn("public_display_rate", fields)
+
+    def test_generic_savings_support_rejects_explicit_foreign_currency_for_cad_target(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "savings"},
+            "extracted_fields": [
+                _field_dict("product_name", "Premium Rate Savings Account", "string", 0.88),
+                _field_dict("currency", "CAD", "string", 0.99),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="u-s-dollar-premium-rate-savings-account",
+                        excerpt=(
+                            "U.S. Dollar Premium Rate Savings Account Balance Interest Rate "
+                            "$0 and over 0.050%"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-BANK-SAV-premium-cad",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-BANK-SAV-premium-usd": supporting_artifact},
+        )
+
+        fields = {item["field_name"] for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields)
+        self.assertNotIn("public_display_rate", fields)
+
+    def test_generic_savings_rate_table_scopes_regular_and_us_dollar_rows(self) -> None:
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="savings_account_rates",
+                        anchor_value="current-rates",
+                        excerpt=(
+                            "Savings account rates\nType\nCurrent rate (%)\n"
+                            "Savings Account\n0.30\nUS$ Savings Account\n0.10\nTFSA Savings Account\n0.30"
+                        ),
+                    )
+                ]
+            }
+        }
+        cases = (("Savings Account", "0.30"), ("U.S. Dollar Savings Account", "0.10"))
+        for product_name, expected_rate in cases:
+            with self.subTest(product_name=product_name):
+                merged = merge_supporting_artifacts(
+                    target_source_id=f"AUTO-BANK-SAV-{expected_rate}",
+                    base_artifact={
+                        "schema_context": {"product_type": "savings"},
+                        "extracted_fields": [_field_dict("product_name", product_name, "string", 0.88)],
+                        "evidence_links": [],
+                        "runtime_notes": [],
+                    },
+                    supporting_artifacts={"AUTO-BANK-SAV-rates": supporting_artifact},
+                )
+                fields = {item["field_name"]: item for item in merged["extracted_fields"]}
+                self.assertEqual(fields["standard_rate"]["candidate_value"], expected_rate)
 
     def test_generic_supporting_merge_handles_title_suffix_and_comparison_rows(self) -> None:
         base_artifact = {
@@ -1980,6 +4179,169 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "30.95")
         self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "30.95")
+
+    def test_generic_chequing_comparison_restores_pdf_decimal_and_stops_before_next_row(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "chequing"},
+            "extracted_fields": [_field_dict("product_name", "Ultimate Package", "string", 0.88)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="account_comparison_rows",
+                        anchor_value="accounts-at-a-glance",
+                        excerpt=(
+                            "Basic Banking Account Basic Plus Bank Account Preferred Package Ultimate Package "
+                            "Monthly Account Fee20 $3\ufffd95 $11\ufffd95 $16\ufffd95 $30\ufffd95 "
+                            "Seniors' Discount ($3.95) ($4.00) ($4.00) ($7.00) "
+                            "Minimum daily closing balance required for monthly account fee waiver21 "
+                            "Not applicable $3,000 $4,0002 $6,0003"
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-BANK-CHE-ultimate",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-BANK-CHE-fees-pdf": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["monthly_fee"]["candidate_value"], "30.95")
+        self.assertEqual(fields_by_name["public_display_fee"]["candidate_value"], "30.95")
+
+    def test_customer_field_cleanup_rejects_fee_waiver_and_ancillary_offer_copy(self) -> None:
+        self.assertTrue(
+            _looks_like_non_value_description(
+                field_name="description_short",
+                value=(
+                    "A U.S. Dollar Premium Rate Savings Account functions like a regular savings account "
+                    "where you can store money and earn interest, but with added perks. BMO’s U.S."
+                ),
+                product_type_family="savings",
+                product_name="U.S. Dollar Premium Rate Savings Account",
+            )
+        )
+        for description in (
+            "Even though you don't need to maintain a minimum balance, you can waive the monthly account fee by holding a minimum balance.",
+            "25 or over and can provide valid proof of enrolment for your Canadian post-secondary program.",
+        ):
+            with self.subTest(description=description):
+                self.assertTrue(
+                    _looks_like_non_value_description(
+                        field_name="description_short",
+                        value=description,
+                        product_type_family="chequing",
+                        product_name="Example Package",
+                    )
+                )
+
+        for card_description in (
+            "Credit card with a 7.99% introductory purchase rate for the first 6 months.",
+            "Earn an additional 20,000 bonus Scene+ points when one purchase posts during the 14th month.",
+            "Choose how to use your points. Your Scene+ account may be closed if you don't use your Scene+ membership for 24 consecutive months.",
+            "Earn Scene+ points when you pay rent and condo fees online through the Casa platform.",
+            "You can earn up to 5.00% for the first 3 months if you are not a current account holder and haven't held either account in the last two years.",
+        ):
+            with self.subTest(card_description=card_description):
+                self.assertTrue(
+                    _looks_like_non_value_description(
+                        field_name="description_short",
+                        value=card_description,
+                        product_type_family="credit-card",
+                        product_name="Example Card",
+                    )
+                )
+
+        for eligibility in (
+            "Only the following Visa Debit transaction types are eligible: online debit purchases. Click here for a list of eligible direct deposits and pre-authorized transactions.",
+            "To qualify, the mortgage must be for a principal residence and the customer must set up preauthorized mortgage payments to receive preferred mortgage rates.",
+            "The primary account holder qualifies for a monthly account fee waiver on a U.S. Dollar account. Both accounts must be in good standing to qualify.",
+            "Offer Eligibility and Exclusions: individuals who were previously cardholders in the past 2 years are not eligible.",
+            "Earn Scene+ points when you pay rent and housing-related bills through the Casa platform with your card.",
+            "Right for you if you want credit for future needs, want to finance expenses, and want a rainy-day fund.",
+        ):
+            with self.subTest(eligibility=eligibility):
+                self.assertTrue(
+                    _looks_like_non_value_eligibility(
+                        field_name="eligibility_text",
+                        value=eligibility,
+                        product_name="Example Package",
+                    )
+                )
+
+        self.assertTrue(
+            _looks_like_non_value_rewards(
+                field_name="rewards_summary",
+                value="Earn up to 1% cash back on eligible everyday purchases and 0.5% on all o",
+            )
+        )
+
+        payload = {
+            "withdrawal_limit_text": (
+                "Legal 1 Symbol (optional) Legal Text Only teller-assisted debit and withdrawal "
+                "transactions conducted at your branch of account are allowed on this account."
+            )
+        }
+        _clean_product_context_fields(product_type_family="savings", candidate_payload=payload)
+        self.assertEqual(
+            payload["withdrawal_limit_text"],
+            "Only teller-assisted debit and withdrawal transactions conducted at your branch of account are allowed on this account.",
+        )
+        self.assertEqual(
+            _clean_deposit_insurance_value("Give us a call Eligible for CDIC Insurance 1 Regular Interest is paid monthly."),
+            "Eligible for CDIC Insurance.",
+        )
+        self.assertEqual(
+            _clean_deposit_insurance_value(
+                "Simplii Financial is a division of CIBC, a CDIC member CDIC Deposit Insurance Information Opens a new window."
+            ),
+            "Simplii Financial is a division of CIBC, a CDIC member.",
+        )
+        self.assertEqual(
+            _clean_deposit_insurance_value("GIC Simplii Financial is a division of CIBC, a CDIC member."),
+            "Simplii Financial is a division of CIBC, a CDIC member.",
+        )
+        self.assertEqual(
+            _clean_deposit_insurance_value(
+                "Legal We are members of the Canada Deposit Insurance Corporation (CDIC) "
+                "Explore our services Bank Accounts Credit Cards Mortgages Loans Investments"
+            ),
+            "We are members of the Canada Deposit Insurance Corporation (CDIC)",
+        )
+        self.assertEqual(
+            _clean_deposit_insurance_value(
+                "BOOK AN APPOINTMENT We are members of the Canada Deposit Insurance Corporation (CDIC) "
+                "Explore our services Bank Accounts Credit Cards"
+            ),
+            "We are members of the Canada Deposit Insurance Corporation (CDIC)",
+        )
+        self.assertTrue(
+            _looks_like_broad_page_copy(
+                field_name="interest_calculation_method",
+                value="Dollar Daily Interest Account A smart way to save your U.S.",
+            )
+        )
+        self.assertTrue(
+            _looks_like_broad_page_copy(
+                field_name="tier_definition_text",
+                value="Benefits Tiered interest up to 0.05% No monthly account fee for seniors Two free debit transactions per month No fee for U.S. drafts.",
+            )
+        )
+
+        self.assertTrue(
+            _looks_like_invalid_application_method(
+                field_name="application_method",
+                value="Mobile App, Online Banking, ABM, Access Card in-store, and cheques.",
+                product_type_family="line-of-credit",
+                context="Funds can be accessed through the Mobile App, Online Banking, ABM, Access Card, and cheques.",
+            )
+        )
 
     def test_generic_supporting_merge_handles_generated_gic_rate_source(self) -> None:
         base_artifact = {
@@ -2013,6 +4375,104 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "3.25")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "3.25")
+
+    def test_generic_gic_family_support_merges_explicit_no_minimum_as_zero(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict("product_name", "RSP Guaranteed Investment", "string", 0.9),
+                _field_dict("term_rate_table", [{"term_label": "1 Year", "rate": "3.15"}], "json", 0.9),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="minimum_deposit",
+                        anchor_value="gic-faq",
+                        excerpt=(
+                            "What's the minimum balance needed to open a GIC? "
+                            "There's no minimum balance required to open an Example Bank GIC."
+                        ),
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-GIC-rsp",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-GIC-overview": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["minimum_deposit"]["candidate_value"], "0.00")
+        self.assertEqual(
+            fields_by_name["minimum_deposit"]["extraction_method"],
+            "generic_supporting_gic_minimum_merge",
+        )
+
+    def test_generic_gic_support_does_not_apply_variant_specific_minimum_to_other_products(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [_field_dict("product_name", "RSP Guaranteed Investment", "string", 0.9)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="minimum_deposit",
+                        anchor_value="special-gic",
+                        excerpt="The 18 Month Special GIC has a minimum investment of $5,000.",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-GIC-rsp",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-GIC-special": supporting_artifact},
+        )
+
+        self.assertNotIn("minimum_deposit", {item["field_name"] for item in merged["extracted_fields"]})
+
+    def test_named_gic_ignores_unscoped_structured_table_for_another_product(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "gic"},
+            "extracted_fields": [
+                _field_dict("product_name", "Example Variable Rate GIC", "string", 0.92),
+                _field_dict("term_length_text", "1 year", "string", 0.86, evidence_chunk_id="chunk-term"),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="term_rate_table",
+                        anchor_value="gic-calculator",
+                        excerpt="Example Bonus Rate GIC Promotional Rate 1 year 2.70% Posted rate 2.45%.",
+                    )
+                ]
+            }
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-GIC-variable",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-EXAMPLE-GIC-calculator": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertNotIn("public_display_rate", fields_by_name)
+        self.assertNotIn("term_rate_table", fields_by_name)
 
     def test_generic_gic_family_page_accepts_scoped_structured_rate_table(self) -> None:
         unrelated_rate = _field_dict("standard_rate", "2.75", "decimal", 0.98, evidence_chunk_id="chunk-nav-rate")
@@ -2622,6 +5082,134 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.65")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "1.50")
         self.assertEqual(fields_by_name["promotional_rate"]["candidate_value"], "1.50")
+        self.assertTrue(fields_by_name["tiered_rate_flag"]["candidate_value"])
+        self.assertIn("$500,000.00 and over: 1.50% / 0.65%", fields_by_name["tier_definition_text"]["candidate_value"])
+
+    def test_generic_chequing_comparison_maps_fee_and_waiver_to_target_column(self) -> None:
+        comparison = (
+            "What is the fee or rebate? "
+            "TD All-Inclusive Banking Plan TD Unlimited Chequing Account "
+            "TD Every Day Chequing Account TD Minimum Chequing Account TD Student Chequing Account "
+            "Monthly fee $30.95 or $0 (with a minimum daily account balance of $6,000). "
+            "$17.95 or $0 (with a minimum daily account balance of $4,000). "
+            "$11.95 or $0 (with a minimum daily account balance of $3,000). "
+            "$3.95 ($0 if you receive an eligible benefit) $0 "
+            "Monthly Fee for Seniors over 60 $22.45 or $0."
+        )
+        supporting_artifact = {
+            "retrieval_result": {
+                "matches": [
+                    _match_dict(
+                        field_name="account_fee_table",
+                        anchor_value="fees",
+                        excerpt=comparison,
+                    )
+                ]
+            }
+        }
+        cases = (
+            ("TD All-Inclusive Banking Plan", "30.95", "6000"),
+            ("TD Every Day Chequing Account", "11.95", "3000"),
+            ("TD Student Chequing Account", "0", None),
+        )
+        for product_name, expected_fee, expected_balance in cases:
+            with self.subTest(product_name=product_name):
+                merged = merge_supporting_artifacts(
+                    target_source_id=f"AUTO-{product_name}",
+                    base_artifact={
+                        "schema_context": {"product_type": "chequing"},
+                        "extracted_fields": [_field_dict("product_name", product_name, "string", 0.88)],
+                        "evidence_links": [],
+                        "runtime_notes": [],
+                    },
+                    supporting_artifacts={"AUTO-FEES": supporting_artifact},
+                )
+                fields = {item["field_name"]: item["candidate_value"] for item in merged["extracted_fields"]}
+                self.assertEqual(fields["monthly_fee"], expected_fee)
+                self.assertEqual(fields["public_display_fee"], expected_fee)
+                if expected_balance is None:
+                    self.assertNotIn("minimum_balance", fields)
+                    self.assertNotIn("fee_waiver_condition", fields)
+                else:
+                    self.assertEqual(fields["minimum_balance"], expected_balance)
+                    self.assertIn(expected_balance, fields["fee_waiver_condition"])
+
+    def test_generic_savings_rate_merge_preserves_material_balance_tiers(self) -> None:
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EPREMIUM",
+            base_artifact={
+                "schema_context": {"product_type": "savings"},
+                "extracted_fields": [
+                    _field_dict("product_name", "Example ePremium Savings Account", "string", 0.88),
+                ],
+                "evidence_links": [],
+                "runtime_notes": [],
+            },
+            supporting_artifacts={
+                "AUTO-RATES": {
+                    "retrieval_result": {
+                        "matches": [
+                            _match_dict(
+                                field_name="savings_rate_table",
+                                anchor_value="example-epremium-savings-account",
+                                excerpt=(
+                                    "Example ePremium Savings Account Total Daily Closing Balance Interest Rate "
+                                    "$0 to $9,999.99 0.000% $10,000.00 to $49,999.99 0.450% "
+                                    "$50,000.00 to $99,999.99 0.450% $100,000.00 and over 0.450%"
+                                ),
+                            )
+                        ]
+                    }
+                }
+            },
+        )
+
+        fields = {item["field_name"]: item["candidate_value"] for item in merged["extracted_fields"]}
+        self.assertEqual(fields["standard_rate"], "0.45")
+        self.assertTrue(fields["tiered_rate_flag"])
+        self.assertIn("$0 to $9,999.99: 0.000%", fields["tier_definition_text"])
+        self.assertIn("$10,000.00 to $49,999.99: 0.450%", fields["tier_definition_text"])
+
+    def test_generic_chequing_support_preserves_explicit_account_wide_unlimited_fact(self) -> None:
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-PERFORMANCE",
+            base_artifact={
+                "schema_context": {"product_type": "chequing"},
+                "extracted_fields": [
+                    _field_dict("product_name", "Performance Chequing Account", "string", 0.88),
+                    _field_dict("monthly_fee", "17.95", "decimal", 0.82),
+                    _field_dict("public_display_fee", "17.95", "decimal", 0.82),
+                    _field_dict("minimum_balance", "4000", "decimal", 0.82),
+                    _field_dict(
+                        "fee_waiver_condition",
+                        "Monthly fee 17.95 is waived to 0.00 with a 4000 minimum balance.",
+                        "string",
+                        0.82,
+                    ),
+                ],
+                "evidence_links": [],
+                "runtime_notes": [],
+            },
+            supporting_artifacts={
+                "AUTO-ACCOUNT-TERMS": {
+                    "retrieval_result": {
+                        "matches": [
+                            _match_dict(
+                                field_name="account_fee_table",
+                                anchor_value="transactions",
+                                excerpt=(
+                                    "Get unlimited monthly transactions with the Premium Chequing Account, "
+                                    "the Performance Chequing Account and the Blue Rewards Chequing Account."
+                                ),
+                            )
+                        ]
+                    }
+                }
+            },
+        )
+
+        fields = {item["field_name"]: item["candidate_value"] for item in merged["extracted_fields"]}
+        self.assertTrue(fields["unlimited_transactions_flag"])
 
     def test_interest_pdf_replaces_noisy_detail_fields(self) -> None:
         base_artifact = {
@@ -2890,7 +5478,7 @@ class NormalizationPersistenceTests(unittest.TestCase):
 
         self.assertEqual(result.run_state, "completed")
         self.assertEqual(result.candidate_count, 1)
-        self.assertEqual(result.field_evidence_link_count, 3)
+        self.assertEqual(result.field_evidence_link_count, 4)
         self.assertEqual(result.model_execution_count, 1)
         self.assertEqual(runner.last_variables()["candidate_count"], "1")
 

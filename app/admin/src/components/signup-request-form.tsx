@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { FormEvent, Suspense, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
-import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
+import { AdminAuthFrame } from "@/components/fpds/admin/admin-auth-frame";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
-import { cn } from "@/lib/utils";
 
 type SignupCopy = {
   brand: string;
   title: string;
+  description: string;
   idLabel: string;
   idPlaceholder: string;
   nameLabel: string;
@@ -40,9 +40,10 @@ type SignupRequestFormProps = {
 };
 
 const BASE_COPY: SignupCopy = {
-  brand: "FPDS ADMIN",
-  title: "Sign up",
-  idLabel: "Id",
+  brand: "FPDS Admin",
+  title: "Request operator access",
+  description: "Create a request for an administrator to review.",
+  idLabel: "Operator ID",
   idPlaceholder: "Enter your id",
   nameLabel: "Name",
   namePlaceholder: "Enter your name",
@@ -66,6 +67,7 @@ const SIGNUP_COPY: Record<AdminLocale, SignupCopy> = {
   ko: {
     ...BASE_COPY,
     title: "회원가입",
+    description: "관리자가 검토할 운영자 접근 요청을 만드세요.",
     idPlaceholder: "아이디를 입력하세요",
     nameLabel: "이름",
     namePlaceholder: "이름을 입력하세요",
@@ -86,6 +88,7 @@ const SIGNUP_COPY: Record<AdminLocale, SignupCopy> = {
   ja: {
     ...BASE_COPY,
     title: "新規登録",
+    description: "管理者が審査する運用アクセス申請を作成します。",
     idPlaceholder: "IDを入力してください",
     nameLabel: "名前",
     namePlaceholder: "名前を入力してください",
@@ -161,32 +164,31 @@ export function SignupRequestForm({ apiOrigin, locale, className }: SignupReques
   }
 
   return (
-    <section className={cn("min-h-screen bg-muted/25 px-4 py-8 md:px-6 md:py-10", className)}>
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-sm items-center justify-center">
-        <div className="w-full space-y-5">
-          <div className="text-center">
-            <h1 className="text-3xl font-semibold tracking-[0.12em] text-foreground sm:text-4xl">{copy.brand}</h1>
-          </div>
-
-          <form
-            className="w-full rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm backdrop-blur sm:p-8"
-            onSubmit={handleSubmit}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{copy.title}</h2>
-              <Suspense fallback={null}>
-                <AdminLocaleSwitcher locale={locale} />
-              </Suspense>
-            </div>
-
-            {submitted ? (
-              <div className="mt-8 rounded-2xl border border-success/20 bg-success-soft px-4 py-4 text-sm text-success">
-                <p className="font-medium">{copy.successTitle}</p>
-                <p className="mt-1 leading-6">{copy.successBody}</p>
-              </div>
-            ) : null}
-
-            <div className="mt-8 grid gap-5">
+    <AdminAuthFrame
+      brand={copy.brand}
+      className={className}
+      description={copy.description}
+      footer={
+        <p className="text-sm text-muted-foreground">
+          {copy.haveAccount}{" "}
+          <Link className="inline-flex min-h-10 items-center font-semibold text-primary underline underline-offset-4" href={loginHref}>
+            {copy.login}
+          </Link>
+        </p>
+      }
+      locale={locale}
+      title={copy.title}
+    >
+      {submitted ? (
+        <div aria-live="polite" className="rounded-md border border-success/25 bg-success-soft px-4 py-4 text-sm text-success" role="status">
+          <p className="font-semibold">{copy.successTitle}</p>
+          <p className="mt-1 leading-6">{copy.successBody}</p>
+          <Button asChild className="mt-5" variant="outline">
+            <Link href={loginHref}>{copy.login}</Link>
+          </Button>
+        </div>
+      ) : (
+        <form aria-busy={pending} className="grid gap-5" onSubmit={handleSubmit}>
               <div className="grid gap-2">
                 <Label htmlFor="signup-login-id">{copy.idLabel}</Label>
                 <Input
@@ -199,6 +201,7 @@ export function SignupRequestForm({ apiOrigin, locale, className }: SignupReques
                   required
                   type="text"
                   value={loginId}
+                  className="h-11"
                 />
               </div>
 
@@ -213,6 +216,7 @@ export function SignupRequestForm({ apiOrigin, locale, className }: SignupReques
                   required
                   type="text"
                   value={displayName}
+                  className="h-11"
                 />
               </div>
 
@@ -227,6 +231,7 @@ export function SignupRequestForm({ apiOrigin, locale, className }: SignupReques
                   required
                   type="password"
                   value={password}
+                  className="h-11"
                 />
               </div>
 
@@ -241,31 +246,23 @@ export function SignupRequestForm({ apiOrigin, locale, className }: SignupReques
                   required
                   type="password"
                   value={confirmPassword}
+                  className="h-11"
                 />
               </div>
 
-              <Button className="h-11 w-full rounded-xl text-sm font-medium" disabled={pending} type="submit">
+              <Button className="h-11 w-full" disabled={pending} type="submit">
                 {pending ? copy.submitting : copy.submit}
                 <ArrowRight className="h-4 w-4" />
               </Button>
 
               {error ? (
-                <div className="rounded-2xl border border-destructive/20 bg-critical-soft px-4 py-3 text-sm text-destructive">
-                  <p className="font-medium">{copy.failed}</p>
+                <div aria-live="assertive" className="rounded-md border border-destructive/25 bg-critical-soft px-4 py-3 text-sm text-destructive" role="alert">
+                  <p className="font-semibold">{copy.failed}</p>
                   <p className="mt-1 leading-6">{error}</p>
                 </div>
               ) : null}
-            </div>
-          </form>
-
-          <p className="text-center text-sm text-muted-foreground">
-            {copy.haveAccount}{" "}
-            <Link className="font-medium text-foreground underline underline-offset-4" href={loginHref}>
-              {copy.login}
-            </Link>
-          </p>
-        </div>
-      </div>
-    </section>
+        </form>
+      )}
+    </AdminAuthFrame>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { PublicLocaleMenu } from "@/components/fpds/public/public-locale-menu";
+import { PublicMark } from "@/components/fpds/public/public-mark";
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams } from "@/lib/public-query";
 
@@ -35,20 +35,18 @@ function FooterContent() {
   const methodologyHref = buildScopedPublicHrefFromSearchParams("/methodology", searchParams);
 
   return (
-    <footer className="border-t border-border/80 bg-card">
-      <div className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6">
+    <footer className="mt-12 border-t border-foreground/15 bg-foreground text-background">
+      <div className="mx-auto w-full max-w-7xl px-4 py-9 md:px-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-3">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                <ChartNoAxesColumnIncreasing className="size-4" aria-hidden="true" />
-              </span>
-              <span className="text-lg font-semibold text-foreground">{copy.shell.brand}</span>
+              <PublicMark className="bg-background text-foreground shadow-none" />
+              <span className="text-lg font-semibold text-background">{copy.shell.brand}</span>
             </Link>
-            <p className="mt-1 text-sm text-muted-foreground">{footerCopy.brandNote}</p>
+            <p className="mt-1 text-sm text-background/65">{footerCopy.brandNote}</p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium" aria-label="Footer navigation">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-background" aria-label="Footer navigation">
             <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
             <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
@@ -56,8 +54,8 @@ function FooterContent() {
           </nav>
         </div>
 
-        <div className="mt-5 flex flex-col gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-3xl text-xs leading-5 text-muted-foreground">{footerCopy.legalNote}</p>
+        <div className="mt-6 flex flex-col gap-4 border-t border-background/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-3xl text-xs leading-5 text-background/60">{footerCopy.legalNote}</p>
           <PublicLocaleMenu align="end" className="flex shrink-0" triggerClassName="w-full justify-between sm:w-auto" />
         </div>
       </div>
@@ -67,7 +65,7 @@ function FooterContent() {
 
 export function PublicFooter() {
   return (
-    <Suspense fallback={<div className="h-24 border-t border-border/80 bg-card" aria-hidden="true" />}>
+    <Suspense fallback={<div className="h-24 border-t border-border/80 bg-foreground" aria-hidden="true" />}>
       <FooterContent />
     </Suspense>
   );
@@ -75,7 +73,7 @@ export function PublicFooter() {
 
 function FooterLink({ children, href }: Readonly<{ children: React.ReactNode; href: string }>) {
   return (
-    <Link className="inline-flex min-h-11 items-center text-muted-foreground transition-colors hover:text-foreground" href={href}>
+    <Link className="inline-flex min-h-11 min-w-12 items-center justify-center text-background/70 transition-colors hover:text-background" href={href}>
       {children}
     </Link>
   );

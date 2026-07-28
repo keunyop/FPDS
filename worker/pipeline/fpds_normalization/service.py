@@ -22,6 +22,8 @@ from worker.pipeline.fpds_field_contract import (
     value_matches_contract,
 )
 from worker.pipeline.fpds_rate_safety import (
+    advertised_promotional_total_rate,
+    bounded_rate_evidence_context,
     canonical_deposit_rate_suppression_reason,
     expired_promotional_offer_end_date,
 )
@@ -44,6 +46,8 @@ _SUBTYPE_REGISTRY = {
 }
 _RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
+_MAX_MONTHLY_ACCOUNT_FEE = Decimal("500")
+_MAX_ANNUAL_CARD_FEE = Decimal("2000")
 _NUMERIC_FIELDS = _RATE_FIELDS | _FEE_FIELDS | {"minimum_balance", "minimum_deposit"}
 _JSON_FIELDS = {"term_rate_table"}
 _DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS = (
@@ -460,6 +464,7 @@ def _normalize_candidate(
         "provider_request_id": None,
     }
     dynamic_payload: dict[str, Any] = {}
+    dynamic_field_names: set[str] = set()
     if dynamic_product_type:
         dynamic_payload, dynamic_notes, dynamic_usage = _normalize_dynamic_fields_with_ai(
             item=item,
@@ -467,7 +472,9 @@ def _normalize_candidate(
             candidate_payload=candidate_payload,
         )
         runtime_notes.extend(dynamic_notes)
-        for field_name, value in dynamic_payload.get("candidate_payload", {}).items():
+        dynamic_candidate_payload = dict(dynamic_payload.get("candidate_payload", {}))
+        dynamic_field_names = set(dynamic_candidate_payload)
+        for field_name, value in dynamic_candidate_payload.items():
             candidate_payload[field_name] = value
             normalized_values_for_links[field_name] = value
             extracted_field = extracted_by_field.get(field_name)
@@ -506,21 +513,77 @@ def _normalize_candidate(
             runtime_notes=runtime_notes,
         )
 
+        # Numeric fields on operator-defined product types require exact
+        # unit-bearing evidence whether introduced by extraction or the AI
+        # mapping pass.
+        dynamic_field_names.update(
+            field_name
+            for field_name in candidate_payload
+            if (contract := field_contract(field_name)) is not None
+            and contract.value_type in {"decimal", "integer"}
+        )
+
     evidence_links_for_output = list(item.evidence_links)
+    evidence_context_by_field = {
+        field_name: " ".join(
+            part
+            for part in (field.anchor_value or "", field.evidence_text_excerpt or "")
+            if part
+        )
+        for field_name, field in extracted_by_field.items()
+    }
+    for field_name in dynamic_field_names:
+        contract = field_contract(field_name)
+        if contract is None or contract.value_type not in {"decimal", "integer"}:
+            continue
+        evidence_context_by_field[field_name] = _find_dynamic_numeric_evidence_context(
+            field_name=field_name,
+            value=candidate_payload.get(field_name),
+            evidence_links=item.evidence_links,
+        )
     _clean_product_context_fields(
         product_type_family=product_type_family,
         candidate_payload=candidate_payload,
         normalized_values_for_links=normalized_values_for_links,
         field_mapping_metadata=field_mapping_metadata,
         runtime_notes=runtime_notes,
-        evidence_context_by_field={
-            field_name: " ".join(
-                part
-                for part in (field.anchor_value or "", field.evidence_text_excerpt or "")
-                if part
-            )
+        evidence_context_by_field=evidence_context_by_field,
+        evidence_excerpt_by_field={
+            field_name: str(field.evidence_text_excerpt or "")
             for field_name, field in extracted_by_field.items()
         },
+        enforce_percentage_evidence_grounding=(
+            str(item.source_metadata.get("product_profile_expansion_mode") or "").strip().lower() != "fixture"
+        ),
+        expired_offer_present=any(
+            expired_promotional_offer_end_date(link.evidence_text_excerpt) is not None
+            for link in item.evidence_links
+        ),
+        dynamic_field_names=dynamic_field_names,
+    )
+    _clean_chequing_fee_waiver_consistency(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_minimum_balance_to_fee_waiver(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_public_display_fee(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
     )
     _apply_credit_card_labeled_fallback(
         product_type_family=product_type_family,
@@ -559,6 +622,69 @@ def _normalize_candidate(
 
     _apply_rate_evidence_fallback(
         product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_savings_labeled_header_standard_rate(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_gic_labeled_posted_and_promotional_rates(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_advertised_promotional_total(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_ongoing_additive_bonus_total(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _complete_gic_term_rate_table_from_split_evidence(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_gic_representative_rates_from_term_table(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_public_display_rate(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
+    _align_promotional_period_from_evidence(
         candidate_payload=candidate_payload,
         field_mapping_metadata=field_mapping_metadata,
         normalized_values_for_links=normalized_values_for_links,
@@ -698,7 +824,12 @@ def _compute_validation_issue_codes(
     if source_language and not _looks_like_language_code(source_language):
         issues.append("ambiguous_mapping")
 
-    for field_name in _NUMERIC_FIELDS:
+    numeric_fields = set(_NUMERIC_FIELDS) | {
+        field_name
+        for field_name in candidate_payload
+        if (contract := field_contract(field_name)) is not None and contract.value_type == "decimal"
+    }
+    for field_name in numeric_fields:
         value = candidate_payload.get(field_name)
         if value in {None, ""}:
             continue
@@ -706,13 +837,48 @@ def _compute_validation_issue_codes(
         if decimal_value is None:
             issues.append("invalid_numeric_range")
             continue
-        if field_name in _RATE_FIELDS and (
+        contract = field_contract(field_name)
+        is_rate = field_name in _RATE_FIELDS or (contract is not None and contract.unit == "percentage_points")
+        is_fee = field_name in _FEE_FIELDS or (
+            contract is not None and contract.unit == "currency_amount" and field_name.endswith("_fee")
+        )
+        if is_rate and (
             decimal_value < Decimal("0")
             or canonical_deposit_rate_suppression_reason(value=decimal_value) is not None
         ):
             issues.append("invalid_numeric_range")
-        if field_name not in _RATE_FIELDS and decimal_value < 0:
+        if not is_rate and decimal_value < 0:
             issues.append("invalid_numeric_range")
+        fee_limit = _MAX_ANNUAL_CARD_FEE if field_name == "annual_fee" else _MAX_MONTHLY_ACCOUNT_FEE
+        if is_fee and decimal_value >= fee_limit:
+            issues.append("invalid_numeric_range")
+
+    public_display_rate = _as_decimal(candidate_payload.get("public_display_rate"))
+    if public_display_rate is not None and any(
+        comparison_rate is not None and public_display_rate < comparison_rate
+        for comparison_rate in (
+            _as_decimal(candidate_payload.get("standard_rate")),
+            _as_decimal(candidate_payload.get("promotional_rate")),
+        )
+    ):
+        issues.append("inconsistent_cross_field_logic")
+
+    advertised_total = next(
+        (
+            value
+            for field_name in ("interest_rate_summary", "promotional_period_text")
+            if (value := advertised_promotional_total_rate(str(candidate_payload.get(field_name) or ""))) is not None
+        ),
+        None,
+    )
+    if advertised_total is not None and any(
+        comparison_rate is not None and comparison_rate != advertised_total
+        for comparison_rate in (
+            _as_decimal(candidate_payload.get("promotional_rate")),
+            public_display_rate,
+        )
+    ):
+        issues.append("inconsistent_cross_field_logic")
 
     if any(not value_matches_contract(field_name, value) for field_name, value in candidate_payload.items()):
         issues.append("invalid_field_type")
@@ -735,15 +901,36 @@ def _compute_validation_issue_codes(
     if requiredness_type == "chequing" and not golden_contract_candidate:
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
             issues.append("required_field_missing")
+        if re.search(r"\bno[- ]fee\b", str(product_name or ""), flags=re.IGNORECASE) and any(
+            fee is not None and fee > 0
+            for fee in (
+                _as_decimal(candidate_payload.get("monthly_fee")),
+                _as_decimal(candidate_payload.get("public_display_fee")),
+            )
+        ):
+            issues.append("inconsistent_cross_field_logic")
     if requiredness_type == "savings" and not golden_contract_candidate:
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
             issues.append("required_field_missing")
+        if (
+            candidate_payload.get("promotional_rate") not in {None, ""}
+            and candidate_payload.get("standard_rate") in {None, ""}
+            and candidate_payload.get("base_12_month_rate") in {None, ""}
+        ):
+            issues.append("required_field_missing")
     if requiredness_type == "gic" and not golden_contract_candidate:
-        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS):
+        if (
+            not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS)
+            and not _has_dynamic_gic_rate_mechanism(candidate_payload)
+        ):
             issues.append("required_field_missing")
         if candidate_payload.get("minimum_deposit") in {None, ""}:
             issues.append("required_field_missing")
-        if candidate_payload.get("term_length_days") in {None, ""} and candidate_payload.get("term_length_text") in {None, ""}:
+        if (
+            candidate_payload.get("term_length_days") in {None, ""}
+            and candidate_payload.get("term_length_text") in {None, ""}
+            and not _has_gic_term_evidence(candidate_payload)
+        ):
             issues.append("required_field_missing")
         if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
             issues.append("inconsistent_cross_field_logic")
@@ -771,6 +958,43 @@ def _compute_validation_issue_codes(
     if not golden_contract_candidate and any(len(values) > 1 for values in conflicting_fields.values()):
         issues.append("conflicting_evidence")
     return sorted(dict.fromkeys(issues))
+
+
+def _has_dynamic_gic_rate_mechanism(candidate_payload: dict[str, object]) -> bool:
+    summary = str(candidate_payload.get("interest_rate_summary") or "").strip().lower()
+    if not summary:
+        return False
+    return any(
+        marker in summary
+        for marker in (
+            "variable interest rate",
+            "variable rate",
+            "variable return",
+            "linked to changes",
+            "linked to the performance",
+            "return is linked",
+            "based on a formula",
+            "rate at time of purchase",
+            "rates available at time of purchase",
+            "current interest rate environment",
+        )
+    )
+
+
+def _has_gic_term_evidence(candidate_payload: dict[str, object]) -> bool:
+    """Accept a structured multi-term table in place of one scalar term."""
+
+    rows = candidate_payload.get("term_rate_table")
+    if not isinstance(rows, list):
+        return False
+    return any(
+        isinstance(row, dict)
+        and (
+            row.get("term_label") not in {None, ""}
+            or row.get("term_length_days") not in {None, ""}
+        )
+        for row in rows
+    )
 
 
 def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
@@ -857,6 +1081,1068 @@ def _apply_rate_evidence_fallback(
     )
 
 
+def _align_savings_labeled_header_standard_rate(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Recover an ongoing savings rate from a compact product-summary header."""
+
+    if product_type_family != "savings":
+        return
+    pattern = re.compile(
+        r"(?<![\d.])(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%\s*"
+        r"(?:[^a-z0-9]{0,18})\s*interest\s+rate\b[\s\S]{0,100}?"
+        r"(?:monthly\s+(?:account\s+)?fee|minimum\s+balance)",
+        flags=re.IGNORECASE,
+    )
+    ranked: list[tuple[float, int, NormalizationEvidenceLink, Decimal]] = []
+    for link in evidence_links_for_output:
+        text = _normalize_text(link.evidence_text_excerpt)
+        for match in pattern.finditer(text):
+            value = _as_decimal(match.group("rate"))
+            if value is None:
+                continue
+            local_prefix = text[max(0, match.start() - 120):match.start()].lower()
+            if any(
+                marker in local_prefix
+                for marker in (
+                    "promotional rate",
+                    "new client offer",
+                    "welcome offer",
+                    "limited-time offer",
+                    "limited time offer",
+                )
+            ):
+                continue
+            local_context = text[max(0, match.start() - 80):min(len(text), match.end() + 130)]
+            if canonical_deposit_rate_suppression_reason(value=value, context=local_context) is not None:
+                continue
+            ranked.append((float(link.citation_confidence), -match.start(), link, value))
+    if not ranked:
+        return
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    _, _, source_link, standard_rate = ranked[0]
+    if _as_decimal(candidate_payload.get("standard_rate")) == standard_rate:
+        return
+    _replace_rate_value_from_link(
+        field_name="standard_rate",
+        value=standard_rate,
+        source_link=source_link,
+        normalization_method="savings_labeled_header_standard_rate_alignment",
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+    )
+    runtime_notes.append(
+        f"Aligned `standard_rate` to the explicitly labeled savings product-header rate `{float(standard_rate)}`."
+    )
+
+
+def _align_gic_labeled_posted_and_promotional_rates(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Align a GIC's exact promotional and posted rate labels from one excerpt."""
+
+    if product_type_family != "gic":
+        return
+    selected: tuple[NormalizationEvidenceLink, Decimal, Decimal] | None = None
+    for link in evidence_links_for_output:
+        text = _normalize_text(
+            " ".join(
+                part
+                for part in (str(link.candidate_value or ""), link.evidence_text_excerpt or "")
+                if part
+            )
+        )
+        if not re.search(
+            r"\b(?:promotional|special|bonus)\s+rate\b|\b(?:prom)?otional\s+rate\b",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            continue
+        for posted_match in re.finditer(
+            r"\bposted\s+rate\s*:?\s*(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+            text,
+            flags=re.IGNORECASE,
+        ):
+            posted_rate = _as_decimal(posted_match.group("rate"))
+            prefix = text[max(0, posted_match.start() - 220):posted_match.start()]
+            promotional_matches = list(_PERCENT_RE.finditer(prefix))
+            if posted_rate is None or not promotional_matches:
+                continue
+            promotional_rate = _as_decimal(promotional_matches[-1].group(1))
+            if promotional_rate is None or promotional_rate < posted_rate:
+                continue
+            selected = (link, posted_rate, promotional_rate)
+            break
+        if selected is not None:
+            break
+    if selected is None:
+        return
+    source_link, posted_rate, promotional_rate = selected
+    for field_name, value in (
+        ("standard_rate", posted_rate),
+        ("promotional_rate", promotional_rate),
+        ("public_display_rate", promotional_rate),
+    ):
+        _replace_rate_value_from_link(
+            field_name=field_name,
+            value=value,
+            source_link=source_link,
+            normalization_method="labeled_gic_posted_promotional_alignment",
+            candidate_payload=candidate_payload,
+            field_mapping_metadata=field_mapping_metadata,
+            normalized_values_for_links=normalized_values_for_links,
+            evidence_links_for_output=evidence_links_for_output,
+        )
+    candidate_payload["introductory_rate_flag"] = True
+    runtime_notes.append(
+        "Aligned the GIC standard, promotional, and public rates from exact posted/promotional labels."
+    )
+
+
+def _align_advertised_promotional_total(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Prefer an explicitly advertised promotional total over additive components."""
+
+    if product_type_family not in {"savings", "gic"}:
+        return
+
+    total_match = _find_advertised_promotional_total(evidence_links_for_output)
+    labeled_match = _find_registration_scoped_promotional_rate(
+        evidence_links_for_output,
+        registered_product=_registered_savings_product_identity(candidate_payload.get("product_name")),
+    )
+    if labeled_match is not None:
+        total_match = labeled_match
+    additive_match = _find_additive_promotional_total(evidence_links_for_output)
+    if total_match is None and additive_match is not None:
+        additive_link, additive_total, additive_regular = additive_match
+        total_match = (additive_link, additive_total)
+        regular_match = (additive_link, additive_regular)
+    if total_match is None:
+        return
+    total_link, total_rate = total_match
+    regular_match = regular_match if additive_match is not None and total_match[0] is additive_match[0] else _find_regular_component_rate(evidence_links_for_output)
+    _replace_rate_value_from_link(
+        field_name="promotional_rate",
+        value=total_rate,
+        source_link=total_link,
+        normalization_method="advertised_promotional_total_alignment",
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+    )
+    _replace_rate_value_from_link(
+        field_name="public_display_rate",
+        value=total_rate,
+        source_link=total_link,
+        normalization_method="advertised_promotional_total_alignment",
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+    )
+
+    if regular_match is not None:
+        regular_link, regular_rate = regular_match
+        _replace_rate_value_from_link(
+            field_name="standard_rate",
+            value=regular_rate,
+            source_link=regular_link,
+            normalization_method="advertised_promotional_component_alignment",
+            candidate_payload=candidate_payload,
+            field_mapping_metadata=field_mapping_metadata,
+            normalized_values_for_links=normalized_values_for_links,
+            evidence_links_for_output=evidence_links_for_output,
+        )
+    elif (
+        product_type_family == "savings"
+        and _as_decimal(candidate_payload.get("standard_rate")) == total_rate
+    ):
+        candidate_payload.pop("standard_rate", None)
+        normalized_values_for_links.pop("standard_rate", None)
+        evidence_links_for_output[:] = [
+            link for link in evidence_links_for_output if link.field_name != "standard_rate"
+        ]
+        metadata = dict(field_mapping_metadata.get("standard_rate") or {})
+        metadata.update(
+            {
+                "normalized_value": None,
+                "normalization_method": "promotional_total_standard_rate_safety",
+                "suppressed_reason": "promotional_rate_not_ongoing_rate",
+            }
+        )
+        field_mapping_metadata["standard_rate"] = metadata
+        runtime_notes.append(
+            "Suppressed a savings standard rate identical to the advertised promotion because no separate ongoing rate was found."
+        )
+
+    runtime_notes.append(
+        f"Aligned the advertised promotional total and public display rate to `{float(total_rate)}`."
+    )
+
+
+def _find_advertised_promotional_total(
+    evidence_links: list[NormalizationEvidenceLink],
+) -> tuple[NormalizationEvidenceLink, Decimal] | None:
+    ranked: list[tuple[int, float, NormalizationEvidenceLink, Decimal]] = []
+    for link in evidence_links:
+        if str(link.field_name or "").strip().lower() not in {
+            "interest_rate_summary",
+            "promotional_period_text",
+            "promotional_rate",
+            "public_display_rate",
+            "term_rate_table",
+        }:
+            continue
+        text = _normalize_text(link.evidence_text_excerpt)
+        value = advertised_promotional_total_rate(text)
+        if value is None:
+            continue
+        lowered = text.lower()
+        score = 20 if "total" in lowered else 18 if "earn up to" in lowered else 16
+        ranked.append((score, float(link.citation_confidence), link, value))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    _, _, link, value = ranked[0]
+    return link, value
+
+
+def _registered_savings_product_identity(product_name: object) -> bool:
+    normalized = _normalize_text(str(product_name or "")).lower()
+    return bool(
+        re.search(r"\b(?:registered|rrsp|rsp|rif|tfsa|fhsa|resp|rdsp|lira|lrif)\b", normalized)
+    )
+
+
+def _find_registration_scoped_promotional_rate(
+    evidence_links: list[NormalizationEvidenceLink],
+    *,
+    registered_product: bool,
+) -> tuple[NormalizationEvidenceLink, Decimal] | None:
+    label = r"(?<!non[- ])registered" if registered_product else r"non[- ]registered"
+    pattern = re.compile(
+        rf"\b{label}\s+promotional\s+rate\b\D{{0,40}}(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%"
+        rf"|(?P<rate_first>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%\s+{label}\s+promotional\s+rate\b",
+        flags=re.IGNORECASE,
+    )
+    ranked: list[tuple[float, NormalizationEvidenceLink, Decimal]] = []
+    for link in evidence_links:
+        text = _normalize_text(link.evidence_text_excerpt)
+        if not text or expired_promotional_offer_end_date(text) is not None:
+            continue
+        match = pattern.search(text)
+        if match is None:
+            continue
+        value = _as_decimal(match.group("rate") or match.group("rate_first"))
+        if value is None or canonical_deposit_rate_suppression_reason(value=value, context=text) is not None:
+            continue
+        ranked.append((float(link.citation_confidence), link, value))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    _, link, value = ranked[0]
+    return link, value
+
+
+def _find_regular_component_rate(
+    evidence_links: list[NormalizationEvidenceLink],
+) -> tuple[NormalizationEvidenceLink, Decimal] | None:
+    ranked: list[tuple[float, NormalizationEvidenceLink, Decimal]] = []
+    pattern = (
+        r"\bregular\s+interest\s+rate\b\s*(?:of\s+)?(?:up\s+to\s+)?"
+        r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%"
+    )
+    for link in evidence_links:
+        text = _normalize_text(link.evidence_text_excerpt)
+        lowered = text.lower()
+        if not text or expired_promotional_offer_end_date(text) is not None:
+            continue
+        if not any(marker in lowered for marker in ("promotional", "promo", "bonus", "on top of")):
+            continue
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match is None:
+            continue
+        value = _as_decimal(match.group("rate"))
+        if value is None:
+            continue
+        if canonical_deposit_rate_suppression_reason(value=value, context=text) is not None:
+            continue
+        ranked.append((float(link.citation_confidence), link, value))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    _, link, value = ranked[0]
+    return link, value
+
+
+def _find_additive_promotional_total(
+    evidence_links: list[NormalizationEvidenceLink],
+) -> tuple[NormalizationEvidenceLink, Decimal, Decimal] | None:
+    """Recover a time-limited total only from explicitly additive components."""
+
+    promotional_pattern = re.compile(
+        r"\b(?:promo(?:tional)?|bonus)\s+(?:interest\s+)?rate\b\D{0,45}"
+        r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        flags=re.IGNORECASE,
+    )
+    regular_pattern = re.compile(
+        r"\bregular\s+(?:annual\s+)?interest\s+rate\b\s*(?:of\s+)?(?:up\s+to\s+)?"
+        r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        flags=re.IGNORECASE,
+    )
+    ranked: list[tuple[float, NormalizationEvidenceLink, Decimal, Decimal]] = []
+    for link in evidence_links:
+        text = _normalize_text(link.evidence_text_excerpt)
+        lowered = text.lower()
+        if expired_promotional_offer_end_date(text) is not None:
+            continue
+        if not any(marker in lowered for marker in ("earn both", "on top of", "in addition to", "plus the regular")):
+            continue
+        if not any(marker in lowered for marker in ("first 3 months", "first three months", "for 3 months", "promotional")):
+            continue
+        promotional_match = promotional_pattern.search(text)
+        regular_match = regular_pattern.search(text)
+        if promotional_match is None or regular_match is None:
+            continue
+        promotional = _as_decimal(promotional_match.group("rate"))
+        regular = _as_decimal(regular_match.group("rate"))
+        if promotional is None or regular is None or promotional <= 0 or regular < 0:
+            continue
+        total = promotional + regular
+        if total <= 0 or total > Decimal("20"):
+            continue
+        ranked.append((float(link.citation_confidence), link, total, regular))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    _, link, total, regular = ranked[0]
+    return link, total, regular
+
+
+def _align_ongoing_additive_bonus_total(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Publish a grounded ongoing total when a page states regular + extra bonus.
+
+    This is distinct from a time-limited acquisition promotion: the recurring
+    regular rate remains ``standard_rate``, while ``public_display_rate`` may
+    show the higher attainable ongoing rate under the stated program condition.
+    """
+
+    if product_type_family != "savings":
+        return
+    regular_pattern = re.compile(
+        r"\bregular\s+(?:annual\s+)?interest\s+rate\b\D{0,45}(?P<regular>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        flags=re.IGNORECASE,
+    )
+    bonus_pattern = re.compile(
+        r"\bbonus\s+interest\s+rate\b[\s\S]{0,90}?\b(?:earn\s+)?(?:an\s+)?(?:extra|additional)\s+"
+        r"(?P<bonus>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        flags=re.IGNORECASE,
+    )
+    ranked: list[tuple[float, NormalizationEvidenceLink, Decimal, Decimal]] = []
+    for link in evidence_links_for_output:
+        text = _normalize_text(link.evidence_text_excerpt)
+        lowered = text.lower()
+        if any(
+            marker in lowered
+            for marker in ("limited time", "limited-time", "first 3 months", "welcome bonus", "promotional")
+        ):
+            continue
+        regular_match = regular_pattern.search(text)
+        bonus_match = bonus_pattern.search(text)
+        if regular_match is None or bonus_match is None:
+            continue
+        regular = _as_decimal(regular_match.group("regular"))
+        bonus = _as_decimal(bonus_match.group("bonus"))
+        if regular is None or bonus is None or bonus <= 0:
+            continue
+        total = regular + bonus
+        if total > Decimal("20"):
+            continue
+        ranked.append((float(link.citation_confidence), link, regular, total))
+    if not ranked:
+        return
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    _, source_link, regular_rate, total_rate = ranked[0]
+    _replace_rate_value_from_link(
+        field_name="standard_rate",
+        value=regular_rate,
+        source_link=source_link,
+        normalization_method="ongoing_additive_bonus_component_alignment",
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+    )
+    _replace_rate_value_from_link(
+        field_name="public_display_rate",
+        value=total_rate,
+        source_link=source_link,
+        normalization_method="ongoing_additive_bonus_total_alignment",
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+    )
+    runtime_notes.append(
+        f"Aligned the ongoing additive bonus total to `{float(total_rate)}` while preserving regular rate `{float(regular_rate)}`."
+    )
+
+
+def _replace_rate_value_from_link(
+    *,
+    field_name: str,
+    value: Decimal,
+    source_link: NormalizationEvidenceLink,
+    normalization_method: str,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+) -> None:
+    normalized_value = float(value)
+    candidate_payload[field_name] = normalized_value
+    normalized_values_for_links[field_name] = normalized_value
+    field_mapping_metadata[field_name] = {
+        "source_field_name": source_link.field_name,
+        "normalized_value": normalized_value,
+        "normalization_method": normalization_method,
+        "evidence_chunk_id": source_link.evidence_chunk_id,
+    }
+    evidence_links_for_output[:] = [
+        link for link in evidence_links_for_output if link.field_name != field_name
+    ]
+    evidence_links_for_output.append(
+        NormalizationEvidenceLink(
+            field_name=field_name,
+            candidate_value=_stringify(normalized_value),
+            evidence_chunk_id=source_link.evidence_chunk_id,
+            evidence_text_excerpt=source_link.evidence_text_excerpt,
+            source_document_id=source_link.source_document_id,
+            source_snapshot_id=source_link.source_snapshot_id,
+            citation_confidence=source_link.citation_confidence,
+            model_execution_id=source_link.model_execution_id,
+            anchor_type=source_link.anchor_type,
+            anchor_value=source_link.anchor_value,
+            page_no=source_link.page_no,
+            chunk_index=source_link.chunk_index,
+        )
+    )
+
+
+def _align_public_display_rate(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Keep the public rate at least as high as its grounded regular/promo components."""
+
+    if product_type_family not in {"savings", "gic"}:
+        return
+    grounded_rates = [
+        (field_name, _as_decimal(candidate_payload.get(field_name)))
+        for field_name in ("standard_rate", "promotional_rate")
+    ]
+    if product_type_family == "gic":
+        table_rates = [
+            _as_decimal(row.get("rate"))
+            for row in (candidate_payload.get("term_rate_table") or [])
+            if isinstance(row, dict)
+        ]
+        table_rates = [value for value in table_rates if value is not None]
+        if table_rates:
+            grounded_rates.append(("term_rate_table", max(table_rates)))
+    grounded_rates = [(field_name, value) for field_name, value in grounded_rates if value is not None]
+    if not grounded_rates:
+        return
+    source_field_name, display_floor = max(grounded_rates, key=lambda item: item[1])
+    current_display = _as_decimal(candidate_payload.get("public_display_rate"))
+    if current_display is not None and current_display >= display_floor:
+        return
+
+    normalized_display = float(display_floor)
+    candidate_payload["public_display_rate"] = normalized_display
+    normalized_values_for_links["public_display_rate"] = normalized_display
+    source_mapping = field_mapping_metadata.get(source_field_name)
+    field_mapping_metadata["public_display_rate"] = {
+        "source_field_name": source_field_name,
+        "normalized_value": normalized_display,
+        "normalization_method": "canonical_public_display_rate_alignment",
+        **(dict(source_mapping) if isinstance(source_mapping, dict) else {}),
+    }
+    field_mapping_metadata["public_display_rate"]["source_field_name"] = source_field_name
+    field_mapping_metadata["public_display_rate"]["normalized_value"] = normalized_display
+    field_mapping_metadata["public_display_rate"]["normalization_method"] = (
+        "canonical_public_display_rate_alignment"
+    )
+
+    source_link = next(
+        (link for link in evidence_links_for_output if link.field_name == source_field_name),
+        None,
+    )
+    evidence_links_for_output[:] = [
+        link for link in evidence_links_for_output if link.field_name != "public_display_rate"
+    ]
+    if source_link is not None:
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name="public_display_rate",
+                candidate_value=_stringify(normalized_display),
+                evidence_chunk_id=source_link.evidence_chunk_id,
+                evidence_text_excerpt=source_link.evidence_text_excerpt,
+                source_document_id=source_link.source_document_id,
+                source_snapshot_id=source_link.source_snapshot_id,
+                citation_confidence=source_link.citation_confidence,
+                model_execution_id=source_link.model_execution_id,
+                anchor_type=source_link.anchor_type,
+                anchor_value=source_link.anchor_value,
+                page_no=source_link.page_no,
+                chunk_index=source_link.chunk_index,
+            )
+        )
+    runtime_notes.append(
+        f"Aligned `public_display_rate` to grounded `{source_field_name}` value `{normalized_display}`."
+    )
+
+
+def _align_gic_representative_rates_from_term_table(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Use the disclosed 12-month row as the comparable standard for a multi-term GIC."""
+
+    if product_type_family != "gic":
+        return
+    rows = [row for row in (candidate_payload.get("term_rate_table") or []) if isinstance(row, dict)]
+    valid_rows = [row for row in rows if _as_decimal(row.get("rate")) is not None]
+    if len(valid_rows) < 2:
+        return
+    one_year_row = next(
+        (
+            row
+            for row in valid_rows
+            if row.get("term_length_days") in {360, 365}
+            or re.fullmatch(r"(?:12\s*months?|1(?:\.0)?\s*years?)", str(row.get("term_label") or "").strip(), flags=re.IGNORECASE)
+        ),
+        None,
+    )
+    if one_year_row is None:
+        return
+    one_year_rate = _as_decimal(one_year_row.get("rate"))
+    if one_year_rate is None:
+        return
+    table_link = next(
+        (link for link in evidence_links_for_output if link.field_name == "term_rate_table"),
+        None,
+    )
+    changed_fields: list[str] = []
+    for field_name in ("standard_rate", "base_12_month_rate"):
+        if _as_decimal(candidate_payload.get(field_name)) == one_year_rate:
+            continue
+        if table_link is not None:
+            _replace_rate_value_from_link(
+                field_name=field_name,
+                value=one_year_rate,
+                source_link=table_link,
+                normalization_method="gic_12_month_representative_rate_alignment",
+                candidate_payload=candidate_payload,
+                field_mapping_metadata=field_mapping_metadata,
+                normalized_values_for_links=normalized_values_for_links,
+                evidence_links_for_output=evidence_links_for_output,
+            )
+        else:
+            normalized_value = float(one_year_rate)
+            candidate_payload[field_name] = normalized_value
+            normalized_values_for_links[field_name] = normalized_value
+            field_mapping_metadata[field_name] = {
+                "source_field_name": "term_rate_table",
+                "normalized_value": normalized_value,
+                "normalization_method": "gic_12_month_representative_rate_alignment",
+            }
+        changed_fields.append(field_name)
+    if changed_fields:
+        runtime_notes.append(
+            "Aligned multi-term GIC representative rate fields to the disclosed 12-month term: "
+            + ", ".join(f"`{field_name}`" for field_name in changed_fields)
+            + "."
+        )
+
+
+def _complete_gic_term_rate_table_from_split_evidence(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Join table rows split across PDF pages when each row is directly labelled."""
+
+    if product_type_family != "gic":
+        return
+    existing_table = candidate_payload.get("term_rate_table")
+    rows = [dict(row) for row in existing_table if isinstance(row, dict)] if isinstance(existing_table, list) else []
+    recovering_missing_table = len(rows) < 2
+    target_identity = _normalized_product_identity_phrase(candidate_payload.get("product_name"))
+    existing_keys = {
+        (_as_int(row.get("term_length_days")), _as_decimal(row.get("rate")))
+        for row in rows
+    }
+    added_links: list[NormalizationEvidenceLink] = []
+    for link in evidence_links_for_output:
+        excerpt = _normalize_text(link.evidence_text_excerpt)
+        if recovering_missing_table and (
+            not target_identity
+            or target_identity not in _normalized_product_identity_phrase(excerpt)
+        ):
+            continue
+        link_added = False
+        for match in re.finditer(
+            r"(?<![\d.])(?P<term>\d{1,3}(?:\.\d{1,2})?\s*(?:days?|months?|years?))"
+            r"\s*(?:[†‡*^◊ⓘ]|\[[^\]]{0,30}\])*\s*"
+            r"(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+            excerpt,
+            flags=re.IGNORECASE,
+        ):
+            term_label = _normalize_text(match.group("term")).lower()
+            term_length_days = _term_label_to_days(term_label)
+            rate = _as_decimal(match.group("rate"))
+            key = (term_length_days, rate)
+            if term_length_days is None or rate is None or key in existing_keys:
+                continue
+            rows.append(
+                {
+                    "term_label": term_label,
+                    "term_length_days": term_length_days,
+                    "rate": float(rate),
+                    "minimum_deposit": None,
+                    "notes": None,
+                }
+            )
+            existing_keys.add(key)
+            link_added = True
+        if link_added:
+            added_links.append(link)
+
+    if not added_links or (recovering_missing_table and len(rows) < 2):
+        return
+    rows.sort(key=lambda row: (_as_int(row.get("term_length_days")) or 10**9, str(row.get("term_label") or "")))
+    candidate_payload["term_rate_table"] = rows
+    normalized_values_for_links["term_rate_table"] = rows
+    metadata = dict(field_mapping_metadata.get("term_rate_table") or {})
+    metadata["normalized_value"] = rows
+    metadata["normalization_method"] = "split_evidence_term_table_completion"
+    field_mapping_metadata["term_rate_table"] = metadata
+    known_chunks = {
+        link.evidence_chunk_id
+        for link in evidence_links_for_output
+        if link.field_name == "term_rate_table"
+    }
+    for link in added_links:
+        if link.evidence_chunk_id in known_chunks:
+            continue
+        known_chunks.add(link.evidence_chunk_id)
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name="term_rate_table",
+                candidate_value=_stringify(rows),
+                evidence_chunk_id=link.evidence_chunk_id,
+                evidence_text_excerpt=link.evidence_text_excerpt,
+                source_document_id=link.source_document_id,
+                source_snapshot_id=link.source_snapshot_id,
+                citation_confidence=link.citation_confidence,
+                model_execution_id=link.model_execution_id,
+                anchor_type=link.anchor_type,
+                anchor_value=link.anchor_value,
+                page_no=link.page_no,
+                chunk_index=link.chunk_index,
+            )
+        )
+    runtime_notes.append(
+        f"Completed the GIC term table from {len(added_links)} exact-product evidence chunk(s)."
+    )
+
+
+def _normalized_product_identity_phrase(value: object) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", " ", str(value or "").lower())
+    return " ".join(normalized.split())
+
+
+def _align_promotional_period_from_evidence(
+    *,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Recover a concise promo duration only when the rate evidence states it directly."""
+
+    promotional_rate = _as_decimal(candidate_payload.get("promotional_rate"))
+    if promotional_rate is None:
+        return
+
+    rate_pattern = re.escape(f"{promotional_rate.normalize():f}")
+    selected: tuple[NormalizationEvidenceLink, str] | None = None
+    for link in evidence_links_for_output:
+        excerpt = _normalize_text(link.evidence_text_excerpt)
+        if not excerpt or re.search(rf"(?<![\d.]){rate_pattern}0*\s*%", excerpt) is None:
+            continue
+        for match in re.finditer(
+            r"\bfor\s+(?:the\s+)?(?:first\s+)?(?P<count>\d{1,3})\s+(?P<unit>days?|weeks?|months?)\b",
+            excerpt,
+            flags=re.IGNORECASE,
+        ):
+            local_context = excerpt[max(0, match.start() - 160):match.end() + 40].lower()
+            if not any(
+                marker in local_context
+                for marker in (
+                    "promotional rate",
+                    "promo rate",
+                    "special interest rate",
+                    "introductory rate",
+                    "welcome offer",
+                    "earn ",
+                    "interest rate",
+                )
+            ):
+                continue
+            count = int(match.group("count"))
+            unit = match.group("unit").lower()
+            if count == 1:
+                unit = unit.rstrip("s")
+            elif not unit.endswith("s"):
+                unit += "s"
+            selected = (link, f"{count} {unit}")
+            break
+        if selected is not None:
+            break
+
+    if selected is None:
+        return
+
+    source_link, period_text = selected
+    for field_name, normalized_value in (
+        ("promotional_period_text", period_text),
+        ("introductory_rate_flag", True),
+    ):
+        candidate_payload[field_name] = normalized_value
+        normalized_values_for_links[field_name] = normalized_value
+        field_mapping_metadata[field_name] = {
+            "source_field_name": source_link.field_name,
+            "normalized_value": normalized_value,
+            "normalization_method": "grounded_promotional_period_alignment",
+            "evidence_chunk_id": source_link.evidence_chunk_id,
+        }
+        evidence_links_for_output[:] = [
+            link for link in evidence_links_for_output if link.field_name != field_name
+        ]
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name=field_name,
+                candidate_value=_stringify(normalized_value),
+                evidence_chunk_id=source_link.evidence_chunk_id,
+                evidence_text_excerpt=source_link.evidence_text_excerpt,
+                source_document_id=source_link.source_document_id,
+                source_snapshot_id=source_link.source_snapshot_id,
+                citation_confidence=source_link.citation_confidence,
+                model_execution_id=source_link.model_execution_id,
+                anchor_type=source_link.anchor_type,
+                anchor_value=source_link.anchor_value,
+                page_no=source_link.page_no,
+                chunk_index=source_link.chunk_index,
+            )
+        )
+    runtime_notes.append(
+        f"Recovered grounded promotional period `{period_text}` from the promotional-rate evidence."
+    )
+
+
+def _clean_chequing_fee_waiver_consistency(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Remove an adjacent plan's waiver when its base fee conflicts with the target."""
+
+    if product_type_family != "chequing":
+        return
+    condition = _normalize_text(candidate_payload.get("fee_waiver_condition"))
+    monthly_fee = _as_decimal(candidate_payload.get("monthly_fee"))
+    if not condition or monthly_fee is None:
+        return
+    match = re.search(
+        r"\bmonthly\s+fee\s+(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+is\s+waived\s+to\s+0(?:\.00)?"
+        r"\s+with\s+a\s+(?P<balance>\d[\d,]*(?:\.\d{1,2})?)\s+minimum\s+balance\b",
+        condition,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return
+    waiver_fee = _as_decimal(match.group("fee"))
+    waiver_balance = _as_decimal(match.group("balance"))
+    if waiver_fee is None or waiver_fee == monthly_fee:
+        return
+
+    if monthly_fee == 0 and waiver_fee > 0:
+        aligned_fee = float(waiver_fee)
+        waiver_link = next(
+            (link for link in evidence_links_for_output if link.field_name == "fee_waiver_condition"),
+            None,
+        )
+        for field_name in ("monthly_fee", "public_display_fee"):
+            candidate_payload[field_name] = aligned_fee
+            normalized_values_for_links[field_name] = aligned_fee
+            metadata = dict(field_mapping_metadata.get(field_name) or {})
+            metadata.update(
+                {
+                    "normalized_value": aligned_fee,
+                    "normalization_method": "conditional_zero_base_fee_alignment",
+                }
+            )
+            field_mapping_metadata[field_name] = metadata
+            evidence_links_for_output[:] = [
+                link for link in evidence_links_for_output if link.field_name != field_name
+            ]
+            if waiver_link is not None:
+                evidence_links_for_output.append(
+                    NormalizationEvidenceLink(
+                        field_name=field_name,
+                        candidate_value=str(aligned_fee),
+                        evidence_chunk_id=waiver_link.evidence_chunk_id,
+                        evidence_text_excerpt=waiver_link.evidence_text_excerpt,
+                        source_document_id=waiver_link.source_document_id,
+                        source_snapshot_id=waiver_link.source_snapshot_id,
+                        citation_confidence=waiver_link.citation_confidence,
+                        model_execution_id=waiver_link.model_execution_id,
+                        anchor_type=waiver_link.anchor_type,
+                        anchor_value=waiver_link.anchor_value,
+                        page_no=waiver_link.page_no,
+                        chunk_index=waiver_link.chunk_index,
+                    )
+                )
+        runtime_notes.append(
+            "Replaced a conditional zero outcome with the fee-waiver disclosure's positive recurring base fee."
+        )
+        return
+
+    removed = ["fee_waiver_condition"]
+    candidate_payload.pop("fee_waiver_condition", None)
+    normalized_values_for_links.pop("fee_waiver_condition", None)
+    field_mapping_metadata.pop("fee_waiver_condition", None)
+    current_balance = _as_decimal(candidate_payload.get("minimum_balance"))
+    if waiver_balance is not None and current_balance == waiver_balance:
+        candidate_payload.pop("minimum_balance", None)
+        normalized_values_for_links.pop("minimum_balance", None)
+        field_mapping_metadata.pop("minimum_balance", None)
+        removed.append("minimum_balance")
+    evidence_links_for_output[:] = [
+        link for link in evidence_links_for_output if link.field_name not in set(removed)
+    ]
+    runtime_notes.append(
+        "Suppressed fee-waiver fields whose stated base fee conflicts with the target monthly fee: "
+        + ", ".join(removed)
+        + "."
+    )
+
+
+def _align_minimum_balance_to_fee_waiver(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Keep the minimum-balance scalar equal to its grounded fee-waiver threshold."""
+
+    if product_type_family != "chequing":
+        return
+    condition = _normalize_text(candidate_payload.get("fee_waiver_condition"))
+    match = re.search(
+        r"\bwith\s+a\s+(?P<balance>\d[\d,]*(?:\.\d{1,2})?)\s+minimum\s+balance\b",
+        condition,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return
+    waiver_balance = _as_decimal(match.group("balance"))
+    current_balance = _as_decimal(candidate_payload.get("minimum_balance"))
+    if waiver_balance is None or waiver_balance <= 0 or current_balance == waiver_balance:
+        return
+    aligned_value = float(waiver_balance)
+    candidate_payload["minimum_balance"] = aligned_value
+    normalized_values_for_links["minimum_balance"] = aligned_value
+    metadata = dict(field_mapping_metadata.get("minimum_balance") or {})
+    metadata.update(
+        {
+            "normalized_value": aligned_value,
+            "normalization_method": "fee_waiver_balance_alignment",
+        }
+    )
+    field_mapping_metadata["minimum_balance"] = metadata
+    waiver_link = next(
+        (link for link in evidence_links_for_output if link.field_name == "fee_waiver_condition"),
+        None,
+    )
+    evidence_links_for_output[:] = [
+        link for link in evidence_links_for_output if link.field_name != "minimum_balance"
+    ]
+    if waiver_link is not None:
+        evidence_links_for_output.append(
+            NormalizationEvidenceLink(
+                field_name="minimum_balance",
+                candidate_value=str(aligned_value),
+                evidence_chunk_id=waiver_link.evidence_chunk_id,
+                evidence_text_excerpt=waiver_link.evidence_text_excerpt,
+                source_document_id=waiver_link.source_document_id,
+                source_snapshot_id=waiver_link.source_snapshot_id,
+                citation_confidence=waiver_link.citation_confidence,
+                model_execution_id=waiver_link.model_execution_id,
+                anchor_type=waiver_link.anchor_type,
+                anchor_value=waiver_link.anchor_value,
+                page_no=waiver_link.page_no,
+                chunk_index=waiver_link.chunk_index,
+            )
+        )
+    runtime_notes.append(
+        "Aligned `minimum_balance` to the explicit positive fee-waiver threshold."
+    )
+
+
+def _align_public_display_fee(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Use a directly grounded recurring fee as the public fee scalar."""
+
+    if product_type_family != "chequing":
+        return
+    monthly_fee = _as_decimal(candidate_payload.get("monthly_fee"))
+    public_fee = _as_decimal(candidate_payload.get("public_display_fee"))
+    if monthly_fee is None or monthly_fee >= _MAX_MONTHLY_ACCOUNT_FEE or monthly_fee == public_fee:
+        return
+    source_link = next(
+        (link for link in evidence_links_for_output if link.field_name == "monthly_fee"),
+        None,
+    )
+    if source_link is None or not _is_direct_recurring_monthly_fee(
+        value=monthly_fee,
+        context=source_link.evidence_text_excerpt,
+    ):
+        return
+
+    normalized_fee = float(monthly_fee)
+    candidate_payload["public_display_fee"] = normalized_fee
+    normalized_values_for_links["public_display_fee"] = normalized_fee
+    field_mapping_metadata["public_display_fee"] = {
+        "source_field_name": "monthly_fee",
+        "normalized_value": normalized_fee,
+        "normalization_method": "canonical_public_display_fee_alignment",
+        "evidence_chunk_id": source_link.evidence_chunk_id,
+        **mapping_contract_metadata("public_display_fee"),
+    }
+    evidence_links_for_output[:] = [
+        link for link in evidence_links_for_output if link.field_name != "public_display_fee"
+    ]
+    evidence_links_for_output.append(
+        NormalizationEvidenceLink(
+            field_name="public_display_fee",
+            candidate_value=_stringify(normalized_fee),
+            evidence_chunk_id=source_link.evidence_chunk_id,
+            evidence_text_excerpt=source_link.evidence_text_excerpt,
+            source_document_id=source_link.source_document_id,
+            source_snapshot_id=source_link.source_snapshot_id,
+            citation_confidence=source_link.citation_confidence,
+            model_execution_id=source_link.model_execution_id,
+            anchor_type=source_link.anchor_type,
+            anchor_value=source_link.anchor_value,
+            page_no=source_link.page_no,
+            chunk_index=source_link.chunk_index,
+        )
+    )
+    runtime_notes.append(
+        f"Aligned `public_display_fee` to directly grounded `monthly_fee` value `{normalized_fee}`."
+    )
+
+
+def _is_direct_recurring_monthly_fee(*, value: Decimal, context: str) -> bool:
+    normalized = _normalize_text(context).lower()
+    if not normalized:
+        return False
+    if value == 0:
+        if re.search(
+            r"\b(?:if|when|with|maintain|balance|waiv(?:e|ed|er)|rebate)\b",
+            normalized,
+        ):
+            return False
+        return bool(
+            re.search(r"\bno\s+monthly(?:\s+(?:plan|account))?\s+fees?\b", normalized)
+            or re.search(r"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b\D{0,30}\$\s*0(?:\.00)?\b", normalized)
+        )
+    token = re.escape(f"{value:f}".rstrip("0").rstrip("."))
+    return bool(
+        re.search(
+            rf"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b[\s\S]{{0,80}}?\$\s*{token}(?![\d.])",
+            normalized,
+        )
+        or re.search(
+            rf"\$\s*{token}(?![\d.])\s*(?:per\s+month|/\s*month|monthly)\b",
+            normalized,
+        )
+    )
+
+
 def _apply_credit_card_labeled_fallback(
     *,
     product_type_family: str | None,
@@ -872,7 +2158,7 @@ def _apply_credit_card_labeled_fallback(
     field_labels = {
         "purchase_interest_rate": r"(?:current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate)",
         "balance_transfer_rate": r"(?:interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
-        "cash_advance_rate": r"(?:cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
     }
     supplemented: list[str] = []
     for field_name, label_pattern in field_labels.items():
@@ -980,9 +2266,11 @@ def _extract_rate_percentages(
         return []
     values: list[Decimal] = []
     for match in _PERCENT_RE.finditer(text):
-        window_start = max(0, match.start() - 90)
-        window_end = min(len(text), match.end() + 90)
-        window = text[window_start:window_end].lower()
+        window = bounded_rate_evidence_context(
+            text,
+            value_start=match.start(),
+            value_end=match.end(),
+        ).lower()
         if not any(token in window for token in ("interest", "rate", "return", "yield", "bonus")):
             continue
         if any(token in window for token in ("100% reimbursed", "unauthorized transactions", "principal protection")):
@@ -1007,8 +2295,19 @@ def _rate_field_suppression_reason(
     field: NormalizationExtractedField,
     product_type_family: str | None = None,
 ) -> str | None:
+    if field_name in {"interest_rate", "mortgage_rate"} and _is_reference_rate_margin_only(
+        field.evidence_text_excerpt
+    ):
+        return "reference_rate_margin_not_total_rate"
     if field_name == "term_rate_table" and expired_promotional_offer_end_date(field.evidence_text_excerpt) is not None:
         return "expired_promotional_offer"
+    if (
+        field_name == "term_rate_table"
+        and product_type_family == "savings"
+        and _has_rate_promotional_context(field.evidence_text_excerpt)
+        and "premium period interest rate" not in str(field.evidence_text_excerpt or "").lower()
+    ):
+        return "savings_promotional_period_not_term_rate"
     if field_name not in _RATE_FIELDS:
         return None
     generic_reason = canonical_deposit_rate_suppression_reason(
@@ -1023,6 +2322,23 @@ def _rate_field_suppression_reason(
     ):
         return "other_product_rate_context"
     return None
+
+
+def _is_reference_rate_margin_only(text: str | None) -> bool:
+    normalized = " ".join(str(text or "").split())
+    has_margin_formula = re.search(
+        r"\b(?:bank\s+)?prime(?:\s+rate)?\b\s*(?:\+|plus|-|minus)\s*\d{1,2}(?:\.\d{1,4})?\s*%",
+        normalized,
+        flags=re.IGNORECASE,
+    ) is not None
+    if not has_margin_formula:
+        return False
+    return re.search(
+        r"\b(?:current|total|effective|annual)\s+(?:annual\s+)?(?:interest\s+)?rate\b\s*(?:is|of|:)?\s*"
+        r"\d{1,2}(?:\.\d{1,4})?\s*%",
+        normalized,
+        flags=re.IGNORECASE,
+    ) is None
 
 
 def _rate_evidence_is_account_context(*, value: object, context: str | None) -> bool:
@@ -1042,10 +2358,12 @@ def _rate_evidence_is_account_context(*, value: object, context: str | None) -> 
 
 def _has_rate_promotional_context(text: str | None) -> bool:
     lowered = str(text or "").lower()
-    return any(
+    if any(
         token in lowered
         for token in (
             "bonus interest",
+            "promo interest",
+            "promo rate",
             "for 3 months",
             "for three months",
             "for the first",
@@ -1054,7 +2372,13 @@ def _has_rate_promotional_context(text: str | None) -> bool:
             "offer expires",
             "promotional",
             "special offer",
+            "new client offer",
         )
+    ):
+        return True
+    return bool(
+        re.search(r"\b(?:for|during)\s+(?:the\s+)?(?:first\s+)?\d{1,3}[- ]?(?:days?|months?)\b", lowered)
+        and any(marker in lowered for marker in ("rate", "interest", "offer", "boost", "earn"))
     )
 
 
@@ -1119,11 +2443,22 @@ def _refine_product_name_from_source_metadata(
     source_metadata: dict[str, object],
     runtime_notes: list[str],
 ) -> str | None:
-    if not _looks_like_generic_product_name(product_name):
-        return product_name
-
     discovery_metadata = source_metadata.get("discovery_metadata")
     if not isinstance(discovery_metadata, dict):
+        return product_name
+
+    normalized_product_name = re.sub(r"[^a-z0-9]+", "", str(product_name or "").lower())
+    if normalized_product_name:
+        for metadata_key in ("primary_heading", "page_title"):
+            candidate = _clean_product_name_candidate(str(discovery_metadata.get(metadata_key) or ""))
+            normalized_candidate = re.sub(r"[^a-z0-9]+", "", str(candidate or "").lower())
+            if candidate and normalized_candidate == normalized_product_name and candidate != product_name:
+                runtime_notes.append(
+                    f"Restored official product_name formatting `{candidate}` from source discovery metadata `{metadata_key}`."
+                )
+                return candidate
+
+    if not _looks_like_generic_product_name(product_name):
         return product_name
 
     for metadata_key in ("primary_heading", "page_title"):
@@ -1138,7 +2473,7 @@ def _refine_product_name_from_source_metadata(
 
 def _looks_like_generic_product_name(value: object) -> bool:
     normalized = re.sub(r"\s+", " ", str(value or "").strip().lower())
-    return normalized in {
+    if normalized in {
         "",
         "account",
         "accounts",
@@ -1165,13 +2500,29 @@ def _looks_like_generic_product_name(value: object) -> bool:
         "personal loans",
         "line of credit",
         "lines of credit",
-    }
+        "current gic interest rates",
+        "current guaranteed investment interest rates",
+    }:
+        return True
+    return any(
+        re.search(pattern, normalized)
+        for pattern in (
+            r"^(?:the\s+)?(?:gic|term deposit)\s+(?:tab\s*le|calculator|selector|search(?: tool)?)$",
+            r"^(?:rate|rates|term|terms)\s+(?:table|calculator|selector)$",
+            r"^benefits of banking with\b",
+            r"\bincluded with every\b",
+            r"\breach your .+ faster\b",
+            r"\bsave for (?:today|tomorrow)\b",
+            r"\b(?:open|compare|choose|find|explore|discover) (?:an? |the |our )?.*(?:account|options|products?)\b",
+        )
+    )
 
 
 def _clean_product_name_candidate(value: str) -> str | None:
     cleaned = value.split("|", 1)[0]
     cleaned = re.sub(r"\s+opens in\b.*$", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\s+", " ", cleaned).strip(" ?.:-")
+    cleaned = re.sub(r"\s*[ⓘℹ]\s*$", "", cleaned).strip(" ?.:-")
     if not cleaned:
         return None
     words = cleaned.split()
@@ -1179,6 +2530,47 @@ def _clean_product_name_candidate(value: str) -> str | None:
     if len(words) >= 4 and len(words) % 2 == 0 and words[:half] == words[half:]:
         cleaned = " ".join(words[:half])
     return cleaned
+
+
+def _clean_deposit_insurance_value(value: str) -> str:
+    normalized = _normalize_text(value)
+    division_member = re.search(
+        r"(?P<sentence>[A-Z][A-Za-z0-9&.' -]{1,80}\s+is\s+a\s+division\s+of\s+"
+        r"[A-Z][A-Za-z0-9&.' -]{1,60},\s+a\s+CDIC\s+member)\b",
+        normalized,
+    )
+    if division_member is not None:
+        sentence = _normalize_text(division_member.group("sentence"))
+        sentence = re.sub(
+            r"^(?:(?:GIC|term deposit|savings account|chequing account|checking account|credit card)\s+)+",
+            "",
+            sentence,
+            flags=re.IGNORECASE,
+        )
+        return sentence.rstrip(".") + "."
+    eligible = re.search(
+        r"\beligible\s+(?:deposits?\s+are\s+)?(?:for\s+)?CDIC\s+(?:deposit\s+)?insurance\b",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if eligible is not None:
+        return "Eligible for CDIC Insurance."
+    membership = re.search(
+        r"(?P<sentence>[A-Z][A-Za-z0-9&.'’\-]*(?:\s+[A-Z][A-Za-z0-9&.'’\-]*){0,7}\s+"
+        r"(?:is|are)\s+(?:a\s+)?members?\s+of\s+(?:the\s+)?Canada\s+Deposit\s+Insurance\s+Corporation"
+        r"(?:\s*\(CDIC\))?\.?)",
+        normalized,
+    )
+    if membership is not None:
+        sentence = _normalize_text(membership.group("sentence"))
+        sentence = re.sub(
+            r"^(?:(?:legal|book an appointment|schedule an appointment|contact us|open account)\s+)+",
+            "",
+            sentence,
+            flags=re.IGNORECASE,
+        )
+        return sentence[:280]
+    return normalized
 
 
 def _compute_source_confidence(
@@ -1344,7 +2736,50 @@ def _clean_product_context_fields(
     field_mapping_metadata: dict[str, object] | None = None,
     runtime_notes: list[str] | None = None,
     evidence_context_by_field: dict[str, str] | None = None,
+    evidence_excerpt_by_field: dict[str, str] | None = None,
+    enforce_percentage_evidence_grounding: bool = True,
+    expired_offer_present: bool = False,
+    dynamic_field_names: set[str] | None = None,
 ) -> None:
+    deposit_insurance = str(candidate_payload.get("deposit_insurance") or "").strip()
+    if deposit_insurance:
+        cleaned_insurance = _clean_deposit_insurance_value(deposit_insurance)
+        if cleaned_insurance != deposit_insurance:
+            candidate_payload["deposit_insurance"] = cleaned_insurance
+            if normalized_values_for_links is not None:
+                normalized_values_for_links["deposit_insurance"] = cleaned_insurance
+            if field_mapping_metadata is not None:
+                metadata = dict(field_mapping_metadata.get("deposit_insurance") or {})
+                metadata["normalized_value"] = cleaned_insurance
+                metadata["normalization_method"] = "bounded_deposit_insurance_sentence"
+                field_mapping_metadata["deposit_insurance"] = metadata
+            if runtime_notes is not None:
+                runtime_notes.append("Reduced deposit-insurance copy to its exact membership statement.")
+
+    description = str(candidate_payload.get("description_short") or "").strip()
+    if description:
+        cleaned_description = _strip_cross_product_description_sentences(
+            _repair_flattened_customer_text(description)
+        )
+        if cleaned_description != description:
+            if cleaned_description:
+                candidate_payload["description_short"] = cleaned_description
+                if normalized_values_for_links is not None:
+                    normalized_values_for_links["description_short"] = cleaned_description
+                if field_mapping_metadata is not None:
+                    metadata = dict(field_mapping_metadata.get("description_short") or {})
+                    metadata["normalized_value"] = cleaned_description
+                    metadata["normalization_method"] = "cross_product_description_cleanup"
+                    field_mapping_metadata["description_short"] = metadata
+            else:
+                candidate_payload.pop("description_short", None)
+                if normalized_values_for_links is not None:
+                    normalized_values_for_links.pop("description_short", None)
+                if field_mapping_metadata is not None:
+                    field_mapping_metadata.pop("description_short", None)
+            if runtime_notes is not None:
+                runtime_notes.append("Removed a cross-product sales sentence from the product description.")
+
     suppressed_fields: list[str] = []
     for field_name, value in list(candidate_payload.items()):
         if field_name in _CORE_FIELDS:
@@ -1354,7 +2789,32 @@ def _clean_product_context_fields(
             field_name=field_name,
             value=value,
             context=evidence_context,
-        ) or _looks_like_other_product_section(context=evidence_context) or _looks_like_credit_card_field_mismatch(
+        ) or _dynamic_numeric_value_is_ungrounded(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+            dynamic_field_names=dynamic_field_names or set(),
+        ) or _audience_flag_is_legal_enumeration(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        ) or _money_value_is_non_fee_context(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        ) or _fee_value_is_plan_dependent(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        ) or _standard_rate_evidence_is_promotional(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        ) or (enforce_percentage_evidence_grounding and _percentage_value_absent_from_evidence(
+            field_name=field_name,
+            value=value,
+            context=(evidence_excerpt_by_field or {}).get(field_name, ""),
+        )) or _looks_like_other_product_section(context=evidence_context) or _looks_like_credit_card_field_mismatch(
             field_name=field_name,
             value=value,
             context=evidence_context,
@@ -1365,13 +2825,40 @@ def _clean_product_context_fields(
         ) or _looks_like_offer_end_mapped_as_effective_date(
             field_name=field_name,
             context=evidence_context,
+        ) or (
+            product_type_family == "gic"
+            and field_name
+            in {
+                "included_transactions",
+                "unlimited_transactions_flag",
+                "overdraft_available_flag",
+                "withdrawal_limit_text",
+            }
         )
         if isinstance(value, str):
             should_suppress = should_suppress or (
                 _looks_like_navigation_contamination(value)
+                or _looks_like_non_value_description(
+                    field_name=field_name,
+                    value=value,
+                    product_type_family=product_type_family,
+                    product_name=str(candidate_payload.get("product_name") or ""),
+                )
                 or _looks_like_non_value_rate(field_name=field_name, value=value)
-                or _looks_like_non_value_eligibility(field_name=field_name, value=value)
+                or _looks_like_non_value_eligibility(
+                    field_name=field_name,
+                    value=value,
+                    product_name=str(candidate_payload.get("product_name") or ""),
+                )
+                or _looks_like_non_value_rewards(field_name=field_name, value=value)
+                or _looks_like_expired_promotional_customer_field(
+                    field_name=field_name,
+                    value=value,
+                    context=evidence_context,
+                    expired_offer_present=expired_offer_present,
+                )
                 or _looks_like_invalid_field_type(field_name=field_name, value=value)
+                or _looks_like_invalid_tax_benefit(field_name=field_name, value=value)
                 or _looks_like_unresolved_placeholder(value)
                 or _looks_like_wrong_frequency_context(
                     field_name=field_name,
@@ -1392,6 +2879,12 @@ def _clean_product_context_fields(
                     product_type_family=product_type_family,
                 )
                 or _looks_like_broad_page_copy(field_name=field_name, value=value)
+                or _looks_like_gic_field_context_mismatch(
+                    field_name=field_name,
+                    value=value,
+                    product_name=str(candidate_payload.get("product_name") or ""),
+                    product_type_family=product_type_family,
+                )
             )
         if should_suppress:
             candidate_payload.pop(field_name, None)
@@ -1403,7 +2896,7 @@ def _clean_product_context_fields(
 
     if suppressed_fields and runtime_notes is not None:
         runtime_notes.append(
-            "Suppressed navigation or marketing copy that was incorrectly mapped as product data: "
+            "Suppressed ungrounded, wrong-type, cross-product, or navigation/marketing product fields: "
             + ", ".join(sorted(suppressed_fields))
             + "."
         )
@@ -1449,10 +2942,55 @@ def _clean_product_context_fields(
         field_mapping_metadata=field_mapping_metadata,
         runtime_notes=runtime_notes,
     )
+    _suppress_scalar_term_for_multi_term_table(
+        candidate_payload=candidate_payload,
+        normalized_values_for_links=normalized_values_for_links,
+        field_mapping_metadata=field_mapping_metadata,
+        runtime_notes=runtime_notes,
+    )
 
     withdrawal_text = str(candidate_payload.get("withdrawal_limit_text") or "").strip()
+    legal_prefix_cleaned = re.sub(
+        r"^legal\s+\d+\s+symbol\s*\(optional\)\s+legal\s+text\s+",
+        "",
+        _normalize_text(withdrawal_text),
+        flags=re.IGNORECASE,
+    ).strip()
+    if legal_prefix_cleaned and legal_prefix_cleaned != withdrawal_text:
+        withdrawal_text = legal_prefix_cleaned
+        candidate_payload["withdrawal_limit_text"] = legal_prefix_cleaned
+        if normalized_values_for_links is not None:
+            normalized_values_for_links["withdrawal_limit_text"] = legal_prefix_cleaned
+        if field_mapping_metadata is not None and "withdrawal_limit_text" in field_mapping_metadata:
+            metadata = dict(field_mapping_metadata["withdrawal_limit_text"] or {})
+            metadata["normalized_value"] = legal_prefix_cleaned
+            metadata["normalization_method"] = "legal_prefix_cleanup"
+            field_mapping_metadata["withdrawal_limit_text"] = metadata
+    included_and_additional_match = re.search(
+        r"transactions?\s+included\s+per\s+month(?:\s+\d{1,2})?\s+(?P<count>\d{1,3})\s+"
+        r"additional\s+transactions?(?:\s+\d{1,2})?\s+\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+each",
+        withdrawal_text,
+        flags=re.IGNORECASE,
+    )
+    if included_and_additional_match is not None:
+        count = int(included_and_additional_match.group("count"))
+        noun = "transaction" if count == 1 else "transactions"
+        fee = included_and_additional_match.group("fee").replace(",", "")
+        cleaned_withdrawal = f"{count} {noun} per month included; additional transactions cost ${fee} each."
+        candidate_payload["withdrawal_limit_text"] = cleaned_withdrawal
+        if normalized_values_for_links is not None:
+            normalized_values_for_links["withdrawal_limit_text"] = cleaned_withdrawal
+        if field_mapping_metadata is not None and "withdrawal_limit_text" in field_mapping_metadata:
+            metadata = dict(field_mapping_metadata["withdrawal_limit_text"] or {})
+            metadata["normalized_value"] = cleaned_withdrawal
+            metadata["normalization_method"] = "included_and_additional_transaction_cleanup"
+            field_mapping_metadata["withdrawal_limit_text"] = metadata
+        if runtime_notes is not None:
+            runtime_notes.append("Reduced a broad account-fee table to its included and additional transaction rule.")
+        withdrawal_text = cleaned_withdrawal
     withdrawal_match = re.search(
-        r"\b(?:one|1)\s+free\s+withdrawal(?:s)?\s+(?:a|per)\s+month\b",
+        r"\b(?:(?:one|1)\s+free\s+withdrawal(?:s)?\s+(?:a|per)\s+month|"
+        r"(?:one|1)\s+(?:eligible\s+)?(?:debit\s+)?transaction\s+per\s+month\s+at\s+no\s+cost)\b",
         withdrawal_text,
         flags=re.IGNORECASE,
     )
@@ -1468,6 +3006,96 @@ def _clean_product_context_fields(
             field_mapping_metadata["withdrawal_limit_text"] = metadata
         if runtime_notes is not None:
             runtime_notes.append("Reduced broad savings copy to the explicit monthly free-withdrawal limit.")
+    else:
+        service_charge_match = re.search(
+            r"\$\s*\d[\d,]*(?:\.\d{1,2})?\s+service\s+charge\s+per\s+debit\s+transaction",
+            withdrawal_text,
+            flags=re.IGNORECASE,
+        )
+        if service_charge_match is not None and len(withdrawal_text) > len(service_charge_match.group(0)) + 40:
+            cleaned_withdrawal = _clean_text_value(service_charge_match.group(0)).capitalize() + "."
+            candidate_payload["withdrawal_limit_text"] = cleaned_withdrawal
+            if normalized_values_for_links is not None:
+                normalized_values_for_links["withdrawal_limit_text"] = cleaned_withdrawal
+            if field_mapping_metadata is not None and "withdrawal_limit_text" in field_mapping_metadata:
+                metadata = dict(field_mapping_metadata["withdrawal_limit_text"] or {})
+                metadata["normalized_value"] = cleaned_withdrawal
+                metadata["normalization_method"] = "semantic_withdrawal_fee_cleanup"
+                field_mapping_metadata["withdrawal_limit_text"] = metadata
+            if runtime_notes is not None:
+                runtime_notes.append("Reduced broad savings copy to the explicit per-debit service charge.")
+
+    application_method = str(candidate_payload.get("application_method") or "").strip()
+    application_match = re.search(
+        r"\bapply\s+by\s+signing\s+on\s+to\s+online\s+banking\s+or\s+calling\s+(?:us\s+at\s+)?"
+        r"(?P<phone>1[-\s]\d{3}[-\s]\d{3}[-\s]\d{4})",
+        application_method,
+        flags=re.IGNORECASE,
+    )
+    if application_match is not None and len(application_method) > len(application_match.group(0)) + 20:
+        cleaned_application = _clean_text_value(application_match.group(0)).capitalize() + "."
+        candidate_payload["application_method"] = cleaned_application
+        if normalized_values_for_links is not None:
+            normalized_values_for_links["application_method"] = cleaned_application
+        if field_mapping_metadata is not None and "application_method" in field_mapping_metadata:
+            metadata = dict(field_mapping_metadata["application_method"] or {})
+            metadata["normalized_value"] = cleaned_application
+            metadata["normalization_method"] = "semantic_application_method_cleanup"
+            field_mapping_metadata["application_method"] = metadata
+        if runtime_notes is not None:
+            runtime_notes.append("Reduced repeated application CTA copy to the explicit channel and phone number.")
+    else:
+        channels: list[str] = []
+        lowered_application = _normalize_text(application_method).lower()
+        if re.search(
+            r"\b(?:open|apply(?:\s+for)?|get)\s+(?:an?\s+)?(?:\w+\s+){0,3}?account\s+online\b|"
+            r"\b(?:open|apply|get account)\s+online\b|\bonline\s+(?:application|account opening)\b|"
+            r"\bopen\s+an?\s+account\b.{0,30}\bonline\b",
+            lowered_application,
+        ):
+            channels.append("online")
+        if any(
+            marker in lowered_application
+            for marker in (
+                "book an appointment",
+                "in person",
+                "at the branch",
+                "at a branch",
+                "banking centre",
+                "banking center",
+            )
+        ):
+            channels.append("at a branch")
+        if any(marker in lowered_application for marker in ("call us", "by phone", "phone us")):
+            channels.append("by phone")
+        channels = list(dict.fromkeys(channels))
+        channel_only_cta = any(
+            marker in lowered_application
+            for marker in (
+                "as little as",
+                "nearest branch",
+                "you can also apply",
+                "open an account online",
+                "apply for an account online",
+            )
+        )
+        if channels and (len(application_method) >= 80 or len(channels) >= 2 or channel_only_cta):
+            if len(channels) == 1:
+                cleaned_application = channels[0].capitalize() + "."
+            elif len(channels) == 2:
+                cleaned_application = channels[0].capitalize() + f" or {channels[1]}."
+            else:
+                cleaned_application = ", ".join(channels[:-1]).capitalize() + f", or {channels[-1]}."
+            candidate_payload["application_method"] = cleaned_application
+            if normalized_values_for_links is not None:
+                normalized_values_for_links["application_method"] = cleaned_application
+            if field_mapping_metadata is not None and "application_method" in field_mapping_metadata:
+                metadata = dict(field_mapping_metadata["application_method"] or {})
+                metadata["normalized_value"] = cleaned_application
+                metadata["normalization_method"] = "application_channel_cleanup"
+                field_mapping_metadata["application_method"] = metadata
+            if runtime_notes is not None:
+                runtime_notes.append("Reduced repeated application CTA copy to explicit application channels.")
 
     if product_type_family == "gic":
         description = str(candidate_payload.get("description_short") or "").strip()
@@ -1488,6 +3116,93 @@ def _clean_product_context_fields(
             )
             if simple_interest_match is not None:
                 candidate_payload["interest_calculation_method"] = _clean_text_value(simple_interest_match.group(0))
+
+    if product_type_family == "savings":
+        calculation_method = str(candidate_payload.get("interest_calculation_method") or "").strip()
+        daily_monthly_match = re.search(
+            r"interest (?:is )?calculated daily and paid monthly",
+            calculation_method,
+            flags=re.IGNORECASE,
+        )
+        if daily_monthly_match is not None:
+            cleaned_method = "Interest is calculated daily and paid monthly."
+            if calculation_method != cleaned_method:
+                candidate_payload["interest_calculation_method"] = cleaned_method
+                if normalized_values_for_links is not None:
+                    normalized_values_for_links["interest_calculation_method"] = cleaned_method
+                if field_mapping_metadata is not None:
+                    metadata = dict(field_mapping_metadata.get("interest_calculation_method") or {})
+                    metadata["normalized_value"] = cleaned_method
+                    metadata["normalization_method"] = "daily_monthly_interest_method_cleanup"
+                    field_mapping_metadata["interest_calculation_method"] = metadata
+                if runtime_notes is not None:
+                    runtime_notes.append("Reduced promotional or calculator prose to the exact daily/monthly interest method.")
+
+
+def _percentage_value_absent_from_evidence(*, field_name: str, value: object, context: str) -> bool:
+    contract = field_contract(field_name)
+    if contract is None or contract.value_type != "decimal" or contract.unit != "percentage_points":
+        return False
+    if isinstance(value, bool):
+        return True
+    try:
+        expected = Decimal(str(value).replace(",", "").strip())
+    except InvalidOperation:
+        return False
+    normalized_context = _normalize_text(context)
+    if not normalized_context:
+        return False
+    if expected == 0 and re.search(
+        r"\b(?:no interest|non-interest[- ]bearing|does not pay interest|no interest (?:is )?payable)\b",
+        normalized_context,
+        flags=re.IGNORECASE,
+    ):
+        return False
+    for match in re.finditer(r"(?<![\d.])(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\s*%", normalized_context):
+        try:
+            if Decimal(match.group(1).replace(",", "")) == expected:
+                return False
+        except InvalidOperation:
+            continue
+    return True
+
+
+def _standard_rate_evidence_is_promotional(*, field_name: str, value: object, context: str) -> bool:
+    if field_name not in {"standard_rate", "base_12_month_rate"}:
+        return False
+    lowered = _normalize_text(context).lower()
+    if not lowered:
+        return False
+    numeric_value = _as_decimal(value)
+    if numeric_value is not None:
+        value_pattern = re.escape(f"{numeric_value.normalize():f}")
+        if re.search(
+            rf"(?<![\d.]){value_pattern}0*\s*%\s*(?:[†‡*^◊ⓘ]|\[[^\]]{{0,30}}\])*\s*"
+            r"interest rate[\s\S]{0,100}?(?:monthly fee|minimum balance)",
+            lowered,
+            flags=re.IGNORECASE,
+        ):
+            # A compact product header can contain the ongoing rate and then a
+            # separate limited-time offer. The labelled header value remains
+            # the standard rate even though the evidence chunk contains both.
+            return False
+    if any(
+        marker in lowered
+        for marker in (
+            "promotional rate",
+            "promotional interest",
+            "new client offer",
+            "welcome offer",
+            "special rate",
+            "limited-time",
+            "limited time",
+        )
+    ):
+        return True
+    return bool(
+        re.search(r"\b(?:for|during)\s+(?:the\s+)?(?:first\s+)?\d{1,3}[- ]?(?:days?|months?)\b", lowered)
+        and any(marker in lowered for marker in ("rate", "interest", "offer", "boost", "earn"))
+    )
 
 
 def _looks_like_navigation_contamination(value: str) -> bool:
@@ -1547,6 +3262,354 @@ def _looks_like_navigation_contamination(value: str) -> bool:
     return sum(marker in normalized for marker in navigation_markers) >= 3
 
 
+def _looks_like_non_value_description(
+    *,
+    field_name: str,
+    value: str,
+    product_type_family: str | None = None,
+    product_name: str | None = None,
+) -> bool:
+    if field_name != "description_short":
+        return False
+    collapsed = " ".join(value.lower().split())
+    if len(collapsed) < 220 and collapsed.rstrip().endswith(":"):
+        return True
+    normalized = collapsed.strip(" .:-|")
+    if normalized in {"offer", "special offer", "welcome offer", "compare account", "compare accounts"}:
+        return True
+    if expired_promotional_offer_end_date(value) is not None:
+        return True
+    if len(normalized) <= 40 and re.fullmatch(r"\(?\s*(?:u\s*s\s*\$?\s*)?(?:gic|term deposit)\s*\)?", normalized):
+        return True
+    if re.search(r"\b(?:with|for|and|or|of|to)\s+(?:an?|the|your|our)$", normalized):
+        return True
+    if any(
+        marker in normalized
+        for marker in (
+            "still not sure",
+            "let us help you decide",
+            "answer a few quick questions",
+            "we'll recommend the best",
+            "we’ll recommend the best",
+            "help me choose tool",
+        )
+    ):
+        return True
+    if normalized.startswith(("open account", "chequing account open account", "checking account open account")):
+        return True
+    if sum(
+        marker in normalized
+        for marker in (
+            "book now",
+            "call us",
+            "ready to answer your questions",
+            "assist you in opening an account",
+            "schedule an appointment",
+        )
+    ) >= 2:
+        return True
+    if (
+        normalized.startswith(("monthly account fee", "account features", "account benefits"))
+        and sum(
+            marker in normalized
+            for marker in (
+                "monthly fee",
+                "earn interest",
+                "interest calculated",
+                "foreign currency services",
+                "competitive exchange rates",
+            )
+        ) >= 3
+    ):
+        return True
+    if normalized.startswith(("to qualify for this offer", "to qualify for these offers")):
+        return True
+    if (
+        any(
+            marker in normalized
+            for marker in (
+                "introductory interest rate",
+                "introductory purchase rate",
+                "introductory balance-transfer",
+                "introductory balance transfer",
+            )
+        )
+        and re.search(r"\bfor\s+(?:the\s+)?first\s+\d{1,3}\s+months?\b", normalized)
+    ):
+        return True
+    if (
+        normalized.startswith("earn an additional")
+        and "bonus" in normalized
+        and re.search(r"\b(?:1[0-9]|2[0-4])(?:th|st|nd|rd)\s+month\b", normalized)
+    ):
+        return True
+    if (
+        re.search(r"\bfor\s+(?:the\s+)?first\s+\d{1,3}\s+months?\b", normalized)
+        and any(marker in normalized for marker in ("not a current", "haven't held", "haven?셳 held", "last two years"))
+    ):
+        return True
+    if "scene+ account may be closed" in normalized and "membership" in normalized:
+        return True
+    if "earn scene+ points" in normalized and "casa" in normalized and any(
+        marker in normalized for marker in ("rent", "condo fees", "housing-related")
+    ):
+        return True
+    if "waive the monthly account fee" in normalized and "minimum balance" in normalized:
+        return True
+    if "proof of enrolment" in normalized and re.search(r"\b(?:age\s+)?25\b", normalized):
+        return True
+    if re.fullmatch(
+        r"you can open (?:this |your )?account (?:online|in branch|at a branch)[^.]*",
+        normalized,
+    ):
+        return True
+    if (
+        "personal bank account to fund" in normalized
+        and "need an account" in normalized
+        and "apply for a personal bank account" in normalized
+    ):
+        return True
+    if (
+        normalized.startswith(("you can open this account", "you can open your account"))
+        and "online" in normalized
+        and any(marker in normalized for marker in ("at a branch", "in person", "banking centre", "banking center"))
+    ):
+        return True
+    if (
+        normalized.startswith(("open a ", "open an "))
+        and "offer ends" in normalized
+        and "qualifying" in normalized
+        and any(marker in normalized for marker in (" and get ", " and receive ", "welcome offer"))
+    ):
+        return True
+    if (
+        any(marker in normalized for marker in ("sign in to online banking", "sign on to online banking"))
+        and any(marker in normalized for marker in ("add the ", "open the ", "apply for "))
+        and "account" in normalized
+    ):
+        return True
+    if len(normalized) >= 220 and re.search(r"\b[a-z]{3,18}$", normalized) and not re.search(r"[.!?]$", normalized):
+        # Parser-flattened cards can exceed the display field's hard limit.
+        # A trailing partial clause is worse than omitting the summary and
+        # allowing the complete hero sentence to win on the next collection.
+        return True
+    if re.search(
+        r"\b[\w&.-]+[’']s\s+(?:u\.s\.?|canadian|foreign(?:\s+currency)?)\.?$",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if normalized.startswith("$") and sum(
+        marker in normalized
+        for marker in ("per transfer", "atm withdrawal", "global money transfer", "no fee")
+    ) >= 2:
+        return True
+    if (
+        "features details" in normalized
+        and "monthly fee" in normalized
+        and "interest rate" in normalized
+    ) or "eligibility with plans" in normalized or "full disclosure for" in normalized:
+        return True
+    if re.search(r"\bexplained in\s+20\d{2}\b", normalized) or "we take a deeper look" in normalized:
+        return True
+    if "ratehub" in normalized and re.search(r"\bbest\s+(?:rrsp\s+)?savings account\b", normalized):
+        return True
+    normalized_product_name = _normalize_text(product_name).lower()
+    cross_product_lead = re.match(
+        r"^(?P<other>.{4,90}?\b(?:plan|account|card|mortgage|loan))\s+(?:discount|rebate)\b",
+        normalized,
+    )
+    if (
+        cross_product_lead is not None
+        and normalized_product_name
+        and normalized_product_name in normalized
+        and normalized_product_name not in cross_product_lead.group("other")
+        and any(marker in normalized for marker in ("also have", "also hold", "customers who", "clients who"))
+    ):
+        return True
+    if "additional account benefits" in normalized and len(normalized) >= 140:
+        return True
+    if "pay your friends back or chip in for" in normalized:
+        return True
+    if normalized.startswith("explore offers") and any(
+        marker in normalized for marker in ("kids & teens", "kids and teens", "children and youth")
+    ):
+        return True
+    if (
+        "manage your pre-authorized payments" in normalized
+        and "switching to" in normalized
+        and "another financial institution" in normalized
+    ):
+        return True
+    if "promotional rate" in normalized and "when you also open" in normalized:
+        return True
+    if normalized.startswith(("account fees learn tips", "with you as you grow")):
+        return True
+    if (
+        "learn tips to ensure you find the right account" in normalized
+        or "options to help you reduce your everyday banking fees" in normalized
+    ):
+        return True
+    if re.search(r"\bor in the case of\b[^.]{0,100}\bgic\b", normalized):
+        return True
+    if (
+        "provide us with instructions" in normalized
+        and "gic proceeds upon maturity" in normalized
+    ):
+        return True
+    if normalized.startswith("symbol optional legal text"):
+        return True
+    if (
+        "eligible pre-authorized transaction" in normalized
+        and "at least $" in normalized
+        and re.search(r"\b(?:months?|days?) in a row\b", normalized)
+    ):
+        return True
+    if (
+        "legal disclaimer" in normalized
+        or normalized.startswith("legal bug")
+        or normalized.startswith(("find a branch", "come see us", "here are some additional things you can do"))
+        or (
+            "offer expires" in normalized
+            and "%" in normalized
+            and re.search(r"\bfor\s+\d{1,3}\s+months?\b", normalized)
+        )
+    ):
+        return True
+    if (
+        "registered accounts have no fees while your funds are with us" in normalized
+        and any(marker in normalized for marker in ("transfer your funds", "fee will apply", "fair fees mean"))
+    ):
+        return True
+    if (
+        "gic interest calculator" in normalized
+        and len(re.findall(r"\b\d{1,3}(?:\.\d{1,2})?\s*(?:days?|years?)\s+\d{1,2}(?:\.\d+)?\s*%", normalized)) >= 2
+    ):
+        return True
+    if (
+        " at a glance " in f" {normalized} "
+        or (normalized.startswith("your ") and " account features " in normalized)
+        or (normalized.startswith("no. ") and "monthly fee rebate" in normalized)
+        or normalized.startswith("legal disclaimer")
+        or (
+            normalized.startswith("with ")
+            and "eligible" in normalized
+            and "bank account" in normalized
+            and any(marker in normalized for marker in ("program", "rewards", "benefits"))
+        )
+    ):
+        return True
+    if "bundle to earn" in normalized and any(
+        marker in normalized for marker in ("eligible credit card", "qualifying actions", "get approved")
+    ):
+        return True
+    if (
+        re.search(r"\bearn\s+up\s+to\s+\$\s*\d", normalized)
+        and "bundle" in normalized
+        and sum(marker in normalized for marker in ("banking package", "savings account", "chequing account", "credit card")) >= 2
+    ):
+        return True
+    if (
+        normalized.startswith("open your first ")
+        and "make a deposit" in normalized
+        and any(marker in normalized for marker in ("welcome bonus", "offer terms", "additional terms apply"))
+    ):
+        return True
+    if (
+        "eligible direct deposit" in normalized
+        and re.search(r"\$\s*\d[\d,]*(?:\.\d{1,2})?\s+or\s+more", normalized)
+        and re.search(r"\bfor\s+\d{1,3}\s+(?:straight\s+|consecutive\s+)?months?\b", normalized)
+    ):
+        return True
+    if (
+        re.search(r"\b(?:new to|new client|new customer)\b", normalized)
+        and re.search(r"\b(?:special|promotional|introductory)\s+(?:interest\s+)?rate\b", normalized)
+        and re.search(r"\bfor\s+(?:the\s+)?(?:first\s+)?\d{1,3}\s+(?:days?|weeks?|months?)\b", normalized)
+        and any(marker in normalized for marker in ("open ", "apply", "offer"))
+    ):
+        return True
+    if (
+        "international student gic program" in normalized
+        and any(marker in normalized for marker in ("before you arrive", "visa requirements"))
+        and not any(marker in normalized_product_name for marker in ("international student", "student gic"))
+    ):
+        return True
+    if (
+        any(marker in normalized for marker in ("savings accounts for kids", "children's savings account", "children’s savings account"))
+        and not any(
+            marker in normalized_product_name
+            for marker in ("kid", "child", "youth", "student", "young saver", "leo")
+        )
+    ):
+        return True
+    if (
+        normalized.startswith(("do not need to save", "don't need to save", "don’t need to save"))
+        and "need an account" in normalized
+    ) or "for alternate solutions to help you with everyday banking" in normalized:
+        return True
+    if product_type_family == "chequing" and "savings account" in normalized and not any(
+        marker in normalized for marker in ("chequing", "checking")
+    ):
+        return True
+    if product_type_family == "savings" and any(
+        marker in normalized for marker in ("chequing account", "checking account")
+    ) and not any(marker in normalized for marker in ("savings", "interest rate")):
+        return True
+    if (
+        normalized.startswith("accounts ")
+        and normalized.count(" account") >= 2
+        and not any(
+            re.search(rf"\b{verb}\b", normalized)
+            for verb in ("earn", "save", "grow", "enjoy", "offer", "provide", "include", "help")
+        )
+    ):
+        return True
+    return bool(
+        re.match(r"^(?:accounts?|bank accounts?|chequing accounts?|savings accounts?)\b", normalized)
+        and any(marker in normalized for marker in ("welcome offer", "special offer"))
+    )
+
+
+def _strip_cross_product_description_sentences(value: str) -> str:
+    sentences = re.split(r"(?<=[.!?])\s+", _normalize_text(value))
+    kept: list[str] = []
+    for sentence in sentences:
+        normalized = sentence.lower().strip()
+        cross_product_cta = bool(
+            re.match(
+                r"^(?:(?:if|when)\b[^,.]{0,100},\s*)?"
+                r"(?:try|consider|explore|check out)\s+(?:our|the)\b[^.]{0,120}"
+                r"\b(?:account|card|mortgage|loan|line of credit)\b",
+                normalized,
+            )
+        )
+        if not cross_product_cta:
+            kept.append(sentence.strip())
+    return " ".join(item for item in kept if item).strip()
+
+
+def _repair_flattened_customer_text(value: str) -> str:
+    """Repair a small set of high-confidence HTML/PDF span-boundary joins."""
+
+    repairs = {
+        "accountfor": "account for",
+        "iteasier": "it easier",
+        "thechance": "the chance",
+        "growand": "grow and",
+        "youopen": "you open",
+        "aplace": "a place",
+        "atany": "at any",
+        "alittle": "a little",
+    }
+
+    def replace(match: re.Match[str]) -> str:
+        replacement = repairs[match.group(0).lower()]
+        return replacement[:1].upper() + replacement[1:] if match.group(0)[:1].isupper() else replacement
+
+    pattern = r"\b(?:" + "|".join(re.escape(token) for token in repairs) + r")\b"
+    return re.sub(pattern, replace, _normalize_text(value), flags=re.IGNORECASE)
+
+
 def _looks_like_other_product_section(*, context: str) -> bool:
     normalized = " ".join(context.lower().replace("-", " ").replace("_", " ").split())
     return any(
@@ -1589,7 +3652,7 @@ def _looks_like_credit_card_field_mismatch(
         labels = {
             "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\))",
             "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
-            "cash_advance_rate": r"(?:cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+            "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
         }
         value_pattern = re.escape(f"{numeric_value:g}")
         match = re.search(
@@ -1628,10 +3691,130 @@ def _looks_like_non_rate_numeric_context(*, field_name: str, value: object, cont
         return False
     if isinstance(value, str) and not re.fullmatch(r"\s*\d{1,3}(?:\.\d+)?\s*%?\s*", value):
         return False
+    if field_name in {"interest_rate", "mortgage_rate"} and _is_reference_rate_margin_only(context):
+        return True
     return (
         canonical_deposit_rate_suppression_reason(value=value, context=context) is not None
         or _looks_like_unresolved_placeholder(context)
     )
+
+
+def _dynamic_numeric_value_is_ungrounded(
+    *,
+    field_name: str,
+    value: object,
+    context: str,
+    dynamic_field_names: set[str],
+) -> bool:
+    if field_name not in dynamic_field_names:
+        return False
+    contract = field_contract(field_name)
+    if contract is None or contract.value_type not in {"decimal", "integer"}:
+        return False
+    return not _normalize_text(context)
+
+
+def _find_dynamic_numeric_evidence_context(
+    *,
+    field_name: str,
+    value: object,
+    evidence_links: list[NormalizationEvidenceLink],
+) -> str:
+    """Find exact unit-bearing evidence for an AI-introduced numeric field."""
+
+    contract = field_contract(field_name)
+    if contract is None or contract.value_type not in {"decimal", "integer"}:
+        return ""
+    try:
+        expected = Decimal(str(value).replace(",", "").replace("$", "").replace("%", "").strip())
+    except InvalidOperation:
+        return ""
+    matches: list[str] = []
+    for link in evidence_links:
+        text = _normalize_text(link.evidence_text_excerpt)
+        if not text:
+            continue
+        if contract.unit == "percentage_points":
+            value_matches = any(
+                _as_decimal(match.group(1)) == expected
+                for match in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%", text)
+            )
+        elif contract.unit == "currency_amount":
+            value_matches = any(
+                _as_decimal(match.group(1).replace(",", "")) == expected
+                for match in re.finditer(r"(?:\$|\u20ac|\u00a3)\s*(\d[\d,]*(?:\.\d{1,2})?)", text)
+            )
+            if expected == 0 and field_name.endswith("_fee"):
+                value_matches = value_matches or re.search(r"\b(?:no|zero)\s+(?:annual\s+|monthly\s+)?fees?\b", text, flags=re.IGNORECASE) is not None
+        else:
+            value_matches = re.search(rf"(?<![\d.]){re.escape(format(expected, 'f'))}(?![\d.])", text) is not None
+        if value_matches:
+            matches.append(f"{link.anchor_value or ''} {text}".strip())
+    return " ".join(matches)
+
+
+def _money_value_is_non_fee_context(*, field_name: str, value: object, context: str) -> bool:
+    if field_name not in _FEE_FIELDS:
+        return False
+    try:
+        expected = Decimal(str(value).replace(",", "").strip())
+    except InvalidOperation:
+        return False
+    normalized = _normalize_text(context).lower()
+    if not normalized:
+        return False
+    for match in re.finditer(r"\$\s*([0-9][0-9,]*(?:\.\d{1,2})?)", normalized):
+        try:
+            observed = Decimal(match.group(1).replace(",", ""))
+        except InvalidOperation:
+            continue
+        if observed != expected:
+            continue
+        window = normalized[max(0, match.start() - 90) : min(len(normalized), match.end() + 90)]
+        if any(
+            marker in window
+            for marker in (
+                "direct deposit",
+                "eligible deposit",
+                "deposit today",
+                "gift card",
+                "cash bonus",
+                "welcome bonus",
+                "additional bonus",
+                "purchase of",
+                "spend $",
+            )
+        ):
+            return True
+    return False
+
+
+def _fee_value_is_plan_dependent(*, field_name: str, value: object, context: str) -> bool:
+    """Reject a zero scalar when the product says its fee comes from a plan.
+
+    A broad FAQ chunk may mention a sibling account with no monthly fee after
+    stating that the target account's fee depends on its paired bank plan.
+    The scalar field cannot faithfully encode that plan-dependent outcome.
+    """
+
+    if field_name not in _FEE_FIELDS:
+        return False
+    try:
+        if Decimal(str(value).replace(",", "").strip()) != 0:
+            return False
+    except InvalidOperation:
+        return False
+    normalized = _normalize_text(context).lower()
+    plan_match = re.search(
+        r"\bfee\s+based\s+on\s+(?:bank\s+)?plan\s+limits\b|"
+        r"\b(?:monthly\s+)?fees?\s+(?:will\s+)?depend(?:s)?\s+on\s+(?:the\s+)?(?:bank\s+)?plan\b|"
+        r"\bthis\s+will\s+depend\s+on\s+the\s+bank\s+plan\b",
+        normalized,
+    )
+    if plan_match is None:
+        return False
+    no_fee_match = re.search(r"\b(?:no|zero)\s+monthly\s+fees?\b|\bmonthly\s+fees?\s*\$?0(?:\.00)?\b", normalized)
+    return no_fee_match is None or plan_match.start() < no_fee_match.start()
 
 
 def _looks_like_invalid_field_type(*, field_name: str, value: str) -> bool:
@@ -1639,6 +3822,28 @@ def _looks_like_invalid_field_type(*, field_name: str, value: str) -> bool:
     if normalized_field.endswith("_flag") or normalized_field in {"secured_flag", "redeemable_flag"}:
         return value.strip().lower() not in {"true", "false", "yes", "no", "1", "0"}
     return False
+
+
+def _looks_like_invalid_tax_benefit(*, field_name: str, value: str) -> bool:
+    if field_name != "tax_benefits":
+        return False
+    normalized = " ".join(value.lower().split())
+    tax_markers = (
+        "tax-free",
+        "tax free",
+        "tax-deferred",
+        "tax deferred",
+        "tax sheltered",
+        "tax deduction",
+        "taxable income",
+        "tax benefit",
+        "withholding tax",
+        "income tax",
+        "not taxed",
+    )
+    if not any(marker in normalized for marker in tax_markers):
+        return True
+    return any(marker in normalized for marker in ("special rate", "promotional rate", "new client offer"))
 
 
 def _looks_like_unresolved_placeholder(value: str) -> bool:
@@ -1710,6 +3915,37 @@ def _looks_like_invalid_application_method(
             "sign in to online banking",
         )
     ):
+        return True
+    if (
+        any(marker in normalized for marker in ("mobile app", "online banking", "abm", "access card", "cheques"))
+        and any(
+            marker in normalized_context
+            for marker in ("funds can be accessed", "access your funds", "ways to access")
+        )
+        and not any(
+            marker in normalized
+            for marker in ("apply", "application", "open", "book an appointment", "speak to", "talk to")
+        )
+    ):
+        return True
+    if len(normalized) >= 180 and sum(
+        marker in normalized
+        for marker in ("interest rates", "resources", "legal", "about our", "sign on", "rate (%)", "apy (%)")
+    ) >= 3:
+        # A valid application method is an actionable channel, not a flattened
+        # page span that happens to contain an Apply CTA near its end.
+        return True
+    if sum(
+        marker in normalized
+        for marker in (
+            "monthly fee",
+            "transactions included",
+            "interest calculated",
+            "paper or online statement",
+            "minimum balance",
+            "compare account",
+        )
+    ) >= 3:
         return True
     if product_type_family in {"gic", "credit-card", "mortgage", "personal-loan", "line-of-credit"}:
         targets_bank_account = any(
@@ -1796,6 +4032,11 @@ def _looks_like_non_value_lending_field(
         return True
     if field_name == "monthly_payment_text" and not re.search(r"\b(?:payment|payments|repayment|repay)\b", normalized):
         return True
+    if field_name == "minimum_payment_text" and not (
+        re.search(r"\b(?:minimum\s+payment|payment|payments|pay\s+at\s+least|repayment|repay)\b", normalized)
+        or re.search(r"\b(?:interest[- ]only|interest\s+and\s+principal|principal\s+and\s+interest)\b", normalized)
+    ):
+        return True
     if field_name == "loan_amount_text" and len(normalized) > 100:
         return re.search(r"(?:\$|\b\d[\d,.]*\b|\bminimum\b|\bmaximum\b|\bup to\b)", normalized) is None
     if field_name in {"security_requirement", "collateral_text"}:
@@ -1828,7 +4069,40 @@ def _looks_like_non_value_lending_field(
 
 def _looks_like_broad_page_copy(*, field_name: str, value: str) -> bool:
     normalized = " ".join(value.split())
+    lowered = normalized.lower()
     if field_name == "application_method" and normalized.lower().startswith("how do i apply"):
+        return True
+    if field_name == "notes" and normalized.lower().startswith(
+        ("legal footnote", "legal disclaimer", "footnote details")
+    ):
+        return True
+    if field_name == "notes" and (
+        "other conditions and exceptions may apply" in lowered
+        or ("due to system limitations" in lowered and "bundling" in lowered)
+        or ("refer to" in lowered and "for full details" in lowered)
+        or "for alternate solutions to help you with everyday banking" in lowered
+    ):
+        return True
+    if field_name == "withdrawal_limit_text" and lowered.strip(" .:-") in {"withdrawal fee", "withdrawal fees"}:
+        return True
+    if field_name == "interest_calculation_method" and not any(
+        marker in lowered
+        for marker in (
+            "calculated",
+            "calculation",
+            "accrues",
+            "compounded",
+            "paid monthly",
+            "paid annually",
+            "daily closing balance",
+            "rate paid depends",
+        )
+    ):
+        return True
+    if field_name == "tier_definition_text" and (
+        sum(marker in lowered for marker in ("monthly account fee", "free debit", "foreign exchange", "no fee for")) >= 2
+        and len(re.findall(r"\d{1,3}(?:\.\d+)?\s*%", lowered)) < 2
+    ):
         return True
     concise_fields = {
         "fees_text",
@@ -1840,10 +4114,58 @@ def _looks_like_broad_page_copy(*, field_name: str, value: str) -> bool:
         "security_requirement",
         "collateral_text",
         "deposit_insurance",
+        "tax_benefits",
         "term_length_text",
         "prepayment_privileges",
     }
+    if field_name == "deposit_insurance" and sum(
+        marker in normalized.lower()
+        for marker in ("contact us", "abm locator", "rates", "careers", "community", "get our app", "connect with us")
+    ) >= 3:
+        return True
+    if field_name == "deposit_insurance" and "canada deposit insurance corporation" in lowered and sum(
+        marker in lowered
+        for marker in (
+            "more account information",
+            "summary of account fees",
+            "savings account interest rates",
+            "branch locator",
+            "regulatory information",
+        )
+    ) >= 2:
+        return True
     return len(normalized) >= 240 and field_name in concise_fields
+
+
+def _looks_like_gic_field_context_mismatch(
+    *, field_name: str, value: str, product_name: str, product_type_family: str | None
+) -> bool:
+    if product_type_family != "gic" or field_name != "tax_benefits":
+        return False
+    normalized = " ".join(value.lower().split())
+    identity = " ".join(product_name.lower().split())
+    navigation_markers = (
+        "bank accounts",
+        "credit cards",
+        "mortgages",
+        "personal loans",
+        "investments",
+        "contact us",
+        "about us",
+        "legal",
+    )
+    if sum(marker in normalized for marker in navigation_markers) >= 3:
+        return True
+    retirement_identity = any(marker in identity for marker in ("rsp", "rrsp", "rif", "retirement"))
+    retirement_context = any(
+        marker in normalized for marker in ("rsp", "rrsp", "rif", "retirement", "tax-deferred", "tax sheltered")
+    )
+    if retirement_identity and any(marker in normalized for marker in ("tfsa", "tax-free")) and not retirement_context:
+        return True
+    tfsa_identity = any(marker in identity for marker in ("tfsa", "tax-free"))
+    if tfsa_identity and retirement_context and not any(marker in normalized for marker in ("tfsa", "tax-free")):
+        return True
+    return False
 
 
 def _duplicated_page_copy_fields(candidate_payload: dict[str, object]) -> set[str]:
@@ -1851,16 +4173,19 @@ def _duplicated_page_copy_fields(candidate_payload: dict[str, object]) -> set[st
     for field_name, value in candidate_payload.items():
         if not isinstance(value, str):
             continue
-        normalized = " ".join(value.lower().split())
-        if len(normalized) < 120:
+        normalized = " ".join(value.lower().split()).strip(" .:;|-_")
+        if len(normalized) < 80:
             continue
         by_value.setdefault(normalized, []).append(field_name)
-    return {
-        field_name
-        for field_names in by_value.values()
-        if len(field_names) >= 2
-        for field_name in field_names
-    }
+    duplicated: set[str] = set()
+    for field_names in by_value.values():
+        if len(field_names) < 2:
+            continue
+        if "description_short" in field_names:
+            duplicated.update(field_name for field_name in field_names if field_name != "description_short")
+        else:
+            duplicated.update(field_names)
+    return duplicated
 
 
 def _suppress_inconsistent_term_length(
@@ -1909,10 +4234,77 @@ def _suppress_inconsistent_term_length(
         )
 
 
-def _looks_like_non_value_eligibility(*, field_name: str, value: str) -> bool:
+def _suppress_scalar_term_for_multi_term_table(
+    *,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object] | None,
+    field_mapping_metadata: dict[str, object] | None,
+    runtime_notes: list[str] | None,
+) -> None:
+    rows = candidate_payload.get("term_rate_table")
+    if not isinstance(rows, list):
+        return
+    distinct_terms = {
+        (row.get("term_length_days"), str(row.get("term_label") or "").strip().lower())
+        for row in rows
+        if isinstance(row, dict)
+        and (row.get("term_length_days") not in {None, ""} or row.get("term_label"))
+    }
+    if len(distinct_terms) < 2:
+        return
+    term_text = str(candidate_payload.get("term_length_text") or "").strip()
+    declared_durations = re.findall(
+        r"(?<!\d)\d{1,3}\s*(?:day|days|month|months|year|years)\b",
+        term_text,
+        flags=re.IGNORECASE,
+    )
+    if len(declared_durations) != 1:
+        return
+    removed: list[str] = []
+    for field_name in ("term_length_days", "term_length_text"):
+        if field_name not in candidate_payload:
+            continue
+        candidate_payload.pop(field_name, None)
+        if normalized_values_for_links is not None:
+            normalized_values_for_links.pop(field_name, None)
+        if field_mapping_metadata is not None:
+            metadata = dict(field_mapping_metadata.get(field_name) or {})
+            metadata.update(
+                {
+                    "normalized_value": None,
+                    "normalization_method": "multi_term_table_scalar_safety",
+                    "suppressed_reason": "single_term_scalar_in_multi_term_product",
+                }
+            )
+            field_mapping_metadata[field_name] = metadata
+        removed.append(field_name)
+    if removed and runtime_notes is not None:
+        runtime_notes.append(
+            "Suppressed a single-term scalar because the same product publishes a multi-term rate table."
+        )
+
+
+def _looks_like_non_value_eligibility(
+    *, field_name: str, value: str, product_name: str | None = None
+) -> bool:
     if field_name not in {"eligibility", "eligibility_text"}:
         return False
     normalized = " ".join(value.lower().split())
+    truncated_program_definition = (
+        len(normalized) >= 80
+        and not re.search(r"[.!?]$", normalized)
+        and re.search(r"\b(?:by having|with|from) an eligible$", normalized) is not None
+    )
+    application_or_program_instructions = any(
+        marker in normalized
+        for marker in (
+            "to apply, you’ll need",
+            "to apply, you'll need",
+            "automatically apply the highest value rebate",
+            "activate the value program",
+            "eligible for one fee-waiver",
+        )
+    )
     calculator_cta = "calculator" in normalized and any(
         marker in normalized
         for marker in ("calculate", "find out how much", "may qualify to borrow", "estimate how much")
@@ -1943,16 +4335,230 @@ def _looks_like_non_value_eligibility(*, field_name: str, value: str) -> bool:
         )
     )
     rate_or_insurance_card = not eligibility_criteria and (
-        "%" in normalized or "eligible for cdic coverage" in normalized or "deposit insurance" in normalized
+        "%" in normalized
+        or "eligible for cdic coverage" in normalized
+        or "eligible for cdic insurance" in normalized
+        or "deposit insurance" in normalized
+    )
+    application_cta = not eligibility_criteria and bool(
+        re.fullmatch(
+            r"(?:how to apply\s*)?(?:talk|speak) to an? (?:scotia )?advisor(?:\s+book an appointment)?",
+            normalized.strip(" .:-"),
+        )
+    )
+    cross_product_offer = not eligibility_criteria and (
+        any(
+            marker in normalized
+            for marker in ("eligible credit card", "eligible chequing account", "eligible savings account")
+        )
+        and any(
+            marker in normalized
+            for marker in ("qualifying transaction", "qualifying condition", "cash bonus", "bundle bonus")
+        )
+    )
+    cross_product_application = not eligibility_criteria and "eligible credit card" in normalized and "then apply" in normalized
+    direct_deposit_offer = "eligible direct deposit" in normalized and (
+        re.search(r"\bfor\s+\d{1,3}\s+(?:straight\s+|consecutive\s+)?months?\b", normalized) is not None
+        or any(marker in normalized for marker in ("welcome offer", "cash bonus", "gift card", "offer ends"))
+    )
+    generic_cash_offer = (
+        any(marker in normalized for marker in ("cash bonus bundle offer", "cash bonus", "welcome offer"))
+        and any(marker in normalized for marker in ("qualifying transactions", "offer period", "offer terms"))
+    )
+    promotional_transaction_criteria = any(
+        marker in normalized
+        for marker in (
+            "only the following visa debit transaction types are eligible",
+            "list of eligible direct deposits and pre-authorized transactions",
+            "list of eligible direct deposits and preauthorized transactions",
+        )
+    )
+    ancillary_product_offer = (
+        "to qualify" in normalized
+        and (
+            ("mortgage" in normalized and any(marker in normalized for marker in ("preferred mortgage rate", "preauthorized mortgage payment")))
+            or ("fee waiver" in normalized and "account holder" in normalized)
+        )
+    )
+    overdraft_feature = (
+        "eligible for overdraft protection" in normalized
+        and not eligibility_criteria
+    )
+    brokerage_benefit = (
+        "account holders" in normalized
+        and "commission" in normalized
+        and any(marker in normalized for marker in ("trades", "trading", "brokerage"))
+    )
+    acquisition_offer_criteria = any(
+        marker in normalized
+        for marker in (
+            "the offer is available to new",
+            "offer is only applicable",
+            "qualifying conditions",
+            "promotional rate will apply",
+        )
+    ) and any(marker in normalized for marker in ("offer", "promotional rate", "eligible savings account"))
+    acquisition_offer_criteria = acquisition_offer_criteria or bool(
+        re.search(r"\b(?:the\s+[^.]{0,90}\s+)?offer\b[^.]{0,60}\bavailable to new\b", normalized)
+        and any(
+            marker in normalized
+            for marker in ("client number", "within 60 days", "primary account holder", "eligible savings account")
+        )
+    )
+    promotional_history_criteria = any(
+        marker in normalized
+        for marker in (
+            "preceding the offer period",
+            "not eligible for this bonus",
+            "haven't had",
+            "haven’t had",
+            "held either account within",
+        )
+    ) and any(marker in normalized for marker in ("offer", "bonus", "promo", "promotional"))
+    promotional_history_criteria = promotional_history_criteria or (
+        "offer eligibility" in normalized
+        and "previously" in normalized
+        and "cardholder" in normalized
+        and re.search(r"\bpast\s+\d{1,2}\s+years?\b", normalized) is not None
+    )
+    rewards_platform_usage = (
+        "scene+" in normalized
+        and "casa" in normalized
+        and any(marker in normalized for marker in ("rent", "condo fees", "housing-related bill"))
+    )
+    product_feature_list = (
+        "guaranteed rate for your entire term" in normalized
+        and "principal is always guaranteed" in normalized
+        and any(marker in normalized for marker in ("compound automatically", "registered and non-registered plans"))
+    )
+    dated_account_offer = re.search(
+        r"\bto qualify(?: for (?:this|the|these) offers?)?,?\s+(?:make sure to\s+)?open\s+a\s+new\b"
+        r"[\s\S]{0,180}?\bbetween\s+[a-z]+\s+\d{1,2},\s+20\d{2}\s+and\s+[a-z]+\s+\d{1,2},\s+20\d{2}",
+        normalized,
+    ) is not None
+    normalized_product_name = " ".join(str(product_name or "").lower().split())
+    audience_sibling = (
+        any(
+            marker in normalized
+            for marker in ("international student", "visa requirements", "before you arrive in canada")
+        )
+        and not any(
+            marker in normalized_product_name
+            for marker in ("international student", "student gic", "student program")
+        )
     )
     generic_marketing = not eligibility_criteria and any(
         marker in normalized
-        for marker in ("great option when you need", "focus on your", "make it happen", "hassle-free")
+        for marker in (
+            "great option when you need",
+            "focus on your",
+            "make it happen",
+            "hassle-free",
+            "qualifying actions apply",
+            "take advantage of offers and perks",
+            "bundle with any eligible",
+            "then apply and get approved for any eligible",
+            "suitable for applicants who want",
+            "right for you if you want",
+        )
     )
-    return calculator_cta or estimate_output or rate_or_insurance_card or generic_marketing or len(normalized) < 120 and (
+    generic_marketing = generic_marketing or (
+        normalized.count("want to") >= 2
+        and not any(
+            marker in normalized
+            for marker in ("must ", "resident", "minimum income", "credit score", "age of majority")
+        )
+    )
+    rewards_example = not eligibility_criteria and (
+        any(marker in normalized for marker in ("eligible purchase", "eligible grocery", "eligible gas"))
+        and any(marker in normalized for marker in ("point", "reward", "cash back", "cashback", "earn"))
+    )
+    return (
+        calculator_cta
+        or estimate_output
+        or rate_or_insurance_card
+        or application_cta
+        or cross_product_offer
+        or cross_product_application
+        or direct_deposit_offer
+        or generic_cash_offer
+        or promotional_transaction_criteria
+        or ancillary_product_offer
+        or overdraft_feature
+        or brokerage_benefit
+        or acquisition_offer_criteria
+        or promotional_history_criteria
+        or rewards_platform_usage
+        or product_feature_list
+        or dated_account_offer
+        or audience_sibling
+        or generic_marketing
+        or rewards_example
+        or application_or_program_instructions
+        or truncated_program_definition
+        or len(normalized) < 120 and (
         normalized.startswith("and ")
         or "we understand that" in normalized
         or normalized in {"learn more", "get started", "contact us"}
+        )
+    )
+
+
+def _audience_flag_is_legal_enumeration(*, field_name: str, value: object, context: str) -> bool:
+    if field_name not in {"student_plan_flag", "newcomer_plan_flag"} or not _truthy(value):
+        return False
+    normalized = _normalize_text(context).lower()
+    return bool(
+        re.search(
+            r"\b(?:means|includes?)\s+(?:any\s+of\s+)?(?:the\s+)?following\s+accounts?\b",
+            normalized,
+        )
+        and any(marker in normalized for marker in ("offer eligibility", "offer exclusions", "package bonus"))
+    )
+
+
+def _looks_like_non_value_rewards(*, field_name: str, value: str) -> bool:
+    if field_name != "rewards_summary":
+        return False
+    normalized = _normalize_text(value).lower()
+    promotional = any(
+        marker in normalized
+        for marker in ("welcome offer", "bonus points", "bonus scene+", "first 3 months", "first 6 months", "first 14 months")
+    )
+    ongoing = (
+        re.search(r"\b(?:earn|get)\s+(?:up to\s+)?\d+(?:\.\d+)?\s*(?:%|points?)\b[^.]{0,120}\b(?:per|on)\b", normalized)
+        is not None
+        or any(marker in normalized for marker in ("on every purchase", "on all other eligible", "cash back on eligible"))
+    )
+    truncated = re.search(
+        r"\b(?:o|ot|oth|elig|eligi|purch|purcha)$",
+        normalized,
+    ) is not None
+    return (promotional and not ongoing) or truncated
+
+
+def _looks_like_expired_promotional_customer_field(
+    *,
+    field_name: str,
+    value: str,
+    context: str,
+    expired_offer_present: bool,
+) -> bool:
+    if field_name not in {"description_short", "eligibility_text", "notes", "promotional_period_text", "rewards_summary"}:
+        return False
+    if expired_promotional_offer_end_date(value) is not None or expired_promotional_offer_end_date(context) is not None:
+        return True
+    if not expired_offer_present:
+        return False
+    normalized = _normalize_text(f"{value} {context}").lower()
+    if field_name == "eligibility_text" and re.search(r"\bto qualify\b[\s\S]{0,120}?\bopen\s+a\s+new\b", normalized):
+        return True
+    return any(
+        marker in normalized
+        for marker in (
+            "special offer", "welcome offer", "introductory", "bonus points", "bonus scene+",
+            "for the first 3 months", "for the first 6 months", "for the first 9 months", "first 14 months",
+        )
     )
 
 
@@ -2275,15 +4881,15 @@ def _product_signal_text(candidate_payload: dict[str, object], *, field_names: t
 
 def _infer_target_customer_tags(candidate_payload: dict[str, object]) -> list[str]:
     tags: list[str] = []
-    merged_text = " ".join(str(candidate_payload.get(field_name, "")) for field_name in ("product_name", "description_short", "notes", "eligibility_text")).lower()
-    if "student" in merged_text or "youth" in merged_text or _truthy(candidate_payload.get("student_plan_flag")):
+    identity_text = str(candidate_payload.get("product_name") or "").lower()
+    if "student" in identity_text or "youth" in identity_text or _truthy(candidate_payload.get("student_plan_flag")):
         tags.append("student")
-    if "newcomer" in merged_text or _truthy(candidate_payload.get("newcomer_plan_flag")):
+    if "newcomer" in identity_text or _truthy(candidate_payload.get("newcomer_plan_flag")):
         tags.append("newcomer")
-    if "senior" in merged_text:
+    if "senior" in identity_text:
         tags.append("senior")
     if any(
-        token in merged_text
+        token in identity_text
         for token in (
             "business account",
             "business banking",
@@ -2381,7 +4987,7 @@ def _normalize_term_rate_table(value: object) -> list[dict[str, object]] | None:
 def _parse_term_rate_text(value: str) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     pattern = re.compile(
-        r"(?P<term>\d{1,3}\s*(?:day|days|month|months|year|years))\s*[:\-]?\s*(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        r"(?P<term>\d{1,3}(?:\.\d{1,2})?\s*(?:day|days|month|months|year|years))\s*[:\-]?\s*(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
         flags=re.IGNORECASE,
     )
     for match in pattern.finditer(value):
@@ -2455,20 +5061,28 @@ def _set_field_note(field_mapping_metadata: dict[str, object], field_name: str, 
 def _term_label_to_days(term_label: str) -> int | None:
     if re.search(r"\d{1,3}\s*(?:-|–|—|to)\s*\d{1,3}\s*days?\b", term_label, flags=re.IGNORECASE):
         return None
-    match = re.search(r"(?<!\d)(\d{1,3})\s*(day|days|month|months|year|years)\b", term_label, flags=re.IGNORECASE)
+    match = re.search(
+        r"(?<![\d.])(\d{1,3}(?:\.\d{1,2})?)\s*(day|days|month|months|year|years)\b",
+        term_label,
+        flags=re.IGNORECASE,
+    )
     if match is None:
         return None
-    value = _as_int(match.group(1))
+    value = _as_decimal(match.group(1))
     if value is None:
         return None
     unit = match.group(2).lower()
     if unit.startswith("day"):
-        return value
-    if unit.startswith("month"):
-        return value * 30
-    if unit.startswith("year"):
-        return value * 365
-    return None
+        days = value
+    elif unit.startswith("month"):
+        days = value * Decimal("30")
+    elif unit.startswith("year"):
+        days = value * Decimal("365")
+    else:
+        return None
+    if days != days.to_integral_value():
+        days = (days + Decimal("0.5")).to_integral_value()
+    return int(days)
 
 
 def _parse_canonical_decimal(*, field_name: str, value: object) -> Decimal | None:

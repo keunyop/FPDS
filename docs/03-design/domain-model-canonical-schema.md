@@ -128,6 +128,7 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 | `description_short` | text | X | source-derived short description |
 | `public_display_rate` | decimal | X | public-facing snapshot rate |
 | `public_display_fee` | decimal | X | public-facing snapshot fee |
+| `transaction_fee` | decimal | X | per-transaction charge when disclosed |
 | `product_highlight_badge_code` | string code | X | UI label mapping용 badge code |
 | `effective_date` | date | X | source-effective date if available |
 | `last_verified_at` | timestamp | O | last verification timestamp |
@@ -164,6 +165,7 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 #### Chequing
 
 - `included_transactions`
+- `transaction_fee`
 - `unlimited_transactions_flag`
 - `interac_e_transfer_included`
 - `overdraft_available`

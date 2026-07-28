@@ -264,6 +264,8 @@ const AUDIT_COPY = {
 export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfaceProps) {
   const copy = AUDIT_COPY[locale];
   const categoryCounts = auditLog.summary.category_counts;
+  const fieldClass =
+    "h-10 min-w-0 rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30";
   const statItems = [
     {
       label: copy.visibleEvents,
@@ -297,7 +299,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
 
   return (
     <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.description}
@@ -310,11 +312,11 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
         items={statItems}
       />
 
-      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <article className="min-w-0 rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersSort}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.controls}</h2>
+            <h2 className="text-base font-semibold text-foreground">{copy.controls}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{copy.filtersSort}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -330,12 +332,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
           </div>
         </div>
 
-        <form action={buildAdminHref("/admin/audit", new URLSearchParams(), locale)} className="mt-6 grid min-w-0 gap-5">
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
+        <form action={buildAdminHref("/admin/audit", new URLSearchParams(), locale)} className="mt-4 grid min-w-0 gap-4">
+          <div className="grid min-w-0 gap-3 xl:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))]">
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -346,7 +348,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.category}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.eventCategory}
                 name="event_category"
               >
@@ -362,7 +364,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.eventType}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.eventType}
                 name="event_type"
                 placeholder="review_task_edited"
@@ -373,7 +375,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.actorType}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.actorType}
                 name="actor_type"
               >
@@ -389,7 +391,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.targetType}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.targetType}
                 name="target_type"
                 placeholder="review_task"
@@ -400,7 +402,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.sortBy}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.sortBy}
                 name="sort_by"
               >
@@ -412,11 +414,11 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             </label>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto]">
+          <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.occurredFrom}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.occurredFrom}
                 name="occurred_from"
                 type="date"
@@ -426,7 +428,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.occurredTo}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.occurredTo}
                 name="occurred_to"
                 type="date"
@@ -436,7 +438,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.order}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.sortOrder}
                 name="sort_order"
               >
@@ -455,12 +457,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
         </form>
       </article>
 
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.table}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="text-xs font-semibold text-muted-foreground">{copy.results}</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{copy.table}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {copy.pageSummary(auditLog.page, Math.max(auditLog.total_pages, 1), auditLog.total_items)}
             </p>
           </div>
@@ -488,16 +490,16 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
         </div>
 
         {auditLog.items.length === 0 ? (
-          <div className="px-6 py-10">
-            <div className="rounded-[1.5rem] border border-dashed border-border bg-background px-6 py-8">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.noMatching}</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+          <div className="px-4 py-8">
+            <div className="rounded-lg border border-dashed border-border bg-background px-5 py-6">
+              <p className="text-sm font-medium text-muted-foreground">{copy.noMatching}</p>
+              <h3 className="mt-2 text-lg font-semibold text-foreground">
                 {copy.noMatchingTitle}
               </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                 {copy.noMatchingDescription}
               </p>
-              <div className="mt-6">
+              <div className="mt-4">
                 <Button asChild variant="outline">
                   <Link href={buildAdminHref("/admin/audit", new URLSearchParams(), locale)}>{copy.resetFilters}</Link>
                 </Button>
@@ -506,54 +508,69 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
           </div>
         ) : (
           <>
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1240px] table-fixed border-separate border-spacing-0">
+            <div
+              aria-label={copy.table}
+              className="max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              role="region"
+              tabIndex={0}
+            >
+              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
+                <caption className="sr-only">
+                  {copy.pageSummary(auditLog.page, Math.max(auditLog.total_pages, 1), auditLog.total_items)}
+                </caption>
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.event}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.actor}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.target}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.reasonDiff}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.linkedContext}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
+                  <tr className="text-left text-xs text-muted-foreground">
+                    <th className="sticky left-0 z-20 w-[190px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.event}</th>
+                    <th className="w-[170px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.actor}</th>
+                    <th className="w-[230px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">
+                      {copy.action} · {copy.reasonDiff}
+                    </th>
+                    <th className="w-[210px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.target}</th>
+                    <th className="w-[190px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.linkedContext}</th>
+                    <th className="w-[90px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {auditLog.items.map((item) => (
-                    <tr className="align-top" key={item.audit_event_id}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", categoryBadgeClasses(item.event_category))}>
-                              {toTitleCase(item.event_category)}
-                            </span>
-                            <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                              {formatEventType(item.event_type)}
-                            </span>
-                          </div>
-                          <p className="text-sm font-medium leading-6 text-foreground">{formatTimestamp(item.occurred_at)}</p>
-                          <span className="text-xs text-muted-foreground">{item.audit_event_id}</span>
+                    <tr className="group align-top" key={item.audit_event_id}>
+                      <td className="sticky left-0 z-10 border-b border-border/70 bg-card px-4 py-4 group-hover:bg-muted">
+                        <div className="grid gap-1.5">
+                          <p className="font-mono text-xs font-semibold text-foreground">{formatTimestamp(item.occurred_at)}</p>
+                          <span className={cn("inline-flex w-fit rounded-md px-2 py-0.5 text-xs font-medium", categoryBadgeClasses(item.event_category))}>
+                            {toTitleCase(item.event_category)}
+                          </span>
+                          <span className="truncate font-mono text-xs text-muted-foreground">{item.audit_event_id}</span>
                         </div>
                       </td>
 
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2 text-sm">
-                          <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", actorTypeBadgeClasses(item.actor_type))}>
-                            {toTitleCase(item.actor_type)}
-                          </span>
-                          <span className="font-medium text-foreground">
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-1.5 text-sm">
+                          <span className="font-medium leading-5 text-foreground">
                             {item.actor.display_name ?? item.actor.email ?? item.actor.actor_id ?? copy.systemActor}
                           </span>
+                          <span className={cn("inline-flex w-fit rounded-md px-2 py-0.5 text-xs font-medium", actorTypeBadgeClasses(item.actor_type))}>
+                            {toTitleCase(item.actor_type)}
+                          </span>
                         </div>
                       </td>
 
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2 text-sm">
-                          <span className="font-medium text-foreground">{item.target.display_name ?? item.target.target_id}</span>
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-1.5 text-sm">
+                          <span className="font-medium leading-5 text-foreground">{formatEventType(item.event_type)}</span>
+                          <span className="leading-5 text-muted-foreground">
+                            {item.reason.reason_text ?? item.reason.reason_code ?? copy.noReason}
+                          </span>
+                          {item.source_ref ? <span className="truncate font-mono text-xs text-muted-foreground">{copy.sourceRef}: {item.source_ref}</span> : null}
+                        </div>
+                      </td>
+
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-1.5 text-sm">
+                          <span className="font-medium leading-5 text-foreground">{item.target.display_name ?? item.target.target_id}</span>
                           {item.state_transition.previous_state || item.state_transition.new_state ? (
-                            <span className="text-muted-foreground">
+                            <span className="inline-flex w-fit rounded-md bg-info-soft px-2 py-0.5 font-mono text-xs text-info">
                               {item.state_transition.previous_state ?? copy.unknown}
-                              {" -> "}
+                              {" → "}
                               {item.state_transition.new_state ?? copy.unknown}
                             </span>
                           ) : (
@@ -562,17 +579,8 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                         </div>
                       </td>
 
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2 text-sm">
-                          <span className="font-medium text-foreground">
-                            {item.reason.reason_text ?? item.reason.reason_code ?? copy.noReason}
-                          </span>
-                          {item.source_ref ? <span className="text-muted-foreground">{copy.sourceRef}: {item.source_ref}</span> : null}
-                        </div>
-                      </td>
-
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2 text-sm">
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-1.5 text-sm">
                           <span className="font-medium text-foreground">
                             {item.related_context.product_name ?? item.related_context.bank_name ?? copy.noProductContext}
                           </span>
@@ -581,7 +589,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                               ? `${item.related_context.bank_name}${item.related_context.bank_code ? ` (${item.related_context.bank_code})` : ""}`
                               : copy.noBankContext}
                           </span>
-                          <span className="text-muted-foreground">
+                          <span className="truncate font-mono text-xs text-muted-foreground">
                             {item.related_context.review_task_id
                               ? `${copy.review} ${item.related_context.review_task_id}`
                               : item.related_context.run_id
@@ -591,8 +599,8 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                         </div>
                       </td>
 
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="flex flex-col gap-2">
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="flex flex-col items-stretch gap-2">
                           {item.related_context.review_task_id ? (
                             <Button asChild size="sm" variant="outline">
                               <Link href={buildAdminHref(`/admin/reviews/${item.related_context.review_task_id}`, new URLSearchParams(), locale)}>{copy.reviewDetail}</Link>
@@ -614,7 +622,7 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
               </table>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-border/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 {copy.showing((auditLog.page - 1) * auditLog.page_size + 1, Math.min(auditLog.page * auditLog.page_size, auditLog.total_items), auditLog.total_items)}
               </p>
@@ -623,20 +631,12 @@ export function AuditLogSurface({ auditLog, filters, locale }: AuditLogSurfacePr
                   <Button asChild size="sm" variant="outline">
                     <Link href={buildAuditHref(locale, filters, { page: Math.max(1, auditLog.page - 1) })}>{copy.previous}</Link>
                   </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.previous}
-                  </span>
-                )}
+                ) : <Button disabled size="sm" variant="outline">{copy.previous}</Button>}
                 {auditLog.has_next_page ? (
                   <Button asChild size="sm" variant="outline">
                     <Link href={buildAuditHref(locale, filters, { page: auditLog.page + 1 })}>{copy.next}</Link>
                   </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.next}
-                  </span>
-                )}
+                ) : <Button disabled size="sm" variant="outline">{copy.next}</Button>}
               </div>
             </div>
           </>

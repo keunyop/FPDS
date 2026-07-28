@@ -181,10 +181,20 @@ def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
             timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as exc:
-        if exc.stdout:
-            print(exc.stdout, end="")
-        if exc.stderr:
-            print(exc.stderr, end="", file=sys.stderr)
+        timeout_stdout = _subprocess_output_text(exc.stdout)
+        timeout_stderr = _subprocess_output_text(exc.stderr)
+        if timeout_stdout:
+            print(timeout_stdout, end="")
+        if timeout_stderr:
+            print(timeout_stderr, end="", file=sys.stderr)
+        recovered_output = _completed_stage_output(timeout_stdout)
+        if recovered_output is not None:
+            print(
+                f"[source-collection-runner] stage {stage_name} emitted a completed persistence result before timeout; continuing",
+                file=sys.stderr,
+                flush=True,
+            )
+            return recovered_output
         raise RuntimeError(f"{stage_name} timed out after {timeout_seconds} seconds.") from exc
     if completed.stdout:
         print(completed.stdout, end="")
@@ -199,6 +209,30 @@ def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
         return json.loads(stdout)
     except json.JSONDecodeError:
         return {}
+
+
+def _subprocess_output_text(value: str | bytes | None) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value or ""
+
+
+def _completed_stage_output(stdout: str) -> dict[str, Any] | None:
+    if not stdout.strip():
+        return None
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    persistence = payload.get("persistence")
+    if not isinstance(persistence, dict) or persistence.get("run_state") != "completed":
+        return None
+    source_results = payload.get("source_results")
+    if not isinstance(source_results, list):
+        return None
+    return payload
 
 
 def _build_worker_command(module_name: str, args: list[str]) -> list[str]:
@@ -262,28 +296,33 @@ def _dedupe_target_sources_by_snapshot_checksum(
     snapshot_output: dict[str, Any],
     target_source_ids: list[str],
 ) -> tuple[list[str], list[str]]:
-    """Keep one normalization target per byte-identical snapshot.
+    """Keep one normalization target per byte-identical logical source document.
 
-    Supporting sources still pass through parse and extraction. Targets without a
-    checksum are retained because equivalence cannot be proven safely.
+    Different URLs can return the same WAF, consent, or JavaScript shell bytes.
+    Therefore checksum equality alone is not proof that two product pages are the
+    same product. Supporting sources still pass through parse and extraction.
     """
     target_set = set(target_source_ids)
-    checksum_by_source_id = {
-        str(item.get("source_id")): str(item.get("checksum") or "").strip()
+    identity_by_source_id = {
+        str(item.get("source_id")): (
+            str(item.get("source_document_id") or "").strip(),
+            str(item.get("checksum") or "").strip(),
+        )
         for item in snapshot_output.get("source_results", [])
         if str(item.get("source_id") or "") in target_set
     }
     retained: list[str] = []
     duplicates: list[str] = []
-    seen_checksums: set[str] = set()
+    seen_identities: set[tuple[str, str]] = set()
     for source_id in target_source_ids:
-        checksum = checksum_by_source_id.get(source_id, "")
-        if checksum and checksum in seen_checksums:
+        source_document_id, checksum = identity_by_source_id.get(source_id, ("", ""))
+        identity = (source_document_id, checksum)
+        if source_document_id and checksum and identity in seen_identities:
             duplicates.append(source_id)
             continue
         retained.append(source_id)
-        if checksum:
-            seen_checksums.add(checksum)
+        if source_document_id and checksum:
+            seen_identities.add(identity)
     return retained, duplicates
 
 

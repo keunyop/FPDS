@@ -13,7 +13,6 @@ import {
   LogOut,
   Search,
   ScrollText,
-  ShieldCheck,
   Sparkles,
   UploadCloud,
   UserRound,
@@ -21,6 +20,7 @@ import {
 
 import { LogoutButton } from "@/app/admin/LogoutButton";
 import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
+import { AdminMark } from "@/components/fpds/admin/admin-mark";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -44,7 +44,6 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
@@ -363,29 +362,32 @@ function isNavItemActive(pathname: string | null, href?: string) {
 function ModuleTabs({
   activeGroupIndex,
   groups,
-  onChange,
+  locale,
 }: {
   activeGroupIndex: number;
   groups: NavGroup[];
-  onChange: (index: number) => void;
+  locale: AdminLocale;
 }) {
   return (
-    <nav aria-label="Primary modules" className="hidden flex-1 items-center gap-1 overflow-x-auto md:flex">
+    <nav aria-label="Primary modules" className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex">
       {groups.map((group, index) => {
         const isActive = index === activeGroupIndex;
+        const href = group.items.find((item) => item.href)?.href ?? "/admin";
 
         return (
-          <button
+          <Link
+            aria-current={isActive ? "page" : undefined}
             className={cn(
-              "rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-              isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+              "inline-flex min-h-10 items-center border-b-2 px-3 text-sm font-semibold transition-colors",
+              isActive
+                ? "border-sidebar-primary text-sidebar-foreground"
+                : "border-transparent text-sidebar-foreground/60 hover:border-sidebar-border hover:text-sidebar-foreground",
             )}
+            href={buildAdminHref(href, new URLSearchParams(), locale)}
             key={group.title}
-            onClick={() => onChange(index)}
-            type="button"
           >
             {group.title}
-          </button>
+          </Link>
         );
       })}
     </nav>
@@ -395,37 +397,35 @@ function ModuleTabs({
 function MobileBottomNav({
   activeGroupIndex,
   groups,
-  onChange,
+  locale,
 }: {
   activeGroupIndex: number;
   groups: NavGroup[];
-  onChange: (index: number) => void;
+  locale: AdminLocale;
 }) {
-  const { setOpenMobile } = useSidebar();
-
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar md:hidden" aria-label="Mobile modules">
       <div className="grid grid-cols-4">
         {groups.map((group, index) => {
           const Icon = group.items[0]?.icon;
           const isActive = index === activeGroupIndex;
+          const href = group.items.find((item) => item.href)?.href ?? "/admin";
 
           return (
-            <button
+            <Link
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 px-2 py-2 text-[11px] transition-colors",
-                isActive ? "text-foreground" : "text-muted-foreground",
+                "flex min-h-14 flex-col items-center justify-center gap-1 border-t-2 px-2 py-1.5 text-[11px] font-semibold transition-colors",
+                isActive
+                  ? "border-sidebar-primary text-sidebar-primary"
+                  : "border-transparent text-sidebar-foreground/65 hover:text-sidebar-foreground",
               )}
+              href={buildAdminHref(href, new URLSearchParams(), locale)}
               key={group.title}
-              onClick={() => {
-                onChange(index);
-                setOpenMobile(false);
-              }}
-              type="button"
             >
-              {Icon ? <Icon className="h-4 w-4" /> : null}
+              {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null}
               <span className="truncate">{group.title}</span>
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -476,8 +476,11 @@ function AppSidebar({
                   return (
                     <SidebarMenuItem key={item.label}>
                       <SidebarMenuButton asChild className="bg-transparent" isActive={isActive} tooltip={item.label}>
-                        <Link href={buildAdminHref(item.href!, new URLSearchParams(), locale)}>
-                          <Icon className="h-4 w-4" />
+                        <Link
+                          aria-current={isActive ? "page" : undefined}
+                          href={buildAdminHref(item.href!, new URLSearchParams(), locale)}
+                        >
+                          <Icon className="h-4 w-4" aria-hidden="true" />
                           <span>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -504,7 +507,7 @@ function AppSidebar({
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user.loginId}</span>
+                    <span className="truncate text-xs text-sidebar-foreground/55">{user.loginId}</span>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -568,20 +571,18 @@ const ApplicationShell5 = ({
   return (
     <SidebarProvider className={cn("min-h-screen bg-transparent", className)}>
       <div className="flex min-h-screen w-full flex-col">
-        <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
             <SidebarTrigger className="md:hidden" />
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <p className="text-base font-semibold tracking-tight text-foreground">{copy.brand}</p>
+              <AdminMark />
+              <p className="text-base font-semibold tracking-[-0.02em] text-sidebar-foreground">{copy.brand}</p>
             </div>
 
-            <ModuleTabs activeGroupIndex={activeGroupIndex} groups={navGroups} onChange={setActiveGroupIndex} />
+            <ModuleTabs activeGroupIndex={activeGroupIndex} groups={navGroups} locale={locale} />
 
             <div className="ml-auto flex items-center gap-2">
-              <span className="hidden items-center rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+              <span className="hidden min-h-8 items-center border border-sidebar-border bg-sidebar-accent px-2.5 text-[11px] font-semibold text-sidebar-foreground/75 sm:inline-flex">
                 {environmentLabel}
               </span>
               <React.Suspense fallback={null}>
@@ -603,10 +604,10 @@ const ApplicationShell5 = ({
 
           <SidebarInset className="min-w-0 bg-transparent pb-20 md:pb-0">
             <div className="flex min-h-[calc(100vh-3.5rem)] min-w-0 flex-col">
-              <div className="border-b bg-background/70 px-4 py-3 backdrop-blur md:hidden">
+              <div className="border-b border-border bg-card px-4 py-2.5 md:hidden">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-foreground">{navGroups[activeGroupIndex].title}</p>
-                  <span className="inline-flex items-center rounded-full border border-border/80 bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  <span className="inline-flex min-h-8 items-center border border-border bg-muted px-2.5 text-[11px] font-semibold text-muted-foreground">
                     {environmentLabel}
                   </span>
                 </div>
@@ -618,7 +619,7 @@ const ApplicationShell5 = ({
         </div>
       </div>
 
-      <MobileBottomNav activeGroupIndex={activeGroupIndex} groups={navGroups} onChange={setActiveGroupIndex} />
+      <MobileBottomNav activeGroupIndex={activeGroupIndex} groups={navGroups} locale={locale} />
     </SidebarProvider>
   );
 };

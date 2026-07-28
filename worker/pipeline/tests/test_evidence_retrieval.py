@@ -71,6 +71,88 @@ class EvidenceRetrievalServiceTests(unittest.TestCase):
         self.assertEqual(result.matches[0].evidence_chunk_id, "chunk-fee-001")
         self.assertGreater(result.matches[0].score, result.matches[1].score)
 
+    def test_minimum_investment_language_ranks_for_minimum_deposit(self) -> None:
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-minimum-investment",
+            parsed_document_id="parsed-gic",
+            chunk_index=0,
+            anchor_type="section",
+            anchor_value="terms-and-rates",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt="Minimum investment of $2,500 ($500 for each term).",
+            retrieval_metadata={},
+            source_document_id="src-gic",
+            source_snapshot_id="snap-gic",
+            bank_code="BANK",
+            country_code="CA",
+            source_type="html",
+        )
+        request = EvidenceRetrievalRequest(
+            correlation_id=None,
+            run_id="run-gic",
+            parsed_document_id="parsed-gic",
+            field_names=["minimum_deposit"],
+            metadata_filters=MetadataFilters(),
+            retrieval_mode="metadata-only",
+            max_matches_per_field=2,
+        )
+
+        result = self.service.retrieve(request=request, candidates=[candidate])
+
+        self.assertEqual(result.matches[0].evidence_chunk_id, "chunk-minimum-investment")
+
+    def test_direct_no_minimum_balance_and_free_transfer_evidence_outrank_generic_legal_copy(self) -> None:
+        def candidate(chunk_id: str, index: int, excerpt: str) -> EvidenceChunkCandidate:
+            return EvidenceChunkCandidate(
+                evidence_chunk_id=chunk_id,
+                parsed_document_id="parsed-account",
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value="account-benefits" if index == 0 else "legal-disclaimers",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=excerpt,
+                retrieval_metadata={},
+                source_document_id="src-account",
+                source_snapshot_id="snap-account",
+                bank_code="BANK",
+                country_code="CA",
+                source_type="html",
+            )
+
+        candidates = [
+            candidate(
+                "chunk-direct",
+                0,
+                "No minimum balance. Free Interac e-Transfer transactions are included with this account.",
+            ),
+            *[
+                candidate(
+                    f"chunk-legal-{index}",
+                    index + 1,
+                    "The minimum balance and transfer rules may vary. See eligible balance requirements and Interac terms.",
+                )
+                for index in range(6)
+            ],
+        ]
+        request = EvidenceRetrievalRequest(
+            correlation_id=None,
+            run_id="run-account",
+            parsed_document_id="parsed-account",
+            field_names=["minimum_balance", "interac_e_transfer_included"],
+            metadata_filters=MetadataFilters(),
+            retrieval_mode="metadata-only",
+            max_matches_per_field=2,
+        )
+
+        result = self.service.retrieve(request=request, candidates=candidates)
+        first_by_field = {}
+        for match in result.matches:
+            first_by_field.setdefault(match.field_name, match.evidence_chunk_id)
+        self.assertEqual(first_by_field["minimum_balance"], "chunk-direct")
+        self.assertEqual(first_by_field["interac_e_transfer_included"], "chunk-direct")
+
     def test_term_rate_table_keeps_bounded_extra_matches_for_split_tables(self) -> None:
         candidates = [
             EvidenceChunkCandidate(

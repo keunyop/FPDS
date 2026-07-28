@@ -8,7 +8,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 from worker.discovery.fpds_discovery.discovery import SourceDiscoveryService
-from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, FetchedResponse, fetch_response, fetch_text, validate_fetch_url
+from worker.discovery.fpds_discovery.fetch import (
+    DiscoveryFetchPolicy,
+    FetchedResponse,
+    _should_try_browser_rendered_rate_fallback,
+    fetch_response,
+    fetch_text,
+    validate_fetch_url,
+)
 from worker.discovery.fpds_discovery.registry import DEFAULT_REGISTRY_PATH, load_registry
 from worker.discovery.fpds_discovery.url_utils import (
     build_source_document_id,
@@ -37,6 +44,26 @@ class UrlUtilsTests(unittest.TestCase):
 
 
 class FetchPolicyTests(unittest.TestCase):
+    def test_from_env_default_browser_allowlist_covers_known_dynamic_rate_hosts(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            policy = DiscoveryFetchPolicy.from_env()
+
+        self.assertEqual(
+            policy.browser_fallback_domains,
+            (
+                "bmo.com",
+                "www.bmo.com",
+                "cibc.com",
+                "www.cibc.com",
+                "rbcroyalbank.com",
+                "www.rbcroyalbank.com",
+                "simplii.com",
+                "www.simplii.com",
+                "tangerine.ca",
+                "www.tangerine.ca",
+            ),
+        )
+
     def test_from_env_merges_extra_allowed_domains(self) -> None:
         with patch.dict(os.environ, {"FPDS_SOURCE_FETCH_ALLOWLIST": "td.com,tdcanadatrust.com"}, clear=False):
             policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=("bmo.com", "www.bmo.com"))
@@ -73,6 +100,26 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(policy.browser_fallback_domains, ("bmo.com", "www.bmo.com"))
         self.assertEqual(policy.browser_fallback_timeout_seconds, 150)
         self.assertEqual(policy.browser_executable, r"C:\Browsers\msedge.exe")
+
+    def test_default_browser_fallback_covers_observed_dynamic_rate_domains(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            policy = DiscoveryFetchPolicy.from_env()
+
+        self.assertEqual(
+            policy.browser_fallback_domains,
+            (
+                "bmo.com",
+                "www.bmo.com",
+                "cibc.com",
+                "www.cibc.com",
+                "rbcroyalbank.com",
+                "www.rbcroyalbank.com",
+                "simplii.com",
+                "www.simplii.com",
+                "tangerine.ca",
+                "www.tangerine.ca",
+            ),
+        )
 
     def test_validate_fetch_url_allows_td_https_urls(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
@@ -139,6 +186,188 @@ class FetchPolicyTests(unittest.TestCase):
         ):
             with self.assertRaises(ValueError):
                 fetch_text("https://www.bmo.com/main/personal/test/", policy)
+
+    def test_rate_page_without_numeric_rates_requests_bounded_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        shell = FetchedResponse(
+            body=b"<html><title>Interest Rates</title><body><div id='rate-app'></div></body></html>",
+            final_url="https://www.examplebank.ca/accounts/interest-rates/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+        rendered = FetchedResponse(
+            **{
+                **shell.__dict__,
+                "body": b"<html><body>Interest Rate 0.50%</body></html>",
+            }
+        )
+
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(shell, policy))
+        self.assertFalse(_should_try_browser_rendered_rate_fallback(rendered, policy))
+
+    def test_non_rate_page_does_not_request_browser_rendering_for_missing_percentages(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        response = FetchedResponse(
+            body=b"<html><body>Open a savings account today.</body></html>",
+            final_url="https://www.examplebank.ca/accounts/savings/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertFalse(_should_try_browser_rendered_rate_fallback(response, policy))
+
+    def test_product_page_with_unresolved_rate_placeholder_requests_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        response = FetchedResponse(
+            body=(
+                b"<html><body>Annual fee $0 Purchase interest rate "
+                b"RDS%rate[2].CARD.Published(null,null,6,null)(#O2#)%</body></html>"
+            ),
+            final_url="https://www.examplebank.ca/credit-cards/cash-back-card.html",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(response, policy))
+
+    def test_failed_rendered_rate_fallback_keeps_direct_snapshot_with_diagnostics(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+
+        class _DirectHeaders(dict):
+            def get_content_type(self):
+                return "text/html"
+
+        class _DirectPlaceholderResponse:
+            status = 200
+            headers = _DirectHeaders({"content-type": "text/html; charset=utf-8"})
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, traceback):
+                return False
+
+            def geturl(self):
+                return "https://www.examplebank.ca/investments/gic.html"
+
+            def read(self):
+                return b"<html>1 year RDS%rate[5].GIC.Published(1_year)(#O3#)%</html>"
+
+        class _FakeOpener:
+            def open(self, request, timeout):
+                del request, timeout
+                return _DirectPlaceholderResponse()
+
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=_FakeOpener()),
+            patch(
+                "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                side_effect=RuntimeError("render timed out\nwith details"),
+            ),
+        ):
+            response = fetch_response("https://www.examplebank.ca/investments/gic.html", policy)
+
+        self.assertEqual(response.content_type, "text/html")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-attempted"], "true")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-error-type"], "RuntimeError")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-error"], "render timed out with details")
+
+    def test_product_page_with_unresolved_datacode_rate_requests_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        response = FetchedResponse(
+            body=(
+                b"<html><body>Earn a savings interest rate of "
+                b"<datacode data-code='savingsAccount.segments.default.totalRate'></datacode>"
+                b" while another account earns 0.10%.</body></html>"
+            ),
+            final_url="https://www.examplebank.ca/accounts/savings-amplifier/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(response, policy))
+
+        escaped_response = FetchedResponse(
+            **{
+                **response.__dict__,
+                "body": (
+                    b'{"markup":"\\u003cdatacode data-code=\\"savingsAccount.segments.default.totalRate\\" '
+                    b'data-format=\\"Percent (0.00%)\\"\\u003e"}'
+                ),
+            }
+        )
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(escaped_response, policy))
+
+    def test_product_page_with_double_bracket_rate_placeholder_requests_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        response = FetchedResponse(
+            body=(
+                b"<html><body>Current GIC interest rates "
+                b"90 Day [[GIC.RATE.90_DAY]] 1 Year [[GIC.RATE.1_YEAR]]</body></html>"
+            ),
+            final_url="https://www.examplebank.ca/rates/gic-rates",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(response, policy))
+
+    def test_product_page_with_resolved_rate_does_not_request_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+        response = FetchedResponse(
+            body=b"<html><body>Annual fee $0 Purchase interest rate 21.75%</body></html>",
+            final_url="https://www.examplebank.ca/credit-cards/cash-back-card.html",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-07-22T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertFalse(_should_try_browser_rendered_rate_fallback(response, policy))
 
 
 class DiscoveryServiceTests(unittest.TestCase):

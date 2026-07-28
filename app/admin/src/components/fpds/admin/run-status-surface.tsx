@@ -49,7 +49,7 @@ const RUN_STATUS_COPY = {
     runStates: "Run states",
     startedFrom: "Started from",
     startedTo: "Started to",
-    applyFilters: "Search",
+    applyFilters: "검색",
     reset: "Reset",
     results: "Results",
     tableTitle: "Run table",
@@ -119,7 +119,7 @@ const RUN_STATUS_COPY = {
     runStates: "실행 상태",
     startedFrom: "시작일",
     startedTo: "종료일",
-    applyFilters: "Search",
+    applyFilters: "検索",
     reset: "초기화",
     results: "결과",
     tableTitle: "실행 테이블",
@@ -249,13 +249,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
   const runTypeOptions = Array.from(new Set([...COMMON_RUN_TYPES, ...Object.keys(runs.summary.run_type_counts)])).sort();
   const statItems = [
     {
-      label: copy.visibleRuns,
-      value: String(runs.summary.total_items),
-      note: copy.currentFilters,
-      tone: "info" as const,
-      icon: Activity,
-    },
-    {
       label: copy.failed,
       value: String(stateCounts.failed ?? 0),
       note: copy.failedNote,
@@ -273,14 +266,21 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       label: copy.inProgress,
       value: String(stateCounts.started ?? 0),
       note: copy.inProgressNote,
-      tone: "success" as const,
+      tone: "info" as const,
       icon: LoaderCircle,
+    },
+    {
+      label: copy.visibleRuns,
+      value: String(runs.summary.total_items),
+      note: copy.currentFilters,
+      tone: "neutral" as const,
+      icon: Activity,
     },
   ];
 
   return (
-    <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+    <section className="grid min-w-0 gap-5">
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.headerDescription}
@@ -294,11 +294,11 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         items={statItems}
       />
 
-      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <article className="min-w-0 border border-border bg-card p-4">
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersEyebrow}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.controlsTitle}</h2>
+            <p className="text-xs font-medium text-muted-foreground">{copy.filtersEyebrow}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.controlsTitle}</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -311,12 +311,12 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
           </div>
         </div>
 
-        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
+        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="mt-4 grid gap-4">
+          <div className="grid min-w-0 gap-3 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -327,7 +327,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.runType}</span>
               <select
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.runType}
                 name="run_type"
               >
@@ -343,7 +343,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.sortBy}</span>
               <select
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.sortBy}
                 name="sort_by"
               >
@@ -358,7 +358,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.order}</span>
               <select
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.sortOrder}
                 name="sort_order"
               >
@@ -369,7 +369,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.scope}</span>
-              <span className="flex h-10 min-w-0 items-center rounded-xl border border-border bg-background px-3 text-sm text-foreground">
+              <span className="flex h-10 min-w-0 items-center rounded-md border border-input bg-background px-3 text-sm text-foreground">
                 <input
                   className="mr-2 h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
                   defaultChecked={filters.partialOnly}
@@ -382,13 +382,13 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             </label>
           </div>
 
-          <div className="grid min-w-0 gap-4 lg:grid-cols-[1.3fr_1fr_1fr_auto]">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[1.3fr_1fr_1fr_auto]">
             <fieldset className="grid min-w-0 gap-2 text-sm">
               <legend className="font-medium text-foreground">{copy.runStates}</legend>
               <div className="flex flex-wrap gap-2">
                 {RUN_STATES.map((state) => (
                   <label
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm text-foreground"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                     key={state}
                   >
                     <input
@@ -407,7 +407,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.startedFrom}</span>
               <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.startedFrom}
                 name="started_from"
                 type="date"
@@ -417,7 +417,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.startedTo}</span>
               <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
                 defaultValue={filters.startedTo}
                 name="started_to"
                 type="date"
@@ -434,12 +434,12 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         </form>
       </article>
 
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="min-w-0 overflow-hidden border border-border bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">{copy.results}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
               {copy.pageSummary(runs.page, runs.total_pages, runs.total_items)}
             </p>
           </div>
@@ -463,9 +463,9 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
         {runs.items.length === 0 ? (
           <div className="px-6 py-10">
-            <div className="rounded-[1.5rem] border border-dashed border-border bg-background px-6 py-8">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.noMatches}</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+            <div className="border border-dashed border-border bg-background px-5 py-6">
+              <p className="text-xs font-medium text-muted-foreground">{copy.noMatches}</p>
+              <h3 className="mt-2 text-lg font-semibold tracking-tight text-foreground">
                 {copy.emptyTitle}
               </h3>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
@@ -480,10 +480,10 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
           </div>
         ) : (
           <>
-            <div className="max-w-full overflow-x-auto px-6 py-5">
+            <div aria-label={copy.tableTitle} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
               <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  <tr className="text-left text-xs text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.run}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.type}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
@@ -568,7 +568,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                     <Link href={buildRunHref(filters, { page: Math.max(1, runs.page - 1) }, locale)}>{copy.previous}</Link>
                   </Button>
                 ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
+                  <span className="inline-flex h-9 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                     {copy.previous}
                   </span>
                 )}
@@ -577,7 +577,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                     <Link href={buildRunHref(filters, { page: runs.page + 1 }, locale)}>{copy.next}</Link>
                   </Button>
                 ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
+                  <span className="inline-flex h-9 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                     {copy.next}
                   </span>
                 )}

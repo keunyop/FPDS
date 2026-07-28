@@ -267,6 +267,8 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
   const productTypeOptions = buildAdminProductTypeOptions(productTypes);
   const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
   const changeTypeCounts = changes.summary.change_type_counts;
+  const fieldClass =
+    "h-10 min-w-0 rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30";
   const statItems = [
     {
       label: copy.visibleChanges,
@@ -300,7 +302,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
 
   return (
     <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.description}
@@ -313,11 +315,11 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
         items={statItems}
       />
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <article className="min-w-0 rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.filtersSort}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.controls}</h2>
+            <h2 className="text-base font-semibold text-foreground">{copy.controls}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{copy.filtersSort}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -330,12 +332,12 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
           </div>
         </div>
 
-        <form action={buildAdminHref("/admin/changes", new URLSearchParams(), locale)} className="mt-6 grid gap-5">
-          <div className="grid gap-4 xl:grid-cols-[1.6fr_repeat(4,minmax(0,1fr))]">
+        <form action={buildAdminHref("/admin/changes", new URLSearchParams(), locale)} className="mt-4 grid min-w-0 gap-4">
+          <div className="grid min-w-0 gap-3 xl:grid-cols-[1.6fr_repeat(4,minmax(0,1fr))]">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -346,7 +348,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.bank}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.bankCode}
                 name="bank_code"
               >
@@ -362,7 +364,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.productType}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.productType}
                 name="product_type"
               >
@@ -378,7 +380,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.changeType}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.changeType}
                 name="change_type"
               >
@@ -394,7 +396,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.sortBy}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.sortBy}
                 name="sort_by"
               >
@@ -406,11 +408,11 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             </label>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto]">
+          <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.changedFrom}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.changedFrom}
                 name="changed_from"
                 type="date"
@@ -420,7 +422,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.changedTo}</span>
               <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.changedTo}
                 name="changed_to"
                 type="date"
@@ -430,7 +432,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
             <label className="grid gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.order}</span>
               <select
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
+                className={fieldClass}
                 defaultValue={filters.sortOrder}
                 name="sort_order"
               >
@@ -449,12 +451,12 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
         </form>
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.results}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.table}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="text-xs font-semibold text-muted-foreground">{copy.results}</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">{copy.table}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               {copy.pageSummary(changes.page, Math.max(changes.total_pages, 1), changes.total_items)}
             </p>
           </div>
@@ -484,16 +486,16 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
         </div>
 
         {changes.items.length === 0 ? (
-          <div className="px-6 py-10">
-            <div className="rounded-[1.5rem] border border-dashed border-border bg-background px-6 py-8">
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.noMatching}</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+          <div className="px-4 py-8">
+            <div className="rounded-lg border border-dashed border-border bg-background px-5 py-6">
+              <p className="text-sm font-medium text-muted-foreground">{copy.noMatching}</p>
+              <h3 className="mt-2 text-lg font-semibold text-foreground">
                 {copy.noMatchingTitle}
               </h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                 {copy.noMatchingDescription}
               </p>
-              <div className="mt-6">
+              <div className="mt-4">
                 <Button asChild variant="outline">
                   <Link href={buildAdminHref("/admin/changes", new URLSearchParams(), locale)}>{copy.resetFilters}</Link>
                 </Button>
@@ -502,127 +504,94 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto px-6 py-5">
-              <table className="min-w-[1560px] table-fixed border-separate border-spacing-0">
+            <div
+              aria-label={copy.table}
+              className="max-w-full overflow-x-auto overscroll-x-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              role="region"
+              tabIndex={0}
+            >
+              <table className="min-w-[1120px] table-fixed border-separate border-spacing-0">
+                <caption className="sr-only">
+                  {copy.pageSummary(changes.page, Math.max(changes.total_pages, 1), changes.total_items)}
+                </caption>
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.change}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.product}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.detected}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.changedFields}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.reviewContext}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.runContext}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.auditContext}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
+                  <tr className="text-left text-xs text-muted-foreground">
+                    <th className="sticky left-0 z-20 w-[220px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">
+                      {copy.detected} · {copy.change}
+                    </th>
+                    <th className="w-[220px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.product}</th>
+                    <th className="w-[210px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.changedFields}</th>
+                    <th className="w-[190px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.auditContext}</th>
+                    <th className="w-[220px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">
+                      {copy.reviewContext} · {copy.runContext}
+                    </th>
+                    <th className="w-[100px] border-b border-border bg-muted px-4 py-3 font-semibold" scope="col">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {changes.items.map((item) => (
-                    <tr className="align-top" key={item.change_event_id}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", changeTypeBadgeClasses(item.change_type))}>
+                    <tr className="group align-top" key={item.change_event_id}>
+                      <td className="sticky left-0 z-10 border-b border-border/70 bg-card px-4 py-4 group-hover:bg-muted">
+                        <div className="grid gap-1.5">
+                          <p className="font-mono text-xs font-semibold text-foreground">{formatTimestamp(item.detected_at)}</p>
+                          <span className={cn("inline-flex w-fit rounded-md px-2 py-0.5 text-xs font-medium", changeTypeBadgeClasses(item.change_type))}>
                             {formatChangeType(item.change_type)}
                           </span>
-                          <p className="text-sm font-medium leading-6 text-foreground">{item.change_summary}</p>
-                          <span className="text-xs text-muted-foreground">{item.change_event_id}</span>
+                          <p className="text-sm font-medium leading-5 text-foreground">{item.change_summary}</p>
+                          <span className="truncate font-mono text-xs text-muted-foreground">{item.change_event_id}</span>
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="border-b border-border/70 px-4 py-4">
                         <div className="grid gap-1">
                           <p className="font-medium text-foreground">{item.product_name}</p>
                           <p className="text-sm text-muted-foreground">
                             {item.bank_name} · {formatAdminProductType(item.product_type, productTypeLabelMap)}
                             {item.subtype_code ? ` · ${item.subtype_code}` : ""}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="font-mono text-xs text-muted-foreground">
                             Product {item.canonical_product_id}
                             {item.version_info.current_version_no ? ` · v${item.version_info.current_version_no}` : ""}
                           </p>
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">{formatTimestamp(item.detected_at)}</span>
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-2 text-sm">
                           <span className="text-muted-foreground">
                             {copy.previousVersion} {item.version_info.previous_version_no ?? copy.missing}
                           </span>
+                          {item.changed_fields.length === 0 ? (
+                            <p className="leading-5 text-muted-foreground">{copy.noFieldDiff}</p>
+                          ) : (
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.changed_fields.map((field) => (
+                                <span
+                                  className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground"
+                                  key={`${item.change_event_id}-${field}`}
+                                >
+                                  {field}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        {item.changed_fields.length === 0 ? (
-                          <p className="text-sm leading-6 text-muted-foreground">{copy.noFieldDiff}</p>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {item.changed_fields.map((field) => (
-                              <span
-                                className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
-                                key={`${item.change_event_id}-${field}`}
-                              >
-                                {field}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        {item.review_context.review_task_id ? (
-                          <div className="grid gap-2 text-sm">
-                            <Link
-                              className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
-                              href={buildAdminHref(`/admin/reviews/${item.review_context.review_task_id}`, new URLSearchParams(), locale)}
-                            >
-                              {item.review_context.review_task_id}
-                            </Link>
-                            <span className="text-muted-foreground">
-                              {toTitleCase(item.review_context.review_state ?? "unknown")}
-                              {item.review_context.action_type ? ` · ${toTitleCase(item.review_context.action_type)}` : ""}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {item.review_context.diff_summary ?? item.review_context.reason_text ?? copy.noReviewerNote}
-                            </span>
-                          </div>
-                        ) : (
-                          <p className="text-sm leading-6 text-muted-foreground">{copy.noLinkedReview}</p>
-                        )}
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        {item.run_context.run_id ? (
-                          <div className="grid gap-2 text-sm">
-                            <Link
-                              className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
-                              href={buildAdminHref(`/admin/runs/${item.run_context.run_id}`, new URLSearchParams(), locale)}
-                            >
-                              {item.run_context.run_id}
-                            </Link>
-                            <span className="text-muted-foreground">
-                              {toTitleCase(item.run_context.run_type ?? "unknown")} · {toTitleCase(item.run_context.run_status ?? "unknown")}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {item.run_context.correlation_id ? `${copy.correlation} ${item.run_context.correlation_id}` : copy.noCorrelation}
-                            </span>
-                          </div>
-                        ) : (
-                          <p className="text-sm leading-6 text-muted-foreground">{copy.noRun}</p>
-                        )}
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="border-b border-border/70 px-4 py-4">
                         {item.audit_context ? (
-                          <div className="grid gap-2 text-sm">
-                            <span className="inline-flex w-fit rounded-full bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning">
+                          <div className="grid gap-1.5 text-sm">
+                            <span className="inline-flex w-fit rounded-md bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">
                               {copy.manualOverrideAudit}
                             </span>
                             <span className="font-medium text-foreground">
                               {item.audit_context.actor.display_name ?? item.actor.display_name ?? copy.operator}
                             </span>
-                            <span className="text-muted-foreground">
+                            <span className="leading-5 text-muted-foreground">
                               {item.audit_context.diff_summary ?? copy.auditDiffMissing}
                             </span>
-                            <span className="text-muted-foreground">{formatTimestamp(item.audit_context.occurred_at)}</span>
+                            <span className="font-mono text-xs text-muted-foreground">{formatTimestamp(item.audit_context.occurred_at)}</span>
                           </div>
                         ) : (
                           <div className="grid gap-1 text-sm">
-                            <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", actorTypeBadgeClasses(item.actor_type))}>
+                            <span className={cn("inline-flex w-fit rounded-md px-2 py-0.5 text-xs font-medium", actorTypeBadgeClasses(item.actor_type))}>
                               {item.actor_type === "user" ? copy.userLinked : copy.systemLinked}
                             </span>
                             <span className="text-muted-foreground">
@@ -631,8 +600,49 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
                           </div>
                         )}
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="flex flex-col gap-2">
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="grid gap-3 text-sm">
+                          {item.review_context.review_task_id ? (
+                            <div className="grid gap-1">
+                              <Link
+                                className="truncate font-mono text-xs font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline"
+                                href={buildAdminHref(`/admin/reviews/${item.review_context.review_task_id}`, new URLSearchParams(), locale)}
+                              >
+                                {copy.reviewContext}: {item.review_context.review_task_id}
+                              </Link>
+                              <span className="text-muted-foreground">
+                                {toTitleCase(item.review_context.review_state ?? "unknown")}
+                                {item.review_context.action_type ? ` · ${toTitleCase(item.review_context.action_type)}` : ""}
+                              </span>
+                              <span className="line-clamp-2 leading-5 text-muted-foreground">
+                                {item.review_context.diff_summary ?? item.review_context.reason_text ?? copy.noReviewerNote}
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="leading-5 text-muted-foreground">{copy.noLinkedReview}</p>
+                          )}
+                          {item.run_context.run_id ? (
+                            <div className="grid gap-1 border-t border-border/70 pt-2">
+                              <Link
+                                className="truncate font-mono text-xs font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline"
+                                href={buildAdminHref(`/admin/runs/${item.run_context.run_id}`, new URLSearchParams(), locale)}
+                              >
+                                {copy.runContext}: {item.run_context.run_id}
+                              </Link>
+                              <span className="text-muted-foreground">
+                                {toTitleCase(item.run_context.run_type ?? "unknown")} · {toTitleCase(item.run_context.run_status ?? "unknown")}
+                              </span>
+                              <span className="truncate text-muted-foreground">
+                                {item.run_context.correlation_id ? `${copy.correlation} ${item.run_context.correlation_id}` : copy.noCorrelation}
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="border-t border-border/70 pt-2 leading-5 text-muted-foreground">{copy.noRun}</p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="border-b border-border/70 px-4 py-4">
+                        <div className="flex flex-col items-stretch gap-2">
                           {item.review_context.review_task_id ? (
                             <Button asChild size="sm" variant="outline">
                               <Link href={buildAdminHref(`/admin/reviews/${item.review_context.review_task_id}`, new URLSearchParams(), locale)}>{copy.reviewDetail}</Link>
@@ -654,7 +664,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
               </table>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-border/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 {copy.showing((changes.page - 1) * changes.page_size + 1, Math.min(changes.page * changes.page_size, changes.total_items), changes.total_items)}
               </p>
@@ -663,20 +673,12 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
                   <Button asChild size="sm" variant="outline">
                     <Link href={buildChangeHref(locale, filters, { page: Math.max(1, changes.page - 1) })}>{copy.previous}</Link>
                   </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.previous}
-                  </span>
-                )}
+                ) : <Button disabled size="sm" variant="outline">{copy.previous}</Button>}
                 {changes.has_next_page ? (
                   <Button asChild size="sm" variant="outline">
                     <Link href={buildChangeHref(locale, filters, { page: changes.page + 1 })}>{copy.next}</Link>
                   </Button>
-                ) : (
-                  <span className="inline-flex h-7 items-center rounded-[min(var(--radius-md),12px)] border border-border bg-muted px-2.5 text-[0.8rem] text-muted-foreground opacity-60">
-                    {copy.next}
-                  </span>
-                )}
+                ) : <Button disabled size="sm" variant="outline">{copy.next}</Button>}
               </div>
             </div>
           </>

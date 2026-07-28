@@ -38,6 +38,7 @@ This is an operating-policy baseline, not an implementation approval by itself.
 6. Candidate-producing scope is controlled by registry role. `detail` sources are candidate-producing by default. Supporting sources may be included for evidence support, but they should not create standalone product candidates unless their registry role explicitly allows it.
 7. Registry edits are direct operational changes, so they must be audit-visible.
 8. The MVP stays intentionally narrow: no diff-heavy refresh approval workflow is required for the first admin-managed registry slice.
+9. Committed seed rows are discovery hints, not permanent safety exceptions. Each refresh applies the current action-flow, calculator, servicing/help, onboarding/join, forms-repository, editorial/tips, product-type, and supporting-relevance policy to seeded hints before materializing active rows.
 
 Short form:
 
@@ -203,6 +204,8 @@ Important rules:
 - retail collection scope must reject clearly business/commercial/corporate product pages before they become generated detail sources
 - seed-backed detail hints with low page evidence remain eligible only when page validation has no negative signal; low-evidence pages with negative signals should not become candidate-producing detail sources and should rely on later rerun/source correction instead
 - a source-catalog bulk collect should enqueue the selected bank/product groups as one collection plan and process those groups sequentially inside one background runner process; the deeper source-collection stages still apply per-stage timeouts, but the plan-level runner should avoid launching one DB-connected process per group and exhausting the session pool
+- snapshot checksum reuse is scoped to the same source document. Different URLs that return the same WAF, consent, or error body remain independently attributable and cannot borrow one another's successful snapshot identity
+- when a URL is shared as supporting evidence by later scopes, snapshot persistence must preserve an existing candidate-producing `detail` metadata assignment. A later supporting fetch may add evidence, but it cannot silently change that source document's product boundary or role
 
 ---
 
@@ -233,7 +236,12 @@ Current repository state:
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is role-aware and limited to `detail`. Existing bank-specific merges remain supported, while generated product-matched supporting HTML can now provide generic savings or GIC rate evidence without becoming a candidate itself
 - generated collection allowlists canonicalize only a leading `www.` host label so official apex redirects remain bounded. Supporting links under an unrelated product path are excluded, and multi-product family pages carry an explicit ambiguous-boundary reason that prevents automatic canonical publication.
+- allowlisted snapshot capture may replace direct HTML with a browser-rendered PDF when an explicit rate page is only a JavaScript shell or a product page retains a recognizable unresolved rate placeholder. The fallback is value-agnostic, remains on the same official URL/domain, records the fetch method in snapshot headers, and fails soft to the direct snapshot so downstream missing-field validation still protects publication.
 - retail discovery treats explicit commercial URL/title signals as hard scope vetoes across deposit and lending types. Successful rediscovery also revalidates previously generated detail rows and inactivates stale rows that now match a deterministic hard-scope veto, so an old commercial detail cannot survive merely because it was excluded before current candidate evaluation. Plural family identities such as a generic credit-cards heading plus multiple named variants are classified as `multi_product_family_overview`; lending family overviews are evidence-only rather than standalone candidates, while any review-first family handling remains blocked from auto-publication.
+- explicit application/prequalification routes and internal `shadow-site` mirrors are hard source-scope vetoes. Their absence must not make a run partial because they are operator journeys or stale internal mirrors, not evidence sources.
+- a confirmed singular product heading/title with explicit attributes may override a family marker caused only by plural SEO copy or related-product headings; generic plural/category identities remain supporting-only.
+- rejected detail candidates retain a bounded diagnostic summary with URL, AI role/score, page score, title/H1, and reason codes so Operations can distinguish a weak source from a discovery-policy defect without reopening raw worker logs.
+- seed detail hints retain discovery continuity but cannot reduce the current Product Type expected-field baseline; generated details request the union so stale seed metadata cannot create structurally incomplete approved products.
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 - the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
 - the recognized Canada financial-institution baseline is live in DB through migrations `0020`, `0021`, and `0022`, with 28 active Canadian bank/direct-bank/credit-union profiles, refreshed official logo metadata where publicly available, and full active Product Type source-catalog coverage for every active Canadian financial institution
@@ -278,3 +286,5 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-07-05 | Added bank logo metadata and recognized Canada bank full active Product Type coverage baseline status |
 | 2026-07-05 | Added Vancity to the recognized Canada coverage set by explicit Product Owner request |
 | 2026-07-13 | Added the unframed bank-logo presentation rule and official asset refresh policy |
+| 2026-07-22 | Applied current scope policy to seed hints, excluded non-evidence servicing/onboarding/editorial repositories, and added bounded detail-rejection diagnostics plus named-product recovery rules |
+| 2026-07-22 | Made detail expected fields additive over the active Product Type contract and extended dynamic-rate recovery to double-bracket rate/APR placeholders |

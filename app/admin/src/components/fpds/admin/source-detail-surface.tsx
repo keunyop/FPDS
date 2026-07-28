@@ -48,6 +48,9 @@ const SOURCE_DETAIL_EN_COPY = {
   aiRationale: "AI rationale",
   recentHistory: "Recent collection history",
   noRecentRuns: "No recent collection runs were linked to this source yet.",
+  lastVerified: "Last verified",
+  lastSeen: "Last seen",
+  updated: "Updated",
   started: "started",
   candidates: (count: number) => `${count} candidates`,
   reviewQueued: (count: number) => `${count} review queued`,
@@ -62,10 +65,100 @@ const SOURCE_DETAIL_EN_COPY = {
   removeTitle: (sourceId: string) => `Remove ${sourceId}?`,
 } as const;
 
-const SOURCE_DETAIL_COPY: Record<AdminLocale, typeof SOURCE_DETAIL_EN_COPY> = {
+const SOURCE_DETAIL_COPY = {
   en: SOURCE_DETAIL_EN_COPY,
-  ko: SOURCE_DETAIL_EN_COPY,
-  ja: SOURCE_DETAIL_EN_COPY,
+  ko: {
+    back: "소스 목록으로",
+    openUrl: "소스 URL 열기",
+    description: "생성된 소스 메타데이터와 수집 이력을 확인합니다.",
+    path: ["운영", "소스", "소스 상세"],
+    bank: "은행",
+    country: "국가",
+    productType: "상품 유형",
+    productKey: "상품 키",
+    sourceName: "소스명",
+    sourceType: "소스 유형",
+    role: "역할",
+    status: "상태",
+    language: "언어",
+    purpose: "용도",
+    candidateProducing: "후보 생성 여부",
+    sourceUrl: "소스 URL",
+    normalizedUrl: "정규화 URL",
+    discoveryExplainability: "탐색 근거",
+    promotedTitle: "이 소스가 승격된 이유",
+    promotedDescription: "제한된 탐색 점수와 선택 신호입니다.",
+    selectionPathMissing: "선택 경로 없음",
+    confidenceMissing: "신뢰도 없음",
+    noMetadata: "이 소스에 저장된 탐색 근거 메타데이터가 없습니다.",
+    aiPredictedRole: "AI 예측 역할",
+    aiConfidenceBand: "AI 신뢰 구간",
+    pageTitle: "페이지 제목",
+    aiRationale: "AI 판단 근거",
+    recentHistory: "최근 수집 이력",
+    noRecentRuns: "이 소스에 연결된 최근 수집 실행이 없습니다.",
+    lastVerified: "최근 검증",
+    lastSeen: "최근 관측",
+    updated: "수정 시각",
+    started: "시작",
+    candidates: (count: number) => `후보 ${count.toLocaleString("ko-KR")}건`,
+    reviewQueued: (count: number) => `검토 대기 ${count.toLocaleString("ko-KR")}건`,
+    yes: "예",
+    no: "아니요",
+    missing: "없음",
+    deleting: "제거 중...",
+    removeSource: "소스 제거",
+    removeFailed: "소스를 제거하지 못했습니다.",
+    removeApiFailed: "소스를 제거하지 못했습니다. Admin API를 확인하고 다시 시도하세요.",
+    removeDescription: "소스를 제거됨 상태로 표시하고 감사 이력을 유지하며 향후 수집 대상에서 제외합니다. 과거 실행 또는 후보 기록은 삭제하지 않습니다.",
+    removeTitle: (sourceId: string) => `${sourceId} 소스를 제거할까요?`,
+  },
+  ja: {
+    back: "ソース一覧へ",
+    openUrl: "ソース URL を開く",
+    description: "生成されたソースメタデータと収集履歴を確認します。",
+    path: ["運用", "ソース", "ソース詳細"],
+    bank: "銀行",
+    country: "国",
+    productType: "商品タイプ",
+    productKey: "商品キー",
+    sourceName: "ソース名",
+    sourceType: "ソースタイプ",
+    role: "役割",
+    status: "状態",
+    language: "言語",
+    purpose: "用途",
+    candidateProducing: "候補生成",
+    sourceUrl: "ソース URL",
+    normalizedUrl: "正規化 URL",
+    discoveryExplainability: "探索根拠",
+    promotedTitle: "このソースが昇格された理由",
+    promotedDescription: "制約された探索スコアと選択シグナルです。",
+    selectionPathMissing: "選択経路なし",
+    confidenceMissing: "信頼度なし",
+    noMetadata: "このソースには探索根拠メタデータが保存されていません。",
+    aiPredictedRole: "AI 予測役割",
+    aiConfidenceBand: "AI 信頼度帯",
+    pageTitle: "ページタイトル",
+    aiRationale: "AI 判断根拠",
+    recentHistory: "最近の収集履歴",
+    noRecentRuns: "このソースに関連する最近の収集実行はありません。",
+    lastVerified: "最終検証",
+    lastSeen: "最終観測",
+    updated: "更新日時",
+    started: "開始",
+    candidates: (count: number) => `候補 ${count.toLocaleString("ja-JP")} 件`,
+    reviewQueued: (count: number) => `レビュー待ち ${count.toLocaleString("ja-JP")} 件`,
+    yes: "はい",
+    no: "いいえ",
+    missing: "なし",
+    deleting: "削除中...",
+    removeSource: "ソースを削除",
+    removeFailed: "ソースを削除できませんでした。",
+    removeApiFailed: "ソースを削除できませんでした。Admin API を確認して再試行してください。",
+    removeDescription: "ソースを削除済みにして監査履歴を保持し、今後の収集対象から除外します。過去の実行や候補記録は削除しません。",
+    removeTitle: (sourceId: string) => `${sourceId} を削除しますか？`,
+  },
 };
 
 export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: SourceDetailSurfaceProps) {
@@ -79,6 +172,7 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
 
   async function handleDelete() {
     setPendingDelete(true);
+    document.body.dataset.adminMutationPending = "true";
     setError(null);
 
     try {
@@ -102,11 +196,12 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
       setDeleteDialogOpen(false);
     } finally {
       setPendingDelete(false);
+      delete document.body.dataset.adminMutationPending;
     }
   }
 
   return (
-    <section className="grid gap-6">
+    <section aria-busy={pendingDelete} className="grid gap-5">
       <AdminPageHeader
         actions={
           <>
@@ -137,7 +232,7 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
         title={detail.source.source_id}
       />
 
-      {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+      {error ? <p aria-live="assertive" className="border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">{error}</p> : null}
 
       <article className="grid gap-4 lg:grid-cols-2">
         <ReadonlyField label={copy.bank} value={detail.source.bank_code} />
@@ -150,20 +245,20 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
         <ReadonlyField label={copy.language} value={detail.source.source_language} />
         <ReadonlyField label={copy.purpose} value={detail.source.purpose || copy.missing} />
         <ReadonlyField label={copy.candidateProducing} value={detail.source.candidate_producing_flag ? copy.yes : copy.no} />
-        <ReadonlyField label={fieldLabel(locale, "lastVerified")} value={formatSourceDateTime(detail.source.last_verified_at, copy.missing)} />
-        <ReadonlyField label={fieldLabel(locale, "lastSeen")} value={formatSourceDateTime(detail.source.last_seen_at, copy.missing)} />
+        <ReadonlyField label={copy.lastVerified} value={formatSourceDateTime(detail.source.last_verified_at, copy.missing)} />
+        <ReadonlyField label={copy.lastSeen} value={formatSourceDateTime(detail.source.last_seen_at, copy.missing)} />
         <ReadonlyField label={copy.productKey} value={detail.source.product_key ?? copy.missing} />
-        <ReadonlyField label={fieldLabel(locale, "updated")} value={formatSourceDateTime(detail.source.updated_at, copy.missing)} />
+        <ReadonlyField label={copy.updated} value={formatSourceDateTime(detail.source.updated_at, copy.missing)} />
         <ReadonlyField className="lg:col-span-2" label={copy.sourceUrl} value={detail.source.source_url} />
         <ReadonlyField className="lg:col-span-2" label={copy.normalizedUrl} value={detail.source.normalized_url} />
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="border border-border bg-card p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.discoveryExplainability}</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.promotedTitle}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.promotedDescription}</p>
+            <p className="text-xs font-medium text-muted-foreground">{copy.discoveryExplainability}</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.promotedTitle}</h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">{copy.promotedDescription}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -178,7 +273,7 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
         {Object.keys(discoveryMetadata).length === 0 ? (
           <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noMetadata}</p>
         ) : (
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
             <ReadonlyField label={copy.aiPredictedRole} value={asString(discoveryMetadata.ai_predicted_role) ?? copy.missing} />
             <ReadonlyField label={copy.aiConfidenceBand} value={asString(discoveryMetadata.ai_confidence_band) ?? copy.missing} />
             <ReadonlyField className="lg:col-span-2" label={copy.pageTitle} value={asString(discoveryMetadata.page_title) ?? asString(discoveryMetadata.primary_heading) ?? copy.missing} />
@@ -187,14 +282,14 @@ export function SourceDetailSurface({ detail, locale, csrfToken, userRole }: Sou
         )}
       </article>
 
-      <article className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.recentHistory}</p>
+      <article className="border border-border bg-card p-5">
+        <h2 className="text-lg font-semibold text-foreground">{copy.recentHistory}</h2>
         {detail.recent_runs.length === 0 ? (
           <p className="mt-4 text-sm leading-6 text-muted-foreground">{copy.noRecentRuns}</p>
         ) : (
-          <div className="mt-4 grid gap-3">
+          <div className="mt-4 divide-y divide-border border-y border-border">
             {detail.recent_runs.map((item) => (
-              <div className="rounded-2xl border border-border/80 bg-background p-4" key={item.run_id}>
+              <div className="py-4" key={item.run_id}>
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
@@ -241,9 +336,9 @@ function ReadonlyField({
   className?: string;
 }) {
   return (
-    <article className={`rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm ${className ?? ""}`}>
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-3 break-words text-sm leading-6 text-foreground">{value}</p>
+    <article className={`min-w-0 border border-border bg-card p-4 ${className ?? ""}`}>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 break-words font-mono text-sm leading-6 text-foreground">{value}</p>
     </article>
   );
 }
@@ -254,15 +349,6 @@ function asString(value: unknown) {
   }
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : null;
-}
-
-function fieldLabel(_locale: AdminLocale, key: "lastVerified" | "lastSeen" | "updated") {
-  const labels = {
-    lastVerified: "Last verified",
-    lastSeen: "Last seen",
-    updated: "Updated",
-  };
-  return labels[key];
 }
 
 function formatSourceDateTime(value: string | null, missing: string) {

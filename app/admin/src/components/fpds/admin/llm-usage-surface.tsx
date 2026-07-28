@@ -1,14 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { Coins, Database, Gauge, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 
-import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { LlmUsageDashboardResponse } from "@/lib/admin-api";
-import { formatAdminDateTimeValue } from "@/lib/admin-i18n";
+import {
+  buildAdminHref,
+  formatAdminDateTimeValue,
+  getAdminIntlLocale,
+  type AdminLocale,
+} from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
 export type LlmUsagePageFilters = {
@@ -24,12 +29,356 @@ export type LlmUsagePageFilters = {
 
 type LlmUsageSurfaceProps = {
   filters: LlmUsagePageFilters;
+  locale: AdminLocale;
   usage: LlmUsageDashboardResponse;
 };
 
 type UsageRow = Record<string, unknown>;
 
-export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
+const USAGE_COPY = {
+  en: {
+    path: ["Observability", "Usage"],
+    title: "LLM usage",
+    description: "Trace spend pressure, errors, concentration, and movement before opening run-level evidence.",
+    records: "Usage records",
+    recordsNote: "Rows in scope",
+    tokens: "Total tokens",
+    tokensNote: "Prompt + completion",
+    average: "Average tokens / row",
+    averageNote: "Density in scope",
+    zeroRows: "Zero-token rows",
+    zeroRowsNote: "Instrumentation check",
+    attention: "Operational signals",
+    attentionDescription: "The current cost window, outliers, concentration, and latest movement in decision order.",
+    estimatedCost: "Estimated cost",
+    estimatedSpend: "Current scoped spend",
+    anomalyCandidates: "Anomaly candidates",
+    investigateOutliers: "Rows requiring inspection",
+    topModel: "Top model concentration",
+    noModelRows: "No model rows",
+    latestTrend: "Latest trend signal",
+    noTrendRows: "No trend rows",
+    noSignal: "No signal",
+    filters: "Scope controls",
+    filtersDescription: "Narrow the evidence window without changing usage records.",
+    resetScope: "Reset scope",
+    search: "Search",
+    searchPlaceholder: "usage id, request id, product, review, bank",
+    from: "From",
+    to: "To",
+    runId: "Run ID",
+    runIdPlaceholder: "run id",
+    agentName: "Agent name",
+    modelName: "Model name",
+    provider: "Provider",
+    stage: "Stage",
+    quickScopes: "Quick scopes",
+    extraction: "Extraction",
+    normalization: "Normalization",
+    validation: "Validation",
+    apply: "Apply",
+    clear: "Clear",
+    active: "Active",
+    currentWindow: "Current window",
+    start: "Start",
+    now: "Now",
+    promptTokens: "Prompt tokens",
+    completionTokens: "Completion tokens",
+    totalTokens: "Total tokens",
+    avgTokens: "Avg tokens / row",
+    trend: "Trend",
+    trendTitle: "Cost and volume movement",
+    trendDescription: "Daily buckets expose movement and instrumentation gaps before concentration drilldown.",
+    latestBucket: "Latest bucket",
+    latestCost: "Latest cost",
+    latestSignal: "Latest signal",
+    noTrendTitle: "No trend evidence",
+    noTrendCopy: "Expand the date range or clear filters to recover the usage timeline.",
+    anomalies: "Anomalies",
+    anomalyTitle: "Outliers to investigate",
+    anomalyDescription: "Start with unusual spend or token rows, then open the linked review or run evidence.",
+    noAnomalyTitle: "No anomaly candidates",
+    noAnomalyCopy: "The current scope did not return unusual usage rows.",
+    signal: "Signal",
+    context: "Context",
+    observed: "Observed",
+    reviewContext: "Review context",
+    action: "Action",
+    bucket: "Bucket",
+    volume: "Volume",
+    cost: "Cost",
+    scope: "Scope",
+    recordsColumn: "Records",
+    delta: "Delta",
+    model: "Model",
+    agent: "Agent",
+    run: "Run",
+    lastSeen: "Last seen",
+    concentration: "Concentration",
+    modelTitle: "Model concentration",
+    modelDescription: "Compare model share to find a dominant cost source.",
+    agentTitle: "Agent concentration",
+    agentDescription: "Locate the orchestration layer creating token and cost pressure.",
+    runTitle: "Run-linked spend",
+    runDescription: "Move from a high-cost execution window to its diagnostic evidence.",
+    noModelTitle: "No model aggregation",
+    noModelCopy: "Broaden the date range or clear the model filter.",
+    noAgentTitle: "No agent aggregation",
+    noAgentCopy: "Broaden the scope to recover agent context.",
+    noRunTitle: "No run aggregation",
+    noRunCopy: "Widen the scope or clear the run filter.",
+    focusModel: "Focus model",
+    focusAgent: "Focus agent",
+    openRun: "Open run",
+    openReview: "Open review",
+    noDrilldown: "No linked evidence",
+    rows: "rows",
+    runs: "runs",
+    candidates: "candidates",
+    score: "Score",
+    tokenDelta: "tokens",
+    costDelta: "cost",
+    runType: "Run type",
+    noStage: "No stage context",
+    noModel: "No model context",
+    noProduct: "No product context",
+    noReviewState: "No linked review state",
+    noValidation: "No validation context",
+    noQueueReason: "No queue reason",
+    noTrendNote: "No trend note stored.",
+    noAnomalyReason: "No anomaly reason stored.",
+    missing: "n/a",
+  },
+  ko: {
+    path: ["관찰 가능성", "사용량"],
+    title: "LLM 사용량",
+    description: "실행 근거를 열기 전에 비용 압력, 오류, 집중도와 추세를 추적합니다.",
+    records: "사용 기록",
+    recordsNote: "현재 범위의 행",
+    tokens: "총 토큰",
+    tokensNote: "프롬프트 + 완료",
+    average: "행당 평균 토큰",
+    averageNote: "현재 범위 밀도",
+    zeroRows: "토큰 0인 행",
+    zeroRowsNote: "계측 상태 확인",
+    attention: "운영 신호",
+    attentionDescription: "비용, 이상치, 집중도, 최신 추세 순으로 현재 범위를 점검합니다.",
+    estimatedCost: "예상 비용",
+    estimatedSpend: "현재 범위의 예상 지출",
+    anomalyCandidates: "이상 후보",
+    investigateOutliers: "확인이 필요한 행",
+    topModel: "최상위 모델 집중도",
+    noModelRows: "모델 데이터 없음",
+    latestTrend: "최신 추세 신호",
+    noTrendRows: "추세 데이터 없음",
+    noSignal: "신호 없음",
+    filters: "범위 설정",
+    filtersDescription: "사용 기록을 변경하지 않고 조회할 근거 범위를 좁힙니다.",
+    resetScope: "범위 초기화",
+    search: "검색",
+    searchPlaceholder: "사용 ID, 요청 ID, 상품, 검토, 은행",
+    from: "시작일",
+    to: "종료일",
+    runId: "실행 ID",
+    runIdPlaceholder: "실행 ID",
+    agentName: "에이전트명",
+    modelName: "모델명",
+    provider: "제공자",
+    stage: "단계",
+    quickScopes: "빠른 범위",
+    extraction: "추출",
+    normalization: "정규화",
+    validation: "검증",
+    apply: "적용",
+    clear: "지우기",
+    active: "적용됨",
+    currentWindow: "현재 범위",
+    start: "시작",
+    now: "현재",
+    promptTokens: "프롬프트 토큰",
+    completionTokens: "완료 토큰",
+    totalTokens: "총 토큰",
+    avgTokens: "행당 평균 토큰",
+    trend: "추세",
+    trendTitle: "비용 및 사용량 추세",
+    trendDescription: "일별 변화와 계측 공백을 먼저 확인한 뒤 집중도를 진단합니다.",
+    latestBucket: "최신 구간",
+    latestCost: "최신 비용",
+    latestSignal: "최신 신호",
+    noTrendTitle: "추세 근거 없음",
+    noTrendCopy: "날짜 범위를 넓히거나 필터를 지워 사용량 타임라인을 확인하세요.",
+    anomalies: "이상치",
+    anomalyTitle: "조사할 이상치",
+    anomalyDescription: "비정상 비용 또는 토큰 행부터 확인한 뒤 연결된 검토나 실행 근거를 엽니다.",
+    noAnomalyTitle: "이상 후보 없음",
+    noAnomalyCopy: "현재 범위에서 비정상 사용 행이 발견되지 않았습니다.",
+    signal: "신호",
+    context: "맥락",
+    observed: "관측값",
+    reviewContext: "검토 맥락",
+    action: "작업",
+    bucket: "구간",
+    volume: "사용량",
+    cost: "비용",
+    scope: "범위",
+    recordsColumn: "기록",
+    delta: "변화",
+    model: "모델",
+    agent: "에이전트",
+    run: "실행",
+    lastSeen: "최근 관측",
+    concentration: "집중도",
+    modelTitle: "모델 집중도",
+    modelDescription: "모델별 비중을 비교해 지배적인 비용 원인을 찾습니다.",
+    agentTitle: "에이전트 집중도",
+    agentDescription: "토큰과 비용 압력을 만드는 오케스트레이션 계층을 찾습니다.",
+    runTitle: "실행별 비용",
+    runDescription: "고비용 실행 구간에서 진단 근거로 바로 이동합니다.",
+    noModelTitle: "모델 집계 없음",
+    noModelCopy: "날짜 범위를 넓히거나 모델 필터를 지우세요.",
+    noAgentTitle: "에이전트 집계 없음",
+    noAgentCopy: "범위를 넓혀 에이전트 맥락을 확인하세요.",
+    noRunTitle: "실행 집계 없음",
+    noRunCopy: "범위를 넓히거나 실행 필터를 지우세요.",
+    focusModel: "모델로 좁히기",
+    focusAgent: "에이전트로 좁히기",
+    openRun: "실행 열기",
+    openReview: "검토 열기",
+    noDrilldown: "연결된 근거 없음",
+    rows: "행",
+    runs: "실행",
+    candidates: "후보",
+    score: "점수",
+    tokenDelta: "토큰",
+    costDelta: "비용",
+    runType: "실행 유형",
+    noStage: "단계 맥락 없음",
+    noModel: "모델 맥락 없음",
+    noProduct: "상품 맥락 없음",
+    noReviewState: "연결된 검토 상태 없음",
+    noValidation: "검증 맥락 없음",
+    noQueueReason: "대기열 사유 없음",
+    noTrendNote: "저장된 추세 메모가 없습니다.",
+    noAnomalyReason: "저장된 이상 사유가 없습니다.",
+    missing: "없음",
+  },
+  ja: {
+    path: ["オブザーバビリティ", "使用量"],
+    title: "LLM 使用量",
+    description: "実行証跡を開く前に、コスト圧力、異常、集中度、推移を追跡します。",
+    records: "使用記録",
+    recordsNote: "現在の範囲の行",
+    tokens: "総トークン",
+    tokensNote: "プロンプト + 完了",
+    average: "行あたり平均トークン",
+    averageNote: "現在範囲の密度",
+    zeroRows: "ゼロトークン行",
+    zeroRowsNote: "計測状態の確認",
+    attention: "運用シグナル",
+    attentionDescription: "コスト、異常、集中度、最新推移の順で現在範囲を確認します。",
+    estimatedCost: "推定コスト",
+    estimatedSpend: "現在範囲の推定支出",
+    anomalyCandidates: "異常候補",
+    investigateOutliers: "確認が必要な行",
+    topModel: "上位モデル集中度",
+    noModelRows: "モデルデータなし",
+    latestTrend: "最新の推移シグナル",
+    noTrendRows: "推移データなし",
+    noSignal: "シグナルなし",
+    filters: "範囲設定",
+    filtersDescription: "使用記録を変更せず、確認する証跡の範囲を絞ります。",
+    resetScope: "範囲をリセット",
+    search: "検索",
+    searchPlaceholder: "使用 ID、リクエスト ID、商品、レビュー、銀行",
+    from: "開始日",
+    to: "終了日",
+    runId: "実行 ID",
+    runIdPlaceholder: "実行 ID",
+    agentName: "エージェント名",
+    modelName: "モデル名",
+    provider: "プロバイダー",
+    stage: "ステージ",
+    quickScopes: "クイック範囲",
+    extraction: "抽出",
+    normalization: "正規化",
+    validation: "検証",
+    apply: "適用",
+    clear: "クリア",
+    active: "適用中",
+    currentWindow: "現在の範囲",
+    start: "開始",
+    now: "現在",
+    promptTokens: "プロンプトトークン",
+    completionTokens: "完了トークン",
+    totalTokens: "総トークン",
+    avgTokens: "行あたり平均トークン",
+    trend: "推移",
+    trendTitle: "コストと使用量の推移",
+    trendDescription: "日次変化と計測の欠落を先に確認してから集中度を診断します。",
+    latestBucket: "最新区間",
+    latestCost: "最新コスト",
+    latestSignal: "最新シグナル",
+    noTrendTitle: "推移の証跡なし",
+    noTrendCopy: "日付範囲を広げるかフィルターを解除してタイムラインを確認してください。",
+    anomalies: "異常",
+    anomalyTitle: "調査する異常",
+    anomalyDescription: "異常なコストまたはトークン行から確認し、関連レビューや実行証跡を開きます。",
+    noAnomalyTitle: "異常候補なし",
+    noAnomalyCopy: "現在の範囲では異常な使用行は見つかりませんでした。",
+    signal: "シグナル",
+    context: "コンテキスト",
+    observed: "観測値",
+    reviewContext: "レビュー情報",
+    action: "操作",
+    bucket: "区間",
+    volume: "使用量",
+    cost: "コスト",
+    scope: "範囲",
+    recordsColumn: "記録",
+    delta: "変化",
+    model: "モデル",
+    agent: "エージェント",
+    run: "実行",
+    lastSeen: "最終観測",
+    concentration: "集中度",
+    modelTitle: "モデル集中度",
+    modelDescription: "モデル別の比率を比較し、主要なコスト要因を特定します。",
+    agentTitle: "エージェント集中度",
+    agentDescription: "トークンとコスト圧力を生むオーケストレーション層を特定します。",
+    runTitle: "実行別コスト",
+    runDescription: "高コストの実行区間から診断証跡へ直接移動します。",
+    noModelTitle: "モデル集計なし",
+    noModelCopy: "日付範囲を広げるかモデルフィルターを解除してください。",
+    noAgentTitle: "エージェント集計なし",
+    noAgentCopy: "範囲を広げてエージェント情報を確認してください。",
+    noRunTitle: "実行集計なし",
+    noRunCopy: "範囲を広げるか実行フィルターを解除してください。",
+    focusModel: "モデルに絞る",
+    focusAgent: "エージェントに絞る",
+    openRun: "実行を開く",
+    openReview: "レビューを開く",
+    noDrilldown: "関連証跡なし",
+    rows: "行",
+    runs: "実行",
+    candidates: "候補",
+    score: "スコア",
+    tokenDelta: "トークン",
+    costDelta: "コスト",
+    runType: "実行タイプ",
+    noStage: "ステージ情報なし",
+    noModel: "モデル情報なし",
+    noProduct: "商品情報なし",
+    noReviewState: "関連レビュー状態なし",
+    noValidation: "検証情報なし",
+    noQueueReason: "キュー理由なし",
+    noTrendNote: "保存された推移メモはありません。",
+    noAnomalyReason: "保存された異常理由はありません。",
+    missing: "なし",
+  },
+} satisfies Record<AdminLocale, Record<string, string | readonly string[]>>;
+
+export function LlmUsageSurface({ filters, locale, usage }: LlmUsageSurfaceProps) {
+  const copy = USAGE_COPY[locale];
   const modelRows = usage.by_model ?? [];
   const agentRows = usage.by_agent ?? [];
   const runRows = usage.by_run ?? [];
@@ -39,644 +388,220 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
   const totalTokens = readNumber(totals, ["total_tokens", "token_total", "tokens"]) ?? 0;
   const totalCost = readNumber(totals, ["estimated_cost", "cost_total", "total_cost"]) ?? 0;
   const topModel = topUsageRow(modelRows);
-  const topAgent = topUsageRow(agentRows);
-  const topRun = topUsageRow(runRows);
   const latestTrend = trendRows.at(-1) ?? null;
-  const leadAnomaly = anomalyRows[0] ?? null;
-  const maxTokenVolume = maxTokens(modelRows, agentRows, runRows, trendRows, anomalyRows);
+  const maxTokenVolume = maxTokens(trendRows);
+  const activeFilters = Object.values(filters).filter(Boolean).length;
 
   const statItems = [
     {
-      label: "Usage records",
-      value: formatCount(readNumber(totals, ["usage_record_count", "record_count", "count"])),
-      note: "Current window.",
+      label: copy.records as string,
+      value: formatCount(locale, readNumber(totals, ["usage_record_count", "record_count", "count"])),
+      note: copy.recordsNote as string,
       tone: "info" as const,
       icon: Database,
     },
     {
-      label: "Total tokens",
-      value: formatTokens(totalTokens),
-      note: "Prompt + completion.",
+      label: copy.tokens as string,
+      value: formatTokens(locale, totalTokens),
+      note: copy.tokensNote as string,
       tone: "success" as const,
       icon: Gauge,
     },
     {
-      label: "Estimated cost",
-      value: formatCost(totalCost),
-      note: "Estimated spend.",
-      tone: "warning" as const,
+      label: copy.average as string,
+      value: formatTokens(locale, readNumber(totals, ["average_tokens_per_record"])),
+      note: copy.averageNote as string,
+      tone: "neutral" as const,
       icon: Coins,
     },
     {
-      label: "Anomaly candidates",
-      value: formatCount(readNumber(totals, ["anomaly_candidate_count", "anomaly_count"]), anomalyRows.length),
-      note: "Outliers.",
-      tone: "neutral" as const,
+      label: copy.zeroRows as string,
+      value: formatCount(locale, readNumber(totals, ["zero_token_records"])),
+      note: copy.zeroRowsNote as string,
+      tone: "warning" as const,
       icon: TriangleAlert,
     },
   ];
 
   return (
     <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
-        description="Token volume, cost, concentration, trend, and anomalies."
-        path={["Observability", "Usage"]}
-        title="Usage"
+        description={copy.description as string}
+        path={[...(copy.path as readonly string[])]}
+        title={copy.title as string}
       />
 
-      <Stats5
-        framed={false}
-        items={statItems}
-      />
+      <section aria-labelledby="usage-attention-title" className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col gap-1 border-b border-border px-4 py-3 sm:px-5">
+          <h2 className="text-base font-semibold text-foreground" id="usage-attention-title">{copy.attention}</h2>
+          <p className="text-sm text-muted-foreground">{copy.attentionDescription}</p>
+        </div>
+        <div className="grid divide-y divide-border lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+          <SignalItem
+            label={copy.estimatedCost as string}
+            note={copy.estimatedSpend as string}
+            tone="warning"
+            value={formatCost(locale, totalCost)}
+          />
+          <SignalItem
+            label={copy.anomalyCandidates as string}
+            note={copy.investigateOutliers as string}
+            tone={anomalyRows.length > 0 ? "danger" : "neutral"}
+            value={formatCount(locale, readNumber(totals, ["anomaly_candidate_count", "anomaly_count"]), anomalyRows.length)}
+          />
+          <SignalItem
+            label={copy.topModel as string}
+            note={topModel ? rowLabel(topModel, "model_name", copy.model as string) : copy.noModelRows as string}
+            tone="neutral"
+            value={topModel ? formatPercent(locale, readNumber(topModel, ["cost_share_percent"])) : copy.missing as string}
+          />
+          <SignalItem
+            label={copy.latestTrend as string}
+            note={latestTrend ? formatTimestamp(readText(latestTrend, ["interval_start", "bucket_date", "date"])) : copy.noTrendRows as string}
+            tone={latestTrend ? signalTone(latestTrend) : "neutral"}
+            value={latestTrend ? rowSignal(latestTrend, copy.noSignal as string) : copy.missing as string}
+          />
+        </div>
+      </section>
 
-      <div className="grid min-w-0 gap-6">
-        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-          <div className="grid gap-3">
-            <HotspotCard
-              actionHref={topModel ? buildUsageHref(filters, { modelName: readText(topModel, ["model_name"]), runId: "", search: "" }) : ""}
-              actionLabel="Focus model"
-              label="Top model"
-              note={topModel ? rowText(topModel, ["provider_name", "provider_names"], "Provider") : "No model concentration yet."}
-              shareValue={topModel ? readNumber(topModel, ["cost_share_percent"]) : null}
-              value={topModel ? rowLabel(topModel, "model_name", "Model") : "No model rows"}
-            />
-            <HotspotCard
-              actionHref={topAgent ? buildUsageHref(filters, { agentName: readText(topAgent, ["agent_name"]), runId: "", search: "" }) : ""}
-              actionLabel="Focus agent"
-              label="Top agent"
-              note={topAgent ? rowText(topAgent, ["stage_names"], "No stage context") : "No agent concentration yet."}
-              shareValue={topAgent ? readNumber(topAgent, ["cost_share_percent"]) : null}
-              value={topAgent ? rowLabel(topAgent, "agent_name", "Agent") : "No agent rows"}
-            />
-            <HotspotCard
-              actionHref={topRun ? rowLinkToRun(topRun) : ""}
-              actionLabel="Open run"
-              label="Top run"
-              note={topRun ? rowText(topRun, ["run_type", "run_state"], "Run context") : "No run concentration yet."}
-              shareValue={topRun ? readNumber(topRun, ["cost_share_percent"]) : null}
-              value={topRun ? rowLabel(topRun, "run_id", "Run") : "No run rows"}
-            />
+      <Stats5 framed={false} items={statItems} />
+
+      <section className="rounded-lg border border-border bg-card p-4 sm:p-5">
+        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">{copy.filters}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{copy.filtersDescription}</p>
           </div>
-
-          <div className="mt-4 rounded-[1.5rem] border border-border/80 bg-background p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Lead anomaly</p>
-            <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground">
-              {leadAnomaly ? rowSummary(leadAnomaly, "No anomaly reason stored.") : "No anomaly candidates in the current scope."}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {leadAnomaly
-                ? `${rowLabel(leadAnomaly, "run_id", "Run")} / ${rowText(leadAnomaly, ["agent_name", "model_name"], "Context")}`
-                : "Broaden the time range or clear some filters if you want to inspect drift candidates."}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {leadAnomaly ? (
-                <span className={cn("rounded-full px-3 py-1 text-xs font-medium", anomalyBadgeClasses(leadAnomaly))}>
-                  {rowSignal(leadAnomaly)}
-                </span>
-              ) : null}
-              {leadAnomaly && rowLinkToReview(leadAnomaly) ? (
-                <Button asChild size="sm" variant="outline">
-                  <Link href={rowLinkToReview(leadAnomaly)!}>Open review</Link>
-                </Button>
-              ) : null}
-              {leadAnomaly && rowLinkToRun(leadAnomaly) ? (
-                <Button asChild size="sm" variant="outline">
-                  <Link href={rowLinkToRun(leadAnomaly)!}>Open run</Link>
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-border/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Filters and scope</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Usage Controls</h2>
-          </div>
-
           <div className="flex flex-wrap items-center gap-2">
+            {activeFilters > 0 ? (
+              <span className="rounded-md bg-info-soft px-2.5 py-1 text-xs font-medium text-info">
+                {copy.active} · {formatCount(locale, activeFilters)}
+              </span>
+            ) : null}
             <Button asChild size="sm" variant="outline">
-              <Link href="/admin/usage">Reset scope</Link>
+              <Link href={usageHref(locale, filters, emptyFilters())}>{copy.resetScope}</Link>
             </Button>
-            {filters.search ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Search {filters.search}
-              </span>
-            ) : null}
-            {filters.runId ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Run {filters.runId}
-              </span>
-            ) : null}
-            {filters.agentName ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Agent {filters.agentName}
-              </span>
-            ) : null}
-            {filters.modelName ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Model {filters.modelName}
-              </span>
-            ) : null}
-            {filters.providerName ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Provider {filters.providerName}
-              </span>
-            ) : null}
-            {filters.stage ? (
-              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                Stage {filters.stage}
-              </span>
-            ) : null}
           </div>
         </div>
 
-        <form action="/admin/usage" className="mt-6 grid min-w-0 gap-5">
-          <div className="grid min-w-0 gap-4 xl:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))]">
-            <label className="grid min-w-0 gap-2 text-sm">
-              <span className="font-medium text-foreground">Search</span>
-              <input
-                className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.search}
-                name="q"
-                placeholder="usage id, request id, product, review, bank"
-                type="search"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">From</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.from}
-                name="from"
-                type="date"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">To</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.to}
-                name="to"
-                type="date"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm xl:col-span-2">
-              <span className="font-medium text-foreground">Run id</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.runId}
-                name="run_id"
-                placeholder="run id"
-                type="text"
-              />
-            </label>
+        <form action="/admin/usage" className="mt-4 grid min-w-0 gap-4">
+          {locale !== "en" ? <input name="locale" type="hidden" value={locale} /> : null}
+          <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <FilterField label={copy.search as string}>
+              <input className={inputClasses} defaultValue={filters.search} name="q" placeholder={copy.searchPlaceholder as string} type="search" />
+            </FilterField>
+            <FilterField label={copy.from as string}>
+              <input className={inputClasses} defaultValue={filters.from} name="from" type="date" />
+            </FilterField>
+            <FilterField label={copy.to as string}>
+              <input className={inputClasses} defaultValue={filters.to} name="to" type="date" />
+            </FilterField>
+            <FilterField label={copy.runId as string}>
+              <input className={inputClasses} defaultValue={filters.runId} name="run_id" placeholder={copy.runIdPlaceholder as string} type="text" />
+            </FilterField>
+            <FilterField label={copy.agentName as string}>
+              <input className={inputClasses} defaultValue={filters.agentName} name="agent_name" placeholder="extraction-agent" type="text" />
+            </FilterField>
+            <FilterField label={copy.modelName as string}>
+              <input className={inputClasses} defaultValue={filters.modelName} name="model_name" placeholder="gpt-4.1-mini" type="text" />
+            </FilterField>
+            <FilterField label={copy.provider as string}>
+              <input className={inputClasses} defaultValue={filters.providerName} name="provider_name" placeholder="openai" type="text" />
+            </FilterField>
+            <FilterField label={copy.stage as string}>
+              <input className={inputClasses} defaultValue={filters.stage} name="stage" placeholder="validation_routing" type="text" />
+            </FilterField>
           </div>
-
-          <div className="grid gap-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_auto]">
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">Agent name</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.agentName}
-                name="agent_name"
-                placeholder="extraction-agent"
-                type="text"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">Model name</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.modelName}
-                name="model_name"
-                placeholder="gpt-4.1-mini"
-                type="text"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">Provider</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.providerName}
-                name="provider_name"
-                placeholder="openai"
-                type="text"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">Stage</span>
-              <input
-                className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/40"
-                defaultValue={filters.stage}
-                name="stage"
-                placeholder="validation_routing"
-                type="text"
-              />
-            </label>
-
-            <div className="grid gap-2 text-sm">
-              <span className="font-medium text-foreground">Quick scopes</span>
-              <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link href={buildUsageHref(filters, { stage: "extraction" })}>Extraction</Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={buildUsageHref(filters, { stage: "normalization" })}>Normalization</Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href={buildUsageHref(filters, { stage: "validation_routing" })}>Validation</Link>
-                </Button>
-              </div>
+          <div className="flex flex-col gap-3 border-t border-border pt-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground">{copy.quickScopes}</span>
+              <Button asChild size="sm" variant="outline">
+                <Link href={usageHref(locale, filters, { stage: "extraction" })}>{copy.extraction}</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link href={usageHref(locale, filters, { stage: "normalization" })}>{copy.normalization}</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link href={usageHref(locale, filters, { stage: "validation_routing" })}>{copy.validation}</Link>
+              </Button>
             </div>
-
-            <div className="flex items-end gap-2">
-              <Button type="submit">Search</Button>
+            <div className="flex gap-2">
+              <Button type="submit">{copy.apply}</Button>
               <Button asChild variant="outline">
-                <Link href="/admin/usage">Clear</Link>
+                <Link href={usageHref(locale, filters, emptyFilters())}>{copy.clear}</Link>
               </Button>
             </div>
           </div>
         </form>
-      </article>
+      </section>
 
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Totals</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Usage totals and density</h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {filters.from || filters.to ? (
-              <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-medium text-warning">
-                {filters.from || "Start"} to {filters.to || "Now"}
-              </span>
-            ) : null}
-          </div>
+      <section aria-labelledby="usage-window-title" className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <h2 className="text-base font-semibold text-foreground" id="usage-window-title">{copy.currentWindow}</h2>
+          {filters.from || filters.to ? (
+            <span className="w-fit rounded-md bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning">
+              {filters.from || copy.start} — {filters.to || copy.now}
+            </span>
+          ) : null}
         </div>
+        <dl className="grid divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+          <Metric label={copy.promptTokens as string} value={formatTokens(locale, readNumber(totals, ["prompt_tokens"]))} />
+          <Metric label={copy.completionTokens as string} value={formatTokens(locale, readNumber(totals, ["completion_tokens"]))} />
+          <Metric label={copy.totalTokens as string} value={formatTokens(locale, totalTokens)} />
+          <Metric label={copy.avgTokens as string} value={formatTokens(locale, readNumber(totals, ["average_tokens_per_record"]))} />
+        </dl>
+      </section>
 
-        <div className="px-6 py-5">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <MetricCard label="Prompt tokens" value={formatTokens(readNumber(totals, ["prompt_tokens"]))} />
-            <MetricCard label="Completion tokens" value={formatTokens(readNumber(totals, ["completion_tokens"]))} />
-            <MetricCard label="Total tokens" value={formatTokens(readNumber(totals, ["total_tokens", "token_total", "tokens"]))} />
-            <MetricCard label="Estimated cost" value={formatCost(readNumber(totals, ["estimated_cost", "cost_total", "total_cost"]))} />
-            <MetricCard label="Avg tokens / row" value={formatTokens(readNumber(totals, ["average_tokens_per_record"]))} />
-            <MetricCard label="Zero-token rows" value={formatCount(readNumber(totals, ["zero_token_records"]))} />
-          </div>
-        </div>
-      </article>
-
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <SectionHeader
-          eyebrow="By model"
-          title="Model concentration"
-          description="Model rows now show both raw volume and concentration share so it is easier to spot whether one model is dominating the current cost window."
-        />
-
-        {modelRows.length === 0 ? (
-          <EmptySection
-            title="No model rows"
-            copy="The current window returned no by-model aggregation. Broaden the date range or clear the model filter."
-          />
-        ) : (
-          <div className="max-w-full overflow-x-auto px-6 py-5">
-            <table className="min-w-[1180px] table-fixed border-separate border-spacing-0">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                  <th className="border-b border-border px-3 py-3 font-medium">Model</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Scope</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Tokens</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Cost</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Last seen</th>
-                  <th className="border-b border-border px-3 py-3 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modelRows.map((row, index) => (
-                  <tr className="align-top" key={rowKey(row, index, ["model_name", "model_id", "name"])}>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <div className="grid gap-1">
-                        <p className="font-medium text-foreground">{rowLabel(row, "model_name", "Model")}</p>
-                        <p className="text-xs text-muted-foreground">{rowLabel(row, "provider_name", "Provider")}</p>
-                      </div>
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <div className="grid gap-1 text-sm">
-                        <span className="font-medium text-foreground">
-                          {formatCount(readNumber(row, ["usage_record_count", "record_count", "count"]))} rows /{" "}
-                          {formatCount(readNumber(row, ["run_count", "run_total"]))} runs
-                        </span>
-                        <span className="text-muted-foreground">
-                          {formatCount(readNumber(row, ["candidate_count"]))} candidates / {rowText(row, ["stage_names"], "No stage context")}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <ShareCell
-                        maxValue={totalTokens}
-                        sharePercent={readNumber(row, ["token_share_percent"]) ?? safeShare(readNumber(row, ["total_tokens"]), totalTokens)}
-                        value={formatTokens(readNumber(row, ["total_tokens", "tokens", "token_total"]))}
-                      />
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <ShareCell
-                        maxValue={totalCost}
-                        sharePercent={readNumber(row, ["cost_share_percent"]) ?? safeShare(readNumber(row, ["estimated_cost"]), totalCost)}
-                        tone="warning"
-                        value={formatCost(readNumber(row, ["estimated_cost", "cost", "total_cost"]))}
-                      />
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-sm text-muted-foreground">
-                      {formatTimestamp(readText(row, ["last_seen_at", "last_recorded_at", "updated_at", "recorded_at"]))}
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={buildUsageHref(filters, { modelName: readText(row, ["model_name"]), runId: "", search: "" })}>
-                          Focus model
-                        </Link>
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </article>
-
-      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
-        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-          <SectionHeader
-            eyebrow="By agent"
-            title="Agent concentration"
-            description="Agent rows show which orchestration layer is producing the most token and cost pressure in the current window."
-          />
-
-          {agentRows.length === 0 ? (
-            <EmptySection
-              title="No agent rows"
-              copy="There is no by-agent aggregation in the current window. Broaden the filters to recover agent context."
-            />
-          ) : (
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">Agent</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Scope</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Tokens</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Cost</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agentRows.map((row, index) => (
-                    <tr className="align-top" key={rowKey(row, index, ["agent_name", "name", "agent_id"])}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <p className="font-medium text-foreground">{rowLabel(row, "agent_name", "Agent")}</p>
-                          <p className="text-xs text-muted-foreground">{rowText(row, ["stage_names"], "No stage context")}</p>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">
-                            {formatCount(readNumber(row, ["usage_record_count", "record_count", "count"]))} rows /{" "}
-                            {formatCount(readNumber(row, ["run_count", "run_total"]))} runs
-                          </span>
-                          <span className="text-muted-foreground">{rowText(row, ["model_names"], "No model context")}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <ShareCell
-                          maxValue={totalTokens}
-                          sharePercent={readNumber(row, ["token_share_percent"]) ?? safeShare(readNumber(row, ["total_tokens"]), totalTokens)}
-                          value={formatTokens(readNumber(row, ["total_tokens", "tokens", "token_total"]))}
-                        />
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <ShareCell
-                          maxValue={totalCost}
-                          sharePercent={readNumber(row, ["cost_share_percent"]) ?? safeShare(readNumber(row, ["estimated_cost"]), totalCost)}
-                          tone="warning"
-                          value={formatCost(readNumber(row, ["estimated_cost", "cost", "total_cost"]))}
-                        />
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={buildUsageHref(filters, { agentName: readText(row, ["agent_name"]), runId: "", search: "" })}>
-                            Focus agent
-                          </Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </article>
-
-        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-          <SectionHeader
-            eyebrow="By run"
-            title="Run-linked spend"
-            description="Run rows keep the highest-cost execution windows one click away from the owning diagnostic route."
-          />
-
-          {runRows.length === 0 ? (
-            <EmptySection
-              title="No run rows"
-              copy="There is no by-run aggregation in the current window. Widen the scope or clear the run filter."
-            />
-          ) : (
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1120px] table-fixed border-separate border-spacing-0">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">Run</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Context</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Tokens</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Cost</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {runRows.map((row, index) => (
-                    <tr className="align-top" key={rowKey(row, index, ["run_id", "name", "run_name"])}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          {rowLinkToRun(row) ? (
-                            <Link
-                              className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
-                              href={rowLinkToRun(row)!}
-                            >
-                              {rowLabel(row, "run_id", "Run")}
-                            </Link>
-                          ) : (
-                            <p className="font-medium text-foreground">{rowLabel(row, "run_id", "Run")}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            {rowLabel(row, "run_type", "Run type")}
-                            {readText(row, ["run_state"]) ? ` / ${readText(row, ["run_state"])}` : ""}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">{rowText(row, ["agent_name", "agent_names"], "Agent")}</span>
-                          <span className="text-muted-foreground">{rowText(row, ["model_name", "model_names"], "Model")}</span>
-                          <span className="text-muted-foreground">{rowText(row, ["stage_names"], "No stage context")}</span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <ShareCell
-                          maxValue={totalTokens}
-                          sharePercent={readNumber(row, ["token_share_percent"]) ?? safeShare(readNumber(row, ["total_tokens"]), totalTokens)}
-                          value={formatTokens(readNumber(row, ["total_tokens", "tokens", "token_total"]))}
-                        />
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <ShareCell
-                          maxValue={totalCost}
-                          sharePercent={readNumber(row, ["cost_share_percent"]) ?? safeShare(readNumber(row, ["estimated_cost"]), totalCost)}
-                          tone="warning"
-                          value={formatCost(readNumber(row, ["estimated_cost", "cost", "total_cost"]))}
-                        />
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        {rowLinkToRun(row) ? (
-                          <Button asChild size="sm" variant="outline">
-                            <Link href={rowLinkToRun(row)!}>Open run</Link>
-                          </Button>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">No drilldown</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </article>
-      </div>
-
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-          <SectionHeader
-            eyebrow="Trend"
-            title="Usage trend"
-            description="Daily buckets now call out whether usage is stable, elevated, or spiking instead of leaving operators to infer every movement from raw totals alone."
-          />
-
-          <div className="grid gap-4 border-b border-border/80 px-6 py-5 md:grid-cols-3">
-            <MetricCard
-              label="Latest bucket"
-              value={latestTrend ? formatTokens(readNumber(latestTrend, ["total_tokens"])) : "n/a"}
-            />
-            <MetricCard
-              label="Latest cost"
-              value={latestTrend ? formatCost(readNumber(latestTrend, ["estimated_cost"])) : "n/a"}
-            />
-            <MetricCard
-              label="Latest signal"
-              value={latestTrend ? rowSignal(latestTrend) : "n/a"}
-            />
-          </div>
-
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <DataSection
+          description={copy.trendDescription as string}
+          eyebrow={copy.trend as string}
+          title={copy.trendTitle as string}
+        >
           {trendRows.length === 0 ? (
-            <EmptySection
-              title="No trend rows"
-              copy="There is no trend data for the current scope. Expand the date range to surface the usage timeline."
-            />
+            <EmptySection copy={copy.noTrendCopy as string} title={copy.noTrendTitle as string} />
           ) : (
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto">
+              <table aria-label={copy.trendTitle as string} className="min-w-[880px] table-fixed">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">Bucket</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Volume</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Cost</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Records</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Delta</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Signal</th>
+                  <tr>
+                    <TableHead>{copy.bucket}</TableHead>
+                    <TableHead>{copy.volume}</TableHead>
+                    <TableHead>{copy.cost}</TableHead>
+                    <TableHead>{copy.recordsColumn}</TableHead>
+                    <TableHead>{copy.delta}</TableHead>
+                    <TableHead>{copy.signal}</TableHead>
                   </tr>
                 </thead>
                 <tbody>
                   {trendRows.map((row, index) => {
-                    const totalTokens = readNumber(row, ["total_tokens", "tokens", "token_total"]);
-                    const barWidth = maxTokenVolume > 0 && totalTokens !== null
-                      ? Math.max(6, Math.round((totalTokens / maxTokenVolume) * 100))
-                      : 0;
-
+                    const tokens = readNumber(row, ["total_tokens", "tokens", "token_total"]);
+                    const width = maxTokenVolume > 0 && tokens !== null ? Math.max(5, Math.round((tokens / maxTokenVolume) * 100)) : 0;
                     return (
-                      <tr className="align-top" key={rowKey(row, index, ["period", "bucket_date", "date", "bucket_label", "name"])}>
-                        <td className="border-b border-border/70 px-3 py-4">
-                          <div className="grid gap-1">
-                            <p className="font-medium text-foreground">{rowText(row, ["period", "bucket_date"], "Bucket")}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatTimestamp(readText(row, ["interval_start", "bucket_date", "date", "last_seen_at"]))}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="border-b border-border/70 px-3 py-4">
-                          <div className="grid gap-2">
-                            <div className="h-2 rounded-full bg-muted">
-                              <div
-                                className="h-2 rounded-full bg-primary"
-                                style={{ width: barWidth ? `${barWidth}%` : "0%" }}
-                              />
-                            </div>
-                            <p className="text-sm font-medium text-foreground">{formatTokens(totalTokens)}</p>
-                          </div>
-                        </td>
-                        <td className="border-b border-border/70 px-3 py-4 text-sm text-foreground">
-                          {formatCost(readNumber(row, ["estimated_cost", "cost", "total_cost"]))}
-                        </td>
-                        <td className="border-b border-border/70 px-3 py-4">
-                          <div className="grid gap-1 text-sm">
-                            <span className="font-medium text-foreground">
-                              {formatCount(readNumber(row, ["record_count", "usage_record_count", "count"]))} rows
-                            </span>
-                            <span className="text-muted-foreground">
-                              {formatCount(readNumber(row, ["run_count"]))} runs / {formatCount(readNumber(row, ["candidate_count"]))} candidates
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-b border-border/70 px-3 py-4">
-                          <div className="grid gap-1 text-sm">
-                            <span className="font-medium text-foreground">
-                              {formatSignedPercent(readNumber(row, ["token_delta_percent"]))} tokens
-                            </span>
-                            <span className="text-muted-foreground">
-                              {formatSignedPercent(readNumber(row, ["cost_delta_percent"]))} cost
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-b border-border/70 px-3 py-4">
-                          <div className="grid gap-2">
-                            <span
-                              className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", trendBadgeClasses(row))}
-                            >
-                              {rowSignal(row)}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {rowSummary(row, "No trend note stored.")}
-                            </span>
-                          </div>
-                        </td>
+                      <tr className="align-top" key={rowKey(row, index, ["period", "bucket_date", "date"])}>
+                        <TableCell>
+                          <p className="font-medium text-foreground">{rowText(row, ["period", "bucket_date"], copy.bucket as string)}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{formatTimestamp(readText(row, ["interval_start", "bucket_date", "date"]))}</p>
+                        </TableCell>
+                        <TableCell>
+                          <div className="h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-primary" style={{ width: `${width}%` }} /></div>
+                          <p className="mt-2 font-mono text-xs font-semibold text-foreground">{formatTokens(locale, tokens)}</p>
+                        </TableCell>
+                        <TableCell><span className="font-mono text-xs font-semibold">{formatCost(locale, readNumber(row, ["estimated_cost", "cost", "total_cost"]))}</span></TableCell>
+                        <TableCell>
+                          <p>{formatCount(locale, readNumber(row, ["record_count", "usage_record_count", "count"]))} {copy.rows}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{formatCount(locale, readNumber(row, ["run_count"]))} {copy.runs}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p>{formatSignedPercent(locale, readNumber(row, ["token_delta_percent"]))} {copy.tokenDelta}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{formatSignedPercent(locale, readNumber(row, ["cost_delta_percent"]))} {copy.costDelta}</p>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge row={row} />
+                          <p className="mt-2 max-w-48 text-xs text-muted-foreground">{rowSummary(row, copy.noTrendNote as string)}</p>
+                        </TableCell>
                       </tr>
                     );
                   })}
@@ -684,273 +609,267 @@ export function LlmUsageSurface({ filters, usage }: LlmUsageSurfaceProps) {
               </table>
             </div>
           )}
-        </article>
+        </DataSection>
 
-        <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-          <SectionHeader
-            eyebrow="Anomalies"
-            title="Anomaly drilldown"
-            description="Outlier rows now expose enough context to move from a cost signal into review or run diagnosis without leaving the usage dashboard blindly."
-          />
-
+        <DataSection
+          description={copy.anomalyDescription as string}
+          eyebrow={copy.anomalies as string}
+          title={copy.anomalyTitle as string}
+        >
           {anomalyRows.length === 0 ? (
-            <EmptySection
-              title="No anomaly candidates"
-              copy="The current scope did not return unusual usage rows. Broaden the date range or clear the filters to inspect drift."
-            />
+            <EmptySection copy={copy.noAnomalyCopy as string} title={copy.noAnomalyTitle as string} />
           ) : (
-            <div className="max-w-full overflow-x-auto px-6 py-5">
-              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
+            <div className="max-w-full overflow-x-auto">
+              <table aria-label={copy.anomalyTitle as string} className="min-w-[760px] table-fixed">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">Signal</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Context</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Observed</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Review context</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">Action</th>
+                  <tr>
+                    <TableHead>{copy.signal}</TableHead>
+                    <TableHead>{copy.context}</TableHead>
+                    <TableHead>{copy.observed}</TableHead>
+                    <TableHead>{copy.action}</TableHead>
                   </tr>
                 </thead>
                 <tbody>
                   {anomalyRows.map((row, index) => (
-                    <tr className="align-top" key={rowKey(row, index, ["signal", "reason", "name", "run_id"])}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <span
-                            className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", anomalyBadgeClasses(row))}
-                          >
-                            {rowSignal(row)}
-                          </span>
-                          <p className="text-sm leading-6 text-foreground">{rowSummary(row, "No anomaly reason stored.")}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Score {formatCount(readNumber(row, ["anomaly_score"]))} / {readStringArray(row, ["anomaly_reasons"]).join(", ")}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">{rowLabel(row, "run_id", "Run")}</span>
-                          <span className="text-muted-foreground">
-                            {rowText(row, ["agent_name", "agent_names"], "Agent")}
-                            {" / "}
-                            {rowText(row, ["model_name", "model_names"], "Model")}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {rowText(row, ["product_name"], "No product context")}
-                            {readText(row, ["bank_code"]) ? ` / ${readText(row, ["bank_code"])}` : ""}
-                            {readText(row, ["product_type"]) ? ` / ${readText(row, ["product_type"])}` : ""}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">
-                            {formatTokens(readNumber(row, ["total_tokens", "observed_total_tokens", "tokens"]))}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {formatCost(readNumber(row, ["estimated_cost", "observed_cost", "cost"]))}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1 text-sm">
-                          <span className="font-medium text-foreground">
-                            {rowText(row, ["review_state"], "No linked review state")}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {rowText(row, ["validation_status"], "No validation context")}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {rowText(row, ["queue_reason_code"], "No queue reason")}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
+                    <tr className="align-top" key={rowKey(row, index, ["signal", "reason", "run_id"])}>
+                      <TableCell>
+                        <StatusBadge row={row} />
+                        <p className="mt-2 text-sm text-foreground">{rowSummary(row, copy.noAnomalyReason as string)}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{copy.score} {formatCount(locale, readNumber(row, ["anomaly_score"]))}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-mono text-xs font-semibold text-foreground">{rowLabel(row, "run_id", copy.run as string)}</p>
+                        <p className="mt-1">{rowText(row, ["agent_name", "agent_names"], copy.agent as string)}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{rowText(row, ["product_name"], copy.noProduct as string)}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-mono text-xs font-semibold">{formatTokens(locale, readNumber(row, ["total_tokens", "observed_total_tokens", "tokens"]))}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{formatCost(locale, readNumber(row, ["estimated_cost", "observed_cost", "cost"]))}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">{rowText(row, ["validation_status"], copy.noValidation as string)}</p>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex flex-col gap-2">
-                          {rowLinkToReview(row) ? (
-                            <Button asChild size="sm" variant="outline">
-                              <Link href={rowLinkToReview(row)!}>Open review</Link>
-                            </Button>
-                          ) : null}
-                          {rowLinkToRun(row) ? (
-                            <Button asChild size="sm" variant="outline">
-                              <Link href={rowLinkToRun(row)!}>Open run</Link>
-                            </Button>
-                          ) : null}
-                          {!rowLinkToReview(row) && !rowLinkToRun(row) ? (
-                            <span className="text-xs text-muted-foreground">No related drilldown</span>
-                          ) : null}
+                          {rowLinkToReview(row, locale) ? <Button asChild size="sm" variant="outline"><Link href={rowLinkToReview(row, locale)!}>{copy.openReview}</Link></Button> : null}
+                          {rowLinkToRun(row, locale) ? <Button asChild size="sm" variant="outline"><Link href={rowLinkToRun(row, locale)!}>{copy.openRun}</Link></Button> : null}
+                          {!rowLinkToReview(row, locale) && !rowLinkToRun(row, locale) ? <span className="text-xs text-muted-foreground">{copy.noDrilldown}</span> : null}
                         </div>
-                      </td>
+                      </TableCell>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </article>
+        </DataSection>
+      </div>
+
+      <DataSection
+        description={copy.modelDescription as string}
+        eyebrow={copy.concentration as string}
+        title={copy.modelTitle as string}
+      >
+        {modelRows.length === 0 ? (
+          <EmptySection copy={copy.noModelCopy as string} title={copy.noModelTitle as string} />
+        ) : (
+          <ConcentrationTable
+            copy={copy}
+            filters={filters}
+            locale={locale}
+            rows={modelRows}
+            totalCost={totalCost}
+            totalTokens={totalTokens}
+            type="model"
+          />
+        )}
+      </DataSection>
+
+      <div className="grid min-w-0 gap-6 xl:grid-cols-2">
+        <DataSection
+          description={copy.agentDescription as string}
+          eyebrow={copy.concentration as string}
+          title={copy.agentTitle as string}
+        >
+          {agentRows.length === 0 ? (
+            <EmptySection copy={copy.noAgentCopy as string} title={copy.noAgentTitle as string} />
+          ) : (
+            <ConcentrationTable copy={copy} filters={filters} locale={locale} rows={agentRows} totalCost={totalCost} totalTokens={totalTokens} type="agent" />
+          )}
+        </DataSection>
+        <DataSection
+          description={copy.runDescription as string}
+          eyebrow={copy.concentration as string}
+          title={copy.runTitle as string}
+        >
+          {runRows.length === 0 ? (
+            <EmptySection copy={copy.noRunCopy as string} title={copy.noRunTitle as string} />
+          ) : (
+            <ConcentrationTable copy={copy} filters={filters} locale={locale} rows={runRows} totalCost={totalCost} totalTokens={totalTokens} type="run" />
+          )}
+        </DataSection>
       </div>
     </section>
   );
 }
 
-function SectionHeader({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return (
-    <div className="flex flex-col gap-3 border-b border-border/80 px-6 py-5">
-      <div className="max-w-3xl">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-      </div>
-    </div>
-  );
-}
+type UsageCopy = (typeof USAGE_COPY)[AdminLocale];
 
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-border/80 bg-background px-4 py-4">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function HotspotCard({
-  label,
-  value,
-  note,
-  shareValue,
-  actionHref,
-  actionLabel,
+function ConcentrationTable({
+  copy,
+  filters,
+  locale,
+  rows,
+  totalCost,
+  totalTokens,
+  type,
 }: {
-  label: string;
-  value: string;
-  note: string;
-  shareValue: number | null;
-  actionHref: string;
-  actionLabel: string;
+  copy: UsageCopy;
+  filters: LlmUsagePageFilters;
+  locale: AdminLocale;
+  rows: UsageRow[];
+  totalCost: number;
+  totalTokens: number;
+  type: "model" | "agent" | "run";
 }) {
+  const label = type === "model" ? copy.model : type === "agent" ? copy.agent : copy.run;
   return (
-    <div className="rounded-[1.5rem] border border-border/80 bg-background p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-          <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
-        </div>
-        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-          {formatPercent(shareValue)}
-        </span>
-      </div>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{note}</p>
-      <div className="mt-4">
-        {actionHref ? (
-          <Button asChild size="sm" variant="outline">
-            <Link href={actionHref}>{actionLabel}</Link>
-          </Button>
-        ) : (
-          <span className="text-xs text-muted-foreground">No drilldown</span>
-        )}
-      </div>
+    <div className="max-w-full overflow-x-auto">
+      <table aria-label={label as string} className="min-w-[760px] table-fixed">
+        <thead><tr><TableHead>{label}</TableHead><TableHead>{copy.scope}</TableHead><TableHead>{copy.tokens}</TableHead><TableHead>{copy.cost}</TableHead><TableHead>{copy.action}</TableHead></tr></thead>
+        <tbody>
+          {rows.map((row, index) => {
+            const identityKey = type === "model" ? "model_name" : type === "agent" ? "agent_name" : "run_id";
+            const identity = rowLabel(row, identityKey, label as string);
+            const href = type === "run"
+              ? rowLinkToRun(row, locale)
+              : usageHref(locale, filters, type === "model" ? { modelName: readText(row, ["model_name"]), runId: "", search: "" } : { agentName: readText(row, ["agent_name"]), runId: "", search: "" });
+            return (
+              <tr className="align-top" key={rowKey(row, index, [identityKey, "name"])}>
+                <TableCell>
+                  {type === "run" && href ? <Link className="font-mono text-xs font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline" href={href}>{identity}</Link> : <p className="font-medium text-foreground">{identity}</p>}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {type === "model"
+                      ? rowText(row, ["provider_name"], copy.provider as string)
+                      : type === "agent"
+                        ? rowText(row, ["stage_names"], copy.noStage as string)
+                        : rowText(row, ["run_type", "run_state"], copy.runType as string)}
+                  </p>
+                </TableCell>
+                <TableCell>
+                  <p>{formatCount(locale, readNumber(row, ["usage_record_count", "record_count", "count"]))} {copy.rows}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{formatCount(locale, readNumber(row, ["run_count", "run_total"]))} {copy.runs}</p>
+                </TableCell>
+                <TableCell><ShareCell locale={locale} share={readNumber(row, ["token_share_percent"]) ?? safeShare(readNumber(row, ["total_tokens"]), totalTokens)} value={formatTokens(locale, readNumber(row, ["total_tokens", "tokens", "token_total"]))} /></TableCell>
+                <TableCell><ShareCell locale={locale} share={readNumber(row, ["cost_share_percent"]) ?? safeShare(readNumber(row, ["estimated_cost"]), totalCost)} tone="warning" value={formatCost(locale, readNumber(row, ["estimated_cost", "cost", "total_cost"]))} /></TableCell>
+                <TableCell>{href ? <Button asChild size="sm" variant="outline"><Link href={href}>{type === "model" ? copy.focusModel : type === "agent" ? copy.focusAgent : copy.openRun}</Link></Button> : <span className="text-xs text-muted-foreground">{copy.noDrilldown}</span>}</TableCell>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function ShareCell({
-  value,
-  sharePercent,
-  maxValue,
-  tone = "primary",
-}: {
-  value: string;
-  sharePercent: number;
-  maxValue: number;
-  tone?: "primary" | "warning";
-}) {
-  const barClass = tone === "warning" ? "bg-warning" : "bg-primary";
-  const clampedPercent = Math.max(0, Math.min(100, sharePercent));
+const inputClasses = "h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30";
 
+function FilterField({ children, label }: { children: React.ReactNode; label: string }) {
+  return <label className="grid min-w-0 gap-1.5 text-sm"><span className="font-medium text-foreground">{label}</span>{children}</label>;
+}
+
+function SignalItem({ label, note, tone, value }: { label: string; note: string; tone: "neutral" | "warning" | "danger"; value: string }) {
   return (
-    <div className="grid gap-2">
-      <div className="h-2 rounded-full bg-muted">
-        <div className={cn("h-2 rounded-full", barClass)} style={{ width: maxValue > 0 ? `${Math.max(6, clampedPercent)}%` : "0%" }} />
-      </div>
-      <div className="grid gap-1 text-sm">
-        <span className="font-medium text-foreground">{value}</span>
-        <span className="text-muted-foreground">{formatPercent(sharePercent)}</span>
-      </div>
+    <div className="min-w-0 px-4 py-4 sm:px-5">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className={cn("mt-2 truncate font-mono text-lg font-semibold", tone === "danger" ? "text-destructive" : tone === "warning" ? "text-warning" : "text-foreground")}>{value}</p>
+      <p className="mt-1 truncate text-xs text-muted-foreground">{note}</p>
     </div>
   );
 }
 
-function EmptySection({ title, copy }: { title: string; copy: string }) {
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="px-4 py-4 sm:px-5"><dt className="text-xs font-medium text-muted-foreground">{label}</dt><dd className="mt-2 font-mono text-sm font-semibold text-foreground">{value}</dd></div>;
+}
+
+function DataSection({ children, description, eyebrow, title }: { children: React.ReactNode; description: string; eyebrow: string; title: string }) {
   return (
-    <div className="px-6 py-8">
-      <div className="rounded-[1.5rem] border border-dashed border-border bg-background px-6 py-8">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{title}</p>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">{copy}</p>
+    <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+      <div className="border-b border-border px-4 py-4 sm:px-5">
+        <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
+        <h2 className="mt-1 text-base font-semibold text-foreground">{title}</h2>
+        <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptySection({ copy, title }: { copy: string; title: string }) {
+  return <div className="px-4 py-8 sm:px-5"><p className="text-sm font-medium text-foreground">{title}</p><p className="mt-2 max-w-2xl text-sm text-muted-foreground">{copy}</p></div>;
+}
+
+function TableHead({ children }: { children: React.ReactNode }) {
+  return <th className="border-b border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{children}</th>;
+}
+
+function TableCell({ children }: { children: React.ReactNode }) {
+  return <td className="border-b border-border/70 px-4 py-3 text-sm text-foreground">{children}</td>;
+}
+
+function ShareCell({ locale, share, tone = "primary", value }: { locale: AdminLocale; share: number; tone?: "primary" | "warning"; value: string }) {
+  const width = Math.max(0, Math.min(100, share));
+  return (
+    <div>
+      <div className="h-1.5 rounded-full bg-muted"><div className={cn("h-1.5 rounded-full", tone === "warning" ? "bg-warning" : "bg-primary")} style={{ width: `${width}%` }} /></div>
+      <p className="mt-2 font-mono text-xs font-semibold">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{formatPercent(locale, share)}</p>
     </div>
   );
 }
 
-function buildUsageHref(filters: LlmUsagePageFilters, overrides: Partial<LlmUsagePageFilters>) {
-  const next = {
-    ...filters,
-    ...overrides,
-  };
+function StatusBadge({ row }: { row: UsageRow }) {
+  return <span className={cn("inline-flex rounded-md px-2 py-1 text-xs font-medium", statusBadgeClasses(row))}>{rowSignal(row, "Signal")}</span>;
+}
+
+function usageHref(locale: AdminLocale, filters: LlmUsagePageFilters, overrides: Partial<LlmUsagePageFilters>) {
+  const next = { ...filters, ...overrides };
   const params = new URLSearchParams();
-  if (next.search) {
-    params.set("q", next.search);
-  }
-  if (next.from) {
-    params.set("from", next.from);
-  }
-  if (next.to) {
-    params.set("to", next.to);
-  }
-  if (next.runId) {
-    params.set("run_id", next.runId);
-  }
-  if (next.agentName) {
-    params.set("agent_name", next.agentName);
-  }
-  if (next.modelName) {
-    params.set("model_name", next.modelName);
-  }
-  if (next.providerName) {
-    params.set("provider_name", next.providerName);
-  }
-  if (next.stage) {
-    params.set("stage", next.stage);
-  }
-  const query = params.toString();
-  return query ? `/admin/usage?${query}` : "/admin/usage";
+  if (next.search) params.set("q", next.search);
+  if (next.from) params.set("from", next.from);
+  if (next.to) params.set("to", next.to);
+  if (next.runId) params.set("run_id", next.runId);
+  if (next.agentName) params.set("agent_name", next.agentName);
+  if (next.modelName) params.set("model_name", next.modelName);
+  if (next.providerName) params.set("provider_name", next.providerName);
+  if (next.stage) params.set("stage", next.stage);
+  return buildAdminHref("/admin/usage", params, locale);
+}
+
+function emptyFilters(): LlmUsagePageFilters {
+  return { search: "", from: "", to: "", runId: "", agentName: "", modelName: "", providerName: "", stage: "" };
+}
+
+function rowLinkToRun(row: UsageRow, locale: AdminLocale) {
+  const runId = readText(row, ["run_id"]);
+  return runId ? buildAdminHref(`/admin/runs/${encodeURIComponent(runId)}`, new URLSearchParams(), locale) : "";
+}
+
+function rowLinkToReview(row: UsageRow, locale: AdminLocale) {
+  const reviewTaskId = readText(row, ["review_task_id"]);
+  return reviewTaskId ? buildAdminHref(`/admin/reviews/${encodeURIComponent(reviewTaskId)}`, new URLSearchParams(), locale) : "";
 }
 
 function topUsageRow(rows: UsageRow[]) {
   return [...rows].sort((left, right) => {
-    const leftCost = readNumber(left, ["estimated_cost", "cost", "total_cost"]) ?? 0;
-    const rightCost = readNumber(right, ["estimated_cost", "cost", "total_cost"]) ?? 0;
-    if (rightCost !== leftCost) {
-      return rightCost - leftCost;
-    }
-    const leftTokens = readNumber(left, ["total_tokens", "tokens", "token_total"]) ?? 0;
-    const rightTokens = readNumber(right, ["total_tokens", "tokens", "token_total"]) ?? 0;
-    return rightTokens - leftTokens;
+    const costDelta = (readNumber(right, ["estimated_cost", "cost", "total_cost"]) ?? 0) - (readNumber(left, ["estimated_cost", "cost", "total_cost"]) ?? 0);
+    return costDelta || (readNumber(right, ["total_tokens", "tokens", "token_total"]) ?? 0) - (readNumber(left, ["total_tokens", "tokens", "token_total"]) ?? 0);
   })[0];
 }
 
 function readNumber(row: Record<string, unknown>, keys: string[]) {
   for (const key of keys) {
     const value = row[key];
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-    if (typeof value === "string" && value.trim()) {
-      const parsed = Number(value);
-      if (Number.isFinite(parsed)) {
-        return parsed;
-      }
-    }
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim() && Number.isFinite(Number(value))) return Number(value);
   }
   return null;
 }
@@ -958,156 +877,82 @@ function readNumber(row: Record<string, unknown>, keys: string[]) {
 function readText(row: Record<string, unknown>, keys: string[]) {
   for (const key of keys) {
     const value = row[key];
-    if (typeof value === "string" && value.trim()) {
-      return value.trim();
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (Array.isArray(value)) {
+      const values = value.filter((item): item is string => typeof item === "string" && Boolean(item.trim())).map((item) => item.trim());
+      if (values.length) return values.join(", ");
     }
   }
   return "";
 }
 
-function rowLabel(row: Record<string, unknown>, key: string, fallback: string) {
-  const value = row[key];
-  if (typeof value === "string" && value.trim()) {
-    return value.trim();
-  }
-  return fallback;
+function rowLabel(row: UsageRow, key: string, fallback: string) {
+  return readText(row, [key]) || fallback;
 }
 
-function rowText(row: Record<string, unknown>, keys: string[], fallback: string) {
-  const text = readText(row, keys);
-  if (text) {
-    return text;
-  }
-  const values = readStringArray(row, keys);
-  return values.length ? values.join(", ") : fallback;
+function rowText(row: UsageRow, keys: string[], fallback: string) {
+  return readText(row, keys) || fallback;
 }
 
-function rowSummary(row: Record<string, unknown>, fallback: string) {
-  return (
-    readText(row, ["reason", "summary", "note", "message", "signal_reason"]) ||
-    readStringArray(row, ["anomaly_reasons"]).join(", ") ||
-    fallback
-  );
+function rowSummary(row: UsageRow, fallback: string) {
+  return readText(row, ["reason", "summary", "note", "message", "signal_reason", "anomaly_reasons"]) || fallback;
 }
 
-function rowSignal(row: Record<string, unknown>) {
-  return readText(row, ["signal", "severity", "trend_state", "anomaly_type", "reason_code"]) || "Signal";
-}
-
-function rowLinkToRun(row: UsageRow) {
-  const runId = readText(row, ["run_id"]);
-  return runId ? `/admin/runs/${runId}` : "";
-}
-
-function rowLinkToReview(row: UsageRow) {
-  const reviewTaskId = readText(row, ["review_task_id"]);
-  return reviewTaskId ? `/admin/reviews/${reviewTaskId}` : "";
+function rowSignal(row: UsageRow, fallback: string) {
+  return readText(row, ["signal", "severity", "trend_state", "anomaly_type", "reason_code"]) || fallback;
 }
 
 function rowKey(row: UsageRow, index: number, keys: string[]) {
-  const candidate = keys.map((key) => readText(row, [key])).find(Boolean);
-  return candidate || String(index);
+  return keys.map((key) => readText(row, [key])).find(Boolean) || String(index);
 }
 
-function readStringArray(row: UsageRow, keys: string[]) {
-  for (const key of keys) {
-    const value = row[key];
-    if (!Array.isArray(value)) {
-      continue;
-    }
-    const items = value
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter(Boolean);
-    if (items.length) {
-      return items;
-    }
-  }
-  return [] as string[];
-}
-
-function trendBadgeClasses(row: UsageRow) {
-  const value = readText(row, ["trend_state", "signal", "severity", "status"]);
-  if (value === "critical" || value === "high" || value === "spike") {
-    return "bg-destructive/10 text-destructive";
-  }
-  if (value === "warning" || value === "elevated") {
-    return "bg-warning-soft text-warning";
-  }
-  if (value === "stable" || value === "normal" || value === "baseline") {
-    return "bg-success-soft text-success";
-  }
+function statusBadgeClasses(row: UsageRow) {
+  const value = readText(row, ["trend_state", "signal", "severity", "status"]).toLowerCase();
+  if (["critical", "high", "spike", "failed", "error"].includes(value)) return "bg-destructive/10 text-destructive";
+  if (["warning", "elevated", "medium"].includes(value)) return "bg-warning-soft text-warning";
+  if (["stable", "normal", "baseline", "low", "info"].includes(value)) return "bg-success-soft text-success";
   return "bg-muted text-muted-foreground";
 }
 
-function anomalyBadgeClasses(row: UsageRow) {
-  const value = readText(row, ["signal", "severity", "anomaly_type", "status"]);
-  if (value === "critical" || value === "high" || value === "spike") {
-    return "bg-destructive/10 text-destructive";
-  }
-  if (value === "warning" || value === "elevated" || value === "medium") {
-    return "bg-warning-soft text-warning";
-  }
-  if (value === "low" || value === "info") {
-    return "bg-info-soft text-info";
-  }
-  return "bg-muted text-muted-foreground";
+function signalTone(row: UsageRow): "neutral" | "warning" | "danger" {
+  const value = readText(row, ["trend_state", "signal", "severity", "status"]).toLowerCase();
+  if (["critical", "high", "spike", "failed", "error"].includes(value)) return "danger";
+  if (["warning", "elevated", "medium"].includes(value)) return "warning";
+  return "neutral";
 }
 
-function formatCount(value: number | null, fallback?: number) {
-  const nextValue = value ?? fallback ?? 0;
-  return nextValue.toLocaleString("en-CA");
+function formatCount(locale: AdminLocale, value: number | null, fallback?: number) {
+  return (value ?? fallback ?? 0).toLocaleString(getAdminIntlLocale(locale));
 }
 
-function formatTokens(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-  return value.toLocaleString("en-CA", {
-    maximumFractionDigits: value % 1 === 0 ? 0 : 2,
-  });
+function formatTokens(locale: AdminLocale, value: number | null) {
+  if (value === null) return USAGE_COPY[locale].missing as string;
+  return value.toLocaleString(getAdminIntlLocale(locale), { maximumFractionDigits: value % 1 === 0 ? 0 : 2 });
 }
 
-function formatCost(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-  return `$${value.toFixed(6)}`;
+function formatCost(locale: AdminLocale, value: number | null) {
+  if (value === null) return USAGE_COPY[locale].missing as string;
+  return value.toLocaleString(getAdminIntlLocale(locale), { currency: "USD", maximumFractionDigits: 6, minimumFractionDigits: 2, style: "currency" });
 }
 
-function formatPercent(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-  return `${value.toFixed(2)}%`;
+function formatPercent(locale: AdminLocale, value: number | null) {
+  if (value === null) return USAGE_COPY[locale].missing as string;
+  return `${value.toLocaleString(getAdminIntlLocale(locale), { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`;
 }
 
-function formatSignedPercent(value: number | null) {
-  if (value === null) {
-    return "n/a";
-  }
-  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+function formatSignedPercent(locale: AdminLocale, value: number | null) {
+  if (value === null) return USAGE_COPY[locale].missing as string;
+  return `${value >= 0 ? "+" : ""}${value.toLocaleString(getAdminIntlLocale(locale), { maximumFractionDigits: 2, minimumFractionDigits: 2 })}%`;
 }
 
 function formatTimestamp(value: string) {
   return formatAdminDateTimeValue(value);
 }
 
-function maxTokens(...rows: UsageRow[][]) {
-  let max = 0;
-  for (const rowGroup of rows) {
-    for (const row of rowGroup) {
-      const value = readNumber(row, ["total_tokens", "tokens", "token_total"]);
-      if (value !== null && value > max) {
-        max = value;
-      }
-    }
-  }
-  return max;
+function maxTokens(rows: UsageRow[]) {
+  return rows.reduce((max, row) => Math.max(max, readNumber(row, ["total_tokens", "tokens", "token_total"]) ?? 0), 0);
 }
 
 function safeShare(value: number | null, total: number) {
-  if (value === null || total <= 0) {
-    return 0;
-  }
-  return Number(((value / total) * 100).toFixed(2));
+  return value === null || total <= 0 ? 0 : Number(((value / total) * 100).toFixed(2));
 }

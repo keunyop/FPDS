@@ -110,12 +110,12 @@ export function SignupRequestReviewPanel({ csrfToken, locale, requests }: Signup
   const copy = PANEL_COPY[locale];
 
   return (
-    <section className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm md:p-8">
-      <div className="flex flex-col gap-3 border-b border-border/80 pb-5 md:flex-row md:items-end md:justify-between">
+    <section className="border border-border bg-card p-5">
+      <div className="flex flex-col gap-3 border-b border-border pb-4 md:flex-row md:items-end md:justify-between">
         <div className="max-w-3xl">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.eyebrow}</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{copy.title}</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.description}</p>
+          <p className="text-xs font-medium text-muted-foreground">{copy.eyebrow}</p>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.title}</h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{copy.description}</p>
         </div>
         <div className="inline-flex items-center rounded-full bg-info-soft px-3 py-1 text-xs font-medium text-info">
           {copy.pendingCount}: {requests?.summary.pending_items ?? 0}
@@ -123,15 +123,15 @@ export function SignupRequestReviewPanel({ csrfToken, locale, requests }: Signup
       </div>
 
       {!requests ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-4 py-4 text-sm text-muted-foreground">
+        <div className="mt-4 border border-dashed border-border bg-background px-4 py-4 text-sm text-muted-foreground">
           {copy.unavailable}
         </div>
       ) : requests.items.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-4 py-4 text-sm text-muted-foreground">
+        <div className="mt-4 border border-dashed border-border bg-background px-4 py-4 text-sm text-muted-foreground">
           {copy.empty}
         </div>
       ) : (
-        <div className="mt-6 grid gap-4">
+        <div className="mt-4 divide-y divide-border border-y border-border">
           {requests.items.map((item) => (
             <SignupRequestReviewCard csrfToken={csrfToken} item={item} key={item.signup_request_id} locale={locale} />
           ))}
@@ -160,6 +160,7 @@ function SignupRequestReviewCard({
 
   async function handleReview(action: ReviewAction) {
     setPendingAction(action);
+    document.body.dataset.adminMutationPending = "true";
     setMessage(null);
     setError(null);
 
@@ -188,11 +189,16 @@ function SignupRequestReviewCard({
       setError(copy.reviewFailed);
     } finally {
       setPendingAction(null);
+      delete document.body.dataset.adminMutationPending;
     }
   }
 
   return (
-    <article className="rounded-2xl border border-border/80 bg-background p-4">
+    <article
+      aria-busy={pendingAction !== null}
+      className="py-4"
+      data-admin-dirty={reasonText.length > 0 || role !== "reviewer" ? "true" : undefined}
+    >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
         <div className="grid gap-3">
           <DataRow label={copy.loginId} value={item.login_id} />
@@ -204,7 +210,7 @@ function SignupRequestReviewCard({
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.role}</span>
             <select
-              className="h-10 rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none"
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none"
               onChange={(event) => setRole(event.target.value)}
               value={role}
             >
@@ -228,8 +234,8 @@ function SignupRequestReviewCard({
             </Button>
           </div>
 
-          {message ? <p className="text-sm text-success">{message}</p> : null}
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {message ? <p aria-live="polite" className="text-sm text-success" role="status">{message}</p> : null}
+          {error ? <p aria-live="assertive" className="text-sm text-destructive" role="alert">{error}</p> : null}
         </div>
       </div>
     </article>
@@ -238,9 +244,9 @@ function SignupRequestReviewCard({
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-card px-4 py-3">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
+    <div className="grid gap-1 border-b border-border pb-3 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-baseline">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="break-words font-mono text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

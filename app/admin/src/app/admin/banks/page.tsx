@@ -42,7 +42,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   }
 
   if (!session || !banks || !productTypes || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title="Bank registry could not load." />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "은행 레지스트리를 불러올 수 없습니다." : locale === "ja" ? "銀行レジストリを読み込めません。" : "Bank registry could not load."} />;
   }
 
   return (

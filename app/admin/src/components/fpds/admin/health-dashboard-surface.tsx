@@ -205,7 +205,7 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
   const domain = health.domains[0] ?? null;
   if (!domain) {
     return (
-      <section className="rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <section className="border border-border bg-card p-5" role="status">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{copy.emptyTitle}</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
           {copy.emptyDescription}
@@ -213,9 +213,20 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
       </section>
     );
   }
+  const statusLabel =
+    domain.status === "healthy"
+      ? copy.healthy
+      : domain.status === "pending"
+        ? copy.pending
+        : domain.status === "failed"
+          ? copy.failed
+          : domain.status === "stale"
+            ? copy.stale
+            : copy.unknown;
 
   async function handleRetry() {
     setRetryPending(true);
+    document.body.dataset.adminMutationPending = "true";
     setRetryMessage(null);
     setRetryError(null);
     try {
@@ -236,12 +247,13 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
       setRetryError(copy.retryApiFailed);
     } finally {
       setRetryPending(false);
+      delete document.body.dataset.adminMutationPending;
     }
   }
 
   return (
-    <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+    <section aria-busy={retryPending} className="grid min-w-0 gap-5">
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         actions={
@@ -256,7 +268,7 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         }
         badges={
           <span className={cn("rounded-full px-3 py-1 text-xs font-medium", healthStatusClasses(domain.status))}>
-            {toTitleCase(domain.status)}
+            {statusLabel}
           </span>
         }
         description={copy.description}
@@ -264,22 +276,40 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         title={copy.title}
       />
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <SummaryStat label={copy.canonicalActive} value={formatCount(domain.active_product_count)} />
-        <SummaryStat label={copy.projectedActive} value={formatCount(domain.projected_active_product_count)} />
-        <SummaryStat label={copy.pendingRequests} value={formatCount(domain.queued_request_count + domain.in_progress_request_count)} />
-        <SummaryStat label={copy.latestSuccess} value={formatTimestamp(domain.latest_success_at, copy.missing)} />
-        <SummaryStat label={copy.latestFailure} value={formatTimestamp(domain.latest_failure_at, copy.missing)} />
-        <SummaryStat label={copy.missingDataRatio} value={formatPercent(domain.missing_data_ratio)} />
+      <div className={cn("grid border border-border border-l-4 bg-card lg:grid-cols-[minmax(18rem,1.2fr)_minmax(0,2fr)]", healthStatusBorderClasses(domain.status))}>
+        <div className="border-b border-border p-5 lg:border-b-0 lg:border-r">
+          <p className="text-xs font-medium text-muted-foreground">{copy.servingState}</p>
+          <div className="mt-2 flex flex-wrap items-baseline gap-3">
+            <p className="text-xl font-semibold text-foreground">{statusLabel}</p>
+            <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", healthStatusClasses(domain.status))}>
+              {domain.stale_flag ? copy.stale : statusLabel}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{domain.serving_note}</p>
+        </div>
+        <dl className="grid divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <SummaryStat label={copy.servingSnapshotId} value={domain.serving_snapshot_id ?? copy.noSuccessfulSnapshot} />
+          <SummaryStat label={copy.servingRefreshedAt} value={formatTimestamp(domain.serving_snapshot_refreshed_at, copy.missing)} />
+          <SummaryStat label={copy.latestCanonicalChange} value={formatTimestamp(domain.latest_canonical_change_at, copy.missing)} />
+        </dl>
       </div>
 
+      <dl className="grid overflow-hidden border border-border bg-card md:grid-cols-2 xl:grid-cols-6 [&>*]:border-b [&>*]:border-border md:[&>*]:border-r xl:[&>*]:border-b-0">
+        <SummaryStat label={copy.pendingRequests} value={formatCount(domain.queued_request_count + domain.in_progress_request_count, locale)} />
+        <SummaryStat label={copy.missingDataRatio} value={formatPercent(domain.missing_data_ratio, locale)} />
+        <SummaryStat label={copy.canonicalActive} value={formatCount(domain.active_product_count, locale)} />
+        <SummaryStat label={copy.projectedActive} value={formatCount(domain.projected_active_product_count, locale)} />
+        <SummaryStat label={copy.latestSuccess} value={formatTimestamp(domain.latest_success_at, copy.missing)} />
+        <SummaryStat label={copy.latestFailure} value={formatTimestamp(domain.latest_failure_at, copy.missing)} />
+      </dl>
+
       {retryMessage ? (
-        <p className="rounded-lg border border-success/20 bg-success-soft px-3 py-3 text-sm leading-6 text-success">
+        <p aria-live="polite" className="border-l-4 border-success bg-success-soft px-4 py-3 text-sm leading-6 text-success" role="status">
           {retryMessage}
         </p>
       ) : null}
       {retryError ? (
-        <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-3 text-sm leading-6 text-destructive">
+        <p aria-live="assertive" className="border-l-4 border-destructive bg-destructive/5 px-4 py-3 text-sm leading-6 text-destructive" role="alert">
           {retryError}
         </p>
       ) : null}
@@ -287,14 +317,15 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         <p className="text-sm leading-6 text-muted-foreground">{domain.retry_action.reason}</p>
       ) : null}
 
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
-        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
+        <article className="min-w-0 border border-border bg-card p-5">
           <SectionHeading
             eyebrow={copy.servingState}
             title={copy.publicServing}
           />
-          <div className="mt-6 grid gap-4">
+          <div className="mt-4 divide-y divide-border border-y border-border">
             <SignalRow label={copy.servingNote} value={domain.serving_note} />
+            <SignalRow label={copy.servingSnapshotId} value={domain.serving_snapshot_id ?? copy.noSuccessfulSnapshot} />
             <SignalRow label={copy.servingRefreshedAt} value={formatTimestamp(domain.serving_snapshot_refreshed_at, copy.missing)} />
             <SignalRow
               label={copy.freshnessGap}
@@ -304,14 +335,14 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
           </div>
         </article>
 
-        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+        <article className="min-w-0 border border-border bg-card p-5">
           <SectionHeading
             eyebrow={copy.queue}
             title={copy.queueTitle}
           />
-          <div className="mt-6 grid gap-4">
-            <SignalRow label={copy.queuedRequests} value={formatCount(domain.queued_request_count)} />
-            <SignalRow label={copy.inProgressRequests} value={formatCount(domain.in_progress_request_count)} />
+          <div className="mt-4 divide-y divide-border border-y border-border">
+            <SignalRow label={copy.queuedRequests} value={formatCount(domain.queued_request_count, locale)} />
+            <SignalRow label={copy.inProgressRequests} value={formatCount(domain.in_progress_request_count, locale)} />
             <SignalRow
               label={copy.latestRequest}
               value={`${toTitleCase(domain.latest_request_status ?? copy.unknown)} / ${toTitleCase(domain.latest_request_reason ?? copy.unknown)}`}
@@ -321,13 +352,13 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
         </article>
       </div>
 
-      <div className="grid min-w-0 gap-6">
-        <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <div className="grid min-w-0 gap-5">
+        <article className="min-w-0 border border-border bg-card p-5">
           <SectionHeading
             eyebrow={copy.latestAttempt}
             title={copy.newestExecution}
           />
-          <div className="mt-6 grid gap-4">
+          <div className="mt-4 divide-y divide-border border-y border-border">
             <SignalRow label={copy.attemptStatus} value={toTitleCase(domain.latest_attempt_status ?? copy.unknown)} />
             <SignalRow label={copy.attemptedAt} value={formatTimestamp(domain.latest_attempt_at, copy.missing)} />
             <SignalRow
@@ -344,9 +375,9 @@ export function HealthDashboardSurface({ csrfToken, health, locale }: HealthDash
 
 function SummaryStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border/80 bg-background p-4">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-foreground">{value}</p>
+    <div className="min-w-0 p-4">
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className="mt-1 truncate font-mono text-sm font-semibold text-foreground">{value}</dd>
     </div>
   );
 }
@@ -362,9 +393,9 @@ function SectionHeading({
 }) {
   return (
     <div className="max-w-3xl">
-      <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-      {description ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p> : null}
+      <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
+      <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+      {description ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p> : null}
     </div>
   );
 }
@@ -379,10 +410,10 @@ function SignalRow({
   tone?: "neutral" | "warning" | "danger";
 }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-background p-4">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+    <div className="grid gap-1 py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-4">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p
-        className={cn("mt-2 text-sm leading-6", {
+        className={cn("text-sm leading-6 sm:text-right", {
           "text-foreground": tone === "neutral",
           "text-warning": tone === "warning",
           "text-destructive": tone === "danger",
@@ -405,21 +436,37 @@ function healthStatusClasses(status: DashboardHealthDomain["status"]) {
     return "bg-destructive/10 text-destructive";
   }
   if (status === "stale") {
-    return "bg-amber-100 text-amber-700";
+    return "bg-warning-soft text-warning";
   }
   return "bg-muted text-muted-foreground";
+}
+
+function healthStatusBorderClasses(status: DashboardHealthDomain["status"]) {
+  if (status === "healthy") {
+    return "border-l-success";
+  }
+  if (status === "failed") {
+    return "border-l-destructive";
+  }
+  if (status === "pending" || status === "stale") {
+    return "border-l-warning";
+  }
+  return "border-l-muted-foreground";
 }
 
 function formatTimestamp(value: string | null, missing = "n/a") {
   return formatAdminDateTimeValue(value, missing);
 }
 
-function formatCount(value: number) {
-  return value.toLocaleString("en-CA");
+function formatCount(value: number, locale: AdminLocale) {
+  return value.toLocaleString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-CA");
 }
 
-function formatPercent(value: number) {
-  return `${(value * 100).toFixed(value === 0 ? 0 : 1)}%`;
+function formatPercent(value: number, locale: AdminLocale) {
+  return new Intl.NumberFormat(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-CA", {
+    maximumFractionDigits: value === 0 ? 0 : 1,
+    style: "percent",
+  }).format(value);
 }
 
 function toTitleCase(value: string) {

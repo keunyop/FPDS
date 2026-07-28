@@ -14,7 +14,11 @@ def build_review_diagnosis(
     product_type: str | None = None,
     source_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    priority_fields = _priority_expected_fields(product_type=product_type, expected_fields=expected_fields)
+    priority_fields = _priority_expected_fields(
+        product_type=product_type,
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+    )
     missing_fields = [field_name for field_name in priority_fields if is_empty_review_value(candidate_payload.get(field_name))]
     field_issues = _candidate_field_issues(
         candidate_payload=candidate_payload,
@@ -106,7 +110,13 @@ def build_review_field_items(
         )
     )
     items: list[dict[str, Any]] = []
-    priority_fields = set(_priority_expected_fields(product_type=product_type, expected_fields=expected_fields))
+    priority_fields = set(
+        _priority_expected_fields(
+            product_type=product_type,
+            expected_fields=expected_fields,
+            candidate_payload=candidate_payload,
+        )
+    )
     field_issues = _candidate_field_issues(
         candidate_payload=candidate_payload,
         source_metadata=source_metadata or {},
@@ -178,7 +188,12 @@ def _attention_verb(count: int) -> str:
     return "needs" if count == 1 else "need"
 
 
-def _priority_expected_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
+def _priority_expected_fields(
+    *,
+    product_type: str | None,
+    expected_fields: list[str],
+    candidate_payload: dict[str, Any] | None = None,
+) -> list[str]:
     optional_fields = {
         "notes",
         "description_short",
@@ -189,19 +204,55 @@ def _priority_expected_fields(*, product_type: str | None, expected_fields: list
         "collateral_text",
         "deposit_insurance",
     }
+    payload = candidate_payload or {}
     normalized_type = str(product_type or "").strip().lower()
-    if normalized_type == "gic":
-        priority = [field_name for field_name in ("product_name", "minimum_deposit") if field_name in expected_fields]
-        term_field = next((field_name for field_name in ("term_length_text", "term_length_days") if field_name in expected_fields), None)
-        rate_field = next(
-            (
-                field_name
-                for field_name in ("standard_rate", "base_12_month_rate", "public_display_rate", "highest_rate", "promotional_rate")
-                if field_name in expected_fields
-            ),
-            None,
+    missing: list[str] = []
+
+    def add_if_missing(field_name: str) -> None:
+        if field_name in expected_fields and is_empty_review_value(payload.get(field_name)):
+            missing.append(field_name)
+
+    def add_missing_alternative(field_names: tuple[str, ...]) -> None:
+        available = [field_name for field_name in field_names if field_name in expected_fields]
+        if available and not any(not is_empty_review_value(payload.get(field_name)) for field_name in available):
+            missing.append(available[0])
+
+    if normalized_type == "chequing":
+        add_if_missing("product_name")
+        add_missing_alternative(("monthly_fee", "public_display_fee", "fee_waiver_condition"))
+        return missing
+    if normalized_type == "savings":
+        add_if_missing("product_name")
+        rate_fields = (
+            "standard_rate",
+            "base_12_month_rate",
+            "public_display_rate",
+            "promotional_rate",
+            "highest_rate",
         )
-        return [*priority, *([term_field] if term_field else []), *([rate_field] if rate_field else [])]
+        add_missing_alternative(rate_fields)
+        if (
+            not is_empty_review_value(payload.get("promotional_rate"))
+            and not _has_ongoing_savings_rate(payload)
+        ):
+            ongoing_rate_field = next(
+                (field_name for field_name in ("standard_rate", "base_12_month_rate") if field_name in expected_fields),
+                None,
+            )
+            if ongoing_rate_field is not None and ongoing_rate_field not in missing:
+                missing.append(ongoing_rate_field)
+        return missing
+    if normalized_type == "gic":
+        add_if_missing("product_name")
+        add_if_missing("minimum_deposit")
+        term_rate_rows = payload.get("term_rate_table")
+        has_term_rate_rows = isinstance(term_rate_rows, list) and bool(term_rate_rows)
+        if not has_term_rate_rows:
+            add_missing_alternative(("term_length_text", "term_length_days"))
+            add_missing_alternative(
+                ("standard_rate", "base_12_month_rate", "public_display_rate", "highest_rate", "promotional_rate")
+            )
+        return missing
     type_priority = {
         "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
         "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
@@ -209,8 +260,26 @@ def _priority_expected_fields(*, product_type: str | None, expected_fields: list
         "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
     }.get(normalized_type)
     if type_priority is not None:
-        return [field_name for field_name in expected_fields if field_name in type_priority]
+        return [
+            field_name
+            for field_name in expected_fields
+            if field_name in type_priority and is_empty_review_value(payload.get(field_name))
+        ]
     return [field_name for field_name in expected_fields if field_name not in optional_fields]
+
+
+def _has_ongoing_savings_rate(payload: dict[str, Any]) -> bool:
+    if any(
+        not is_empty_review_value(payload.get(field_name))
+        for field_name in ("standard_rate", "base_12_month_rate")
+    ):
+        return True
+    return any(
+        not is_empty_review_value(value)
+        and field_name.endswith("_rate")
+        and any(marker in field_name for marker in ("regular", "ongoing", "posted"))
+        for field_name, value in payload.items()
+    )
 
 
 def _candidate_field_issues(

@@ -267,25 +267,40 @@ Supplemental FPDS-specific tokens may exist for:
 
 ## 6.3 Visual Direction
 
-The visual direction stays close to the previous benchmark intent:
+The shared benchmark intent remains:
 - crisp
 - calm
 - analytical
 - financial without looking old-fashioned
 - restrained rather than decorative
 
-Color direction:
-- light neutral canvas
-- indigo as primary action and active state
-- cool neutral borders and surfaces
-- teal/green for success
-- amber for warning
-- red for destructive
+The active Public direction, implemented on `2026-07-27`, gives that intent a
+distinctive verified-record expression:
+
+- warm record-paper canvas and paper-white reading surfaces
+- deep ink for structure and primary copy
+- evergreen for verified, fresh, and primary action states
+- maple red for selection and meaningful comparison differences
+- ochre for Loan-family identity and warning states
+- red reserved for destructive or unavailable/error states
+- fine ledger rules, reference numerals, and source-to-review-to-snapshot
+  sequencing instead of decorative gradients or universal card containers
+
+The signature Public composition is the **verified-record ledger**. It must use
+real aggregate values and show how official product records become a reviewed
+public snapshot without exposing evidence traces. A freshness state and date
+belong to the composition; an invented score, market claim, or illustration
+does not.
 
 Typography direction:
-- keep the product UI simple and implementation-friendly
-- avoid introducing a more ornamental editorial font as a core product dependency
-- use a clear UI sans and a readable mono for IDs, runs, and diagnostic values
+- use a sturdy display treatment for the Public market thesis and section
+  statements, a clear UI sans for controls and product content, and a readable
+  mono for dates, rates, counts, and reference values
+- preserve legibility and implementation simplicity; visual distinction comes
+  from hierarchy, rhythm, rules, and semantic color rather than an ornamental
+  font dependency
+- Admin retains the compact neutral operational treatment. Public and Admin
+  share semantic component architecture, not an obligation to look identical.
 
 ---
 
@@ -295,23 +310,27 @@ Typography direction:
 
 | Surface | Vendor Starting Point | FPDS-Owned Layer |
 |---|---|---|
-| `/dashboard` | Shadcnblocks public template header and section rhythm | market snapshot framing, methodology/freshness messaging, filter context |
-| `/dashboard/products` | card/grid, toolbar, filter, and pagination patterns | product-type-aware `ProductCard`, shared scope summary, product-specific metrics |
-| `/dashboard/insights` | stats cards, chart cards, ranking/list sections | ranking semantics, scatter preset logic, insufficiency handling |
+| `/dashboard` | public header and section rhythm | verified-record ledger, real snapshot thesis, coverage actions, rankings, composition, freshness |
+| `/products` | grid, toolbar, filter, and pagination patterns | Deposit identity, type-aware product records, shared scope, selection-led comparison |
+| `/loans` | shared catalog composition | lending scope, lending facts, Loan color cue, review-approved public boundary |
+| `/products/[productId]` | detail/article composition | available facts, conditions, official action, freshness, methodology, family-specific content |
 | `/methodology` | docs/article/content sections | FPDS metric definitions, freshness policy, evidence boundary |
 
 ## 7.2 Admin Surfaces
 
 | Surface | Vendor Starting Point | FPDS-Owned Layer |
 |---|---|---|
-| `/admin` | Admin Kit shell and dashboard widgets | urgent-attention ordering, dashboard health and retry semantics |
-| `/admin/reviews` | Admin Kit table, filters, badges, pagination | review-state, confidence, validation, issue summary semantics |
-| `/admin/reviews/:id` | Admin Kit page shell, cards, forms, sheets | evidence trace, diff preview, review action logic |
-| `/admin/runs` | Admin Kit table and metric panels | run lifecycle semantics and stage vocabulary |
-| `/admin/changes` | Admin Kit list/table patterns | change-event taxonomy and chronology |
+| `/admin` | Admin Kit shell and dashboard structure | real-data Operational Attention Rail across Runs, Review, Public health, and access requests |
+| `/admin/reviews` | compact filters, responsive table/work cards, pagination | bank/product/problem-first scan order, review state, confidence, validation, bulk defer |
+| `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, affected fields, evidence trace, diff preview, alternative review actions, audit consequence |
+| `/admin/runs` | compact filters, joined summary, bounded table | failure and partial-completion triage, live state, source/candidate impact |
+| `/admin/runs/:id` | lifecycle strip and diagnostic regions | stage sequence, failure-first alert, source impact, related review workload, guarded retry |
+| `/admin/banks`, `/admin/product-types`, `/admin/sources` | registry tables and focused dialogs | identity, coverage, generated-source state, safe collection/update/delete workflows |
+| `/admin/changes`, `/admin/audit` | chronology-first tables | time, actor, action, target, outcome, review/run traceability |
 | `/admin/publish` | Admin Kit tables and alert cards | retry/reconciliation behavior and publish risk messaging |
-| `/admin/usage` | Admin Kit metric and chart panels | run/agent/model cost interpretation |
-| `/admin/health/dashboard` | Admin Kit status cards and tables | aggregate freshness, completeness, and cache semantics |
+| `/admin/usage` | operational signal band, compact filters, bounded tables | observed cost, anomaly candidates, model/agent/run concentration, trend |
+| `/admin/health/dashboard` | serving-state band and diagnostic rows | snapshot served to Public, freshness gap, pending work, fallback, attempt state, guarded recovery |
+| `/admin/login`, `/admin/signup` | secure two-zone entrance and forms | anonymous access boundary, operator authentication/request states, live feedback |
 
 ---
 
@@ -378,10 +397,15 @@ When changing UI:
 Public remains dashboard-first.
 
 Key rules:
-- no marketing-led homepage narrative
+- lead with a short market thesis grounded in the latest successful snapshot,
+  not a marketing promise
 - Product Grid and Insights remain sibling surfaces
 - methodology and freshness must remain reachable
 - evidence is never exposed publicly
+- comparisons expose grounded differences without a winner, eligibility score,
+  or recommendation
+- use cards only when they establish a real grouping; do not make every number,
+  paragraph, and action a floating card
 
 ### 9.2 Admin
 
@@ -392,10 +416,25 @@ Key rules:
 - review queue is table-first
 - review detail is a domain page, not a generic template demo
 - publish, usage, and health remain separate operational surfaces
+- use a cool mineral canvas, deep operational frame, restrained teal action,
+  and centralized info/success/warning/destructive tokens; no gradients or
+  route-specific color families
+- triage first, diagnosis second, mutation last; technical IDs remain available
+  after the operator-facing bank, product, issue, state, and time context
+- joined bands, dividers, tables, and progressive disclosure carry dense
+  relationships; cards are reserved for a real semantic group
+- list refresh is visible and pauses for hidden windows, focused editing, open
+  dialogs, dirty state, and in-progress mutations
+- desktop module tabs and mobile bottom navigation are real route links with
+  current-location semantics
+- controls are at least 40px in compact Admin contexts, global keyboard focus is
+  visible, tables scroll inside labelled regions, and all motion stays within
+  150–250ms while respecting reduced-motion
 
 ### 9.3 Shared Rules
 
-- public and admin share the same style family and theme system
+- public and admin share semantic primitives, domain vocabulary, localization,
+  and accessibility rules while allowing purpose-specific visual treatments
 - public is balanced; admin is compact
 - source-derived product text remains in the source language
 - translated UI labels follow locale-resource governance
@@ -505,3 +544,5 @@ The next natural implementation artifacts are:
 | 2026-04-13 | Standardized on `Radix UI + radix-nova` and added vendor/theme/domain ownership rules |
 | 2026-04-13 | Reframed public/admin surface guidance around template composition rather than bespoke primitives |
 | 2026-04-22 | Added a shared copy-discipline rule: keep screens simple, task-focused, and free of unnecessary explanatory text |
+| 2026-07-27 | Added the implemented Public verified-record ledger direction, semantic palette, current route mapping, and non-recommendation comparison rules |
+| 2026-07-27 | Added the shipped Admin evidence-operations direction, Operational Attention Rail, problem/failure/chronology-first route mapping, safe auto-refresh contract, and B2B accessibility baseline |

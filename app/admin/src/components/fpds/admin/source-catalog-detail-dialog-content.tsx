@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupTextarea } from "@/components/ui/input-group";
 import type { ProductTypeItem, SourceCatalogDetailResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
@@ -29,6 +29,7 @@ const DETAIL_CATALOG_COPY = {
   en: {
     catalogItemId: "Catalog item id",
     generatedSources: "Generated sources",
+    lastCollection: "Last collection",
     homepageUrl: "Homepage URL",
     sampleSourceIds: "Sample source ids",
     noGeneratedSources: "No generated sources yet",
@@ -55,6 +56,7 @@ const DETAIL_CATALOG_COPY = {
   ko: {
     catalogItemId: "Catalog item id",
     generatedSources: "생성된 소스",
+    lastCollection: "최근 collection",
     homepageUrl: "홈페이지 URL",
     sampleSourceIds: "샘플 source id",
     noGeneratedSources: "아직 생성된 소스가 없습니다",
@@ -81,6 +83,7 @@ const DETAIL_CATALOG_COPY = {
   ja: {
     catalogItemId: "Catalog item id",
     generatedSources: "生成済みソース",
+    lastCollection: "最新 collection",
     homepageUrl: "ホームページURL",
     sampleSourceIds: "サンプル source id",
     noGeneratedSources: "生成済みソースはまだありません",
@@ -135,6 +138,23 @@ export function SourceCatalogDetailDialogContent({
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const formDirty =
+    form.bank_code !== detail.catalog_item.bank_code ||
+    form.product_type !== detail.catalog_item.product_type ||
+    form.status !== detail.catalog_item.status ||
+    form.change_reason !== (detail.catalog_item.change_reason ?? "");
+
+  useEffect(() => {
+    if (pending) {
+      document.body.dataset.adminMutationPending = "true";
+    } else {
+      delete document.body.dataset.adminMutationPending;
+    }
+
+    return () => {
+      delete document.body.dataset.adminMutationPending;
+    };
+  }, [pending]);
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -166,19 +186,25 @@ export function SourceCatalogDetailDialogContent({
   }
 
   return (
-    <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-5 lg:space-y-0">
+    <div
+      aria-busy={pending}
+      className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:gap-5 lg:space-y-0"
+      data-admin-dirty={formDirty ? "true" : undefined}
+    >
       <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <dl className="grid overflow-hidden rounded-lg border border-border sm:grid-cols-2">
           <ReadonlySummary label={copy.catalogItemId} value={detail.catalog_item.catalog_item_id} />
+          <ReadonlySummary label={copy.status} value={formatStatus(locale, detail.catalog_item.status)} />
           <ReadonlySummary label={copy.generatedSources} value={String(detail.catalog_item.generated_source_count)} />
+          <ReadonlySummary label={copy.lastCollection} value={formatAdminDateTimeValue(detail.recent_runs[0]?.started_at, copy.missing)} />
           <ReadonlySummary label={copy.homepageUrl} value={detail.catalog_item.homepage_url ?? copy.missing} />
           <ReadonlySummary label={copy.sampleSourceIds} value={detail.sample_source_ids.join(", ") || copy.noGeneratedSources} />
-        </div>
+        </dl>
 
-        {message ? <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
-        {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+        {message ? <p aria-live="polite" className="rounded-md border border-success/25 bg-success/10 px-4 py-3 text-sm text-success" role="status">{message}</p> : null}
+        {error ? <p aria-live="assertive" className="rounded-md border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">{error}</p> : null}
 
-        <form className="space-y-4" onSubmit={handleSave}>
+        <form aria-busy={pending} className="space-y-4 border-t border-border pt-4" onSubmit={handleSave}>
           <div className="grid gap-4 lg:grid-cols-3">
             <SelectField
               label={copy.bank}
@@ -204,7 +230,7 @@ export function SourceCatalogDetailDialogContent({
             <FieldLabel>{copy.changeReason}</FieldLabel>
             <InputGroup className="min-h-20 items-start">
               <InputGroupAddon align="block-start">
-                <FileText className="size-4" />
+                <FileText aria-hidden="true" className="size-4" />
               </InputGroupAddon>
               <InputGroupTextarea
                 aria-invalid={Boolean(error)}
@@ -219,12 +245,11 @@ export function SourceCatalogDetailDialogContent({
                 value={form.change_reason}
               />
             </InputGroup>
-            {error ? <FieldError>{error}</FieldError> : null}
           </Field>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
             <Link
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary"
               href={buildAdminHref("/admin/sources", new URLSearchParams(`bank_code=${detail.catalog_item.bank_code}&product_type=${detail.catalog_item.product_type}`), locale)}
             >
               {copy.viewGeneratedSources}
@@ -236,17 +261,19 @@ export function SourceCatalogDetailDialogContent({
         </form>
       </div>
 
-      <div className="space-y-3 rounded-[1.5rem] border border-border/80 bg-muted/20 p-4">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{copy.recentHistory}</p>
+      <section className="overflow-hidden rounded-lg border border-border bg-card" aria-labelledby="catalog-recent-history">
+        <div className="border-b border-border px-4 py-3">
+          <h2 className="text-sm font-semibold text-foreground" id="catalog-recent-history">{copy.recentHistory}</h2>
+        </div>
         {detail.recent_runs.length === 0 ? (
-          <p className="text-sm leading-6 text-muted-foreground">{copy.noRecentRuns}</p>
+          <p className="px-4 py-6 text-sm leading-6 text-muted-foreground">{copy.noRecentRuns}</p>
         ) : (
-          <div className="grid gap-3">
+          <div>
             {detail.recent_runs.slice(0, 3).map((item) => (
-              <div className="rounded-2xl border border-border/80 bg-background px-4 py-3" key={item.run_id}>
+              <div className="border-b border-border px-4 py-3 last:border-b-0" key={item.run_id}>
                 <div className="flex flex-col gap-2">
                   <div>
-                    <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
+                    <Link className="font-mono text-sm font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
                       {item.run_id}
                     </Link>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -254,21 +281,21 @@ export function SourceCatalogDetailDialogContent({
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{item.run_status}</span>
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{copy.candidates(item.candidate_count)}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getRunStatusClass(item.run_status)}`}>{item.run_status}</span>
+                    <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">{copy.candidates(item.candidate_count)}</span>
                   </div>
                 </div>
-                {item.error_summary ? <p className="mt-3 text-sm leading-6 text-destructive">{item.error_summary}</p> : null}
+                {item.error_summary ? <p className="mt-3 border-l-2 border-destructive pl-3 text-sm leading-6 text-destructive">{item.error_summary}</p> : null}
               </div>
             ))}
           </div>
         )}
         {detail.recent_runs.length > 3 ? (
-          <p className="text-xs leading-5 text-muted-foreground">
+          <p className="border-t border-border px-4 py-3 text-xs leading-5 text-muted-foreground">
             {copy.showingLatest}
           </p>
         ) : null}
-      </div>
+      </section>
     </div>
   );
 }
@@ -285,9 +312,9 @@ function formatStatus(locale: AdminLocale, value: string) {
 
 function ReadonlySummary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
-      <p className="mt-2 break-words text-sm font-medium leading-6 text-foreground">{value}</p>
+    <div className="border-b border-border px-4 py-3 last:border-b-0 sm:border-r sm:[&:nth-child(2n)]:border-r-0 sm:[&:nth-last-child(-n+2)]:border-b-0">
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className="mt-1 break-words font-mono text-sm font-medium leading-6 text-foreground">{value}</dd>
     </div>
   );
 }
@@ -306,7 +333,7 @@ function SelectField({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
+      <select className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground" onChange={(event) => onChange(event.target.value)} value={value}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -315,4 +342,18 @@ function SelectField({
       </select>
     </label>
   );
+}
+
+function getRunStatusClass(status: string) {
+  const normalized = status.toLowerCase();
+  if (normalized === "completed" || normalized === "succeeded" || normalized === "success") {
+    return "bg-success/10 text-success";
+  }
+  if (normalized === "failed" || normalized === "error") {
+    return "bg-destructive/10 text-destructive";
+  }
+  if (normalized === "partial" || normalized === "timed_out" || normalized === "timeout") {
+    return "bg-warning/10 text-warning";
+  }
+  return "bg-info/10 text-info";
 }

@@ -199,6 +199,27 @@ Implemented current Public Home hierarchy on `2026-07-18`:
 - Methodology is linked from the compact footer and product disclosure rather than repeated inside the Home content.
 - This is a presentation/scoping update only. The dashboard API metric, ranking, scatter, freshness, and public evidence-boundary contracts remain unchanged.
 
+Implemented verified-record Public Home presentation on `2026-07-27`:
+
+- The first viewport now combines a concise market thesis with a signature
+  source-to-review-to-public ledger. The ledger uses the actual
+  `total_active_products`, `banks_in_scope`, approved Deposit/Loan coverage, and
+  aggregate freshness date; it does not introduce an invented score or claim.
+- Deposit and Loan remain equal next actions, each stating its approved product
+  families. The default market snapshot remains Deposit-scoped so its ranking
+  and bank composition stay comparable.
+- Headline values, freshness, deposit-rate ranking, and products-by-bank bars use
+  a flat editorial hierarchy with ledger rules rather than repeating generic KPI
+  cards.
+- Scatter points remain available only for an explicitly supported,
+  like-for-like scope. Axes and tooltips include their units, and the chart has
+  an assistive-technology table containing the same public values.
+- Fresh, stale, and unavailable states use one localized semantic treatment
+  across Home, catalog, detail, and Methodology.
+- This is a presentation and accessibility update only. It does not alter
+  aggregate calculations, API contracts, canonical eligibility, or the public
+  evidence boundary defined in this document.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

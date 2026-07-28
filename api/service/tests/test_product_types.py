@@ -12,6 +12,7 @@ from api_service.product_types import (
     load_product_type_definitions_map,
     load_product_type_list,
     normalize_product_type_filters,
+    expected_fields_for_product_type,
     require_product_type_definition,
     update_product_type_definition,
 )
@@ -71,6 +72,12 @@ def _product_type_row(
 
 
 class ProductTypeRegistryTests(unittest.TestCase):
+    def test_chequing_default_fields_include_transaction_fee(self) -> None:
+        self.assertIn(
+            "transaction_fee",
+            expected_fields_for_product_type(product_type_code="chequing", product_family="deposit"),
+        )
+
     def test_load_product_type_list_serializes_operator_managed_fields(self) -> None:
         connection = _QueuedConnection(
             [

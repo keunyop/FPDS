@@ -1,7 +1,7 @@
 # Financial Product Field Contract
 
 Status: Active
-Last updated: 2026-07-21
+Last updated: 2026-07-23
 
 ## Purpose
 
@@ -60,13 +60,30 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 19. Security and collateral fields require explicit security semantics such as secured, unsecured, collateral, guarantor, lien, pledge, or down payment. A product heading or marketing slogan is not evidence that a product is secured or unsecured.
 20. A list of available interest-payment or payout frequencies cannot become one scalar option. Preserve a single value only when the evidence states that value as the governing choice for the product; otherwise omit it or use a future typed multi-option field.
 21. A promotion's `valid until`, end, or expiry date is not the product's `effective_date`. Until an explicit offer-end field is part of the canonical contract, omit that date rather than changing its meaning.
-22. When a current official GIC rate section publishes the same minimum deposit for the included variants, place it on each applicable term row and expose the common scalar `minimum_deposit`; do not borrow a registered-plan minimum from another section.
+22. A field excerpt that explicitly names another bank product cannot populate the target candidate unless the same bounded excerpt also identifies the target product. Once a document title is derived, use that title as the target identity for all remaining field extraction.
+23. Percentage safety classification must retain enough bounded surrounding copy to keep scenario, index, cumulative-return, fee, principal-access, and fund-performance semantics attached to the percentage. The same context rule applies to direct extraction, normalization fallback, and supporting merge.
+24. For savings and GIC products, `public_display_rate` cannot be lower than a grounded `standard_rate` or `promotional_rate`. When legal copy exposes a bonus component separately from the total promotional rate, the public display follows the grounded total; unresolved disagreement is `inconsistent_cross_field_logic`.
+25. If normal field retrieval misses a core fee or finite transaction count that is present in the parsed detail source, a bounded evidence-wide fallback may recover it only from strong labels such as `monthly account fee` or explicit monthly/debit transaction count language. Conditional zero offers, durations, balances, and named adjacent products remain ineligible.
+26. When a current official GIC rate section publishes the same minimum deposit for the included variants, place it on each applicable term row and expose the common scalar `minimum_deposit`; do not borrow a registered-plan minimum from another section. Explicit phrases such as `start with as little as` are valid minimum-deposit evidence when they describe the product's opening amount.
+27. A percentage candidate is grounded only when its exact numeric token appears with a percent sign in the linked evidence excerpt. Dynamic-template residue, an adjacent percentage, or a value inferred from another chunk is omitted rather than normalized into a publishable scalar.
+28. A time-limited or eligibility-limited advertised total rate belongs in `promotional_rate` and may be the `public_display_rate`; it is never the `standard_rate`. When official terms separately publish regular and promotional components, preserve the advertised total as the promotion and the regular component as the standard rate. An ongoing conditional bonus without an offer period is not automatically a promotion; when the source explicitly states regular plus extra ongoing bonus, public display may use their grounded sum without setting `promotional_rate`.
+29. `monthly_fee` and `public_display_fee` are two views of the same base monthly charge. If both are present they must agree. Conditional waivers, caps, maximum charges, transaction fees, and another product's fee cannot supply either scalar.
+30. Product currency requires explicit product or rate-table evidence. Foreign-currency identities such as USD, EUR, GBP, or HKD override the collection-country default; an unspecified currency remains reviewable rather than being guessed from nearby navigation. Currency-amount parsing accepts official dollar, euro, and pound symbols while retaining the separately inferred product currency.
+31. Source-profile extensions ending in `*_rate` or `*_fee` use the same numeric percentage-point or currency-amount contract as canonical rates and fees, unless an explicit canonical string contract applies. A bounded fallback may recover one only when the requested field's own label is adjacent to the exact value; it must not persist the surrounding evidence paragraph as the field value.
+32. When an official term table publishes nominal `Rate` and `APY` columns in parallel, comparable annual term rows use the explicitly labelled APY column and preserve `APY` in row notes. Do not mix the nominal column in `term_rate_table` with an APY headline or public display.
+33. Audience-specific onboarding or immigration programs on a general product page cannot populate the general product's eligibility unless the candidate identity itself names that audience/program.
+34. A detail-source seed may add useful requested fields but cannot narrow the current Product Type field contract. Collection requests the union of seed fields and the active baseline so legacy discovery metadata cannot silently omit decision fields.
+35. When shared legal text states registered and non-registered promotions in parallel, `promotional_period_text` must come from the sentence whose registered scope matches the target product. Preserve the applicable total rate and period together; do not attach a registered period to a non-registered product or the reverse.
+36. `withdrawal_limit_text` requires an actual access constraint such as a count, cost, availability restriction, maximum, or minimum. Calculator assumptions, tax treatment, and cross-product navigation are not withdrawal limits. Tax-benefit text must likewise describe the target product type rather than a sibling GIC, savings account, or plan.
+37. A base monthly fee shown as `$X or $0` with a balance condition remains `$X` in `monthly_fee` and `public_display_fee`; the balance-qualified zero belongs in `fee_waiver_condition` and `minimum_balance`.
+38. Audience booleans and customer tags require the target product identity itself to name the audience; related audience benefit sections on a general account page are cross-product support copy. Finite transaction parsing may ignore bounded HTML footnote glyphs, and `minimum_balance` must equal the positive threshold stated by its grounded `fee_waiver_condition` or validation must review the candidate.
+39. Chequing collection requests `transaction_fee` as a currency scalar in addition to the monthly fee. A product-wide per-transaction charge may be stored only from its own adjacent transaction-fee label; balances or audience rules that waive that charge or the monthly fee remain explanatory conditions and cannot replace the base scalar.
 
 ## Runtime Validation
 
 Normalization coerces unambiguous scalar representations into the canonical type. Compound rate prose is redirected into `term_rate_table` when it can be parsed safely. Validation emits `invalid_field_type` when a value remains incompatible with the field contract.
 
-Manual Admin overrides use the same coercion and rejection rules. Canonical continuity is based on stable bank, family, type, and product identity so a subtype correction does not create a duplicate product.
+Manual Admin overrides use the same coercion and rejection rules, including typed booleans, non-negative money/count/duration values, bounded deposit rates, and arrays for list fields. Canonical continuity is based on stable bank, family, type, and product identity so a subtype correction does not create a duplicate product.
 
 Static Golden profiles are test fixtures only. They may be enabled explicitly with `product_profile_expansion_mode=fixture`; they cannot overwrite live collection facts or bypass validation.
 

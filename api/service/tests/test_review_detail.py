@@ -208,6 +208,92 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["category"], "evidence_review")
         self.assertEqual(diagnosis["recommended_action"], "approve")
 
+    def test_savings_promo_diagnosis_reports_only_the_missing_ongoing_rate(self) -> None:
+        expected_fields = [
+            "product_name",
+            "standard_rate",
+            "base_12_month_rate",
+            "public_display_rate",
+            "promotional_rate",
+            "promotional_period_text",
+            "introductory_rate_flag",
+            "interest_payment_frequency",
+            "tiered_rate_flag",
+            "tier_definition_text",
+            "withdrawal_limit_text",
+            "registered_flag",
+            "term_rate_table",
+            "notes",
+        ]
+        payload = {
+            "product_name": "High Interest Savings Account",
+            "promotional_rate": 4.6,
+            "public_display_rate": 4.6,
+            "promotional_period_text": "5 months",
+            "introductory_rate_flag": True,
+        }
+
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=expected_fields,
+            candidate_payload=payload,
+            validation_status="error",
+            validation_issue_codes=["required_field_missing"],
+            product_type="savings",
+        )
+        items = build_review_field_items(
+            expected_fields=expected_fields,
+            candidate_payload=payload,
+            evidence_field_names=["promotional_rate", "promotional_period_text"],
+            current_payload=None,
+            product_type="savings",
+        )
+
+        self.assertEqual(diagnosis["headline"], "1 required field is missing.")
+        self.assertEqual(
+            [item["field_name"] for item in diagnosis["affected_fields"]],
+            ["standard_rate"],
+        )
+        self.assertEqual(
+            [item["field_name"] for item in items if item["missing"]],
+            ["standard_rate"],
+        )
+
+        payload["regular_interest_rate"] = 0.3
+        grounded_diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=[*expected_fields, "regular_interest_rate"],
+            candidate_payload=payload,
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="savings",
+        )
+        self.assertEqual(grounded_diagnosis["category"], "evidence_review")
+        self.assertEqual(grounded_diagnosis["affected_fields"], [])
+
+    def test_gic_term_rate_table_satisfies_term_and_rate_review_groups(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=[
+                "product_name",
+                "minimum_deposit",
+                "term_length_text",
+                "standard_rate",
+                "term_rate_table",
+            ],
+            candidate_payload={
+                "product_name": "Example GIC",
+                "minimum_deposit": 500,
+                "term_rate_table": [{"term_label": "1 year", "rate": 3.0}],
+            },
+            validation_status="pass",
+            validation_issue_codes=[],
+            product_type="gic",
+        )
+
+        self.assertEqual(diagnosis["category"], "evidence_review")
+        self.assertEqual(diagnosis["affected_fields"], [])
+
     def test_review_field_items_include_missing_expected_fields_first(self) -> None:
         items = build_review_field_items(
             expected_fields=["product_name", "standard_rate"],
@@ -274,6 +360,50 @@ class ReviewDetailTests(unittest.TestCase):
                 base_payload={"standard_rate": None},
             )
         self.assertEqual(raised.exception.code, "invalid_field_type")
+
+    def test_normalize_override_payload_enforces_canonical_text_and_boolean_types(self) -> None:
+        with self.assertRaises(ReviewTaskError) as text_error:
+            _normalize_override_payload(
+                override_payload={"term_length_text": 2},
+                base_payload={"term_length_text": None},
+            )
+        self.assertEqual(text_error.exception.code, "invalid_field_type")
+
+        with self.assertRaises(ReviewTaskError) as boolean_error:
+            _normalize_override_payload(
+                override_payload={"secured_flag": "Unsecured or secured variants are available."},
+                base_payload={"secured_flag": None},
+            )
+        self.assertEqual(boolean_error.exception.code, "invalid_field_type")
+
+        with self.assertRaises(ReviewTaskError) as product_name_error:
+            _normalize_override_payload(
+                override_payload={"product_name": 2},
+                base_payload={"product_name": "Existing product"},
+            )
+        self.assertEqual(product_name_error.exception.code, "invalid_field_type")
+
+        with self.assertRaises(ReviewTaskError) as tags_error:
+            _normalize_override_payload(
+                override_payload={"target_customer_tags": "students"},
+                base_payload={"target_customer_tags": []},
+            )
+        self.assertEqual(tags_error.exception.code, "invalid_field_type")
+
+    def test_normalize_override_payload_rejects_implausible_financial_values(self) -> None:
+        for field_name, value in (
+            ("monthly_fee", 4000),
+            ("standard_rate", 25),
+            ("minimum_balance", -1),
+            ("term_length_days", -1),
+        ):
+            with self.subTest(field_name=field_name):
+                with self.assertRaises(ReviewTaskError) as raised:
+                    _normalize_override_payload(
+                        override_payload={field_name: value},
+                        base_payload={field_name: None},
+                    )
+                self.assertEqual(raised.exception.code, "invalid_numeric_range")
 
     def test_changed_field_names_and_diff_summary_cover_edit_preview(self) -> None:
         changed_fields = _changed_field_names(

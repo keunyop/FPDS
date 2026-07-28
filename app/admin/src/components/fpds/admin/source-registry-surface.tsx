@@ -145,8 +145,8 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
   ];
 
   return (
-    <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh />
+    <section className="grid min-w-0 gap-5">
+      <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
         description={copy.description}
@@ -159,11 +159,11 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
         items={statItems}
       />
 
-      <article className="min-w-0 rounded-[1.75rem] border border-border/80 bg-card/95 p-6 shadow-sm">
+      <article className="min-w-0 border border-border bg-card p-4">
         <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))_auto]">
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
-            <input className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
+            <input className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <FilterSelect allLabel={copy.all} defaultValue={filters.bankCode} label={copy.bank} name="bank_code" options={registry.facets.bank_codes} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.countryCode} label={copy.country} name="country_code" options={["CA"]} />
@@ -171,25 +171,25 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
           <FilterSelect allLabel={copy.all} defaultValue={filters.status} label={copy.status} name="status" options={registry.facets.statuses} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.discoveryRole} label={copy.role} name="discovery_role" options={registry.facets.discovery_roles} />
           <div className="flex items-end gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90" type="submit">
+            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" type="submit">
               {copy.apply}
             </button>
-            <Link className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
+            <Link className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" href={buildAdminHref("/admin/sources", new URLSearchParams(), locale)}>
               {copy.reset}
             </Link>
           </div>
         </form>
       </article>
 
-      <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-sm">
-        <div className="border-b border-border/80 px-6 py-5">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">{copy.generatedSourceDetail}</p>
+      <article className="min-w-0 overflow-hidden border border-border bg-card">
+        <div className="border-b border-border px-4 py-4">
+          <h2 className="text-lg font-semibold text-foreground">{copy.generatedSourceDetail}</h2>
         </div>
 
-        <div className="max-w-full overflow-x-auto px-6 py-5">
+        <div aria-label={copy.generatedSourceDetail} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
           <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              <tr className="text-left text-xs text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.source}</th>
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.product}</th>
@@ -254,7 +254,7 @@ function FilterSelect({
   return (
     <label className="grid min-w-0 gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 min-w-0 rounded-xl border border-border bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>

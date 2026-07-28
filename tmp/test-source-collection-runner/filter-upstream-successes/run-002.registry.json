@@ -1,12 +1,12 @@
 {
-  "registry_version": "2026-07-15",
+  "registry_version": "2026-07-23",
   "bank_code": "BMO",
   "country_code": "CA",
   "product_type": "savings",
   "product_family": "deposit",
   "source_language": "en",
   "allowed_domains": [
-    "www.bmo.com"
+    "bmo.com"
   ],
   "entry_source_id": "BMO-SAV-002",
   "sources": [

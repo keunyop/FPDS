@@ -130,6 +130,9 @@ class SnapshotPersistenceTests(unittest.TestCase):
         self.assertTrue(run_source_items[0]["run_source_item_id"].startswith("rsi-"))
         self.assertEqual(variables["run_state"], "completed")
         self.assertEqual(variables["source_failure_count"], "1")
+        persistence_sql = runner.calls[-1][1]
+        self.assertIn("source_document.source_metadata ->> 'discovery_role'", persistence_sql)
+        self.assertIn("THEN source_document.source_metadata", persistence_sql)
 
 
 class EnvLoaderTests(unittest.TestCase):

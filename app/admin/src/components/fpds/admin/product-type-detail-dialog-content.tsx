@@ -215,12 +215,12 @@ export function ProductTypeDetailDialogContent({
         <ReadonlySummary label={copy.managed} value={formatAdminBoolean(locale, productType.managed_flag)} />
       </div>
 
-      {message ? <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</p> : null}
+      {message ? <p aria-live="polite" className="border-l-4 border-success bg-success-soft px-4 py-3 text-sm text-success" role="status">{message}</p> : null}
       {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
 
-      <section className="rounded-[1.5rem] border border-border/80 bg-card/95 p-5 shadow-sm">
+      <section className="border border-border bg-card p-5">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{copy.profileEyebrow}</p>
+          <p className="text-xs font-medium text-muted-foreground">{copy.profileEyebrow}</p>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">{copy.profileTitle}</h2>
           <p className="text-sm leading-6 text-muted-foreground">
             {copy.profileDescription}
@@ -297,7 +297,7 @@ export function ProductTypeDetailDialogContent({
 function ReadonlySummary({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-2 text-sm font-medium text-foreground">{value}</p>
     </div>
   );
@@ -306,7 +306,7 @@ function ReadonlySummary({ label, value }: { label: string; value: string }) {
 function ReadonlyBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-border/80 bg-muted/20 px-4 py-4">
-      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="mt-2 text-sm leading-6 text-foreground">{value}</p>
     </div>
   );

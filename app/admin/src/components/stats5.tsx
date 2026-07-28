@@ -50,24 +50,25 @@ const Stats5 = ({
         </div>
       ) : null}
 
-      <div className={cn("grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4", framed ? "pt-4" : "")}>
+      <div
+        className={cn(
+          "grid min-w-0 overflow-hidden rounded-lg border border-border bg-card md:grid-cols-2 xl:grid-cols-4",
+          framed ? "mt-4" : "",
+        )}
+      >
         {items.map((item) => {
           const Icon = item.icon ?? Activity;
 
           return (
-            <article className="min-w-0 rounded-lg border border-border/80 bg-card px-4 py-4" key={item.label}>
+            <article
+              className="min-w-0 border-b border-border px-4 py-3.5 last:border-b-0 md:border-r md:even:border-r-0 xl:border-b-0 xl:even:border-r xl:last:border-r-0"
+              key={item.label}
+            >
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <p className="min-w-0 text-sm font-medium text-muted-foreground">{item.label}</p>
-                <div
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70",
-                    toneClassMap[item.tone]
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                </div>
+                <p className="min-w-0 text-xs font-semibold text-muted-foreground">{item.label}</p>
+                <Icon className={cn("h-4 w-4", toneClassMap[item.tone])} aria-hidden="true" />
               </div>
-              <p className="mt-3 break-words text-2xl font-semibold tracking-tight text-foreground">{item.value}</p>
+              <p className="mt-2 break-words font-mono text-xl font-semibold tracking-[-0.02em] text-foreground">{item.value}</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.note}</p>
             </article>
           );
