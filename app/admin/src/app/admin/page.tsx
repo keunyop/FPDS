@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Activity, ArrowUpRight, Gauge, ShieldCheck, UserCheck } from "lucide-react";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { SignupRequestReviewPanel } from "@/components/fpds/admin/signup-request-review-panel";
 import {
@@ -23,12 +23,8 @@ const OVERVIEW_COPY = {
       "Start the FastAPI service and refresh this page. The protected admin shell depends on `/api/admin/auth/session`.",
     apiUnavailableBlocked: "Protected navigation, operator context, and authenticated workflow surfaces.",
     breadcrumb: ["Overview", "Dashboard"],
-    greetingFallback: "there",
-    briefingTitle: "Operations briefing",
-    signedInAs: "Signed in as",
-    subtitle: "Review the items that need attention, then jump to the owning surface.",
-    controlFlow: "Operational attention",
-    controlFlowDescription: "Signals follow the operating path from execution and review to public serving.",
+    briefingTitle: "What needs attention",
+    subtitle: "Start with flagged work. Clear items need no action.",
     attentionSignals: "attention signals",
     openSurface: "Open surface",
     clear: "Clear",
@@ -42,8 +38,6 @@ const OVERVIEW_COPY = {
     dashboardHealthHint: "Stale, failed, or empty",
     signupRequests: "Signup requests",
     signupRequestsHint: "Pending approval",
-    role: "Role",
-    roleHint: "Current access",
     unavailable: "n/a",
     healthy: "Healthy",
     needsAttention: "Needs attention",
@@ -55,12 +49,8 @@ const OVERVIEW_COPY = {
       "FastAPI service를 시작한 뒤 페이지를 새로고침해주세요. 보호된 admin shell은 `/api/admin/auth/session`에 의존합니다.",
     apiUnavailableBlocked: "보호된 navigation, operator context, 인증된 workflow 화면.",
     breadcrumb: ["개요", "Dashboard"],
-    greetingFallback: "운영자",
-    briefingTitle: "운영 브리핑",
-    signedInAs: "로그인",
-    subtitle: "주의가 필요한 항목만 확인하고 담당 화면으로 이동하세요.",
-    controlFlow: "운영 주의 항목",
-    controlFlowDescription: "실행과 검토에서 공개 제공 상태까지 운영 흐름 순서로 신호를 보여줍니다.",
+    briefingTitle: "확인이 필요한 작업",
+    subtitle: "표시된 항목부터 처리하세요. 정상 항목은 조치가 필요하지 않습니다.",
     attentionSignals: "개 주의 신호",
     openSurface: "화면 열기",
     clear: "정상",
@@ -74,8 +64,6 @@ const OVERVIEW_COPY = {
     dashboardHealthHint: "오래됨, 실패, 또는 비어 있음",
     signupRequests: "가입 요청",
     signupRequestsHint: "승인 대기",
-    role: "권한",
-    roleHint: "현재 접근 권한",
     unavailable: "없음",
     healthy: "정상",
     needsAttention: "확인 필요",
@@ -87,12 +75,8 @@ const OVERVIEW_COPY = {
       "FastAPI service を起動してからページを更新してください。保護された admin shell は `/api/admin/auth/session` に依存します。",
     apiUnavailableBlocked: "保護された navigation、operator context、認証済み workflow 画面。",
     breadcrumb: ["概要", "Dashboard"],
-    greetingFallback: "operator",
-    briefingTitle: "運用ブリーフィング",
-    signedInAs: "ログイン",
-    subtitle: "対応が必要な項目を確認し、担当画面へ移動してください。",
-    controlFlow: "運用上の注意",
-    controlFlowDescription: "実行と審査から公開提供まで、運用フローに沿ってシグナルを表示します。",
+    briefingTitle: "確認が必要な作業",
+    subtitle: "表示された項目から対応してください。正常な項目は対応不要です。",
     attentionSignals: "件の注意シグナル",
     openSurface: "画面を開く",
     clear: "正常",
@@ -106,8 +90,6 @@ const OVERVIEW_COPY = {
     dashboardHealthHint: "古い、失敗、または空",
     signupRequests: "登録申請",
     signupRequestsHint: "承認待ち",
-    role: "ロール",
-    roleHint: "現在のアクセス権",
     unavailable: "なし",
     healthy: "正常",
     needsAttention: "確認が必要",
@@ -120,12 +102,8 @@ const OVERVIEW_COPY = {
     apiUnavailableBody: string;
     apiUnavailableBlocked: string;
     breadcrumb: readonly [string, string];
-    greetingFallback: string;
     briefingTitle: string;
-    signedInAs: string;
     subtitle: string;
-    controlFlow: string;
-    controlFlowDescription: string;
     attentionSignals: string;
     openSurface: string;
     clear: string;
@@ -139,8 +117,6 @@ const OVERVIEW_COPY = {
     dashboardHealthHint: string;
     signupRequests: string;
     signupRequestsHint: string;
-    role: string;
-    roleHint: string;
     unavailable: string;
     healthy: string;
     needsAttention: string;
@@ -196,7 +172,6 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
   ]);
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
-  const displayName = activeSession.user.display_name.trim() || activeSession.user.login_id || copy.greetingFallback;
   const reviewCount = reviewQueue?.summary.active_items ?? null;
   const runAttentionCount = runs ? (runs.summary.state_counts.failed ?? 0) + runs.summary.partial_items : null;
   const dashboardIssueCount = dashboardHealth
@@ -204,7 +179,15 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
     : null;
   const pendingSignupCount = activeSession.user.role === "admin" ? (signupRequests?.summary.pending_items ?? null) : null;
 
-  const attentionItems = [
+  const attentionItems: Array<{
+    label: string;
+    value: string;
+    hint: string;
+    needsAttention: boolean;
+    available: boolean;
+    icon: typeof Activity;
+    href: string;
+  }> = [
     {
       label: copy.runAttention,
       value: formatCount(runAttentionCount, copy.unavailable),
@@ -232,20 +215,22 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       icon: Gauge,
       href: buildAdminHref("/admin/health/dashboard", new URLSearchParams(), locale),
     },
-    {
-      label: activeSession.user.role === "admin" ? copy.signupRequests : copy.role,
-      value: activeSession.user.role === "admin" ? formatCount(pendingSignupCount, copy.unavailable) : activeSession.user.role,
-      hint: activeSession.user.role === "admin" ? copy.signupRequestsHint : copy.roleHint,
-      needsAttention: activeSession.user.role === "admin" && pendingSignupCount !== null && pendingSignupCount > 0,
-      available: activeSession.user.role !== "admin" || pendingSignupCount !== null,
+  ];
+  if (activeSession.user.role === "admin") {
+    attentionItems.push({
+      label: copy.signupRequests,
+      value: formatCount(pendingSignupCount, copy.unavailable),
+      hint: copy.signupRequestsHint,
+      needsAttention: pendingSignupCount !== null && pendingSignupCount > 0,
+      available: pendingSignupCount !== null,
       icon: ShieldCheck,
       href: buildAdminHref("/admin", new URLSearchParams(), locale),
-    },
-  ] as const;
+    });
+  }
   const attentionSignalCount = attentionItems.filter((item) => item.needsAttention).length;
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -257,31 +242,19 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
     >
       <div className="mx-auto grid w-full max-w-7xl gap-6">
         <AdminPageHeader
-          badges={
-            <span className="inline-flex min-h-8 items-center gap-2 border border-border bg-card px-2.5 text-xs font-semibold text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden="true" />
-              {copy.signedInAs} {displayName} · {activeSession.user.role}
-            </span>
-          }
           description={copy.subtitle}
           path={copy.breadcrumb}
           title={copy.briefingTitle}
         />
 
-        <section aria-labelledby="operational-attention-title">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold tracking-[-0.01em] text-foreground" id="operational-attention-title">
-                {copy.controlFlow}
-              </h2>
-              <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">{copy.controlFlowDescription}</p>
-            </div>
+        <section aria-label={copy.briefingTitle}>
+          <div className="flex justify-end">
             <p className="font-mono text-xs font-semibold text-muted-foreground">
               {attentionSignalCount} {copy.attentionSignals}
             </p>
           </div>
 
-          <div className="mt-4 grid overflow-hidden rounded-lg border border-border bg-card md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-3 grid overflow-hidden rounded-lg border border-border bg-card sm:grid-cols-2 xl:grid-cols-4">
             {attentionItems.map((item) => {
               const Icon = item.icon;
               const stateLabel = !item.available
@@ -338,7 +311,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
           <SignupRequestReviewPanel csrfToken={activeSession.csrf_token} locale={locale} requests={signupRequests} />
         ) : null}
       </div>
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

@@ -28,7 +28,7 @@ type LoginCopy = {
   signUp: string;
 };
 
-interface Login2Props {
+interface AdminLoginFormProps {
   apiOrigin: string;
   nextPath: string;
   locale: AdminLocale;
@@ -86,7 +86,7 @@ const LOGIN_COPY: Record<AdminLocale, LoginCopy> = {
   },
 };
 
-const Login2 = ({ apiOrigin, nextPath, locale, className }: Login2Props) => {
+const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFormProps) => {
   const router = useRouter();
   const copy = LOGIN_COPY[locale];
   const [loginId, setLoginId] = useState("");
@@ -197,4 +197,4 @@ const Login2 = ({ apiOrigin, nextPath, locale, className }: Login2Props) => {
   );
 };
 
-export { Login2 };
+export { AdminLoginForm };

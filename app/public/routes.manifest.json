@@ -6,37 +6,37 @@
     {
       "route": "/",
       "route_id": "public.home",
-      "shell_dir": "route-shells/home",
+      "implementation_path": "src/app/page.tsx",
       "resource_key": "public_navigation.home"
     },
     {
       "route": "/products",
       "route_id": "public.products",
-      "shell_dir": "route-shells/products",
+      "implementation_path": "src/app/products/page.tsx",
       "resource_key": "public_navigation.products"
     },
     {
       "route": "/products/[productId]",
       "route_id": "public.product_detail",
-      "shell_dir": "route-shells/products",
+      "implementation_path": "src/app/products/[productId]/page.tsx",
       "resource_key": "public_navigation.products"
     },
     {
       "route": "/loans",
       "route_id": "public.loans",
-      "shell_dir": "route-shells/products",
+      "implementation_path": "src/app/loans/page.tsx",
       "resource_key": "public_navigation.loans"
     },
     {
       "route": "/dashboard",
       "route_id": "public.dashboard",
-      "shell_dir": "route-shells/dashboard",
+      "implementation_path": "src/app/dashboard/page.tsx",
       "resource_key": "public_navigation.dashboard"
     },
     {
       "route": "/methodology",
       "route_id": "public.methodology",
-      "shell_dir": "route-shells/methodology",
+      "implementation_path": "src/app/methodology/page.tsx",
       "resource_key": "public_navigation.methodology"
     }
   ]

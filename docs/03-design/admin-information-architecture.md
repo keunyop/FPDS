@@ -1,7 +1,7 @@
 # FPDS Admin Information Architecture
 
-Version: 1.1
-Date: 2026-04-15
+Version: 1.2
+Date: 2026-07-28
 Status: Approved Baseline for WBS 1.7.4 plus source-registry follow-on
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
@@ -101,26 +101,32 @@ Not included:
 
 All admin surfaces should share:
 
-1. collapsible primary sidebar
+1. collapsible sidebar containing all current routes
 2. environment badge
-3. top-bar route-group navigation on desktop with an active-route title on smaller screens
+3. direct daily-work navigation on desktop and the same four destinations in the mobile bottom bar
 4. locale toggle
 5. user/session menu anchored in the sidebar footer
 
-### 5.2 Navigation Groups
+### 5.2 Navigation Priority
 
-| Group | Surface | Route Baseline | Purpose |
+The shell exposes route destinations directly. It does not require operators to
+choose an abstract module before finding a task.
+
+| Priority | Surface | Route Baseline | Purpose |
 |---|---|---|---|
-| Overview | Admin Overview Dashboard | `/admin` | operator triage |
-| Review | Review Queue | `/admin/reviews` | review intake and decision workload |
-| Operations | Banks | `/admin/banks` | bank profile setup, initial and ongoing product coverage management, and single-bank or multi-bank collection kickoff |
-| Operations | Source Registry | `/admin/sources` | generated source inspection |
-| Operations | Runs | `/admin/runs` | ingestion diagnostics |
-| Operations | Change History | `/admin/changes` | canonical change chronology |
-| Operations | Audit Log | `/admin/audit` | append-only actor/request trail |
-| Operations | Publish Monitor | `/admin/publish` | BX-PF publish tracking |
-| Observability | LLM Usage | `/admin/usage` | model/agent/run usage visibility |
-| Observability | Dashboard Health | `/admin/health/dashboard` | public aggregate freshness and health |
+| Daily work | Admin Overview | `/admin` | operator triage |
+| Daily work | Review | `/admin/reviews` | review intake and decision workload |
+| Daily work | Runs | `/admin/runs` | collection diagnostics and recovery |
+| Daily work | Banks | `/admin/banks` | coverage management and collection kickoff |
+| More tools | Source Registry | `/admin/sources` | generated source inspection |
+| More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
+| More tools | Change History | `/admin/changes` | canonical change chronology |
+| More tools | Audit Log | `/admin/audit` | append-only actor/request trail |
+| More tools | LLM Usage | `/admin/usage` | model/agent/run usage visibility |
+| More tools | Public Health | `/admin/health/dashboard` | public aggregate freshness and health |
+
+Publish Monitor remains approved follow-on scope but is not shown as a disabled
+navigation item until a live route exists.
 
 ### 5.3 Contextual Routes
 
@@ -143,13 +149,20 @@ All admin surfaces should share:
 
 ### 5.5 Shipped Evidence-Operations Composition
 
-- the desktop module bar and mobile bottom navigation are route links, not
-  sidebar-group toggles; both preserve locale and expose current location
-- the Overview signature is the real-data Operational Attention Rail, ordered
+- desktop and mobile expose the same direct daily-work destinations: Overview,
+  Review, Runs, and Banks; every live secondary route remains available under
+  the clearly labeled `More tools` sidebar group
+- the Overview signature is the real-data attention rail, ordered
   from run attention to review workload, Public snapshot health, and access
   requests
 - route composition follows `attention / current state -> diagnosis -> guarded
   action`; filters and technical context do not displace the first useful work
+- Review Queue and Runs keep common search controls visible and disclose state,
+  sort, and date controls only when needed; Banks prioritizes coverage and
+  collection over profile metadata
+- Review Detail keeps the recommendation and flagged fields visible while
+  product facts, source metadata, AI verification detail, full diff, evidence
+  trace, and audit context use progressive disclosure
 - dense relationships use joined summary bands, dividers, chronology, lifecycle
   strips, and bounded tables; cards are reserved for semantic groups
 - safe auto-refresh is part of the shell contract: its live/paused/last-refresh
@@ -526,6 +539,7 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-07-28 | Replaced abstract module navigation with direct Overview/Review/Runs/Banks daily work plus a complete More Tools group; recorded simplified list filters, Banks table, and Review Detail progressive disclosure for client handoff |
 | 2026-07-27 | Recorded the shipped Admin evidence-operations composition, real route navigation, Operational Attention Rail, safe visible auto-refresh, bounded responsive tables/work cards, and compact target baseline |
 | 2026-07-15 | Refined Review to product-aware requiredness and concrete suspect-field types; only flagged fields open by default, other values and optional audit notes stay collapsed, and source facts no longer duplicate product identity or AI explanation |
 | 2026-04-06 | Initial admin information architecture baseline created for WBS 1.7.4 |

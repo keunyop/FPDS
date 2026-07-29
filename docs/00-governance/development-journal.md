@@ -27,6 +27,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 As of `2026-07-28`:
 - `WBS 5` is the active stage
+- the client-handoff simplification is complete: Admin now exposes Overview, Review, Runs, and Banks as direct daily work, secondary tools remain in one labeled group, core list/detail density is reduced through progressive disclosure, and stale/generated/unreachable repository scaffolding has been removed without changing routes or backend contracts
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - Public Home, Deposit, Loan, comparison, detail, and Methodology now use the verified-record visual system and were production-verified against the live aggregate snapshot in EN, KO, and JA at desktop, tablet, and exact `390px`; `WBS 5.14` remains complete
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
@@ -69,6 +70,22 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-28 - FPDS Client Handoff Simplification
+
+- WBS: cross-cutting Admin UX and repository maintainability follow-on across `4.1`-`5.15`
+- Status: done
+- Goal: make the current FPDS Admin and repository understandable to a receiving client team without weakening review, collection, evidence, security, locale, or Public behavior.
+- Why now: the live feature set was complete enough for handoff, but abstract module navigation, repeated list summaries, always-visible advanced controls, numbered vendor filenames, obsolete route scaffolds, generated artifacts, and stale package entry docs made routine operation and code ownership harder to understand.
+- Outcome: the Admin shell now exposes Overview, Review, Runs, and Banks directly on desktop and mobile, with Sources, Product Types, Changes, Audit Log, Usage, and Public Health under `More tools`. Overview has one attention-led introduction; Review Queue and Runs keep common controls visible and disclose advanced state/sort/date filters; Banks leads with coverage and collection in a four-column list; Review Detail keeps recommendation and flagged fields visible while candidate facts, official-source metadata, AI detail, diff detail, evidence, and audit context remain available under disclosures. Run rows now combine state/error and identity/time context into five scan columns.
+- Structure: adapted Shadcnblocks assets now have semantic FPDS names under `components/fpds/admin/` (`admin-shell`, `admin-login-form`, `admin-modal`, `admin-stat-strip`). Current app route manifests map directly to live App Router files. Obsolete route-shell documents, partial API scaffold manifests/directories, empty placeholder areas, unreachable legacy Bank/Source Catalog/Banner/Public modules, unused UI primitives, unused Admin form dependencies, package metadata, bytecode, test outputs, and two accidental root screenshots were removed. Root `tmp/` evidence and the working prototype were deliberately retained.
+- Safety: every Admin page, compatibility redirect, and 21 browser proxy handlers remains. No API request/response shape, cookie, CSRF, RBAC, database schema, canonical product, evidence record, review decision, collection run, aggregate snapshot, or Public data boundary changed.
+- Documentation: root, docs, app, Admin, and API entrypoints now describe current runtime ownership and exact handoff commands. Admin IA and vendor adoption/override records describe the current navigation and semantic wrapper paths while historical entries retain their original provenance.
+- Key files: `app/admin/src/components/fpds/admin/admin-shell.tsx`, `review-queue-surface.tsx`, `review-queue-results.tsx`, `review-detail-surface.tsx`, `run-status-surface.tsx`, `bank-registry-surface.tsx`, both app route manifests, package/root READMEs, and `docs/03-design/admin-information-architecture.md`.
+- Decisions: keep the separate Admin/Public/API/Worker runtime boundaries; preserve redirect and proxy route folders; prefer progressive disclosure and semantic relocation over a risky App Router or backend reorganization; keep tracked root evidence even though it dominates repository size.
+- Verification: Admin typecheck and production build passed with the full route table including all compatibility pages and proxy handlers. Public typecheck and production build passed with all six functional routes. API full suite passed (`277`), Worker full suite passed (`394`), and the Foundation entrypoint passed Repo Doctor, baseline validation, both frontend typechecks, and both production builds. Both route manifests resolved every implementation path, and final `git diff --check` passed.
+- Known issues: this slice did not repeat live authenticated browser visual QA; the production-rendered EN/KO/JA desktop/tablet/390px baseline from the prior 2026-07-27 Admin/Public QA remains the visual reference. Dense detail tables still use bounded internal horizontal scrolling by design.
+- Next step: Product Owner/client walkthrough using `app/admin/README.md` and the root Client Handoff Map; no migration, data remediation, or external action is required.
 
 ## 2026-07-28 - Review Detail Official-Domain AI Verification
 

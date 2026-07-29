@@ -260,6 +260,20 @@ Do not add an entry for:
   - `pnpm run build`
 - Notes: first install attempt failed because `SHADCNBLOCKS_API_KEY` was not present in the shell; a second attempt passed after loading the local env value. `app/public/node_modules` also needed `pnpm install --config.confirmModulesPurge=false` because its virtual store was linked to `app/admin`.
 
+## 2026-07-28 - Client Handoff Simplification
+
+- Surface or Area: `app/admin` shell and core daily workflows, plus unreachable Public vendor residue
+- Vendor Asset: existing `application-shell5`, `login2`, `offer-modal4`, `stats5`, and the historical `dashboard10` install
+- Install Method: no new vendor install; semantic relocation and reachability-backed cleanup
+- Files Added or Changed: `app/admin/src/components/fpds/admin/admin-shell.tsx`, `admin-login-form.tsx`, `admin-modal.tsx`, `admin-stat-strip.tsx`, Review/Run/Bank surfaces, and `app/public/src/components/ui/*`
+- FPDS Wrappers or Overrides: adapted Admin blocks now use handoff-readable FPDS names; the shell exposes direct daily work, list entrypoints disclose advanced controls, and Review Detail progressively discloses technical context
+- Direct Vendor Edits: yes; current adapted files remain repo-owned FPDS implementations
+- Cleanup: removed the unreachable `banner1` implementation, legacy Bank/Source Catalog page surfaces, the unused Public `dashboard10` re-export, and unused generated primitives; live routes, proxy handlers, and compatibility redirects remain
+- Verification:
+  - `pnpm run typecheck`
+  - `pnpm run build`
+- Notes: historical entries retain their original paths as an implementation record; the block inventory contains the current paths
+
 ---
 
 ## 5. Change History
@@ -267,3 +281,4 @@ Do not add an entry for:
 | Date | Change |
 |---|---|
 | 2026-04-13 | Initial adoption log created after the template-first design baseline was approved |
+| 2026-07-28 | Recorded semantic Admin block ownership and reachability-backed vendor residue cleanup for client handoff |

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { BankRegistrySurface, type BankRegistryPageFilters } from "@/components/fpds/admin/bank-registry-surface";
 import { fetchAdminSession, fetchBankDetail, fetchBankList, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
@@ -46,7 +46,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   }
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -66,7 +66,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
         locale={locale}
         productTypes={productTypes.items}
       />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

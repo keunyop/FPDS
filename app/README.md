@@ -1,13 +1,12 @@
-# App Surface
+# Browser Apps
 
-This directory holds browser-facing FPDS surfaces.
+FPDS keeps its browser surfaces in separate packages so public data exposure and
+operator authentication cannot drift into one runtime.
 
-Current boundary:
-- `public/` for anonymous public experience
-- `admin/` for authenticated operator experience
-- `prototype/` for the read-only prototype result viewer used before full admin ops scope
+- `admin/` — authenticated operator workflows on port `3001`.
+- `public/` — anonymous approved-data experience on port `3000`.
+- `prototype/` — retained read-only result viewer used by the worker exporter.
 
-This is a vendor-neutral skeleton for WBS `2.1`.
-Current implementation note:
-- `app/prototype/index.html` now implements the WBS `3.8` read-only internal result viewer
-- public and admin route implementation still start in later WBS items
+Each live package owns its App Router routes, route manifest, dependencies,
+environment example, and verification commands. See the package README before
+changing a surface.

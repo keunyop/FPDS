@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { RunDetailSurface } from "@/components/fpds/admin/run-detail-surface";
 import { fetchAdminSession, fetchRunStatusDetail, getAdminApiOrigin } from "@/lib/admin-api";
@@ -45,7 +45,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -56,6 +56,6 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
       }}
     >
       <RunDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }

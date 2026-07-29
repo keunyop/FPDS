@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
-import { Stats5 } from "@/components/stats5";
+import { AdminStatStrip } from "@/components/fpds/admin/admin-stat-strip";
 import { Button } from "@/components/ui/button";
 import type { LlmUsageDashboardResponse } from "@/lib/admin-api";
 import {
@@ -466,7 +466,7 @@ export function LlmUsageSurface({ filters, locale, usage }: LlmUsageSurfaceProps
         </div>
       </section>
 
-      <Stats5 framed={false} items={statItems} />
+      <AdminStatStrip framed={false} items={statItems} />
 
       <section className="rounded-lg border border-border bg-card p-4 sm:p-5">
         <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-start lg:justify-between">

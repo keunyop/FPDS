@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { SourceRegistrySurface, type SourceRegistryPageFilters } from "@/components/fpds/admin/source-registry-surface";
 import { fetchAdminSession, fetchSourceRegistryList, getAdminApiOrigin } from "@/lib/admin-api";
@@ -42,7 +42,7 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
   }
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -53,7 +53,7 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
       }}
     >
       <SourceRegistrySurface filters={filters} locale={locale} registry={registry} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

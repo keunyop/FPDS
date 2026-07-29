@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { ClipboardList, ListChecks, CirclePause, TriangleAlert } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { ReviewQueueResults } from "@/components/fpds/admin/review-queue-results";
-import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { BankItem, ProductTypeItem, ReviewQueueResponse } from "@/lib/admin-api";
 import {
@@ -20,7 +18,7 @@ const VALIDATION_OPTIONS = ["pass", "warning", "error"] as const;
 
 const REVIEW_QUEUE_COPY = {
   en: {
-    headerDescription: "Active review work, filters, and queue drill-in.",
+    headerDescription: "Review items that need a decision.",
     path: ["Review", "Review Queue"],
     title: "Review Queue",
     snapshotTitle: "Queue Snapshot",
@@ -56,6 +54,7 @@ const REVIEW_QUEUE_COPY = {
     createdTo: "Created to",
     applyFilters: "Search",
     reset: "Reset",
+    advancedFilters: "Advanced filters",
     results: "Results",
     tableTitle: "Reviewer intake table",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -83,7 +82,7 @@ const REVIEW_QUEUE_COPY = {
     next: "Next",
   },
   ko: {
-    headerDescription: "활성 검토 작업, 필터, 대기열 drill-in.",
+    headerDescription: "결정이 필요한 항목을 검토합니다.",
     path: ["검토", "검토 대기열"],
     title: "검토 대기열",
     snapshotTitle: "대기열 스냅샷",
@@ -117,8 +116,9 @@ const REVIEW_QUEUE_COPY = {
     reviewStates: "검토 상태",
     createdFrom: "생성 시작일",
     createdTo: "생성 종료일",
-    applyFilters: "Search",
+    applyFilters: "검색",
     reset: "초기화",
+    advancedFilters: "고급 필터",
     results: "결과",
     tableTitle: "검토 접수 테이블",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -145,7 +145,7 @@ const REVIEW_QUEUE_COPY = {
     next: "다음",
   },
   ja: {
-    headerDescription: "アクティブな審査作業、フィルター、キュー drill-in。",
+    headerDescription: "判断が必要な項目を審査します。",
     path: ["審査", "審査キュー"],
     title: "審査キュー",
     snapshotTitle: "キュー Snapshot",
@@ -179,8 +179,9 @@ const REVIEW_QUEUE_COPY = {
     reviewStates: "審査状態",
     createdFrom: "作成開始日",
     createdTo: "作成終了日",
-    applyFilters: "Search",
+    applyFilters: "検索",
     reset: "リセット",
+    advancedFilters: "詳細フィルター",
     results: "結果",
     tableTitle: "審査受付テーブル",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -233,38 +234,13 @@ type ReviewQueueSurfaceProps = {
 export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes, csrfToken }: ReviewQueueSurfaceProps) {
   const copy = REVIEW_QUEUE_COPY[locale];
   const productTypeOptions = buildAdminProductTypeOptions(productTypes);
-  const stateCounts = queue.summary.state_counts;
-  const validationCounts = queue.summary.validation_counts;
-  const statItems = [
-    {
-      label: copy.visibleTasks,
-      value: String(queue.summary.total_items),
-      note: copy.currentFilters,
-      tone: "info" as const,
-      icon: ListChecks,
-    },
-    {
-      label: translateReviewState(locale, "queued"),
-      value: String(stateCounts.queued ?? 0),
-      note: copy.queuedNote,
-      tone: "warning" as const,
-      icon: ClipboardList,
-    },
-    {
-      label: translateReviewState(locale, "deferred"),
-      value: String(stateCounts.deferred ?? 0),
-      note: copy.deferredNote,
-      tone: "neutral" as const,
-      icon: CirclePause,
-    },
-    {
-      label: copy.warningsErrors,
-      value: String((validationCounts.warning ?? 0) + (validationCounts.error ?? 0)),
-      note: copy.needsAttention,
-      tone: "warning" as const,
-      icon: TriangleAlert,
-    },
-  ];
+  const advancedFiltersActive =
+    Boolean(filters.validationStatus || filters.createdFrom || filters.createdTo) ||
+    filters.sortBy !== "priority" ||
+    filters.sortOrder !== "desc" ||
+    filters.states.length !== 2 ||
+    !filters.states.includes("queued") ||
+    !filters.states.includes("deferred");
 
   return (
     <section className="grid min-w-0 gap-4">
@@ -276,19 +252,9 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
         title={copy.title}
       />
 
-      <Stats5
-        framed={false}
-        items={statItems}
-      />
-
       <article className="min-w-0 rounded-lg border border-border bg-card p-4">
-        <div className="flex flex-col gap-1 border-b border-border pb-3 sm:flex-row sm:items-baseline sm:justify-between">
-          <h2 className="text-base font-semibold text-foreground">{copy.controlsTitle}</h2>
-          <p className="text-xs text-muted-foreground">{copy.filtersEyebrow}</p>
-        </div>
-
-        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="mt-4 grid min-w-0 gap-4">
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.7fr)_repeat(5,minmax(8rem,1fr))]">
+        <form action={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)} className="grid min-w-0 gap-4">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.7fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
             <label className="grid min-w-0 gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
@@ -332,92 +298,6 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{copy.validation}</span>
-              <select
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
-                defaultValue={filters.validationStatus}
-                name="validation_status"
-              >
-                <option value="">{copy.allStatuses}</option>
-                {VALIDATION_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {translateValidationStatus(locale, option)}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{copy.sortBy}</span>
-              <select
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
-                defaultValue={filters.sortBy}
-                name="sort_by"
-              >
-                <option value="priority">{copy.priority}</option>
-                <option value="created_at">{copy.createdTime}</option>
-                <option value="updated_at">{copy.updatedTime}</option>
-                <option value="source_confidence">{copy.confidence}</option>
-                <option value="product_name">{copy.productName}</option>
-              </select>
-            </label>
-
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{copy.order}</span>
-              <select
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
-                defaultValue={filters.sortOrder}
-                name="sort_order"
-              >
-                <option value="desc">{copy.descending}</option>
-                <option value="asc">{copy.ascending}</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="grid gap-3 lg:grid-cols-[minmax(18rem,1.5fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
-            <fieldset className="grid gap-1.5 text-sm">
-              <legend className="font-medium text-foreground">{copy.reviewStates}</legend>
-              <div className="flex flex-wrap gap-2">
-                {REVIEW_STATES.map((state) => (
-                  <label
-                    className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30"
-                    key={state}
-                  >
-                    <input
-                      className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
-                      defaultChecked={filters.states.includes(state)}
-                      name="state"
-                      type="checkbox"
-                      value={state}
-                    />
-                    <span>{translateReviewState(locale, state)}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{copy.createdFrom}</span>
-              <input
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
-                defaultValue={filters.createdFrom}
-                name="created_from"
-                type="date"
-              />
-            </label>
-
-            <label className="grid gap-1.5 text-sm">
-              <span className="font-medium text-foreground">{copy.createdTo}</span>
-              <input
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
-                defaultValue={filters.createdTo}
-                name="created_to"
-                type="date"
-              />
-            </label>
-
             <div className="flex items-end gap-2">
               <Button type="submit">{copy.applyFilters}</Button>
               <Button asChild variant="outline">
@@ -425,20 +305,99 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </Button>
             </div>
           </div>
+
+          <details className="border-t border-border pt-3" open={advancedFiltersActive}>
+            <summary className="cursor-pointer text-sm font-semibold text-foreground">{copy.advancedFilters}</summary>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-foreground">{copy.validation}</span>
+                <select
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                  defaultValue={filters.validationStatus}
+                  name="validation_status"
+                >
+                  <option value="">{copy.allStatuses}</option>
+                  {VALIDATION_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {translateValidationStatus(locale, option)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-foreground">{copy.sortBy}</span>
+                <select
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                  defaultValue={filters.sortBy}
+                  name="sort_by"
+                >
+                  <option value="priority">{copy.priority}</option>
+                  <option value="created_at">{copy.createdTime}</option>
+                  <option value="updated_at">{copy.updatedTime}</option>
+                  <option value="source_confidence">{copy.confidence}</option>
+                  <option value="product_name">{copy.productName}</option>
+                </select>
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-foreground">{copy.order}</span>
+                <select
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                  defaultValue={filters.sortOrder}
+                  name="sort_order"
+                >
+                  <option value="desc">{copy.descending}</option>
+                  <option value="asc">{copy.ascending}</option>
+                </select>
+              </label>
+
+              <fieldset className="grid gap-1.5 text-sm md:col-span-2 xl:col-span-4">
+                <legend className="font-medium text-foreground">{copy.reviewStates}</legend>
+                <div className="flex flex-wrap gap-2">
+                  {REVIEW_STATES.map((state) => (
+                    <label
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30"
+                      key={state}
+                    >
+                      <input
+                        className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
+                        defaultChecked={filters.states.includes(state)}
+                        name="state"
+                        type="checkbox"
+                        value={state}
+                      />
+                      <span>{translateReviewState(locale, state)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-foreground">{copy.createdFrom}</span>
+                <input
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                  defaultValue={filters.createdFrom}
+                  name="created_from"
+                  type="date"
+                />
+              </label>
+
+              <label className="grid gap-1.5 text-sm">
+                <span className="font-medium text-foreground">{copy.createdTo}</span>
+                <input
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                  defaultValue={filters.createdTo}
+                  name="created_to"
+                  type="date"
+                />
+              </label>
+            </div>
+          </details>
         </form>
       </article>
 
       <ReviewQueueResults csrfToken={csrfToken} filters={filters} locale={locale} productTypes={productTypes} queue={queue} />
     </section>
   );
-}
-
-function formatValidationStatusLabel(locale: AdminLocale, value: string) {
-  if (value === "error") {
-    return locale === "ko" ? "검증 오류" : locale === "ja" ? "検証エラー" : "Validation Error";
-  }
-  if (value === "warning") {
-    return locale === "ko" ? "검증 경고" : locale === "ja" ? "検証警告" : "Validation Warning";
-  }
-  return translateValidationStatus(locale, value);
 }

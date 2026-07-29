@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-type OfferModal4Props = {
+type AdminModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
@@ -33,7 +33,7 @@ type OfferModal4Props = {
   footer?: ReactNode;
 };
 
-function OfferModal4({
+function AdminModal({
   open,
   onOpenChange,
   title,
@@ -46,7 +46,7 @@ function OfferModal4({
   showPanel = true,
   children,
   footer,
-}: OfferModal4Props) {
+}: AdminModalProps) {
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
@@ -158,4 +158,4 @@ function OfferModal4({
   );
 }
 
-export { OfferModal4 };
+export { AdminModal };

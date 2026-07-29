@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { RunStatusSurface, type RunStatusPageFilters } from "@/components/fpds/admin/run-status-surface";
 import { fetchAdminSession, fetchRunStatusList, getAdminApiOrigin } from "@/lib/admin-api";
@@ -45,7 +45,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -56,7 +56,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
       }}
     >
       <RunStatusSurface filters={filters} locale={locale} runs={runs} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

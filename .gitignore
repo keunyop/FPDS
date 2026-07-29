@@ -6,7 +6,9 @@ harness-cleanup-audit.md
 .venv/
 __pycache__/
 *.pyc
+*.egg-info/
 node_modules/
 .next/
 *.tsbuildinfo
 /tmp/
+**/tmp/

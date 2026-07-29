@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { ReviewQueueSurface, type ReviewQueuePageFilters } from "@/components/fpds/admin/review-queue-surface";
 import { fetchAdminSession, fetchBankList, fetchProductTypeList, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
@@ -52,7 +52,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -70,7 +70,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
         productTypes={productTypeList.items}
         queue={queue}
       />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

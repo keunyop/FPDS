@@ -5,7 +5,7 @@ import { GitCompareArrows, History, PackageCheck, PencilLine } from "lucide-reac
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { Stats5 } from "@/components/stats5";
+import { AdminStatStrip } from "@/components/fpds/admin/admin-stat-strip";
 import { Button } from "@/components/ui/button";
 import type { ChangeHistoryListResponse, ProductTypeItem } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
@@ -310,7 +310,7 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
         title={copy.title}
       />
 
-      <Stats5
+      <AdminStatStrip
         framed={false}
         items={statItems}
       />

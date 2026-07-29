@@ -5,7 +5,7 @@ import { CircleCheck, FileSearch, FileText, Target } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { Stats5 } from "@/components/stats5";
+import { AdminStatStrip } from "@/components/fpds/admin/admin-stat-strip";
 import type { SourceRegistryListResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -154,7 +154,7 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
         title={copy.title}
       />
 
-      <Stats5
+      <AdminStatStrip
         framed={false}
         items={statItems}
       />

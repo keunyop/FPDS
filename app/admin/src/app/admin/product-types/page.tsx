@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import {
   ProductTypeRegistrySurface,
@@ -47,7 +47,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
   }
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -66,7 +66,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
         locale={locale}
         productTypes={productTypes}
       />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

@@ -1,7 +1,7 @@
 # FPDS Docs Map
 
 Status: Active navigation index
-Last updated: 2026-04-22
+Last updated: 2026-07-28
 
 This file is the main entrypoint for `docs/`.
 
@@ -68,10 +68,18 @@ Most commonly needed:
 - `docs/03-design/object-storage-evidence-bucket-baseline.md`
 - `docs/03-design/fpds-design-system.md`
 - `docs/03-design/fpds_design_system_stripe_benchmark.md`
+- `docs/03-design/admin-information-architecture.md`
 
 ### 2.5 Golden Test Fixtures
 
 - `worker/pipeline/tests/fixtures/golden/`: source-backed reference datasets for admin collection and review testing
+
+### 2.6 Client Handoff
+
+- `README.md`: runtime map, startup context, and full verification commands
+- `app/admin/README.md`: operator workflow, route/code map, and Admin safety boundaries
+- `app/public/README.md`: Public route, data, localization, and evidence boundaries
+- `api/service/README.md`: live API runtime and endpoint map
 
 ## 3. Status Labels
 
@@ -95,7 +103,10 @@ Open archive docs only when you need to verify how a past decision or prototype 
 
 ## 5. Cleanup Notes
 
-The docs set was simplified on `2026-04-22`:
+The docs set was simplified on `2026-04-22` and reconciled for handoff on
+`2026-07-28`:
 - historical gate and prototype docs moved to `docs/archive/`
 - the design benchmark doc was rewritten as a short current baseline
 - the development journal was reduced to recent resume context
+- stale route-shell placeholders and partial API scaffold manifests were removed;
+  current app manifests point directly to live implementation files

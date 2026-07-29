@@ -1,6 +1,8 @@
 # FPDS Workspace
 
-This repository is the docs-first workspace for `FPDS` (Finance Product Data Service), the evidence-grounded financial product data platform that will later support MyBank-facing experiences.
+This repository is the implementation and operating workspace for `FPDS`
+(Finance Product Data Service), an evidence-grounded financial product data
+platform with separate authenticated Admin and anonymous Public experiences.
 
 The repository is currently `product-implementation-in-progress`.
 
@@ -60,13 +62,14 @@ As of `2026-07-28`:
 - `WBS 5.15` source registry admin MVP is now complete with DB-backed bank and source-catalog management, source-detail generation during collection, a bank-centered `/admin/banks` workflow for bank setup plus initial coverage and bulk collection, compatibility redirects for `/admin/source-catalog`, and read-only `/admin/sources` operator routes
 - the first vector-assisted retrieval bootstrap is now implemented with a pgvector `evidence_chunk_embedding` side table, deterministic local evidence-chunk embeddings for dev/test, metadata-first vector ranking, and metadata-only fallback when vector rows are unavailable
 - the live admin runtime now uses a compact evidence-operations design: a deep operational frame and real-data Attention Rail lead into problem-first Review, failure-first Runs, registry workflows, sticky decisions, chronology, cost/anomaly observability, and Public-snapshot health; safe visible auto-refresh, route recovery, accessible dialogs/tables, semantic state tokens, anonymous Login/Signup, and desktop/mobile route navigation share one B2B interaction baseline
+- the client-handoff simplification now exposes Overview, Review, Runs, and Banks as direct daily work on desktop and mobile, keeps secondary tools in one labeled sidebar group, progressively discloses advanced filters and technical Review context, and removes stale scaffolds, generated artifacts, unreachable UI modules, and numbered handoff-facing vendor filenames without changing live routes or API contracts
 
 ## What This Repo Contains Today
 
 - requirements, scope, planning, governance, and design documents
 - foundation baselines for env, DB, storage, auth, i18n, security, observability, and route manifests
-- shared design-system baseline artifacts and template-adoption guidance for future public and admin UI implementation
-- a minimal Python worker project baseline in `pyproject.toml`
+- shared design-system and vendor-provenance guidance for the live Public and Admin packages
+- a Python worker project under `worker/` with discovery and pipeline stages
 - working prototype ingestion code for discovery, preflight drift checks, scheduled registry refresh artifacts, snapshot capture, parse/chunk, and evidence retrieval stages
 - a pgvector-ready evidence retrieval bootstrap that keeps vector scope limited to `evidence_chunk` and preserves metadata-only fallback
 - working prototype extraction code that turns retrieval matches into sparse extracted drafts with evidence-link drafts
@@ -87,7 +90,7 @@ As of `2026-07-28`:
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection
 - a registered Canada retail lending Product Type baseline for future Admin-run source collection, with active `generic_ai_review` fallback taxonomy rows for credit cards, mortgages, personal loans, and lines of credit
 - a recognized Canadian bank and credit-union registry baseline with logo metadata and full active Product Type coverage for every active Canadian financial institution in the source catalog
-- a Shadcnblocks-based admin UI implementation that keeps the live shell aligned to the FPDS benchmark while leaving future publish surfaces route-oriented
+- an FPDS-owned Admin UI built from adapted Shadcnblocks foundations, with semantic component names and recorded vendor provenance
 - a committed first successful run evidence pack with raw stage outputs and live viewer artifacts
 - a committed prototype findings memo that summarizes feasibility, open quality gaps, and pre-Big-5 recommendations
 - a first hardening baseline that merges product-matched current-rate evidence into TD savings normalization when supporting extraction artifacts are available
@@ -96,7 +99,7 @@ As of `2026-07-28`:
 - deposit parser baselines for `chequing`, `savings`, and `gic` that now extract product-type-specific fields such as transaction bundles, savings tiering or withdrawal rules, and GIC term or redeemability signals while normalizing subtype behavior to the approved canonical taxonomy
 - an aggregate refresh worker slice that builds `public_product_projection` plus dashboard metric, ranking, and scatter source datasets from the canonical product baseline
 - repository harness scripts, git hooks, and CI validation
-- top-level boundaries for future `app`, `api`, `worker`, `shared`, `db`, and `storage` work
+- explicit runtime boundaries across `app`, `api/service`, `worker`, `shared`, `db`, and `storage`
 
 This is still not a full FPDS product yet, but the ingestion core is now actively being implemented.
 
@@ -114,6 +117,42 @@ This is still not a full FPDS product yet, but the ingestion core is now activel
 - Canada Big 5 source registry baseline: [docs/01-planning/canada-big5-source-registry.md](docs/01-planning/canada-big5-source-registry.md)
 - design docs index: [docs/03-design/README.md](docs/03-design/README.md)
 - archive index: [docs/archive/README.md](docs/archive/README.md)
+
+## Client Handoff Map
+
+The runtime boundaries are intentionally separate:
+
+| Area | Purpose | Start here |
+|---|---|---|
+| `app/admin/` | authenticated operator UI and browser-side API proxies | `app/admin/README.md` |
+| `app/public/` | anonymous approved-data UI | `app/public/README.md` |
+| `api/service/` | FastAPI routes, auth, CSRF/RBAC, domain services | `api/service/README.md` |
+| `worker/` | discovery, collection, extraction, normalization, validation, aggregate refresh | `worker/README.md` |
+| `db/` | migrations and canonical schema operations | `db/README.md` |
+| `scripts/harness/` | repeatable repository verification | `docs/00-governance/harness-engineering-baseline.md` |
+
+Admin daily work is **Overview → Review → Runs → Banks**. Sources, Product
+Types, Changes, Audit Log, Usage, and Public Health remain available under
+**More tools**. The current page-to-file maps are
+`app/admin/routes.manifest.json` and `app/public/routes.manifest.json`.
+
+Handoff verification:
+
+```powershell
+cd app/admin
+pnpm run typecheck
+pnpm run build
+
+cd ../public
+pnpm run typecheck
+pnpm run build
+
+cd ../..
+uv run --directory api/service python -m unittest discover -s tests -p "test_*.py"
+uv run python -m unittest discover -s worker -p "test_*.py"
+powershell -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1
+git diff --check
+```
 
 ## Delivery Boundary
 
@@ -174,13 +213,11 @@ Out of scope for the current FPDS build:
 
 ### In Progress
 
-- prototype worker runtime implementation
-- `WBS 5` public experience work and Big 5 expansion slices
-- responsive QA follow-on slices
+- ongoing source-quality hardening and Phase 1 operational data coverage
+- browser smoke follow-ons when new operator or Public workflows are added
 
 ### Not Started
 
-- later admin follow-on surfaces such as publish monitor and health
 - BX-PF runtime integration code
 
 ### Hold Rule

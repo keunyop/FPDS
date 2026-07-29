@@ -2,20 +2,20 @@ import { Activity, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type Stats5Tone = "success" | "info" | "warning" | "neutral";
+type AdminStatStripTone = "success" | "info" | "warning" | "neutral";
 
-type Stats5Item = {
+type AdminStatStripItem = {
   label: string;
   value: string;
   note: string;
-  tone: Stats5Tone;
+  tone: AdminStatStripTone;
   icon?: LucideIcon;
 };
 
-interface Stats5Props {
+interface AdminStatStripProps {
   title?: string;
   description?: string;
-  items: Stats5Item[];
+  items: AdminStatStripItem[];
   className?: string;
   framed?: boolean;
 }
@@ -25,15 +25,15 @@ const toneClassMap = {
   info: "text-info",
   warning: "text-warning",
   neutral: "text-foreground"
-} satisfies Record<Stats5Tone, string>;
+} satisfies Record<AdminStatStripTone, string>;
 
-const Stats5 = ({
+const AdminStatStrip = ({
   title,
   description,
   items,
   className,
   framed = true
-}: Stats5Props) => {
+}: AdminStatStripProps) => {
   return (
     <section className={cn(framed ? "rounded-lg border border-border/80 bg-background p-4" : "min-w-0", className)}>
       {title || description ? (
@@ -78,4 +78,4 @@ const Stats5 = ({
   );
 };
 
-export { Stats5 };
+export { AdminStatStrip };

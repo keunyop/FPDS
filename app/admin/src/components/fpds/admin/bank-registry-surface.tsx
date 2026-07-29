@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { CircleCheck, Landmark, Settings2 } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { OfferModal4 } from "@/components/offer-modal4";
+import { AdminModal } from "@/components/fpds/admin/admin-modal";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
-import { Stats5 } from "@/components/stats5";
 import type {
   BankDetailResponse,
   BankItem,
@@ -18,7 +16,7 @@ import type {
   ProductTypeItem,
   SourceCatalogCollectionLaunchResponse,
 } from "@/lib/admin-api";
-import { buildAdminHref, localizedMissing, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 import { buildAdminProductTypeLabelMap, formatAdminProductType } from "@/lib/admin-product-types";
 
 export type BankRegistryPageFilters = {
@@ -40,7 +38,7 @@ type BankRegistrySurfaceProps = {
 const BANK_COPY = {
   en: {
     addBank: "Add bank",
-    description: "Bank profiles, coverage, and collection launch.",
+    description: "Manage bank coverage and start collection.",
     path: ["Operations", "Banks"],
     title: "Banks",
     banks: "Banks",
@@ -73,7 +71,7 @@ const BANK_COPY = {
   },
   ko: {
     addBank: "은행 추가",
-    description: "은행 프로필, coverage, collection 실행.",
+    description: "은행별 수집 범위를 관리하고 수집을 시작합니다.",
     path: ["운영", "은행"],
     title: "은행",
     banks: "은행",
@@ -84,7 +82,7 @@ const BANK_COPY = {
     searchPlaceholder: "은행명 또는 홈페이지 URL",
     status: "상태",
     all: "전체",
-    apply: "Search",
+    apply: "검색",
     reset: "초기화",
     bankList: "은행 목록",
     collecting: "수집 중...",
@@ -106,7 +104,7 @@ const BANK_COPY = {
   },
   ja: {
     addBank: "銀行を追加",
-    description: "銀行プロファイル、カバレッジ、collection 実行。",
+    description: "銀行ごとの収集範囲を管理し、収集を開始します。",
     path: ["運用", "銀行"],
     title: "銀行",
     banks: "銀行",
@@ -117,7 +115,7 @@ const BANK_COPY = {
     searchPlaceholder: "銀行名またはホームページURL",
     status: "状態",
     all: "すべて",
-    apply: "Search",
+    apply: "検索",
     reset: "リセット",
     bankList: "銀行一覧",
     collecting: "収集中...",
@@ -170,30 +168,6 @@ export function BankRegistrySurface({
   const selectedCoverageCount = selectedCatalogItems.length;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
   const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
-  const statItems = [
-    {
-      label: copy.banks,
-      value: String(banks.summary.total_items),
-      note: "Current filter.",
-      tone: "info" as const,
-      icon: Landmark,
-    },
-    {
-      label: copy.active,
-      value: String(banks.summary.status_counts.active ?? 0),
-      note: "Enabled banks.",
-      tone: "success" as const,
-      icon: CircleCheck,
-    },
-    {
-      label: copy.managed,
-      value: String(banks.items.filter((item) => item.managed_flag).length),
-      note: "Configured banks.",
-      tone: "neutral" as const,
-      icon: Settings2,
-    },
-  ];
-
   useEffect(() => {
     setAddDialogOpen(addModalOpen);
   }, [addModalOpen]);
@@ -360,12 +334,6 @@ export function BankRegistrySurface({
         title={copy.title}
       />
 
-      <Stats5
-        className="[&>div]:md:grid-cols-3 [&>div]:xl:grid-cols-3"
-        framed={false}
-        items={statItems}
-      />
-
       <article className="border border-border bg-card p-4">
         <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
           <label className="grid gap-2 text-sm">
@@ -387,7 +355,9 @@ export function BankRegistrySurface({
       <article className="border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">{copy.bankList}</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {copy.bankList} <span className="font-mono text-sm text-muted-foreground">({banks.summary.total_items})</span>
+            </h2>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAddModal} type="button">
@@ -395,7 +365,7 @@ export function BankRegistrySurface({
             </button>
             <button
                className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={bulkPending}
+              disabled={bulkPending || selectedCoverageCount === 0}
               onClick={() => void handleBulkCollect()}
               type="button"
             >
@@ -414,7 +384,7 @@ export function BankRegistrySurface({
           </p>
         ) : null}
         <div aria-label={copy.bankList} className="overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-          <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
+          <table className="min-w-[720px] table-fixed border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">
@@ -427,9 +397,6 @@ export function BankRegistrySurface({
                   />
                 </th>
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.code}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.homepage}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.catalogs}</th>
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.generatedSources}</th>
               </tr>
@@ -437,7 +404,7 @@ export function BankRegistrySurface({
             <tbody>
               {banks.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={7}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={4}>
                     {copy.noBanks}
                   </td>
                 </tr>
@@ -454,24 +421,18 @@ export function BankRegistrySurface({
                       />
                     </td>
                     <td className="border-b border-border/70 px-3 py-4">
-                      <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
                         <BankLogoMark bank={item} />
-                        <button className="min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
-                          {item.bank_name}
-                        </button>
+                        <div className="grid min-w-0 gap-1">
+                          <button className="min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
+                            {item.bank_name}
+                          </button>
+                          <span className="text-xs text-muted-foreground">
+                            {item.bank_code} · {formatStatus(locale, item.status)}
+                          </span>
+                        </div>
                       </div>
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.bank_code}</td>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      {item.homepage_url ? (
-                        <a className="text-primary underline-offset-4 hover:underline" href={item.homepage_url} rel="noreferrer" target="_blank">
-                          {item.homepage_url}
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">{localizedMissing(locale)}</span>
-                      )}
-                    </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{formatStatus(locale, item.status)}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">
                       {item.catalog_product_types.length > 0 ? (
                         formatProductTypeList(item.catalog_product_types, productTypeLabelMap)
@@ -488,7 +449,7 @@ export function BankRegistrySurface({
         </div>
       </article>
 
-      <OfferModal4
+      <AdminModal
         onOpenChange={handleAddDialogChange}
         open={addDialogOpen}
         showPanel={false}
@@ -496,9 +457,9 @@ export function BankRegistrySurface({
         width="medium"
       >
         <BankCreateDialogContent csrfToken={csrfToken} locale={locale} onCreated={handleBankCreated} productTypes={productTypes} />
-      </OfferModal4>
+      </AdminModal>
 
-      <OfferModal4
+      <AdminModal
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
@@ -514,7 +475,7 @@ export function BankRegistrySurface({
             productTypes={productTypes}
           />
         ) : null}
-      </OfferModal4>
+      </AdminModal>
     </section>
   );
 }

@@ -6,10 +6,10 @@ import { CircleCheck, CircleOff, Shapes } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { OfferModal4 } from "@/components/offer-modal4";
+import { AdminModal } from "@/components/fpds/admin/admin-modal";
 import { ProductTypeCreateDialogContent } from "@/components/fpds/admin/product-type-create-dialog-content";
 import { ProductTypeDetailDialogContent } from "@/components/fpds/admin/product-type-detail-dialog-content";
-import { Stats5 } from "@/components/stats5";
+import { AdminStatStrip } from "@/components/fpds/admin/admin-stat-strip";
 import type { ProductTypeItem, ProductTypeListResponse } from "@/lib/admin-api";
 import { buildAdminHref, localizedMissing, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -224,7 +224,7 @@ export function ProductTypeRegistrySurface({
         title={copy.title}
       />
 
-      <Stats5
+      <AdminStatStrip
         className="[&>div]:md:grid-cols-3 [&>div]:xl:grid-cols-3"
         framed={false}
         items={statItems}
@@ -318,7 +318,7 @@ export function ProductTypeRegistrySurface({
         </div>
       </article>
 
-      <OfferModal4
+      <AdminModal
         onOpenChange={handleAddDialogChange}
         open={addDialogOpen}
         showPanel={false}
@@ -326,9 +326,9 @@ export function ProductTypeRegistrySurface({
         width="narrow"
       >
         <ProductTypeCreateDialogContent csrfToken={csrfToken} locale={locale} onCreated={handleProductTypeCreated} />
-      </OfferModal4>
+      </AdminModal>
 
-      <OfferModal4
+      <AdminModal
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
@@ -345,7 +345,7 @@ export function ProductTypeRegistrySurface({
             productType={selectedProductType}
           />
         ) : null}
-      </OfferModal4>
+      </AdminModal>
     </section>
   );
 }

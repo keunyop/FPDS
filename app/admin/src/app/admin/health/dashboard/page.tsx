@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { HealthDashboardSurface } from "@/components/fpds/admin/health-dashboard-surface";
 import { fetchAdminSession, fetchDashboardHealth, getAdminApiOrigin } from "@/lib/admin-api";
@@ -42,7 +42,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -53,6 +53,6 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
       }}
     >
       <HealthDashboardSurface csrfToken={session.csrf_token} health={health} locale={locale} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }

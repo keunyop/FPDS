@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { AuditLogSurface, type AuditLogPageFilters } from "@/components/fpds/admin/audit-log-surface";
 import { fetchAdminSession, fetchAuditLogList, getAdminApiOrigin } from "@/lib/admin-api";
@@ -43,7 +43,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -54,7 +54,7 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
       }}
     >
       <AuditLogSurface auditLog={auditLog} filters={filters} locale={locale} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

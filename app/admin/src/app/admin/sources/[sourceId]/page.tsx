@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { SourceDetailSurface } from "@/components/fpds/admin/source-detail-surface";
 import { fetchAdminSession, fetchSourceRegistryDetail, getAdminApiOrigin } from "@/lib/admin-api";
@@ -47,7 +47,7 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
   }
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -58,6 +58,6 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
       }}
     >
       <SourceDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} userRole={session.user.role} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }

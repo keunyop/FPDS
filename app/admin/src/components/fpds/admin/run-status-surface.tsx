@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, CircleX, LoaderCircle, Split } from "lucide-react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
-import { Stats5 } from "@/components/stats5";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
 import { buildAdminHref, formatAdminDateTime, translateRunState, type AdminLocale } from "@/lib/admin-i18n";
@@ -16,7 +14,7 @@ const COMMON_RUN_TYPES = ["snapshot_capture", "parse_chunk", "extraction", "norm
 
 const RUN_STATUS_COPY = {
   en: {
-    headerDescription: "Run state, partial completion, and execution diagnostics.",
+    headerDescription: "Find failed or incomplete collections, then open a run.",
     path: ["Operations", "Runs"],
     title: "Runs",
     snapshotTitle: "Run Snapshot",
@@ -49,8 +47,9 @@ const RUN_STATUS_COPY = {
     runStates: "Run states",
     startedFrom: "Started from",
     startedTo: "Started to",
-    applyFilters: "검색",
+    applyFilters: "Search",
     reset: "Reset",
+    advancedFilters: "Advanced filters",
     results: "Results",
     tableTitle: "Run table",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -86,7 +85,7 @@ const RUN_STATUS_COPY = {
     previous: "Previous",
   },
   ko: {
-    headerDescription: "실행 상태, 부분 완료, 실행 진단.",
+    headerDescription: "실패하거나 완료되지 않은 수집을 찾아 실행 상세를 확인합니다.",
     path: ["운영", "실행"],
     title: "실행",
     snapshotTitle: "실행 스냅샷",
@@ -119,8 +118,9 @@ const RUN_STATUS_COPY = {
     runStates: "실행 상태",
     startedFrom: "시작일",
     startedTo: "종료일",
-    applyFilters: "検索",
+    applyFilters: "검색",
     reset: "초기화",
+    advancedFilters: "고급 필터",
     results: "결과",
     tableTitle: "실행 테이블",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -155,7 +155,7 @@ const RUN_STATUS_COPY = {
     previous: "이전",
   },
   ja: {
-    headerDescription: "実行状態、部分完了、実行診断。",
+    headerDescription: "失敗または未完了の収集を探し、実行詳細を確認します。",
     path: ["運用", "実行"],
     title: "実行",
     snapshotTitle: "実行 Snapshot",
@@ -188,8 +188,9 @@ const RUN_STATUS_COPY = {
     runStates: "実行状態",
     startedFrom: "開始日",
     startedTo: "終了日",
-    applyFilters: "Search",
+    applyFilters: "検索",
     reset: "リセット",
+    advancedFilters: "詳細フィルター",
     results: "結果",
     tableTitle: "実行テーブル",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
@@ -245,38 +246,14 @@ type RunStatusSurfaceProps = {
 
 export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProps) {
   const copy = RUN_STATUS_COPY[locale];
-  const stateCounts = runs.summary.state_counts;
   const runTypeOptions = Array.from(new Set([...COMMON_RUN_TYPES, ...Object.keys(runs.summary.run_type_counts)])).sort();
-  const statItems = [
-    {
-      label: copy.failed,
-      value: String(stateCounts.failed ?? 0),
-      note: copy.failedNote,
-      tone: "warning" as const,
-      icon: CircleX,
-    },
-    {
-      label: copy.partial,
-      value: String(runs.summary.partial_items),
-      note: copy.partialNote,
-      tone: "neutral" as const,
-      icon: Split,
-    },
-    {
-      label: copy.inProgress,
-      value: String(stateCounts.started ?? 0),
-      note: copy.inProgressNote,
-      tone: "info" as const,
-      icon: LoaderCircle,
-    },
-    {
-      label: copy.visibleRuns,
-      value: String(runs.summary.total_items),
-      note: copy.currentFilters,
-      tone: "neutral" as const,
-      icon: Activity,
-    },
-  ];
+  const advancedFiltersActive =
+    Boolean(filters.startedFrom || filters.startedTo) ||
+    filters.sortBy !== "started_at" ||
+    filters.sortOrder !== "desc" ||
+    filters.states.length !== 2 ||
+    !filters.states.includes("started") ||
+    !filters.states.includes("failed");
 
   return (
     <section className="grid min-w-0 gap-5">
@@ -288,31 +265,9 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         title={copy.title}
       />
 
-      <Stats5
-        className="[&>div]:md:grid-cols-2 [&>div]:xl:grid-cols-4"
-        framed={false}
-        items={statItems}
-      />
-
       <article className="min-w-0 border border-border bg-card p-4">
-        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-xs font-medium text-muted-foreground">{copy.filtersEyebrow}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.controlsTitle}</h2>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="outline">
-              <Link href={buildAdminHref("/admin/runs", new URLSearchParams(), locale)}>{copy.defaultRuns}</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline">
-              <Link href={buildRunHref(filters, { states: [...RUN_STATES], page: 1 }, locale)}>{copy.allStates}</Link>
-            </Button>
-          </div>
-        </div>
-
-        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="mt-4 grid gap-4">
-          <div className="grid min-w-0 gap-3 xl:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))]">
+        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="grid gap-4">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.45fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
@@ -341,33 +296,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             </label>
 
             <label className="grid min-w-0 gap-2 text-sm">
-              <span className="font-medium text-foreground">{copy.sortBy}</span>
-              <select
-                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
-                defaultValue={filters.sortBy}
-                name="sort_by"
-              >
-                <option value="started_at">{copy.startedTime}</option>
-                <option value="completed_at">{copy.completedTime}</option>
-                <option value="candidate_count">{copy.candidateCount}</option>
-                <option value="review_queued_count">{copy.reviewQueued}</option>
-                <option value="run_type">{copy.runType}</option>
-              </select>
-            </label>
-
-            <label className="grid min-w-0 gap-2 text-sm">
-              <span className="font-medium text-foreground">{copy.order}</span>
-              <select
-                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
-                defaultValue={filters.sortOrder}
-                name="sort_order"
-              >
-                <option value="desc">{copy.descending}</option>
-                <option value="asc">{copy.ascending}</option>
-              </select>
-            </label>
-
-            <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.scope}</span>
               <span className="flex h-10 min-w-0 items-center rounded-md border border-input bg-background px-3 text-sm text-foreground">
                 <input
@@ -380,49 +308,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                 {copy.partialOnly}
               </span>
             </label>
-          </div>
-
-          <div className="grid min-w-0 gap-3 lg:grid-cols-[1.3fr_1fr_1fr_auto]">
-            <fieldset className="grid min-w-0 gap-2 text-sm">
-              <legend className="font-medium text-foreground">{copy.runStates}</legend>
-              <div className="flex flex-wrap gap-2">
-                {RUN_STATES.map((state) => (
-                  <label
-                    className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                    key={state}
-                  >
-                    <input
-                      className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
-                      defaultChecked={filters.states.includes(state)}
-                      name="state"
-                      type="checkbox"
-                      value={state}
-                    />
-                    <span>{translateRunState(locale, state)}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <label className="grid min-w-0 gap-2 text-sm">
-              <span className="font-medium text-foreground">{copy.startedFrom}</span>
-              <input
-                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
-                defaultValue={filters.startedFrom}
-                name="started_from"
-                type="date"
-              />
-            </label>
-
-            <label className="grid min-w-0 gap-2 text-sm">
-              <span className="font-medium text-foreground">{copy.startedTo}</span>
-              <input
-                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
-                defaultValue={filters.startedTo}
-                name="started_to"
-                type="date"
-              />
-            </label>
 
             <div className="flex items-end gap-2">
               <Button type="submit">{copy.applyFilters}</Button>
@@ -431,6 +316,79 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </Button>
             </div>
           </div>
+
+          <details className="border-t border-border pt-3" open={advancedFiltersActive}>
+            <summary className="cursor-pointer text-sm font-semibold text-foreground">{copy.advancedFilters}</summary>
+            <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <label className="grid min-w-0 gap-2 text-sm">
+                <span className="font-medium text-foreground">{copy.sortBy}</span>
+                <select
+                  className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
+                  defaultValue={filters.sortBy}
+                  name="sort_by"
+                >
+                  <option value="started_at">{copy.startedTime}</option>
+                  <option value="completed_at">{copy.completedTime}</option>
+                  <option value="candidate_count">{copy.candidateCount}</option>
+                  <option value="review_queued_count">{copy.reviewQueued}</option>
+                  <option value="run_type">{copy.runType}</option>
+                </select>
+              </label>
+
+              <label className="grid min-w-0 gap-2 text-sm">
+                <span className="font-medium text-foreground">{copy.order}</span>
+                <select
+                  className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
+                  defaultValue={filters.sortOrder}
+                  name="sort_order"
+                >
+                  <option value="desc">{copy.descending}</option>
+                  <option value="asc">{copy.ascending}</option>
+                </select>
+              </label>
+
+              <fieldset className="grid min-w-0 gap-2 text-sm md:col-span-2 xl:col-span-4">
+                <legend className="font-medium text-foreground">{copy.runStates}</legend>
+                <div className="flex flex-wrap gap-2">
+                  {RUN_STATES.map((state) => (
+                    <label
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                      key={state}
+                    >
+                      <input
+                        className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
+                        defaultChecked={filters.states.includes(state)}
+                        name="state"
+                        type="checkbox"
+                        value={state}
+                      />
+                      <span>{translateRunState(locale, state)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label className="grid min-w-0 gap-2 text-sm">
+                <span className="font-medium text-foreground">{copy.startedFrom}</span>
+                <input
+                  className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
+                  defaultValue={filters.startedFrom}
+                  name="started_from"
+                  type="date"
+                />
+              </label>
+
+              <label className="grid min-w-0 gap-2 text-sm">
+                <span className="font-medium text-foreground">{copy.startedTo}</span>
+                <input
+                  className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/25"
+                  defaultValue={filters.startedTo}
+                  name="started_to"
+                  type="date"
+                />
+              </label>
+            </div>
+          </details>
         </form>
       </article>
 
@@ -481,37 +439,19 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         ) : (
           <>
             <div aria-label={copy.tableTitle} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-              <table className="min-w-[1080px] table-fixed border-separate border-spacing-0">
+              <table className="min-w-[820px] table-fixed border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.run}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.type}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.window}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium">{copy.run}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.sourceSummary}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.candidateSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.errorSummary}</th>
                     <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {runs.items.map((item) => (
                     <tr className="align-top" key={item.run_id}>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
-                            {item.run_id}
-                          </Link>
-                        </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                            {toTitleCase(item.run_type)}
-                          </span>
-                          <span className="text-xs text-muted-foreground">{copy.trigger} {toTitleCase(item.trigger_type)}</span>
-                        </div>
-                      </td>
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2">
                           <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", runStateBadgeClasses(item.run_status))}>
@@ -522,12 +462,27 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                               {copy.partialCompletion}
                             </span>
                           ) : null}
+                          {item.error_summary ? (
+                            <p className="max-w-xs text-xs leading-5 text-destructive">{item.error_summary}</p>
+                          ) : null}
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-1">
-                          <span className="text-sm text-foreground">{formatAdminDateTime(locale, item.started_at)}</span>
-                          <span className="text-xs text-muted-foreground">{copy.completed} {formatAdminDateTime(locale, item.completed_at)}</span>
+                        <div className="grid gap-2">
+                          <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
+                            {item.run_id}
+                          </Link>
+                          <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                            {toTitleCase(item.run_type)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatAdminDateTime(locale, item.started_at)} · {copy.trigger} {toTitleCase(item.trigger_type)}
+                          </span>
+                          {item.completed_at ? (
+                            <span className="text-xs text-muted-foreground">
+                              {copy.completed} {formatAdminDateTime(locale, item.completed_at)}
+                            </span>
+                          ) : null}
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
@@ -543,9 +498,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           <span className="font-medium text-foreground">{item.candidate_count} {copy.candidates}</span>
                           <span className="text-muted-foreground">{item.review_queued_count} {copy.queuedForReview}</span>
                         </div>
-                      </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <p className="text-sm leading-6 text-muted-foreground">{item.error_summary ?? copy.noRunError}</p>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
                         <Button asChild size="sm" variant="outline">

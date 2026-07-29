@@ -1,10 +1,16 @@
-# API Surface
+# API Service
 
-This directory holds server-side browser-facing and service-facing API boundaries.
+The live FastAPI application is entirely under `service/`. It owns anonymous
+Public reads, authenticated Admin reads and mutations, session/CSRF/RBAC
+enforcement, aggregate refresh, and worker launch integration.
 
-Current boundary:
-- `public/` for anonymous read APIs
-- `admin/` for authenticated operator APIs
-- `internal/` for private orchestration interfaces
+Start with:
 
-Exact endpoints and handlers are defined later by WBS `2.x` and `3.x`.
+- `service/README.md` for runtime and endpoint guidance.
+- `service/api_service/main.py` for route registration.
+- `service/api_service/routers/` for route ownership.
+- `service/tests/` for behavior and security coverage.
+
+The authoritative interface description is
+`docs/03-design/api-interface-contracts.md`; obsolete placeholder API
+directories and partial route manifests are intentionally not retained.

@@ -237,7 +237,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
 
   return (
     <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
-      <div className="flex flex-col gap-2 border-b border-border px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="border-b border-border px-4 py-3">
         <div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h2 className="text-base font-semibold text-foreground">{copy.tableTitle}</h2>
@@ -245,29 +245,6 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
               {copy.pageSummary(queue.page, queue.total_pages, queue.total_items)}
             </p>
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {filters.states.map((state) => (
-            <span className={cn("rounded-full px-3 py-1 text-xs font-medium", stateBadgeClasses(state))} key={state}>
-              {translateReviewState(locale, state)}
-            </span>
-          ))}
-          {filters.bankCode ? (
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-              {filters.bankCode}
-            </span>
-          ) : null}
-          {filters.productType ? (
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-              {formatAdminProductType(filters.productType, productTypeLabelMap)}
-            </span>
-          ) : null}
-          {filters.validationStatus ? (
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-              {translateValidationStatus(locale, filters.validationStatus)}
-            </span>
-          ) : null}
         </div>
       </div>
 
@@ -305,12 +282,14 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
               </label>
               <span className="text-xs text-muted-foreground">{copy.bulkUnavailable}</span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            {selectedIds.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
               <Button className="min-h-10" disabled={selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("defer")} size="sm" type="button" variant="outline">
                 {pendingAction === "defer" ? <Loader2 className="animate-spin" /> : <CirclePause />}
                 {pendingAction === "defer" ? copy.deferring : translateReviewAction(locale, "defer")}
               </Button>
-            </div>
+              </div>
+            ) : null}
           </div>
 
           {statusMessage ? (

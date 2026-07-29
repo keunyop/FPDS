@@ -4,143 +4,121 @@
   "default_locale": "en",
   "routes": [
     {
+      "route": "/",
+      "route_id": "admin.package_root_redirect",
+      "implementation_path": "src/app/page.tsx",
+      "access": "anonymous",
+      "behavior": "compatibility_redirect"
+    },
+    {
       "route": "/admin/login",
       "route_id": "admin.login",
-      "shell_dir": "route-shells/login",
-      "resource_key": "admin_operations.login",
+      "implementation_path": "src/app/admin/login/page.tsx",
       "access": "anonymous"
     },
     {
       "route": "/admin/signup",
       "route_id": "admin.signup",
-      "shell_dir": "route-shells/signup",
-      "resource_key": "admin_operations.signup",
+      "implementation_path": "src/app/admin/signup/page.tsx",
       "access": "anonymous"
     },
     {
       "route": "/admin",
       "route_id": "admin.overview",
-      "shell_dir": "route-shells/overview",
-      "resource_key": "admin_operations.overview",
+      "implementation_path": "src/app/admin/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/reviews",
       "route_id": "admin.reviews",
-      "shell_dir": "route-shells/reviews",
-      "resource_key": "admin_operations.reviews",
+      "implementation_path": "src/app/admin/reviews/page.tsx",
       "access": "authenticated"
     },
     {
-      "route": "/admin/reviews/:reviewTaskId",
+      "route": "/admin/reviews/[reviewTaskId]",
       "route_id": "admin.review_detail",
-      "shell_dir": "route-shells/review-detail",
-      "resource_key": "admin_operations.review_detail",
+      "implementation_path": "src/app/admin/reviews/[reviewTaskId]/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/runs",
       "route_id": "admin.runs",
-      "shell_dir": "route-shells/runs",
-      "resource_key": "admin_operations.runs",
+      "implementation_path": "src/app/admin/runs/page.tsx",
       "access": "authenticated"
     },
     {
-      "route": "/admin/runs/:runId",
+      "route": "/admin/runs/[runId]",
       "route_id": "admin.run_detail",
-      "shell_dir": "route-shells/run-detail",
-      "resource_key": "admin_operations.run_detail",
-      "access": "authenticated"
-    },
-    {
-      "route": "/admin/changes",
-      "route_id": "admin.changes",
-      "shell_dir": "route-shells/changes",
-      "resource_key": "admin_operations.changes",
+      "implementation_path": "src/app/admin/runs/[runId]/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/banks",
       "route_id": "admin.banks",
-      "shell_dir": "route-shells/banks",
-      "resource_key": "admin_operations.banks",
+      "implementation_path": "src/app/admin/banks/page.tsx",
       "access": "authenticated"
+    },
+    {
+      "route": "/admin/banks/[bankCode]",
+      "route_id": "admin.bank_detail_redirect",
+      "implementation_path": "src/app/admin/banks/[bankCode]/page.tsx",
+      "access": "authenticated",
+      "behavior": "compatibility_redirect"
     },
     {
       "route": "/admin/product-types",
       "route_id": "admin.product_types",
-      "shell_dir": "route-shells/banks",
-      "resource_key": "admin_operations.product_types",
-      "access": "authenticated"
-    },
-    {
-      "route": "/admin/banks/:bankCode",
-      "route_id": "admin.bank_detail",
-      "shell_dir": "route-shells/bank-detail",
-      "resource_key": "admin_operations.bank_detail",
+      "implementation_path": "src/app/admin/product-types/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/source-catalog",
-      "route_id": "admin.source_catalog",
-      "shell_dir": "route-shells/source-catalog",
-      "resource_key": "admin_operations.source_catalog",
-      "access": "authenticated"
+      "route_id": "admin.source_catalog_redirect",
+      "implementation_path": "src/app/admin/source-catalog/page.tsx",
+      "access": "authenticated",
+      "behavior": "compatibility_redirect"
     },
     {
-      "route": "/admin/source-catalog/:catalogItemId",
-      "route_id": "admin.source_catalog_detail",
-      "shell_dir": "route-shells/source-catalog-detail",
-      "resource_key": "admin_operations.source_catalog_detail",
-      "access": "authenticated"
+      "route": "/admin/source-catalog/[catalogItemId]",
+      "route_id": "admin.source_catalog_detail_redirect",
+      "implementation_path": "src/app/admin/source-catalog/[catalogItemId]/page.tsx",
+      "access": "authenticated",
+      "behavior": "compatibility_redirect"
     },
     {
       "route": "/admin/sources",
       "route_id": "admin.sources",
-      "shell_dir": "route-shells/sources",
-      "resource_key": "admin_operations.sources",
+      "implementation_path": "src/app/admin/sources/page.tsx",
       "access": "authenticated"
     },
     {
-      "route": "/admin/sources/:sourceId",
+      "route": "/admin/sources/[sourceId]",
       "route_id": "admin.source_detail",
-      "shell_dir": "route-shells/source-detail",
-      "resource_key": "admin_operations.source_detail",
+      "implementation_path": "src/app/admin/sources/[sourceId]/page.tsx",
+      "access": "authenticated"
+    },
+    {
+      "route": "/admin/changes",
+      "route_id": "admin.changes",
+      "implementation_path": "src/app/admin/changes/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/audit",
       "route_id": "admin.audit",
-      "shell_dir": "route-shells/audit",
-      "resource_key": "admin_operations.audit",
-      "access": "authenticated"
-    },
-    {
-      "route": "/admin/publish",
-      "route_id": "admin.publish",
-      "shell_dir": "route-shells/publish",
-      "resource_key": "admin_operations.publish",
+      "implementation_path": "src/app/admin/audit/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/usage",
       "route_id": "admin.usage",
-      "shell_dir": "route-shells/usage",
-      "resource_key": "admin_operations.usage",
+      "implementation_path": "src/app/admin/usage/page.tsx",
       "access": "authenticated"
     },
     {
       "route": "/admin/health/dashboard",
       "route_id": "admin.health_dashboard",
-      "shell_dir": "route-shells/health-dashboard",
-      "resource_key": "admin_operations.health_dashboard",
-      "access": "authenticated"
-    },
-    {
-      "route": "/admin/products/:productId",
-      "route_id": "admin.product_record",
-      "shell_dir": "route-shells/product-record",
-      "resource_key": "admin_operations.product_record",
+      "implementation_path": "src/app/admin/health/dashboard/page.tsx",
       "access": "authenticated"
     }
   ]

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { ReviewDetailSurface } from "@/components/fpds/admin/review-detail-surface";
 import { fetchAdminSession, fetchReviewTaskDetail, getAdminApiOrigin } from "@/lib/admin-api";
@@ -50,7 +50,7 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -61,6 +61,6 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
       }}
     >
       <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }

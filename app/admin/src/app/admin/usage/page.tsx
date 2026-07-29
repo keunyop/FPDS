@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ApplicationShell5 } from "@/components/application-shell5";
+import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { LlmUsageSurface, type LlmUsagePageFilters } from "@/components/fpds/admin/llm-usage-surface";
 import { fetchAdminSession, fetchLlmUsage, getAdminApiOrigin } from "@/lib/admin-api";
@@ -49,7 +49,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
 
   return (
-    <ApplicationShell5
+    <AdminShell
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -60,7 +60,7 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
       }}
     >
       <LlmUsageSurface filters={filters} locale={locale} usage={usage} />
-    </ApplicationShell5>
+    </AdminShell>
   );
 }
 

@@ -809,21 +809,37 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
         <SourceDecisionCard copy={copy} detail={detail} locale={locale} />
       </div>
 
-      <AiVerificationPanel
-        copy={copy}
-        locale={locale}
-        error={aiVerificationError}
-        message={aiVerificationMessage}
-        onApplyAll={applyAiCorrections}
-        onApplyField={(field) => {
-          if (field.can_apply) {
-            applyAiCorrections({ [field.field_name]: field.proposed_value });
-          }
-        }}
-        onRun={handleAiVerification}
-        pending={aiVerificationPending}
-        verification={aiVerification}
-      />
+      <details
+        className="overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-sm"
+        open={
+          aiVerificationPending ||
+          Boolean(aiVerificationError || aiVerificationMessage) ||
+          aiVerification.latest_attempt?.execution_status === "failed" ||
+          Boolean(
+            aiVerification.latest_attempt?.result &&
+              aiVerification.latest_attempt.result.overall_status !== "verified",
+          )
+        }
+      >
+        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">
+          {copy.aiVerificationTitle}
+        </summary>
+        <AiVerificationPanel
+          copy={copy}
+          locale={locale}
+          error={aiVerificationError}
+          message={aiVerificationMessage}
+          onApplyAll={applyAiCorrections}
+          onApplyField={(field) => {
+            if (field.can_apply) {
+              applyAiCorrections({ [field.field_name]: field.proposed_value });
+            }
+          }}
+          onRun={handleAiVerification}
+          pending={aiVerificationPending}
+          verification={aiVerification}
+        />
+      </details>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
         <article className="min-w-0 border-y border-border/80 bg-card/95 px-5 py-5">
@@ -997,9 +1013,11 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
           </article>
 
           {diffPreview.length > 0 ? (
-            <article className="border-y border-border/80 bg-card/95 px-5 py-5">
-              <SectionHeading eyebrow={copy.editedApproval} title={copy.diffPreview} />
-              <div className="mt-4 divide-y divide-border/80">
+            <details className="border-y border-border/80 bg-card/95">
+              <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">
+                {copy.diffPreview} ({formatCount(locale, diffPreview.length)})
+              </summary>
+              <div className="divide-y divide-border/80 border-t border-border/80 px-5 py-4">
                 {diffPreview.map((item) => (
                   <div className="py-3 first:pt-0 last:pb-0" key={item.fieldName}>
                     <p className="text-sm font-medium text-foreground">{toTitleCase(item.fieldName)}</p>
@@ -1010,7 +1028,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
                   </div>
                 ))}
               </div>
-            </article>
+            </details>
           ) : null}
         </aside>
       </div>
@@ -1356,14 +1374,6 @@ function ReviewProductPresentation({
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{product.name}</h2>
             {product.description ? <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
           </div>
-          {detail.source_context.source_url ? (
-            <Button asChild className="shrink-0" variant="outline">
-              <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">
-                <ExternalLink />
-                {copy.openOriginSource}
-              </a>
-            </Button>
-          ) : null}
         </div>
 
         <dl className="mt-5 grid overflow-hidden rounded-lg border border-border/80 bg-background sm:grid-cols-3 sm:divide-x sm:divide-border/80">
@@ -1373,24 +1383,27 @@ function ReviewProductPresentation({
         </dl>
       </div>
 
-      <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        <section>
-          <SectionHeading eyebrow={copy.candidateDetails} title={copy.productFacts} />
-          <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
-            {product.facts.map((fact) => (
-              <ReviewProductFactRow key={fact.label} {...fact} />
-            ))}
-          </dl>
-        </section>
-        <section className="rounded-lg border border-border/80 bg-muted/20 p-4">
-          <SectionHeading eyebrow={copy.reviewFocus} title={copy.keyConditions} />
-          <dl className="mt-4 grid gap-4">
-            {product.conditions.map((fact) => (
-              <ReviewProductFactRow key={fact.label} {...fact} />
-            ))}
-          </dl>
-        </section>
-      </div>
+      <details>
+        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">{copy.candidateDetails}</summary>
+        <div className="grid gap-4 border-t border-border/80 p-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+          <section>
+            <SectionHeading eyebrow={copy.candidateDetails} title={copy.productFacts} />
+            <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+              {product.facts.map((fact) => (
+                <ReviewProductFactRow key={fact.label} {...fact} />
+              ))}
+            </dl>
+          </section>
+          <section className="rounded-lg border border-border/80 bg-muted/20 p-4">
+            <SectionHeading eyebrow={copy.reviewFocus} title={copy.keyConditions} />
+            <dl className="mt-4 grid gap-4">
+              {product.conditions.map((fact) => (
+                <ReviewProductFactRow key={fact.label} {...fact} />
+              ))}
+            </dl>
+          </section>
+        </div>
+      </details>
     </article>
   );
 }
@@ -1643,24 +1656,26 @@ function SourceDecisionCard({
   locale: AdminLocale;
 }) {
   return (
-    <article className="rounded-lg border border-border/80 bg-card/95 p-5 shadow-sm">
-      <p className="text-sm font-medium text-muted-foreground">{copy.sourceCheck}</p>
-      <dl className="mt-4 grid gap-3 text-sm">
-        <MetaRow label={copy.confidence} value={formatConfidence(detail.candidate.source_confidence, locale)} />
-        <MetaRow
-          label={copy.evidenceFields}
-          value={`${formatCount(locale, detail.evidence_summary.field_count)} ${copy.fields} / ${formatCount(locale, detail.evidence_summary.item_count)} ${copy.links}`}
-        />
-        {detail.source_context.discovery_role ? <MetaRow label={copy.sourceRole} value={toTitleCase(detail.source_context.discovery_role)} /> : null}
-      </dl>
-      {detail.source_context.source_url ? (
-        <Button asChild className="mt-4 w-full" variant="outline">
-          <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">
-            {copy.openSource} <ExternalLink />
-          </a>
-        </Button>
-      ) : null}
-    </article>
+    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+      <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">{copy.sourceCheck}</summary>
+      <div className="border-t border-border/80 p-5">
+        <dl className="grid gap-3 text-sm">
+          <MetaRow label={copy.confidence} value={formatConfidence(detail.candidate.source_confidence, locale)} />
+          <MetaRow
+            label={copy.evidenceFields}
+            value={`${formatCount(locale, detail.evidence_summary.field_count)} ${copy.fields} / ${formatCount(locale, detail.evidence_summary.item_count)} ${copy.links}`}
+          />
+          {detail.source_context.discovery_role ? <MetaRow label={copy.sourceRole} value={toTitleCase(detail.source_context.discovery_role)} /> : null}
+        </dl>
+        {detail.source_context.source_url ? (
+          <Button asChild className="mt-4 w-full" variant="outline">
+            <a href={detail.source_context.source_url} rel="noreferrer" target="_blank">
+              {copy.openSource} <ExternalLink />
+            </a>
+          </Button>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
