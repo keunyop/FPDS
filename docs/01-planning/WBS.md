@@ -271,6 +271,7 @@ Based on:
 | 4.8 | Completed | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
 | 4.9 | Completed | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
 | 4.10 | Completed | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5, 4.6 | 2026-05-06 |
+| 4.11 | Completed | Review Detail AI verification | official-domain live comparison, cited differences, safe correction staging, usage/audit persistence | Frontend, Backend, AI/Data | 4.3, 4.4, 4.8 | 2026-07-28 |
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 

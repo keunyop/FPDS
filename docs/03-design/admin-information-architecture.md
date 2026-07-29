@@ -281,6 +281,8 @@ Runtime decision refinement:
 - only affected fields are expanded initially; all other collected fields remain editable in one collapsed group
 - source check shows confidence, evidence coverage, source role, and the source link without duplicating bank/product identity or AI rationale already available in diagnostic context
 - reason code and reviewer note are optional collapsed controls; the recommended decision actions remain immediately available
+- an AI verification band sits between candidate/source context and editable fields; it searches only registered official bank domains, separates match, mismatch, and unverified results, keeps official citations visible, and allows safe corrections to be staged individually or together
+- AI verification is advisory evidence: running it does not alter review state, apply a candidate mutation, approve a product, or publish; the existing human edit-and-approve action remains the only persistence boundary
 
 ### 7.4 Source Registry Management
 

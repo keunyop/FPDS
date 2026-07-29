@@ -375,6 +375,8 @@ Every audit event must support at least the following fields.
 | `candidate_auto_promotion_skipped` | system | policy blocks auto-promotion for review or rejection | include skip reason, previous/new candidate state, and review task id when queued |
 | `stale_review_auto_superseded` | system | a newer candidate from the same detail source is approved | include old/new candidate ids and previous review/candidate states |
 | `evidence_trace_viewed` | user | reviewer opens sensitive trace context | include review task/product context |
+| `review_ai_verification_completed` | user | official-domain verification completes | include review/candidate/model ids, allowed domains, cited sources, result summary, and correction field names |
+| `review_ai_verification_failed` | user | official-domain verification fails | include review/candidate/model ids and safe failure reason |
 | `run_started` | system/user/scheduler | run initialization | include trigger metadata |
 | `run_completed` | system | run terminal completion | include summary counters |
 | `run_failed` | system | fatal run termination | include terminal reason |

@@ -581,6 +581,61 @@ export type ReviewModelExecution = {
   };
 };
 
+export type ReviewAiVerificationSource = {
+  url: string;
+  title: string;
+};
+
+export type ReviewAiVerificationField = {
+  field_name: string;
+  label: string;
+  status: "match" | "mismatch" | "unverified";
+  collected_value: unknown;
+  verified_value: unknown;
+  confidence: number;
+  rationale: string;
+  sources: ReviewAiVerificationSource[];
+  can_apply: boolean;
+  proposed_value: unknown;
+  validation_note: string | null;
+};
+
+export type ReviewAiVerification = {
+  status: "ready" | "unavailable" | "completed" | "failed";
+  provider_configured: boolean;
+  can_run: boolean;
+  latest_attempt: {
+    model_execution_id: string;
+    model_id: string;
+    execution_status: string;
+    started_at: string | null;
+    completed_at: string | null;
+    error_message: string | null;
+    allowed_domains: string[];
+    sources: ReviewAiVerificationSource[];
+    result: {
+      overall_status: "verified" | "differences_found" | "partial" | "unable";
+      summary: string;
+      verified_at: string;
+      status_counts: {
+        match: number;
+        mismatch: number;
+        unverified: number;
+      };
+      fields: ReviewAiVerificationField[];
+      proposed_corrections: Record<string, unknown>;
+      source_count: number;
+    } | null;
+    usage: {
+      llm_usage_id: string | null;
+      prompt_tokens: number | null;
+      completion_tokens: number | null;
+      estimated_cost: number | null;
+      recorded_at: string | null;
+    };
+  } | null;
+};
+
 export type ReviewTaskDetailResponse = {
   review_task: {
     review_task_id: string;
@@ -674,6 +729,7 @@ export type ReviewTaskDetailResponse = {
     summary: string;
   }>;
   model_executions: ReviewModelExecution[];
+  ai_verification: ReviewAiVerification;
   current_product: {
     product_id: string;
     status: string;

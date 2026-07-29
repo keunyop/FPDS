@@ -322,7 +322,7 @@ Typography direction:
 |---|---|---|
 | `/admin` | Admin Kit shell and dashboard structure | real-data Operational Attention Rail across Runs, Review, Public health, and access requests |
 | `/admin/reviews` | compact filters, responsive table/work cards, pagination | bank/product/problem-first scan order, review state, confidence, validation, bulk defer |
-| `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, affected fields, evidence trace, diff preview, alternative review actions, audit consequence |
+| `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, official-domain AI verification band, affected fields, cited evidence, correction staging, diff preview, alternative review actions, audit consequence |
 | `/admin/runs` | compact filters, joined summary, bounded table | failure and partial-completion triage, live state, source/candidate impact |
 | `/admin/runs/:id` | lifecycle strip and diagnostic regions | stage sequence, failure-first alert, source impact, related review workload, guarded retry |
 | `/admin/banks`, `/admin/product-types`, `/admin/sources` | registry tables and focused dialogs | identity, coverage, generated-source state, safe collection/update/delete workflows |

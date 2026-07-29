@@ -1235,14 +1235,21 @@ def _align_advertised_promotional_total(
     if labeled_match is not None:
         total_match = labeled_match
     additive_match = _find_additive_promotional_total(evidence_links_for_output)
-    if total_match is None and additive_match is not None:
+    regular_match = None
+    if additive_match is not None and (
+        total_match is None or total_match[0] is additive_match[0]
+    ):
         additive_link, additive_total, additive_regular = additive_match
         total_match = (additive_link, additive_total)
         regular_match = (additive_link, additive_regular)
     if total_match is None:
         return
     total_link, total_rate = total_match
-    regular_match = regular_match if additive_match is not None and total_match[0] is additive_match[0] else _find_regular_component_rate(evidence_links_for_output)
+    regular_match = (
+        regular_match
+        if additive_match is not None and total_match[0] is additive_match[0]
+        else _find_regular_component_rate(evidence_links_for_output)
+    )
     _replace_rate_value_from_link(
         field_name="promotional_rate",
         value=total_rate,

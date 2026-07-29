@@ -9,6 +9,7 @@ Current scope:
 - login, logout, session introspection, and approval-gated signup-request routes
 - review queue list route backed by `review_task` and `normalized_candidate`, including source role, missing expected fields, and a recommended next action
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
+- official-domain AI verification for a review task, with structured field comparison, safe correction proposals, model usage, source, and audit persistence
 - run list route backed by `ingestion_run` with protected run-state diagnostics
 - run detail read route with source processing summary, error summary, related review tasks, and usage summary
 - change-history list route backed by `change_event` with protected canonical chronology and manual-override audit context
@@ -44,6 +45,7 @@ Current routes:
 - `GET /api/admin/auth/session`
 - `GET /api/admin/review-tasks`
 - `GET /api/admin/review-tasks/:reviewTaskId`
+- `POST /api/admin/review-tasks/:reviewTaskId/ai-verify`
 - `GET /api/admin/runs`
 - `GET /api/admin/runs/:runId`
 - `POST /api/admin/runs/:runId/retry`
@@ -129,6 +131,7 @@ cd api/service
 - Public signup creates a pending `user_signup_request`; it does not create an active account until an existing `admin` approves the request and assigns a role.
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
+- Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists execution/usage/sources/audit context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
 - Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
 - Completed collection runs with `partial_completion_flag=true` expose the same retry path, while clean completed runs remain non-retryable.

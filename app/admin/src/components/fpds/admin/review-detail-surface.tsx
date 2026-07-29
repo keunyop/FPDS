@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Bot, Check, CirclePause, ExternalLink, Loader2, PencilLine, X } from "lucide-react";
+import { Bot, Check, CirclePause, ExternalLink, Loader2, PencilLine, ShieldCheck, Sparkles, TriangleAlert, X } from "lucide-react";
 
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type {
   ReviewDecisionAction,
+  ReviewAiVerification,
+  ReviewAiVerificationField,
   ReviewEvidenceLink,
   ReviewFieldItem,
   ReviewFieldTraceGroup,
@@ -87,6 +89,31 @@ const REVIEW_DETAIL_COPY = {
     keyConditions: "Key conditions",
     recommended: "Recommended action",
     sourceCheck: "Source check",
+    aiVerification: "AI verification",
+    aiVerificationTitle: "Check current official facts",
+    aiVerificationDescription: "AI searches the registered bank domain and compares current official facts. You keep the final decision.",
+    verifyWithAi: "Verify with AI",
+    verifyAgain: "Verify again",
+    verifyingWithAi: "Checking official bank sources",
+    aiProviderUnavailable: "Configure the OpenAI provider to run live verification.",
+    aiVerificationFailed: "AI verification could not complete.",
+    aiVerified: "Verified",
+    aiDifferencesFound: "Differences found",
+    aiPartial: "Partially verified",
+    aiUnable: "Unable to verify",
+    aiMatches: "Matches",
+    aiDifferences: "Differences",
+    aiUnverified: "Unverified",
+    aiOfficialValue: "Official value",
+    aiCollectedValue: "Collected value",
+    aiOfficialSources: "Official sources",
+    aiApplyCorrection: "Use correction",
+    aiApplyAll: "Use all safe corrections",
+    aiApplied: "AI corrections added to reviewed values.",
+    aiNoCorrections: "No contract-safe corrections are available.",
+    aiRunRecorded: "The verification run and usage are recorded for audit.",
+    aiLatestCheck: "Latest check",
+    aiModel: "Model",
     confidence: "Confidence",
     evidenceFields: "Evidence coverage",
     sourceRole: "Source role",
@@ -156,6 +183,31 @@ const REVIEW_DETAIL_COPY = {
     cashability: "Cashability",
   },
   ko: {
+    aiVerification: "AI 검증",
+    aiVerificationTitle: "현재 공식 정보 확인",
+    aiVerificationDescription: "AI가 등록된 은행 공식 도메인을 검색해 현재 정보와 수집 값을 비교합니다. 최종 결정은 검토자가 내립니다.",
+    verifyWithAi: "AI로 검증",
+    verifyAgain: "다시 검증",
+    verifyingWithAi: "은행 공식 출처 확인 중",
+    aiProviderUnavailable: "실시간 검증을 실행하려면 OpenAI 공급자를 설정하세요.",
+    aiVerificationFailed: "AI 검증을 완료하지 못했습니다.",
+    aiVerified: "검증 완료",
+    aiDifferencesFound: "차이 발견",
+    aiPartial: "일부 검증",
+    aiUnable: "검증 불가",
+    aiMatches: "일치",
+    aiDifferences: "불일치",
+    aiUnverified: "확인 불가",
+    aiOfficialValue: "공식 값",
+    aiCollectedValue: "수집 값",
+    aiOfficialSources: "공식 출처",
+    aiApplyCorrection: "보정값 사용",
+    aiApplyAll: "안전한 보정값 모두 사용",
+    aiApplied: "AI 보정값을 검토 값에 반영했습니다.",
+    aiNoCorrections: "필드 계약을 통과한 보정값이 없습니다.",
+    aiRunRecorded: "검증 실행과 사용량은 감사 이력에 기록됩니다.",
+    aiLatestCheck: "최근 검증",
+    aiModel: "모델",
     backToQueue: "검토 대기열로",
     openRun: "실행 보기",
     sourceCandidateName: "원본 후보 이름",
@@ -260,6 +312,31 @@ const REVIEW_DETAIL_COPY = {
     cashability: "중도 인출",
   },
   ja: {
+    aiVerification: "AI検証",
+    aiVerificationTitle: "現在の公式情報を確認",
+    aiVerificationDescription: "AIが登録済みの銀行公式ドメインを検索し、現在の情報と収集値を比較します。最終判断はレビュー担当者が行います。",
+    verifyWithAi: "AIで検証",
+    verifyAgain: "再検証",
+    verifyingWithAi: "銀行の公式情報を確認中",
+    aiProviderUnavailable: "ライブ検証を実行するにはOpenAIプロバイダーを設定してください。",
+    aiVerificationFailed: "AI検証を完了できませんでした。",
+    aiVerified: "検証済み",
+    aiDifferencesFound: "差異あり",
+    aiPartial: "一部検証済み",
+    aiUnable: "検証不可",
+    aiMatches: "一致",
+    aiDifferences: "不一致",
+    aiUnverified: "未確認",
+    aiOfficialValue: "公式値",
+    aiCollectedValue: "収集値",
+    aiOfficialSources: "公式ソース",
+    aiApplyCorrection: "補正値を使用",
+    aiApplyAll: "安全な補正値をすべて使用",
+    aiApplied: "AI補正値をレビュー値に反映しました。",
+    aiNoCorrections: "フィールド契約を満たす補正値はありません。",
+    aiRunRecorded: "検証実行と使用量は監査履歴に記録されます。",
+    aiLatestCheck: "最新の検証",
+    aiModel: "モデル",
     backToQueue: "レビューキューへ",
     openRun: "実行を表示",
     sourceCandidateName: "ソース候補名",
@@ -451,6 +528,10 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
   const [extraFieldValue, setExtraFieldValue] = useState("");
   const [extraOverrides, setExtraOverrides] = useState<ExtraOverride[]>([]);
   const [pendingAction, setPendingAction] = useState<ReviewDecisionAction | null>(null);
+  const [aiVerification, setAiVerification] = useState<ReviewAiVerification>(detail.ai_verification);
+  const [aiVerificationPending, setAiVerificationPending] = useState(false);
+  const [aiVerificationMessage, setAiVerificationMessage] = useState<string | null>(null);
+  const [aiVerificationError, setAiVerificationError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFieldName, setSelectedFieldName] = useState<string | null>(
@@ -549,7 +630,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
     [orderedReviewFields],
   );
 
-  const decisionDisabled = Boolean(pendingAction);
+  const decisionDisabled = Boolean(pendingAction) || aiVerificationPending;
   const editApproveDisabled =
     decisionDisabled ||
     !detail.available_actions.includes("edit_approve") ||
@@ -565,6 +646,57 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
   function updateEditableField(fieldName: string, value: string) {
     setError(null);
     setEditableValues((current) => ({ ...current, [fieldName]: value }));
+  }
+
+  function applyAiCorrections(corrections: Record<string, unknown>) {
+    const entries = Object.entries(corrections).filter(([fieldName]) => isReviewEditableField(fieldName));
+    if (entries.length === 0) {
+      setAiVerificationMessage(copy.aiNoCorrections);
+      return;
+    }
+    setEditableValues((current) => {
+      const next = { ...current };
+      for (const [fieldName, value] of entries) {
+        next[fieldName] = valueToEditableString(value);
+      }
+      return next;
+    });
+    setAiVerificationError(null);
+    setAiVerificationMessage(copy.aiApplied);
+  }
+
+  async function handleAiVerification() {
+    if (!aiVerification.can_run || aiVerificationPending) {
+      return;
+    }
+    setAiVerificationPending(true);
+    setAiVerificationError(null);
+    setAiVerificationMessage(null);
+    try {
+      const response = await fetch(`/admin/reviews/${detail.review_task.review_task_id}/ai-verify`, {
+        method: "POST",
+        headers: {
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
+      });
+      const payload = (await response.json()) as {
+        data?: { ai_verification?: ReviewAiVerification };
+        error?: { message?: string };
+      };
+      if (payload.data?.ai_verification) {
+        setAiVerification(payload.data.ai_verification);
+      }
+      if (!response.ok) {
+        const persistedFailure = payload.data?.ai_verification?.latest_attempt?.execution_status === "failed";
+        setAiVerificationError(persistedFailure ? null : (payload.error?.message ?? copy.aiVerificationFailed));
+        return;
+      }
+      setAiVerificationMessage(copy.aiRunRecorded);
+    } catch {
+      setAiVerificationError(copy.aiVerificationFailed);
+    } finally {
+      setAiVerificationPending(false);
+    }
   }
 
   function addExtraOverride() {
@@ -627,13 +759,19 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
 
   return (
     <section
-      aria-busy={pendingAction ? true : undefined}
+      aria-busy={pendingAction || aiVerificationPending ? true : undefined}
       className="grid gap-5"
       data-admin-dirty={hasUnsavedChanges ? "true" : undefined}
-      data-admin-mutation-pending={pendingAction ? "true" : undefined}
+      data-admin-mutation-pending={pendingAction || aiVerificationPending ? "true" : undefined}
     >
       <p aria-live="polite" className="sr-only" role="status">
-        {pendingAction ? copy.submitting : message ? `${copy.submittedAction}: ${message}` : ""}
+        {aiVerificationPending
+          ? copy.verifyingWithAi
+          : pendingAction
+            ? copy.submitting
+            : message
+              ? `${copy.submittedAction}: ${message}`
+              : aiVerificationMessage ?? ""}
       </p>
       <AdminPageHeader
         actions={
@@ -670,6 +808,22 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
         <DecisionRecommendationCard copy={copy} recommendation={recommendation} />
         <SourceDecisionCard copy={copy} detail={detail} locale={locale} />
       </div>
+
+      <AiVerificationPanel
+        copy={copy}
+        locale={locale}
+        error={aiVerificationError}
+        message={aiVerificationMessage}
+        onApplyAll={applyAiCorrections}
+        onApplyField={(field) => {
+          if (field.can_apply) {
+            applyAiCorrections({ [field.field_name]: field.proposed_value });
+          }
+        }}
+        onRun={handleAiVerification}
+        pending={aiVerificationPending}
+        verification={aiVerification}
+      />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
         <article className="min-w-0 border-y border-border/80 bg-card/95 px-5 py-5">
@@ -865,6 +1019,308 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
       <AuditContextPanel copy={copy} detail={detail} locale={locale} />
     </section>
   );
+}
+
+function AiVerificationPanel({
+  copy,
+  locale,
+  error,
+  message,
+  onApplyAll,
+  onApplyField,
+  onRun,
+  pending,
+  verification,
+}: {
+  copy: ReviewDetailCopy;
+  locale: AdminLocale;
+  error: string | null;
+  message: string | null;
+  onApplyAll: (corrections: Record<string, unknown>) => void;
+  onApplyField: (field: ReviewAiVerificationField) => void;
+  onRun: () => void;
+  pending: boolean;
+  verification: ReviewAiVerification;
+}) {
+  const attempt = verification.latest_attempt;
+  const result = attempt?.result;
+  const corrections = result?.proposed_corrections ?? {};
+  const correctionCount = Object.keys(corrections).length;
+  const priorityFields = result?.fields.filter((field) => field.status !== "match") ?? [];
+  const matchedFields = result?.fields.filter((field) => field.status === "match") ?? [];
+
+  return (
+    <article
+      aria-busy={pending ? true : undefined}
+      className="border-y border-border/80 bg-card/95"
+      data-admin-mutation-pending={pending ? "true" : undefined}
+    >
+      <div className="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            <Sparkles className="size-4" aria-hidden="true" />
+            {copy.aiVerification}
+          </div>
+          <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground">{copy.aiVerificationTitle}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.aiVerificationDescription}</p>
+        </div>
+        <Button
+          className="min-w-36"
+          disabled={!verification.can_run || pending}
+          onClick={onRun}
+          type="button"
+        >
+          {pending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+          {pending
+            ? copy.verifyingWithAi
+            : attempt
+              ? copy.verifyAgain
+              : copy.verifyWithAi}
+        </Button>
+      </div>
+
+      {!verification.provider_configured ? (
+        <div className="border-t border-border/70 px-5 py-4">
+          <p className="flex items-start gap-2 text-sm leading-6 text-warning">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {copy.aiProviderUnavailable}
+          </p>
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="border-t border-border/70 px-5 py-4">
+          <StatusMessage tone="destructive">{error}</StatusMessage>
+        </div>
+      ) : null}
+      {message ? (
+        <div className="border-t border-border/70 px-5 py-4">
+          <StatusMessage tone="success">{message}</StatusMessage>
+        </div>
+      ) : null}
+
+      {attempt ? (
+        <div className="border-t border-border/70 px-5 py-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", aiVerificationStatusClasses(result?.overall_status, attempt.execution_status))}>
+              {aiVerificationStatusLabel(copy, result?.overall_status, attempt.execution_status)}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {copy.aiLatestCheck}: {formatTimestamp(attempt.completed_at ?? attempt.started_at, locale)}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {copy.aiModel}: {attempt.model_id}
+            </span>
+          </div>
+
+          {attempt.execution_status === "failed" ? (
+            <p className="mt-3 text-sm leading-6 text-destructive">{attempt.error_message ?? copy.aiVerificationFailed}</p>
+          ) : result ? (
+            <>
+              <div className="mt-4 grid gap-px overflow-hidden rounded-lg border border-border/80 bg-border/80 sm:grid-cols-3">
+                <AiVerificationCount
+                  icon={<ShieldCheck className="size-4" aria-hidden="true" />}
+                  label={copy.aiMatches}
+                  value={result.status_counts.match}
+                />
+                <AiVerificationCount
+                  icon={<TriangleAlert className="size-4" aria-hidden="true" />}
+                  label={copy.aiDifferences}
+                  value={result.status_counts.mismatch}
+                />
+                <AiVerificationCount
+                  icon={<CirclePause className="size-4" aria-hidden="true" />}
+                  label={copy.aiUnverified}
+                  value={result.status_counts.unverified}
+                />
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
+                <p className="max-w-3xl text-sm leading-6 text-foreground">{result.summary}</p>
+                {correctionCount > 0 ? (
+                  <Button onClick={() => onApplyAll(corrections)} type="button" variant="outline">
+                    <PencilLine aria-hidden="true" />
+                    {copy.aiApplyAll} ({formatCount(locale, correctionCount)})
+                  </Button>
+                ) : (
+                  <p className="text-xs leading-5 text-muted-foreground">{copy.aiNoCorrections}</p>
+                )}
+              </div>
+
+              {priorityFields.length > 0 ? (
+                <div className="mt-4 divide-y divide-border/75 border-y border-border/75">
+                  {priorityFields.map((field) => (
+                    <AiVerificationFieldRow
+                      copy={copy}
+                      field={field}
+                      key={field.field_name}
+                      locale={locale}
+                      onApply={() => onApplyField(field)}
+                    />
+                  ))}
+                </div>
+              ) : null}
+
+              {matchedFields.length > 0 ? (
+                <details className="mt-4 rounded-lg border border-border/80 bg-background">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
+                    {copy.aiMatches} ({formatCount(locale, matchedFields.length)})
+                  </summary>
+                  <div className="divide-y divide-border/70 border-t border-border/70 px-4">
+                    {matchedFields.map((field) => (
+                      <AiVerificationFieldRow
+                        copy={copy}
+                        field={field}
+                        key={field.field_name}
+                        locale={locale}
+                        onApply={() => onApplyField(field)}
+                      />
+                    ))}
+                  </div>
+                </details>
+              ) : null}
+
+              {attempt.sources.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    {copy.aiOfficialSources}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {attempt.sources.map((source) => (
+                      <a
+                        className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground hover:border-primary/50 hover:text-primary"
+                        href={source.url}
+                        key={source.url}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <ExternalLink className="size-3.5" aria-hidden="true" />
+                        {source.title || source.url}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function AiVerificationCount({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-3 bg-background px-4 py-3">
+      <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        {icon}
+        {label}
+      </span>
+      <span className="font-mono text-sm font-semibold text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function AiVerificationFieldRow({
+  copy,
+  field,
+  locale,
+  onApply,
+}: {
+  copy: ReviewDetailCopy;
+  field: ReviewAiVerificationField;
+  locale: AdminLocale;
+  onApply: () => void;
+}) {
+  return (
+    <div className="grid gap-3 py-4 first:pt-0 last:pb-0 lg:grid-cols-[minmax(10rem,0.65fr)_minmax(0,1.35fr)_auto] lg:items-start">
+      <div>
+        <p className="text-sm font-semibold text-foreground">{field.label}</p>
+        <span className={cn("mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-medium", aiFieldStatusClasses(field.status))}>
+          {field.status === "match" ? copy.aiMatches : field.status === "mismatch" ? copy.aiDifferences : copy.aiUnverified}
+        </span>
+      </div>
+      <div className="min-w-0">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <p className="text-xs text-muted-foreground">{copy.aiCollectedValue}</p>
+            <p className="mt-1 break-words text-sm leading-6 text-foreground">{formatValue(field.collected_value, locale)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{copy.aiOfficialValue}</p>
+            <p className="mt-1 break-words text-sm leading-6 text-foreground">{formatValue(field.verified_value, locale)}</p>
+          </div>
+        </div>
+        {field.rationale ? <p className="mt-2 text-xs leading-5 text-muted-foreground">{field.rationale}</p> : null}
+        {field.validation_note ? <p className="mt-2 text-xs leading-5 text-warning">{field.validation_note}</p> : null}
+        {field.sources.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+            {field.sources.map((source) => (
+              <a
+                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                href={source.url}
+                key={source.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {source.title || copy.openSource}
+                <ExternalLink className="size-3" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      {field.can_apply ? (
+        <Button onClick={onApply} size="sm" type="button" variant="outline">
+          <PencilLine aria-hidden="true" />
+          {copy.aiApplyCorrection}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function aiVerificationStatusLabel(
+  copy: ReviewDetailCopy,
+  overallStatus: "verified" | "differences_found" | "partial" | "unable" | undefined,
+  executionStatus: string,
+) {
+  if (executionStatus === "failed") {
+    return copy.aiVerificationFailed;
+  }
+  if (overallStatus === "verified") {
+    return copy.aiVerified;
+  }
+  if (overallStatus === "differences_found") {
+    return copy.aiDifferencesFound;
+  }
+  if (overallStatus === "partial") {
+    return copy.aiPartial;
+  }
+  return copy.aiUnable;
+}
+
+function aiVerificationStatusClasses(
+  overallStatus: "verified" | "differences_found" | "partial" | "unable" | undefined,
+  executionStatus: string,
+) {
+  if (executionStatus === "failed" || overallStatus === "unable") {
+    return "bg-destructive/10 text-destructive";
+  }
+  if (overallStatus === "verified") {
+    return "bg-success/10 text-success";
+  }
+  return "bg-warning/10 text-warning";
+}
+
+function aiFieldStatusClasses(status: ReviewAiVerificationField["status"]) {
+  if (status === "match") {
+    return "bg-success/10 text-success";
+  }
+  if (status === "mismatch") {
+    return "bg-warning/10 text-warning";
+  }
+  return "bg-muted text-muted-foreground";
 }
 
 type ReviewProductFact = {

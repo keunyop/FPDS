@@ -27,6 +27,11 @@ from api_service.aggregate_refresh import (
     queue_review_aggregate_refresh_request,
     request_manual_aggregate_refresh,
 )
+from api_service.ai_verification import (
+    AiVerificationError,
+    load_latest_ai_verification,
+    run_review_ai_verification,
+)
 from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
@@ -194,6 +199,11 @@ async def login_error_handler(request: Request, exc: LoginError):
 
 @app.exception_handler(ReviewTaskError)
 async def review_task_error_handler(request: Request, exc: ReviewTaskError):
+    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
+
+
+@app.exception_handler(AiVerificationError)
+async def ai_verification_error_handler(request: Request, exc: AiVerificationError):
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
 
 
@@ -1068,6 +1078,13 @@ async def review_task_detail(request: Request, review_task_id: str, background_t
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         payload = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
+        if payload:
+            payload["ai_verification"] = load_latest_ai_verification(
+                connection,
+                review_task_id=review_task_id,
+                actor_role=str(actor["role"]),
+                review_state=str(payload["review_task"].get("review_state") or ""),
+            )
     if not payload:
         return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
     _schedule_evidence_trace_viewed_audit(
@@ -1085,6 +1102,50 @@ async def review_task_detail(request: Request, review_task_id: str, background_t
         evidence_item_count=int(payload["evidence_summary"]["item_count"]),
     )
     return _success(payload, request)
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/ai-verify")
+def ai_verify_review_task(request: Request, review_task_id: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        detail = load_review_task_detail(
+            connection,
+            review_task_id=review_task_id,
+            actor_role=str(actor["role"]),
+        )
+        if not detail:
+            return _error(
+                status_code=404,
+                code="review_task_not_found",
+                message="Review task was not found.",
+                request=request,
+            )
+        result = run_review_ai_verification(
+            connection,
+            detail=detail,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    if not result["ok"]:
+        return JSONResponse(
+            status_code=int(result["status_code"]),
+            content={
+                "error": {
+                    "code": result["error"]["code"],
+                    "message": result["error"]["message"],
+                    "details": {},
+                },
+                "data": {"ai_verification": result["ai_verification"]},
+                "meta": _meta(request),
+            },
+        )
+    return _success({"ai_verification": result["ai_verification"]}, request)
 
 
 def _schedule_evidence_trace_viewed_audit(

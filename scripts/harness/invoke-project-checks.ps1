@@ -171,7 +171,8 @@ function Install-PackageDependenciesIfNeeded {
 
 $repoRoot = Get-RepoRoot
 $packageJsonFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter package.json -File -ErrorAction SilentlyContinue | Where-Object {
-    $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\"
+    $_.FullName -notmatch "\\(\.git|node_modules|\.next|\.venv)\\" -and
+    $_.FullName -notmatch "\\tmp\\chrome-[^\\]+\\"
 }
 
 if (-not $packageJsonFiles) {

@@ -4,7 +4,7 @@ This repository is the docs-first workspace for `FPDS` (Finance Product Data Ser
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-27`:
+As of `2026-07-28`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -42,6 +42,7 @@ As of `2026-07-27`:
 - `WBS 4.8` LLM usage tracking is now complete with a session-protected usage dashboard API, time-range and scope filters, totals, per-model, per-agent, per-run, and trend aggregations, and anomaly drilldown candidates
 - `WBS 4.9` usage dashboard v1 is now complete with provider/stage/search filters, richer scope coverage signals, concentration shares, trend deltas, and denser anomaly drilldown context on `/admin/usage`
 - `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
+- `WBS 4.11` Review Detail AI verification is now complete: authorized reviewers can force a live search of registered official bank domains, compare official facts with the collected candidate, inspect cited match/mismatch/unverified results, and selectively stage contract-safe corrections without auto-approving or publishing
 - `WBS 5.1` Big 5 source registry is now complete with a committed Canada Big 5 registry catalog and per-bank `chequing`, `savings`, and `gic` source baselines
 - `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification
@@ -75,7 +76,7 @@ As of `2026-07-27`:
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth, session handling, and approval-gated signup requests
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, `/admin/signup`, protected `/admin`, and session-aware route gating
 - a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for Deposit, `/loans` for approved retail lending, `/products/[productId]` for public product detail, and `/methodology` for public metric/data-boundary notes
-- a live review-queue, decision, and trace runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
+- a live review-queue, decision, trace, and AI-verification runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, `POST /api/admin/review-tasks/:reviewTaskId/ai-verify`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
 - a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface

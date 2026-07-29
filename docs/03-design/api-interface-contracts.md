@@ -474,6 +474,7 @@ Rules:
 | `validation_issues[]` | issue detail |
 | `decision_history[]` | previous decisions |
 | `model_executions[]` | relevant execution references |
+| `ai_verification` | latest official-domain AI verification attempt, result, sources, and usage |
 
 `evidence_links[]`는 아래를 포함한다.
 
@@ -486,6 +487,21 @@ Rules:
 - `source_url`
 - `citation_confidence`
 - `model_execution_id`
+
+### 5.3A `POST /api/admin/review-tasks/:id/ai-verify`
+
+Purpose:
+- independently re-check the candidate against current official bank information before a human decision.
+
+Contract:
+- requires an authenticated `admin` or `reviewer` session and the standard CSRF header;
+- forces a live OpenAI Responses web search restricted to domains registered for the candidate's bank;
+- returns field-level `match`, `mismatch`, or `unverified` status, collected and verified values, confidence, rationale, and clickable official sources;
+- returns `proposed_corrections` only for editable fields that pass the same type and range normalization as manual review overrides;
+- persists `model_execution`, `llm_usage_record`, official source metadata, and a success/failure `audit_event`;
+- never changes candidate, review, canonical product, or publish state.
+
+Repeated runs are append-only. `GET /api/admin/review-tasks/:id` exposes the newest attempt through `ai_verification`; provider, source, or schema failures remain readable and do not mutate product data.
 
 ### 5.4 Review Decision Routes
 

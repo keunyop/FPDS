@@ -46,6 +46,95 @@ class AiRuntimeTests(unittest.TestCase):
         self.assertEqual(result, {"result": "ok"})
         self.assertEqual(metadata["model_id"], "gpt-5.6-luna")
 
+    def test_responses_request_can_force_domain_restricted_web_search(self) -> None:
+        response = MagicMock()
+        response.read.return_value = json.dumps(
+            {
+                "id": "resp-test-002",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "web_search_call",
+                        "action": {
+                            "type": "search",
+                            "sources": [
+                                {"url": "https://bank.example/rates", "title": "Official rates"},
+                            ],
+                        },
+                    },
+                    {
+                        "type": "message",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "text": '{"result":"verified"}',
+                                "annotations": [
+                                    {
+                                        "type": "url_citation",
+                                        "url": "https://bank.example/rates",
+                                        "title": "Official rates",
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                ],
+                "usage": {"input_tokens": 10, "output_tokens": 5},
+            }
+        ).encode("utf-8")
+
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "FPDS_LLM_PROVIDER": "openai",
+                    "FPDS_LLM_API_KEY": "test-key",
+                    "FPDS_LLM_MODEL": "test-model",
+                },
+                clear=True,
+            ),
+            patch("worker.pipeline.fpds_ai_runtime.urllib.request.urlopen") as urlopen,
+        ):
+            urlopen.return_value.__enter__.return_value = response
+            result, metadata = invoke_openai_json_schema(
+                instructions="Verify the product.",
+                payload={"input": "test"},
+                schema_name="test_result",
+                schema={
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {"result": {"type": "string"}},
+                    "required": ["result"],
+                },
+                web_search_allowed_domains=[
+                    "https://www.bank.example/products",
+                    "bank.example",
+                ],
+                require_web_search=True,
+            )
+
+        request_body = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
+        self.assertEqual(
+            request_body["tools"],
+            [
+                {
+                    "type": "web_search",
+                    "search_context_size": "medium",
+                    "external_web_access": True,
+                    "filters": {"allowed_domains": ["bank.example"]},
+                }
+            ],
+        )
+        self.assertEqual(request_body["tool_choice"], "required")
+        self.assertEqual(request_body["include"], ["web_search_call.action.sources"])
+        self.assertEqual(request_body["max_tool_calls"], 4)
+        self.assertFalse(request_body["store"])
+        self.assertEqual(result, {"result": "verified"})
+        self.assertEqual(
+            metadata["web_search_sources"],
+            [{"url": "https://bank.example/rates", "title": "Official rates"}],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

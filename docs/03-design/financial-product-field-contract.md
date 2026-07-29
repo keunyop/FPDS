@@ -78,6 +78,7 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 37. A base monthly fee shown as `$X or $0` with a balance condition remains `$X` in `monthly_fee` and `public_display_fee`; the balance-qualified zero belongs in `fee_waiver_condition` and `minimum_balance`.
 38. Audience booleans and customer tags require the target product identity itself to name the audience; related audience benefit sections on a general account page are cross-product support copy. Finite transaction parsing may ignore bounded HTML footnote glyphs, and `minimum_balance` must equal the positive threshold stated by its grounded `fee_waiver_condition` or validation must review the candidate.
 39. Chequing collection requests `transaction_fee` as a currency scalar in addition to the monthly fee. A product-wide per-transaction charge may be stored only from its own adjacent transaction-fee label; balances or audience rules that waive that charge or the monthly fee remain explanatory conditions and cannot replace the base scalar.
+40. Review Detail AI verification may propose a correction only when a current official source from the registered bank domain supports the exact field and the value passes the same manual-override coercion and range checks. Unsupported or ambiguous facts remain `unverified`; verification never guesses, auto-approves, or publishes.
 
 ## Runtime Validation
 

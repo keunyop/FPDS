@@ -25,7 +25,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-27`:
+As of `2026-07-28`:
 - `WBS 5` is the active stage
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - Public Home, Deposit, Loan, comparison, detail, and Methodology now use the verified-record visual system and were production-verified against the live aggregate snapshot in EN, KO, and JA at desktop, tablet, and exact `390px`; `WBS 5.14` remains complete
@@ -33,7 +33,8 @@ As of `2026-07-27`:
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
-- the active FPDS Admin accuracy audit has retracted confirmed unsafe legacy/live candidates through audited remediation, added exact percentage evidence, promotion/standard-rate, fee, currency, source-role, and product-boundary guards, and is completing fresh representative recollection under `goal.md`
+- the FPDS Admin accuracy audit has retracted confirmed unsafe legacy/live candidates through audited remediation and added exact percentage evidence, promotion/standard-rate, fee, currency, source-role, and product-boundary guards; its representative recollection checkpoints remain documented in the recent entries
+- Review Detail now supports CSRF-protected, role-gated AI verification against registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; the existing human decision remains the only approval/publish boundary
 - latest source/review hardening blocks multi-product family composites, fixes rate-first schedule pairing and `www`/apex redirects, excludes service/advice and cross-product sources, verified named Haventree mortgage discovery, and completed the approved audited retraction of two unsafe historical candidates
 - the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
@@ -68,6 +69,22 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-28 - Review Detail Official-Domain AI Verification
+
+- WBS: `4.11`, Review and evidence operations
+- Status: done
+- Goal: let an authorized reviewer independently compare one collected candidate with current official bank facts, inspect evidence-backed differences, and stage safe corrections without weakening the existing human approval boundary.
+- Why now: Review Detail already exposed the candidate, trace, and manual override workflow, but reviewers still had to leave FPDS and manually repeat the official-source check before deciding.
+- Outcome: `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` now forces OpenAI Responses web search within the bank domains registered from its homepage and source documents. The strict structured result is reduced server-side to match/mismatch/unverified fields, official citations, confidence, rationale, and correction proposals that pass the existing override contract. The newest attempt is returned with Review Detail and repeated attempts remain append-only.
+- UI: Review Detail includes a compact EN/KO/JA verification band with provider, running, success, partial, unavailable, and failure states; field counts; collected-versus-official values; clickable official sources; and individual/all-safe correction staging. Staging only fills the existing reviewed-value form. The operator must still submit Edit & Approve.
+- Safety and audit: only `admin` and `reviewer` roles can run verification; the route requires the session CSRF token. Unknown/read-only result fields and non-official sources are discarded, unsupported facts become `unverified`, and provider/schema failures do not mutate the candidate. Model execution, token/cost usage, allowed domains, sources, result metadata, and completion/failure audit events are persisted.
+- Not done: no automatic approval, canonical product mutation, publish transition, public API exposure, or unrestricted web search was added. A live paid model call was not made as part of automated verification.
+- Key files: `api/service/api_service/ai_verification.py`, `api_service/main.py`, `worker/pipeline/fpds_ai_runtime.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, the Review Detail AI proxy route, API/worker tests, and the active API/IA/state/field-contract design documents.
+- Decisions: verification is advisory and evidence-first. Current official facts require a returned citation from the allowed bank domain; no citation means unverified. Corrections reuse the manual review coercion/range boundary and are never committed by the AI action itself.
+- Verification: focused AI/review tests passed (`38`). The full API suite passed (`277`) and the full Worker suite passed (`394`). The Foundation entrypoint passed Repo Doctor and baseline validation, Admin typecheck/build (`24` static pages plus the new AI proxy route), and Public typecheck/build (`7` pages). The Worker suite exposed an existing uninitialized promotional-component branch; the minimal fix now preserves an explicitly additive regular-plus-promotion total and its regression test passes. Foundation initially inspected Git-ignored Chrome QA user profiles under `tmp/chrome-*`; harness discovery now excludes only those generated browser profiles while retaining tracked `tmp` fixture checks.
+- Known issues: the live feature requires a configured OpenAI provider key and outbound access at runtime. Verification quality still depends on the bank publishing an accessible current official fact; inaccessible or ambiguous facts intentionally remain unverified.
+- Next step: Product Owner visual/operational review with a configured development provider and a representative queued task; no schema migration or canonical-data operation is required.
 
 ## 2026-07-27 - FPDS Admin Evidence-Operations Design And Production QA
 
