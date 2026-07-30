@@ -118,7 +118,9 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
         refresh_call = next(params for sql, params in connection.calls if "INSERT INTO aggregate_refresh_request" in sql)
         self.assertEqual(refresh_call["trigger_reason"], "auto_promotion")
+        self.assertEqual(refresh_call["country_code"], "CA")
         self.assertIn('"candidate_ids": ["cand-001"]', str(refresh_call["request_metadata"]))
+        self.assertEqual(result["aggregate_refreshes"], [result["aggregate_refresh"]])
 
     def test_approval_supersedes_older_same_source_review_with_audit(self) -> None:
         candidate = _candidate_row()

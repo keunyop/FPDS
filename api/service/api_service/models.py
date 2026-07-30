@@ -8,8 +8,13 @@ AUTH_PASSWORD_MIN_LENGTH = 4
 
 
 class LoginRequest(BaseModel):
+    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
     login_id: str = Field(min_length=3, max_length=50)
     password: str = Field(min_length=AUTH_PASSWORD_MIN_LENGTH, max_length=256)
+
+
+class CountrySwitchRequest(BaseModel):
+    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
 
 
 class SignupRequestCreateRequest(BaseModel):
@@ -32,7 +37,7 @@ class ReviewDecisionRequest(BaseModel):
 class SourceRegistryWriteRequest(BaseModel):
     source_id: str | None = Field(default=None, max_length=120)
     bank_code: str | None = Field(default=None, max_length=20)
-    country_code: str | None = Field(default=None, max_length=10)
+    country_code: str | None = Field(default=None, min_length=2, max_length=2)
     product_type: str | None = Field(default=None, max_length=50)
     product_key: str | None = Field(default=None, max_length=120)
     source_name: str | None = Field(default=None, max_length=300)
@@ -61,7 +66,7 @@ class BankWriteRequest(BaseModel):
     homepage_url: str | None = Field(default=None, max_length=2000)
     logo_url: str | None = Field(default=None, max_length=2000)
     logo_alt_text: str | None = Field(default=None, max_length=300)
-    country_code: str | None = Field(default=None, max_length=10)
+    country_code: str | None = Field(default=None, min_length=2, max_length=2)
     source_language: str | None = Field(default=None, max_length=10)
     status: str | None = Field(default=None, max_length=30)
     change_reason: str | None = Field(default=None, max_length=2000)

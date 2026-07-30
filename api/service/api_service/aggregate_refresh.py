@@ -37,6 +37,7 @@ def queue_review_aggregate_refresh_request(
     country_code: str = DEFAULT_COUNTRY_CODE,
     refresh_scope: str = DEFAULT_REFRESH_SCOPE,
 ) -> dict[str, Any]:
+    country_code = _normalize_country_code(country_code)
     requested_at = utc_now()
     request_row = {
         "aggregate_refresh_request_id": new_id("aggreq"),
@@ -76,6 +77,7 @@ def queue_auto_promotion_aggregate_refresh_request(
     country_code: str = DEFAULT_COUNTRY_CODE,
     refresh_scope: str = DEFAULT_REFRESH_SCOPE,
 ) -> dict[str, Any]:
+    country_code = _normalize_country_code(country_code)
     requested_at = utc_now()
     request_row = {
         "aggregate_refresh_request_id": new_id("aggreq"),
@@ -129,6 +131,7 @@ def request_manual_aggregate_refresh(
     country_code: str = DEFAULT_COUNTRY_CODE,
     refresh_scope: str = DEFAULT_REFRESH_SCOPE,
 ) -> dict[str, Any]:
+    country_code = _normalize_country_code(country_code)
     actor_role = str(actor.get("role", ""))
     if actor_role not in MUTATION_ROLES:
         raise AggregateRefreshError(
@@ -234,6 +237,38 @@ def claim_aggregate_refresh_batch(
         "refresh_scope": refresh_scope,
         "started_at": _serialize_timestamp(started_at),
     }
+
+
+def claim_next_aggregate_refresh_batch(connection: Any) -> dict[str, Any] | None:
+    next_scope = connection.execute(
+        """
+        SELECT
+            country_code,
+            refresh_scope
+        FROM aggregate_refresh_request
+        WHERE request_status IN ('queued', 'started')
+        ORDER BY requested_at ASC, aggregate_refresh_request_id ASC
+        LIMIT 1
+        """
+    ).fetchone()
+    if not next_scope:
+        return None
+    return claim_aggregate_refresh_batch(
+        connection,
+        country_code=str(next_scope["country_code"]),
+        refresh_scope=str(next_scope["refresh_scope"]),
+    )
+
+
+def _normalize_country_code(country_code: str) -> str:
+    normalized = country_code.strip().upper()
+    if len(normalized) != 2 or not normalized.isascii() or not normalized.isalpha():
+        raise AggregateRefreshError(
+            status_code=400,
+            code="invalid_country_code",
+            message="country_code must be a two-letter ISO 3166-1 alpha-2 code.",
+        )
+    return normalized
 
 
 def complete_aggregate_refresh_batch(

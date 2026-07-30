@@ -154,6 +154,7 @@ def load_review_task_detail(
           ON nc.candidate_id = rt.candidate_id
         LEFT JOIN bank AS b
           ON b.bank_code = nc.bank_code
+         AND b.country_code = nc.country_code
         JOIN source_document AS sd
           ON sd.source_document_id = nc.source_document_id
         LEFT JOIN run_source_item AS rsi
@@ -547,6 +548,7 @@ def apply_review_decision(
             return {
                 "review_task_id": review_task_id,
                 "review_state": current_state,
+                "country_code": str(review_row["country_code"]),
                 "already_applied": True,
             }
         else:
@@ -722,6 +724,7 @@ def apply_review_decision(
     return {
         "review_task_id": review_task_id,
         "review_state": target_state,
+        "country_code": str(review_row["country_code"]),
         "product_id": product_result["product_id"] if product_result else None,
         "product_version_id": product_result["product_version_id"] if product_result else None,
         "change_event_types": product_result["change_event_types"] if product_result else [],

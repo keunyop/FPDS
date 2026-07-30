@@ -201,7 +201,7 @@ def normalize_public_query_filters(
     if normalized_locale not in SUPPORTED_LOCALES:
         normalized_locale = "en"
 
-    normalized_country_code = (country_code or "CA").strip().upper() or "CA"
+    normalized_country_code = normalize_public_country_code(country_code)
 
     normalized_product_types = tuple(
         value
@@ -221,6 +221,13 @@ def normalize_public_query_filters(
         minimum_deposit_bucket=_normalize_bucket(minimum_deposit_bucket, SUPPORTED_MINIMUM_DEPOSIT_BUCKETS),
         term_bucket=_normalize_bucket(term_bucket, SUPPORTED_TERM_BUCKETS),
     )
+
+
+def normalize_public_country_code(country_code: str | None) -> str:
+    normalized = (country_code or "CA").strip().upper()
+    if len(normalized) != 2 or not normalized.isascii() or not normalized.isalpha():
+        return "CA"
+    return normalized
 
 
 def load_latest_public_snapshot(connection: Connection, *, country_code: str) -> dict[str, Any] | None:

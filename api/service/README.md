@@ -6,7 +6,12 @@ Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read APIs
 - DB-backed admin user accounts
 - DB-backed admin sessions
-- login, logout, session introspection, and approval-gated signup-request routes
+- enabled-country discovery plus country-required login, logout, session
+  introspection, and approval-gated signup-request routes
+- CSRF-protected, audited switching of the current Admin session to another
+  active working country
+- admin-only prepared-country registry listing, activation, reversible
+  deactivation, session revocation, and config auditing
 - review queue list route backed by `review_task` and `normalized_candidate`, including source role, missing expected fields, and a recommended next action
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
 - official-domain AI verification for a review task, with structured field comparison, safe correction proposals, model usage, source, and audit persistence
@@ -30,12 +35,14 @@ Current scope:
 - bootstrap CLI for the first operator account
 
 Current routes:
+- `GET /api/public/countries`
 - `GET /api/public/products`
 - `GET /api/public/products/:productId`
 - `GET /api/public/filters`
 - `GET /api/public/dashboard-summary`
 - `GET /api/public/dashboard-rankings`
 - `GET /api/public/dashboard-scatter`
+- `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/signup-requests`
 - `GET /api/admin/auth/signup-requests`
@@ -43,6 +50,10 @@ Current routes:
 - `POST /api/admin/auth/signup-requests/:signupRequestId/reject`
 - `POST /api/admin/auth/logout`
 - `GET /api/admin/auth/session`
+- `POST /api/admin/auth/country`
+- `GET /api/admin/countries`
+- `POST /api/admin/countries/:countryCode/activate`
+- `DELETE /api/admin/countries/:countryCode`
 - `GET /api/admin/review-tasks`
 - `GET /api/admin/review-tasks/:reviewTaskId`
 - `POST /api/admin/review-tasks/:reviewTaskId/ai-verify`
@@ -92,6 +103,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence
 psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
 ```
 
 Create the first operator account:
@@ -119,8 +132,24 @@ cd api/service
 ## Notes
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- Public reads are country-scoped by bank-owned ISO alpha-2 codes.
+  `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
+  countries with active products in their latest completed public snapshot.
+- Admin login requires an enabled `country_code`. The selected country is
+  persisted on `admin_auth_session`, returned by the session endpoint, and is
+  the server authority for country-owned Admin reads and writes.
+- Authenticated operators may switch that session authority to another active
+  country through `POST /api/admin/auth/country`; the transition is
+  CSRF-protected and emits `auth_country_switched`.
+- Bank and source natural uniqueness is country-aware. Opaque technical IDs
+  (`product_id`, `candidate_id`, `run_id`, document/version IDs) remain stable;
+  `product_type_code` remains a global semantic code while country-specific
+  subtype taxonomy and bank coverage carry `country_code`.
 - Public product list/detail and dashboard-ranking responses may expose a single `product_url` for direct navigation to the bank's public product page; raw evidence traces, source excerpts, and source URL lists remain excluded from public responses.
 - Approve and edit-approve now queue `aggregate_refresh_request` rows inside the same review-decision transaction, then launch a background aggregate refresh runner after commit so public serving can stay on the latest successful snapshot without blocking review writes.
+- Review approval and automatic promotion queue the approved product's country,
+  and the runner claims pending work by country/scope instead of assuming
+  Canada.
 - Source collection now runs the same audited canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are audit-logged and rejected before they can become public canonical products.
 - `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.
 - Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.

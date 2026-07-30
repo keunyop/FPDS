@@ -30,6 +30,7 @@ LOWER(
 
 @dataclass(frozen=True)
 class ChangeHistoryFilters:
+    country_code: str
     product_id: str | None
     bank_code: str | None
     product_type: str | None
@@ -45,6 +46,7 @@ class ChangeHistoryFilters:
 
 def normalize_change_history_filters(
     *,
+    country_code: str = "CA",
     product_id: str | None,
     bank_code: str | None,
     product_type: str | None,
@@ -70,6 +72,7 @@ def normalize_change_history_filters(
         normalized_sort_by = "detected_at"
 
     return ChangeHistoryFilters(
+        country_code=country_code.strip().upper(),
         product_id=_normalize_text(product_id),
         bank_code=_normalize_text(bank_code).upper() if _normalize_text(bank_code) else None,
         product_type=_normalize_text(product_type).lower() if _normalize_text(product_type) else None,
@@ -101,6 +104,7 @@ def load_change_history_list(connection: Connection, *, filters: ChangeHistoryFi
           ON nc.candidate_id = rt.candidate_id
         LEFT JOIN bank AS b
           ON b.bank_code = cp.bank_code
+         AND b.country_code = cp.country_code
         WHERE {where_sql}
         """,
         params,
@@ -122,6 +126,7 @@ def load_change_history_list(connection: Connection, *, filters: ChangeHistoryFi
           ON nc.candidate_id = rt.candidate_id
         LEFT JOIN bank AS b
           ON b.bank_code = cp.bank_code
+         AND b.country_code = cp.country_code
         WHERE {where_sql}
         GROUP BY ce.event_type
         """,
@@ -181,6 +186,7 @@ def load_change_history_list(connection: Connection, *, filters: ChangeHistoryFi
           ON nc.candidate_id = rt.candidate_id
         LEFT JOIN bank AS b
           ON b.bank_code = cp.bank_code
+         AND b.country_code = cp.country_code
         LEFT JOIN LATERAL (
             SELECT
                 rd.review_decision_id,
@@ -257,6 +263,7 @@ def load_change_history_list(connection: Connection, *, filters: ChangeHistoryFi
             "manual_override_items": change_type_counts.get("ManualOverride", 0),
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "product_id": filters.product_id,
             "bank_code": filters.bank_code,
             "product_type": filters.product_type,
@@ -276,8 +283,8 @@ def load_change_history_list(connection: Connection, *, filters: ChangeHistoryFi
 
 
 def _build_where_clause(filters: ChangeHistoryFilters) -> tuple[str, dict[str, Any]]:
-    clauses = ["1 = 1"]
-    params: dict[str, Any] = {}
+    clauses = ["cp.country_code = %(country_code)s"]
+    params: dict[str, Any] = {"country_code": filters.country_code}
 
     if filters.product_id:
         clauses.append("ce.product_id = %(product_id)s")

@@ -50,6 +50,8 @@ export default async function LlmUsagePage({ searchParams }: LlmUsagePageProps) 
 
   return (
     <AdminShell
+      countryCode={session.country_code}
+      csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}

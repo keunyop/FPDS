@@ -40,6 +40,7 @@ _SAFE_SOURCE_METADATA_KEYS = {
 
 @dataclass(frozen=True)
 class RunStatusFilters:
+    country_code: str
     states: tuple[str, ...]
     run_type: str | None
     partial_only: bool
@@ -54,6 +55,7 @@ class RunStatusFilters:
 
 def normalize_run_status_filters(
     *,
+    country_code: str = "CA",
     states: Iterable[str] | None,
     run_type: str | None,
     partial_only: bool,
@@ -82,6 +84,7 @@ def normalize_run_status_filters(
     normalized_sort_order = "asc" if sort_order == "asc" else "desc"
 
     return RunStatusFilters(
+        country_code=country_code.strip().upper(),
         states=normalized_states,
         run_type=run_type.strip().lower() if run_type and run_type.strip() else None,
         partial_only=partial_only,
@@ -198,6 +201,7 @@ def load_run_status_list(connection: Connection, *, filters: RunStatusFilters) -
             "partial_items": partial_items,
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "states": list(filters.states),
             "run_type": filters.run_type,
             "partial_only": filters.partial_only,
@@ -277,6 +281,7 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
           ON sd.source_document_id = rsi.source_document_id
         LEFT JOIN bank AS b
           ON b.bank_code = sd.bank_code
+         AND b.country_code = sd.country_code
         LEFT JOIN source_snapshot AS ss
           ON ss.snapshot_id = rsi.selected_snapshot_id
         LEFT JOIN parsed_document AS pd
@@ -334,6 +339,7 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
           ON nc.candidate_id = rt.candidate_id
         LEFT JOIN bank AS b
           ON b.bank_code = nc.bank_code
+         AND b.country_code = nc.country_code
         WHERE rt.run_id = %(run_id)s
         ORDER BY rt.created_at DESC, rt.review_task_id ASC
         """,
@@ -382,8 +388,14 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
 
 
 def _build_where_clause(filters: RunStatusFilters) -> tuple[str, dict[str, Any]]:
-    clauses = ["ir.run_state = ANY(%(states)s)"]
-    params: dict[str, Any] = {"states": list(filters.states)}
+    clauses = [
+        "ir.run_state = ANY(%(states)s)",
+        "ir.country_code = %(country_code)s",
+    ]
+    params: dict[str, Any] = {
+        "states": list(filters.states),
+        "country_code": filters.country_code,
+    }
 
     if filters.run_type:
         clauses.append(f"{_RUN_TYPE_SQL} = %(run_type)s")

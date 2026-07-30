@@ -72,6 +72,12 @@
       "access": "authenticated"
     },
     {
+      "route": "/admin/countries",
+      "route_id": "admin.countries",
+      "implementation_path": "src/app/admin/countries/page.tsx",
+      "access": "admin"
+    },
+    {
       "route": "/admin/source-catalog",
       "route_id": "admin.source_catalog_redirect",
       "implementation_path": "src/app/admin/source-catalog/page.tsx",

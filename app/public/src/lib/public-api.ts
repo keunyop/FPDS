@@ -92,7 +92,13 @@ export type PublicFilterOption = {
   productType?: string;
 };
 
+export type PublicCountryOption = {
+  code: string;
+  count: number;
+};
+
 export type PublicFiltersResponse = {
+  countries: PublicCountryOption[];
   banks: PublicFilterOption[];
   product_types: PublicFilterOption[];
   subtypes: PublicFilterOption[];
@@ -217,6 +223,7 @@ export async function fetchPublicProductDetail(productId: string, searchParams: 
 
 export async function fetchPublicFilters(searchParams: URLSearchParams): Promise<PublicFiltersResponse> {
   const payload = await fetchPublicData<{
+    countries: PublicCountryOption[];
     banks: Array<{ code: string; label: string; count: number }>;
     product_types: Array<{ code: string; label: string; count: number }>;
     subtypes: Array<{ code: string; label: string; count: number; product_type: string }>;
@@ -230,6 +237,7 @@ export async function fetchPublicFilters(searchParams: URLSearchParams): Promise
   }>("/api/public/filters", searchParams);
 
   return {
+    countries: payload.countries,
     banks: payload.banks.map((option) => normalizeFilterOption(option)),
     product_types: payload.product_types.map((option) => normalizeFilterOption(option)),
     subtypes: payload.subtypes.map((option) => normalizeFilterOption(option, option.product_type)),

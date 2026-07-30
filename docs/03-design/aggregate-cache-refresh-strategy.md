@@ -134,6 +134,17 @@ admin metric health는 최소 아래를 보여줄 수 있어야 한다.
 - public API는 latest successful snapshot을 계속 서빙한다.
 - latest successful snapshot이 없으면 해당 domain은 empty state 또는 degraded response를 반환하되 freshness/status를 함께 노출해야 한다.
 
+### 7.1 Country Isolation
+
+- aggregate refresh requests are queued and claimed by `(country_code,
+  refresh_scope)`
+- one refresh batch reads canonical products and writes projections for exactly
+  one ISO country
+- a failed country refresh does not invalidate another country's serving
+  snapshot
+- review approval and automatic promotion enqueue the country owned by the
+  approved candidate; they do not fall back silently to Canada
+
 ---
 
 ## 8. What This Strategy Intentionally Does Not Decide
@@ -169,3 +180,4 @@ admin metric health는 최소 아래를 보여줄 수 있어야 한다.
 | Date | Change |
 |---|---|
 | 2026-04-01 | Initial aggregate and cache refresh strategy created for WBS 1.4.5 |
+| 2026-07-29 | Added country-isolated request, batch, and serving rules |

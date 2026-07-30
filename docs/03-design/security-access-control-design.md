@@ -59,7 +59,16 @@ Additional onboarding rules:
 - a pending access request becomes usable only after an existing `admin` approves it and assigns one of `admin`, `reviewer`, or `read_only`
 
 - admin login은 human user 전용이다.
+- login request는 활성화된 ISO alpha-2 `country_code`를 반드시 포함한다.
+- 선택 국가는 `admin_auth_session.country_code`에 저장되고 Admin shell에서
+  지속적으로 표시된다.
 - admin API는 cookie-backed authenticated session이 없으면 접근할 수 없다.
+- 은행, 소스, 수집, run, review, canonical change, LLM usage처럼
+  국가가 소유하는 Admin 데이터는 request query가 아니라 세션 국가로
+  제한한다. 다른 국가의 ID를 직접 요청해도 존재 여부를 노출하지 않는다.
+- 이 country context는 현재 role을 대체하는 새 권한이 아니다. RBAC와 CSRF
+  검사는 그대로 적용되며, 향후 사용자별 국가 권한이 필요하면 별도
+  authorization mapping으로 추가한다.
 - browser는 access token을 직접 저장하거나 전달하지 않는다.
 - service-to-service 인증은 admin browser login과 분리된 별도 credential을 사용한다.
 
@@ -83,6 +92,13 @@ human RBAC baseline은 아래 3개 역할이다.
 - `reviewer`는 review action과 관련 조회를 수행할 수 있지만 권한/보안 정책 변경은 할 수 없다.
 - `read_only`는 조회만 가능하며 write action은 수행할 수 없다.
 - audit visibility는 세 역할 모두 가능하되, 민감 설정 변경은 `admin`만 가능하다.
+- the Countries navigation and country-registry read/write API are `admin`
+  only; activation and deactivation are platform configuration changes
+- country-registry mutations require the session CSRF token and append a
+  config audit event
+- deactivation is fail-safe: the current session country and final active
+  country are protected, and active sessions belonging to a newly deactivated
+  country are revoked
 
 ---
 
@@ -123,6 +139,15 @@ human RBAC baseline은 아래 3개 역할이다.
   - `HttpOnly`
   - `SameSite=Lax`
   - `Secure` in production
+- country context는 HttpOnly session record 안에 두며 browser local storage나
+  수정 가능한 country cookie를 authority로 사용하지 않는다.
+- the header country switch may update `admin_auth_session.country_code` only
+  after authenticated-session resolution, active-country validation, and CSRF
+  verification; URL state, local storage, and browser-provided labels are not
+  authority
+- each real session-country transition records the prior and next code in the
+  auth audit trail and returns the UI to Overview so entity/detail context is
+  not reused across countries
 - cookie-authenticated admin write에는 CSRF 보호를 적용한다.
 - baseline security headers:
   - CSP

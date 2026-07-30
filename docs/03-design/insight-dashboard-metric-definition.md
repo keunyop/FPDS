@@ -290,10 +290,14 @@ This metric baseline requires the following API/aggregate alignment.
 - `GET /api/public/dashboard-summary`
   - returns the exact four headline KPI cards above
   - returns `products_by_bank` and `products_by_product_type` breakdown datasets
+  - computes only within the requested ISO country and its latest completed
+    public snapshot
 - `GET /api/public/dashboard-rankings`
   - returns ranking widgets from the Section 6 catalog
+  - never ranks products from different countries in one response
 - `GET /api/public/dashboard-scatter`
   - accepts only the Section 7 preset keys
+  - never plots products from different countries in one response
 - `dashboard_metric_snapshot`
   - stores headline KPI values plus summary breakdown datasets for the scoped snapshot
 - `dashboard_ranking_snapshot`

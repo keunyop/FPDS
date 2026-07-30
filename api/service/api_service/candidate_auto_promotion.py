@@ -287,6 +287,7 @@ def promote_auto_validated_candidates(
             {
                 "candidate_id": candidate_id,
                 "run_id": str(row["run_id"]),
+                "country_code": str(row["country_code"]).upper(),
                 "product_id": str(product_result["product_id"]),
                 "product_version_id": product_result["product_version_id"],
                 "change_event_types": [str(item) for item in product_result["change_event_types"]],
@@ -294,22 +295,28 @@ def promote_auto_validated_candidates(
             }
         )
 
-    aggregate_refresh_request = None
+    aggregate_refresh_requests: list[dict[str, Any]] = []
     if queue_aggregate_refresh and promoted_items:
-        aggregate_refresh_request = queue_auto_promotion_aggregate_refresh_request(
-            connection,
-            actor=active_actor,
-            request_context=active_context,
-            promoted_count=len(promoted_items),
-            product_ids=[str(item["product_id"]) for item in promoted_items],
-            candidate_ids=[str(item["candidate_id"]) for item in promoted_items],
-            run_ids=[str(item["run_id"]) for item in promoted_items],
-            change_event_types=[
-                str(change_type)
-                for item in promoted_items
-                for change_type in item["change_event_types"]
-            ],
-        )
+        country_codes = sorted({str(item["country_code"]) for item in promoted_items})
+        for country_code in country_codes:
+            country_items = [item for item in promoted_items if item["country_code"] == country_code]
+            aggregate_refresh_requests.append(
+                queue_auto_promotion_aggregate_refresh_request(
+                    connection,
+                    actor=active_actor,
+                    request_context=active_context,
+                    promoted_count=len(country_items),
+                    product_ids=[str(item["product_id"]) for item in country_items],
+                    candidate_ids=[str(item["candidate_id"]) for item in country_items],
+                    run_ids=[str(item["run_id"]) for item in country_items],
+                    change_event_types=[
+                        str(change_type)
+                        for item in country_items
+                        for change_type in item["change_event_types"]
+                    ],
+                    country_code=country_code,
+                )
+            )
 
     return {
         "run_id": run_id,
@@ -322,7 +329,8 @@ def promote_auto_validated_candidates(
             "auto_approve_min_confidence": policy["auto_approve_min_confidence"],
             "force_review_issue_codes": sorted(policy["force_review_issue_codes"]),
         },
-        "aggregate_refresh": aggregate_refresh_request,
+        "aggregate_refresh": aggregate_refresh_requests[0] if len(aggregate_refresh_requests) == 1 else None,
+        "aggregate_refreshes": aggregate_refresh_requests,
     }
 
 

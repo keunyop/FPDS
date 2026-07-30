@@ -42,7 +42,7 @@ class _QueuedConnection:
 
 class LoginTransitionRegressionTests(unittest.TestCase):
     def test_login_request_accepts_four_character_dev_password(self) -> None:
-        payload = LoginRequest(login_id="test", password="test")
+        payload = LoginRequest(country_code="CA", login_id="test", password="test")
         self.assertEqual(payload.login_id, "test")
         self.assertEqual(payload.password, "test")
 
@@ -53,13 +53,21 @@ class LoginTransitionRegressionTests(unittest.TestCase):
         self.assertEqual(payload.password, "test")
 
     def test_login_request_accepts_five_character_dev_password(self) -> None:
-        payload = LoginRequest(login_id="admin", password="admin")
+        payload = LoginRequest(country_code="CA", login_id="admin", password="admin")
         self.assertEqual(payload.login_id, "admin")
         self.assertEqual(payload.password, "admin")
 
     def test_login_request_still_rejects_too_short_password(self) -> None:
         with self.assertRaises(ValidationError):
-            LoginRequest(login_id="admin", password="abc")
+            LoginRequest(country_code="CA", login_id="admin", password="abc")
+
+    def test_login_request_requires_country_context(self) -> None:
+        with self.assertRaises(ValidationError):
+            LoginRequest(login_id="admin", password="admin")
+
+    def test_login_request_rejects_non_iso_country_code_shape(self) -> None:
+        with self.assertRaises(ValidationError):
+            LoginRequest(country_code="CAN", login_id="admin", password="admin")
 
     def test_signup_request_still_rejects_too_short_password(self) -> None:
         with self.assertRaises(ValidationError):

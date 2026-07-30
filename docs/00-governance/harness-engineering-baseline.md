@@ -1,7 +1,7 @@
 # FPDS Harness Engineering Baseline
 
-Version: 1.1
-Date: 2026-04-09
+Version: 1.2
+Date: 2026-07-29
 Status: Active
 Source Documents:
 - `docs/00-governance/working-agreement.md`
@@ -31,7 +31,10 @@ Its scope is the repository harness and workflow guardrails only.
 ## 2. Baseline Decisions
 
 1. `AGENTS.md` keeps only short, always-on operating rules.
-2. Before substantive work starts, the agent reads `AGENTS.md`, root `README.md`, and `docs/00-governance/development-journal.md`.
+2. Before substantive work starts, the agent reads `AGENTS.md`, root
+   `README.md`, `docs/00-governance/development-journal.md`, and
+   `docs/README.md`; the docs map then routes only the task-relevant active
+   documents.
 3. The pre-commit hook runs on `staged files only`.
 4. The pre-commit hook auto-fixes only low-risk text hygiene issues and stays quiet on success.
 5. Cleanup audit starts as `report-only` and does not auto-delete or auto-refactor files.
@@ -159,7 +162,9 @@ Do not turn the journal into:
 
 - Install hooks locally with `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/install-hooks.ps1`.
 - Run the same foundation baseline used by CI with `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/invoke-foundation-checks.ps1`.
-- Before substantive work starts, read `AGENTS.md`, root `README.md`, and `docs/00-governance/development-journal.md`.
+- Before substantive work starts, read `AGENTS.md`, root `README.md`,
+  `docs/00-governance/development-journal.md`, and `docs/README.md`, then use
+  the docs map to select only task-relevant active documents.
 - Keep `docs/README.md` as the docs map entrypoint.
 - Strengthen project checks only after package management and runtime bootstrap are real, not hypothetical.
 - When JavaScript package checks become real, prefer `pnpm` and allow `npm` only when the package explicitly signals it through `packageManager` or lockfile shape.
@@ -178,3 +183,4 @@ Do not turn the journal into:
 | 2026-04-09 | Rewrote the document in ASCII-first format and added startup read order to include the development journal alongside `AGENTS.md` and root `README.md` |
 | 2026-04-11 | Updated project-check guidance so future JavaScript runtime checks are pnpm-first in line with the approved runtime baseline |
 | 2026-04-13 | Clarified that live JavaScript package checks may install missing dependencies and should run in CI with a pinned Node runtime |
+| 2026-07-29 | Added the docs map to startup context and adopted task-routed active document reads |

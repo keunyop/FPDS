@@ -47,6 +47,8 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
 
   return (
     <AdminShell
+      countryCode={session.country_code}
+      csrfToken={session.csrf_token}
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}

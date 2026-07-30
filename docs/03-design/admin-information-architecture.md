@@ -104,8 +104,16 @@ All admin surfaces should share:
 1. collapsible sidebar containing all current routes
 2. environment badge
 3. direct daily-work navigation on desktop and the same four destinations in the mobile bottom bar
-4. locale toggle
-5. user/session menu anchored in the sidebar footer
+4. a working-country dropdown in the authenticated header; an active-country
+   switch is confirmed and returns to Overview while preserving locale
+5. user/session menu anchored in the sidebar footer, containing the locale
+   dropdown and sign-out action
+6. a standalone locale dropdown on anonymous Login and Signup screens
+
+The working-country dropdown is operational navigation, not country-registry
+administration. It is available to every authenticated role and lists only
+active countries. Activating or deactivating countries remains in the
+admin-only `/admin/countries` surface.
 
 ### 5.2 Navigation Priority
 
@@ -120,6 +128,7 @@ choose an abstract module before finding a task.
 | Daily work | Banks | `/admin/banks` | coverage management and collection kickoff |
 | More tools | Source Registry | `/admin/sources` | generated source inspection |
 | More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
+| More tools | Countries | `/admin/countries` | admin-only operational country activation |
 | More tools | Change History | `/admin/changes` | canonical change chronology |
 | More tools | Audit Log | `/admin/audit` | append-only actor/request trail |
 | More tools | LLM Usage | `/admin/usage` | model/agent/run usage visibility |
@@ -138,6 +147,7 @@ navigation item until a live route exists.
 | Source Catalog Detail | `/admin/source-catalog/:catalogItemId` | compatibility redirect into bank detail |
 | Source Registry Detail | `/admin/sources/:sourceId` | source registry list, source catalog detail, run detail, search |
 | Product Type Management | `/admin/product-types` | operator-managed product type registry, bank coverage search, and dynamic onboarding controls |
+| Country Management | `/admin/countries` | admin-only prepared-country activation and reversible deactivation |
 | Run Detail | `/admin/runs/:runId` | runs list, review detail, usage drilldown, source collection history, search |
 | Product Record | `/admin/products/:productId` | change history, publish monitor, review result context, search |
 
@@ -146,6 +156,9 @@ navigation item until a live route exists.
 - `Localization Health` remains a possible future admin health surface
 - broader scheduler or refresh governance remains a later source-operations slice
 - `Product Type Management` is now the operator-owned registry surface for product type definitions used by bank coverage selection and homepage-first discovery
+- `Countries` is visible only to `admin`. It presents one prepared-country
+  selector and the short active-country list; free-form creation is excluded.
+  The current session country remains visibly protected.
 
 ### 5.5 Shipped Evidence-Operations Composition
 
@@ -492,6 +505,8 @@ Minimum information:
 ### 9.2 Localization Rules
 
 - navigation, widget titles, status labels, filter labels, and help text use `en`, `ko`, and `ja`
+- authenticated language selection lives in the sidebar Account menu; Login
+  and Signup expose the same locale options through a standalone dropdown
 - `product_name`, `description_short`, `eligibility_text`, `fee_waiver_condition`, evidence excerpts, and source names derived from source content may remain in source language
 
 ---

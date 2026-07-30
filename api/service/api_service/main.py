@@ -16,9 +16,11 @@ from api_service.auth import (
     authenticate_user,
     create_signup_request,
     get_session_by_token,
+    load_admin_login_countries,
     load_signup_requests,
     review_signup_request,
     revoke_session,
+    switch_session_country,
 )
 from api_service.aggregate_refresh import (
     AggregateRefreshError,
@@ -35,10 +37,12 @@ from api_service.ai_verification import (
 from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
+from api_service.countries import activate_country, deactivate_country, load_country_registry
 from api_service.db import open_connection
 from api_service.errors import SourceRegistryError
 from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
 from api_service.models import BankWriteRequest
+from api_service.models import CountrySwitchRequest
 from api_service.models import LoginRequest
 from api_service.models import ProductTypeWriteRequest
 from api_service.models import ReviewDecisionRequest
@@ -57,6 +61,7 @@ from api_service.public_dashboard import (
 )
 from api_service.public_products import (
     PRODUCT_SORT_OPTIONS,
+    load_available_public_countries,
     load_public_filters,
     load_public_product_detail,
     load_public_products,
@@ -270,9 +275,145 @@ def _require_admin_role(actor: dict[str, Any]) -> None:
         raise SourceRegistryError(status_code=403, code="admin_role_required", message="Admin role is required.")
 
 
+def _session_country(session_info: dict[str, Any]) -> str:
+    country_code = str(session_info.get("country_code") or "").strip().upper()
+    if len(country_code) != 2:
+        raise LoginError(
+            status_code=401,
+            code="country_context_required",
+            message="Sign in again and select a country.",
+        )
+    return country_code
+
+
+def _require_payload_country(payload: dict[str, Any], *, country_code: str) -> dict[str, Any]:
+    requested = str(payload.get("country_code") or country_code).strip().upper()
+    if requested != country_code:
+        raise SourceRegistryError(
+            status_code=403,
+            code="country_scope_mismatch",
+            message="The requested record is outside the signed-in country.",
+        )
+    return {**payload, "country_code": country_code}
+
+
+def _require_country_records(
+    connection: Any,
+    *,
+    table_name: str,
+    id_column: str,
+    record_ids: list[str],
+    country_code: str,
+) -> None:
+    trusted_scopes = {
+        ("bank", "bank_code"),
+        ("source_registry_item", "source_id"),
+        ("source_registry_catalog_item", "catalog_item_id"),
+        ("normalized_candidate", "candidate_id"),
+        ("ingestion_run", "run_id"),
+    }
+    if (table_name, id_column) not in trusted_scopes:
+        raise RuntimeError("Unsupported country scope lookup.")
+    unique_ids = list(dict.fromkeys(record_ids))
+    rows = connection.execute(
+        f"""
+        SELECT {id_column}
+        FROM {table_name}
+        WHERE {id_column} = ANY(%(record_ids)s)
+          AND country_code = %(country_code)s
+        """,
+        {"record_ids": unique_ids, "country_code": country_code},
+    ).fetchall()
+    if len(rows) != len(unique_ids):
+        raise SourceRegistryError(
+            status_code=404,
+            code="country_scoped_record_not_found",
+            message="The requested record was not found in the signed-in country.",
+        )
+
+
+def _require_review_task_country(connection: Any, *, review_task_id: str, country_code: str) -> None:
+    row = connection.execute(
+        """
+        SELECT rt.review_task_id
+        FROM review_task AS rt
+        JOIN normalized_candidate AS nc
+          ON nc.candidate_id = rt.candidate_id
+        WHERE rt.review_task_id = %(review_task_id)s
+          AND nc.country_code = %(country_code)s
+        """,
+        {"review_task_id": review_task_id, "country_code": country_code},
+    ).fetchone()
+    if not row:
+        raise SourceRegistryError(
+            status_code=404,
+            code="country_scoped_record_not_found",
+            message="The requested record was not found in the signed-in country.",
+        )
+
+
 @app.get("/healthz")
 async def healthz() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/admin/auth/countries")
+async def admin_login_countries(request: Request) -> JSONResponse:
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        countries = load_admin_login_countries(connection)
+    return _success({"countries": countries}, request)
+
+
+@app.get("/api/admin/countries")
+async def country_registry(request: Request) -> JSONResponse:
+    actor, _ = _resolve_session(request)
+    _require_admin_role(actor)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_country_registry(connection)
+    return _success(payload, request)
+
+
+@app.post("/api/admin/countries/{country_code}/activate")
+async def activate_country_registry_item(request: Request, country_code: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        country = activate_country(
+            connection,
+            country_code=country_code,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"country": country}, request)
+
+
+@app.delete("/api/admin/countries/{country_code}")
+async def deactivate_country_registry_item(request: Request, country_code: str) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        country = deactivate_country(
+            connection,
+            country_code=country_code,
+            current_country_code=_session_country(session_info),
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    return _success({"country": country}, request)
 
 
 @app.post("/api/admin/auth/login")
@@ -283,6 +424,7 @@ async def login(request: Request, payload: LoginRequest) -> JSONResponse:
             connection,
             login_id=payload.login_id,
             password=payload.password,
+            country_code=payload.country_code,
             ip_address=_request_ip(request),
             user_agent=request.headers.get("user-agent"),
             request_id=request.state.request_id,
@@ -300,6 +442,7 @@ async def login(request: Request, payload: LoginRequest) -> JSONResponse:
                 "issued_at": session["issued_at"].isoformat(),
                 "expires_at": session["absolute_expires_at"].isoformat(),
             },
+            "country_code": session["country_code"],
             "csrf_token": session["csrf_token"],
             "redirect_to": "/admin",
         },
@@ -419,10 +562,29 @@ async def session(request: Request) -> JSONResponse:
     return _success(
         {
             "user": actor,
+            "country_code": _session_country(session_info),
             "csrf_token": session_info["csrf_token"],
         },
         request,
     )
+
+
+@app.post("/api/admin/auth/country")
+async def switch_country(request: Request, payload: CountrySwitchRequest) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_csrf(request, session_info=session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        country_code = switch_session_country(
+            connection,
+            auth_session_id=session_info["auth_session_id"],
+            country_code=payload.country_code,
+            actor=actor,
+            request_id=request.state.request_id,
+            ip_address=_request_ip(request),
+            user_agent=request.headers.get("user-agent"),
+        )
+    return _success({"country_code": country_code, "redirect_to": "/admin"}, request)
 
 
 @app.get("/api/admin/sources")
@@ -435,10 +597,13 @@ async def source_registry_list(
     discovery_role: str | None = None,
     q: str | None = None,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
+    session_country = _session_country(session_info)
+    if country_code:
+        _require_payload_country({"country_code": country_code}, country_code=session_country)
     filters = normalize_source_registry_filters(
         bank_code=bank_code,
-        country_code=country_code,
+        country_code=session_country,
         product_type=product_type,
         status=status,
         discovery_role=discovery_role,
@@ -466,9 +631,17 @@ async def create_source_registry(
 
 @app.get("/api/admin/sources/{source_id}")
 async def source_registry_detail(request: Request, source_id: str) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
+    country_code = _session_country(session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_item",
+            id_column="source_id",
+            record_ids=[source_id],
+            country_code=country_code,
+        )
         payload = load_source_registry_detail(connection, source_id=source_id)
     if not payload:
         return _error(status_code=404, code="source_registry_item_not_found", message="Source registry item was not found.", request=request)
@@ -497,6 +670,13 @@ async def delete_source_registry(request: Request, source_id: str) -> JSONRespon
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_item",
+            id_column="source_id",
+            record_ids=[source_id],
+            country_code=_session_country(session_info),
+        )
         source = delete_source_registry_item(
             connection,
             source_id=source_id,
@@ -517,6 +697,13 @@ async def launch_source_collection(request: Request, payload: SourceCollectionRe
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_item",
+            id_column="source_id",
+            record_ids=payload.source_ids,
+            country_code=_session_country(session_info),
+        )
         result = start_source_collection(
             connection,
             source_ids=payload.source_ids,
@@ -536,8 +723,8 @@ async def bank_list(
     status: str | None = None,
     q: str | None = None,
 ) -> JSONResponse:
-    _resolve_session(request)
-    filters = normalize_bank_filters(search=q, status=status)
+    _actor, session_info = _resolve_session(request)
+    filters = normalize_bank_filters(country_code=_session_country(session_info), search=q, status=status)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         payload = load_bank_list(connection, filters=filters)
@@ -552,11 +739,12 @@ async def create_bank(
     actor, session_info = _resolve_session(request)
     _require_admin_role(actor)
     _require_csrf(request, session_info=session_info)
+    country_code = _session_country(session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         bank = create_bank_profile(
             connection,
-            payload=payload.model_dump(exclude_unset=True),
+            payload=_require_payload_country(payload.model_dump(exclude_unset=True), country_code=country_code),
             actor=actor,
             request_context={
                 "request_id": request.state.request_id,
@@ -569,9 +757,17 @@ async def create_bank(
 
 @app.get("/api/admin/banks/{bank_code}")
 async def bank_detail(request: Request, bank_code: str) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
+    country_code = _session_country(session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="bank",
+            id_column="bank_code",
+            record_ids=[bank_code.upper()],
+            country_code=country_code,
+        )
         payload = load_bank_detail(connection, bank_code=bank_code.upper())
     if not payload:
         return _error(status_code=404, code="bank_profile_not_found", message="Bank profile was not found.", request=request)
@@ -587,12 +783,20 @@ async def patch_bank(
     actor, session_info = _resolve_session(request)
     _require_admin_role(actor)
     _require_csrf(request, session_info=session_info)
+    country_code = _session_country(session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="bank",
+            id_column="bank_code",
+            record_ids=[bank_code.upper()],
+            country_code=country_code,
+        )
         bank = update_bank_profile(
             connection,
             bank_code=bank_code.upper(),
-            payload=payload.model_dump(exclude_unset=True),
+            payload=_require_payload_country(payload.model_dump(exclude_unset=True), country_code=country_code),
             actor=actor,
             request_context={
                 "request_id": request.state.request_id,
@@ -610,6 +814,13 @@ async def delete_bank(request: Request, bank_code: str) -> JSONResponse:
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="bank",
+            id_column="bank_code",
+            record_ids=[bank_code.upper()],
+            country_code=_session_country(session_info),
+        )
         bank = delete_bank_profile(
             connection,
             bank_code=bank_code.upper(),
@@ -631,8 +842,9 @@ async def source_catalog_list(
     status: str | None = None,
     q: str | None = None,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     filters = normalize_source_catalog_filters(
+        country_code=_session_country(session_info),
         search=q,
         bank_code=bank_code,
         product_type=product_type,
@@ -654,6 +866,14 @@ async def create_source_catalog(
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        bank_code = str(payload.bank_code or "").strip().upper()
+        _require_country_records(
+            connection,
+            table_name="bank",
+            id_column="bank_code",
+            record_ids=[bank_code],
+            country_code=_session_country(session_info),
+        )
         catalog_item = create_source_catalog_item(
             connection,
             payload=payload.model_dump(exclude_unset=True),
@@ -669,9 +889,16 @@ async def create_source_catalog(
 
 @app.get("/api/admin/source-catalog/{catalog_item_id}")
 async def source_catalog_detail(request: Request, catalog_item_id: str) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_catalog_item",
+            id_column="catalog_item_id",
+            record_ids=[catalog_item_id],
+            country_code=_session_country(session_info),
+        )
         payload = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
     if not payload:
         return _error(status_code=404, code="source_catalog_not_found", message="Source catalog item was not found.", request=request)
@@ -689,6 +916,21 @@ async def patch_source_catalog(
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_catalog_item",
+            id_column="catalog_item_id",
+            record_ids=[catalog_item_id],
+            country_code=_session_country(session_info),
+        )
+        if payload.bank_code:
+            _require_country_records(
+                connection,
+                table_name="bank",
+                id_column="bank_code",
+                record_ids=[payload.bank_code.upper()],
+                country_code=_session_country(session_info),
+            )
         catalog_item = update_source_catalog_item(
             connection,
             catalog_item_id=catalog_item_id,
@@ -710,6 +952,13 @@ async def launch_source_catalog_collection(request: Request, payload: SourceCata
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="source_registry_catalog_item",
+            id_column="catalog_item_id",
+            record_ids=payload.catalog_item_ids,
+            country_code=_session_country(session_info),
+        )
         result = start_source_catalog_collection(
             connection,
             catalog_item_ids=payload.catalog_item_ids,
@@ -751,6 +1000,7 @@ async def create_product_type(
             connection,
             payload=payload.model_dump(exclude_unset=True),
             actor=actor,
+            country_code=_session_country(session_info),
             request_context={
                 "request_id": request.state.request_id,
                 "ip_address": _request_ip(request),
@@ -787,6 +1037,7 @@ async def patch_product_type(
             product_type_code=product_type_code.lower(),
             payload=payload.model_dump(exclude_unset=True),
             actor=actor,
+            country_code=_session_country(session_info),
             request_context={
                 "request_id": request.state.request_id,
                 "ip_address": _request_ip(request),
@@ -937,6 +1188,14 @@ async def public_filters(
     return _success(payload, request, meta_extra={"locale": filters.locale})
 
 
+@app.get("/api/public/countries")
+async def public_countries(request: Request) -> JSONResponse:
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        countries = load_available_public_countries(connection)
+    return _success({"countries": countries}, request)
+
+
 @app.get("/api/public/dashboard-summary")
 async def public_dashboard_summary(
     request: Request,
@@ -1052,8 +1311,9 @@ async def review_tasks(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     filters = normalize_review_queue_filters(
+        country_code=_session_country(session_info),
         states=state,
         bank_code=bank_code,
         product_type=product_type,
@@ -1074,9 +1334,14 @@ async def review_tasks(
 
 @app.get("/api/admin/review-tasks/{review_task_id}")
 async def review_task_detail(request: Request, review_task_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
-    actor, _session_info = _resolve_session(request)
+    actor, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_review_task_country(
+            connection,
+            review_task_id=review_task_id,
+            country_code=_session_country(session_info),
+        )
         payload = load_review_task_detail(connection, review_task_id=review_task_id, actor_role=str(actor["role"]))
         if payload:
             payload["ai_verification"] = load_latest_ai_verification(
@@ -1110,6 +1375,11 @@ def ai_verify_review_task(request: Request, review_task_id: str) -> JSONResponse
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_review_task_country(
+            connection,
+            review_task_id=review_task_id,
+            country_code=_session_country(session_info),
+        )
         detail = load_review_task_detail(
             connection,
             review_task_id=review_task_id,
@@ -1233,8 +1503,9 @@ async def run_status_list(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     filters = normalize_run_status_filters(
+        country_code=_session_country(session_info),
         states=state,
         run_type=run_type,
         partial_only=partial_only,
@@ -1254,9 +1525,16 @@ async def run_status_list(
 
 @app.get("/api/admin/runs/{run_id}")
 async def run_status_detail(request: Request, run_id: str) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="ingestion_run",
+            id_column="run_id",
+            record_ids=[run_id],
+            country_code=_session_country(session_info),
+        )
         payload = load_run_status_detail(connection, run_id=run_id)
     if not payload:
         return _error(status_code=404, code="run_not_found", message="Run was not found.", request=request)
@@ -1270,6 +1548,13 @@ async def retry_run(request: Request, run_id: str) -> JSONResponse:
     _require_csrf(request, session_info=session_info)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
+        _require_country_records(
+            connection,
+            table_name="ingestion_run",
+            id_column="run_id",
+            record_ids=[run_id],
+            country_code=_session_country(session_info),
+        )
         payload = retry_failed_run(
             connection,
             run_id=run_id,
@@ -1285,10 +1570,10 @@ async def retry_run(request: Request, run_id: str) -> JSONResponse:
 
 @app.get("/api/admin/dashboard-health")
 async def dashboard_health(request: Request) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
-        payload = load_dashboard_health(connection)
+        payload = load_dashboard_health(connection, country_code=_session_country(session_info))
     return _success(payload, request)
 
 
@@ -1302,6 +1587,7 @@ async def retry_dashboard_health(request: Request) -> JSONResponse:
         payload = request_manual_aggregate_refresh(
             connection,
             actor=actor,
+            country_code=_session_country(session_info),
             request_context={
                 "request_id": request.state.request_id,
                 "ip_address": _request_ip(request),
@@ -1327,8 +1613,9 @@ async def change_history_list(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     filters = normalize_change_history_filters(
+        country_code=_session_country(session_info),
         product_id=product_id,
         bank_code=bank_code,
         product_type=product_type,
@@ -1406,8 +1693,9 @@ async def llm_usage_dashboard(
     stage: str | None = None,
     q: str | None = None,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _actor, session_info = _resolve_session(request)
     filters = normalize_llm_usage_filters(
+        country_code=_session_country(session_info),
         recorded_from=from_,
         recorded_to=to,
         run_id=run_id,
@@ -1435,6 +1723,11 @@ async def _handle_review_decision(
     settings: Settings = request.app.state.settings
     aggregate_refresh_request: dict[str, Any] | None = None
     with open_connection(settings) as connection:
+        _require_review_task_country(
+            connection,
+            review_task_id=review_task_id,
+            country_code=_session_country(session_info),
+        )
         result = apply_review_decision(
             connection,
             review_task_id=review_task_id,
@@ -1462,6 +1755,7 @@ async def _handle_review_decision(
                 product_id=str(result["product_id"]),
                 action_type=action_type,
                 change_event_types=[str(item) for item in result.get("change_event_types", [])],
+                country_code=str(result["country_code"]),
             )
     if aggregate_refresh_request:
         aggregate_refresh_request["launch"] = launch_aggregate_refresh_runner()

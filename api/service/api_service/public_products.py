@@ -155,10 +155,12 @@ def load_public_product_detail(connection, *, product_id: str, filters: PublicQu
 
 
 def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str, Any]:
+    countries = load_available_public_countries(connection)
     snapshot = load_latest_public_snapshot(connection, country_code=filters.country_code)
     freshness = build_freshness_payload(snapshot, cache_ttl_sec=300)
     if not snapshot:
         return {
+            "countries": countries,
             "banks": [],
             "product_types": [],
             "subtypes": [],
@@ -179,6 +181,7 @@ def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str,
     filtered_rows = apply_public_filters(rows, filters=filters)
     locale = filters.locale
     return {
+        "countries": countries,
         "banks": _count_labeled_options(
             ((str(row["bank_code"]), str(row["bank_name"])) for row in filtered_rows),
             code_key="code",
@@ -204,6 +207,45 @@ def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str,
         "applied_filters": applied_filters_payload(filters),
         "freshness": freshness,
     }
+
+
+def load_available_public_countries(connection) -> list[dict[str, Any]]:
+    """Return countries represented by their latest completed, active public snapshot."""
+    rows = connection.execute(
+        """
+        WITH latest_completed AS (
+            SELECT DISTINCT ON (country_code)
+                snapshot_id,
+                country_code
+            FROM aggregate_refresh_run
+            WHERE refresh_status = 'completed'
+              AND refresh_scope = 'phase1_public'
+            ORDER BY
+                country_code ASC,
+                COALESCE(refreshed_at, attempted_at) DESC,
+                attempted_at DESC,
+                snapshot_id DESC
+        )
+        SELECT
+            latest_completed.country_code AS code,
+            COUNT(projection.product_id)::integer AS count
+        FROM latest_completed
+        JOIN public_product_projection AS projection
+          ON projection.snapshot_id = latest_completed.snapshot_id
+         AND projection.country_code = latest_completed.country_code
+         AND projection.status = 'active'
+        GROUP BY latest_completed.country_code
+        ORDER BY latest_completed.country_code ASC
+        """,
+        {},
+    ).fetchall()
+    return [
+        {
+            "code": str(row["code"]).upper(),
+            "count": int(row["count"]),
+        }
+        for row in rows
+    ]
 
 
 def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> list[dict[str, Any]]:

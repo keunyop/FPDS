@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 import unittest
 
 from api_service.aggregate_refresh import (
+    AggregateRefreshError,
+    claim_next_aggregate_refresh_batch,
     load_dashboard_health,
     queue_auto_promotion_aggregate_refresh_request,
     queue_review_aggregate_refresh_request,
@@ -40,6 +42,33 @@ class _Connection:
 
 
 class AggregateRefreshTests(unittest.TestCase):
+    def test_manual_refresh_rejects_non_iso_country_code(self) -> None:
+        with self.assertRaises(AggregateRefreshError) as captured:
+            request_manual_aggregate_refresh(
+                _Connection(),
+                actor={"user_id": "usr-001", "role": "admin"},
+                request_context={"request_id": "req-001"},
+                country_code="Canada",
+            )
+        self.assertEqual(captured.exception.code, "invalid_country_code")
+
+    def test_claim_next_refresh_uses_country_and_scope_from_oldest_pending_request(self) -> None:
+        connection = _Connection(
+            [
+                {"country_code": "US", "refresh_scope": "phase1_public"},
+                [{"aggregate_refresh_request_id": "aggreq-us-001"}],
+                None,
+            ]
+        )
+
+        batch = claim_next_aggregate_refresh_batch(connection)
+
+        self.assertIsNotNone(batch)
+        assert batch is not None
+        self.assertEqual(batch["country_code"], "US")
+        self.assertEqual(batch["request_ids"], ["aggreq-us-001"])
+        self.assertEqual(connection.calls[1][1]["country_code"], "US")
+
     def test_queue_review_refresh_request_persists_review_context(self) -> None:
         connection = _Connection()
 

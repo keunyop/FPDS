@@ -17,6 +17,7 @@ _MODEL_NAME_SQL = "COALESCE(NULLIF(lur.usage_metadata ->> 'model_id', ''), NULLI
 
 @dataclass(frozen=True)
 class LLMUsageFilters:
+    country_code: str
     recorded_from: datetime | None
     recorded_to: datetime | None
     run_id: str | None
@@ -29,6 +30,7 @@ class LLMUsageFilters:
 
 def normalize_llm_usage_filters(
     *,
+    country_code: str = "CA",
     recorded_from: datetime | None,
     recorded_to: datetime | None,
     run_id: str | None,
@@ -39,6 +41,7 @@ def normalize_llm_usage_filters(
     search: str | None,
 ) -> LLMUsageFilters:
     return LLMUsageFilters(
+        country_code=country_code.strip().upper(),
         recorded_from=recorded_from,
         recorded_to=recorded_to,
         run_id=_normalize_text(run_id),
@@ -121,6 +124,7 @@ def load_llm_usage_dashboard(connection: Connection, *, filters: LLMUsageFilters
         "usage_trend": usage_trend,
         "anomaly_candidates": anomaly_candidates,
         "applied_filters": {
+            "country_code": filters.country_code,
             "from": filters.recorded_from.isoformat() if filters.recorded_from else None,
             "to": filters.recorded_to.isoformat() if filters.recorded_to else None,
             "run_id": filters.run_id,
@@ -134,8 +138,10 @@ def load_llm_usage_dashboard(connection: Connection, *, filters: LLMUsageFilters
 
 
 def _build_where_clause(filters: LLMUsageFilters) -> tuple[str, dict[str, Any]]:
-    clauses = ["1 = 1"]
-    params: dict[str, Any] = {}
+    clauses = [
+        "COALESCE(ir.country_code, nc.country_code) = %(country_code)s",
+    ]
+    params: dict[str, Any] = {"country_code": filters.country_code}
 
     if filters.recorded_from:
         clauses.append("lur.recorded_at >= %(recorded_from)s")

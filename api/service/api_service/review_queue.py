@@ -19,6 +19,7 @@ VALIDATION_STATES = ("pass", "warning", "error")
 
 @dataclass(frozen=True)
 class ReviewQueueFilters:
+    country_code: str
     states: tuple[str, ...]
     bank_code: str | None
     product_type: str | None
@@ -34,6 +35,7 @@ class ReviewQueueFilters:
 
 def normalize_review_queue_filters(
     *,
+    country_code: str = "CA",
     states: Iterable[str] | None,
     bank_code: str | None,
     product_type: str | None,
@@ -55,6 +57,7 @@ def normalize_review_queue_filters(
         normalized_validation_status = None
 
     return ReviewQueueFilters(
+        country_code=country_code.strip().upper(),
         states=normalized_states,
         bank_code=bank_code.strip().upper() if bank_code and bank_code.strip() else None,
         product_type=product_type.strip().lower() if product_type and product_type.strip() else None,
@@ -80,6 +83,7 @@ def load_review_queue(
       ON nc.candidate_id = rt.candidate_id
     LEFT JOIN bank AS b
       ON b.bank_code = nc.bank_code
+     AND b.country_code = nc.country_code
     JOIN source_document AS sd
       ON sd.source_document_id = nc.source_document_id
     """
@@ -169,6 +173,7 @@ def load_review_queue(
             "validation_counts": validation_counts,
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "states": list(filters.states),
             "bank_code": filters.bank_code,
             "product_type": filters.product_type,
@@ -188,8 +193,14 @@ def load_review_queue(
 
 
 def _build_where_clause(filters: ReviewQueueFilters) -> tuple[str, dict[str, Any]]:
-    clauses = ["rt.review_state = ANY(%(states)s)"]
-    params: dict[str, Any] = {"states": list(filters.states)}
+    clauses = [
+        "rt.review_state = ANY(%(states)s)",
+        "nc.country_code = %(country_code)s",
+    ]
+    params: dict[str, Any] = {
+        "states": list(filters.states),
+        "country_code": filters.country_code,
+    }
 
     if filters.bank_code:
         clauses.append("nc.bank_code = %(bank_code)s")

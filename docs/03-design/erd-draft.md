@@ -1,8 +1,8 @@
-﻿# FPDS ERD Draft
+# FPDS ERD Draft
 
-Version: 1.0  
-Date: 2026-04-01  
-Status: Approved Baseline for WBS 1.4.2  
+Version: 1.0
+Date: 2026-04-01
+Status: Approved Baseline for WBS 1.4.2
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -24,7 +24,7 @@ Source Documents:
 - evidence, chunk, candidate, product, review, run, publish, usage 중심 저장 구조를 명확히 한다.
 - `1.4.3 snapshot/evidence 저장 전략`, `1.4.4 retrieval/vector`, `1.5.x API`, `1.6.x security`가 같은 데이터 경계를 참조하도록 맞춘다.
 
-이 문서는 논리 ERD 초안이다.  
+이 문서는 논리 ERD 초안이다.
 exact column type, index, partitioning, retention policy, auth/session schema, BX-PF payload schema, vector backend physical schema는 후속 WBS에서 구체화한다.
 
 ---
@@ -57,7 +57,7 @@ exact column type, index, partitioning, retention policy, auth/session schema, B
 | `canonical_product` + `product_version` | 둘 다 유지 | continuity identity와 immutable approved snapshot을 동시에 보존해야 change/publish/idempotency가 단순해진다. |
 | logical `field_evidence_link` | `field_evidence_link` | candidate/product version 모두 연결 가능한 공통 trace table로 유지한다. |
 
-위 naming은 이번 ERD의 논리 기준이다.  
+위 naming은 이번 ERD의 논리 기준이다.
 구현 시 테이블명 접두사나 snake_case 세부 명칭은 바뀔 수 있지만, 엔터티 책임 분리는 유지해야 한다.
 
 ---
@@ -315,11 +315,19 @@ erDiagram
 - canonical bank reference 엔터티다.
 - `source_document`, `canonical_product`가 공통으로 참조한다.
 - exact bank profile 확장 필드는 현재 ERD 범위 밖이다.
+- 운영 business key는 `country_code + bank_code`다. 현재 legacy
+  `bank_code` PK 호환은 유지하되 composite unique/FK가 국가-은행 일치를
+  강제한다.
 
 #### `source_document`
 
 - source identity의 안정 키를 보유한다.
-- 추천 natural key는 `bank_code + normalized_source_url + source_type`다.
+- 추천 natural key는
+  `country_code + bank_code + normalized_source_url + source_type`다.
+- `source_registry_item`의 생성 source natural key도
+  `country_code + bank_code + product_type + normalized_url + source_type`다.
+- `admin_auth_session`과 `ingestion_run`은 `country_code`를 직접 보유해
+  로그인 이후 운영 조회와 수집 lineage의 국가 경계를 유지한다.
 - registry seed 여부와 discovered metadata를 함께 가진다.
 
 #### `run_source_item`
@@ -445,7 +453,7 @@ erDiagram
 | `dashboard_ranking_snapshot` | ranking widget 결과 저장용 | filter scope, product type, metric key 포함 권장 |
 | `user_account` | reviewer/operator actor reference용 | auth provider 종속 세부 schema는 `1.6.x`에서 닫기 |
 
-이 중 `translation_resource`, `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`는 PRD에 직접 명시된 저장 단위다.  
+이 중 `translation_resource`, `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`는 PRD에 직접 명시된 저장 단위다.
 scatter/grid cache 분리는 `docs/03-design/aggregate-cache-refresh-strategy.md`, `docs/03-design/insight-dashboard-metric-definition.md`, `docs/03-design/product-type-visualization-principles.md`에서 구체화한다.
 
 ---

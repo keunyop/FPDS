@@ -112,6 +112,7 @@ def load_audit_log_list(connection: Connection, *, filters: AuditLogFilters) -> 
           ON cp.product_id = ae.product_id
         LEFT JOIN bank AS b
           ON b.bank_code = COALESCE(cp.bank_code, nc.bank_code)
+         AND b.country_code = COALESCE(cp.country_code, nc.country_code)
         LEFT JOIN ingestion_run AS ir
           ON ir.run_id = ae.run_id
         WHERE {where_sql}
@@ -134,6 +135,7 @@ def load_audit_log_list(connection: Connection, *, filters: AuditLogFilters) -> 
           ON cp.product_id = ae.product_id
         LEFT JOIN bank AS b
           ON b.bank_code = COALESCE(cp.bank_code, nc.bank_code)
+         AND b.country_code = COALESCE(cp.country_code, nc.country_code)
         LEFT JOIN ingestion_run AS ir
           ON ir.run_id = ae.run_id
         WHERE {where_sql}
@@ -156,6 +158,7 @@ def load_audit_log_list(connection: Connection, *, filters: AuditLogFilters) -> 
           ON cp.product_id = ae.product_id
         LEFT JOIN bank AS b
           ON b.bank_code = COALESCE(cp.bank_code, nc.bank_code)
+         AND b.country_code = COALESCE(cp.country_code, nc.country_code)
         LEFT JOIN ingestion_run AS ir
           ON ir.run_id = ae.run_id
         WHERE {where_sql}
@@ -212,6 +215,7 @@ def load_audit_log_list(connection: Connection, *, filters: AuditLogFilters) -> 
           ON cp.product_id = ae.product_id
         LEFT JOIN bank AS b
           ON b.bank_code = COALESCE(cp.bank_code, nc.bank_code)
+         AND b.country_code = COALESCE(cp.country_code, nc.country_code)
         LEFT JOIN ingestion_run AS ir
           ON ir.run_id = ae.run_id
         WHERE {where_sql}

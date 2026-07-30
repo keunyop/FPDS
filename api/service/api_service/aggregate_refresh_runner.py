@@ -4,9 +4,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from api_service.aggregate_refresh import (
-    DEFAULT_COUNTRY_CODE,
-    DEFAULT_REFRESH_SCOPE,
-    claim_aggregate_refresh_batch,
+    claim_next_aggregate_refresh_batch,
     complete_aggregate_refresh_batch,
     fail_aggregate_refresh_batch,
 )
@@ -25,11 +23,7 @@ def main() -> int:
         connection.commit()
         try:
             while True:
-                batch = claim_aggregate_refresh_batch(
-                    connection,
-                    country_code=DEFAULT_COUNTRY_CODE,
-                    refresh_scope=DEFAULT_REFRESH_SCOPE,
-                )
+                batch = claim_next_aggregate_refresh_batch(connection)
                 if not batch:
                     break
                 connection.commit()

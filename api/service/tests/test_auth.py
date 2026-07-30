@@ -4,7 +4,15 @@ from datetime import UTC, datetime
 import unittest
 from unittest.mock import patch
 
-from api_service.auth import LoginError, create_signup_request, review_signup_request, validate_login_id
+from api_service.auth import (
+    LoginError,
+    create_signup_request,
+    load_admin_login_countries,
+    review_signup_request,
+    switch_session_country,
+    validate_admin_country,
+    validate_login_id,
+)
 
 
 class _QueuedCursor:
@@ -39,6 +47,99 @@ class _QueuedConnection:
 class AuthTests(unittest.TestCase):
     def test_validate_login_id_normalizes_case(self) -> None:
         self.assertEqual(validate_login_id(" Admin.User "), "admin.user")
+
+    def test_load_admin_login_countries_returns_active_registry_order(self) -> None:
+        connection = _QueuedConnection(
+            [[
+                {"country_code": "CA", "country_name": "Canada"},
+                {"country_code": "US", "country_name": "United States"},
+            ]]
+        )
+
+        result = load_admin_login_countries(connection)
+
+        self.assertEqual(
+            result,
+            [
+                {"country_code": "CA", "country_name": "Canada"},
+                {"country_code": "US", "country_name": "United States"},
+            ],
+        )
+        self.assertIn("WHERE status = 'active'", connection.calls[0][0])
+
+    def test_validate_admin_country_normalizes_supported_code(self) -> None:
+        connection = _QueuedConnection([{"country_code": "CA"}])
+
+        self.assertEqual(validate_admin_country(connection, " ca "), "CA")
+        self.assertEqual(connection.calls[0][1]["country_code"], "CA")
+
+    def test_validate_admin_country_rejects_disabled_or_unknown_code(self) -> None:
+        connection = _QueuedConnection([None])
+
+        with self.assertRaises(LoginError) as captured:
+            validate_admin_country(connection, "US")
+
+        self.assertEqual(captured.exception.code, "unsupported_country")
+
+    def test_switch_session_country_updates_only_current_session_and_audits(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {"country_code": "US"},
+                {
+                    "auth_session_id": "sess-001",
+                    "user_id": "admin-001",
+                    "country_code": "CA",
+                    "session_status": "active",
+                },
+                None,
+                None,
+            ]
+        )
+
+        result = switch_session_country(
+            connection,
+            auth_session_id="sess-001",
+            country_code="us",
+            actor={"user_id": "admin-001", "login_id": "admin", "role": "admin"},
+            request_id="req-001",
+            ip_address="127.0.0.1",
+            user_agent="test",
+        )
+
+        self.assertEqual(result, "US")
+        update = next((sql, params) for sql, params in connection.calls if "UPDATE admin_auth_session" in sql)
+        self.assertEqual(update[1]["auth_session_id"], "sess-001")
+        self.assertEqual(update[1]["country_code"], "US")
+        audit = next((sql, params) for sql, params in connection.calls if "INSERT INTO audit_event" in sql)
+        self.assertEqual(audit[1]["event_type"], "auth_country_switched")
+        self.assertEqual(audit[1]["target_id"], "sess-001")
+
+    def test_switch_session_country_same_country_is_noop(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {"country_code": "CA"},
+                {
+                    "auth_session_id": "sess-001",
+                    "user_id": "admin-001",
+                    "country_code": "CA",
+                    "session_status": "active",
+                },
+            ]
+        )
+
+        result = switch_session_country(
+            connection,
+            auth_session_id="sess-001",
+            country_code="CA",
+            actor={"user_id": "admin-001", "login_id": "admin", "role": "admin"},
+            request_id="req-001",
+            ip_address=None,
+            user_agent=None,
+        )
+
+        self.assertEqual(result, "CA")
+        self.assertFalse(any("UPDATE admin_auth_session" in sql for sql, _ in connection.calls))
+        self.assertFalse(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
 
     def test_create_signup_request_inserts_pending_request(self) -> None:
         now = datetime(2026, 4, 22, 9, 0, tzinfo=UTC)

@@ -1,5 +1,6 @@
 export type PublicScopeFilters = {
   locale: string;
+  countryCode: string;
   bankCodes: string[];
   productTypes: string[];
   targetCustomerTags: string[];
@@ -37,6 +38,7 @@ const SORT_OPTIONS = new Set([
 ]);
 
 const SUPPORTED_LOCALES = new Set(["en", "ko", "ja"]);
+export const DEFAULT_PUBLIC_COUNTRY_CODE = "CA";
 const SUPPORTED_AXIS_PRESETS = new Set([
   "chequing_fee_vs_minimum_balance",
   "savings_rate_vs_minimum_balance",
@@ -108,17 +110,17 @@ export function buildDashboardSearchParams(filters: DashboardPageFilters) {
   return params;
 }
 
-export function buildGlobalFilterSearchParams(filters: Pick<PublicScopeFilters, "locale">) {
+export function buildGlobalFilterSearchParams(filters: Pick<PublicScopeFilters, "locale" | "countryCode">) {
   const params = new URLSearchParams();
   params.set("locale", filters.locale);
-  params.set("country_code", "CA");
+  params.set("country_code", filters.countryCode);
   return params;
 }
 
 export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
   const params = new URLSearchParams();
   params.set("locale", filters.locale);
-  params.set("country_code", "CA");
+  params.set("country_code", filters.countryCode);
 
   for (const bankCode of filters.bankCodes) {
     params.append("bank_code", bankCode);
@@ -151,6 +153,9 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
 
   if (state.locale !== "en") {
     params.set("locale", state.locale);
+  }
+  if (state.countryCode !== DEFAULT_PUBLIC_COUNTRY_CODE) {
+    params.set("country_code", state.countryCode);
   }
   for (const bankCode of state.bankCodes) {
     params.append("bank_code", bankCode);
@@ -197,6 +202,7 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
 export function buildScopedPublicHrefFromSearchParams(path: PublicRoutePath, searchParams: SearchParamsReader) {
   return buildPublicHref(path, {
     locale: normalizeLocaleValue(searchParams.get("locale") ?? ""),
+    countryCode: normalizeCountryCodeValue(searchParams.get("country_code") ?? ""),
     bankCodes: normalizeMultiValues(searchParams.getAll("bank_code"), true),
     productTypes: normalizeMultiValues(searchParams.getAll("product_type")),
     targetCustomerTags: normalizeMultiValues(searchParams.getAll("target_customer_tag")),
@@ -207,9 +213,26 @@ export function buildScopedPublicHrefFromSearchParams(path: PublicRoutePath, sea
   });
 }
 
+export function buildCountryHref(pathname: string, searchParams: SearchParamsReader, countryCode: string) {
+  const params = new URLSearchParams();
+  const locale = normalizeLocaleValue(searchParams.get("locale") ?? "");
+  const normalizedCountryCode = normalizeCountryCodeValue(countryCode);
+
+  if (locale !== "en") {
+    params.set("locale", locale);
+  }
+  if (normalizedCountryCode !== DEFAULT_PUBLIC_COUNTRY_CODE) {
+    params.set("country_code", normalizedCountryCode);
+  }
+
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
 function parsePublicScopeFilters(searchParams: PageSearchParams): PublicScopeFilters {
   return {
     locale: normalizeLocaleValue(firstValue(searchParams.locale)),
+    countryCode: normalizeCountryCodeValue(firstValue(searchParams.country_code)),
     bankCodes: normalizeMultiValues(multiValue(searchParams.bank_code), true),
     productTypes: normalizeMultiValues(multiValue(searchParams.product_type)),
     targetCustomerTags: normalizeMultiValues(multiValue(searchParams.target_customer_tag)),
@@ -223,6 +246,11 @@ function parsePublicScopeFilters(searchParams: PageSearchParams): PublicScopeFil
 function normalizeLocaleValue(value: string) {
   const locale = value.toLowerCase();
   return SUPPORTED_LOCALES.has(locale) ? locale : "en";
+}
+
+export function normalizeCountryCodeValue(value: string) {
+  const countryCode = value.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(countryCode) ? countryCode : DEFAULT_PUBLIC_COUNTRY_CODE;
 }
 
 function normalizeScalarValue(value: string) {

@@ -264,6 +264,22 @@ The shared public aggregate vocabulary uses the following approved bucket bounda
 
 These boundaries are the baseline for `5.6` aggregate projection generation and the shared filter vocabulary used by the later grid and dashboard APIs.
 
+### 10.11 Country Selection And Global Readiness
+
+- Public header utility space is reserved for country selection; language
+  selection lives in the footer.
+- The selector lists only countries represented by active products in their
+  latest completed public snapshot. Current data therefore exposes Canada
+  without suggesting unavailable worldwide coverage.
+- Country names are localized from ISO region codes at the UI boundary. Flags
+  and IP/browser geolocation are not used.
+- `CA` is the clean-URL default. Other two-letter country codes persist through
+  Home, Deposit, Loan, detail, and Methodology navigation.
+- Changing country clears bank, product, bucket, axis, sort, and pagination
+  state so country-owned codes cannot leak into the next market.
+- Direct URLs for a valid but unavailable country render the existing honest
+  unavailable/empty state.
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

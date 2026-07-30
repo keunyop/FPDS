@@ -854,7 +854,7 @@ def _prepare_source_registry_payload(payload: dict[str, Any], *, existing_row: d
     return {
         "source_id": _required_text(payload.get("source_id", existing.get("source_id")), "source_id"),
         "bank_code": _required_text(payload.get("bank_code", existing.get("bank_code")), "bank_code").upper(),
-        "country_code": _required_text(payload.get("country_code", existing.get("country_code", "CA")), "country_code").upper(),
+        "country_code": _normalize_country_code(payload.get("country_code", existing.get("country_code", "CA"))),
         "product_type": _required_text(payload.get("product_type", existing.get("product_type")), "product_type").lower(),
         "product_key": _optional_text(payload.get("product_key", existing.get("product_key"))),
         "source_name": _required_text(payload.get("source_name", existing.get("source_name")), "source_name"),
@@ -980,6 +980,7 @@ def _insert_collection_run_row(
         """
         INSERT INTO ingestion_run (
             run_id,
+            country_code,
             run_state,
             trigger_type,
             triggered_by,
@@ -998,6 +999,7 @@ def _insert_collection_run_row(
         )
         VALUES (
             %(run_id)s,
+            %(country_code)s,
             'started',
             'admin_source_collection',
             %(triggered_by)s,
@@ -1017,6 +1019,7 @@ def _insert_collection_run_row(
         ON CONFLICT (run_id) DO UPDATE
         SET
             run_state = 'started',
+            country_code = EXCLUDED.country_code,
             trigger_type = 'admin_source_collection',
             triggered_by = COALESCE(EXCLUDED.triggered_by, ingestion_run.triggered_by),
             source_scope_count = GREATEST(ingestion_run.source_scope_count, EXCLUDED.source_scope_count),
@@ -1032,6 +1035,7 @@ def _insert_collection_run_row(
         """,
         {
             "run_id": run_id,
+            "country_code": group["country_code"],
             "triggered_by": triggered_by,
             "source_scope_count": len(group["included_source_ids"]),
             "retry_of_run_id": retry_of_run_id,
@@ -1232,6 +1236,17 @@ def _required_text(value: Any, field_name: str) -> str:
     normalized = _optional_text(value)
     if not normalized:
         raise SourceRegistryError(status_code=422, code="required_field_missing", message=f"{field_name} is required.")
+    return normalized
+
+
+def _normalize_country_code(value: Any) -> str:
+    normalized = _required_text(value, "country_code").upper()
+    if len(normalized) != 2 or not normalized.isascii() or not normalized.isalpha():
+        raise SourceRegistryError(
+            status_code=422,
+            code="invalid_country_code",
+            message="country_code must be a two-letter ISO 3166-1 alpha-2 code.",
+        )
     return normalized
 
 

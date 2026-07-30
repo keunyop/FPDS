@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 
 export type AdminSession = {
+  country_code: string;
   user: {
     user_id: string;
     login_id: string;
@@ -1010,6 +1011,23 @@ export type ProductTypeListResponse = {
   };
 };
 
+export type CountryRegistryItem = {
+  country_code: string;
+  country_name: string;
+  status: "active" | "inactive";
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type CountryRegistryResponse = {
+  items: CountryRegistryItem[];
+  summary: {
+    total_items: number;
+    active_items: number;
+    available_items: number;
+  };
+};
+
 type AdminApiResponse<T> = {
   data: T;
 };
@@ -1108,6 +1126,10 @@ export async function fetchProductTypeList(searchParams?: URLSearchParams): Prom
 export async function fetchProductTypeDetail(productTypeCode: string): Promise<ProductTypeItem | null> {
   const payload = await fetchAdminData<{ product_type: ProductTypeItem }>(`/api/admin/product-types/${encodeURIComponent(productTypeCode)}`, undefined, { allowNotFound: true });
   return payload?.product_type ?? null;
+}
+
+export async function fetchCountryRegistry(): Promise<CountryRegistryResponse | null> {
+  return fetchAdminData<CountryRegistryResponse>("/api/admin/countries");
 }
 
 export async function fetchBankList(searchParams: URLSearchParams): Promise<BankListResponse | null> {

@@ -46,6 +46,8 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
   const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
   return (
     <AdminShell
+      countryCode={session.country_code}
+      csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}

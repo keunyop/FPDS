@@ -45,11 +45,20 @@ include an estimated-interest calculator and an approved term-rate table.
 Lending details may include rate type, term, amortization, payment, prepayment,
 amount or limit, and security when those fields are approved.
 
+The header uses a compact country selector backed by countries represented in
+their latest completed active public snapshots. Country changes reset
+country-owned bank and product filters rather than carrying invalid scope
+across markets. The current published and collection scope remains Canada.
+
 ## Localization, States, and Accessibility
 
-- EN, KO, and JA are selected with the `locale` query parameter. Locale is
+- EN, KO, and JA are selected from the footer with the `locale` query
+  parameter. Locale is
   preserved across navigation, metadata is localized, and the document `lang`
   value is synchronized before hydration.
+- Country is selected from the header with the `country_code` query parameter.
+  Canada is the clean-URL default, non-default ISO alpha-2 codes persist across
+  navigation, and country names use the active UI locale.
 - Source-derived institution and product content remains in its source language;
   FPDS-owned navigation, labels, freshness, methodology, and safety copy are
   localized.
@@ -64,7 +73,7 @@ amount or limit, and security when those fields are approved.
 
 ## Data and Asset Boundaries
 
-Public data comes from `GET /api/public/products`,
+Public data comes from `GET /api/public/countries`, `GET /api/public/products`,
 `GET /api/public/products/:productId`, `GET /api/public/filters`, and the public
 dashboard endpoints. Reads use a short server-side timeout so a slow API renders
 the localized unavailable state instead of leaving navigation pending.

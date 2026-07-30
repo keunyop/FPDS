@@ -43,6 +43,8 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
 
   return (
     <AdminShell
+      countryCode={session.country_code}
+      csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}

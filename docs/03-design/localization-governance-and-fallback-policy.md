@@ -1,4 +1,4 @@
-﻿# FPDS Localization Governance and Fallback Policy
+# FPDS Localization Governance and Fallback Policy
 
 Version: 1.0
 Date: 2026-04-06
@@ -28,7 +28,7 @@ Source Documents:
 - locale fallback 순서와 source-derived text 처리 원칙을 public/admin/API vocabulary와 맞춘다.
 - Japanese glossary의 scope, owner, change rule을 정의해 Phase 2 확장 전에 terminology drift를 줄인다.
 
-이 문서는 구현 시작 신호가 아니다.  
+이 문서는 구현 시작 신호가 아니다.
 구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
 
 ---
@@ -70,7 +70,7 @@ Source Documents:
 - Phase 1 public market scope가 Canada Big 5이므로 English baseline이 가장 자연스럽다.
 - External API와 future public documentation도 English-first 확장이 더 단순하다.
 
-이 결정은 문서 authoring 언어를 제한하지 않는다.  
+이 결정은 문서 authoring 언어를 제한하지 않는다.
 하지만 persisted UI resource registry의 기준 locale과 fallback root는 `en`이다.
 
 ### 4.2 Localizable vs Non-Localizable Boundary
@@ -113,7 +113,7 @@ resource ownership은 아래 domain으로 구분한다.
 | Domain Reviewer | 금융 용어, taxonomy label, methodology wording 검토가 필요한 경우 consult |
 | QA / Reviewer | high-impact screen에서 locale rendering과 fallback behavior 검증 |
 
-현재 팀 baseline에서는 별도 localization PM이나 dedicated translator를 두지 않는다.  
+현재 팀 baseline에서는 별도 localization PM이나 dedicated translator를 두지 않는다.
 따라서 Product Owner가 의미 승인권을 가진다.
 
 ### 5.2 Resource-Class Ownership Matrix
@@ -152,7 +152,7 @@ resource 상태는 최소 아래 의미를 가져야 한다.
 | `approved` | fallback root 또는 locale target으로 사용자 노출 가능 |
 | `deprecated` | 새 key/resource로 대체 예정, 신규 사용 금지 |
 
-Phase 1 baseline에서는 `approved`만 public/admin 노출 대상으로 본다.  
+Phase 1 baseline에서는 `approved`만 public/admin 노출 대상으로 본다.
 `draft`는 내부 authoring 상태로만 유지한다.
 
 ### 5.5 Localization Health Visibility Baseline
@@ -318,6 +318,16 @@ glossary entry는 최소 아래 필드를 가져야 한다.
 - 의미가 확정된 금융 용어는 카타카나 음역보다 업계에서 통용되는 Japanese finance term을 우선한다.
 - 코드값과 표시값은 분리한다. 내부 code는 English를 유지하고 display label만 locale-aware 하게 바꾼다.
 - 한 term이 public/admin 양쪽에 공통으로 쓰이면 같은 Japanese base term을 유지하고, 필요 시 usage note로 문맥 차이를 설명한다.
+
+### 7.7 Country Name Localization
+
+- product country is a stable ISO 3166-1 alpha-2 code, not translated content
+- Public renders region names with runtime internationalization data for EN,
+  KO, and JA and falls back to the ISO code if a name is unavailable
+- language changes preserve country and current query state
+- country changes preserve language but clear country-owned product filters
+- country selection and language selection are separate controls; neither
+  infers the other
 
 ---
 

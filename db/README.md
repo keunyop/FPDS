@@ -6,6 +6,9 @@ Current decisions:
 - PostgreSQL is the baseline database.
 - Migrations are SQL-first so the repo is not blocked on a framework or ORM choice.
 - Primary keys use application-generated `text` ids for now, which avoids taking a UUID extension dependency before the runtime is chosen.
+- Opaque technical IDs stay stable across country moves and imports. Country is
+  part of bank/source business uniqueness and country-owned lookup indexes,
+  rather than being concatenated into every technical primary key.
 - Flexible candidate and canonical field payloads live in `jsonb` until the implementation needs stricter column-level expansion.
 - `pgvector` is intentionally deferred from the first migration. `0012_evidence_chunk_embeddings.sql` adds the first evidence-chunk embedding side table, while metadata-only retrieval fallback remains allowed when the migration or rows are unavailable in early `dev`.
 - Runtime admin and API reads no longer auto-reseed `bank`, `product_type_registry`, `source_registry_catalog_item`, or `source_registry_item` from committed JSON seed baselines. Empty tables now remain empty until an explicit operator write, import step, or full migration replay repopulates them.
@@ -30,6 +33,13 @@ Files:
 - `migrations/0022_bank_logo_asset_refresh.sql`: replaces recognized-bank favicon defaults with verified official logo assets while preserving operator-supplied custom logo URLs
 - `migrations/0023_versioned_parsed_documents.sql`: permits one immutable parsed artifact per snapshot and parser version so parser upgrades can reparse without overwriting earlier evidence lineage
 - `migrations/0024_deposit_field_contract_defaults.sql`: aligns deposit product-type expected fields with the executable cross-bank field contract and records the registry change in history
+- `migrations/0025_country_scoped_admin.sql`: adds the enabled-country registry,
+  country-bound Admin sessions and ingestion runs, country/bank composite
+  integrity, country-aware source uniqueness, and country-qualified product
+  lookup indexes
+- `migrations/0026_country_registry_management.sql`: adds the stored English
+  country-name fallback and country registry lookup index used by the
+  admin-only prepared-country activation workflow
 
 How to apply when a database is available:
 
@@ -53,6 +63,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0021_vancity_credit_union_full_cove
 psql $env:FPDS_DATABASE_URL -f db/migrations/0022_bank_logo_asset_refresh.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0023_versioned_parsed_documents.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0024_deposit_field_contract_defaults.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
 ```
 
 Notes:
@@ -61,3 +73,8 @@ Notes:
 - Keep future migrations additive and append-only where possible.
 - Put extension-specific or vendor-specific migrations in later numbered files.
 - Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set, and `0022_bank_logo_asset_refresh.sql` upgrades eligible favicon defaults to verified official logo assets. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.
+- `country_registry` is the operational allowlist for Admin login. Adding a new
+  country is an explicit enablement step and does not by itself authorize
+  collection or release for that market.
+- Country removal is an `inactive` status transition rather than row deletion,
+  preserving country-scoped foreign keys and historical records.

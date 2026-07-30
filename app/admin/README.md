@@ -14,9 +14,24 @@ The shell puts four daily tasks first:
 3. **Runs** — find failed or partial collection work and inspect or retry it.
 4. **Banks** — manage bank coverage and launch collection.
 
+Before entering the workspace, the operator selects an enabled working country
+on the login form. The API persists that ISO alpha-2 code in the server-side
+session, and the shell keeps it visible in the header. The country owns the
+scope of reads and writes, but the operator can switch to another active
+country from the header. A switch is confirmed, updates the server-side
+session, and returns to Overview in the same language so detail/filter state
+does not cross countries.
+
 The sidebar keeps less frequent tools available: Sources, Product Types,
-Changes, Audit Log, Usage, and Public Health. Existing Bank and Source Catalog
-detail URLs remain compatibility redirects; their APIs are still live.
+Countries, Changes, Audit Log, Usage, and Public Health. Countries is visible
+only to administrators and uses a prepared ISO list: activation adds a login
+country, while reversible deactivation preserves history and protects the
+current/last active country. Existing Bank and Source Catalog detail URLs
+remain compatibility redirects; their APIs are still live.
+Authenticated language selection lives in the sidebar Account menu rather than
+the global header. Login and Signup use the same EN/KO/JA dropdown pattern as a
+standalone control, and every locale change preserves the current route and
+non-locale query state.
 
 ## Code Map
 
@@ -37,6 +52,14 @@ their FPDS role first; vendor provenance remains recorded in the design logs.
 ## Safety Boundaries
 
 - Preserve EN/KO/JA locale query propagation and source-language content.
+- Never treat a client query parameter as the Admin country authority. Reads
+  and writes derive country from the authenticated server-side session.
+- Keep header switching limited to active countries, CSRF-protected, audited,
+  and redirected to Overview rather than preserving a country-owned route.
+- Keep platform-wide account and audit administration conceptually separate
+  from country-owned bank, source, collection, review, and product data.
+- Treat country removal as reversible deactivation. Never physically delete a
+  country row or accept a free-form country identity from the browser.
 - Preserve session cookies, CSRF headers, RBAC, proxy status/body forwarding,
   query parameter names, and mutation timeout behavior.
 - Do not expose evidence, review state, or private source traces to Public.

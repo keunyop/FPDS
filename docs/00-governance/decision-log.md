@@ -67,6 +67,10 @@ If a topic is not covered here, follow document authority:
 | D-018 | 2026-04-21 | Aggregate Refresh Behavior | Canonical approval should enqueue asynchronous aggregate refresh, and public serving should fall back to the latest successful snapshot if a newer refresh fails. | This is the live serving and health behavior for public data. | development journal, admin health slice |
 | D-019 | 2026-04-21 | Registry Reset Behavior | Runtime code must not silently reseed bank, product type, source catalog, or generated source rows after operator resets. | Protects resettable registry state and empty-state replay testing. | development journal |
 | D-020 | 2026-04-22 | Docs Operating Rule | Active implementation should start from `README.md`, `docs/README.md`, `development-journal.md`, and relevant active design docs, while `docs/archive/` is skipped by default. | Reduces startup cost and keeps Codex on current sources of truth. | docs map, development journal |
+| D-021 | 2026-07-29 | Country Dimension | FPDS is ultimately a worldwide bank-product platform. Country is owned by the bank as an ISO 3166-1 alpha-2 code and is carried into canonical products, aggregate snapshots, public projections, APIs, and Public URL state. Selectors expose only countries with active products in their latest completed public snapshot; no currency, locale, hostname, flag, or geolocation inference is used. Current collection and release scope remains Canada until separately approved. | Enables global expansion without mixing markets or prematurely widening collection scope. | Product Owner direction, API contract, Public IA |
+| D-022 | 2026-07-29 | Admin Country Context and Keys | Admin login requires an enabled country and stores it in the server-side session as the authority for country-owned operational data. Stable technical IDs remain opaque. Bank/source business uniqueness and product identity lookup include country; global semantic product-type codes remain country-neutral while subtype taxonomy and bank coverage are country-qualified. | Prevents cross-country Admin mistakes and future key collisions without making IDs display-oriented or duplicating the product-type vocabulary per market. | Product Owner direction, security design, canonical schema, migration `0025` |
+| D-023 | 2026-07-29 | Country Registry Operations | Admin country onboarding uses a prepared ISO 3166-1 alpha-2 catalog. Operators activate or reversibly deactivate countries; they do not create free-form country records or physically delete country-owned history. The current session country and final active country are protected, and deactivation revokes sessions for the affected country. | Keeps country identity standardized, makes global expansion simple, and prevents operational lockout or historical-integrity loss. | Product Owner direction, `FR-ADM-018`, migration `0026` |
+| D-024 | 2026-07-29 | Admin Country Switching | An authenticated operator may switch the current session to another active country from the global header. The server session remains the sole authority; the CSRF-protected transition is audited and returns to Overview while preserving locale instead of carrying country-owned entity or filter context across markets. | Removes unnecessary sign-out/sign-in friction without weakening the country isolation boundary. | Product Owner direction, `FR-ADM-001`, Admin API/security design |
 
 ---
 
@@ -76,6 +80,7 @@ If a topic is not covered here, follow document authority:
 - Prototype and gate history are still retained, but they are not default reading paths anymore.
 - Current implementation should optimize for data quality, evidence traceability, operator reviewability, and public-serving stability before polish.
 - Future scope beyond the approved Phase 1 cutline still needs explicit Product Owner direction.
+- Worldwide coverage is the long-term product direction, but each new country's collection, taxonomy, legal/operating review, and release still requires an approved scope slice.
 
 ---
 
@@ -99,3 +104,7 @@ Do not update this file for:
 | Date | Change |
 |---|---|
 | 2026-04-22 | Rewrote the decision log as a short current-baseline document and removed stale detailed history from the default path |
+| 2026-07-29 | Added D-021 country-dimension and worldwide-direction baseline while retaining Canada as current collection scope |
+| 2026-07-29 | Added D-022 server-side Admin country context and country-aware key policy |
+| 2026-07-29 | Added D-023 prepared country catalog and reversible country-registry operations |
+| 2026-07-29 | Added D-024 audited in-session Admin country switching |

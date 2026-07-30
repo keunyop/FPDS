@@ -246,7 +246,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "FPDS Deposits",
-      pageDescription: "Compare Canadian chequing, savings, and GIC products.",
+      pageDescription: "Compare chequing, savings, and GIC products in the selected country.",
       title: "Compare deposits",
       description: "Chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
@@ -446,7 +446,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "FPDS 예금",
-      pageDescription: "캐나다 입출금, 저축, GIC 상품을 비교합니다.",
+      pageDescription: "선택한 국가의 입출금, 저축, GIC 상품을 비교합니다.",
       title: "예금 비교",
       description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품입니다.",
       currentScope: "현재 범위",
@@ -646,7 +646,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "FPDS 預金",
-      pageDescription: "カナダの当座、普通預金、GIC 商品を比較します。",
+      pageDescription: "選択した国の当座、普通預金、GIC 商品を比較します。",
       title: "預金を比較",
       description: "最新の公開スナップショットにある当座、普通預金、GIC 商品です。",
       currentScope: "現在の範囲",
@@ -824,8 +824,8 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
     fresh: "Current snapshot",
     freshness: "Snapshot freshness",
-    homeBody: "Orient across the Canadian market, shortlist products with comparable public facts, then confirm current terms with the institution.",
-    homeKicker: "Verified Canadian financial product records",
+    homeBody: "Orient across the selected market, shortlist products with comparable public facts, then confirm current terms with the institution.",
+    homeKicker: "Verified financial product records",
     homeTitle: "A changing market, made legible.",
     loanCoverage: "Mortgage, personal loan and line of credit",
     methodologyIntro: "How source facts become comparable public records—and where FPDS deliberately stops.",
@@ -859,8 +859,8 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
     fresh: "최신 스냅샷",
     freshness: "스냅샷 최신성",
-    homeBody: "캐나다 금융시장을 한눈에 파악하고, 비교 가능한 공개 정보로 후보를 좁힌 뒤, 금융기관 공식 페이지에서 최신 조건을 확인하세요.",
-    homeKicker: "검증된 캐나다 금융상품 기록",
+    homeBody: "선택한 금융시장을 한눈에 파악하고, 비교 가능한 공개 정보로 후보를 좁힌 뒤, 금융기관 공식 페이지에서 최신 조건을 확인하세요.",
+    homeKicker: "검증된 금융상품 기록",
     homeTitle: "변하는 금융시장을, 읽을 수 있게.",
     loanCoverage: "모기지·개인대출·신용한도",
     methodologyIntro: "공식 출처의 정보가 비교 가능한 공개 기록이 되는 과정과 FPDS가 의도적으로 멈추는 경계입니다.",
@@ -894,8 +894,8 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
     fresh: "最新スナップショット",
     freshness: "スナップショットの鮮度",
-    homeBody: "カナダ市場を把握し、比較できる公開情報で候補を絞り、金融機関の公式ページで最新条件を確認してください。",
-    homeKicker: "検証済みカナダ金融商品レコード",
+    homeBody: "選択した市場を把握し、比較できる公開情報で候補を絞り、金融機関の公式ページで最新条件を確認してください。",
+    homeKicker: "検証済み金融商品レコード",
     homeTitle: "変わる市場を、読み解ける形に。",
     loanCoverage: "住宅ローン・個人ローン・与信枠",
     methodologyIntro: "公式情報が比較できる公開レコードになる流れと、FPDS が意図的に設ける境界です。",
@@ -942,7 +942,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
   if (normalizePublicLocale(locale) === "ko") {
     return {
       pageTitle: "FPDS 대출",
-      pageDescription: "캐나다 대출 상품 카탈로그입니다.",
+      pageDescription: "선택한 국가의 대출 상품 카탈로그입니다.",
       title: "대출 상품",
       description: "최신 공개 스냅샷에서 활성 모기지, 개인 대출, 신용한도 대출 상품을 조회합니다.",
     };
@@ -950,14 +950,14 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
   if (normalizePublicLocale(locale) === "ja") {
     return {
       pageTitle: "FPDS ローン",
-      pageDescription: "カナダのローン商品のカタログです。",
+      pageDescription: "選択した国のローン商品のカタログです。",
       title: "ローン商品",
       description: "最新の公開スナップショットから、有効な住宅ローン、個人ローン、ライン・オブ・クレジット商品を絞り込みます。",
     };
   }
   return {
     pageTitle: "FPDS Loan",
-    pageDescription: "Compare Canadian mortgage, personal loan, and line of credit products.",
+    pageDescription: "Compare mortgage, personal loan, and line of credit products in the selected country.",
     title: "Compare loans",
     description: "Mortgage, personal loan, and line of credit products from the latest public snapshot.",
   };

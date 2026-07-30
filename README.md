@@ -6,7 +6,7 @@ platform with separate authenticated Admin and anonymous Public experiences.
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-28`:
+As of `2026-07-29`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -38,6 +38,10 @@ As of `2026-07-28`:
 - Current cross-bank accuracy hardening requires exact percentage evidence, separates regular rates from time/eligibility-limited promotional totals and ongoing bonuses, preserves foreign-product currency, requires direct and cross-field-consistent monthly fees, and prevents adjacent product, family-page, investment-fund, FX, index-return, calculator, or WAF content from becoming public product facts. Snapshot metadata preserves established detail ownership across shared supporting fetches, manual review overrides use the executable type/range contract, and the collection watchdog can recover only a fully persisted terminal result emitted before timeout. Confirmed unsafe historical/live candidates are retracted through audited remediation before corrected recollection.
 - Latest decision-field hardening maps flattened horizontal comparison tables back to the target product column, separates a positive recurring fee from its balance-qualified `$0` outcome, preserves material savings balance tiers and transaction fees, ranks explicit multi-step qualification evidence over marketing summaries, and carries exact account-wide unlimited-transaction facts from official supporting sources. Cross-sell audience offers, account-switching services, incomplete fragments, award copy, and repeated application CTAs are removed from customer-facing fields without inventing missing values.
 - Public now has separate Deposit and Loan catalog routes. Loan accepts review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products through the same aggregate snapshot and public-only data boundary; candidates that still require review remain non-public.
+- Public country readiness is now implemented end to end: bank-owned ISO alpha-2 country codes flow through canonical approval and country-specific aggregate refresh into Public APIs and URL state. The header selects among countries with active latest snapshots, the footer owns EN/KO/JA language selection, and current collection scope remains Canada.
+- Admin is now country-scoped from sign-in: operators select an enabled country before authentication, the server stores it in the session, the shell keeps the working country visible, and bank/source/collection/run/review/change/usage operations are constrained to that country. Stable product/candidate/run IDs remain opaque; country is enforced through business keys, foreign keys, and lookup indexes.
+- Admin administrators can now manage that login allowlist from `/admin/countries`: countries are selected from a prepared ISO catalog, activation is audited, and reversible deactivation preserves historical data while protecting the current and final active country.
+- The authenticated Admin header now switches the current server-side session among active countries with confirmation, CSRF protection, and audit history, then returns to Overview in the same language to prevent country-owned screen context from leaking across markets.
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns
@@ -78,13 +82,14 @@ As of `2026-07-28`:
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
 - a first live `FastAPI` admin service package under `api/service/` for DB-backed admin auth, session handling, and approval-gated signup requests
 - a first live `Next.js` admin package under `app/admin/` with `/admin/login`, `/admin/signup`, protected `/admin`, and session-aware route gating
+- an admin-only `/admin/countries` surface backed by a prepared ISO country catalog and audited country-registry activation/deactivation APIs
 - a first live `Next.js` public package under `app/public/` with dashboard-first `/dashboard`, `/products` for Deposit, `/loans` for approved retail lending, `/products/[productId]` for public product detail, and `/methodology` for public metric/data-boundary notes
 - a live review-queue, decision, trace, and AI-verification runtime slice with `GET /api/admin/review-tasks`, `GET /api/admin/review-tasks/:reviewTaskId`, `POST /api/admin/review-tasks/:reviewTaskId/ai-verify`, protected `/admin/reviews`, and a protected `/admin/reviews/:reviewTaskId` decision-plus-trace surface
 - a live run-status runtime slice with `GET /api/admin/runs`, `GET /api/admin/runs/:runId`, protected `/admin/runs`, and a protected `/admin/runs/:runId` diagnostic surface
 - a live change-history runtime slice with `GET /api/admin/change-history` and a protected `/admin/changes` chronology surface
 - a live audit-log runtime slice with `GET /api/admin/audit-log` and a protected `/admin/audit` append-only chronology surface
 - a live LLM usage runtime slice with `GET /api/admin/llm-usage` and a dashboard-shaped usage aggregation response for totals, model, agent, run, and anomaly drilldown analysis
-- a live public aggregate runtime slice with `GET /api/public/products`, `GET /api/public/products/:productId`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
+- a live country-aware public aggregate runtime slice with `GET /api/public/countries`, `GET /api/public/products`, `GET /api/public/products/:productId`, `GET /api/public/filters`, `GET /api/public/dashboard-summary`, `GET /api/public/dashboard-rankings`, and `GET /api/public/dashboard-scatter` backed by `aggregate_refresh_run` plus `public_product_projection`
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
 - a completed dashboard health surface on `/admin/health/dashboard` with aggregate freshness, queue visibility, serving fallback, stale or failed state signals, and operator retry
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection

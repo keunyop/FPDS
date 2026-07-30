@@ -1,7 +1,7 @@
 # FPDS Docs Map
 
 Status: Active navigation index
-Last updated: 2026-07-28
+Last updated: 2026-07-29
 
 This file is the main entrypoint for `docs/`.
 
@@ -11,16 +11,25 @@ Default rule:
 
 ## 1. Resume A Codex Session
 
-Read in this order:
+Before substantive work, read in this order:
 1. `README.md`
 2. `docs/00-governance/development-journal.md`
-3. `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-4. `docs/02-requirements/scope-baseline.md`
-5. `docs/01-planning/plan.md`
-6. `docs/01-planning/WBS.md`
-7. `docs/00-governance/decision-log.md`
-8. `docs/00-governance/raid-log.md`
-9. only the design docs needed for the current slice
+3. this docs map
+
+Then route by task instead of loading every active document:
+
+| Task affects | Read next |
+|---|---|
+| product behavior, scope, or acceptance | requirements definition and `scope-baseline.md` |
+| delivery selection, sequencing, or status | `plan.md` and `WBS.md` |
+| architecture or a settled baseline | `decision-log.md` and relevant design docs |
+| an active risk, issue, assumption, or dependency | `raid-log.md` |
+| a runtime boundary | that boundary's README plus relevant contracts/design docs |
+| UI or visual behavior | design docs index, both frontend baselines, relevant surface/locale docs, and the Admin/Public README |
+| harness, CI, or repository-wide checks | `harness-engineering-baseline.md` |
+
+This keeps the startup context current without spending context on unrelated
+requirements, planning, or design material.
 
 ## 2. Active Documents
 

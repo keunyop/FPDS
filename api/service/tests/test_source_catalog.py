@@ -34,6 +34,7 @@ from api_service.source_catalog import (
     _looks_like_credit_card_detail_path,
     _looks_like_secondary_catalog_hub,
     _looks_like_javascript_shell,
+    _normalize_country_code,
     _ordered_detail_candidates,
     _page_is_audience_offer_hub,
     _promote_detail_candidates,
@@ -105,6 +106,12 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_country_code_requires_iso_alpha_2_shape(self) -> None:
+        self.assertEqual(_normalize_country_code(" us "), "US")
+        with self.assertRaises(SourceRegistryError) as captured:
+            _normalize_country_code("Canada")
+        self.assertEqual(captured.exception.code, "invalid_country_code")
+
     def test_seed_supporting_hints_remain_subject_to_current_scope_policy(self) -> None:
         definition = _product_type_definition("gic")
         self.assertFalse(
@@ -2056,7 +2063,10 @@ class SourceCatalogTests(unittest.TestCase):
             ]
         )
 
-        result = load_bank_list(connection, filters=normalize_bank_filters(search=None, status=None))
+        result = load_bank_list(
+            connection,
+            filters=normalize_bank_filters(country_code="CA", search=None, status=None),
+        )
 
         self.assertEqual(result["items"][0]["catalog_product_types"], ["gic", "savings"])
         self.assertEqual(
@@ -4153,7 +4163,10 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertEqual(result[0]["source_id"], "AUTO-BMO-CHQ-existing")
         sql, _params = connection.calls[0]
-        self.assertIn("ON CONFLICT (bank_code, product_type, normalized_url, source_type) DO UPDATE", sql)
+        self.assertIn(
+            "ON CONFLICT (country_code, bank_code, product_type, normalized_url, source_type) DO UPDATE",
+            sql,
+        )
         self.assertIn("WHEN source_registry_item.status = 'removed'", sql)
 
     def test_upsert_source_registry_rows_preserves_removed_status_on_conflict(self) -> None:

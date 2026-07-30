@@ -38,6 +38,12 @@
       "route_id": "public.methodology",
       "implementation_path": "src/app/methodology/page.tsx",
       "resource_key": "public_navigation.methodology"
+    },
+    {
+      "route": "/api/public/countries",
+      "route_id": "public.proxy.countries",
+      "implementation_path": "src/app/api/public/countries/route.ts",
+      "resource_key": "public_country.options"
     }
   ]
 }

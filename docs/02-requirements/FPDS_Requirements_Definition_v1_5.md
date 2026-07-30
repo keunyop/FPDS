@@ -411,6 +411,19 @@ UI 번역 리소스 또는 설정 라벨이 불완전한 경우 시스템은 정
 ### FR-ADM-001 Admin Login
 admin 사용자는 인증(auth)을 통해 로그인해야 한다.
 
+로그인 전에 활성화된 ISO 3166-1 alpha-2 업무 국가를 선택해야 하며, 선택한
+국가는 서버 세션에 저장되어 해당 세션의 은행, 소스, 수집 실행, 검토,
+canonical 변경 및 사용량 조회 범위를 결정해야 한다. 화면 query나 mutation
+payload가 세션 국가를 임의로 우회할 수 없어야 하며, 현재 업무 국가는 Admin
+shell에서 항상 확인 가능해야 한다.
+
+Authenticated operators must also be able to switch to another active working
+country from the global Admin header without signing out. The switch must
+update the server-side session authority, require CSRF protection, emit an
+audit event, preserve the selected UI language, and return the operator to
+Admin Overview so country-owned detail routes, filters, and unsaved screen
+state do not cross the boundary.
+
 ### FR-ADM-002 Review Queue
 시스템은 저신뢰/충돌/누락/정책 위반 후보를 review queue로 보낼 수 있어야 한다.
 
@@ -540,6 +553,27 @@ Current boundary:
 - the live runtime now lets operators define additional deposit product types, attach them to bank coverage, and run homepage-first discovery plus generic AI fallback through manual review
 - public publish, dashboard aggregation, and auto-approval semantics remain constrained to the existing reviewed canonical flow until later slices widen those downstream surfaces intentionally
 - Product Owner approval on `2026-07-14` widens the Public Product Grid to review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products. This does not widen auto-approval: lending candidates continue to require review before entering the public aggregate snapshot.
+
+### FR-ADM-018 Country Registry Management
+
+An `admin` must be able to manage the operational country allowlist from FPDS
+Admin.
+
+Minimum behavior:
+- the operator selects from a prepared ISO 3166-1 alpha-2 country catalog and
+  does not type a free-form country code or country name
+- the active-country list shows the localized country name and stable
+  two-letter code
+- activation makes the country available for future Admin login
+- removal is a reversible inactive status transition; country-owned historical
+  records are not physically deleted
+- the country used by the current session and the final active country cannot
+  be deactivated
+- deactivation revokes active Admin sessions for that country
+- activation and deactivation require the `admin` role, CSRF protection, and
+  an audit event
+- activating a country does not automatically configure banks, product types,
+  collection coverage, taxonomy, or Public release
 
 ## 8.3 Data Ingestion Requirements
 
@@ -1580,3 +1614,23 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - LLM usage / cost monitoring을 요구사항에 포함
 - Phase 2 범위는 일본 Big 5 수신상품 DB + SaaS/Open API
 - 맞춤 추천 및 인사이트 서비스는 후속 MyBank 프로젝트 범위
+
+## Appendix B. 2026-07-29 Geographic Direction Update
+
+- FPDS의 궁극적 지리 범위는 전 세계 은행 상품이다.
+- 현재 수집과 release scope는 캐나다이며, 이 업데이트만으로 다른 국가
+  수집을 시작하지 않는다.
+- 은행이 소유한 ISO 3166-1 alpha-2 `country_code`를 canonical, aggregate,
+  Public API/UI 전 구간의 국가 기준으로 사용한다.
+- Public은 최신 완료 snapshot에 실제 active 공개 상품이 있는 국가만 선택
+  항목으로 노출한다.
+- 국가별 신규 수집은 taxonomy, 운영, 규제/표시 요구사항을 포함한 별도
+  승인 범위로 진행한다.
+- Admin은 로그인 시 활성화된 업무 국가를 선택하고, 서버 세션이 이후
+  국가 소유 데이터의 authority가 된다. 국가 변경은 새 세션으로 수행한다.
+- 키 정책은 내부 기술 ID와 업무 키를 구분한다. `product_id`,
+  `candidate_id`, `run_id` 등은 안정적인 불투명 ID로 유지하고, 은행과
+  source 자연키·연속성 조회에는 `country_code`를 포함한다.
+- `product_type_code`는 `savings`처럼 전 세계에서 공유할 수 있는 의미
+  vocabulary로 유지한다. 국가별 차이는 `country_code`가 포함된 subtype
+  taxonomy와 bank coverage에서 관리한다.

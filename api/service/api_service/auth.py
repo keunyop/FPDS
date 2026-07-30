@@ -50,6 +50,50 @@ def validate_login_id(login_id: str) -> str:
     return normalized
 
 
+def load_admin_login_countries(connection: Connection) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT country_code, country_name
+        FROM country_registry
+        WHERE status = 'active'
+        ORDER BY display_order, country_code
+        """
+    ).fetchall()
+    return [
+        {
+            "country_code": str(row["country_code"]).upper(),
+            "country_name": str(row["country_name"]),
+        }
+        for row in rows
+    ]
+
+
+def validate_admin_country(connection: Connection, country_code: str) -> str:
+    normalized = country_code.strip().upper()
+    if not re.fullmatch(r"[A-Z]{2}", normalized):
+        raise LoginError(
+            status_code=422,
+            code="invalid_country_code",
+            message="Select a valid two-letter country code.",
+        )
+    row = connection.execute(
+        """
+        SELECT country_code
+        FROM country_registry
+        WHERE country_code = %(country_code)s
+          AND status = 'active'
+        """,
+        {"country_code": normalized},
+    ).fetchone()
+    if not row:
+        raise LoginError(
+            status_code=422,
+            code="unsupported_country",
+            message="This country is not enabled for FPDS Admin.",
+        )
+    return normalized
+
+
 def _record_audit_event(
     connection: Connection,
     *,
@@ -267,6 +311,7 @@ def create_session(
     connection: Connection,
     *,
     user: dict[str, Any],
+    country_code: str,
     ip_address: str | None,
     user_agent: str | None,
     settings: Settings,
@@ -276,6 +321,7 @@ def create_session(
     session = {
         "auth_session_id": new_id("sess"),
         "user_id": user["user_id"],
+        "country_code": country_code,
         "session_token_hash": hash_session_token(session_token, settings.session_secret),
         "csrf_token": new_csrf_token() if settings.csrf_enabled else None,
         "session_status": "active",
@@ -291,6 +337,7 @@ def create_session(
         INSERT INTO admin_auth_session (
             auth_session_id,
             user_id,
+            country_code,
             session_token_hash,
             csrf_token,
             session_status,
@@ -304,6 +351,7 @@ def create_session(
         VALUES (
             %(auth_session_id)s,
             %(user_id)s,
+            %(country_code)s,
             %(session_token_hash)s,
             %(csrf_token)s,
             %(session_status)s,
@@ -325,11 +373,13 @@ def authenticate_user(
     *,
     login_id: str,
     password: str,
+    country_code: str,
     ip_address: str | None,
     user_agent: str | None,
     request_id: str,
     settings: Settings,
 ) -> tuple[dict[str, Any], dict[str, Any], str]:
+    normalized_country_code = validate_admin_country(connection, country_code)
     normalized_login_id = validate_login_id(login_id)
     user = get_user_by_login_id(connection, normalized_login_id)
 
@@ -480,6 +530,7 @@ def authenticate_user(
     session, session_token = create_session(
         connection,
         user=user,
+        country_code=normalized_country_code,
         ip_address=ip_address,
         user_agent=user_agent,
         settings=settings,
@@ -506,7 +557,7 @@ def authenticate_user(
         ip_address=ip_address,
         user_agent=user_agent,
         request_id=request_id,
-        payload={"login_id": normalized_login_id},
+        payload={"login_id": normalized_login_id, "country_code": normalized_country_code},
     )
     return user, session, session_token
 
@@ -820,6 +871,7 @@ def get_session_by_token(
         SELECT
             s.auth_session_id,
             s.user_id,
+            s.country_code,
             s.csrf_token,
             s.session_status,
             s.issued_at,
@@ -829,10 +881,13 @@ def get_session_by_token(
             u.email,
             u.role,
             u.display_name,
-            u.account_status
+            u.account_status,
+            c.status AS country_status
         FROM admin_auth_session AS s
         JOIN user_account AS u
           ON u.user_id = s.user_id
+        JOIN country_registry AS c
+          ON c.country_code = s.country_code
         WHERE s.session_token_hash = %(session_token_hash)s
         """,
         {"session_token_hash": hash_session_token(session_token, settings.session_secret)},
@@ -841,7 +896,11 @@ def get_session_by_token(
         return None
 
     now = utc_now()
-    expired = session["session_status"] != "active" or session["account_status"] != "active"
+    expired = (
+        session["session_status"] != "active"
+        or session["account_status"] != "active"
+        or session["country_status"] != "active"
+    )
     expired = expired or session["idle_expires_at"] <= now or session["absolute_expires_at"] <= now
     if expired:
         connection.execute(
@@ -890,8 +949,78 @@ def get_session_by_token(
     session_info = {
         "auth_session_id": session["auth_session_id"],
         "csrf_token": session["csrf_token"],
+        "country_code": session["country_code"],
     }
     return actor, session_info
+
+
+def switch_session_country(
+    connection: Connection,
+    *,
+    auth_session_id: str,
+    country_code: str,
+    actor: dict[str, Any],
+    request_id: str,
+    ip_address: str | None,
+    user_agent: str | None,
+) -> str:
+    next_country_code = validate_admin_country(connection, country_code)
+    session = connection.execute(
+        """
+        SELECT auth_session_id, user_id, country_code, session_status
+        FROM admin_auth_session
+        WHERE auth_session_id = %(auth_session_id)s
+          AND user_id = %(user_id)s
+        FOR UPDATE
+        """,
+        {
+            "auth_session_id": auth_session_id,
+            "user_id": actor["user_id"],
+        },
+    ).fetchone()
+    if not session or session["session_status"] != "active":
+        raise LoginError(
+            status_code=401,
+            code="authentication_required",
+            message="Admin session is required.",
+        )
+
+    previous_country_code = str(session["country_code"]).upper()
+    if previous_country_code == next_country_code:
+        return next_country_code
+
+    connection.execute(
+        """
+        UPDATE admin_auth_session
+        SET country_code = %(country_code)s, last_seen_at = %(last_seen_at)s
+        WHERE auth_session_id = %(auth_session_id)s
+        """,
+        {
+            "auth_session_id": auth_session_id,
+            "country_code": next_country_code,
+            "last_seen_at": utc_now(),
+        },
+    )
+    _record_audit_event(
+        connection,
+        event_type="auth_country_switched",
+        actor_type="user",
+        actor_id=actor["user_id"],
+        actor_role_snapshot=actor["role"],
+        target_type="auth_session",
+        target_id=auth_session_id,
+        reason_code="operator_country_switch",
+        reason_text=f"Admin working country changed from {previous_country_code} to {next_country_code}.",
+        ip_address=ip_address,
+        user_agent=user_agent,
+        request_id=request_id,
+        payload={
+            "login_id": actor["login_id"],
+            "previous_country_code": previous_country_code,
+            "country_code": next_country_code,
+        },
+    )
+    return next_country_code
 
 
 def revoke_session(

@@ -9,6 +9,7 @@ import {
   Database,
   FileClock,
   Gauge,
+  Globe2,
   History,
   LayoutDashboard,
   LogOut,
@@ -20,6 +21,7 @@ import {
 
 import { LogoutButton } from "@/app/admin/LogoutButton";
 import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
+import { AdminCountrySwitcher } from "@/components/fpds/admin/admin-country-switcher";
 import { AdminMark } from "@/components/fpds/admin/admin-mark";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -56,6 +58,8 @@ type ShellUser = {
 
 type AdminShellProps = {
   children: React.ReactNode;
+  countryCode: string;
+  csrfToken: string | null | undefined;
   environmentLabel: string;
   logoutApiOrigin: string;
   user: ShellUser;
@@ -71,6 +75,7 @@ type NavItem = {
     | "banks"
     | "sources"
     | "productTypes"
+    | "countries"
     | "changes"
     | "audit"
     | "usage"
@@ -84,7 +89,7 @@ type ShellCopy = {
   dailyWork: string;
   moreTools: string;
   account: string;
-  items: Record<NavItem["key"], string>;
+  items: Partial<Record<NavItem["key"], string>>;
 };
 
 const primaryItems: NavItem[] = [
@@ -97,6 +102,7 @@ const primaryItems: NavItem[] = [
 const toolItems: NavItem[] = [
   { key: "sources", href: "/admin/sources", icon: Database },
   { key: "productTypes", href: "/admin/product-types", icon: Shapes },
+  { key: "countries", href: "/admin/countries", icon: Globe2 },
   { key: "changes", href: "/admin/changes", icon: History },
   { key: "audit", href: "/admin/audit", icon: ScrollText },
   { key: "usage", href: "/admin/usage", icon: Sparkles },
@@ -160,6 +166,16 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
   },
 };
 
+const countryMenuLabel: Record<AdminLocale, string> = {
+  en: "Countries",
+  ko: "\uAD6D\uAC00",
+  ja: "\u56FD",
+};
+
+function navItemLabel(copy: ShellCopy, locale: AdminLocale, key: NavItem["key"]) {
+  return key === "countries" ? countryMenuLabel[locale] : copy.items[key] ?? key;
+}
+
 function isActive(pathname: string | null, href: string) {
   if (!pathname) {
     return false;
@@ -188,16 +204,17 @@ function AdminNavLink({
   const copy = copyByLocale[locale];
   const active = isActive(pathname, item.href);
   const Icon = item.icon;
+  const label = navItemLabel(copy, locale, item.key);
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild className="bg-transparent" isActive={active} tooltip={copy.items[item.key]}>
+      <SidebarMenuButton asChild className="bg-transparent" isActive={active} tooltip={label}>
         <Link
           aria-current={active ? "page" : undefined}
           href={buildAdminHref(item.href, new URLSearchParams(), locale)}
         >
           <Icon className="h-4 w-4" aria-hidden="true" />
-          <span>{copy.items[item.key]}</span>
+          <span>{label}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -230,7 +247,7 @@ function PrimaryNav({
             href={buildAdminHref(item.href, new URLSearchParams(), locale)}
             key={item.key}
           >
-            {copy.items[item.key]}
+            {navItemLabel(copy, locale, item.key)}
           </Link>
         );
       })}
@@ -270,7 +287,7 @@ function MobileBottomNav({
               key={item.key}
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
-              <span className="truncate">{copy.items[item.key]}</span>
+              <span className="truncate">{navItemLabel(copy, locale, item.key)}</span>
             </Link>
           );
         })}
@@ -292,6 +309,9 @@ function AppSidebar({
 }) {
   const copy = copyByLocale[locale];
   const userInitial = user.loginId.trim().charAt(0).toUpperCase() || "U";
+  const visibleToolItems = user.role.toLowerCase() === "admin"
+    ? toolItems
+    : toolItems.filter((item) => item.key !== "countries");
 
   return (
     <Sidebar className="top-14 h-[calc(100svh-3.5rem)]! border-r bg-sidebar" collapsible="icon">
@@ -317,7 +337,7 @@ function AppSidebar({
           <SidebarGroupLabel>{copy.moreTools}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {toolItems.map((item) => (
+              {visibleToolItems.map((item) => (
                 <AdminNavLink item={item} locale={locale} pathname={pathname} key={item.key} />
               ))}
             </SidebarMenu>
@@ -361,6 +381,11 @@ function AppSidebar({
                     <UserRound className="h-4 w-4" />
                     <span>{copy.account}</span>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <React.Suspense fallback={null}>
+                    <AdminLocaleSwitcher locale={locale} variant="menu" />
+                  </React.Suspense>
+                  <DropdownMenuSeparator />
                   <LogoutButton
                     apiOrigin={logoutApiOrigin}
                     className="w-full justify-start px-1.5 text-left"
@@ -379,6 +404,8 @@ function AppSidebar({
 
 function AdminShell({
   children,
+  countryCode,
+  csrfToken,
   environmentLabel,
   logoutApiOrigin,
   user,
@@ -403,12 +430,10 @@ function AdminShell({
             <PrimaryNav locale={locale} pathname={pathname} />
 
             <div className="ml-auto flex items-center gap-2">
+              <AdminCountrySwitcher countryCode={countryCode} csrfToken={csrfToken} locale={locale} />
               <span className="hidden min-h-8 items-center border border-sidebar-border bg-sidebar-accent px-2.5 text-[11px] font-semibold text-sidebar-foreground/75 sm:inline-flex">
                 {environmentLabel}
               </span>
-              <React.Suspense fallback={null}>
-                <AdminLocaleSwitcher locale={locale} />
-              </React.Suspense>
             </div>
           </div>
         </header>
@@ -425,7 +450,7 @@ function AdminShell({
             <div className="flex min-h-[calc(100vh-3.5rem)] min-w-0 flex-col">
               <div className="border-b border-border bg-card px-4 py-2.5 md:hidden">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-foreground">{copy.items[selectedItem.key]}</p>
+                  <p className="text-sm font-medium text-foreground">{navItemLabel(copy, locale, selectedItem.key)}</p>
                   <span className="inline-flex min-h-8 items-center border border-border bg-muted px-2.5 text-[11px] font-semibold text-muted-foreground">
                     {environmentLabel}
                   </span>

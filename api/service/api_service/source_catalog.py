@@ -359,12 +359,14 @@ _AUTHORITATIVE_CATALOG_DETAIL_BONUS = 6
 
 @dataclass(frozen=True)
 class BankFilters:
+    country_code: str
     search: str | None
     status: str | None
 
 
 @dataclass(frozen=True)
 class SourceCatalogFilters:
+    country_code: str
     search: str | None
     bank_code: str | None
     product_type: str | None
@@ -437,10 +439,11 @@ class PageEvidenceAssessment:
     product_identity_match: bool = False
 
 
-def normalize_bank_filters(*, search: str | None, status: str | None) -> BankFilters:
+def normalize_bank_filters(*, country_code: str, search: str | None, status: str | None) -> BankFilters:
     normalized_search = _normalize_search(search)
     normalized_status = _clean_text(status)
     return BankFilters(
+        country_code=_normalize_country_code(country_code),
         search=normalized_search,
         status=normalized_status.lower() if normalized_status else None,
     )
@@ -448,6 +451,7 @@ def normalize_bank_filters(*, search: str | None, status: str | None) -> BankFil
 
 def normalize_source_catalog_filters(
     *,
+    country_code: str,
     search: str | None,
     bank_code: str | None,
     product_type: str | None,
@@ -458,6 +462,7 @@ def normalize_source_catalog_filters(
     normalized_product_type = _clean_text(product_type)
     normalized_status = _clean_text(status)
     return SourceCatalogFilters(
+        country_code=_normalize_country_code(country_code),
         search=normalized_search,
         bank_code=normalized_bank_code.upper() if normalized_bank_code else None,
         product_type=normalized_product_type.lower() if normalized_product_type else None,
@@ -466,8 +471,8 @@ def normalize_source_catalog_filters(
 
 
 def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str, Any]:
-    where_clauses = ["1 = 1"]
-    params: dict[str, Any] = {}
+    where_clauses = ["b.country_code = %(country_code)s"]
+    params: dict[str, Any] = {"country_code": filters.country_code}
     if filters.status:
         where_clauses.append("b.status = %(status)s")
         params["status"] = filters.status
@@ -509,8 +514,10 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
         FROM bank AS b
         LEFT JOIN source_registry_catalog_item AS sci
             ON sci.bank_code = b.bank_code
+           AND sci.country_code = b.country_code
         LEFT JOIN source_registry_item AS sri
             ON sri.bank_code = b.bank_code
+           AND sri.country_code = b.country_code
         WHERE {" AND ".join(where_clauses)}
         GROUP BY
             b.bank_code,
@@ -545,10 +552,11 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             ON sri.bank_code = sci.bank_code
            AND sri.product_type = sci.product_type
         WHERE sci.bank_code = ANY(%(bank_codes)s)
+          AND sci.country_code = %(country_code)s
         GROUP BY sci.catalog_item_id, sci.bank_code, sci.product_type, sci.status
         ORDER BY sci.bank_code, sci.product_type
         """,
-        {"bank_codes": bank_codes or [""]},
+        {"bank_codes": bank_codes or [""], "country_code": filters.country_code},
     ).fetchall() if bank_codes else []
     catalog_items_by_bank: dict[str, list[dict[str, Any]]] = {}
     for item in catalog_item_rows:
@@ -576,6 +584,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             "statuses": sorted(status_counts),
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "search": filters.search,
             "status": filters.status,
         },
@@ -729,7 +738,7 @@ def create_bank_profile(
         """,
         {
             "bank_code": bank_code,
-            "country_code": (_clean_text(payload.get("country_code")) or "CA").upper(),
+            "country_code": _normalize_country_code(payload.get("country_code")),
             "bank_name": bank_name,
             "status": (_clean_text(payload.get("status")) or "active").lower(),
             "homepage_url": homepage_url,
@@ -826,7 +835,7 @@ def update_bank_profile(
         raise SourceRegistryError(status_code=409, code="bank_homepage_exists", message="A bank with this homepage URL already exists.")
 
     updated_status = (_clean_text(payload.get("status", existing_row["status"])) or "active").lower()
-    updated_country_code = (_clean_text(payload.get("country_code", existing_row["country_code"])) or "CA").upper()
+    updated_country_code = _normalize_country_code(payload.get("country_code", existing_row["country_code"]))
     updated_source_language = (_clean_text(payload.get("source_language", existing_row["source_language"])) or "en").lower()
     updated_change_reason = _clean_text(payload.get("change_reason", existing_row["change_reason"]))
     diff_summary = _build_bank_diff_summary(existing_row, {
@@ -1002,8 +1011,8 @@ def delete_bank_profile(
 
 def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFilters) -> dict[str, Any]:
     product_type_map = load_product_type_definitions_map(connection, active_only=False)
-    where_clauses = ["1 = 1"]
-    params: dict[str, Any] = {}
+    where_clauses = ["sci.country_code = %(country_code)s"]
+    params: dict[str, Any] = {"country_code": filters.country_code}
     if filters.bank_code:
         where_clauses.append("sci.bank_code = %(bank_code)s")
         params["bank_code"] = filters.bank_code
@@ -1047,10 +1056,13 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
+           AND b.country_code = sci.country_code
+           AND b.country_code = sci.country_code
         JOIN product_type_registry AS ptr
             ON ptr.product_type_code = sci.product_type
         LEFT JOIN source_registry_item AS sri
             ON sri.bank_code = sci.bank_code
+           AND sri.country_code = sci.country_code
            AND sri.product_type = sci.product_type
         WHERE {" AND ".join(where_clauses)}
         GROUP BY
@@ -1077,8 +1089,10 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
         """
         SELECT bank_code, bank_name
         FROM bank
+        WHERE country_code = %(country_code)s
         ORDER BY bank_name, bank_code
-        """
+        """,
+        {"country_code": filters.country_code},
     ).fetchall()
 
     items = [_serialize_source_catalog_row(row, bank_row=row, generated_source_count=int(row["generated_source_count"] or 0)) for row in rows]
@@ -1096,6 +1110,7 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             "statuses": sorted(status_counts),
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "search": filters.search,
             "bank_code": filters.bank_code,
             "product_type": filters.product_type,
@@ -1126,8 +1141,10 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
+           AND b.country_code = sci.country_code
         LEFT JOIN source_registry_item AS sri
             ON sri.bank_code = sci.bank_code
+           AND sri.country_code = sci.country_code
            AND sri.product_type = sci.product_type
         WHERE sci.catalog_item_id = %(catalog_item_id)s
         GROUP BY
@@ -1405,6 +1422,7 @@ def start_source_catalog_collection(
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
+           AND b.country_code = sci.country_code
         JOIN product_type_registry AS ptr
             ON ptr.product_type_code = sci.product_type
            AND ptr.status = 'active'
@@ -1805,7 +1823,7 @@ def _upsert_source_registry_rows(connection: Connection, rows: list[dict[str, An
                 %(created_at)s,
                 %(updated_at)s
             )
-            ON CONFLICT (bank_code, product_type, normalized_url, source_type) DO UPDATE
+            ON CONFLICT (country_code, bank_code, product_type, normalized_url, source_type) DO UPDATE
             SET
                 country_code = EXCLUDED.country_code,
                 product_key = EXCLUDED.product_key,
@@ -4291,7 +4309,7 @@ def _build_generated_source_row(
         "bank_code": bank_code,
         "country_code": country_code,
         "product_type": product_type,
-        "product_key": f"{bank_code}:{product_type}",
+        "product_key": f"{country_code.upper()}:{bank_code.upper()}:{product_type}",
         "source_name": source_name,
         "source_url": raw_url,
         "normalized_url": normalized_url,
@@ -5377,6 +5395,17 @@ def _clean_text(value: Any) -> str | None:
         return None
     cleaned = str(value).strip()
     return cleaned or None
+
+
+def _normalize_country_code(value: Any) -> str:
+    normalized = (_clean_text(value) or "CA").upper()
+    if len(normalized) != 2 or not normalized.isascii() or not normalized.isalpha():
+        raise SourceRegistryError(
+            status_code=422,
+            code="invalid_country_code",
+            message="country_code must be a two-letter ISO 3166-1 alpha-2 code.",
+        )
+    return normalized
 
 
 def _canonical_product_type_code(value: Any) -> str:

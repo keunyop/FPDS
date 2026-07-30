@@ -36,6 +36,11 @@ Source Documents:
 4. source-derived product data는 source language 단일 값으로 유지하고, UI 번역 리소스는 별도 관리한다.
 5. validation과 confidence routing은 hard-coded 임계값이 아니라 정책 + 외부 설정값 기준으로 운영한다.
 6. 핵심 필드는 evidence linkage와 review 가능성을 우선한다.
+7. 기술 primary key와 업무 natural key를 구분한다. `product_id`,
+   `candidate_id`, `run_id`, source/version ID는 안정적인 불투명 ID로
+   유지하고 국가 문자열을 일괄 결합하지 않는다.
+8. 국가 안에서만 고유할 수 있는 은행·source 업무키에는
+   `country_code`를 포함하고 DB composite constraint로 강제한다.
 
 ---
 
@@ -56,6 +61,10 @@ FPDS taxonomy는 아래 5개 축으로 관리한다.
 ### 3.2 Taxonomy Governance Rules
 
 - `product_type`는 Phase 1에서 `chequing`, `savings`, `gic`를 공식 기준으로 사용한다.
+- `product_type_code`는 전 세계 공통 semantic vocabulary다. 국가별
+  availability와 의미 차이는 bank coverage 및
+  `country_code + product_family + product_type + subtype_code` taxonomy로
+  표현하며 `CA:savings` 같은 문자열을 global type PK로 사용하지 않는다.
 - `subtype_code`는 `country_code + product_family + product_type` 기준 registry로 관리한다.
 - 현재 registry에 맞지 않는 상품은 `subtype_code = other`로 수용하고 `source_subtype_label`을 반드시 보존한다.
 - subtype이 실제로 늘어나야 할 경우 schema 변경이 아니라 taxonomy registry 변경으로 처리한다.

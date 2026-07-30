@@ -1,8 +1,8 @@
-﻿  # FPDS Scope Baseline and Build Start Approval
+  # FPDS Scope Baseline and Build Start Approval
 
-Version: 1.0  
-Date: 2026-03-30  
-Status: Approved Baseline for WBS 1.1.1 - 1.1.5  
+Version: 1.0
+Date: 2026-03-30
+Status: Approved Baseline for WBS 1.1.1 - 1.1.5
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -125,6 +125,21 @@ Phase 1 v1 범위는 `Canada Big 5 + 3개 상품군 + Public/Admin`이라는 상
 
 즉, 이 문서에서의 Phase 1 v1은 단순한 UX shell 범위가 아니라 PRD Phase 1 acceptance에 직접 연결되는 실행 범위다.
 
+### 4.4 Long-Term Geographic Direction
+
+Product Owner direction on `2026-07-29` establishes worldwide bank-product
+coverage as the ultimate FPDS direction. This does not automatically expand the
+current collection or release cutline beyond Canada.
+
+- country ownership starts at `bank.country_code`
+- the stable boundary is uppercase ISO 3166-1 alpha-2
+- canonical products, aggregate refreshes, public projections, APIs, and Public
+  URL state preserve that country code
+- a new country's collection, taxonomy, compliance/operating review, and
+  release remain separately approved slices
+- currency, UI locale, domain name, user location, or IP geolocation must not
+  infer product country
+
 ---
 
 ## 5. Official Non-Goals
@@ -154,7 +169,7 @@ FPDS의 현재 공식 비범위 항목은 PRD의 전체 `Non-Goals`를 그대로
 
 ## 6. Phase 1 Release Cutline
 
-이 문서의 release cutline은 `Phase 1 release 기준 Must Have / Later`다.  
+이 문서의 release cutline은 `Phase 1 release 기준 Must Have / Later`다.
 Phase 2는 계약 범위에 포함되지만, Phase 1 release cutline에서는 `Later`로 분리한다.
 
 ### 6.1 Must Have for Phase 1 Release
@@ -239,7 +254,7 @@ Gate A 결과와 실제 개발 시작 승인은 아래 방식으로 남긴다.
 - `docs/00-governance/decision-log.md`에 Gate A 결과 및 개발 시작 승인 결정을 기록
 - `docs/01-planning/WBS.md`와 `docs/00-governance/roadmap.md` 상태 갱신
 
-Gate A `Pass` 자체는 개발 시작 승인이 아니다.  
+Gate A `Pass` 자체는 개발 시작 승인이 아니다.
 이 문서는 gate와 start approval의 기록 방식을 함께 정의한다.
 
 ---

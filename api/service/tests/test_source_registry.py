@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from api_service.source_registry import (
+    _normalize_country_code,
     build_source_collection_plan,
     create_source_registry_item,
     delete_source_registry_item,
@@ -12,6 +13,7 @@ from api_service.source_registry import (
     start_source_collection,
     update_source_registry_item,
 )
+from api_service.errors import SourceRegistryError
 
 
 class _QueuedCursor:
@@ -60,6 +62,12 @@ def _product_type_definitions(*codes: str) -> dict[str, dict[str, object]]:
 
 
 class SourceRegistryTests(unittest.TestCase):
+    def test_country_code_requires_iso_alpha_2_shape(self) -> None:
+        self.assertEqual(_normalize_country_code(" us "), "US")
+        with self.assertRaises(SourceRegistryError) as captured:
+            _normalize_country_code("Canada")
+        self.assertEqual(captured.exception.code, "invalid_country_code")
+
     def test_filter_normalization_compacts_values(self) -> None:
         filters = normalize_source_registry_filters(
             bank_code=" td ",

@@ -301,6 +301,10 @@ Based on:
 | 5.16 | Completed | operator-managed product type onboarding 구현 | DB-managed product type registry with searchable name/description + AI-assisted homepage discovery + generic AI extraction/normalization fallback + safe manual-review routing | Backend, Frontend, AI/Data | 5.15 | 2026-05-17 |
 | 5.17 | Completed | vector-assisted evidence retrieval bootstrap | pgvector evidence chunk embedding side table + metadata-first vector ranking + metadata-only fallback | Backend, AI/Data | 3.4, 5.16 | 2026-05-17 |
 | 5.18 | Completed | recognized Canada financial-institution registry baseline | 28 active Canada bank/direct-bank/credit-union profiles + logo metadata + full active Product Type source-catalog coverage | Backend, Frontend, AI/Data | 5.15, 5.16 | 2026-07-05 |
+| 5.19 | Completed | country-aware Public foundation | bank-owned ISO country invariant, country-specific refresh queue/runner, active-snapshot country API, country-preserved Public URLs, header country selector, footer language selector | Backend, Frontend, QA | 5.6, 5.7, 5.8, 5.11, 5.12 | 2026-07-29 |
+| 5.20 | Completed | country-scoped Admin and key integrity | login country selector, session-owned working country, persistent shell context, country-scoped bank/source/collection/run/review/change/usage operations, country-aware DB business keys and indexes | Backend, Frontend, Security, QA | 4.1-4.11, 5.15, 5.16, 5.19 | 2026-07-29 |
+| 5.21 | Completed | Admin country registry management | prepared ISO country catalog, admin-only activation/deactivation, protected current/last country, session revocation, audit trail, and responsive Countries UI | Backend, Frontend, Security, QA | 5.20 | 2026-07-29 |
+| 5.22 | Completed | Admin header country switching | active-country header dropdown, CSRF-protected session context switch, auth audit trail, locale-preserved Overview reset, and responsive confirmation UX | Backend, Frontend, Security, QA | 5.20, 5.21 | 2026-07-29 |
 
 ### 5.5 Scope Baseline
 

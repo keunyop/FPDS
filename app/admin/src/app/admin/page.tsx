@@ -231,6 +231,8 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
 
   return (
     <AdminShell
+      countryCode={activeSession.country_code}
+      csrfToken={activeSession.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}

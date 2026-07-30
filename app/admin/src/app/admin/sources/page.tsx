@@ -43,6 +43,8 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
 
   return (
     <AdminShell
+      countryCode={session.country_code}
+      csrfToken={session.csrf_token}
       environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
@@ -61,7 +63,6 @@ function parsePageFilters(searchParams: Record<string, string | string[] | undef
   return {
     q: firstValue(searchParams.q),
     bankCode: firstValue(searchParams.bank_code).toUpperCase(),
-    countryCode: firstValue(searchParams.country_code).toUpperCase(),
     productType: firstValue(searchParams.product_type).toLowerCase(),
     status: firstValue(searchParams.status).toLowerCase(),
     discoveryRole: firstValue(searchParams.discovery_role).toLowerCase(),
@@ -72,7 +73,6 @@ function buildApiSearchParams(filters: SourceRegistryPageFilters) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
   if (filters.bankCode) params.set("bank_code", filters.bankCode);
-  if (filters.countryCode) params.set("country_code", filters.countryCode);
   if (filters.productType) params.set("product_type", filters.productType);
   if (filters.status) params.set("status", filters.status);
   if (filters.discoveryRole) params.set("discovery_role", filters.discoveryRole);

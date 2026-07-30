@@ -12,7 +12,6 @@ import { buildAdminHref, formatAdminDateTimeValue, type AdminLocale } from "@/li
 export type SourceRegistryPageFilters = {
   q: string;
   bankCode: string;
-  countryCode: string;
   productType: string;
   status: string;
   discoveryRole: string;
@@ -160,13 +159,12 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
       />
 
       <article className="min-w-0 border border-border bg-card p-4">
-        <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[1.4fr_repeat(5,minmax(0,1fr))_auto]">
+        <form action={buildAdminHref("/admin/sources", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))_auto]">
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
             <input className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <FilterSelect allLabel={copy.all} defaultValue={filters.bankCode} label={copy.bank} name="bank_code" options={registry.facets.bank_codes} />
-          <FilterSelect allLabel={copy.all} defaultValue={filters.countryCode} label={copy.country} name="country_code" options={["CA"]} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.productType} label={copy.productType} name="product_type" options={registry.facets.product_types} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.status} label={copy.status} name="status" options={registry.facets.statuses} />
           <FilterSelect allLabel={copy.all} defaultValue={filters.discoveryRole} label={copy.role} name="discovery_role" options={registry.facets.discovery_roles} />

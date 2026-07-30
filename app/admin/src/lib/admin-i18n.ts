@@ -15,6 +15,18 @@ const ADMIN_LOCALE_LABELS: Record<AdminLocale, string> = {
   ja: "JA",
 };
 
+const ADMIN_LOCALE_NAMES: Record<AdminLocale, string> = {
+  en: "English",
+  ko: "한국어",
+  ja: "日本語",
+};
+
+const ADMIN_LANGUAGE_LABELS: Record<AdminLocale, string> = {
+  en: "Language",
+  ko: "언어",
+  ja: "言語",
+};
+
 const REVIEW_STATE_LABELS: Record<AdminLocale, Record<string, string>> = {
   en: {
     queued: "Queued",
@@ -225,6 +237,14 @@ export function resolveAdminLocale(searchParams: Record<string, string | string[
 
 export function getAdminLocaleLabel(locale: AdminLocale) {
   return ADMIN_LOCALE_LABELS[locale];
+}
+
+export function getAdminLocaleName(locale: AdminLocale) {
+  return ADMIN_LOCALE_NAMES[locale];
+}
+
+export function getAdminLanguageLabel(locale: AdminLocale) {
+  return ADMIN_LANGUAGE_LABELS[locale];
 }
 
 export function getAdminIntlLocale(locale: AdminLocale) {

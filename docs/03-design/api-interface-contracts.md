@@ -179,6 +179,14 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `page` | integer | default `1` |
 | `page_size` | integer | default `20`, max `100` |
 
+Country rules:
+- `country_code` is uppercase ISO 3166-1 alpha-2 and defaults fail-safe to `CA`
+  on anonymous reads
+- country comes from bank/canonical ownership, never currency, locale, host, or
+  user geolocation inference
+- product, detail, filter, summary, ranking, and scatter reads use the latest
+  completed snapshot for the same country
+
 ### 4.3 `GET /api/public/products`
 
 목적:
@@ -266,6 +274,27 @@ Numeric product fields are serialized as finite JSON numbers only. Missing, inva
 | `minimum_balance_buckets[]` | `{ code, label, count }` |
 | `minimum_deposit_buckets[]` | `{ code, label, count }` |
 | `term_buckets[]` | `{ code, label, count }` |
+
+The response also includes `countries[]` with stable `code` and active product
+`count` values from each country's latest completed public snapshot.
+
+### 4.5A `GET /api/public/countries`
+
+Purpose:
+- provide the lightweight global option set used by the Public header
+- return only countries with at least one active public projection in that
+  country's latest completed `phase1_public` snapshot
+
+Response `data.countries[]`:
+
+| Field | Description |
+|---|---|
+| `code` | uppercase ISO 3166-1 alpha-2 code |
+| `count` | active public product count in the latest completed snapshot |
+
+Localized country names are presentation data generated from the stable ISO
+code at the Public UI boundary. FPDS does not maintain duplicate translated
+country names in product records.
 
 ### 4.6 `GET /api/public/dashboard-summary`
 
@@ -389,7 +418,9 @@ point baseline:
 ### 5.1A Admin Auth and Access Request Routes
 
 Admin auth baseline routes:
+- `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
+- `POST /api/admin/auth/country`
 - `POST /api/admin/auth/logout`
 - `GET /api/admin/auth/session`
 
@@ -403,8 +434,60 @@ Access-request onboarding routes:
 
 | Field | Description |
 |---|---|
+| `country_code` | required enabled ISO 3166-1 alpha-2 working country |
 | `login_id` | operator login id, not email-shaped by default |
 | `password` | operator password |
+
+`GET /api/admin/auth/countries` is anonymous because login depends on it. It
+returns only active operational country codes plus an English fallback name
+from `country_registry`; localized labels remain UI presentation data. A
+successful login stores `country_code` on the server-side session, and
+`GET /api/admin/auth/session` returns the same code beside `user` and
+`csrf_token`.
+
+`POST /api/admin/auth/country` request:
+
+| Field | Description |
+|---|---|
+| `country_code` | required active ISO 3166-1 alpha-2 target country |
+
+Switch rules:
+- requires an authenticated Admin session and matching CSRF header
+- is available to every authenticated human role; it changes operational
+  context, not country-registry configuration or RBAC
+- validates that the target country is active, then updates only the current
+  `admin_auth_session.country_code`
+- same-country selection is idempotent and emits no mutation audit event
+- a real transition emits `auth_country_switched` with previous and next
+  country codes
+- the client preserves locale and navigates to `/admin`; it does not carry a
+  country-owned entity route, filter, or query state into the new context
+
+Country-owned Admin endpoints do not accept a client-selected country as their
+authority. Banks, generated sources, catalog coverage, collections, runs,
+review tasks, canonical change history, dashboard health, and LLM usage derive
+scope from the authenticated session. A conflicting explicit country returns a
+country-scope error, and a direct cross-country entity ID is returned as not
+found.
+
+Country-registry administration routes:
+- `GET /api/admin/countries`
+- `POST /api/admin/countries/:countryCode/activate`
+- `DELETE /api/admin/countries/:countryCode`
+
+Rules:
+- all three routes require an authenticated `admin`; mutations also require
+  the session CSRF token
+- list results merge the prepared ISO 3166-1 alpha-2 catalog with operational
+  `active` or `inactive` state
+- activation accepts only a path code from the prepared catalog and upserts
+  its English fallback name into `country_registry`
+- `DELETE` is a reversible inactive transition, not physical deletion
+- the current session country and final active country return `409` when a
+  deactivation is attempted
+- deactivation revokes active sessions for the affected country
+- each real status transition emits a `config` audit event targeting
+  `country_registry`
 
 `POST /api/admin/auth/signup-requests` request baseline:
 

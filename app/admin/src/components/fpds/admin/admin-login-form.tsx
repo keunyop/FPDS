@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Globe2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import { AdminAuthFrame } from "@/components/fpds/admin/admin-auth-frame";
 import { Button } from "@/components/ui/button";
@@ -86,9 +86,38 @@ const LOGIN_COPY: Record<AdminLocale, LoginCopy> = {
   },
 };
 
+const COUNTRY_COPY: Record<AdminLocale, { label: string; loading: string; unavailable: string }> = {
+  en: {
+    label: "Working country",
+    loading: "Loading countries…",
+    unavailable: "Countries could not be loaded. Check the Admin API and try again.",
+  },
+  ko: {
+    label: "업무 국가",
+    loading: "국가를 불러오는 중…",
+    unavailable: "국가 목록을 불러올 수 없습니다. Admin API를 확인한 후 다시 시도해 주세요.",
+  },
+  ja: {
+    label: "作業対象国",
+    loading: "国を読み込み中…",
+    unavailable: "国の一覧を読み込めません。Admin APIを確認して、もう一度お試しください。",
+  },
+};
+
+const localeTagByAdminLocale: Record<AdminLocale, string> = {
+  en: "en-CA",
+  ko: "ko-KR",
+  ja: "ja-JP",
+};
+
 const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFormProps) => {
   const router = useRouter();
   const copy = LOGIN_COPY[locale];
+  const countryCopy = COUNTRY_COPY[locale];
+  const [countries, setCountries] = useState<string[]>([]);
+  const [countryCode, setCountryCode] = useState("");
+  const [countriesPending, setCountriesPending] = useState(true);
+  const [countriesError, setCountriesError] = useState<string | null>(null);
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -103,6 +132,52 @@ const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFo
 
   const signupHref = useMemo(() => buildAdminHref("/admin/signup", new URLSearchParams(), locale), [locale]);
 
+  const countryDisplayNames = useMemo(
+    () => new Intl.DisplayNames([localeTagByAdminLocale[locale]], { type: "region" }),
+    [locale],
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCountries() {
+      setCountriesPending(true);
+      setCountriesError(null);
+      try {
+        const response = await fetch(`${apiOrigin}/api/admin/auth/countries`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("country-list-unavailable");
+        }
+        const payload = (await response.json()) as {
+          data?: { countries?: Array<{ country_code?: string }> };
+        };
+        const available = (payload.data?.countries ?? [])
+          .map((item) => (item.country_code ?? "").trim().toUpperCase())
+          .filter((item) => /^[A-Z]{2}$/.test(item));
+        setCountries(available);
+        setCountryCode((current) => current || (available.includes("CA") ? "CA" : available[0] ?? ""));
+        if (available.length === 0) {
+          setCountriesError(countryCopy.unavailable);
+        }
+      } catch (loadError) {
+        if (loadError instanceof DOMException && loadError.name === "AbortError") {
+          return;
+        }
+        setCountriesError(countryCopy.unavailable);
+      } finally {
+        if (!controller.signal.aborted) {
+          setCountriesPending(false);
+        }
+      }
+    }
+
+    void loadCountries();
+    return () => controller.abort();
+  }, [apiOrigin, countryCopy.unavailable]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
@@ -115,7 +190,7 @@ const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFo
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ login_id: loginId, password }),
+        body: JSON.stringify({ country_code: countryCode, login_id: loginId, password }),
       });
 
       if (!response.ok) {
@@ -151,6 +226,45 @@ const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFo
     >
       <form aria-busy={pending} className="grid gap-5" onSubmit={handleSubmit}>
               <div className="grid gap-2">
+                <Label htmlFor="country-code">{countryCopy.label}</Label>
+                <div className="relative">
+                  <Globe2
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <select
+                    aria-describedby={countriesError ? "country-error" : undefined}
+                    className="flex h-11 w-full appearance-none rounded-md border border-input bg-background py-2 pl-10 pr-9 text-sm text-foreground shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={countriesPending || countries.length === 0}
+                    id="country-code"
+                    name="country_code"
+                    onChange={(event) => setCountryCode(event.target.value)}
+                    required
+                    value={countryCode}
+                  >
+                    {countriesPending ? <option value="">{countryCopy.loading}</option> : null}
+                    {!countriesPending && countries.length === 0 ? <option value="">{countryCopy.unavailable}</option> : null}
+                    {countries.map((code) => (
+                      <option key={code} value={code}>
+                        {countryDisplayNames.of(code) ?? code} ({code})
+                      </option>
+                    ))}
+                  </select>
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"
+                  >
+                    ▾
+                  </span>
+                </div>
+                {countriesError ? (
+                  <p className="text-sm leading-5 text-destructive" id="country-error">
+                    {countriesError}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="login-id">{copy.idLabel}</Label>
                 <Input
                   autoCapitalize="none"
@@ -181,7 +295,7 @@ const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFo
                 />
               </div>
 
-              <Button className="h-11 w-full" disabled={pending} type="submit">
+              <Button className="h-11 w-full" disabled={pending || countriesPending || !countryCode} type="submit">
                 {pending ? copy.submitting : copy.submit}
                 <ArrowRight className="h-4 w-4" />
               </Button>

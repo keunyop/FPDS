@@ -25,10 +25,21 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-28`:
+As of `2026-07-29`:
 - `WBS 5` is the active stage
 - the client-handoff simplification is complete: Admin now exposes Overview, Review, Runs, and Banks as direct daily work, secondary tools remain in one labeled group, core list/detail density is reduced through progressive disclosure, and stale/generated/unreachable repository scaffolding has been removed without changing routes or backend contracts
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
+- country is now a first-class bank/canonical/aggregate/Public dimension; the
+  Public header selects active published countries, the footer owns language,
+  and current collection scope remains Canada
+- Admin now requires an enabled working country at login, stores it in the
+  server session, lets authenticated operators change it from the shell header,
+  and scopes country-owned bank/source/collection/run/review/change/usage work
+  to that session country
+- Admin language selection now uses one EN/KO/JA dropdown pattern: authenticated
+  routes place it inside the sidebar Account menu, while Login and Signup show
+  the standalone dropdown and the global Header remains focused on country and
+  environment context
 - Public Home, Deposit, Loan, comparison, detail, and Methodology now use the verified-record visual system and were production-verified against the live aggregate snapshot in EN, KO, and JA at desktop, tablet, and exact `390px`; `WBS 5.14` remains complete
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
@@ -70,6 +81,221 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-29 - Admin Header Working-Country Switch
+
+- WBS: `5.22`
+- Status: done
+- Goal: let an authenticated FPDS Admin operator change the active working
+  country directly from the persistent header without logging out.
+- Outcome: the former passive country badge is now an EN/KO/JA-aware dropdown
+  listing only active configured countries. Selecting a different country
+  opens a confirmation that explains the return to Overview and loss of
+  screen-local filters or unsaved work. Success returns to locale-preserving
+  `/admin`.
+- Security and state: `POST /api/admin/auth/country` validates the destination
+  against the active country registry, requires the current session and CSRF,
+  updates only that session's server-owned `country_code`, and records
+  `auth_country_switched` with previous and next country codes. Choosing the
+  current country is a no-op.
+- Boundary: the switch does not activate countries or mutate country-scoped
+  business data. Country registry configuration remains the separate
+  administrator-only `/admin/countries` workflow.
+- Key files: `app/admin/src/components/fpds/admin/admin-country-switcher.tsx`,
+  `app/admin/src/components/fpds/admin/admin-shell.tsx`,
+  `app/admin/src/app/admin/country-options/route.ts`,
+  `app/admin/src/app/admin/switch-country/route.ts`,
+  `api/service/api_service/auth.py`, `api/service/api_service/main.py`,
+  `api/service/api_service/models.py`, `api/service/tests/test_auth.py`.
+- Verification: API auth tests `9` passed; full API suite `297` passed; Admin
+  typecheck and production build passed; repository doctor and
+  `git diff --check` passed; desktop and exact `390px` shell rendering
+  inspected with no horizontal overflow.
+- Known issues: none.
+- Next step: operators can activate another country in `/admin/countries`,
+  sign in or switch to it, then configure that country's banks and collection
+  coverage through the existing country-scoped workflows.
+
+## 2026-07-29 - Admin Country Registry Management
+
+- WBS: `5.21`
+- Status: done
+- Goal: let administrators add and remove operational countries without
+  typing country identity or risking historical country-scoped data.
+- Outcome: `/admin/countries` now presents a prepared 249-entry ISO 3166-1
+  alpha-2 selector and a compact active-country list with localized names and
+  stable codes. The sidebar entry is visible only to `admin`.
+- Safety: removal is a reversible `inactive` transition. The current login
+  country and final active country are protected; deactivation revokes active
+  sessions for the affected country. Mutations require Admin role plus CSRF and
+  emit `country_activated` or `country_deactivated` config audit events.
+- Boundary: country activation only makes the country available at Admin
+  sign-in. It does not create banks, product types, collection coverage,
+  taxonomy, canonical products, or Public release readiness.
+- Database: migration `0026_country_registry_management.sql` adds the stored
+  English country-name fallback and lookup index; it was applied successfully
+  to dev and the active `CA / Canada` row was verified.
+- Verification: targeted country/auth unit tests passed (`14`), the complete
+  API service suite passed (`295`), and Admin typecheck plus production build
+  passed with the Countries page and both mutation proxy routes present.
+  Production component renders at `1440x1000` and exact `390x844` verified the
+  prepared selector, admin-only navigation, current-country protection, and
+  zero horizontal document overflow; the temporary dummy-data QA route and
+  browser profile were removed afterward.
+- Key files: `api/service/api_service/country_catalog.py`,
+  `api/service/api_service/countries.py`,
+  `db/migrations/0026_country_registry_management.sql`,
+  `app/admin/src/app/admin/countries/`, and
+  `app/admin/src/components/fpds/admin/country-registry-surface.tsx`.
+
+## 2026-07-29 - Admin Locale Dropdown Placement
+
+- WBS: `5.12` locale-rollout UX follow-on
+- Status: done
+- Goal: remove language selection from the authenticated Admin Header, place it
+  inside the sidebar Account menu, and replace the segmented auth-screen
+  locale control with the dropdown pattern already used by FPDS Public.
+- Outcome: `AdminLocaleSwitcher` is now one reusable Radix dropdown with
+  standalone and Account-menu presentations. Login and Signup show the
+  localized current language with EN/KO/JA options and an active checkmark.
+  Authenticated routes expose `Language` inside the sidebar footer Account menu;
+  the Header now retains only working-country and environment context.
+- Behavior: locale links continue to use the existing `buildAdminHref`
+  contract, preserving route and all non-locale query parameters. The controls
+  remain keyboard-operable, use visible localized labels, and meet the
+  40px/44px Admin target-size baseline.
+- Key files: `app/admin/src/components/admin-locale-switcher.tsx`,
+  `app/admin/src/components/fpds/admin/admin-shell.tsx`,
+  `app/admin/src/components/fpds/admin/admin-auth-frame.tsx`, and
+  `app/admin/src/lib/admin-i18n.ts`.
+- Verification: Admin typecheck and production build passed. Headless Chrome
+  verified the Korean Login dropdown at exact `390x844`, with viewport and
+  document widths both `390px`, all three locale options, correct document
+  language, and preservation of `next` plus an unrelated query parameter.
+  An authenticated `1440x1000` render verified zero Header locale controls and
+  keyboard opening of Account -> Language -> EN/KO/JA. An authenticated exact
+  `390x844` render also verified the Account language list remains fully inside
+  the viewport with no horizontal document overflow. Repo Doctor and `git
+  diff --check` passed.
+- Not done: supported locales, source-content translation, country selection,
+  authentication behavior, and per-user persisted locale preferences were not
+  changed.
+
+## 2026-07-29 - Country-Scoped Admin And Key Integrity
+
+- WBS: `5.20`, country-scoped Admin and worldwide key readiness
+- Status: done
+- Goal: require an explicit country before Admin login and make that selection
+  a real server-enforced operational boundary, while choosing a country-aware
+  key model that remains stable as FPDS expands beyond Canada.
+- Outcome: `GET /api/admin/auth/countries` exposes active operational country
+  codes from `country_registry`; login requires one, persists it on
+  `admin_auth_session`, returns it from session introspection, and displays the
+  localized country name/code in the Admin shell. The session country is fixed
+  until logout.
+- Scope enforcement: bank/source/catalog lists, direct entity reads and writes,
+  collection launches, run list/detail/retry, review list/detail/AI
+  verification/decisions, canonical change history, Public aggregate health,
+  and LLM usage derive country from the authenticated session. Cross-country
+  IDs are returned as not found, and conflicting bank mutation country values
+  are rejected.
+- Key decision: `product_id`, `candidate_id`, `run_id`, source/version IDs stay
+  stable technical IDs. Migration `0025_country_scoped_admin.sql` adds
+  country/bank composite integrity, country-aware source natural uniqueness,
+  country-qualified product identity indexes, run country lineage, and
+  `CA:BANK:product-type` generated product keys. `product_type_code` remains a
+  global semantic vocabulary; country-specific taxonomy and coverage keep the
+  country key.
+- Database: applied `0025` to dev successfully in one transaction. It backfilled
+  93 sessions, 610 ingestion runs, and 1,146 generated product keys. Post-check:
+  one active country, zero sessions/runs without country, zero source/bank
+  country mismatches, and one migration-history row.
+- UX: login country selection is first in the form, localized with
+  `Intl.DisplayNames`, keyboard/native-select accessible, and fail-closed when
+  countries cannot load. Compact auth layout now stacks locale selection below
+  the title to avoid narrow-screen pressure.
+- Documentation: requirements, security, API contract, canonical schema, ERD,
+  DB/API/Admin package docs, root status, decision `D-022`, and WBS `5.20` now
+  record the country-context and key policy.
+- Verification: API `288` tests and Worker `394` tests passed; Admin typecheck
+  and production build passed; Repo Doctor passed; live
+  `/api/admin/auth/countries` returned `CA`; production-rendered login was
+  visually checked at desktop `1440x1000`, compact `500x844`, and exact mobile
+  `390x844`. The exact mobile audit reported viewport, document, and body widths
+  of `390px`, with no horizontal overflow.
+- Not done: no non-Canada country was enabled and no collection/release scope
+  was expanded. Per-user country authorization and in-session country switching
+  remain future slices if operationally needed.
+- Key files: `db/migrations/0025_country_scoped_admin.sql`,
+  `api/service/api_service/auth.py`, `main.py`, country-scoped query modules,
+  `app/admin/src/components/fpds/admin/admin-login-form.tsx`,
+  `admin-shell.tsx`, and `admin-auth-frame.tsx`.
+- Next step: before onboarding another market, add its ISO code to
+  `country_registry` through an approved enablement migration and complete that
+  country's bank registry, taxonomy, regulatory/display, collection, and
+  release checklist.
+
+## 2026-07-29 - Country-Aware Public And Worldwide-Ready Data Boundary
+
+- WBS: `5.19`, country-aware Public foundation
+- Status: done
+- Goal: prepare FPDS for eventual worldwide bank-product coverage without
+  widening the current Canada collection scope, and replace the Public header
+  language control with a simple country selector while retaining language in
+  the footer.
+- Outcome: existing bank, candidate, canonical, aggregate, and public-projection
+  country fields now operate as one ISO 3166-1 alpha-2 boundary. Bank/source
+  mutations validate two-letter country codes. Review approvals and automatic
+  promotions enqueue their owned country, automatic promotion separates
+  mixed-country batches, and the aggregate runner claims the oldest pending
+  country/scope instead of always claiming Canada.
+- Public API: `GET /api/public/countries` and `countries[]` in
+  `GET /api/public/filters` expose only countries with active products in their
+  latest completed `phase1_public` snapshot. All existing products, detail,
+  summary, ranking, and scatter endpoints retain their per-country latest
+  snapshot boundary.
+- Public UX: the header now presents a compact no-flag country menu with
+  locale-aware `Intl.DisplayNames`; the footer is the only language-menu
+  location. Non-default country codes persist through Home, Deposit, Loan,
+  detail, and Methodology. A country change preserves locale but clears
+  country-owned filters, view settings, and pagination. Canada remains the
+  clean-URL default and the only currently collected market.
+- Documentation: the requirements and scope baseline now distinguish worldwide
+  long-term direction from current Canada scope. Decision `D-021`, WBS `5.19`,
+  API, aggregate, Public IA, metric, localization, package, route-manifest, and
+  root runtime docs record the new contract.
+- Key files: `api/service/api_service/public_products.py`,
+  `aggregate_refresh.py`, `aggregate_refresh_runner.py`,
+  `candidate_auto_promotion.py`, `review_detail.py`, source mutation boundaries,
+  `app/public/src/components/fpds/public/public-country-menu.tsx`,
+  `app/public/src/lib/public-query.ts`, and the Public countries proxy route.
+- Verification: focused country/API tests passed, and the full API suite passed
+  (`283`). Public `pnpm run typecheck` and production `pnpm run build`
+  passed, including `/api/public/countries`. Headless Chrome DevTools checks at
+  exact `390px` and `1440px` confirmed no horizontal document overflow, a
+  country-only header, a language-only footer, Korean document/country labels,
+  and `country_code=US` preservation across every shell link. Repo Doctor and
+  `git diff --check` passed.
+- Not done: no non-Canadian bank, product, source, taxonomy, or public snapshot
+  was created; no country was inferred from currency, locale, hostname, IP, or
+  browser location.
+- Next step: when the Product Owner approves the first non-Canadian market,
+  define its institution coverage, product taxonomy, evidence/validation rules,
+  operating/legal display requirements, and release acceptance as a separate
+  scope slice before collection.
+
+## 2026-07-29 - Persistent Codex Instructions And Task-Routed Document Reads
+
+- WBS: cross-cutting repository governance and harness documentation
+- Status: done
+- Goal: replace the repeated per-request Codex prompt with one repository-wide instruction baseline for FPDS Admin and Public, while keeping startup context complete and task-specific document reads efficient.
+- Outcome: root `AGENTS.md` now defines Product Owner authority, task-routed document reads, bounded `goal.md` use for substantive multi-step work, financial-data/evidence/security boundaries, Admin/Public UX quality, proportionate verification, documentation updates, and completion auditing. Because the root file applies to the whole repository, no duplicate Admin/Public instruction files were added.
+- Document routing: `README.md`, this journal, and `docs/README.md` are the substantive-work startup set. Requirements/scope, plan/WBS, decision/RAID, runtime READMEs, design docs, and the harness baseline are selected only when the current slice touches their authority. UI work still requires the design index, both frontend baselines, relevant surface/locale docs, and the affected package README. Archive material remains opt-in.
+- Decisions: replaced the open-ended "continue improving until satisfied" loop with explicit acceptance criteria and a bounded final audit; limited temporary `goal.md` to substantive multi-step work so trivial/read-only tasks do not create file churn; replaced permission to ignore inconvenient rules with a conflict/escalation rule that follows document authority; retained optional subagent use only for separable, non-overlapping work with main-agent verification.
+- Key files: `AGENTS.md`, `docs/README.md`, and `docs/00-governance/harness-engineering-baseline.md`.
+- Verification: `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1` passed; `git diff --check` passed. Full application builds were not run because no runtime code or contract changed.
+- Known issues: several older active planning/requirements files still have the encoding/readability debt already tracked as RAID `I-003`; this slice did not rewrite their product content.
+- Next step: use normal Codex requests without repeating the old role/process block; include only the task itself and any task-specific acceptance or Product Owner decision.
 
 ## 2026-07-28 - FPDS Client Handoff Simplification
 

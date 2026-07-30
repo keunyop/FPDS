@@ -5,6 +5,7 @@ from decimal import Decimal
 import unittest
 
 from api_service.public_products import (
+    load_available_public_countries,
     load_public_filters,
     load_public_product_detail,
     load_public_products,
@@ -25,14 +26,24 @@ class _FakeResult:
 
 
 class _PublicConnection:
-    def __init__(self, *, latest_success: dict | None, latest_attempt: dict | None, rows: list[dict]) -> None:
+    def __init__(
+        self,
+        *,
+        latest_success: dict | None,
+        latest_attempt: dict | None,
+        rows: list[dict],
+        countries: list[dict] | None = None,
+    ) -> None:
         self.latest_success = latest_success
         self.latest_attempt = latest_attempt
         self.rows = rows
+        self.countries = countries or []
         self.calls: list[tuple[str, dict[str, object]]] = []
 
     def execute(self, sql: str, params: dict[str, object]) -> _FakeResult:
         self.calls.append((sql, params))
+        if "WITH latest_completed AS" in sql:
+            return _FakeResult(many=self.countries)
         if "AND refresh_status = 'completed'" in sql:
             return _FakeResult(one=self.latest_success)
         if "FROM aggregate_refresh_run" in sql:
@@ -41,6 +52,60 @@ class _PublicConnection:
 
 
 class PublicProductsTests(unittest.TestCase):
+    def test_country_codes_are_normalized_and_invalid_values_fail_safe_to_canada(self) -> None:
+        us_query = normalize_public_products_query(
+            locale="en",
+            country_code=" us ",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="default",
+            sort_order="desc",
+            page=1,
+            page_size=20,
+        )
+        invalid_query = normalize_public_products_query(
+            locale="en",
+            country_code="CAN",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="default",
+            sort_order="desc",
+            page=1,
+            page_size=20,
+        )
+
+        self.assertEqual(us_query.filters.country_code, "US")
+        self.assertEqual(invalid_query.filters.country_code, "CA")
+
+    def test_available_countries_use_latest_active_public_snapshots(self) -> None:
+        connection = _PublicConnection(
+            latest_success=None,
+            latest_attempt=None,
+            rows=[],
+            countries=[
+                {"code": "ca", "count": 14},
+                {"code": "US", "count": 8},
+            ],
+        )
+
+        countries = load_available_public_countries(connection)
+
+        self.assertEqual(countries, [{"code": "CA", "count": 14}, {"code": "US", "count": 8}])
+        self.assertIn("DISTINCT ON (country_code)", connection.calls[0][0])
+        self.assertIn("projection.status = 'active'", connection.calls[0][0])
+
     def test_load_public_products_sorts_and_paginates_snapshot_rows(self) -> None:
         connection = _PublicConnection(
             latest_success=_latest_success_snapshot(),

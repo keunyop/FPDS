@@ -357,6 +357,7 @@ def create_product_type_definition(
     payload: dict[str, Any],
     actor: dict[str, Any],
     request_context: dict[str, Any],
+    country_code: str = "CA",
 ) -> dict[str, Any]:
     display_name = _required_text(payload.get("display_name"), "display_name")
     description = _required_text(payload.get("description"), "description")
@@ -441,6 +442,7 @@ def create_product_type_definition(
     )
     _sync_product_type_taxonomy_registry(
         connection,
+        country_code=country_code,
         product_type_code=product_type_code,
         product_family=product_family,
         status=status,
@@ -467,6 +469,7 @@ def update_product_type_definition(
     payload: dict[str, Any],
     actor: dict[str, Any],
     request_context: dict[str, Any],
+    country_code: str = "CA",
 ) -> dict[str, Any]:
     existing = load_product_type_definition(connection, product_type_code=product_type_code)
     if existing is None:
@@ -544,6 +547,7 @@ def update_product_type_definition(
         _cascade_product_type_code_update(connection, existing_code=existing_code, updated_code=updated_code)
     _sync_product_type_taxonomy_registry(
         connection,
+        country_code=country_code,
         product_type_code=updated_code,
         product_family=product_family,
         status=status,
@@ -584,8 +588,9 @@ def _cascade_product_type_code_update(connection: Connection, *, existing_code: 
     connection.execute(
         """
         UPDATE source_registry_item
-        SET product_key = bank_code || ':' || %(updated_product_type_code)s
-        WHERE product_key = bank_code || ':' || %(existing_product_type_code)s
+        SET product_key = country_code || ':' || bank_code || ':' || %(updated_product_type_code)s
+        WHERE product_key = country_code || ':' || bank_code || ':' || %(existing_product_type_code)s
+           OR product_key = bank_code || ':' || %(existing_product_type_code)s
         """,
         {
             "existing_product_type_code": existing_code,
@@ -653,8 +658,7 @@ def delete_product_type_definition(
     connection.execute(
         """
         DELETE FROM taxonomy_registry
-        WHERE country_code = 'CA'
-          AND product_type = %(product_type_code)s
+        WHERE product_type = %(product_type_code)s
         """,
         {"product_type_code": existing_code},
     )
@@ -677,11 +681,24 @@ def delete_product_type_definition(
     return existing
 
 
-def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type_code: str, product_family: str, status: str) -> None:
+def _sync_product_type_taxonomy_registry(
+    connection: Connection,
+    *,
+    country_code: str,
+    product_type_code: str,
+    product_family: str,
+    status: str,
+) -> None:
+    normalized_country_code = str(country_code).strip().upper()
     now = utc_now()
     subtype_rows = [
         {
-            "taxonomy_id": _taxonomy_id(product_family=product_family, product_type_code=product_type_code, subtype_code=subtype_code),
+            "taxonomy_id": _taxonomy_id(
+                country_code=normalized_country_code,
+                product_family=product_family,
+                product_type_code=product_type_code,
+                subtype_code=subtype_code,
+            ),
             "subtype_code": subtype_code,
             "display_order": display_order,
             "notes": notes,
@@ -713,7 +730,7 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
         )
         SELECT
             taxonomy_id,
-            'CA',
+            %(country_code)s,
             %(product_family)s,
             %(product_type)s,
             subtype_code,
@@ -730,6 +747,7 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
         """,
         {
             "product_type": product_type_code,
+            "country_code": normalized_country_code,
             "product_family": product_family,
             "active_flag": status == "active",
             "subtype_rows": json.dumps(subtype_rows, ensure_ascii=True),
@@ -743,12 +761,13 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
         SET
             active_flag = %(active_flag)s,
             updated_at = %(updated_at)s
-        WHERE country_code = 'CA'
+        WHERE country_code = %(country_code)s
           AND product_family = %(product_family)s
           AND product_type = %(product_type)s
         """,
         {
             "product_type": product_type_code,
+            "country_code": normalized_country_code,
             "product_family": product_family,
             "active_flag": status == "active",
             "updated_at": now,
@@ -757,11 +776,15 @@ def _sync_product_type_taxonomy_registry(connection: Connection, *, product_type
     connection.execute(
         """
         DELETE FROM taxonomy_registry
-        WHERE country_code = 'CA'
+        WHERE country_code = %(country_code)s
           AND product_family <> %(product_family)s
           AND product_type = %(product_type)s
         """,
-        {"product_type": product_type_code, "product_family": product_family},
+        {
+            "country_code": normalized_country_code,
+            "product_type": product_type_code,
+            "product_family": product_family,
+        },
     )
 
 
@@ -774,9 +797,9 @@ def _taxonomy_subtypes_for_product_type(product_type_code: str, *, product_famil
     return (("other", 999, f"Canada {product_family} taxonomy v1 generic fallback"),)
 
 
-def _taxonomy_id(*, product_family: str, product_type_code: str, subtype_code: str) -> str:
+def _taxonomy_id(*, country_code: str, product_family: str, product_type_code: str, subtype_code: str) -> str:
     normalized_subtype = subtype_code.replace("_", "-")
-    return f"tax-ca-{product_family}-{product_type_code}-{normalized_subtype}"
+    return f"tax-{country_code.lower()}-{product_family}-{product_type_code}-{normalized_subtype}"
 
 
 def _record_product_type_audit_event(
