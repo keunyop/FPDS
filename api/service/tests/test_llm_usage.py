@@ -125,6 +125,7 @@ class LLMUsageTests(unittest.TestCase):
         payload = load_llm_usage_dashboard(connection, filters=filters)
 
         self.assertEqual(len(connection.calls), 1)
+        self.assertIn("lur.usage_metadata ->> 'country_code'", connection.calls[0][0])
         self.assertEqual(payload["totals"]["usage_record_count"], 2)
         self.assertEqual(payload["totals"]["run_count"], 1)
         self.assertEqual(payload["totals"]["total_tokens"], 1500)
@@ -135,6 +136,62 @@ class LLMUsageTests(unittest.TestCase):
         self.assertGreaterEqual(payload["totals"]["anomaly_candidate_count"], 1)
         self.assertEqual(payload["anomaly_candidates"][0]["llm_usage_id"], "usage-001")
         self.assertIn("high_token_usage", payload["anomaly_candidates"][0]["anomaly_reasons"])
+
+    def test_standalone_ai_usage_is_counted_without_fake_run_aggregation(self) -> None:
+        rows = [
+            {
+                "llm_usage_id": "usage-bank-001",
+                "recorded_at": datetime(2026, 7, 30, 12, 0, tzinfo=UTC),
+                "run_id": None,
+                "model_execution_id": "me-bank-001",
+                "candidate_id": None,
+                "provider_request_id": "provider-bank-001",
+                "prompt_tokens": 400,
+                "completion_tokens": 100,
+                "estimated_cost": Decimal("0.001000"),
+                "usage_metadata": {
+                    "country_code": "CA",
+                    "operation_id": "bankonboard-001",
+                },
+                "stage_name": "bank_registry_onboarding",
+                "agent_name": "fpds_bank_onboarding",
+                "provider_name": "openai",
+                "model_name": "gpt-test",
+                "execution_status": "completed",
+                "model_started_at": datetime(2026, 7, 30, 11, 59, tzinfo=UTC),
+                "model_completed_at": datetime(2026, 7, 30, 12, 0, tzinfo=UTC),
+                "run_state": None,
+                "trigger_type": None,
+                "run_stage": "bank_registry_onboarding",
+                "correlation_id": "",
+                "request_id": "req-bank-001",
+                "product_name": None,
+                "bank_code": None,
+                "product_type": None,
+                "validation_status": None,
+                "review_task_id": None,
+                "review_state": None,
+                "queue_reason_code": None,
+            }
+        ]
+        connection = _RecordingConnection(rows)
+        filters = normalize_llm_usage_filters(
+            recorded_from=None,
+            recorded_to=None,
+            run_id=None,
+            agent_name=None,
+            model_name=None,
+            provider_name=None,
+            stage=None,
+            search=None,
+        )
+
+        payload = load_llm_usage_dashboard(connection, filters=filters)
+
+        self.assertEqual(payload["totals"]["usage_record_count"], 1)
+        self.assertEqual(payload["totals"]["run_count"], 0)
+        self.assertEqual(payload["by_run"], [])
+        self.assertEqual(payload["by_agent"][0]["agent_name"], "fpds_bank_onboarding")
 
 
 if __name__ == "__main__":

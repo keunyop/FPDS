@@ -909,6 +909,38 @@ export type BankDetailResponse = {
   }>;
 };
 
+export type BankAiOnboardingResponse = {
+  operation_id: string;
+  country_code: string;
+  country_name: string;
+  requested_count: number;
+  added_count: number;
+  coverage_item_count: number;
+  ranking_basis: {
+    metric: string;
+    as_of_date: string;
+    summary: string;
+  };
+  banks: Array<{
+    bank: BankItem;
+    rank: number;
+    size_metric_label: string;
+    size_metric_value: string;
+    size_metric_as_of: string;
+    ranking_source_url: string;
+    homepage_source_url: string;
+    logo_source_url: string | null;
+    coverage: Array<{
+      product_type: string;
+      source_url: string;
+    }>;
+  }>;
+  sources: Array<{
+    url: string;
+    title: string;
+  }>;
+};
+
 export type SourceCatalogItem = {
   catalog_item_id: string;
   bank_code: string;

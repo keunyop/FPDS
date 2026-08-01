@@ -8,6 +8,7 @@ from worker.discovery.env import load_env_file, resolve_default_env_file
 from worker.discovery.fpds_discovery.drift import RegistryPreflightDriftService
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy
 from worker.discovery.fpds_discovery.registry import load_registry
+from worker.run_scope import require_single_country_code
 
 from .capture import CaptureSource, ExistingSnapshotRecord, SnapshotCaptureService
 from .persistence import PsqlSnapshotRepository, SnapshotDatabaseConfig, utc_now_iso
@@ -70,6 +71,7 @@ def main() -> int:
     registry = load_registry(args.registry_path)
     selected_sources = args.source_id or [source.source_id for source in registry.sources]
     sources = [CaptureSource.from_registry_source(registry.by_source_id(source_id)) for source_id in selected_sources]
+    country_code = require_single_country_code(source.country_code for source in sources)
 
     existing_snapshots = []
     if args.existing_snapshots_path is not None:
@@ -82,6 +84,7 @@ def main() -> int:
         repository = PsqlSnapshotRepository(SnapshotDatabaseConfig.from_env())
         repository.start_ingestion_run(
             run_id=args.run_id,
+            country_code=country_code,
             trigger_type=args.trigger_type,
             triggered_by=args.triggered_by,
             source_scope_count=len(sources),

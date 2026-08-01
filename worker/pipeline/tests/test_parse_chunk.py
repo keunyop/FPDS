@@ -6,7 +6,7 @@ from shutil import rmtree
 import unittest
 
 from worker.pipeline.fpds_parse_chunk.models import ExistingParsedDocumentRecord, ParseSourceSnapshot
-from worker.pipeline.fpds_parse_chunk.parser import PARSER_VERSION
+from worker.pipeline.fpds_parse_chunk.parser import PARSER_VERSION, parse_snapshot_bytes
 from worker.pipeline.fpds_parse_chunk.persistence import (
     ParseChunkDatabaseConfig,
     PsqlParseChunkRepository,
@@ -16,6 +16,26 @@ from worker.pipeline.fpds_parse_chunk.storage import ParseChunkStorageConfig, bu
 
 
 class ParseChunkServiceTests(unittest.TestCase):
+    def test_html_parser_preserves_structured_component_evidence_behind_location_gate(self) -> None:
+        payload = {
+            "title": "Advantage Savings",
+            "content": "<p>$8 monthly maintenance fee. Interest is compounded daily.</p>",
+        }
+        artifact = parse_snapshot_bytes(
+            body=(
+                f"<html><head><title>Advantage Savings</title></head><body>"
+                f"<h1>Please select your county</h1><div data-product='{json.dumps(payload)}'></div>"
+                "</body></html>"
+            ).encode(),
+            content_type="text/html",
+        )
+
+        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v3")
+        self.assertIn("Advantage Savings", artifact.full_text)
+        self.assertIn("$8 monthly maintenance fee", artifact.full_text)
+        self.assertEqual(artifact.parser_metadata["structured_component_section_count"], 2)
+        self.assertTrue(any(segment.anchor_type == "structured_component" for segment in artifact.segments))
+
     def test_html_snapshot_preserves_heading_only_rate_and_leaf_rate_card_values(self) -> None:
         temp_path = _prepare_workspace_temp_dir("parse-chunk-rate-card")
         try:

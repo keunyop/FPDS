@@ -84,6 +84,7 @@ class PsqlValidationRoutingRepository:
         self,
         *,
         run_id: str,
+        country_code: str,
         trigger_type: str,
         triggered_by: str | None,
         source_scope_count: int,
@@ -95,6 +96,7 @@ class PsqlValidationRoutingRepository:
         schema = self.active_schema
         run_metadata = {
             "pipeline_stage": "validation_routing",
+            "country_code": country_code,
             "correlation_id": correlation_id,
             "request_id": request_id,
             "source_ids": source_ids,
@@ -105,6 +107,7 @@ SET LOCAL search_path TO {schema};
 
 INSERT INTO ingestion_run (
     run_id,
+    country_code,
     run_state,
     trigger_type,
     triggered_by,
@@ -123,6 +126,7 @@ INSERT INTO ingestion_run (
 )
 VALUES (
     :'run_id',
+    :'country_code',
     'started',
     :'trigger_type',
     NULLIF(:'triggered_by', ''),
@@ -140,6 +144,7 @@ VALUES (
     NULL
 )
 ON CONFLICT (run_id) DO UPDATE SET
+    country_code = EXCLUDED.country_code,
     run_state = 'started',
     trigger_type = EXCLUDED.trigger_type,
     triggered_by = COALESCE(EXCLUDED.triggered_by, ingestion_run.triggered_by),
@@ -153,6 +158,7 @@ COMMIT;
             sql,
             variables={
                 "run_id": run_id,
+                "country_code": country_code,
                 "trigger_type": trigger_type,
                 "triggered_by": triggered_by or "",
                 "source_scope_count": str(source_scope_count),

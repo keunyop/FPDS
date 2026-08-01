@@ -6,7 +6,7 @@ platform with separate authenticated Admin and anonymous Public experiences.
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-29`:
+As of `2026-07-30`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -42,6 +42,22 @@ As of `2026-07-29`:
 - Admin is now country-scoped from sign-in: operators select an enabled country before authentication, the server stores it in the session, the shell keeps the working country visible, and bank/source/collection/run/review/change/usage operations are constrained to that country. Stable product/candidate/run IDs remain opaque; country is enforced through business keys, foreign keys, and lookup indexes.
 - Admin administrators can now manage that login allowlist from `/admin/countries`: countries are selected from a prepared ISO catalog, activation is audited, and reversible deactivation preserves historical data while protecting the current and final active country.
 - The authenticated Admin header now switches the current server-side session among active countries with confirmation, CSRF protection, and audit history, then returns to Overview in the same language to prevent country-owned screen context from leaking across markets.
+- AI-assisted bank registry onboarding is implemented for Banks: an
+  administrator selects `1` to `10`, the server researches the largest missing
+  banks for the session country with current web evidence, and the full
+  official-homepage/logo/active-coverage set is created atomically with
+  usage/audit lineage. Customer-facing display names are kept separate from
+  legal entity names and exact ranking-source labels so fixed-width regulatory
+  abbreviations cannot become UI bank names. Migration `0027` is applied to
+  shared dev.
+- US Admin product collection is hardened end to end: every worker stage
+  persists one validated run country, AI coverage evidence is retained as the
+  first bounded discovery route, US checking/CD vocabulary and structured
+  location-gated pages are supported, unreachable supporting HTML is removed
+  before collection, US candidates default to USD, and legal/CTA/calculator
+  headings cannot become product names. Migration `0028` and five audited Bank
+  of America coverage URLs are applied in shared dev; a normal five-type run
+  completed `30/30` sources with no partial run.
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns
@@ -93,6 +109,11 @@ As of `2026-07-29`:
 - a completed usage dashboard v1 surface on `/admin/usage` with provider/stage/search scoping, operational coverage summaries, concentration hotspots, trend delta signals, and richer anomaly triage context
 - a completed dashboard health surface on `/admin/health/dashboard` with aggregate freshness, queue visibility, serving fallback, stale or failed state signals, and operator retry
 - a completed source registry admin MVP surface with `/admin/banks` for bank setup, initial bank coverage, bank-list bulk collection, per-bank coverage collection, compatibility redirects for the older `/admin/source-catalog` entry points, and read-only `/admin/sources` plus `/admin/sources/:sourceId` for generated source detail inspection
+- an implemented AI-assisted `/admin/banks` onboarding flow with a bounded
+  EN/KO/JA count modal, server-session country authority, largest-first
+  current-web research, duplicate filtering, official citations, atomic
+  profile/coverage creation, readable display-name validation, and standalone
+  LLM usage/audit persistence for legal and ranking names
 - a registered Canada retail lending Product Type baseline for future Admin-run source collection, with active `generic_ai_review` fallback taxonomy rows for credit cards, mortgages, personal loans, and lines of credit
 - a recognized Canadian bank and credit-union registry baseline with logo metadata and full active Product Type coverage for every active Canadian financial institution in the source catalog
 - an FPDS-owned Admin UI built from adapted Shadcnblocks foundations, with semantic component names and recorded vendor provenance

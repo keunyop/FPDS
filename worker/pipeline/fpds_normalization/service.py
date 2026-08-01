@@ -14,6 +14,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import (
     canonical_value_type,
     field_contract,
@@ -404,7 +405,11 @@ def _normalize_candidate(
         runtime_notes=runtime_notes,
     )
     source_language = _coalesce_string(_field_value(extracted_by_field, "source_language"), item.source_language, "und")
-    currency = _coalesce_string(_field_value(extracted_by_field, "currency"), "CAD")
+    currency = _coalesce_string(
+        _field_value(extracted_by_field, "currency"),
+        default_currency_for_country(country_code),
+        "XXX",
+    )
     candidate_payload: dict[str, object] = {
         "status": "active",
         "last_verified_at": _utc_now_iso(),

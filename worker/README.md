@@ -17,3 +17,17 @@ Current implementation slices:
 - `WBS 3.6` normalization mapping in `worker/pipeline/fpds_normalization/`
 - `WBS 3.7` validation/confidence routing in `worker/pipeline/fpds_validation_routing/`
 - `WBS 3.8` result-viewer payload export in `worker/pipeline/fpds_result_viewer/`
+
+Runtime invariants:
+- one ingestion run owns exactly one normalized ISO alpha-2 country code;
+  snapshot, parse/chunk, extraction, normalization, and validation persistence
+  all write that country and reject mixed-country scopes before DB work
+- HTML discovery reads ordinary anchors plus bounded JSON component links from
+  `data-*` attributes; parser version `fpds-parse-chunk-v3` also retains
+  bounded component text as `structured_component` evidence when a visible
+  location gate hides the product copy
+- market defaults are country-owned (`CA -> CAD`, `US -> USD`); an unknown
+  country remains explicit instead of silently inheriting CAD
+- product-title extraction prefers high-confidence official location-gated
+  page identity and removes SEO action suffixes while rejecting legal
+  documents, enrollment CTAs, calculators, and other non-product headings

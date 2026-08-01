@@ -35,12 +35,14 @@ from api_service.source_catalog import (
     _looks_like_secondary_catalog_hub,
     _looks_like_javascript_shell,
     _normalize_country_code,
+    _normalize_coverage_source_url,
     _ordered_detail_candidates,
     _page_is_audience_offer_hub,
     _promote_detail_candidates,
     _product_type_discovery_profile,
     _record_catalog_audit_event,
     _source_scope_exclusion_reason,
+    _supporting_html_page_is_fetchable,
     _score_candidate_links_with_ai,
     _score_page_evidence,
     _score_product_link,
@@ -57,6 +59,8 @@ from api_service.source_catalog import (
     update_bank_profile,
 )
 from api_service.errors import SourceRegistryError
+from api_service.product_type_localization import localize_product_type_definition
+from worker.discovery.fpds_discovery.url_utils import normalize_source_url
 
 
 class _QueuedCursor:
@@ -106,6 +110,225 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_us_discovery_localizes_checking_and_cd_without_mutating_canonical_codes(self) -> None:
+        chequing = localize_product_type_definition(
+            country_code="US",
+            definition=_product_type_definition("chequing"),
+        )
+        gic = localize_product_type_definition(
+            country_code="US",
+            definition=_product_type_definition("gic"),
+        )
+
+        self.assertEqual(chequing["product_type_code"], "chequing")
+        self.assertIn("checking account", chequing["discovery_keywords"])
+        self.assertEqual(gic["product_type_code"], "gic")
+        self.assertIn("certificate of deposit", gic["discovery_keywords"])
+
+    def test_location_gate_can_use_structured_product_evidence_without_promoting_a_family_hub(self) -> None:
+        structured_payload = json.dumps(
+            {
+                "title": "Advantage Savings",
+                "content": "<p>$8 monthly fee. Earn interest compounded daily.</p>",
+            }
+        )
+        html = (
+            "<html><head><title>Advantage Savings | Example Bank</title></head><body>"
+            "<h1>Please select your county</h1><p>Enter your ZIP code.</p>"
+            f"<div data-product='{structured_payload}'></div></body></html>"
+        )
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.bank.example/deposits/savings/advantage-savings/",
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bank.example/deposits/savings/advantage-savings",
+            raw_url="https://www.bank.example/deposits/savings/advantage-savings/",
+            anchor_text="Advantage Savings",
+            source_type="html",
+            origin="verified_coverage_source",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint="Advantage Savings",
+            priority_hint="P1",
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=candidate.normalized_url,
+            predicted_role="supporting_html",
+            relevance_score=7.0,
+            confidence_band="medium",
+            reason_codes=["hub_page_not_detail", "not_product_detail"],
+            short_rationale="The visible page is location gated.",
+        )
+
+        self.assertIn("location_access_gate", evidence.page_evidence_reason_codes)
+        self.assertIn("structured_component_evidence", evidence.page_evidence_reason_codes)
+        self.assertNotIn("multi_product_family_overview", evidence.page_evidence_reason_codes)
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            ),
+            evidence,
+        )
+
+    def test_us_cd_location_gate_uses_localized_identity_terms(self) -> None:
+        definition = localize_product_type_definition(
+            country_code="US",
+            definition=_product_type_definition("gic"),
+        )
+        structured_payload = json.dumps(
+            {
+                "title": "Bank of America Certificates of Deposit",
+                "content": (
+                    "<p>Open a CD with a $1,000 minimum opening deposit. "
+                    "Choose a fixed term and view the annual percentage yield.</p>"
+                ),
+            }
+        )
+        html = (
+            "<html><head><title>Certificate of Deposit - View CD Rates and Account Options</title></head><body>"
+            "<h1>Please select your county</h1><p>Enter your ZIP code.</p>"
+            f"<div data-product='{structured_payload}'></div></body></html>"
+        )
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.bank.example/deposits/bank-cds/cd-accounts/",
+                fetch_policy=SimpleNamespace(),
+                product_type="gic",
+                product_type_definition=definition,
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bank.example/deposits/bank-cds/cd-accounts",
+            raw_url="https://www.bank.example/deposits/bank-cds/cd-accounts/",
+            anchor_text="Certificate of Deposit (CD)",
+            source_type="html",
+            origin="verified_coverage_source",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint="Certificate of Deposit (CD)",
+            priority_hint="P1",
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=candidate.normalized_url,
+            predicted_role="detail",
+            relevance_score=10.0,
+            confidence_band="high",
+            reason_codes=["named_product_detail"],
+            short_rationale="Official Certificate of Deposit product page.",
+        )
+
+        self.assertTrue(evidence.product_identity_match, evidence)
+        self.assertIn("title_semantic_match", evidence.page_evidence_reason_codes)
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            ),
+            evidence,
+        )
+
+    def test_only_verified_coverage_can_relax_location_gate_page_score(self) -> None:
+        url = "https://www.bank.example/deposits/savings/savings-accounts"
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="supporting_html",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["hub_page_not_detail", "not_product_detail"],
+            short_rationale="Official location-gated savings coverage page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=4,
+            page_evidence_reason_codes=[
+                "product_identity_signal",
+                "structured_component_evidence",
+                "location_access_gate",
+                "title_semantic_match",
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+                "insufficient_evidence",
+            ],
+            page_title="Open a Bank of America Advantage Savings Account Online",
+            primary_heading="Please select your county",
+            heading_match=False,
+            attribute_signal_count=2,
+            negative_signal_count=1,
+            product_identity_match=True,
+        )
+
+        def candidate(origin: str) -> HomepageCandidate:
+            return HomepageCandidate(
+                normalized_url=url,
+                raw_url=f"{url}/",
+                anchor_text="Savings account",
+                source_type="html",
+                origin=origin,
+                heuristic_score=5,
+                supporting_signal=False,
+                seed_source_id=None,
+                source_name_hint=None,
+                priority_hint=None,
+                expected_fields_hint=[],
+            )
+
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate("verified_coverage_source"),
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            )
+        )
+        self.assertFalse(
+            _candidate_promotes_to_detail(
+                candidate=candidate("homepage_or_hub_link"),
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            )
+        )
+
+    def test_unreachable_supporting_html_is_excluded_before_collection(self) -> None:
+        url = "https://www.bank.example/en/home-ownership/stale-article"
+        unavailable = PageEvidenceAssessment(
+            page_evidence_score=0,
+            page_evidence_reason_codes=["page_fetch_unavailable"],
+            page_title=None,
+            primary_heading=None,
+            heading_match=False,
+            attribute_signal_count=0,
+            negative_signal_count=0,
+            fetch_error="HTTP fetch failed with status 404",
+        )
+        cache = {url: unavailable}
+
+        with patch("api_service.source_catalog._score_page_evidence") as scorer:
+            self.assertFalse(
+                _supporting_html_page_is_fetchable(
+                    normalized_url=url,
+                    raw_url=url,
+                    fetch_policy=SimpleNamespace(),
+                    product_type="mortgage",
+                    product_type_definition=_product_type_definition("mortgage"),
+                    page_evidence_by_url=cache,
+                )
+            )
+            scorer.assert_not_called()
+
     def test_country_code_requires_iso_alpha_2_shape(self) -> None:
         self.assertEqual(_normalize_country_code(" us "), "US")
         with self.assertRaises(SourceRegistryError) as captured:
@@ -1777,6 +2000,10 @@ class SourceCatalogTests(unittest.TestCase):
                     "status": "active",
                     "change_reason": "Initial operator setup",
                     "initial_coverage_product_types": ["savings", "gic"],
+                    "initial_coverage_source_urls": {
+                        "savings": "https://www.atlasbank.ca/accounts/savings/",
+                        "gic": "https://www.atlasbank.ca/investments/cds/",
+                    },
                 },
                 actor={"user_id": "usr-001", "role": "admin"},
                 request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
@@ -1786,6 +2013,32 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(create_catalog_item.call_args_list[0].kwargs["payload"]["product_type"], "savings")
         self.assertEqual(create_catalog_item.call_args_list[1].kwargs["payload"]["product_type"], "gic")
         self.assertEqual(create_catalog_item.call_args_list[0].kwargs["payload"]["bank_code"], "ATL")
+        self.assertEqual(
+            create_catalog_item.call_args_list[0].kwargs["payload"]["coverage_source_url"],
+            "https://www.atlasbank.ca/accounts/savings/",
+        )
+
+    def test_coverage_source_url_must_be_https_and_on_the_bank_domain(self) -> None:
+        self.assertEqual(
+            _normalize_coverage_source_url(
+                "https://products.atlasbank.ca/accounts/savings/",
+                normalized_homepage_url="https://www.atlasbank.ca/",
+            ),
+            (
+                "https://products.atlasbank.ca/accounts/savings/",
+                "https://products.atlasbank.ca/accounts/savings",
+            ),
+        )
+        with self.assertRaisesRegex(SourceRegistryError, "official homepage domain"):
+            _normalize_coverage_source_url(
+                "https://unrelated.example/savings/",
+                normalized_homepage_url="https://www.atlasbank.ca/",
+            )
+        with self.assertRaisesRegex(SourceRegistryError, "public HTTPS"):
+            _normalize_coverage_source_url(
+                "http://www.atlasbank.ca/savings/",
+                normalized_homepage_url="https://www.atlasbank.ca/",
+            )
 
     def test_create_bank_profile_accepts_homepage_without_scheme(self) -> None:
         connection = _QueuedConnection([None, None])
@@ -2243,6 +2496,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "source_language": "en",
                 "homepage_url": "https://www.atlasbank.ca",
                 "normalized_homepage_url": "https://www.atlasbank.ca",
+                "coverage_source_url": None,
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -2719,6 +2973,74 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
+
+    def test_generate_sources_starts_from_verified_coverage_url_and_embedded_json_links(self) -> None:
+        homepage_url = "https://www.bank.example/"
+        coverage_url = "https://www.bank.example/credit-cards/"
+        detail_url = "https://www.bank.example/credit-cards/products/travel-rewards-credit-card"
+        embedded_catalog = json.dumps(
+            {
+                "products": [
+                    {
+                        "name": "Travel Rewards Credit Card",
+                        "learnMore": {"path": "products/travel-rewards-credit-card/"},
+                    }
+                ]
+            }
+        )
+        pages = {
+            normalize_source_url(homepage_url): "<html><body>Bank homepage without product navigation</body></html>",
+            normalize_source_url(coverage_url): f"<div data-product-catalog='{embedded_catalog}'></div>",
+            detail_url: (
+                "<html><head><title>Travel Rewards Credit Card</title></head><body>"
+                "<h1>Travel Rewards Credit Card</h1><p>No annual fee and rewards on purchases.</p>"
+                "</body></html>"
+            ),
+        }
+
+        def fake_fetch(url: str, _policy: object) -> str:
+            return pages[normalize_source_url(url)]
+
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=fake_fetch),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        detail_url: AiParallelCandidateScore(
+                            candidate_url=detail_url,
+                            predicted_role="detail",
+                            relevance_score=9.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                            short_rationale="Named credit card detail page.",
+                        )
+                    },
+                    notes=[],
+                ),
+            ),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="BANK",
+                bank_name="Example Bank",
+                country_code="US",
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+                homepage_url=homepage_url,
+                coverage_source_url=coverage_url,
+                source_language="en",
+            )
+
+        detail_urls = {
+            item["normalized_url"]
+            for item in result.rows
+            if item["discovery_role"] == "detail"
+        }
+        self.assertIn(detail_url, detail_urls, (result.discovery_notes, result.rows))
+        self.assertTrue(any("verified official Product Type coverage URL" in note for note in result.discovery_notes))
 
     def test_generate_sources_from_homepage_expands_secondary_product_category_hub(self) -> None:
         homepage_url = "https://www.examplebank.ca/"
@@ -4255,6 +4577,17 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("bank.status = 'active'", migration_sql)
         self.assertIn("product_type_registry.status = 'active'", migration_sql)
         self.assertIn("ON CONFLICT (bank_code, country_code, product_type) DO UPDATE", migration_sql)
+
+    def test_coverage_evidence_migration_is_additive_and_auditable(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0028_source_catalog_coverage_evidence.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ADD COLUMN IF NOT EXISTS coverage_source_url text", migration_sql)
+        self.assertIn("ADD COLUMN IF NOT EXISTS normalized_coverage_source_url text", migration_sql)
+        self.assertIn("source_registry_catalog_item_coverage_source_https_check", migration_sql)
+        self.assertIn("0028_source_catalog_coverage_evidence.sql", migration_sql)
 
     def test_bank_logo_refresh_uses_official_assets_without_overwriting_custom_urls(self) -> None:
         repo_root = Path(__file__).resolve().parents[3]

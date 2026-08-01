@@ -12,7 +12,8 @@ The shell puts four daily tasks first:
 2. **Review** — inspect flagged fields, evidence, AI verification, and record a
    guarded decision.
 3. **Runs** — find failed or partial collection work and inspect or retry it.
-4. **Banks** — manage bank coverage and launch collection.
+4. **Banks** — add banks manually or through grounded AI research, manage
+   coverage, and launch collection.
 
 Before entering the workspace, the operator selects an enabled working country
 on the login form. The API persists that ISO alpha-2 code in the server-side
@@ -48,6 +49,9 @@ routes.manifest.json              current page-route-to-file map
 The shared shell is `src/components/fpds/admin/admin-shell.tsx`. Numbered
 vendor-derived blocks were renamed after adaptation so handoff readers see
 their FPDS role first; vendor provenance remains recorded in the design logs.
+Banks list rows, AI-onboarding results, and bank-detail previews reuse
+`src/components/fpds/admin/bank-logo-mark.tsx`: every asset keeps its aspect
+ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 
 ## Safety Boundaries
 
@@ -58,6 +62,11 @@ their FPDS role first; vendor provenance remains recorded in the design logs.
   and redirected to Overview rather than preserving a country-owned route.
 - Keep platform-wide account and audit administration conceptually separate
   from country-owned bank, source, collection, review, and product data.
+- Keep `Add banks with AI` admin-only and tied to the displayed server-session
+  country. Its result must retain clickable ranking/homepage/coverage evidence
+  and must not imply that product collection or Public release has occurred.
+- Keep Banks workflow logos on the shared fixed-footprint mark; do not size
+  individual bank assets ad hoc or reintroduce a visible logo frame.
 - Treat country removal as reversible deactivation. Never physically delete a
   country row or accept a free-form country identity from the browser.
 - Preserve session cookies, CSRF headers, RBAC, proxy status/body forwarding,

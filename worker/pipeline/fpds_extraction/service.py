@@ -13,6 +13,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import canonical_value_type, field_contract, field_contract_payload
 from worker.pipeline.fpds_evidence_retrieval.models import (
     EvidenceChunkCandidate,
@@ -309,6 +310,40 @@ _GENERIC_BANKING_INFO_MARKERS = (
     "banking services",
     "banking agreements",
     "cross border banking",
+)
+_NON_PRODUCT_DOCUMENT_TITLE_MARKERS = (
+    "account agreement",
+    "banking agreement",
+    "disclosure statement",
+    "fee schedule",
+    "online banking service agreement",
+    "privacy policy",
+    "service agreement",
+    "terms and conditions",
+)
+_NON_PRODUCT_DOCUMENT_TITLE_PATTERNS = (
+    re.compile(
+        r"\b(?:account|banking|cardholder|credit card|deposit|electronic banking|online banking|"
+        r"service|user)\s+agreements?\b",
+        flags=re.IGNORECASE,
+    ),
+    re.compile(r"\bagreements?\s+(?:and|&)\s+disclosures?\b", flags=re.IGNORECASE),
+    re.compile(
+        r"\b(?:account|banking|cardholder|credit card|deposit|fee|product|rate)\s+disclosures?\b",
+        flags=re.IGNORECASE,
+    ),
+    re.compile(r"\b(?:fee|rate)\s+schedules?\b", flags=re.IGNORECASE),
+    re.compile(r"\b(?:cookie|privacy)\s+(?:notices?|polic(?:y|ies))\b", flags=re.IGNORECASE),
+    re.compile(r"\b(?:legal notices?|terms of (?:service|use))\b", flags=re.IGNORECASE),
+)
+_NON_PRODUCT_ACTION_TITLE_PATTERNS = (
+    re.compile(
+        r"^(?:apply(?:\s+now)?|calculate|compare|contact|enroll(?:\s+now)?|find|"
+        r"get started|learn more|log in|schedule|sign in|try)\b",
+        flags=re.IGNORECASE,
+    ),
+    re.compile(r"\b(?:calculator|made simple)\b", flags=re.IGNORECASE),
+    re.compile(r"^(?:account|banking|card|loan|mortgage)\s+options?\b", flags=re.IGNORECASE),
 )
 _PRODUCT_PROFILE_CONFLICT_KEYWORDS = {
     "gic": (
@@ -2394,7 +2429,11 @@ def _clean_title_candidate(value: str) -> str:
     if not normalized:
         return ""
 
-    cleaned = _restore_us_dollar_text(normalized)
+    cleaned = _strip_title_action_copy(_restore_us_dollar_text(normalized))
+    if _looks_like_non_product_document_title(cleaned):
+        return ""
+    if any(pattern.search(cleaned) is not None for pattern in _NON_PRODUCT_ACTION_TITLE_PATTERNS):
+        return ""
     cleaned = re.sub(
         r"(?:\s+\|\s+(?:(?:BMO|CIBC|RBC|Royal Bank|Scotiabank|Simplii Financial|Tangerine|TD|Oaken Financial)(?:\s+Canada)?|Investments|Bank Accounts?))+$",
         "",
@@ -2431,6 +2470,41 @@ def _clean_title_candidate(value: str) -> str:
         if candidate:
             return _restore_us_dollar_text(candidate)
     return cleaned
+
+
+def _strip_title_action_copy(value: str) -> str:
+    cleaned = _normalize_text(value)
+    cleaned = re.sub(
+        r"(?:\s*[:|]\s+|\s+[-\u2013\u2014]\s+)"
+        r"(?:apply|compare|explore|get started|learn|open|view)\b.*$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    ).strip()
+    open_now_match = re.match(r"^open now\s*[-:\u2013\u2014]\s*(.+)$", cleaned, flags=re.IGNORECASE)
+    if open_now_match is not None:
+        cleaned = _normalize_text(open_now_match.group(1))
+    open_product_match = re.match(
+        r"^open\s+(?:a|an|the)\s+(.+?)(?:\s+(?:online|today))?$",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    if open_product_match is not None:
+        candidate = _normalize_text(open_product_match.group(1))
+        if any(keyword in candidate.lower() for keyword in _PRODUCT_TITLE_KEYWORDS):
+            cleaned = candidate
+    return cleaned
+
+
+def _looks_like_non_product_document_title(value: str) -> bool:
+    normalized = _normalize_text(value)
+    if not normalized:
+        return False
+    lowered = normalized.lower()
+    return (
+        any(marker in lowered for marker in _NON_PRODUCT_DOCUMENT_TITLE_MARKERS)
+        or any(pattern.search(normalized) is not None for pattern in _NON_PRODUCT_DOCUMENT_TITLE_PATTERNS)
+    )
 
 
 def _extract_description(*, context: ExtractionDocumentContext, candidates: list[EvidenceChunkCandidate]) -> str | None:
@@ -2563,6 +2637,25 @@ def _authoritative_discovery_product_title(context: ExtractionDocumentContext) -
         ai_score = float(discovery_metadata.get("ai_parallel_score") or 0)
     except (TypeError, ValueError):
         ai_score = 0.0
+    page_reason_codes = {
+        str(item).strip().lower()
+        for item in discovery_metadata.get("page_evidence_reason_codes", [])
+        if str(item).strip()
+    }
+    ai_role = str(discovery_metadata.get("ai_predicted_role") or "").lower()
+    candidate_origin = str(discovery_metadata.get("candidate_origin") or "").lower()
+    if (
+        page_title
+        and not _title_conflicts_with_product_context(context=context, title=page_title)
+        and ai_role in {"detail", "supporting_html"}
+        and ai_score >= 8
+        and str(discovery_metadata.get("ai_confidence_band") or "").lower() == "high"
+        and "location_access_gate" in page_reason_codes
+        and "structured_component_evidence" in page_reason_codes
+        and "title_semantic_match" in page_reason_codes
+        and (ai_role == "detail" or candidate_origin == "verified_coverage_source")
+    ):
+        return page_title
     if (
         heading
         and not _looks_like_marketing_or_family_title(heading)
@@ -3107,7 +3200,7 @@ def _infer_currency(*, context: ExtractionDocumentContext) -> str:
             return currency_code
     if re.search(r"\bu\.?s\.?(?:\s+|[-_/]).{0,30}\b(?:savings|account|deposit)\b", context_text):
         return "USD"
-    return "CAD"
+    return default_currency_for_country(context.country_code) or "XXX"
 
 
 def _extract_money_value(

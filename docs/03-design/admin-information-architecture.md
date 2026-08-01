@@ -125,7 +125,7 @@ choose an abstract module before finding a task.
 | Daily work | Admin Overview | `/admin` | operator triage |
 | Daily work | Review | `/admin/reviews` | review intake and decision workload |
 | Daily work | Runs | `/admin/runs` | collection diagnostics and recovery |
-| Daily work | Banks | `/admin/banks` | coverage management and collection kickoff |
+| Daily work | Banks | `/admin/banks` | bank onboarding, coverage management, and collection kickoff |
 | More tools | Source Registry | `/admin/sources` | generated source inspection |
 | More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
 | More tools | Countries | `/admin/countries` | admin-only operational country activation |
@@ -315,6 +315,8 @@ Runtime decision refinement:
 Purpose:
 - own active source scope
 - let operators manage banks and product coverage with minimal controlled inputs
+- let administrators add a bounded, largest-first set of missing banks through
+  current web-grounded AI research for the server-session country
 - let operators inspect generated source rows after collection
 - let operators start collection from bank-owned coverage items
 - let operators start bulk collection from the bank list across multiple banks' attached coverage items
@@ -346,6 +348,19 @@ Minimum row fields:
 
 Rules:
 - `/admin/banks` owns visible bank profile editing
+- bank list rows, AI-onboarding results, and bank-detail previews use one
+  unframed logo mark with a `56x40` layout slot and a `48x24` contain viewport
+  so square favicons and wide wordmarks keep their proportions with comparable
+  visual weight
+- `/admin/banks` exposes `Add banks with AI` only to `admin`; its modal selects
+  `1` to `10`, keeps the working country read-only, and explains duplicate
+  exclusion plus all-or-nothing creation
+- AI onboarding results show ranking/as-of context and clickable homepage,
+  ranking, and per-coverage official evidence; source-derived bank names are
+  not translated
+- AI bank onboarding creates only bank profiles and grounded active Product
+  Type coverage. Collection, review, canonical approval, and Public release
+  remain separate actions
 - `/admin/banks` also owns bank/product-type coverage editing and collection launch
 - `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
 - `/admin/product-types` owns all product-type definitions as operator-managed DB rows and is the source of truth for bank coverage option search
@@ -547,6 +562,7 @@ Minimum information:
 |---|---|
 | 1.7.4 | Sections 2-11 |
 | 5.15 | Sections 2, 5, 6, 7.4, 8, 10, 11 |
+| 5.23 | Sections 5, 7.4, 8, 10 |
 
 ---
 
@@ -554,6 +570,8 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-07-30 | Standardized Banks list, AI-result, and detail-preview logos on one unframed fixed-footprint component |
+| 2026-07-30 | Added the Banks AI-onboarding action, modal/result hierarchy, and separation from product collection/publish workflows |
 | 2026-07-28 | Replaced abstract module navigation with direct Overview/Review/Runs/Banks daily work plus a complete More Tools group; recorded simplified list filters, Banks table, and Review Detail progressive disclosure for client handoff |
 | 2026-07-27 | Recorded the shipped Admin evidence-operations composition, real route navigation, Operational Attention Rail, safe visible auto-refresh, bounded responsive tables/work cards, and compact target baseline |
 | 2026-07-15 | Refined Review to product-aware requiredness and concrete suspect-field types; only flagged fields open by default, other values and optional audit notes stay collapsed, and source facts no longer duplicate product identity or AI explanation |

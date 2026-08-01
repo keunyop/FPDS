@@ -7,7 +7,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from worker.discovery.fpds_discovery.discovery import SourceDiscoveryService
+from worker.discovery.fpds_discovery.discovery import (
+    SourceDiscoveryService,
+    extract_links,
+    extract_structured_text_sections,
+)
 from worker.discovery.fpds_discovery.fetch import (
     DiscoveryFetchPolicy,
     FetchedResponse,
@@ -41,6 +45,54 @@ class UrlUtilsTests(unittest.TestCase):
         document_id = build_source_document_id("TD", normalized, "html")
         self.assertEqual(identity, "TD|https://www.td.com/ca/en/test|html")
         self.assertEqual(document_id, build_source_document_id("TD", normalized, "html"))
+
+    def test_extract_links_reads_bounded_json_component_links(self) -> None:
+        payload = {
+            "products": [
+                {
+                    "name": "Customized Cash Rewards",
+                    "learnMore": {"path": "products/cash-back-credit-card/"},
+                },
+                {
+                    "title": "Travel Rewards",
+                    "url": "https://www.bank.example/credit-cards/products/travel-rewards/",
+                },
+                {"title": "Template", "href": "/products/{productId}/"},
+            ]
+        }
+        html = f"<div data-product-catalog='{json.dumps(payload)}'></div>"
+
+        links = extract_links(html, base_url="https://www.bank.example/credit-cards/")
+
+        self.assertEqual(
+            [(link.normalized_url, link.anchor_text) for link in links],
+            [
+                (
+                    "https://www.bank.example/credit-cards/products/cash-back-credit-card",
+                    "Customized Cash Rewards",
+                ),
+                (
+                    "https://www.bank.example/credit-cards/products/travel-rewards",
+                    "Travel Rewards",
+                ),
+            ],
+        )
+
+    def test_extract_structured_text_sections_reads_component_copy(self) -> None:
+        payload = {
+            "title": "Advantage Savings",
+            "content": "<p>$8 monthly fee, waived with an eligible balance.</p>",
+            "config": {"endpoint": "https://api.bank.example/internal"},
+        }
+        html = f"<div data-product='{json.dumps(payload)}'></div>"
+
+        self.assertEqual(
+            extract_structured_text_sections(html),
+            [
+                "Advantage Savings",
+                "$8 monthly fee, waived with an eligible balance.",
+            ],
+        )
 
 
 class FetchPolicyTests(unittest.TestCase):

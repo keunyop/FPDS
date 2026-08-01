@@ -407,6 +407,7 @@ point baseline:
 
 대상 기능:
 - admin auth and access-request onboarding
+- bank registry and AI-assisted bank onboarding
 - review queue and decision
 - product detail and change history
 - audit log
@@ -488,6 +489,58 @@ Rules:
 - deactivation revokes active sessions for the affected country
 - each real status transition emits a `config` audit event targeting
   `country_registry`
+
+### 5.1B `POST /api/admin/banks/ai-onboard`
+
+Purpose:
+- add a bounded set of the largest missing banks for the authenticated working
+  country, with official identity, logo metadata, and grounded active Product
+  Type coverage.
+
+Request:
+
+| Field | Description |
+|---|---|
+| `count` | required integer from `1` to `10` |
+
+Rules:
+- requires an authenticated `admin` and matching CSRF header
+- derives country only from `admin_auth_session.country_code`
+- requires configured OpenAI Responses structured output plus live web search
+- uses one current comparable domestic size measure, excludes existing bank
+  names/aliases/homepage domains, and requires consulted citations for ranking,
+  official homepage, and every coverage item
+- accepts coverage codes only when the Product Type row is active and the
+  cited page is on the bank's official domain
+- persists each accepted coverage citation as the catalog row's
+  `coverage_source_url`; collection gives that exact verified route priority
+  while legacy null rows retain homepage discovery
+- uses a directly verified same-domain logo when present, otherwise the
+  official-domain `/favicon.ico` fallback
+- rejects the whole operation when fewer than `count` valid banks remain
+- creates all bank profiles and coverage rows in one nested transaction; a
+  race or validation failure rolls the bank batch back before failure
+  execution/usage/audit records are committed
+- persists standalone `model_execution` and `llm_usage_record` rows with null
+  ingestion `run_id`, plus country/operation metadata and a success/failure
+  config audit event
+- does not start source collection or mutate candidate, canonical, aggregate,
+  or Public state
+
+Success `data` includes:
+- `operation_id`, country, requested/added/coverage counts
+- ranking metric, as-of date, and summary
+- each created bank plus national rank, size value/date, official homepage,
+  ranking evidence, logo evidence when applicable, and per-coverage evidence
+- the consulted web-source list
+
+An insufficient-evidence response is `422` with
+`bank_ai_results_insufficient`; provider unavailability/failure and ordinary
+registry validation errors retain their specific non-2xx status. No failure
+response reports a partial bank set. Before migration `0027` is present, the
+route returns `503 bank_ai_schema_not_ready` before invoking the provider.
+Migration `0028` adds the optional normalized coverage-evidence columns used by
+new onboarding writes and collection plans.
 
 `POST /api/admin/auth/signup-requests` request baseline:
 
@@ -1312,3 +1365,4 @@ public/admin 전용 internal fields, evidence detail, review history는 포함�
 |---|---|
 | 2026-04-01 | Initial API and interface contract baseline created for WBS 1.5.1-1.5.5 |
 | 2026-04-13 | Added the admin audit-log route baseline alongside change history, publish, usage, and dashboard health contracts |
+| 2026-07-30 | Added the session-country, cited, atomic AI bank-onboarding mutation contract |

@@ -679,6 +679,29 @@ class ExtractionServiceTests(unittest.TestCase):
                 )
                 self.assertEqual(_infer_currency(context=context), expected)
 
+    def test_currency_defaults_to_run_country_without_locale_inference(self) -> None:
+        us_context = ExtractionDocumentContext(
+            source_id="AUTO-US-BANK-CARD-001",
+            parsed_document_id="parsed-us-001",
+            source_document_id="src-us-001",
+            snapshot_id="snap-us-001",
+            bank_code="BANK",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={"product_type": "credit-card"},
+        )
+        unknown_context = ExtractionDocumentContext(
+            **{
+                **us_context.__dict__,
+                "source_id": "AUTO-XX-BANK-CARD-001",
+                "country_code": "XX",
+            }
+        )
+
+        self.assertEqual(_infer_currency(context=us_context), "USD")
+        self.assertEqual(_infer_currency(context=unknown_context), "XXX")
+
     def test_confirmed_discovery_product_title_beats_marketing_heading(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-SAV-USD",
@@ -5223,6 +5246,80 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertEqual(extracted_by_field["product_name"].candidate_value, "TD Special Offer GICs")
         finally:
             rmtree(temp_path, ignore_errors=True)
+
+    def test_product_title_rejects_embedded_legal_document_heading(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BOAN-CHE-001",
+            parsed_document_id="parsed-boan-che-001",
+            source_document_id="src-boan-che-001",
+            snapshot_id="snap-boan-che-001",
+            bank_code="BOAN",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "chequing",
+                "discovery_metadata": {
+                    "page_title": "Bank of America Advantage Banking: Open a Checking Account Today",
+                    "primary_heading": "Please select your county",
+                    "candidate_origin": "homepage_or_hub_link",
+                    "ai_parallel_score": 9.5,
+                    "ai_predicted_role": "detail",
+                    "ai_confidence_band": "high",
+                    "page_evidence_reason_codes": [
+                        "product_identity_signal",
+                        "structured_component_evidence",
+                        "location_access_gate",
+                        "title_semantic_match",
+                    ],
+                },
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-boan-legal",
+            parsed_document_id="parsed-boan-che-001",
+            chunk_index=0,
+            anchor_type="structured_component",
+            anchor_value="structured-component-1",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt=(
+                "Deposit Agreement and Disclosures\n"
+                "Online Banking Service Agreement\n"
+                "Enroll now in online banking\n"
+                "Bank of America Advantage Banking gives customers checking account options."
+            ),
+            retrieval_metadata={},
+            source_document_id="src-boan-che-001",
+            source_snapshot_id="snap-boan-che-001",
+            bank_code="BOAN",
+            country_code="US",
+            source_type="html",
+        )
+
+        self.assertEqual(
+            _extract_document_title(context=context, candidates=[candidate]),
+            "Bank of America Advantage Banking",
+        )
+        self.assertEqual(_clean_title_candidate("Online Banking Service Agreement"), "")
+        self.assertEqual(_clean_title_candidate("Deposit Agreement and Disclosures"), "")
+        self.assertEqual(_clean_title_candidate("Credit Card Agreement & Disclosure"), "")
+        self.assertEqual(_clean_title_candidate("Privacy Notice"), "")
+        self.assertEqual(
+            _clean_title_candidate("Bank of America Advantage Banking: Open a Checking Account Today"),
+            "Bank of America Advantage Banking",
+        )
+        self.assertEqual(
+            _clean_title_candidate("Certificate of Deposit - View CD Rates and Account Options"),
+            "Certificate of Deposit",
+        )
+        self.assertEqual(
+            _clean_title_candidate("Open a Bank of America Advantage Savings Account Online"),
+            "Bank of America Advantage Savings Account",
+        )
+        self.assertEqual(_clean_title_candidate("Enroll now in online banking"), "")
+        self.assertEqual(_clean_title_candidate("Account options made simple"), "")
+        self.assertEqual(_clean_title_candidate("Try the Savings Goal Calculator"), "")
 
     def test_extracts_product_name_prefers_real_account_name_over_feature_heading(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-feature-title")

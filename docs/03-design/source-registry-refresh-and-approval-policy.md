@@ -156,6 +156,27 @@ Current live workflow note:
 - `/admin/source-catalog` may still exist as a compatibility route, but it is no longer the preferred primary workflow.
 - bank list bulk collect is allowed as long as the action resolves to the underlying bank-plus-product coverage items.
 
+Current AI bank-onboarding note:
+- an `admin` may request `1` to `10` missing banks for the authenticated
+  server-session country
+- live web research must use one current comparable size measure, consult an
+  authoritative ranking source, and establish each official homepage
+- the registry `bank_name` is the official customer-facing display name;
+  full legal entity names and exact ranking-source labels remain separate
+  private execution/audit evidence, and fixed-width regulatory abbreviations
+  are not valid display names
+- existing identities and homepage domains are excluded again on the server;
+  the requested set is rejected unless every bank remains fully valid
+- coverage is created only for active Product Type registry codes supported by
+  a current page on the bank's official domain
+- each AI-created coverage row preserves that verified same-domain page as
+  private `coverage_source_url` evidence; collection starts there before
+  bounded homepage fallback and never accepts a cross-domain route
+- a directly verified same-domain logo is preferred; the homepage-domain
+  favicon is the only automatic fallback
+- all bank and coverage writes are atomic and usage/audit records remain
+  private; the action does not collect or publish products
+
 Still deferred from the MVP:
 - crawler-driven registry auto-promotion
 - candidate-diff review UI for registry changes
@@ -170,6 +191,13 @@ Current live product-type onboarding note:
 - For the Phase 1 canonical deposit product types `chequing`, `savings`, and `gic`, product-type registry writes must keep the full approved subtype taxonomy synchronized, not only the generic `other` fallback. Dynamic or newly added product types still start with `other` unless a later approved subtype registry is introduced.
 - The Canada retail lending baseline is registered as `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`. FPDS canonical product type codes use hyphens even when an operator enters spaces or underscores.
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
+- Country-local discovery vocabulary is allowed without renaming canonical
+  Product Type codes. In the US, canonical `chequing` is discovered as
+  checking and canonical `gic` as certificates of deposit/CDs.
+- Dynamic component catalogs may expose official links and product copy only
+  inside JSON-valued `data-*` attributes. Discovery and parsing may read those
+  values only with fixed size/node/count limits and the normal same-domain,
+  HTTPS, role, and page-evidence checks.
 - Homepage-first discovery may infer a bounded discovery profile from the stored display name, description, and discovery keywords. For example, a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals, while generated source rows still preserve the registered product type code.
 - the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
 - generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
@@ -197,6 +225,8 @@ For this policy, `collect` means:
 
 Important rules:
 - the run must persist which source rows were selected so the collection scope is reproducible later
+- the run must carry exactly one country and every worker-stage
+  `ingestion_run` upsert must persist that `country_code`
 - `detail` sources are the default candidate-producing scope
 - supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
 - only `detail` sources create primary standalone candidates; supporting and linked sources remain evidence-only even when selected or auto-included
@@ -266,9 +296,6 @@ The following are intentionally out of scope for the first source-registry admin
 - broader supporting-source auto-inclusion rules beyond the existing explicit TD, BMO, and Scotia savings paths
 - dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
 - optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
-- operator-managed product type registry with searchable `name` and `description`
-- hybrid homepage discovery scoring that uses deterministic candidate generation, AI parallel scoring, and page-level evidence validation
-- parser, normalization, validation, and vocabulary fallback rules for newly added product types
 
 ---
 
@@ -288,3 +315,5 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-07-13 | Added the unframed bank-logo presentation rule and official asset refresh policy |
 | 2026-07-22 | Applied current scope policy to seed hints, excluded non-evidence servicing/onboarding/editorial repositories, and added bounded detail-rejection diagnostics plus named-product recovery rules |
 | 2026-07-22 | Made detail expected fields additive over the active Product Type contract and extended dynamic-rate recovery to double-bracket rate/APR placeholders |
+| 2026-07-30 | Added the official-evidence, duplicate, logo-fallback, active-coverage, and atomicity rules for AI bank onboarding |
+| 2026-07-30 | Separated customer-facing bank display names from legal entity names and exact ranking labels; rejected fixed-width US regulatory abbreviations as registry display names |

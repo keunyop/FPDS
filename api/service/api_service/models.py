@@ -73,6 +73,10 @@ class BankWriteRequest(BaseModel):
     initial_coverage_product_types: list[str] = Field(default_factory=list)
 
 
+class BankAiOnboardingRequest(BaseModel):
+    count: int = Field(ge=1, le=10)
+
+
 class SourceCatalogWriteRequest(BaseModel):
     bank_code: str | None = Field(default=None, max_length=20)
     product_type: str | None = Field(default=None, max_length=50)

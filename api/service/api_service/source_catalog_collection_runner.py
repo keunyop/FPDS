@@ -91,6 +91,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 "product_type": group["product_type"],
                 "homepage_url": group["homepage_url"],
                 "normalized_homepage_url": group["normalized_homepage_url"],
+                "coverage_source_url": group.get("coverage_source_url"),
                 "source_language": group["source_language"],
             },
             run_id=str(group["run_id"]),

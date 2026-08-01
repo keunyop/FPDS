@@ -139,7 +139,13 @@ def load_llm_usage_dashboard(connection: Connection, *, filters: LLMUsageFilters
 
 def _build_where_clause(filters: LLMUsageFilters) -> tuple[str, dict[str, Any]]:
     clauses = [
-        "COALESCE(ir.country_code, nc.country_code) = %(country_code)s",
+        """
+        COALESCE(
+            ir.country_code,
+            nc.country_code,
+            NULLIF(lur.usage_metadata ->> 'country_code', '')
+        ) = %(country_code)s
+        """,
     ]
     params: dict[str, Any] = {"country_code": filters.country_code}
 
@@ -325,6 +331,8 @@ def _build_by_agent(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _build_by_run(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     buckets: dict[str, dict[str, Any]] = {}
     for row in rows:
+        if not _string_or_none(row.get("run_id")):
+            continue
         run_id = _normalize_label(row.get("run_id"))
         bucket = buckets.setdefault(
             run_id,
@@ -508,7 +516,7 @@ def _build_anomaly_candidates(rows: list[dict[str, Any]]) -> list[dict[str, Any]
             {
                 "llm_usage_id": str(row["llm_usage_id"]),
                 "recorded_at": row["recorded_at"].isoformat() if row.get("recorded_at") else None,
-                "run_id": str(row["run_id"]),
+                "run_id": _string_or_none(row.get("run_id")),
                 "model_execution_id": _string_or_none(row.get("model_execution_id")),
                 "candidate_id": _string_or_none(row.get("candidate_id")),
                 "provider_name": _normalize_label(row.get("provider_name")),

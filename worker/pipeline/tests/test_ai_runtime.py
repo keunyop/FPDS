@@ -135,6 +135,63 @@ class AiRuntimeTests(unittest.TestCase):
             [{"url": "https://bank.example/rates", "title": "Official rates"}],
         )
 
+    def test_responses_request_can_force_open_web_search_without_domain_filter(self) -> None:
+        response = MagicMock()
+        response.read.return_value = json.dumps(
+            {
+                "id": "resp-test-003",
+                "model": "test-model",
+                "output": [
+                    {"type": "web_search_call", "action": {"type": "search", "sources": []}},
+                    {
+                        "type": "message",
+                        "content": [{"type": "output_text", "text": '{"result":"researched"}'}],
+                    },
+                ],
+                "usage": {"input_tokens": 10, "output_tokens": 5},
+            }
+        ).encode("utf-8")
+
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "FPDS_LLM_PROVIDER": "openai",
+                    "FPDS_LLM_API_KEY": "test-key",
+                    "FPDS_LLM_MODEL": "test-model",
+                },
+                clear=True,
+            ),
+            patch("worker.pipeline.fpds_ai_runtime.urllib.request.urlopen") as urlopen,
+        ):
+            urlopen.return_value.__enter__.return_value = response
+            result, _metadata = invoke_openai_json_schema(
+                instructions="Research the market.",
+                payload={"input": "test"},
+                schema_name="test_result",
+                schema={
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {"result": {"type": "string"}},
+                    "required": ["result"],
+                },
+                require_web_search=True,
+            )
+
+        request_body = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
+        self.assertEqual(
+            request_body["tools"],
+            [
+                {
+                    "type": "web_search",
+                    "search_context_size": "medium",
+                    "external_web_access": True,
+                }
+            ],
+        )
+        self.assertEqual(request_body["tool_choice"], "required")
+        self.assertEqual(result, {"result": "researched"})
+
 
 if __name__ == "__main__":
     unittest.main()

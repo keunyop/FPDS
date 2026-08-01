@@ -16,7 +16,9 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
   const filters = parsePageFilters(resolvedSearchParams);
   const apiSearchParams = buildApiSearchParams(filters);
   const activeBankCode = firstValue(resolvedSearchParams.bank) || null;
-  const addModalOpen = firstValue(resolvedSearchParams.modal).toLowerCase() === "add";
+  const modal = firstValue(resolvedSearchParams.modal).toLowerCase();
+  const addModalOpen = modal === "add";
+  const aiAddModalOpen = modal === "ai-add";
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let banks: Awaited<ReturnType<typeof fetchBankList>> = null;
@@ -62,11 +64,14 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
         activeBankCode={activeBankCode}
         activeBankDetail={activeBankDetail}
         addModalOpen={addModalOpen}
+        aiAddModalOpen={aiAddModalOpen}
         banks={banks}
+        countryCode={session.country_code}
         csrfToken={session.csrf_token}
         filters={filters}
         locale={locale}
         productTypes={productTypes.items}
+        userRole={session.user.role}
       />
     </AdminShell>
   );

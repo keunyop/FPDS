@@ -8,6 +8,7 @@ from pathlib import Path
 from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.discovery.fpds_discovery.registry import RegistrySource, load_registry
 from worker.env import load_env_file, resolve_default_env_file
+from worker.run_scope import require_single_country_code
 
 from .models import (
     NormalizationArtifactLookup,
@@ -77,6 +78,9 @@ def main() -> int:
     lookup_source_document_ids = [*target_source_document_ids, *supporting_source_document_ids]
     repository.ensure_ingestion_run(
         run_id=args.run_id,
+        country_code=require_single_country_code(
+            selected_sources_by_id[source_id].country_code for source_id in args.source_id
+        ),
         trigger_type=args.trigger_type,
         triggered_by=args.triggered_by,
         source_scope_count=len(target_source_document_ids),

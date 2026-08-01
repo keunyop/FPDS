@@ -40,6 +40,12 @@ Files:
 - `migrations/0026_country_registry_management.sql`: adds the stored English
   country-name fallback and country registry lookup index used by the
   admin-only prepared-country activation workflow
+- `migrations/0027_standalone_ai_operations.sql`: permits operational
+  `model_execution` and `llm_usage_record` rows without an ingestion run so
+  country-scoped AI registry actions can retain execution and cost lineage
+- `migrations/0028_source_catalog_coverage_evidence.sql`: preserves the
+  official Product Type coverage URL that justified each catalog row so
+  collection can start from that verified route
 
 How to apply when a database is available:
 
@@ -65,6 +71,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0023_versioned_parsed_documents.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0024_deposit_field_contract_defaults.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
 ```
 
 Notes:
@@ -78,3 +86,10 @@ Notes:
   collection or release for that market.
 - Country removal is an `inactive` status transition rather than row deletion,
   preserving country-scoped foreign keys and historical records.
+- Apply `0027` before enabling AI bank onboarding. Standalone operational AI
+  rows keep `run_id=NULL`; their country and operation lineage lives in
+  execution/usage metadata, while ingestion-backed executions remain linked to
+  their run as before.
+- Apply `0028` before relying on AI onboarding coverage evidence as the
+  collection entry route. Existing catalog rows remain valid with a null
+  coverage URL and continue to use bounded homepage discovery.

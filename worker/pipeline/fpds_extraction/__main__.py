@@ -7,6 +7,7 @@ from pathlib import Path
 
 from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
+from worker.run_scope import require_single_country_code
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 
 from .models import ExtractionDocumentContext, ExtractionInput
@@ -116,6 +117,9 @@ def _load_contexts(
         source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
         repository.ensure_ingestion_run(
             run_id=args.run_id,
+            country_code=require_single_country_code(
+                selected_sources_by_id[source_id].country_code for source_id in args.source_id
+            ),
             trigger_type=args.trigger_type,
             triggered_by=args.triggered_by,
             source_scope_count=len(source_document_ids),
@@ -154,16 +158,6 @@ def _load_contexts(
     if not args.parsed_document_id:
         raise ValueError("At least one --source-id or --parsed-document-id is required.")
 
-    repository.ensure_ingestion_run(
-        run_id=args.run_id,
-        trigger_type=args.trigger_type,
-        triggered_by=args.triggered_by,
-        source_scope_count=len(args.parsed_document_id),
-        correlation_id=args.correlation_id,
-        request_id=args.request_id,
-        source_ids=[],
-        started_at=_utc_now_iso(),
-    )
     contexts = repository.load_document_contexts_by_parsed_document_ids(parsed_document_ids=args.parsed_document_id)
     found = {item.parsed_document_id for item in contexts}
     missing_parsed_document_ids = [item for item in args.parsed_document_id if item not in found]
@@ -172,6 +166,17 @@ def _load_contexts(
             "No parsed document context was found for parsed_document_id values: "
             + ", ".join(missing_parsed_document_ids)
         )
+    repository.ensure_ingestion_run(
+        run_id=args.run_id,
+        country_code=require_single_country_code(context.country_code for context in contexts),
+        trigger_type=args.trigger_type,
+        triggered_by=args.triggered_by,
+        source_scope_count=len(args.parsed_document_id),
+        correlation_id=args.correlation_id,
+        request_id=args.request_id,
+        source_ids=[],
+        started_at=_utc_now_iso(),
+    )
     return contexts
 
 

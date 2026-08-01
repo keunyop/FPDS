@@ -7,6 +7,7 @@ from pathlib import Path
 
 from worker.discovery.fpds_discovery.catalog import resolve_sources_by_id
 from worker.env import load_env_file, resolve_default_env_file
+from worker.run_scope import require_single_country_code
 
 from .models import ValidationEvidenceLink, ValidationInput
 from .persistence import PsqlValidationRoutingRepository, ValidationRoutingDatabaseConfig
@@ -62,6 +63,9 @@ def main() -> int:
     source_document_ids = [selected_sources_by_id[source_id].source_document_id for source_id in args.source_id]
     repository.ensure_ingestion_run(
         run_id=args.run_id,
+        country_code=require_single_country_code(
+            selected_sources_by_id[source_id].country_code for source_id in args.source_id
+        ),
         trigger_type=args.trigger_type,
         triggered_by=args.triggered_by,
         source_scope_count=len(source_document_ids),

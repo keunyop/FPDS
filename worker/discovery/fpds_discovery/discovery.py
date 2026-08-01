@@ -3,7 +3,9 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from html.parser import HTMLParser
-from typing import Callable
+import json
+import re
+from typing import Any, Callable
 from urllib.parse import urljoin, urlparse
 
 from .registry import RegistrySource, SourceRegistry
@@ -14,6 +16,24 @@ PROMOTION_KEYWORDS = ("offer", "offers", "bonus", "promo", "promotion")
 COMPARE_KEYWORDS = ("compare",)
 AUTHENTICATED_FLOW_KEYWORDS = ("easyweb", "login", "secureopen", "secure-open", "open-account", "apply")
 PERSONALIZED_DISCOVERY_KEYWORDS = ("discovery.td.com", "find-the-account", "recommend")
+_STRUCTURED_ATTRIBUTE_MAX_CHARS = 1_000_000
+_STRUCTURED_LINK_MAX = 256
+_STRUCTURED_NODE_MAX = 20_000
+_STRUCTURED_LINK_KEYS = {"href", "url"}
+_STRUCTURED_LABEL_KEYS = ("content", "label", "title", "name", "headline")
+_STRUCTURED_TEXT_KEYS = {
+    "body",
+    "content",
+    "description",
+    "headline",
+    "heading",
+    "label",
+    "name",
+    "text",
+    "title",
+}
+_STRUCTURED_TEXT_MAX = 128
+_STRUCTURED_TEXT_TOTAL_CHARS = 100_000
 
 
 @dataclass(frozen=True)
@@ -395,13 +415,12 @@ class _LinkExtractor(HTMLParser):
         self._text_parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attr_map = dict(attrs)
+        self._extract_structured_attribute_links(attrs)
         if tag != "a":
             return
-        attr_map = dict(attrs)
         href = attr_map.get("href")
-        if not href:
-            return
-        if href.startswith("#") or href.startswith(IGNORED_SCHEMES):
+        if not href or href.startswith("#") or href.startswith(IGNORED_SCHEMES):
             return
         self._current_href = href
         self._text_parts = []
@@ -417,29 +436,152 @@ class _LinkExtractor(HTMLParser):
         if tag != "a" or self._current_href is None:
             return
 
-        resolved_url = urljoin(self.base_url, self._current_href)
+        self._append_link(self._current_href, " ".join(self._text_parts).strip())
+        self._current_href = None
+        self._text_parts = []
+
+    def _append_link(self, href: str, anchor_text: str) -> None:
+        if (
+            not href
+            or href.startswith("#")
+            or href.startswith(IGNORED_SCHEMES)
+            or "{" in href
+            or "}" in href
+            or len(self.links) >= _STRUCTURED_LINK_MAX
+        ):
+            return
+        resolved_url = urljoin(self.base_url, href)
         try:
             normalized_url = normalize_source_url(resolved_url)
         except ValueError:
-            self._current_href = None
-            self._text_parts = []
             return
 
-        anchor_text = " ".join(self._text_parts).strip()
         self.links.append(
             ExtractedLink(
-                href=self._current_href,
+                href=href,
                 resolved_url=resolved_url,
                 normalized_url=normalized_url,
                 source_type=infer_source_type(normalized_url),
-                anchor_text=anchor_text,
+                anchor_text=_strip_embedded_html(anchor_text),
             )
         )
-        self._current_href = None
-        self._text_parts = []
+
+    def _extract_structured_attribute_links(self, attrs: list[tuple[str, str | None]]) -> None:
+        for name, raw_value in attrs:
+            value = (raw_value or "").strip()
+            if (
+                not name.lower().startswith("data-")
+                or not value
+                or len(value) > _STRUCTURED_ATTRIBUTE_MAX_CHARS
+                or value[0] not in "[{"
+            ):
+                continue
+            try:
+                payload = json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            node_count = 0
+            stack: list[tuple[Any, str | None, str]] = [(payload, None, "")]
+            while stack and node_count < _STRUCTURED_NODE_MAX and len(self.links) < _STRUCTURED_LINK_MAX:
+                node, parent_key, inherited_label = stack.pop()
+                node_count += 1
+                if isinstance(node, dict):
+                    label = next(
+                        (
+                            str(node[key])
+                            for key in _STRUCTURED_LABEL_KEYS
+                            if isinstance(node.get(key), str) and str(node[key]).strip()
+                        ),
+                        inherited_label,
+                    )
+                    for key, item in node.items():
+                        normalized_key = str(key).lower()
+                        if isinstance(item, str) and (
+                            normalized_key in _STRUCTURED_LINK_KEYS
+                            or (normalized_key == "path" and str(parent_key or "").lower() == "learnmore")
+                        ):
+                            self._append_link(item.strip(), label)
+                        elif isinstance(item, (dict, list)):
+                            stack.append((item, str(key), label))
+                elif isinstance(node, list):
+                    stack.extend(
+                        (item, parent_key, inherited_label)
+                        for item in reversed(node)
+                        if isinstance(item, (dict, list))
+                    )
+
+
+def _strip_embedded_html(value: str) -> str:
+    return " ".join(re.sub(r"<[^>]+>", " ", value or "").split())
 
 
 def extract_links(html_text: str, *, base_url: str) -> list[ExtractedLink]:
     parser = _LinkExtractor(base_url=base_url)
     parser.feed(html_text)
-    return parser.links
+    by_identity: dict[tuple[str, str], ExtractedLink] = {}
+    for link in parser.links:
+        by_identity.setdefault((link.normalized_url, link.anchor_text), link)
+    return list(by_identity.values())
+
+
+class _StructuredTextExtractor(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.sections: list[str] = []
+        self._seen: set[str] = set()
+        self._total_chars = 0
+
+    def handle_starttag(self, _tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, raw_value in attrs:
+            value = (raw_value or "").strip()
+            if (
+                not name.lower().startswith("data-")
+                or not value
+                or len(value) > _STRUCTURED_ATTRIBUTE_MAX_CHARS
+                or value[0] not in "[{"
+            ):
+                continue
+            try:
+                payload = json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            node_count = 0
+            stack: list[Any] = [payload]
+            while (
+                stack
+                and node_count < _STRUCTURED_NODE_MAX
+                and len(self.sections) < _STRUCTURED_TEXT_MAX
+                and self._total_chars < _STRUCTURED_TEXT_TOTAL_CHARS
+            ):
+                node = stack.pop()
+                node_count += 1
+                if isinstance(node, dict):
+                    for key, item in node.items():
+                        if isinstance(item, str) and str(key).lower() in _STRUCTURED_TEXT_KEYS:
+                            self._append(item)
+                        elif isinstance(item, (dict, list)):
+                            stack.append(item)
+                elif isinstance(node, list):
+                    stack.extend(item for item in reversed(node) if isinstance(item, (dict, list)))
+
+    def _append(self, value: str) -> None:
+        text = _strip_embedded_html(value)
+        if (
+            len(text) < 2
+            or text in self._seen
+            or text.startswith(("http://", "https://", "/content/", "/etc/"))
+        ):
+            return
+        remaining = _STRUCTURED_TEXT_TOTAL_CHARS - self._total_chars
+        if remaining <= 0:
+            return
+        text = text[: min(4_000, remaining)]
+        self._seen.add(text)
+        self.sections.append(text)
+        self._total_chars += len(text)
+
+
+def extract_structured_text_sections(html_text: str) -> list[str]:
+    parser = _StructuredTextExtractor()
+    parser.feed(html_text)
+    return parser.sections

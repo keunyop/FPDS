@@ -25,8 +25,17 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-29`:
+As of `2026-07-30`:
 - `WBS 5` is the active stage
+- US collection-failure hardening is complete, fully regression tested, and
+  verified through audited shared-dev Bank of America recollection after
+  migration `0028`
+- `WBS 5.23` AI bank-registry onboarding is complete, locally verified, and
+  activated in shared dev through migration
+  `0027_standalone_ai_operations.sql`
+- AI onboarding now separates readable bank display names from legal entity
+  names and exact ranking labels; the five affected US shared-dev bank names
+  were corrected through audited updates
 - the client-handoff simplification is complete: Admin now exposes Overview, Review, Runs, and Banks as direct daily work, secondary tools remain in one labeled group, core list/detail density is reduced through progressive disclosure, and stale/generated/unreachable repository scaffolding has been removed without changing routes or backend contracts
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - country is now a first-class bank/canonical/aggregate/Public dimension; the
@@ -81,6 +90,191 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-07-30 - US Product Collection Failure Hardening
+
+- WBS: `5.15`, `5.16`, `5.23`
+- Status: done
+- Goal: diagnose the all-failed US Admin product collection and fix the common
+  pipeline classes so the next US bank/site does not need a one-off bypass.
+- Why now: Bank of America collection exposed both a hard worker persistence
+  failure and US/dynamic-site discovery gaps.
+- Outcome: the hard failure was traced to migration `0025` making
+  `ingestion_run.country_code` non-null while all five worker persistence
+  stages still omitted it. Snapshot, parse/chunk, extraction, normalization,
+  and validation now persist a validated single-country scope and reject
+  invalid/mixed-country runs before DB work. Discovery also keeps canonical
+  codes while using US `checking` and CD vocabulary, reads bounded links and
+  product copy from JSON-valued `data-*` components, resolves relative links
+  against the fetched URL, and preserves location-gated component copy in
+  parser v3. Migration `0028` adds the verified coverage evidence URL to
+  source-catalog rows so later collection starts from the page AI already
+  cited instead of rediscovering it from the homepage.
+- Follow-on hardening: the queued runner now forwards the verified coverage
+  URL into materialization; exact coverage pages can safely survive a ZIP or
+  county gate without relaxing ordinary candidate pages. Page-validation
+  fetch failures and source-language conflicts cannot be reintroduced as
+  supporting HTML. US currency defaults to USD, and legal documents, SEO
+  actions, enrollment CTAs, calculators, and other non-product headings are
+  excluded from product identity.
+- Shared dev: Product Owner approval was received. Migration `0028` was
+  applied, all five Bank of America coverage rows were backfilled with exact
+  same-domain URLs through five
+  `source_catalog_coverage_evidence_backfilled` audit events, and 46 generated
+  sources were soft-inactivated for clean regeneration through one
+  `generated_source_scope_reset` event. Request ID:
+  `req-us-collection-repair-20260730`.
+- Runtime evidence: `collection_kPrqgtYCIyAEXz9y` completed all five product
+  types with no partial run, `30/30` sources successful, `12` review
+  candidates, and USD on every candidate. After the final title-quality
+  guard, `collection_wN63XHwPQbEPgnTP` produced
+  `Bank of America Advantage Banking`, `Certificate of Deposit`, and
+  `Bank of America Advantage Savings Account`, all in USD. CD and savings were
+  full successes; checking isolated one official supporting-page HTTP 500
+  after discovery and still completed with `13/14` sources and the correct
+  candidate.
+- Publication boundary: every new candidate remains review-routed; none was
+  approved or published.
+- Key files: worker run-scope and five persistence entry points, discovery
+  link extraction, parse/chunk parser v3, source catalog and AI onboarding,
+  `0028_source_catalog_coverage_evidence.sql`, API/worker regression tests,
+  runtime READMEs, API contract, and source-registry policy.
+- Decisions: coverage citations remain official-domain private operational
+  evidence; local vocabulary never renames canonical Product Type codes;
+  structured component parsing is bounded and remains subject to existing
+  HTTPS, domain, role, evidence, review, and publication gates. A genuine
+  post-discovery source outage is reported as an isolated partial-source
+  failure rather than being hidden or escalating to an all-run failure.
+- Verification:
+  - API full suite: `317` tests
+  - worker discovery full suite: `48` tests
+  - worker pipeline full suite: `354` tests
+  - focused US coverage/location/title/supporting-source regressions
+  - shared-dev terminal, source-status, candidate-name/currency, migration,
+    coverage, and audit queries
+  - `git diff --check`
+- Known issues: Bank of America currently withholds some required financial
+  fields behind location-dependent interactions, so the corrected candidates
+  remain in review with `required_field_missing`; this is a data-review state,
+  not a collection-run failure. Diagnostic-run candidates were not approved
+  or published.
+- Next step: operator review of the corrected Bank of America candidates;
+  publication remains outside this hardening slice.
+
+## 2026-07-30 - Admin Banks Logo Footprint Standardization
+
+- WBS: `5.15`, `5.23` UI hardening
+- Status: done
+- Goal: remove the large visual-size difference between square favicon assets
+  and wide bank wordmarks on the Admin Banks workflow.
+- Why now: the list, AI result, and detail preview each used separate
+  max-dimension renderers. A square source could occupy the full `40px` height
+  while a wide wordmark occupied only a shallow strip, despite sharing a row.
+- Outcome: all three locations now reuse one `BankLogoMark`. It preserves the
+  existing unframed presentation and source aspect ratio inside a `48x24`
+  `object-contain` image viewport and a stable `56x40` layout slot. Missing or
+  failed assets still fall back to the accessible bank-code mark.
+- Not done: no logo asset, bank record, API contract, Public component, frame,
+  background, or border was changed.
+- Key files:
+  `app/admin/src/components/fpds/admin/bank-logo-mark.tsx`,
+  `bank-registry-surface.tsx`, `bank-ai-onboarding-dialog-content.tsx`,
+  `bank-detail-dialog-content.tsx`, Admin README, and Admin IA.
+- Verification:
+  - `pnpm run typecheck` in `app/admin`
+  - `pnpm run build` in `app/admin`
+  - temporary production-style logo fixtures covering square, wide, tall, and
+    missing assets were visually inspected at `1440px`, `768px`, and exact
+    `390px`; alignment stayed stable with no cropping or document overflow
+  - temporary QA route, screenshots, browser profiles, and server artifacts
+    were removed
+- Known issues: visual mass cannot be mathematically identical across every
+  possible transparent logo artwork, but the shared viewport removes the
+  previous component-level size variance without distorting brand assets.
+- Next step: normal Product Owner visual review on the live Banks screen.
+
+## 2026-07-30 - AI Bank Display-Name Normalization
+
+- WBS: `5.23`
+- Status: done
+- Goal: prevent fixed-width regulatory ranking abbreviations from becoming
+  customer-facing bank names and correct the five affected US shared-dev rows.
+- Why now: the first US onboarding result stored Federal Reserve LBR labels
+  such as `JPMORGAN CHASE BK NA` directly in `bank.bank_name`, making valid
+  source abbreviations look like truncated UI data.
+- Outcome: the model contract now returns a customer-facing `bank_name`, full
+  `legal_name`, its official source, and the exact `ranking_name` separately.
+  US display names carrying the observed `BK`, `AMER`, `NA`, `N.A.`, or
+  `National Association` report/legal suffix patterns are rejected before
+  registry creation. Successful model execution and audit metadata retain the
+  legal and ranking name evidence.
+- Shared dev: corrected `BOAN`, `CN`, `JCBN`, `USBN`, and `WFBN` to `Bank of
+  America`, `Citibank`, `JPMorgan Chase Bank`, `U.S. Bank`, and `Wells Fargo
+  Bank`. Each exact change has a `bank_profile_updated` audit event containing
+  the old ranking label, official legal name, and Federal Reserve/OCC sources.
+- Not done: no bank code, homepage, logo URL, Product Type coverage, collection,
+  canonical product, or Public publication state was changed.
+- Key files: `api/service/api_service/bank_ai_onboarding.py`,
+  `api/service/tests/test_bank_ai_onboarding.py`, API/root README, requirements,
+  WBS, decision log, and source-registry policy.
+- Decisions: the registry owns a concise official customer-facing display name;
+  legal entity identity and ranking-source labels remain private evidence
+  rather than UI labels.
+- Verification:
+  - `.\\api\\service\\.venv\\Scripts\\python.exe -m unittest
+    api.service.tests.test_bank_ai_onboarding` (`10` tests)
+  - `$env:PYTHONPATH='api/service';
+    .\\api\\service\\.venv\\Scripts\\python.exe -m unittest discover -s
+    api/service/tests -p "test_*.py"` (`308` tests)
+  - shared-dev readback confirmed all five display names, logo alt text values,
+    and five `regulatory_abbreviation_normalized` audit events
+- Known issues: older completed model-execution records retain their original
+  provider response lineage but cannot retroactively gain the new structured
+  v2 name-evidence array; the corrective audit events hold that mapping.
+- Next step: deploy the API change before the next AI bank onboarding run.
+
+## 2026-07-30 - AI-Assisted Bank Registry Onboarding
+
+- WBS: `5.23`
+- Status: done
+- Goal: let an administrator add a selected number of the largest missing
+  banks for the current Admin header country, including homepage, logo, and
+  grounded Product Type coverage.
+- Outcome: Banks now exposes an admin-only `Add banks with AI` action. Its
+  EN/KO/JA modal selects `1` to `10`, displays the read-only working country,
+  explains duplicate exclusion and all-or-nothing behavior, and refreshes the
+  registry after a verified result.
+- Research and validation: the backend forces OpenAI Responses live web search,
+  requires one comparable current domestic size basis, collects complete
+  consulted-source metadata, excludes existing/duplicate identities and
+  domains, and accepts homepage, logo, and coverage evidence only from
+  bank-controlled domains. Coverage is limited to active Product Type rows;
+  an official-domain favicon is the controlled logo fallback.
+- Safety and state: country comes only from the authenticated session. The
+  mutation requires `admin` plus CSRF, writes the requested bank-plus-coverage
+  batch atomically, records standalone model usage and success/failure audit
+  context, and does not launch collection, approve canonical data, or publish.
+- Database: migration `0027_standalone_ai_operations.sql` makes ingestion
+  `run_id` optional for operational `model_execution` and `llm_usage_record`
+  rows. Product Owner authorization was received and the migration was applied
+  to the shared-dev `public` schema in one transaction. Post-check confirmed
+  the migration-history row and `YES` nullability for both `run_id` columns.
+  No bank rows were created and no AI provider call was made during activation.
+- Key files: `api/service/api_service/bank_ai_onboarding.py`,
+  `api/service/api_service/main.py`,
+  `app/admin/src/components/fpds/admin/bank-ai-onboarding-dialog-content.tsx`,
+  `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`,
+  `worker/pipeline/fpds_ai_runtime.py`, and migration `0027`.
+- Verification: focused onboarding/usage/AI-runtime tests passed; full API
+  suite passed `306`; full Worker suite passed `395`; Admin typecheck and
+  production build passed with `/admin/banks/ai-onboard`. Production-rendered
+  initial, pending, insufficient-evidence, and success states were inspected
+  in EN/KO/JA at desktop, tablet, and an iframe-enforced exact `390px`; the
+  temporary QA routes, screenshots, browser profiles, and server were removed.
+- Known issues: none in the implemented slice.
+- Next step: an administrator may run the first bounded onboarding request from
+  Banks in the intended working country; product collection remains a separate
+  follow-up action.
 
 ## 2026-07-29 - Admin Header Working-Country Switch
 

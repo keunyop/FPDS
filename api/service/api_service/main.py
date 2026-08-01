@@ -29,6 +29,7 @@ from api_service.aggregate_refresh import (
     queue_review_aggregate_refresh_request,
     request_manual_aggregate_refresh,
 )
+from api_service.bank_ai_onboarding import run_bank_ai_onboarding
 from api_service.ai_verification import (
     AiVerificationError,
     load_latest_ai_verification,
@@ -41,6 +42,7 @@ from api_service.countries import activate_country, deactivate_country, load_cou
 from api_service.db import open_connection
 from api_service.errors import SourceRegistryError
 from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
+from api_service.models import BankAiOnboardingRequest
 from api_service.models import BankWriteRequest
 from api_service.models import CountrySwitchRequest
 from api_service.models import LoginRequest
@@ -753,6 +755,49 @@ async def create_bank(
             },
         )
     return _success({"bank": bank}, request, status_code=201)
+
+
+@app.post("/api/admin/banks/ai-onboard")
+def ai_onboard_banks(
+    request: Request,
+    payload: BankAiOnboardingRequest,
+) -> JSONResponse:
+    actor, session_info = _resolve_session(request)
+    _require_admin_role(actor)
+    _require_csrf(request, session_info=session_info)
+    country_code = _session_country(session_info)
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        result = run_bank_ai_onboarding(
+            connection,
+            country_code=country_code,
+            requested_count=payload.count,
+            actor=actor,
+            request_context={
+                "request_id": request.state.request_id,
+                "ip_address": _request_ip(request),
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
+    if not result["ok"]:
+        return JSONResponse(
+            status_code=int(result["status_code"]),
+            content={
+                "error": {
+                    "code": result["error"]["code"],
+                    "message": result["error"]["message"],
+                    "details": {},
+                },
+                "data": {"operation_id": result["operation_id"]},
+                "meta": _meta(request),
+            },
+        )
+    response_payload = {
+        key: value
+        for key, value in result.items()
+        if key not in {"ok", "status_code"}
+    }
+    return _success(response_payload, request, status_code=201)
 
 
 @app.get("/api/admin/banks/{bank_code}")

@@ -180,6 +180,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             "source_language": "en",
             "homepage_url": "https://www.bmo.com/",
             "normalized_homepage_url": "https://www.bmo.com/",
+            "coverage_source_url": "https://www.bmo.com/main/personal/bank-accounts/savings/",
         }
         prepared_plan = {
             "triggered_by": "admin@example.com",
@@ -217,6 +218,10 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             source_catalog_collection_runner._run_group(plan=plan, group=group)
 
         self.assertEqual(materialize.call_args.kwargs["row"]["product_type"], "saving")
+        self.assertEqual(
+            materialize.call_args.kwargs["row"]["coverage_source_url"],
+            "https://www.bmo.com/main/personal/bank-accounts/savings/",
+        )
         prepare_collection.assert_called_once()
         self.assertEqual(
             prepare_collection.call_args.kwargs["run_id_overrides"],

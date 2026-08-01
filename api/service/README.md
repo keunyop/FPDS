@@ -21,6 +21,10 @@ Current scope:
 - audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
 - usage dashboard route backed by `llm_usage_record` with protected totals, richer scope metadata, per-model, per-agent, per-run, trend, and anomaly drilldown aggregations
 - bank registry list/detail/create/update routes backed by `bank`
+- admin-only, CSRF-protected AI bank onboarding for the session country, with
+  required live web research, largest-first duplicate exclusion, official
+  homepage/logo/active Product Type evidence, customer-facing display-name
+  validation, preserved legal/ranking names, atomic creation, usage, and audit
 - guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
@@ -68,6 +72,7 @@ Current routes:
 - `GET /api/admin/sources`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
+- `POST /api/admin/banks/ai-onboard`
 - `GET /api/admin/banks/:bankCode`
 - `PATCH /api/admin/banks/:bankCode`
 - `DELETE /api/admin/banks/:bankCode`
@@ -105,6 +110,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
 ```
 
 Create the first operator account:
@@ -169,10 +176,39 @@ cd api/service
 - LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
 - Bank, product type, and source catalog management now treat the DB as the operational source of truth immediately; if those tables are empty, the admin/runtime surfaces now stay empty until an operator or explicit import/seed step repopulates them.
 - Bank creation now accepts optional initial coverage product types and creates the related `source_registry_catalog_item` rows in the same admin write flow so the bank modal can start with coverage already attached.
+- `POST /api/admin/banks/ai-onboard` accepts only a bounded count, derives the
+  working country from the server session, requires live web search, removes
+  existing identities/domains, and creates the full verified bank-plus-active-
+  coverage set atomically. The model contract separates the official
+  customer-facing display name from the full legal entity name and exact
+  ranking-source label; observed US fixed-width report abbreviations are
+  rejected as display names while legal/ranking values remain in private
+  execution and audit evidence. It records standalone model usage and audit
+  context but does not launch collection or publish data. Migration `0027`
+  must be applied before the route is enabled against a database.
 - Bank create and update now accept homepage URLs without an explicit scheme by normalizing them to `https://...`, while still rejecting invalid non-http(s) values with a validation error instead of a server crash.
 - Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
 - Existing bank homepage values are no longer auto-repaired from committed seed data during runtime reads or admin writes; reset and replay flows now preserve intentionally empty operator-managed state.
 - Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, and queues the homepage-discovery plus materialization work on a background API-side runner before the deeper worker stages continue.
+- AI-created coverage now preserves its verified same-domain official
+  `coverage_source_url` on the catalog row and gives that route first priority
+  during bounded discovery. Migration `0028` is required before this contract
+  is enabled; legacy rows with no evidence URL retain homepage fallback.
+- The queued collection runner forwards that coverage route through the
+  materialization boundary. Exact verified coverage pages may use a narrowly
+  relaxed location-gate evidence threshold only with high AI support,
+  structured product copy, title identity, and no hard product/service veto;
+  ordinary homepage links retain the stricter threshold.
+- US discovery keeps the canonical `chequing` and `gic` codes but uses
+  country-local `checking` and certificate-of-deposit/CD vocabulary. Product
+  links and evidence embedded in bounded JSON-valued `data-*` component
+  attributes are recognized, including pages whose visible shell is a ZIP or
+  county gate.
+- HTML candidates already found unreachable during page validation are not
+  reintroduced as supporting sources, and supporting paths that conflict with
+  the run source language are excluded before snapshot collection. A source
+  that becomes unavailable only after discovery remains an explicit isolated
+  partial-source failure.
 - Source catalog collect now creates `ingestion_run` rows immediately and returns a fast queued response so `/admin/banks` and compatibility source-catalog actions no longer wait on homepage discovery or candidate-page validation before responding.
 - Homepage-first collection still preserves the existing active detail scope when no replacement detail rows are found, and the queued background runner now reuses that preserved active detail scope for collection instead of incorrectly closing the run as a no-detail partial completion.
 - Bank-wide source-catalog collect now launches one background runner process for the selected collection plan and lets that runner process bank/product groups sequentially. This keeps bulk collection inside the dev DB session-pool budget while the per-stage watchdog still closes a hung worker stage as `failed` instead of leaving it indefinitely `started`.
@@ -192,6 +228,9 @@ cd api/service
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Snapshot capture now runs source fetches concurrently inside the same run, and the shared fetch timeout baseline moved to `90` seconds to better tolerate slower Big 5 pages without stretching bank-wide collection wall-clock time linearly per source.
 - Downstream collection stages now stop when snapshot capture produces no usable sources, and they only process the subset of sources whose snapshots were actually stored or reused so the final run error reflects the real failing stage more accurately.
+- Every persisted worker stage now writes the required single-country
+  `ingestion_run.country_code`; mixed-country or invalid run scopes fail before
+  persistence instead of relying on a database constraint failure.
 - `POST /api/admin/sources` and `PATCH /api/admin/sources/:sourceId` are intentionally kept as read-only error responses in the MVP so the live operator flow stays centered on `/api/admin/banks` and `/api/admin/source-catalog`.
 - Dynamic product-type onboarding is now live for the admin registry and collection pipeline: `/api/admin/product-types` now supports list/create/detail/update/delete for operator-defined types, delete is blocked when bank coverage or generated sources still reference the type, bank coverage writes validate against the registry, source collection plans carry product-type definitions into the worker stages, and non-canonical types use the generic AI extraction or normalization fallback path with safe manual-review routing.
 - Candidate-producing scope is restricted to `detail` sources. Generated `supporting_html`, `supporting_pdf`, and linked-document sources may be fetched, parsed, and merged as evidence, but cannot define standalone products. Product-matched generic supporting rate pages can fill missing or invalid savings/GIC rate fields.

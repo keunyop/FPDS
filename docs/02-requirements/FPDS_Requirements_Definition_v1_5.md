@@ -575,6 +575,37 @@ Minimum behavior:
 - activating a country does not automatically configure banks, product types,
   collection coverage, taxonomy, or Public release
 
+### FR-ADM-019 AI-Assisted Bank Registry Onboarding
+
+An `admin` must be able to add a bounded number of large missing banks for the
+authenticated working country from the Banks surface.
+
+Minimum behavior:
+- the server derives country only from the authenticated Admin session; the
+  browser does not submit or override country
+- the action requires the `admin` role and the session CSRF token
+- the operator selects a count from `1` to `10` in an EN/KO/JA modal
+- live web research orders eligible deposit-taking banks by one current,
+  comparable, authoritative domestic size measure and preserves its as-of date
+- already registered bank identities and official homepage domains are
+  excluded server-side, including aliases and `www`/apex equivalence
+- every bank requires an official homepage and current official evidence for
+  at least one coverage item selected only from active Product Type registry
+  rows
+- a verified same-domain logo is retained when available; otherwise the
+  official-domain favicon is the controlled resilience fallback
+- all requested banks and their grounded coverage rows are created atomically;
+  an insufficient or invalid result creates no partial bank set
+- model execution, usage, consulted sources, and a success/failure audit event
+  are retained without exposing API credentials
+- the result identifies added banks, national rank/size context, coverage, and
+  clickable evidence
+
+Boundary:
+- this action configures bank profiles and Product Type coverage only
+- it does not collect products, approve canonical data, activate a country,
+  create Product Types, publish Public data, or authorize a new-country release
+
 ## 8.3 Data Ingestion Requirements
 
 ### FR-DATA-001 Source Types
@@ -1149,6 +1180,9 @@ Acceptance Criteria:
 
 Current live admin behavior:
 - bank create can include initial coverage selection for the currently supported product types
+- an administrator can choose `Add banks with AI`, select `1` to `10`, and
+  atomically register the largest fully sourced missing banks for the
+  server-session country
 - bank detail can add more coverage and launch per-coverage collection
 - bank list can multi-select banks and bulk-launch collection across all attached coverage items
 
@@ -1198,6 +1232,26 @@ Later follow-on requirement:
 3. Admin searches that product type when attaching coverage to a bank
 4. AI-assisted discovery uses the stored product type definition when inferring relevant bank-site URLs from the homepage, with deterministic candidate generation plus AI parallel scoring and page-level evidence validation
 5. Parser and normalization flows either use dedicated product-type logic or fall back to an approved safe handling path
+
+## 12.3B AI-Assisted Bank Registry Onboarding Workflow
+1. Admin opens Banks under the current server-session country
+2. Admin opens `Add banks with AI` and selects a bounded count
+3. System loads active Product Types and existing country banks
+4. AI performs required live web research using one comparable current size
+   measure and returns extra ranked candidates with consulted sources. Each
+   candidate separates its official customer-facing display name, full legal
+   entity name, and exact ranking-source label.
+5. Server excludes existing or duplicate identities/domains and accepts only
+   official-homepage, official-name, official-coverage, and active-Product-Type
+   evidence. Fixed-width regulatory report abbreviations must not be persisted
+   as the display name.
+6. If the requested count cannot be fully verified, the system records the
+   failed operation and creates no banks
+7. Otherwise, the system atomically creates all bank profiles and grounded
+   coverage rows, records legal/ranking name evidence in private
+   execution/usage/audit context, and refreshes Banks
+8. Product collection, review, canonical approval, and Public release remain
+   separate operator workflows
 
 ## 12.2 Review Workflow
 1. Candidate enters review queue
@@ -1627,7 +1681,8 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - 국가별 신규 수집은 taxonomy, 운영, 규제/표시 요구사항을 포함한 별도
   승인 범위로 진행한다.
 - Admin은 로그인 시 활성화된 업무 국가를 선택하고, 서버 세션이 이후
-  국가 소유 데이터의 authority가 된다. 국가 변경은 새 세션으로 수행한다.
+  국가 소유 데이터의 authority가 된다. 인증된 운영자는 헤더에서
+  CSRF-protected 전환을 확인해 같은 세션의 업무 국가를 바꿀 수 있다.
 - 키 정책은 내부 기술 ID와 업무 키를 구분한다. `product_id`,
   `candidate_id`, `run_id` 등은 안정적인 불투명 ID로 유지하고, 은행과
   source 자연키·연속성 조회에는 `country_code`를 포함한다.

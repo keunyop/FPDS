@@ -57,15 +57,15 @@ def invoke_openai_json_schema(
         },
     }
     allowed_domains = _normalize_allowed_domains(web_search_allowed_domains or [])
-    if allowed_domains:
-        request_body["tools"] = [
-            {
-                "type": "web_search",
-                "search_context_size": "medium",
-                "external_web_access": True,
-                "filters": {"allowed_domains": allowed_domains},
-            }
-        ]
+    if allowed_domains or require_web_search:
+        web_search_tool: dict[str, Any] = {
+            "type": "web_search",
+            "search_context_size": "medium",
+            "external_web_access": True,
+        }
+        if allowed_domains:
+            web_search_tool["filters"] = {"allowed_domains": allowed_domains}
+        request_body["tools"] = [web_search_tool]
         request_body["tool_choice"] = "required" if require_web_search else "auto"
         request_body["include"] = ["web_search_call.action.sources"]
         request_body["max_tool_calls"] = 4

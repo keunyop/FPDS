@@ -305,6 +305,7 @@ Based on:
 | 5.20 | Completed | country-scoped Admin and key integrity | login country selector, session-owned working country, persistent shell context, country-scoped bank/source/collection/run/review/change/usage operations, country-aware DB business keys and indexes | Backend, Frontend, Security, QA | 4.1-4.11, 5.15, 5.16, 5.19 | 2026-07-29 |
 | 5.21 | Completed | Admin country registry management | prepared ISO country catalog, admin-only activation/deactivation, protected current/last country, session revocation, audit trail, and responsive Countries UI | Backend, Frontend, Security, QA | 5.20 | 2026-07-29 |
 | 5.22 | Completed | Admin header country switching | active-country header dropdown, CSRF-protected session context switch, auth audit trail, locale-preserved Overview reset, and responsive confirmation UX | Backend, Frontend, Security, QA | 5.20, 5.21 | 2026-07-29 |
+| 5.23 | Completed | AI-assisted bank registry onboarding | session-country largest-missing-bank research, official homepage/logo/active Product Type evidence, readable display-name validation with private legal/ranking-name evidence, atomic registry write, usage/audit trail, EN/KO/JA modal, and verified shared-dev migration | Backend, Frontend, AI/Data, Security, QA | 4.8, 5.15, 5.16, 5.20 | 2026-07-30 |
 
 ### 5.5 Scope Baseline
 

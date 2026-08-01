@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { Globe, ImageIcon, Landmark, Languages, ShieldCheck, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
+import { BankLogoMark } from "@/components/fpds/admin/bank-logo-mark";
 import { DestructiveConfirmDialog } from "@/components/fpds/admin/destructive-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -340,30 +341,15 @@ function BankLogoPreview({
   bankName: string;
   logoUrl: string;
 }) {
-  const [failed, setFailed] = useState(false);
   const normalizedLogoUrl = logoUrl.trim();
-  const showLogo = Boolean(normalizedLogoUrl && !failed);
-
-  useEffect(() => {
-    setFailed(false);
-  }, [normalizedLogoUrl]);
 
   return (
     <div className="flex items-center gap-3 py-1">
-      <span className="flex h-11 w-20 shrink-0 items-center justify-center">
-        {showLogo ? (
-          <img
-            alt={`${bankName} logo`}
-            className="max-h-full max-w-full object-contain"
-            decoding="async"
-            loading="lazy"
-            onError={() => setFailed(true)}
-            src={normalizedLogoUrl}
-          />
-        ) : (
-          <span className="text-xs font-semibold tracking-tight text-foreground">{bankCode.slice(0, 4)}</span>
-        )}
-      </span>
+      <BankLogoMark
+        bankCode={bankCode}
+        bankName={bankName}
+        logoUrl={normalizedLogoUrl}
+      />
       <div className="min-w-0">
         <p className="text-xs font-medium text-muted-foreground">Logo preview</p>
         <p className="mt-1 truncate text-sm font-medium text-foreground">{bankName}</p>

@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { AdminModal } from "@/components/fpds/admin/admin-modal";
+import { BankAiOnboardingDialogContent } from "@/components/fpds/admin/bank-ai-onboarding-dialog-content";
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
+import { BankLogoMark } from "@/components/fpds/admin/bank-logo-mark";
 import type {
   BankDetailResponse,
+  BankAiOnboardingResponse,
   BankItem,
   BankListResponse,
   ProductTypeItem,
@@ -32,12 +36,16 @@ type BankRegistrySurfaceProps = {
   activeBankCode: string | null;
   activeBankDetail: BankDetailResponse | null;
   addModalOpen: boolean;
+  aiAddModalOpen: boolean;
+  countryCode: string;
   productTypes: ProductTypeItem[];
+  userRole: string;
 };
 
 const BANK_COPY = {
   en: {
     addBank: "Add bank",
+    addBanksWithAi: "Add banks with AI",
     description: "Manage bank coverage and start collection.",
     path: ["Operations", "Banks"],
     title: "Banks",
@@ -68,9 +76,11 @@ const BANK_COPY = {
     collectApiFailed: "Collection could not be started. Check the admin API and try again.",
     none: "none",
     bankDetail: "Bank detail",
+    aiAdded: (count: number) => `${count} ${count === 1 ? "bank was" : "banks were"} added with verified coverage.`,
   },
   ko: {
     addBank: "은행 추가",
+    addBanksWithAi: "AI로 은행 추가",
     description: "은행별 수집 범위를 관리하고 수집을 시작합니다.",
     path: ["운영", "은행"],
     title: "은행",
@@ -101,9 +111,11 @@ const BANK_COPY = {
     collectApiFailed: "Collection을 시작할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
     none: "없음",
     bankDetail: "은행 상세",
+    aiAdded: (count: number) => `검증된 coverage와 함께 은행 ${count}개를 추가했습니다.`,
   },
   ja: {
     addBank: "銀行を追加",
+    addBanksWithAi: "AIで銀行を追加",
     description: "銀行ごとの収集範囲を管理し、収集を開始します。",
     path: ["運用", "銀行"],
     title: "銀行",
@@ -134,6 +146,7 @@ const BANK_COPY = {
     collectApiFailed: "Collection を開始できません。Admin APIを確認してから再試行してください。",
     none: "なし",
     bankDetail: "銀行詳細",
+    aiAdded: (count: number) => `確認済みの coverage とともに${count}件の銀行を追加しました。`,
   },
 } as const;
 
@@ -145,11 +158,15 @@ export function BankRegistrySurface({
   activeBankCode,
   activeBankDetail,
   addModalOpen,
+  aiAddModalOpen,
+  countryCode,
   productTypes,
+  userRole,
 }: BankRegistrySurfaceProps) {
   const copy = BANK_COPY[locale];
   const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
+  const [aiDialogOpen, setAiDialogOpen] = useState(aiAddModalOpen);
   const [bankDialogOpen, setBankDialogOpen] = useState(Boolean(activeBankCode && activeBankDetail));
   const [bankDialogDetail, setBankDialogDetail] = useState<BankDetailResponse | null>(activeBankDetail);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
@@ -173,6 +190,10 @@ export function BankRegistrySurface({
   }, [addModalOpen]);
 
   useEffect(() => {
+    setAiDialogOpen(aiAddModalOpen);
+  }, [aiAddModalOpen]);
+
+  useEffect(() => {
     setBankDialogOpen(Boolean(activeBankCode && activeBankDetail));
     setBankDialogDetail(activeBankDetail);
   }, [activeBankCode, activeBankDetail]);
@@ -191,6 +212,17 @@ export function BankRegistrySurface({
     params.set("modal", "add");
     params.delete("bank");
     setAddDialogOpen(true);
+    setAiDialogOpen(false);
+    setBankDialogOpen(false);
+    syncUrlWithParams(params);
+  }
+
+  function openAiModal() {
+    const params = new URLSearchParams(baseSearchParams);
+    params.set("modal", "ai-add");
+    params.delete("bank");
+    setAiDialogOpen(true);
+    setAddDialogOpen(false);
     setBankDialogOpen(false);
     syncUrlWithParams(params);
   }
@@ -201,6 +233,7 @@ export function BankRegistrySurface({
     params.delete("modal");
     const bank = banks.items.find((item) => item.bank_code === bankCode);
     setAddDialogOpen(false);
+    setAiDialogOpen(false);
     setBankDialogOpen(true);
     setBankDialogDetail(bank ? buildPreviewBankDetail(bank) : null);
     syncUrlWithParams(params);
@@ -209,6 +242,7 @@ export function BankRegistrySurface({
 
   function closeModal() {
     setAddDialogOpen(false);
+    setAiDialogOpen(false);
     setBankDialogOpen(false);
     syncUrlWithParams(new URLSearchParams(baseSearchParams), { replace: true });
   }
@@ -238,6 +272,12 @@ export function BankRegistrySurface({
     }
   }
 
+  function handleAiDialogChange(open: boolean) {
+    if (!open) {
+      closeModal();
+    }
+  }
+
   function handleDetailDialogChange(open: boolean) {
     if (!open) {
       closeModal();
@@ -250,6 +290,11 @@ export function BankRegistrySurface({
       return;
     }
     closeModal();
+  }
+
+  function handleAiBanksCompleted(result: BankAiOnboardingResponse) {
+    setMessage(copy.aiAdded(result.added_count));
+    setError(null);
   }
 
   function toggleBankSelection(bankCode: string) {
@@ -360,7 +405,13 @@ export function BankRegistrySurface({
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAddModal} type="button">
+            {userRole === "admin" ? (
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAiModal} type="button">
+                <Sparkles aria-hidden="true" className="size-4" />
+                {copy.addBanksWithAi}
+              </button>
+            ) : null}
+            <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
               {copy.addBank}
             </button>
             <button
@@ -422,7 +473,12 @@ export function BankRegistrySurface({
                     </td>
                     <td className="border-b border-border/70 px-3 py-4">
                       <div className="flex min-w-0 items-start gap-3">
-                        <BankLogoMark bank={item} />
+                        <BankLogoMark
+                          alt={item.logo_alt_text}
+                          bankCode={item.bank_code}
+                          bankName={item.bank_name}
+                          logoUrl={item.logo_url}
+                        />
                         <div className="grid min-w-0 gap-1">
                           <button className="min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
                             {item.bank_name}
@@ -448,6 +504,24 @@ export function BankRegistrySurface({
           </table>
         </div>
       </article>
+
+      <AdminModal
+        description={copy.description}
+        onOpenChange={handleAiDialogChange}
+        open={aiDialogOpen && userRole === "admin"}
+        showPanel={false}
+        title={copy.addBanksWithAi}
+        width="medium"
+      >
+        <BankAiOnboardingDialogContent
+          countryCode={countryCode}
+          csrfToken={csrfToken}
+          locale={locale}
+          onClose={closeModal}
+          onCompleted={handleAiBanksCompleted}
+          productTypes={productTypes}
+        />
+      </AdminModal>
 
       <AdminModal
         onOpenChange={handleAddDialogChange}
@@ -596,31 +670,6 @@ function FilterSelect({
         ))}
       </select>
     </label>
-  );
-}
-
-function BankLogoMark({ bank }: { bank: BankItem }) {
-  const [failed, setFailed] = useState(false);
-  const logoUrl = bank.logo_url ?? "";
-  const showLogo = Boolean(logoUrl && !failed);
-
-  return (
-    <span className="flex h-10 w-14 shrink-0 items-center justify-center">
-      {showLogo ? (
-        <img
-          alt={bank.logo_alt_text ?? `${bank.bank_name} logo`}
-          className="max-h-full max-w-full object-contain"
-          decoding="async"
-          loading="lazy"
-          onError={() => setFailed(true)}
-          src={logoUrl}
-        />
-      ) : (
-        <span className="text-[10px] font-semibold tracking-tight text-foreground">
-          {bank.bank_code.slice(0, 4)}
-        </span>
-      )}
-    </span>
   );
 }
 

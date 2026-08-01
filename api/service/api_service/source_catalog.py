@@ -27,6 +27,7 @@ from api_service.product_types import (
     load_product_type_definitions_map,
     require_product_type_definition,
 )
+from api_service.product_type_localization import localize_product_type_definition
 from api_service.security import new_id, utc_now
 from api_service.source_registry import _insert_collection_run_row
 from api_service.source_registry_utils import (
@@ -35,7 +36,11 @@ from api_service.source_registry_utils import (
     load_seed_source_registry_rows,
     normalize_source_url,
 )
-from worker.discovery.fpds_discovery.discovery import extract_links
+from worker.discovery.fpds_discovery.discovery import (
+    ExtractedLink,
+    extract_links,
+    extract_structured_text_sections,
+)
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
 from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
 from worker.pipeline.fpds_ai_runtime import estimated_cost_usd
@@ -324,7 +329,14 @@ _PRODUCT_TYPE_ATTRIBUTE_HINTS = {
 _PRODUCT_TYPE_IDENTITY_HINTS = {
     "chequing": ("chequing account", "checking account", "echequing", "e-chequing"),
     "savings": ("savings account", "saving account", "esavings", "e-savings"),
-    "gic": ("gic", "term deposit", "guaranteed investment certificate"),
+    "gic": (
+        "gic",
+        "term deposit",
+        "guaranteed investment certificate",
+        "certificate of deposit",
+        "cd account",
+        "bank cd",
+    ),
     "credit-card": ("credit card", "visa card", "mastercard", "american express card"),
     "mortgage": ("mortgage",),
     "personal-loan": ("personal loan", "car loan", "vehicle loan", "rrsp loan"),
@@ -546,6 +558,8 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             sci.bank_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             COUNT(DISTINCT sri.source_id) AS generated_source_count
         FROM source_registry_catalog_item AS sci
         LEFT JOIN source_registry_item AS sri
@@ -553,7 +567,13 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
            AND sri.product_type = sci.product_type
         WHERE sci.bank_code = ANY(%(bank_codes)s)
           AND sci.country_code = %(country_code)s
-        GROUP BY sci.catalog_item_id, sci.bank_code, sci.product_type, sci.status
+        GROUP BY
+            sci.catalog_item_id,
+            sci.bank_code,
+            sci.product_type,
+            sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url
         ORDER BY sci.bank_code, sci.product_type
         """,
         {"bank_codes": bank_codes or [""], "country_code": filters.country_code},
@@ -565,6 +585,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
                 "catalog_item_id": str(item["catalog_item_id"]),
                 "product_type": str(item["product_type"]),
                 "status": str(item["status"]),
+                "coverage_source_url": item.get("coverage_source_url"),
                 "generated_source_count": int(item["generated_source_count"] or 0),
             }
         )
@@ -624,6 +645,8 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
             country_code,
             product_type,
             status,
+            coverage_source_url,
+            normalized_coverage_source_url,
             change_reason,
             created_at,
             updated_at
@@ -690,6 +713,7 @@ def create_bank_profile(
     logo_url = _normalize_optional_public_url(payload.get("logo_url"), "logo_url")
     logo_alt_text = _normalize_logo_alt_text(payload.get("logo_alt_text"), bank_name=bank_name, logo_url=logo_url)
     initial_coverage_product_types = list(payload.get("initial_coverage_product_types") or [])
+    initial_coverage_source_urls = dict(payload.get("initial_coverage_source_urls") or {})
     existing_by_homepage = connection.execute(
         """
         SELECT bank_code
@@ -770,6 +794,7 @@ def create_bank_profile(
                 "product_type": product_type,
                 "status": (_clean_text(payload.get("status")) or "active").lower(),
                 "change_reason": _clean_text(payload.get("change_reason")),
+                "coverage_source_url": initial_coverage_source_urls.get(str(product_type)),
             },
             actor=actor,
             request_context=request_context,
@@ -1042,6 +1067,8 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             sci.country_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             ptr.product_family,
             sci.change_reason,
             sci.created_at,
@@ -1071,6 +1098,8 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             sci.country_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1128,6 +1157,8 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             sci.country_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1153,6 +1184,8 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             sci.country_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1231,6 +1264,10 @@ def create_source_catalog_item(
     ).fetchone()
     if not bank_row:
         raise SourceRegistryError(status_code=404, code="bank_profile_not_found", message="Select a valid bank before creating source catalog coverage.")
+    coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
+        payload.get("coverage_source_url"),
+        normalized_homepage_url=str(bank_row["normalized_homepage_url"] or bank_row["homepage_url"]),
+    )
 
     existing = connection.execute(
         """
@@ -1259,6 +1296,8 @@ def create_source_catalog_item(
             country_code,
             product_type,
             status,
+            coverage_source_url,
+            normalized_coverage_source_url,
             change_reason,
             created_at,
             updated_at
@@ -1269,6 +1308,8 @@ def create_source_catalog_item(
             %(country_code)s,
             %(product_type)s,
             %(status)s,
+            %(coverage_source_url)s,
+            %(normalized_coverage_source_url)s,
             %(change_reason)s,
             %(created_at)s,
             %(updated_at)s
@@ -1280,6 +1321,8 @@ def create_source_catalog_item(
             "country_code": bank_row["country_code"],
             "product_type": product_type,
             "status": (_clean_text(payload.get("status")) or "active").lower(),
+            "coverage_source_url": coverage_source_url,
+            "normalized_coverage_source_url": normalized_coverage_source_url,
             "change_reason": _clean_text(payload.get("change_reason")),
             "created_at": now,
             "updated_at": now,
@@ -1293,7 +1336,11 @@ def create_source_catalog_item(
         target_id=catalog_item_id,
         target_type="source_registry_catalog_item",
         diff_summary=f"Created source catalog item `{catalog_item_id}`.",
-        metadata={"bank_code": bank_code, "product_type": product_type},
+        metadata={
+            "bank_code": bank_code,
+            "product_type": product_type,
+            "coverage_source_url": coverage_source_url,
+        },
     )
     detail = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
     if detail is None:
@@ -1311,7 +1358,15 @@ def update_source_catalog_item(
 ) -> dict[str, Any]:
     existing = connection.execute(
         """
-        SELECT catalog_item_id, bank_code, country_code, product_type, status, change_reason
+        SELECT
+            catalog_item_id,
+            bank_code,
+            country_code,
+            product_type,
+            status,
+            coverage_source_url,
+            normalized_coverage_source_url,
+            change_reason
         FROM source_registry_catalog_item
         WHERE catalog_item_id = %(catalog_item_id)s
         """,
@@ -1356,6 +1411,10 @@ def update_source_catalog_item(
 
     updated_status = (_clean_text(payload.get("status", existing["status"])) or "active").lower()
     updated_change_reason = _clean_text(payload.get("change_reason", existing["change_reason"]))
+    coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
+        payload.get("coverage_source_url", existing.get("coverage_source_url")),
+        normalized_homepage_url=str(bank_row["normalized_homepage_url"] or bank_row["homepage_url"]),
+    )
     diff_summary = _build_catalog_diff_summary(existing, {"bank_code": bank_code, "product_type": product_type, "status": updated_status})
     connection.execute(
         """
@@ -1365,6 +1424,8 @@ def update_source_catalog_item(
             country_code = %(country_code)s,
             product_type = %(product_type)s,
             status = %(status)s,
+            coverage_source_url = %(coverage_source_url)s,
+            normalized_coverage_source_url = %(normalized_coverage_source_url)s,
             change_reason = %(change_reason)s,
             updated_at = %(updated_at)s
         WHERE catalog_item_id = %(catalog_item_id)s
@@ -1375,6 +1436,8 @@ def update_source_catalog_item(
             "country_code": bank_row["country_code"],
             "product_type": product_type,
             "status": updated_status,
+            "coverage_source_url": coverage_source_url,
+            "normalized_coverage_source_url": normalized_coverage_source_url,
             "change_reason": updated_change_reason,
             "updated_at": utc_now(),
         },
@@ -1387,7 +1450,11 @@ def update_source_catalog_item(
         target_id=catalog_item_id,
         target_type="source_registry_catalog_item",
         diff_summary=diff_summary,
-        metadata={"bank_code": bank_code, "product_type": product_type},
+        metadata={
+            "bank_code": bank_code,
+            "product_type": product_type,
+            "coverage_source_url": coverage_source_url,
+        },
     )
     detail = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
     if detail is None:
@@ -1414,6 +1481,8 @@ def start_source_catalog_collection(
             sci.country_code,
             sci.product_type,
             sci.status,
+            sci.coverage_source_url,
+            sci.normalized_coverage_source_url,
             ptr.product_family,
             b.bank_name,
             b.homepage_url,
@@ -1510,6 +1579,7 @@ def _build_source_catalog_collection_plan(
                 "source_language": str(row.get("source_language") or "en"),
                 "homepage_url": str(row["homepage_url"]),
                 "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
+                "coverage_source_url": row.get("coverage_source_url"),
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -1604,6 +1674,7 @@ def _materialize_sources_for_catalog_item(
         product_type=product_type,
         product_type_definition=product_type_definition,
         homepage_url=str(row["homepage_url"]),
+        coverage_source_url=_clean_text(row.get("coverage_source_url")),
         source_language=str(row.get("source_language") or "en"),
         run_id=run_id,
         correlation_id=correlation_id,
@@ -1980,16 +2051,25 @@ def _generate_sources_from_homepage(
     product_type_definition: dict[str, Any],
     homepage_url: str,
     source_language: str,
+    coverage_source_url: str | None = None,
     run_id: str | None = None,
     correlation_id: str | None = None,
     request_id: str | None = None,
 ) -> HomepageSourceGenerationResult:
     product_type = _canonical_product_type_code(product_type)
+    product_type_definition = localize_product_type_definition(
+        country_code=country_code,
+        definition=product_type_definition,
+    )
     discovery_product_type = _product_type_discovery_profile(product_type, product_type_definition)
     normalized_homepage_url = normalize_source_url(homepage_url)
     hostname = urlparse(normalized_homepage_url).hostname
     if not hostname:
         raise SourceRegistryError(status_code=422, code="bank_homepage_invalid", message="Bank homepage URL must include a hostname.")
+    verified_coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
+        coverage_source_url,
+        normalized_homepage_url=normalized_homepage_url,
+    )
 
     fetch_policy = DiscoveryFetchPolicy(allowed_domains=_discovery_allowed_domains(hostname))
     detail_links: list[tuple[int, Any]] = []
@@ -2053,6 +2133,29 @@ def _generate_sources_from_homepage(
         if hub_score > 0:
             hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
 
+    if verified_coverage_source_url and normalized_coverage_source_url:
+        coverage_link = ExtractedLink(
+            href=verified_coverage_source_url,
+            resolved_url=verified_coverage_source_url,
+            normalized_url=normalized_coverage_source_url,
+            source_type=infer_source_type(normalized_coverage_source_url),
+            anchor_text=_product_type_label(product_type_definition),
+        )
+        coverage_score = max(
+            1,
+            _score_product_link(
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=normalized_coverage_source_url,
+                anchor_text=coverage_link.anchor_text,
+            ),
+        )
+        detail_links.append((coverage_score + 100, coverage_link))
+        hub_pages.append((coverage_score + 1_000, normalized_coverage_source_url, verified_coverage_source_url))
+        discovery_notes.append(
+            "Started bounded discovery from the catalog item's verified official Product Type coverage URL."
+        )
+
     seed_entry_url = _load_seed_entry_url(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -2085,7 +2188,7 @@ def _generate_sources_from_homepage(
         except Exception as exc:
             discovery_notes.append(f"Hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
-        for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
+        for link in _extract_allowed_links(html_text=page_html, base_url=resolved_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
                 continue
@@ -2140,7 +2243,7 @@ def _generate_sources_from_homepage(
             discovery_notes.append(f"Secondary hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
         expanded_secondary_hub_count += 1
-        for link in _extract_allowed_links(html_text=page_html, base_url=normalized_page_url, hostname=hostname):
+        for link in _extract_allowed_links(html_text=page_html, base_url=resolved_page_url, hostname=hostname):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
                 continue
@@ -2198,8 +2301,16 @@ def _generate_sources_from_homepage(
         product_type=discovery_product_type,
     )
     source_rows: list[dict[str, Any]] = []
-    entry_url = seed_entry_url or (unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url)
-    entry_raw_url = seed_entry_url or (unique_hub_pages[0][2] if unique_hub_pages else homepage_url)
+    entry_url = (
+        normalized_coverage_source_url
+        or seed_entry_url
+        or (unique_hub_pages[0][1] if unique_hub_pages else normalized_homepage_url)
+    )
+    entry_raw_url = (
+        verified_coverage_source_url
+        or seed_entry_url
+        or (unique_hub_pages[0][2] if unique_hub_pages else homepage_url)
+    )
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
     html_candidates = _build_html_candidates(
@@ -2209,6 +2320,7 @@ def _generate_sources_from_homepage(
         detail_links=unique_detail_links,
         supporting_links=unique_supporting_links,
         seed_detail_hints=seed_detail_hints,
+        verified_coverage_url=normalized_coverage_source_url,
     )
     homepage_self_candidate = _build_homepage_self_candidate(
         product_type=discovery_product_type,
@@ -2241,6 +2353,7 @@ def _generate_sources_from_homepage(
         request_id=request_id,
     )
     discovery_notes.extend(ai_result.notes)
+    page_evidence_by_url: dict[str, PageEvidenceAssessment] = {}
     detail_rows, rejected_detail_urls, detail_notes = _promote_detail_candidates(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -2253,6 +2366,7 @@ def _generate_sources_from_homepage(
         candidates=html_candidates,
         ai_scores=ai_result.scores,
         ai_unavailable=ai_result.ai_unavailable,
+        page_evidence_by_url=page_evidence_by_url,
     )
     discovery_notes.extend(detail_notes)
 
@@ -2288,6 +2402,8 @@ def _generate_sources_from_homepage(
 
     promoted_detail_urls = {str(item["normalized_url"]) for item in detail_rows}
     promoted_supporting_urls: set[str] = set()
+    unavailable_supporting_count = 0
+    locale_mismatch_supporting_count = 0
     if should_emit_context_rows:
         for hint in seed_supporting_hints:
             normalized_url = normalize_source_url(str(hint["source_url"]))
@@ -2333,6 +2449,22 @@ def _generate_sources_from_homepage(
             if not _ai_supporting_source_is_relevant(ai_score):
                 continue
             if candidate.normalized_url in promoted_detail_urls or candidate.normalized_url in promoted_supporting_urls:
+                continue
+            if _url_locale_conflicts_source_language(
+                normalized_url=candidate.normalized_url,
+                source_language=source_language,
+            ):
+                locale_mismatch_supporting_count += 1
+                continue
+            if not _supporting_html_page_is_fetchable(
+                normalized_url=candidate.normalized_url,
+                raw_url=candidate.raw_url,
+                fetch_policy=fetch_policy,
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                page_evidence_by_url=page_evidence_by_url,
+            ):
+                unavailable_supporting_count += 1
                 continue
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
@@ -2387,6 +2519,22 @@ def _generate_sources_from_homepage(
                 continue
             if candidate.normalized_url in promoted_detail_urls or candidate.normalized_url in promoted_supporting_urls:
                 continue
+            if _url_locale_conflicts_source_language(
+                normalized_url=candidate.normalized_url,
+                source_language=source_language,
+            ):
+                locale_mismatch_supporting_count += 1
+                continue
+            if not _supporting_html_page_is_fetchable(
+                normalized_url=candidate.normalized_url,
+                raw_url=candidate.raw_url,
+                fetch_policy=fetch_policy,
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                page_evidence_by_url=page_evidence_by_url,
+            ):
+                unavailable_supporting_count += 1
+                continue
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
                 discovery_product_type=discovery_product_type,
@@ -2434,6 +2582,22 @@ def _generate_sources_from_homepage(
                 continue
             if link.normalized_url in promoted_supporting_urls:
                 continue
+            if _url_locale_conflicts_source_language(
+                normalized_url=link.normalized_url,
+                source_language=source_language,
+            ):
+                locale_mismatch_supporting_count += 1
+                continue
+            if not _supporting_html_page_is_fetchable(
+                normalized_url=link.normalized_url,
+                raw_url=link.resolved_url,
+                fetch_policy=fetch_policy,
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                page_evidence_by_url=page_evidence_by_url,
+            ):
+                unavailable_supporting_count += 1
+                continue
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
                 discovery_product_type=discovery_product_type,
@@ -2479,6 +2643,14 @@ def _generate_sources_from_homepage(
                         ),
                     },
                 )
+            )
+        if unavailable_supporting_count:
+            discovery_notes.append(
+                f"Excluded {unavailable_supporting_count} unreachable supporting HTML source(s) before collection."
+            )
+        if locale_mismatch_supporting_count:
+            discovery_notes.append(
+                f"Excluded {locale_mismatch_supporting_count} supporting HTML source(s) that conflicted with the run source language."
             )
         for _, link in unique_pdf_links:
             if not _link_is_relevant_supporting_source(
@@ -2547,6 +2719,7 @@ def _build_html_candidates(
     detail_links: list[tuple[int, Any]],
     supporting_links: list[tuple[int, Any]],
     seed_detail_hints: list[dict[str, Any]],
+    verified_coverage_url: str | None = None,
 ) -> list[HomepageCandidate]:
     scoring_product_type = discovery_product_type or product_type
     by_url: dict[str, HomepageCandidate] = {}
@@ -2565,7 +2738,11 @@ def _build_html_candidates(
             raw_url=str(link.resolved_url),
             anchor_text=str(link.anchor_text),
             source_type=str(link.source_type),
-            origin="homepage_or_hub_link",
+            origin=(
+                "verified_coverage_source"
+                if verified_coverage_url and str(link.normalized_url) == verified_coverage_url
+                else "homepage_or_hub_link"
+            ),
             heuristic_score=int(score),
             supporting_signal=supporting_signal,
             seed_source_id=None,
@@ -2600,7 +2777,7 @@ def _build_html_candidates(
     candidates = list(by_url.values())
     candidates.sort(
         key=lambda item: (
-            0 if item.origin == "seed_detail_hint" else 1,
+            {"seed_detail_hint": 0, "verified_coverage_source": 1}.get(item.origin, 2),
             -item.heuristic_score,
             item.normalized_url,
         )
@@ -3164,6 +3341,7 @@ def _promote_detail_candidates(
     candidates: list[HomepageCandidate],
     ai_scores: dict[str, AiParallelCandidateScore],
     ai_unavailable: bool = False,
+    page_evidence_by_url: dict[str, PageEvidenceAssessment] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(product_type_definition)
@@ -3200,6 +3378,8 @@ def _promote_detail_candidates(
             product_type=discovery_product_type,
             product_type_definition=product_type_definition,
         )
+        if page_evidence_by_url is not None:
+            page_evidence_by_url[candidate.normalized_url] = page_evidence
         if page_evidence.fetch_error:
             notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
             if not _candidate_is_seed_backed(candidate):
@@ -3338,6 +3518,27 @@ def _promote_detail_candidates(
         _dedupe_preserve_order(rejected_detail_urls),
         _dedupe_preserve_order([note for note in notes if note]),
     )
+
+
+def _supporting_html_page_is_fetchable(
+    *,
+    normalized_url: str,
+    raw_url: str,
+    fetch_policy: DiscoveryFetchPolicy,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    page_evidence_by_url: dict[str, PageEvidenceAssessment],
+) -> bool:
+    page_evidence = page_evidence_by_url.get(normalized_url)
+    if page_evidence is None:
+        page_evidence = _score_page_evidence(
+            raw_url=raw_url,
+            fetch_policy=fetch_policy,
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+        )
+        page_evidence_by_url[normalized_url] = page_evidence
+    return not page_evidence.fetch_error
 
 
 def _detail_rejection_reason(
@@ -3515,6 +3716,12 @@ def _candidate_promotes_to_detail(
         )
         if not named_detail_override:
             return False
+    if _location_gated_structured_page_can_be_detail(
+        candidate=candidate,
+        ai_score=ai_score,
+        page_evidence=page_evidence,
+    ):
+        return True
     if allow_family_overview and _deposit_family_overview_can_be_detail(
         candidate=candidate,
         ai_score=ai_score,
@@ -3552,6 +3759,67 @@ def _candidate_promotes_to_detail(
             and page_evidence.negative_signal_count == 0
         )
     return candidate.heuristic_score > 0 or strong_page_detail_signal
+
+
+def _location_gated_structured_page_can_be_detail(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    page_reasons = set(page_evidence.page_evidence_reason_codes)
+    verified_coverage_source = candidate.origin == "verified_coverage_source"
+    verified_coverage_evidence_sufficient = (
+        verified_coverage_source
+        and ai_score is not None
+        and (
+            (
+                ai_score.predicted_role == "detail"
+                and ai_score.relevance_score >= 8.0
+                and ai_score.confidence_band == "high"
+                and page_evidence.page_evidence_score >= 1
+                and page_evidence.attribute_signal_count >= 1
+                and page_evidence.negative_signal_count <= 2
+            )
+            or (
+                ai_score.predicted_role == "supporting_html"
+                and ai_score.relevance_score >= 8.0
+                and ai_score.confidence_band != "low"
+                and page_evidence.page_evidence_score >= 4
+                and page_evidence.attribute_signal_count >= 2
+                and page_evidence.negative_signal_count <= 1
+            )
+        )
+    )
+    if (
+        ai_score is None
+        or ai_score.predicted_role not in {"detail", "supporting_html"}
+        or ai_score.relevance_score < 6.0
+        or ai_score.confidence_band == "low"
+        or candidate.heuristic_score <= 0
+        or (
+            not verified_coverage_evidence_sufficient
+            and (
+                page_evidence.page_evidence_score < 5
+                or page_evidence.attribute_signal_count < 2
+            )
+        )
+        or not page_evidence.product_identity_match
+        or "title_semantic_match" not in page_reasons
+        or "location_access_gate" not in page_reasons
+        or "structured_component_evidence" not in page_reasons
+        or "multi_product_family_overview" in page_reasons
+    ):
+        return False
+    ai_reasons = set(_coerce_reason_codes(ai_score.reason_codes))
+    return not ai_reasons.intersection(
+        {
+            "non_product_editorial_page",
+            "non_product_service_flow",
+            "promo_or_apply_flow",
+            "supporting_terms_or_rates_page",
+        }
+    )
 
 
 def _page_has_specific_singular_product_identity(page_evidence: PageEvidenceAssessment) -> bool:
@@ -3900,11 +4168,29 @@ def _score_page_evidence(
     title_text = parser.title_text
     primary_heading = parser.primary_heading
     heading_text = " ".join([primary_heading, *parser.secondary_headings]).strip()
-    body_text = " ".join(parser.body_chunks[:40]).strip()
+    visible_body_text = " ".join(parser.body_chunks[:40]).strip()
+    structured_sections = extract_structured_text_sections(html_text)
+    structured_text = " ".join(structured_sections)
+    body_text = " ".join([visible_body_text, structured_text]).strip()
+    access_gate_detected = any(
+        marker in f"{primary_heading} {visible_body_text}".lower()
+        for marker in (
+            "select your county",
+            "select a location",
+            "enter your zip code",
+            "enter a zip code",
+            "provide your zip code",
+        )
+    )
     identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
     semantic_terms = _product_type_semantic_terms(product_type_definition)
     attribute_terms = _product_type_attribute_keywords(product_type, product_type_definition)
     title_match = _term_hits(title_text, identity_terms)
+    if access_gate_detected and structured_sections and not title_match:
+        title_match = _term_hits(
+            title_text,
+            list(_DISCOVERY_PROFILE_TERMS.get(_canonical_product_type_code(product_type), ())),
+        )
     primary_heading_match = _term_hits(primary_heading, identity_terms)
     body_match = _term_hits(body_text, semantic_terms)
     attribute_hits = _distinct_term_hits(" ".join([heading_text, body_text]), attribute_terms)
@@ -3918,7 +4204,7 @@ def _score_page_evidence(
         title_text=title_text,
         primary_heading=primary_heading,
         secondary_headings=parser.secondary_headings,
-        body_text=" ".join(parser.body_chunks),
+        body_text=" ".join([*parser.body_chunks, *structured_sections]),
     )
 
     score = 0
@@ -3926,6 +4212,10 @@ def _score_page_evidence(
     product_identity_match = bool(title_match or primary_heading_match)
     if product_identity_match:
         reason_codes.append("product_identity_signal")
+    if structured_sections:
+        reason_codes.append("structured_component_evidence")
+    if access_gate_detected:
+        reason_codes.append("location_access_gate")
     if title_match:
         score += 3
         reason_codes.append("title_semantic_match")
@@ -5169,6 +5459,7 @@ def _serialize_source_catalog_row(row: dict[str, Any], *, bank_row: dict[str, An
         "country_code": str(row["country_code"]),
         "product_type": str(row["product_type"]),
         "status": str(row["status"]),
+        "coverage_source_url": row.get("coverage_source_url"),
         "homepage_url": bank_row.get("homepage_url"),
         "normalized_homepage_url": bank_row.get("normalized_homepage_url"),
         "logo_url": bank_row.get("logo_url"),
@@ -5453,6 +5744,40 @@ def _normalize_optional_public_url(value: Any, field_name: str) -> str | None:
             code=f"{field_name}_invalid",
             message=f"{field_name} must be a valid public http or https URL.",
         ) from exc
+
+
+def _normalize_coverage_source_url(
+    value: Any,
+    *,
+    normalized_homepage_url: str,
+) -> tuple[str | None, str | None]:
+    cleaned = _clean_text(value)
+    if cleaned is None:
+        return None, None
+    candidate = cleaned if "://" in cleaned else f"https://{cleaned.lstrip('/')}"
+    try:
+        normalized = normalize_source_url(candidate)
+    except ValueError as exc:
+        raise SourceRegistryError(
+            status_code=422,
+            code="coverage_source_url_invalid",
+            message="coverage_source_url must be a valid public HTTPS URL.",
+        ) from exc
+    parsed = urlparse(normalized)
+    homepage_host = urlparse(normalized_homepage_url).hostname
+    if parsed.scheme.lower() != "https" or not parsed.hostname or not homepage_host:
+        raise SourceRegistryError(
+            status_code=422,
+            code="coverage_source_url_invalid",
+            message="coverage_source_url must be a valid public HTTPS URL.",
+        )
+    if not host_matches_allowed_domains(parsed.hostname, _discovery_allowed_domains(homepage_host)):
+        raise SourceRegistryError(
+            status_code=422,
+            code="coverage_source_domain_mismatch",
+            message="coverage_source_url must be on the bank's official homepage domain.",
+        )
+    return candidate, normalized
 
 
 def _normalize_logo_alt_text(value: Any, *, bank_name: str, logo_url: str | None) -> str | None:

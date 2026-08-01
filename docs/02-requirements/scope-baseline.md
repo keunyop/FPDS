@@ -140,6 +140,22 @@ current collection or release cutline beyond Canada.
 - currency, UI locale, domain name, user location, or IP geolocation must not
   infer product country
 
+### 4.5 Controlled Bank Registry Expansion
+
+The Product Owner direction on `2026-07-30` authorizes AI-assisted bank
+profile and Product Type coverage onboarding for the active Admin session
+country.
+
+- the action may register only a bounded, largest-first set of missing banks
+  supported by current web evidence
+- country remains server-session-owned and bank/coverage creation remains
+  admin-only, CSRF-protected, atomic, usage-tracked, and audited
+- coverage may reference only active Product Type registry rows and must be
+  supported by a current official bank page
+- this registry configuration does not itself authorize product collection,
+  taxonomy expansion, canonical approval, Public publication, or a new-country
+  release
+
 ---
 
 ## 5. Official Non-Goals
@@ -277,3 +293,4 @@ Gate A `Pass` 자체는 개발 시작 승인이 아니다.
 |---|---|
 | 2026-03-30 | Initial scope baseline created for WBS 1.1.1 - 1.1.5 |
 | 2026-04-06 | Clarified that Gate A Pass and actual implementation start approval are separate controls |
+| 2026-07-30 | Recorded the bounded AI-assisted bank-registry onboarding authorization without widening collection or release scope |

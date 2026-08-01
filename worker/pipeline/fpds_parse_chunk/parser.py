@@ -7,10 +7,12 @@ import re
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
+from worker.discovery.fpds_discovery.discovery import extract_structured_text_sections
+
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v2"
+PARSER_VERSION = "fpds-parse-chunk-v3"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -33,6 +35,7 @@ def parse_snapshot_bytes(*, body: bytes, content_type: str) -> ParsedArtifact:
 
 def _parse_html(body: bytes) -> ParsedArtifact:
     html = body.decode("utf-8", errors="replace")
+    structured_sections = extract_structured_text_sections(html)
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
@@ -50,6 +53,15 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         document_title = _normalize_text((soup.title.get_text(" ", strip=True) if soup.title else ""))
         if document_title:
             sections = [_RawSegment(anchor_type="section", anchor_value="document", page_no=None, text=document_title)]
+    sections.extend(
+        _RawSegment(
+            anchor_type="structured_component",
+            anchor_value=f"structured-component-{index}",
+            page_no=None,
+            text=text,
+        )
+        for index, text in enumerate(structured_sections, start=1)
+    )
 
     full_text, segments = _finalize_segments(sections)
     if not full_text.strip():
@@ -59,6 +71,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         "parser_name": PARSER_NAME,
         "content_type": "text/html",
         "section_count": len(segments),
+        "structured_component_section_count": len(structured_sections),
         "partial_parse_flag": False,
     }
     return ParsedArtifact(
