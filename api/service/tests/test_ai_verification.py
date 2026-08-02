@@ -173,10 +173,12 @@ class AiVerificationTests(TestCase):
         )
 
     def test_registered_bank_domains_do_not_admit_unregistered_preferred_host(self):
+        connection = _RecordingConnection()
         self.assertEqual(
             load_registered_bank_domains(
-                _RecordingConnection(),
+                connection,
                 bank_code="BANK",
+                country_code="CA",
                 preferred_urls=[
                     "https://unregistered.example/product",
                     "https://bank.example/example-savings",
@@ -184,6 +186,8 @@ class AiVerificationTests(TestCase):
             ),
             ["bank.example", "rates.bank.example"],
         )
+        domain_query = next(params for sql, params in connection.calls if "SELECT source_url FROM (" in sql)
+        self.assertEqual(domain_query["country_code"], "CA")
 
     def test_build_payload_excludes_read_only_fields(self):
         payload = build_ai_verification_payload(
@@ -410,6 +414,38 @@ class AiVerificationTests(TestCase):
         audit_payload = json.loads(audit["event_payload"])
         self.assertEqual(audit_payload["allowed_domains"], ["bank.example", "rates.bank.example"])
         self.assertEqual(audit_payload["sources"], [source])
+
+    def test_system_actor_is_preserved_in_verification_audit(self):
+        connection = _RecordingConnection()
+        source = {"url": "https://bank.example/rates", "title": "Official rates"}
+
+        def invoke_model(**_kwargs):
+            return (
+                {"overall_status": "verified", "summary": "Verified.", "fields": []},
+                {
+                    "provider": "openai",
+                    "model_id": "test-model",
+                    "prompt_tokens": 10,
+                    "completion_tokens": 5,
+                    "web_search_sources": [source],
+                },
+            )
+
+        with patch.dict(
+            os.environ,
+            {"FPDS_LLM_PROVIDER": "openai", "FPDS_LLM_API_KEY": "test-key"},
+            clear=False,
+        ):
+            run_review_ai_verification(
+                connection,
+                detail=_detail(),
+                actor={"actor_type": "system", "role": "admin"},
+                request_context={"request_id": "batch-001"},
+                invoke_model=invoke_model,
+            )
+
+        audit = next(params for sql, params in connection.calls if "INSERT INTO audit_event" in sql)
+        self.assertEqual(audit["actor_type"], "system")
 
     def test_run_failure_is_persisted_without_mutating_candidate(self):
         connection = _RecordingConnection()

@@ -194,6 +194,11 @@ def _context_with_registry_metadata(
             "source_metadata": {
                 **context.source_metadata,
                 **registry_metadata,
+                "normalized_source_url": getattr(
+                    registry_source,
+                    "normalized_url",
+                    registry_metadata.get("normalized_source_url"),
+                ),
             },
         }
     )

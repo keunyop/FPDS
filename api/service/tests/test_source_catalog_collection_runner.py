@@ -4,7 +4,7 @@ import json
 import unittest
 from unittest.mock import patch
 
-from api_service import source_catalog_collection_runner
+from api_service import source_catalog_collection_runner, source_collection_runner
 from api_service.source_catalog import CatalogItemMaterializationResult
 
 
@@ -52,6 +52,40 @@ class _ConnectionContext:
 
 
 class SourceCatalogCollectionRunnerTests(unittest.TestCase):
+    def test_catalog_failure_metadata_retains_exact_worker_stage(self) -> None:
+        failure = source_collection_runner.WorkerStageError(
+            stage_name="fpds_snapshot",
+            failure_kind="nonzero_exit",
+            return_code=1,
+            diagnostic="psql command failed: country_code is required",
+        )
+        metadata = source_catalog_collection_runner._catalog_run_metadata(
+            plan={
+                "collection_id": "collection-001",
+                "correlation_id": "corr-001",
+                "request_id": "req-001",
+            },
+            group={
+                "catalog_item_id": "catalog-us-boan-mortgage-001",
+                "bank_code": "BOAN",
+                "country_code": "US",
+                "product_type": "mortgage",
+                "product_family": "lending",
+                "source_language": "en",
+            },
+            discovery_status="materialization_failed",
+            discovery_notes=[str(failure)],
+            generated_source_ids=[],
+            collection_source_ids=[],
+            target_source_ids=[],
+            failure=failure,
+        )
+
+        self.assertEqual(metadata["pipeline_stage"], "source_catalog_collection")
+        self.assertEqual(metadata["failed_stage"], "fpds_snapshot")
+        self.assertEqual(metadata["stage_failure"]["failure_kind"], "nonzero_exit")
+        self.assertEqual(metadata["stage_failure"]["return_code"], 1)
+
     def test_only_detail_sources_can_produce_standalone_candidates(self) -> None:
         detail = {"discovery_role": "detail", "product_type": "gic"}
         linked_terms = {

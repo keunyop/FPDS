@@ -394,6 +394,7 @@ class ReviewDetailTests(unittest.TestCase):
         for field_name, value in (
             ("monthly_fee", 4000),
             ("standard_rate", 25),
+            ("mortgage_rate", 100),
             ("minimum_balance", -1),
             ("term_length_days", -1),
         ):

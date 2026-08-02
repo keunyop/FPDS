@@ -78,7 +78,27 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 37. A base monthly fee shown as `$X or $0` with a balance condition remains `$X` in `monthly_fee` and `public_display_fee`; the balance-qualified zero belongs in `fee_waiver_condition` and `minimum_balance`.
 38. Audience booleans and customer tags require the target product identity itself to name the audience; related audience benefit sections on a general account page are cross-product support copy. Finite transaction parsing may ignore bounded HTML footnote glyphs, and `minimum_balance` must equal the positive threshold stated by its grounded `fee_waiver_condition` or validation must review the candidate.
 39. Chequing collection requests `transaction_fee` as a currency scalar in addition to the monthly fee. A product-wide per-transaction charge may be stored only from its own adjacent transaction-fee label; balances or audience rules that waive that charge or the monthly fee remain explanatory conditions and cannot replace the base scalar.
-40. Review Detail AI verification may propose a correction only when a current official source from the registered bank domain supports the exact field and the value passes the same manual-override coercion and range checks. Unsupported or ambiguous facts remain `unverified`; verification never guesses, auto-approves, or publishes.
+40. Review Detail AI verification may propose a correction only when a current official source from the registered bank domain supports the exact field and the value passes the same manual-override coercion and range checks. Unsupported or ambiguous facts remain `unverified`, and verification never guesses or publishes by itself. A verification attempt does not directly approve a candidate; the separate audited assessment in rule 43 may authorize system approval only after its identity, coverage, source, and safe-correction gates all pass.
+41. Configured collection applies official-domain AI grounding to every
+    candidate-producing detail source, including standard Product Types. The
+    model receives the exact product identity, complete active field contract,
+    current collected values, and bounded fresh evidence chunks. A grounded
+    value may replace or supplement extraction only when the cited URL appears
+    in the provider's consulted allowlisted sources and an exact returned quote
+    exists in the selected evidence chunk, then passes the canonical type and
+    numeric safe-range checks used by review edits. Supporting pages remain
+    evidence-only; provider failure keeps the deterministic extraction result
+    and normal validation/review routing.
+42. Dynamic/lending auto-validation requires a persisted collection grounding
+    assessment. `product_name`, at least one additional decision field, and at
+    least `80%` of assessed priority/typed fields must carry accepted official
+    grounding metadata. This eligibility does not remove requiredness,
+    confidence, force-review, source-role, or product-boundary checks.
+43. Collection residual-review automation uses the full requested Review field
+    set as its denominator. Only official matches and successfully applied safe
+    mismatches pass; unverified or omitted fields fail. Verified identity, at
+    least one official source, no unapplied correction, and `>=80%` are required
+    for system approval.
 
 ## Runtime Validation
 

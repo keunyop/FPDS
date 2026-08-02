@@ -149,6 +149,14 @@ The review task should support at least these reason codes.
 
 Phase 1 auto-approval is implemented as an audited system path, not as an invisible state flip. `auto_validated` pass candidates that meet the live field type/unit contract, product requiredness, confidence, evidence, and force-review policy are promoted through the same canonical upsert/change-event path as human approval. Candidates that pass validation but match non-product page guards are audit-logged and rejected, while force-review policy hits are routed back into a review task. Golden fixtures do not change live validation or approval eligibility; unavailable required official facts remain reviewable rather than being filled or bypassed.
 
+Dynamic and lending candidates additionally require a persisted official AI
+grounding assessment with verified product identity, at least two verified
+decision fields, and the configured assessed-field ratio. Remaining active
+detail reviews are eligible for one bounded collection-autopilot verification:
+safe cited mismatches may update only the candidate, and system approval occurs
+only at the configured full-field pass rate with no unapplied correction.
+Provider failure or any insufficient result preserves the Review state.
+
 ---
 
 ## 4. Run Lifecycle
@@ -366,7 +374,7 @@ Every audit event must support at least the following fields.
 | Event Type | Actor | Trigger Timing | Required Notes |
 |---|---|---|---|
 | `review_task_created` | system | review routing creates task | include queue reason and issue summary |
-| `review_task_approved` | user | approve action | include reason code |
+| `review_task_approved` | user/system | approve action or explicitly authorized threshold approval | include reason code; system threshold approval also includes requested/passed counts, pass rate, verified identity, canonical/version ids, and aggregate request lineage |
 | `review_task_rejected` | user | reject action | include reason code |
 | `review_task_edited` | user | edit & approve action | include diff summary |
 | `review_task_deferred` | user | defer action | include defer reason |
@@ -375,8 +383,9 @@ Every audit event must support at least the following fields.
 | `candidate_auto_promotion_skipped` | system | policy blocks auto-promotion for review or rejection | include skip reason, previous/new candidate state, and review task id when queued |
 | `stale_review_auto_superseded` | system | a newer candidate from the same detail source is approved | include old/new candidate ids and previous review/candidate states |
 | `evidence_trace_viewed` | user | reviewer opens sensitive trace context | include review task/product context |
-| `review_ai_verification_completed` | user | official-domain verification completes | include review/candidate/model ids, allowed domains, cited sources, result summary, and correction field names |
-| `review_ai_verification_failed` | user | official-domain verification fails | include review/candidate/model ids and safe failure reason |
+| `review_ai_verification_completed` | user/system | official-domain verification completes | include review/candidate/model ids, allowed domains, cited sources, result summary, and correction field names |
+| `review_ai_verification_failed` | user/system | official-domain verification fails | include review/candidate/model ids and safe failure reason |
+| `review_ai_corrections_applied` | system | existing-queue or collection-autopilot remediation applies cited, contract-safe mismatches | preserve queued/deferred state until the separate threshold assessment and include model, field, value, source, and correlation context |
 | `run_started` | system/user/scheduler | run initialization | include trigger metadata |
 | `run_completed` | system | run terminal completion | include summary counters |
 | `run_failed` | system | fatal run termination | include terminal reason |

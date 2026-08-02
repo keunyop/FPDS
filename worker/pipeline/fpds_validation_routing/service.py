@@ -60,6 +60,7 @@ _SUMMARY_MESSAGES = {
     "low_confidence": "The overall source confidence was below the routing threshold.",
     "validation_error": "Validation produced one or more error-level issues.",
     "manual_sampling_review": "This product type requires a reviewer decision before publication.",
+    "ai_grounding_insufficient": "Official-source AI grounding did not verify enough decision-critical fields for automatic approval.",
     "taxonomy_registry_sync_missing": "The candidate taxonomy is part of the approved canonical deposit baseline but is missing from the active DB registry.",
 }
 _CANONICAL_DEPOSIT_SUBTYPE_REGISTRY = {
@@ -138,6 +139,13 @@ class ValidationRoutingService:
                 product_type=_string_or_none(candidate_before.get("product_type")),
                 source_metadata=item.source_metadata,
             )
+            collection_ai_assessment = _assess_collection_ai_grounding(
+                candidate_record=candidate_before,
+                candidate_payload=candidate_payload,
+                expected_fields=[str(field_name) for field_name in item.source_metadata.get("expected_fields", [])],
+                dynamic_product_type=dynamic_product_type,
+                threshold=routing_config.ai_auto_approve_min_verified_ratio,
+            )
 
             validation_issue_codes = _compute_validation_issue_codes(
                 candidate_record=candidate_before,
@@ -158,6 +166,7 @@ class ValidationRoutingService:
                 validation_issue_codes=validation_issue_codes,
                 runtime_notes=item.runtime_notes,
                 dynamic_product_type=dynamic_product_type,
+                collection_ai_assessment=collection_ai_assessment,
             )
             route_decision = _route_candidate(
                 validation_status=validation_status,
@@ -165,6 +174,7 @@ class ValidationRoutingService:
                 source_confidence=source_confidence,
                 routing_config=routing_config,
                 dynamic_product_type=dynamic_product_type,
+                collection_ai_assessment=collection_ai_assessment,
             )
             review_task_id = _build_review_task_id(item.candidate_id) if route_decision["review_required"] else None
             issue_summary = _build_issue_summary(
@@ -224,6 +234,7 @@ class ValidationRoutingService:
                 routing_config=routing_config,
                 runtime_notes=runtime_notes,
                 started_at=started_at,
+                collection_ai_assessment=collection_ai_assessment,
             )
             metadata_payload = {
                 "candidate_id": item.candidate_id,
@@ -241,6 +252,7 @@ class ValidationRoutingService:
                 "queue_reason_codes": route_decision["queue_reason_codes"],
                 "review_task_id": review_task_id,
                 "runtime_notes": runtime_notes,
+                "collection_ai_assessment": collection_ai_assessment,
             }
             self.object_store.put_object_bytes(
                 object_key=validation_storage_key,
@@ -282,6 +294,7 @@ class ValidationRoutingService:
                     "review_task_id": review_task_id,
                     "field_evidence_link_count": len(item.field_evidence_links),
                     "runtime_notes": runtime_notes,
+                    "collection_ai_assessment": collection_ai_assessment,
                 },
             )
             usage_record = _build_usage_record(
@@ -348,6 +361,7 @@ class ValidationRoutingService:
                     request_id=request_id,
                     stage_status="completed",
                     error_summary=None,
+                    collection_ai_assessment=collection_ai_assessment,
                 ),
             )
         except Exception as exc:
@@ -455,6 +469,7 @@ def _compute_validation_issue_codes(
         issues.add("required_field_missing")
 
     product_type = _string_or_none(candidate_record.get("product_type"))
+    product_type_family = _canonical_product_type_family(product_type)
     subtype_code = _string_or_none(candidate_record.get("subtype_code"))
     if not dynamic_product_type and product_type not in taxonomy_registry:
         issues.add("invalid_taxonomy_code")
@@ -488,7 +503,10 @@ def _compute_validation_issue_codes(
             continue
         contract = field_contract(field_name)
         is_annual_rate = field_name in _ANNUAL_RATE_FIELDS or (
-            contract is not None and contract.unit == "percentage_points" and field_name != "highest_rate"
+            product_type_family in {"chequing", "savings", "gic"}
+            and contract is not None
+            and contract.unit == "percentage_points"
+            and field_name != "highest_rate"
         )
         is_rate = field_name in _RATE_FIELDS or (contract is not None and contract.unit == "percentage_points")
         is_fee = field_name in _FEE_FIELDS or (
@@ -500,6 +518,8 @@ def _compute_validation_issue_codes(
         ):
             issues.add("invalid_numeric_range")
         if field_name == "highest_rate" and not (Decimal("0") <= decimal_value <= Decimal("100")):
+            issues.add("invalid_numeric_range")
+        if is_rate and not is_annual_rate and field_name != "highest_rate" and decimal_value >= Decimal("100"):
             issues.add("invalid_numeric_range")
         if not is_rate and decimal_value < 0:
             issues.add("invalid_numeric_range")
@@ -563,7 +583,6 @@ def _compute_validation_issue_codes(
         if integer_value is None or integer_value < 1:
             issues.add("invalid_term_value")
 
-    product_type_family = _canonical_product_type_family(product_type)
     requiredness_type = product_type_family or product_type
     if requiredness_type == "chequing":
         if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
@@ -755,6 +774,7 @@ def _compute_source_confidence(
     validation_issue_codes: list[str],
     runtime_notes: list[str],
     dynamic_product_type: bool = False,
+    collection_ai_assessment: dict[str, object] | None = None,
 ) -> float:
     product_type = _string_or_none(candidate_record.get("product_type"))
     required_fields = [
@@ -806,7 +826,9 @@ def _compute_source_confidence(
         score -= 0.15
     if "partial_source_failure" in validation_issue_codes:
         score -= 0.08
-    if dynamic_product_type:
+    if dynamic_product_type and bool((collection_ai_assessment or {}).get("eligible")):
+        score += 0.08 * float((collection_ai_assessment or {}).get("verified_ratio") or 0.0)
+    elif dynamic_product_type:
         score = min(score - 0.08, 0.72)
     return round(max(0.0, min(0.99, score)), 4)
 
@@ -818,6 +840,7 @@ def _route_candidate(
     source_confidence: float,
     routing_config: ValidationRoutingConfig,
     dynamic_product_type: bool = False,
+    collection_ai_assessment: dict[str, object] | None = None,
 ) -> dict[str, object]:
     queue_reason_codes: list[str] = []
     if validation_status == "error":
@@ -831,8 +854,9 @@ def _route_candidate(
     ):
         if code in validation_issue_codes and code not in queue_reason_codes:
             queue_reason_codes.append(code)
-    if dynamic_product_type and "manual_sampling_review" not in queue_reason_codes:
-        queue_reason_codes.append("manual_sampling_review")
+    ai_grounding_eligible = bool((collection_ai_assessment or {}).get("eligible"))
+    if dynamic_product_type and not ai_grounding_eligible and "ai_grounding_insufficient" not in queue_reason_codes:
+        queue_reason_codes.append("ai_grounding_insufficient")
 
     force_review = any(code in routing_config.force_review_issue_codes for code in validation_issue_codes)
     warning_requires_review = validation_status == "warning" and source_confidence < routing_config.review_warning_confidence_floor
@@ -843,7 +867,7 @@ def _route_candidate(
         and not warning_requires_review
     )
 
-    if dynamic_product_type:
+    if dynamic_product_type and not ai_grounding_eligible:
         review_required = True
     elif routing_config.routing_mode == "prototype":
         if "manual_sampling_review" not in queue_reason_codes:
@@ -869,6 +893,105 @@ def _uses_dynamic_product_type(*, product_type: str | None, source_metadata: dic
     if product_type in {"chequing", "savings", "gic"}:
         return False
     return bool(source_metadata.get("product_type_dynamic", True))
+
+
+def _assess_collection_ai_grounding(
+    *,
+    candidate_record: dict[str, object],
+    candidate_payload: dict[str, object],
+    expected_fields: list[str],
+    dynamic_product_type: bool,
+    threshold: float,
+) -> dict[str, object]:
+    """Decide whether official AI evidence can replace blanket manual review.
+
+    The assessment intentionally ignores optional marketing copy. It covers
+    product identity, known decision-priority fields, and every populated
+    typed numeric/boolean/structured field in the registered product contract.
+    Validation and force-review policies still run independently afterward.
+    """
+
+    normalized_threshold = max(0.0, min(1.0, float(threshold)))
+    if not dynamic_product_type:
+        return {
+            "required": False,
+            "eligible": True,
+            "threshold": normalized_threshold,
+            "assessed_fields": [],
+            "verified_fields": [],
+            "unverified_fields": [],
+            "verified_ratio": 1.0,
+            "product_identity_verified": False,
+            "official_sources": [],
+            "reason_codes": [],
+        }
+
+    product_type = _string_or_none(candidate_record.get("product_type"))
+    mapping_metadata = candidate_record.get("field_mapping_metadata")
+    mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
+    priority_fields = set(_dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields))
+    priority_fields.add("product_name")
+    assessed_fields = set(priority_fields)
+    for field_name in expected_fields:
+        value = candidate_payload.get(field_name)
+        contract = field_contract(field_name)
+        if value in (None, "", [], {}) or contract is None or contract.value_type == "string":
+            continue
+        assessed_fields.add(field_name)
+
+    verified_fields: list[str] = []
+    official_sources: dict[str, dict[str, str]] = {}
+    for field_name in sorted(assessed_fields):
+        metadata = mappings.get(field_name)
+        if not isinstance(metadata, dict):
+            continue
+        sources = metadata.get("official_web_sources")
+        valid_sources = [
+            source
+            for source in sources
+            if isinstance(source, dict) and str(source.get("url") or "").strip()
+        ] if isinstance(sources, list) else []
+        if (
+            metadata.get("official_grounding_contract_version") == "collection-official-grounding-v1"
+            and str(metadata.get("official_verification_status") or "") in {"match", "mismatch"}
+            and str(metadata.get("official_evidence_quote") or "").strip()
+            and valid_sources
+        ):
+            verified_fields.append(field_name)
+            for source in valid_sources:
+                url = str(source.get("url") or "").strip()
+                official_sources[url] = {
+                    "url": url,
+                    "title": str(source.get("title") or url),
+                }
+
+    assessed = sorted(assessed_fields)
+    verified = sorted(set(verified_fields))
+    verified_ratio = len(verified) / len(assessed) if assessed else 0.0
+    product_identity_verified = "product_name" in verified
+    reason_codes: list[str] = []
+    if not product_identity_verified:
+        reason_codes.append("product_identity_unverified")
+    if len(verified) < 2:
+        reason_codes.append("verified_field_count_below_minimum")
+    if not official_sources:
+        reason_codes.append("official_source_missing")
+    if verified_ratio < normalized_threshold:
+        reason_codes.append("verified_field_ratio_below_threshold")
+    return {
+        "required": True,
+        "eligible": not reason_codes,
+        "contract_version": "collection-official-grounding-v1",
+        "threshold": normalized_threshold,
+        "minimum_verified_field_count": 2,
+        "assessed_fields": assessed,
+        "verified_fields": verified,
+        "unverified_fields": [field_name for field_name in assessed if field_name not in set(verified)],
+        "verified_ratio": round(verified_ratio, 6),
+        "product_identity_verified": product_identity_verified,
+        "official_sources": [official_sources[url] for url in sorted(official_sources)],
+        "reason_codes": reason_codes,
+    }
 
 
 def _canonical_product_type_family(product_type: str | None) -> str | None:
@@ -964,6 +1087,7 @@ def _build_validation_artifact_payload(
     routing_config: ValidationRoutingConfig,
     runtime_notes: list[str],
     started_at: str,
+    collection_ai_assessment: dict[str, object],
 ) -> dict[str, object]:
     return {
         "run_id": run_id,
@@ -983,7 +1107,9 @@ def _build_validation_artifact_payload(
             "auto_approve_min_confidence": routing_config.auto_approve_min_confidence,
             "review_warning_confidence_floor": routing_config.review_warning_confidence_floor,
             "force_review_issue_codes": sorted(routing_config.force_review_issue_codes),
+            "ai_auto_approve_min_verified_ratio": routing_config.ai_auto_approve_min_verified_ratio,
         },
+        "collection_ai_assessment": collection_ai_assessment,
         "candidate_before": candidate_before,
         "candidate_after": candidate_after,
         "field_evidence_links": [
@@ -1069,6 +1195,7 @@ def _build_run_source_item_record(
     request_id: str | None,
     stage_status: str,
     error_summary: str | None,
+    collection_ai_assessment: dict[str, object] | None = None,
 ) -> dict[str, object]:
     digest = sha256(f"{run_id}|{item.source_document_id}".encode("utf-8")).hexdigest()[:16]
     return {
@@ -1098,6 +1225,7 @@ def _build_run_source_item_record(
             "runtime_notes": runtime_notes,
             "correlation_id": correlation_id,
             "request_id": request_id,
+            "collection_ai_assessment": collection_ai_assessment,
         },
     }
 

@@ -639,6 +639,26 @@ Contract:
 
 Repeated runs are append-only. `GET /api/admin/review-tasks/:id` exposes the newest attempt through `ai_verification`; provider, source, or schema failures remain readable and do not mutate product data.
 
+### 5.3B Collection and Existing Queue AI Correction
+
+This is a service workflow rather than a browser route. The source-collection
+runner invokes it automatically for a bounded residual Review set when policy
+and provider are enabled; an explicit existing-queue remediation may reuse the
+same contract. It reuses `POST .../ai-verify` service semantics, then:
+
+- applies only sanitized cited mismatches to the queued candidate and preserves
+  review state while scoring;
+- calculates `(match + applied mismatch) / requested fields`, so omitted model
+  fields and `unverified` results count against the score;
+- requires verified `product_name`, an official source, no remaining correction,
+  and score `>= 0.80` for automatic approval;
+- invokes the existing review decision and country aggregate-refresh contracts
+  for eligible candidates; lower scores remain `queued`/`deferred`;
+- persists the assessment in `model_execution.execution_metadata` and emits
+  `review_ai_corrections_applied` plus normal verification/approval audit events.
+- reuses a completed attempt and assessment after runner restart, and bounds
+  automatic calls with `COLLECTION_AI_REVIEW_AUTOPILOT_MAX_CANDIDATES`.
+
 ### 5.4 Review Decision Routes
 
 결정 route baseline:
@@ -978,6 +998,25 @@ Vector-assisted rules:
 - `score` may blend lexical and vector signals, but the response must remain traceable to an `evidence_chunk_id`.
 - vector-specific detail may appear in internal `match_metadata`, but public APIs must not expose vector metadata.
 - if pgvector infrastructure or embedding rows are unavailable, the worker must return `applied_retrieval_mode=metadata-only` with a runtime note instead of failing extraction.
+
+### 6.4A Collection Official-Grounding Interface
+
+For a candidate-producing detail source and a configured OpenAI provider, the
+extraction boundary sends one structured request containing:
+
+- exact bank, country, Product Type, product name, language, and origin URL;
+- the canonical official-domain allowlist from the selected collection scope;
+- the complete resolved field list and executable field contract;
+- current extracted values and up to 24 prioritized fresh evidence chunks.
+
+The request requires live web search and structured `match`, `mismatch`, or
+`unverified` field results. A retained field must include a canonical JSON
+value, selected `evidence_chunk_id`, exact quote, confidence, rationale, and at
+least one official URL present in the provider's consulted-source metadata.
+Off-domain, unconsulted, unquoted, malformed, or unverified results are ignored.
+Execution/usage/consulted-source metadata remains private and traceable.
+Supporting/entry sources and unconfigured or failed providers retain the
+deterministic extraction path.
 
 ### 6.5 Schema Lookup and Normalization Interface
 

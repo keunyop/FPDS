@@ -201,7 +201,14 @@ Current live product-type onboarding note:
 - Homepage-first discovery may infer a bounded discovery profile from the stored display name, description, and discovery keywords. For example, a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals, while generated source rows still preserve the registered product type code.
 - the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
 - generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
-- Operator-managed product types without specialized parser support, including the current lending baseline, continue through generic AI extraction/normalization fallback and are forced into manual review. Following the 2026-07-14 Product Owner decision, review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products are included in the Public aggregate snapshot; unreviewed candidates remain non-public.
+- Operator-managed product types without specialized parser support, including
+  the current lending baseline, continue through generic AI
+  extraction/normalization. They may use normal policy auto-approval only when
+  the persisted official-grounding assessment verifies product identity, at
+  least two decision fields, and at least `80%` of assessed decision fields;
+  otherwise they remain in Review. Approved `mortgage`, `personal-loan`, and
+  `line-of-credit` products are included in the Public aggregate snapshot;
+  unapproved candidates remain non-public.
 - Source collection plans and extraction artifacts must carry `product_family` from the product type registry so lending candidates are not normalized as deposits.
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
@@ -222,11 +229,29 @@ For this policy, `collect` means:
 6. run normal validation/routing behavior
 7. create `review_task` rows when the candidate is not auto-clear
 8. promote policy-clear `auto_validated` candidates through the audited canonical upsert path
+9. when enabled, AI-verify and safely correct a bounded set of active detail
+   review tasks left by this run
+10. system-approve only candidates meeting the full-field threshold and queue
+    the normal country aggregate refresh; retain every other candidate in Review
+
+Configured collection extraction performs a bounded current-official-source
+grounding pass for each candidate-producing detail source before normalization.
+The registry supplies the canonical official-domain allowlist and normalized
+origin URL. Values remain eligible only when a consulted allowlisted URL and
+an exact quote from the fresh captured chunk agree; provider failure falls back
+to deterministic extraction and does not weaken review or publication gates.
+For dynamic/lending candidates, this grounding also produces a persisted
+decision-field eligibility assessment. A passing assessment removes the old
+blanket manual-review rule but does not remove any validator, force-review,
+source-role, product-boundary, canonical, audit, or aggregate-refresh guard.
 
 Important rules:
 - the run must persist which source rows were selected so the collection scope is reproducible later
 - the run must carry exactly one country and every worker-stage
   `ingestion_run` upsert must persist that `country_code`
+- a worker subprocess failure must retain the exact failed stage plus a
+  bounded, credential-redacted diagnostic in private run metadata; a generic
+  exit code alone is not sufficient operational evidence
 - `detail` sources are the default candidate-producing scope
 - supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
 - only `detail` sources create primary standalone candidates; supporting and linked sources remain evidence-only even when selected or auto-included

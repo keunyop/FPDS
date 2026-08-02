@@ -71,6 +71,43 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
 
 
 class CandidateAutoPromotionTests(unittest.TestCase):
+    def test_dynamic_candidate_without_persisted_ai_assessment_returns_to_review(self) -> None:
+        invalid_assessments = [
+            None,
+            {
+                "contract_version": "collection-official-grounding-v1",
+                "required": True,
+                "eligible": True,
+                "threshold": 0.8,
+                "verified_ratio": 1.0,
+                "product_identity_verified": True,
+                "verified_fields": ["mortgage_rate", "product_name"],
+                "official_sources": [],
+            },
+        ]
+        for assessment in invalid_assessments:
+            with self.subTest(assessment=assessment):
+                candidate = _candidate_row()
+                candidate.update(
+                    {
+                        "product_family": "lending",
+                        "product_type": "mortgage",
+                        "subtype_code": "other",
+                        "product_name": "Five-Year Fixed Mortgage",
+                        "collection_ai_assessment": assessment,
+                    }
+                )
+                connection = _Connection(
+                    [_policy_rows(), [candidate], None, {"review_task_id": "review-ai-grounding"}, None]
+                )
+
+                result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+                self.assertEqual(result["promoted_count"], 0)
+                self.assertEqual(result["skipped_items"][0]["skip_reason"], "ai_grounding_insufficient")
+                self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+                self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
     def test_pass_candidate_promotes_to_canonical_with_audit_and_refresh(self) -> None:
         decided_at = datetime(2026, 5, 13, 12, 0, tzinfo=UTC)
         connection = _Connection(
@@ -121,6 +158,59 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(refresh_call["country_code"], "CA")
         self.assertIn('"candidate_ids": ["cand-001"]', str(refresh_call["request_metadata"]))
         self.assertEqual(result["aggregate_refreshes"], [result["aggregate_refresh"]])
+
+    def test_dynamic_candidate_with_eligible_ai_assessment_can_promote(self) -> None:
+        candidate = _candidate_row()
+        candidate.update(
+            {
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "subtype_code": "other",
+                "product_name": "Five-Year Fixed Mortgage",
+                "collection_ai_assessment": {
+                    "contract_version": "collection-official-grounding-v1",
+                    "required": True,
+                    "eligible": True,
+                    "threshold": 0.8,
+                    "verified_ratio": 1.0,
+                    "product_identity_verified": True,
+                    "verified_fields": ["mortgage_rate", "product_name", "rate_type", "term_length_text"],
+                    "official_sources": [
+                        {"url": "https://www.td.com/ca/en/personal-banking/products/mortgages/rates"}
+                    ],
+                },
+            }
+        )
+        candidate["candidate_payload"] = {
+            "product_name": "Five-Year Fixed Mortgage",
+            "mortgage_rate": 4.25,
+            "rate_type": "fixed",
+            "term_length_text": "5 years",
+            "status": "active",
+        }
+        connection = _Connection(
+            [
+                _policy_rows(),
+                [candidate],
+                None,
+                None,
+                [],
+                None,
+                None,
+                None,
+                None,
+                None,
+                [],
+                None,
+            ]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 1)
+        audit_call = next(params for sql, params in connection.calls if "candidate_auto_promoted" in sql)
+        self.assertIn('"product_identity_verified": true', str(audit_call["event_payload"]))
+        self.assertIn('"verified_ratio": 1.0', str(audit_call["event_payload"]))
 
     def test_approval_supersedes_older_same_source_review_with_audit(self) -> None:
         candidate = _candidate_row()

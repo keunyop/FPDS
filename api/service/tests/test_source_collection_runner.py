@@ -4,6 +4,8 @@ import json
 import subprocess
 import shutil
 import unittest
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +13,35 @@ from api_service import source_collection_runner
 
 
 class SourceCollectionRunnerTests(unittest.TestCase):
+    def test_mark_run_failed_persists_structured_worker_failure(self) -> None:
+        connection = MagicMock()
+        manager = MagicMock()
+        manager.__enter__.return_value = connection
+        manager.__exit__.return_value = False
+        failure = source_collection_runner.WorkerStageError(
+            stage_name="fpds_snapshot",
+            failure_kind="nonzero_exit",
+            return_code=1,
+            diagnostic="psql command failed: country_code is required",
+        )
+
+        with (
+            patch("api_service.source_collection_runner.Settings.from_env", return_value=MagicMock()),
+            patch("api_service.source_collection_runner.open_connection", return_value=manager),
+        ):
+            source_collection_runner._mark_run_failed(
+                run_id="run-001",
+                stage_name="source_collection",
+                error_summary=str(failure),
+                failure_metadata=source_collection_runner._stage_failure_metadata(failure),
+            )
+
+        params = connection.execute.call_args.args[1]
+        metadata = json.loads(params["run_metadata"])
+        self.assertEqual(metadata["pipeline_stage"], "source_collection")
+        self.assertEqual(metadata["failed_stage"], "fpds_snapshot")
+        self.assertEqual(metadata["stage_failure"]["return_code"], 1)
+
     def test_logical_review_supersession_records_system_audit(self) -> None:
         stale_cursor = MagicMock()
         stale_cursor.fetchall.return_value = [
@@ -146,6 +177,10 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary") as persist_summary,
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
+            patch(
+                "api_service.source_collection_runner._run_collection_review_ai_autopilot_for_run",
+                return_value={"approved_count": 0},
+            ),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
 
@@ -271,6 +306,10 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary"),
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
+            patch(
+                "api_service.source_collection_runner._run_collection_review_ai_autopilot_for_run",
+                return_value={"approved_count": 0},
+            ),
         ):
             source_collection_runner._run_group(plan=plan, group=group)
 
@@ -435,6 +474,14 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         )
 
         self.assertEqual(payload["allowed_domains"], ["rbcroyalbank.com"])
+        self.assertEqual(
+            payload["sources"][0]["official_domain_allowlist"],
+            ["rbcroyalbank.com"],
+        )
+        self.assertEqual(
+            payload["sources"][0]["normalized_source_url"],
+            "https://www.rbcroyalbank.com/accounts/",
+        )
 
     def test_run_stage_raises_clear_error_when_worker_stage_times_out(self) -> None:
         with (
@@ -447,6 +494,44 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(RuntimeError, "fpds_snapshot timed out after 120 seconds."):
                 source_collection_runner._run_stage("worker.discovery.fpds_snapshot", ["--run-id", "run-001"])
+
+    def test_run_stage_preserves_bounded_redacted_nonzero_exit_diagnostic(self) -> None:
+        stderr = (
+            "connection postgresql://operator:super-secret@db.example/fpds failed\n"
+            "RuntimeError: psql command failed: ERROR: null value in column country_code violates not-null constraint\n"
+        )
+        captured_stderr = StringIO()
+        with redirect_stderr(captured_stderr):
+            with (
+                patch("api_service.source_collection_runner.shutil.which", return_value="uv"),
+                patch(
+                    "api_service.source_collection_runner.subprocess.run",
+                    return_value=subprocess.CompletedProcess(
+                        args=["uv"],
+                        returncode=1,
+                        stdout="",
+                        stderr=stderr,
+                    ),
+                ),
+            ):
+                with self.assertRaises(source_collection_runner.WorkerStageError) as raised:
+                    source_collection_runner._run_stage(
+                        "worker.discovery.fpds_snapshot",
+                        ["--run-id", "run-001"],
+                    )
+
+        error = raised.exception
+        self.assertEqual(error.stage_name, "fpds_snapshot")
+        self.assertEqual(error.failure_kind, "nonzero_exit")
+        self.assertEqual(error.return_code, 1)
+        self.assertIn("null value in column country_code", str(error))
+        self.assertNotIn("super-secret", str(error))
+        self.assertIn("postgresql://[redacted]@db.example/fpds", captured_stderr.getvalue())
+        self.assertNotIn("super-secret", captured_stderr.getvalue())
+        metadata = source_collection_runner._stage_failure_metadata(error)
+        self.assertEqual(metadata["failed_stage"], "fpds_snapshot")
+        self.assertEqual(metadata["stage_failure"]["return_code"], 1)
+        self.assertIn("country_code", metadata["stage_failure"]["diagnostic"])
 
     def test_run_stage_recovers_completed_persistence_output_emitted_before_timeout(self) -> None:
         completed_output = {

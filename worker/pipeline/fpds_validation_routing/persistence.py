@@ -258,6 +258,10 @@ FROM (
             auto_approve_min_confidence=_coerce_policy_number(policy_map.get("AUTO_APPROVE_MIN_CONFIDENCE"), 1.0),
             review_warning_confidence_floor=_coerce_policy_number(policy_map.get("REVIEW_WARNING_CONFIDENCE_FLOOR"), 0.0),
             force_review_issue_codes=_coerce_policy_codes(policy_map.get("FORCE_REVIEW_ISSUE_CODES")),
+            ai_auto_approve_min_verified_ratio=_coerce_policy_number(
+                policy_map.get("AI_AUTO_APPROVE_MIN_VERIFIED_FIELD_RATIO"),
+                0.8,
+            ),
         )
 
     def persist_validation_result(

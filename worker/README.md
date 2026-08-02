@@ -31,3 +31,13 @@ Runtime invariants:
 - product-title extraction prefers high-confidence official location-gated
   page identity and removes SEO action suffixes while rejecting legal
   documents, enrollment CTAs, calculators, and other non-product headings
+- configured OpenAI collection runs apply one official-domain grounding pass to
+  every candidate-producing `detail` source, including the standard Product
+  Types. The pass receives the full active field contract and may replace or
+  supplement a field only when the provider actually consulted an allowlisted
+  official URL and the model returns an exact quote from the freshly captured
+  evidence chunk. Supporting sources remain evidence-only, and provider
+  unavailability falls back to the existing heuristic extraction path.
+- dynamic/lending candidates that verify official product identity, at least
+  two decision fields, and the configured `80%` decision-field ratio may use
+  normal Phase 1 auto-validation; insufficient grounding remains review-bound

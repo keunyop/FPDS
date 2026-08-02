@@ -6,6 +6,8 @@ from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 import json
 import re
+from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from worker.pipeline.fpds_ai_runtime import (
     configured_model_id,
@@ -82,6 +84,14 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "newcomer_plan_flag",
     "notes",
 )
+_AI_SAFE_RATE_FIELDS = {
+    "standard_rate",
+    "base_12_month_rate",
+    "promotional_rate",
+    "public_display_rate",
+    "highest_rate",
+}
+_AI_SAFE_MONTHLY_FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _COMMON_DEFAULT_FIELDS = {
     "product_name",
     "description_short",
@@ -500,26 +510,35 @@ class ExtractionService:
             completion_tokens = 0
             provider_request_id = None
 
-            if _uses_dynamic_product_type(context):
-                ai_fields, ai_notes, ai_usage = _extract_dynamic_fields_with_ai(
+            ai_usage: dict[str, Any] | None = None
+            if _uses_official_ai_grounding(context) and llm_provider_configured():
+                ai_fields, ai_notes, ai_usage = _extract_official_fields_with_ai(
                     context=context,
                     candidates=extraction_input.candidates,
                     requested_fields=field_names,
+                    collected_fields=extracted_fields,
                 )
                 runtime_notes.extend(ai_notes)
                 if ai_fields:
                     extracted_fields = _merge_extracted_fields(base_fields=extracted_fields, ai_fields=ai_fields)
                 if ai_usage:
-                    agent_name = "fpds-dynamic-product-extractor"
+                    agent_name = "fpds-official-product-grounding-agent"
                     model_id = str(ai_usage["model_id"])
                     prompt_tokens = int(ai_usage.get("prompt_tokens") or 0)
                     completion_tokens = int(ai_usage.get("completion_tokens") or 0)
                     provider_request_id = ai_usage.get("provider_request_id")
                     usage_metadata = {
-                        "usage_mode": "openai-dynamic-product-extraction",
+                        "usage_mode": "openai-official-product-grounding",
                         "provider": "openai",
                         "model_id": model_id,
+                        "require_web_search": True,
+                        "official_domain_allowlist": _official_domain_allowlist(context),
+                        "official_web_sources": list(ai_usage.get("web_search_sources") or []),
                     }
+            elif _uses_dynamic_product_type(context):
+                runtime_notes.append(
+                    "Dynamic product extraction kept heuristic mode because the OpenAI provider or API key was not configured."
+                )
             evidence_links = [
                 EvidenceLinkDraft(
                     field_name=field.field_name,
@@ -608,6 +627,15 @@ class ExtractionService:
                     "evidence_link_count": len(evidence_links),
                     "extracted_storage_key": extracted_storage_key,
                     "metadata_storage_key": metadata_storage_key,
+                    "official_grounding_contract_version": (
+                        "collection-official-grounding-v1" if ai_usage else None
+                    ),
+                    "official_domain_allowlist": (
+                        _official_domain_allowlist(context) if ai_usage else []
+                    ),
+                    "official_web_sources": (
+                        list(ai_usage.get("web_search_sources") or []) if ai_usage else []
+                    ),
                 },
             )
             usage_record = _build_usage_record(
@@ -914,6 +942,11 @@ def _extract_from_matches(
             anchor_value=match.anchor_value,
         )
         if candidate_value is None:
+            continue
+        if not _ai_candidate_value_is_contract_safe(
+            field_name=field_name,
+            value=candidate_value,
+        ):
             continue
         confidence = round(min(0.99, max(0.55, match.score)), 4)
         extracted_field = ExtractedFieldCandidate(
@@ -2847,6 +2880,34 @@ def _uses_dynamic_product_type(context: ExtractionDocumentContext) -> bool:
     return bool(context.source_metadata.get("product_type_dynamic", True))
 
 
+def _uses_official_ai_grounding(context: ExtractionDocumentContext) -> bool:
+    discovery_role = str(context.source_metadata.get("discovery_role") or "detail").strip().lower()
+    if discovery_role != "detail":
+        return False
+    return bool(_official_domain_allowlist(context))
+
+
+def _official_domain_allowlist(context: ExtractionDocumentContext) -> list[str]:
+    configured = context.source_metadata.get("official_domain_allowlist")
+    values = list(configured) if isinstance(configured, (list, tuple, set)) else []
+    values.extend(
+        str(context.source_metadata.get(key) or "")
+        for key in ("normalized_source_url", "source_url")
+    )
+    domains: list[str] = []
+    for value in values:
+        raw = str(value or "").strip()
+        if not raw:
+            continue
+        parsed = urlsplit(raw if "://" in raw else f"https://{raw}")
+        host = (parsed.hostname or "").strip(".").lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if host and "." in host and host not in domains:
+            domains.append(host)
+    return domains[:20]
+
+
 def _canonical_product_type_family(product_type: str | None) -> str | None:
     normalized = str(product_type or "").strip().lower()
     if normalized in _CANONICAL_PRODUCT_TYPES:
@@ -3009,15 +3070,13 @@ def _merge_extracted_fields(
     return _dedupe_fields(merged)
 
 
-def _extract_dynamic_fields_with_ai(
+def _extract_official_fields_with_ai(
     *,
     context: ExtractionDocumentContext,
     candidates: list[EvidenceChunkCandidate],
     requested_fields: list[str],
+    collected_fields: list[ExtractedFieldCandidate],
 ) -> tuple[list[ExtractedFieldCandidate], list[str], dict[str, Any] | None]:
-    if not llm_provider_configured():
-        return [], ["Dynamic product extraction kept heuristic mode because the OpenAI provider or API key was not configured."], None
-
     candidate_map = {candidate.evidence_chunk_id: candidate for candidate in candidates}
     ai_requested_fields = [
         field_name
@@ -3030,68 +3089,162 @@ def _extract_dynamic_fields_with_ai(
         "additionalProperties": False,
         "properties": {
             "summary": {"type": "string"},
-            "field_candidates": {
+            "fields": {
                 "type": "array",
+                "maxItems": 60,
                 "items": {
                     "type": "object",
                     "additionalProperties": False,
                     "properties": {
                         "field_name": {"type": "string"},
-                        "candidate_value": {"type": "string"},
-                        "value_type": {"type": "string", "enum": ["string", "decimal", "integer", "boolean", "json"]},
+                        "status": {"type": "string", "enum": ["match", "mismatch", "unverified"]},
+                        "has_verified_value": {"type": "boolean"},
+                        "verified_value_json": {"type": "string"},
                         "evidence_chunk_id": {"type": "string"},
-                        "confidence": {"type": "number"},
+                        "evidence_quote": {"type": "string"},
+                        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                        "rationale": {"type": "string"},
+                        "sources": {
+                            "type": "array",
+                            "maxItems": 5,
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "properties": {
+                                    "url": {"type": "string"},
+                                    "title": {"type": "string"},
+                                },
+                                "required": ["url", "title"],
+                            },
+                        },
                     },
-                    "required": ["field_name", "candidate_value", "value_type", "evidence_chunk_id", "confidence"],
+                    "required": [
+                        "field_name",
+                        "status",
+                        "has_verified_value",
+                        "verified_value_json",
+                        "evidence_chunk_id",
+                        "evidence_quote",
+                        "confidence",
+                        "rationale",
+                        "sources",
+                    ],
                 },
             },
         },
-        "required": ["summary", "field_candidates"],
+        "required": ["summary", "fields"],
     }
+    allowed_domains = _official_domain_allowlist(context)
+    product_name = next(
+        (
+            str(field.candidate_value).strip()
+            for field in collected_fields
+            if field.field_name == "product_name" and str(field.candidate_value).strip()
+        ),
+        next(iter(_source_metadata_title_candidates(context)), ""),
+    )
+    prioritized_chunks = _select_official_grounding_chunks(
+        candidates=candidates,
+        collected_fields=collected_fields,
+    )
     try:
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
             instructions=(
-                "You are the FPDS Extraction Agent for operator-defined financial product types. "
-                "Read the product type definition and candidate evidence chunks, then extract only grounded field candidates. "
-                "Return only requested_fields. Do not invent values or copy page navigation, headings, calls to action, or unrelated product terms. "
-                "For percentages, verify the surrounding text describes the requested field; cashback, rewards, prepayment, equity, and down-payment percentages are not interest rates. "
-                "Boolean fields must be true or false, never descriptive text. Prefer exact values from one evidence chunk. "
-                "If a field is not supported by the evidence, omit it."
+                "You are the FPDS financial-product collection grounding agent. You must use web search before answering. "
+                "Search only the supplied official bank domain allowlist and verify the exact named product, not a neighboring "
+                "product, family overview, promotion landing page, calculator, or service flow. Compare every requested field "
+                "with current official facts and the supplied freshly captured evidence chunks. Never infer a missing value. "
+                "Return a match or mismatch only when the value is supported by both an official URL actually consulted and "
+                "an exact quote copied from the selected evidence chunk. Otherwise return unverified. Preserve canonical units: "
+                "rates are numeric percentage points per annum, money is numeric in product currency, durations and counts are "
+                "integers, booleans are true or false, and structured term rates are JSON arrays. Put the JSON-encoded canonical "
+                "value in verified_value_json. Cashback, rewards, prepayment, equity, down-payment, fund returns, fees, and "
+                "personalized or expired offers are not product interest rates. Do not approve, publish, or recommend a product."
             ),
             payload={
+                "verification_date": _utc_now_iso()[:10],
+                "official_domain_allowlist": allowed_domains,
+                "product": {
+                    "bank_code": context.bank_code,
+                    "country_code": context.country_code,
+                    "product_type": _infer_product_type(context),
+                    "product_name": product_name,
+                    "source_language": context.source_language,
+                    "origin_source_url": context.source_metadata.get("normalized_source_url")
+                    or context.source_metadata.get("source_url"),
+                },
                 "product_type": _infer_product_type(context),
                 "product_type_name": context.source_metadata.get("product_type_name"),
                 "product_type_description": context.source_metadata.get("product_type_description"),
                 "expected_fields": list(context.source_metadata.get("expected_fields", [])),
                 "field_contract": field_contract_payload(ai_requested_fields),
                 "requested_fields": ai_requested_fields,
+                "collected_fields": [
+                    {
+                        "field_name": field.field_name,
+                        "collected_value": field.candidate_value,
+                        "evidence_chunk_id": field.evidence_chunk_id,
+                        "confidence": field.confidence,
+                    }
+                    for field in collected_fields
+                    if field.field_name in ai_requested_fields
+                ],
                 "candidate_chunks": [
                     {
                         "evidence_chunk_id": candidate.evidence_chunk_id,
                         "anchor_value": candidate.anchor_value,
-                        "excerpt": candidate.evidence_excerpt[:1200],
+                        "excerpt": candidate.evidence_excerpt[:1800],
                     }
-                    for candidate in candidates[:12]
+                    for candidate in prioritized_chunks
                 ],
             },
-            schema_name="dynamic_product_extraction",
+            schema_name="collection_official_product_grounding",
             schema=schema,
+            web_search_allowed_domains=allowed_domains,
+            require_web_search=True,
         )
     except Exception as exc:
-        return [], [f"Dynamic product extraction AI fallback was unavailable: {exc}"], None
+        return [], [f"Official product grounding was unavailable; collection kept evidence-first extraction: {exc}"], None
 
+    provider_sources = _filter_official_web_sources(
+        list(usage.get("web_search_sources") or []),
+        allowed_domains=allowed_domains,
+    )
+    provider_source_by_url = {item["url"]: item for item in provider_sources}
     extracted_fields: list[ExtractedFieldCandidate] = []
-    for item in response_payload.get("field_candidates", []):
+    seen_fields: set[str] = set()
+    for item in response_payload.get("fields", []):
         field_name = str(item.get("field_name") or "").strip()
+        if field_name in seen_fields:
+            continue
+        seen_fields.add(field_name)
         evidence_chunk_id = str(item.get("evidence_chunk_id") or "").strip()
         if field_name not in ai_requested_fields or evidence_chunk_id not in candidate_map:
             continue
+        if str(item.get("status") or "unverified") not in {"match", "mismatch"}:
+            continue
+        if not bool(item.get("has_verified_value")):
+            continue
         candidate = candidate_map[evidence_chunk_id]
+        evidence_quote = str(item.get("evidence_quote") or "").strip()
+        if not _exact_quote_is_grounded(quote=evidence_quote, excerpt=candidate.evidence_excerpt):
+            continue
+        cited_sources = _validated_field_sources(
+            item.get("sources"),
+            provider_source_by_url=provider_source_by_url,
+            allowed_domains=allowed_domains,
+        )
+        if not cited_sources:
+            continue
+        try:
+            verified_value = json.loads(str(item.get("verified_value_json") or ""))
+        except (json.JSONDecodeError, TypeError, ValueError):
+            continue
         candidate_value = _coerce_ai_candidate_value(
             field_name=field_name,
-            value=str(item.get("candidate_value") or ""),
-            value_type=str(item.get("value_type") or "string"),
+            value=_json_value_for_coercion(verified_value),
+            value_type=canonical_value_type(field_name),
         )
         if candidate_value is None:
             continue
@@ -3101,7 +3254,7 @@ def _extract_dynamic_fields_with_ai(
                 candidate_value=candidate_value,
                 value_type=canonical_value_type(field_name, str(item.get("value_type") or "string")),
                 confidence=round(min(0.99, max(0.5, float(item.get("confidence") or 0.75))), 4),
-                extraction_method="openai_dynamic_extractor",
+                extraction_method="openai_official_grounding",
                 source_document_id=context.source_document_id,
                 source_snapshot_id=context.snapshot_id,
                 evidence_chunk_id=candidate.evidence_chunk_id,
@@ -3110,7 +3263,14 @@ def _extract_dynamic_fields_with_ai(
                 anchor_value=candidate.anchor_value,
                 page_no=candidate.page_no,
                 chunk_index=candidate.chunk_index,
-                field_metadata={"dynamic_product_type": True},
+                field_metadata={
+                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_verification_status": str(item.get("status")),
+                    "official_web_sources": cited_sources,
+                    "evidence_quote": evidence_quote[:500],
+                    "rationale": str(item.get("rationale") or "")[:600],
+                    "dynamic_product_type": _uses_dynamic_product_type(context),
+                },
             )
         )
     notes = []
@@ -3118,8 +3278,156 @@ def _extract_dynamic_fields_with_ai(
     if summary:
         notes.append(summary)
     if extracted_fields:
-        notes.append(f"Dynamic product extraction AI supplemented {len(extracted_fields)} field candidate(s).")
+        notes.append(
+            f"Official-domain AI grounding verified or corrected {len(extracted_fields)} evidence-linked field candidate(s)."
+        )
+    usage = {
+        **usage,
+        "web_search_sources": provider_sources,
+        "official_domain_allowlist": allowed_domains,
+    }
     return extracted_fields, notes, usage
+
+
+def _select_official_grounding_chunks(
+    *,
+    candidates: list[EvidenceChunkCandidate],
+    collected_fields: list[ExtractedFieldCandidate],
+) -> list[EvidenceChunkCandidate]:
+    candidate_by_id = {candidate.evidence_chunk_id: candidate for candidate in candidates}
+    selected: list[EvidenceChunkCandidate] = []
+    seen: set[str] = set()
+    for field in collected_fields:
+        evidence_chunk_id = str(field.evidence_chunk_id or "")
+        candidate = candidate_by_id.get(evidence_chunk_id)
+        if candidate is None or evidence_chunk_id in seen:
+            continue
+        selected.append(candidate)
+        seen.add(evidence_chunk_id)
+    for candidate in candidates:
+        if candidate.evidence_chunk_id in seen:
+            continue
+        selected.append(candidate)
+        seen.add(candidate.evidence_chunk_id)
+        if len(selected) >= 24:
+            break
+    return selected[:24]
+
+
+def _filter_official_web_sources(
+    sources: list[object],
+    *,
+    allowed_domains: list[str],
+) -> list[dict[str, str]]:
+    output: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        url = _canonical_official_source_url(source.get("url"))
+        if (
+            not url
+            or url in seen
+            or not _url_matches_official_domains(url, allowed_domains=allowed_domains)
+        ):
+            continue
+        seen.add(url)
+        output.append(
+            {
+                "url": url,
+                "title": _normalize_text(str(source.get("title") or url))[:300],
+            }
+        )
+    return output[:100]
+
+
+def _validated_field_sources(
+    value: object,
+    *,
+    provider_source_by_url: dict[str, dict[str, str]],
+    allowed_domains: list[str],
+) -> list[dict[str, str]]:
+    if not isinstance(value, list):
+        return []
+    output: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for source in value[:5]:
+        if not isinstance(source, dict):
+            continue
+        url = _canonical_official_source_url(source.get("url"))
+        provider_source = provider_source_by_url.get(url)
+        if (
+            provider_source is None
+            or url in seen
+            or not _url_matches_official_domains(url, allowed_domains=allowed_domains)
+        ):
+            continue
+        seen.add(url)
+        output.append(provider_source)
+    return output
+
+
+def _url_matches_official_domains(url: str, *, allowed_domains: list[str]) -> bool:
+    host = (urlsplit(url).hostname or "").lower().strip(".")
+    return any(host == domain or host.endswith(f".{domain}") for domain in allowed_domains)
+
+
+def _canonical_official_source_url(value: object) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    parsed = urlsplit(raw)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        return ""
+    return urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path or "/", parsed.query, ""))
+
+
+def _exact_quote_is_grounded(*, quote: str, excerpt: str) -> bool:
+    normalized_quote = _normalize_text(quote).casefold()
+    normalized_excerpt = _normalize_text(excerpt).casefold()
+    return len(normalized_quote) >= 8 and normalized_quote in normalized_excerpt
+
+
+def _json_value_for_coercion(value: object) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return ""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True)
+    return str(value)
+
+
+def _ai_candidate_value_is_contract_safe(*, field_name: str, value: object) -> bool:
+    contract = field_contract(field_name)
+    if contract is None:
+        return True
+    if contract.value_type == "decimal":
+        try:
+            decimal_value = Decimal(str(value))
+        except (InvalidOperation, ValueError):
+            return False
+        if not decimal_value.is_finite():
+            return False
+        if decimal_value < 0:
+            return False
+        if contract.unit == "percentage_points":
+            max_rate = Decimal("25") if field_name in _AI_SAFE_RATE_FIELDS else Decimal("100")
+            if decimal_value >= max_rate:
+                return False
+        if field_name in _AI_SAFE_MONTHLY_FEE_FIELDS and decimal_value > Decimal("500"):
+            return False
+    if contract.value_type == "integer":
+        return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+    if contract.value_type == "boolean":
+        return isinstance(value, bool)
+    if contract.value_type == "json" and field_name == "term_rate_table":
+        return isinstance(value, list)
+    if contract.value_type == "string":
+        return isinstance(value, str) and bool(value.strip())
+    return True
 
 
 def _coerce_ai_candidate_value(*, field_name: str, value: str, value_type: str) -> object | None:

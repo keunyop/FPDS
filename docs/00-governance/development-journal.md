@@ -25,7 +25,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-07-30`:
+As of `2026-08-01`:
 - `WBS 5` is the active stage
 - US collection-failure hardening is complete, fully regression tested, and
   verified through audited shared-dev Bank of America recollection after
@@ -55,7 +55,8 @@ As of `2026-07-30`:
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
 - the FPDS Admin accuracy audit has retracted confirmed unsafe legacy/live candidates through audited remediation and added exact percentage evidence, promotion/standard-rate, fee, currency, source-role, and product-boundary guards; its representative recollection checkpoints remain documented in the recent entries
-- Review Detail now supports CSRF-protected, role-gated AI verification against registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; the existing human decision remains the only approval/publish boundary
+- Review Detail supports CSRF-protected, role-gated AI verification against country-scoped registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; interactive verification remains advisory, while collection and existing-queue remediation use the Product Owner-approved 80% full-field threshold for system approval
+- configured detail-product collection now uses the same required official-domain live-search discipline across standard and dynamic Product Types, while accepting a field only when a provider-consulted official URL and an exact quote from the fresh evidence chunk both support it
 - latest source/review hardening blocks multi-product family composites, fixes rate-first schedule pairing and `www`/apex redirects, excludes service/advice and cross-product sources, verified named Haventree mortgage discovery, and completed the approved audited retraction of two unsafe historical candidates
 - the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
@@ -90,6 +91,188 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-08-02 - BOAN Mortgage Run RCA and Failure Diagnostics
+
+- WBS: `5.15`, `5.16`, collection reliability hardening
+- Status: done
+- Goal: explain why
+  `run_20260731_041753_boan_mortgage_collect_7lD8qbPY` failed and prevent the
+  same worker/schema mismatch from recurring opaquely in other runs.
+- RCA: the run selected `30` BOAN mortgage sources but `fpds_snapshot` exited
+  before writing any `run_source_item`. Migration `0025` had already made
+  `ingestion_run.country_code` non-null, while the then-running snapshot and
+  downstream worker upserts still omitted that column. The source-catalog
+  wrapper retained only `fpds_snapshot failed with exit code 1`, which hid the
+  database constraint detail.
+- Existing prevention verified: snapshot, parse/chunk, extraction,
+  normalization, and validation now require one valid country and include it
+  in every ingestion-run insert/update. The focused cross-stage regression
+  passes for `US`; later BOAN mortgage runs completed, including the clean
+  `17/17` run `run_20260731_061006_boan_mortgage_collect_8Uig924q`.
+- Additional outcome: non-zero worker exits and unrecoverable timeouts now
+  raise a structured stage error. Direct and source-catalog runners persist
+  `failed_stage`, failure kind, return code or timeout, and a bounded worker
+  diagnostic. Credential URLs and common secret assignments are redacted from
+  both console output and stored metadata.
+- Not done: the historical failed run was not retried or mutated; later BOAN
+  runs already provide recovery evidence, and no candidate or canonical data
+  changed in this slice.
+- Key files: source collection runners, focused API tests, API runtime README,
+  and source-registry operating policy.
+- Verification: API full suite `334/334`, API regression `11/11`, worker full
+  suite `406/406`, focused single-country contract tests `2/2`, and
+  `git diff --check`.
+- Known issues: the historical row cannot recover the original stderr because
+  the old runner never persisted it; the RCA is corroborated by DB timing,
+  zero source items, migration state, code history, the earlier hardening
+  record, and successful later reruns.
+- Next step: no Product Owner action is required unless the historical run
+  should be explicitly retried for audit continuity.
+
+## 2026-08-01 - Low-Touch Collection AI Autopilot
+
+- WBS: `3.5`, `3.7`, `4.3`, `4.11`, `5.15`, `5.16`
+- Status: done
+- Goal: increase AI judgment in Admin product collection and leave as little
+  safe post-collection work as possible for operators.
+- Outcome: dynamic and lending candidates are no longer unconditionally forced
+  into Review. Validation now persists a collection AI assessment over product
+  identity, known decision-priority fields, and populated typed contract
+  fields. Verified identity, at least two verified fields, the configured
+  `80%` assessed-field ratio, normal confidence, clean validation, and every
+  force-review guard are all required before normal auto-promotion.
+- Residual Review automation: after normal promotion, the collection runner
+  AI-verifies a policy-bounded set of active detail reviews, applies only cited
+  contract-safe mismatches, scores every requested field, and system-approves
+  only `>=80%` results with verified identity, an official source, and no
+  unapplied correction. Completed attempts are reused after restart; provider
+  failure, sub-threshold results, and ambiguous/non-product boundaries remain
+  in Review without failing the collection run.
+- Accuracy and isolation: lending percentage values now have a bounded `<100%`
+  AI/review/validation contract, and Review AI official-domain lookup is
+  constrained by both bank and candidate country.
+- Policy/docs: migration `0029_collection_ai_autopilot_policy.sql` records the
+  enabled default, `80%` grounding and full-field thresholds, and `200`-candidate
+  per-run cap. Requirements, WBS, decision/RAID, workflow, field contract,
+  review/audit, API, source policy, demo, DB, and runtime docs now replace the
+  old blanket manual-review rule. Decision `D-028` records the new baseline.
+- Not done: migration `0029` was not applied to shared dev, no live provider
+  call or Admin collection was launched, and existing DB candidates were not
+  mutated in this implementation slice.
+- Key files: worker extraction/normalization/validation services,
+  `api_service/collection_ai_autopilot.py`, Review AI correction/decision and
+  source collection runner services, migration `0029`, tests, and active
+  requirements/design/runtime/governance docs.
+- Verification:
+  - worker pipeline full suite: `358/358`
+  - API full suite: `331/331`
+  - worker regression: `2/2`
+  - API regression: `11/11`
+  - focused official-grounding, validation, auto-promotion, Review AI,
+    collection-runner, and review-contract tests
+  - `git diff --check`
+- Known issues: live latency, usage cost, and bank-by-bank pass-rate impact need
+  a targeted Admin recollection after migration `0029`; lower-confidence or
+  officially incomplete products intentionally remain operator work.
+- Next step: apply `0029` in the intended environment, run one representative
+  weak lending/deposit collection, and compare autopilot approvals, retained
+  Review reasons, Usage, and Public aggregate output before widening the live
+  run scope.
+
+## 2026-08-01 - Existing Review Queue AI Correction and 80% Approval
+
+- WBS: `4.3`, `4.11`, Review/canonical data-quality remediation
+- Status: done
+- Goal: AI-verify every active existing Review Queue candidate, correct cited
+  contract-safe mismatches, auto-approve products with at least 80% verified
+  field coverage, and leave lower scores for operator approval.
+- Scope before mutation: shared dev contained `94` active queued tasks (`CA 75`,
+  `US 19`), no completed Review AI attempts for those tasks, `143` canonical
+  products, and `14,801` Public projection rows.
+- Outcome: all `94/94` candidates completed official-domain AI verification
+  with no provider failure. `73` candidates received one or more safe field
+  corrections. The score used every requested field as its denominator;
+  official matches and applied safe mismatches passed, while omitted and
+  unverified fields failed. Verified product identity, official sources, and no
+  remaining correction were mandatory. Two candidates scored `87.5%` and were
+  auto-approved; `92` candidates remain in Review.
+- Approved products: `CIBC Aeroplan Visa Card for Students` and `Scotiabank
+  American Express Card (for students)` entered canonical through the existing
+  review decision path. Both country aggregate refresh requests completed.
+- Final shared-dev state: `94` verification audits, `73` correction audits,
+  `94` persisted threshold assessments, `2` system approvals, `145` canonical
+  products, `92` active review tasks (`CA 73`, `US 19`), and `14,941` Public
+  projection rows.
+- Key files: `api_service/ai_verification.py`,
+  `api_service/review_ai_correction.py`, `api_service/review_detail.py`, the
+  resumable `tmp/fpds_review_ai_backfill.py` operator tool, API tests, runtime
+  docs, requirements, API/state contracts, decision log, and RAID.
+- Decisions: recorded `D-027`. Interactive Verify with AI remains advisory;
+  only an explicitly authorized remediation batch may apply corrections and
+  threshold approval. Exact `80%` passes; partial model response cannot shrink
+  the denominator.
+- Verification: focused AI verification/correction/review tests passed before
+  execution; the final API suite passed `325/325` and API regression passed
+  `11/11`. Post-run DB reconciliation confirmed all counts, both completed
+  aggregate refresh requests, and the final canonical/Review/Public boundary.
+- Usage: `94` usage records captured `2,090,387` prompt tokens and `284,209`
+  completion tokens with an estimated total cost of `$0.968161`.
+- Known issues: `92` lower-scoring candidates still require operator review;
+  many are family, service, calculator, or incomplete product pages and should
+  not be approved solely because some fields were corrected.
+- Next step: review the remaining Queue in descending AI pass rate, starting
+  with candidates just below 80%, and reject clear non-product identities.
+
+## 2026-08-01 - Collection Official-Domain AI Grounding
+
+- WBS: `3.5`, `5.15`, `5.16` collection-quality hardening
+- Status: done
+- Goal: explain and close the quality gap between normal Admin product
+  collection and Review Detail `Verify with AI` without weakening evidence,
+  review, approval, or publication boundaries.
+- Why now: executable-path comparison showed that Review verification forced a
+  current official-domain web search over a named product and all review fields,
+  then sanitized citations and field-contract values. Standard Product Type
+  collection instead remained heuristic-only; AI extraction/normalization was
+  limited to dynamic Product Types and used stored chunks without live search.
+- Outcome: every configured candidate-producing `detail` source now receives
+  one required official-domain web grounding pass. The request includes exact
+  product context, collected values, the complete resolved Product Type field
+  contract, and up to 24 prioritized fresh evidence chunks. A match or
+  correction is retained only when its URL is both allowlisted and present in
+  provider consulted-source metadata, its exact quote exists in the selected
+  chunk, and its JSON value passes canonical type and numeric safe-range
+  validation aligned with review edits. The resulting
+  evidence chunk link, official sources, quote, rationale, model execution, and
+  usage remain traceable through extraction/normalization metadata.
+- Fail-safe behavior: supporting and entry sources remain evidence-only. An
+  unconfigured, failed, off-domain, unconsulted, unquoted, malformed, ambiguous,
+  or unverified AI result leaves deterministic extraction or omission intact
+  and continues through existing validation and review routing.
+- Not done: no shared-dev collection, provider call, candidate mutation,
+  canonical approval, or Public publication was run in this slice. Existing
+  collected candidates are unchanged until an operator starts a new collection
+  or retry.
+- Key files: `worker/pipeline/fpds_extraction/service.py`, extraction registry
+  context, normalization trace metadata, source collection runner, focused API
+  and worker tests, requirements, runtime/design docs, decision log, and RAID.
+- Decisions: recorded `D-026`; one AI request is bounded to each
+  candidate-producing detail source, while deterministic extraction remains the
+  provider-independent fallback and the human/canonical gates stay unchanged.
+- Verification:
+  - Worker pipeline full suite: `357` tests
+  - API full suite: `317` tests
+  - Worker regression suite: `2` tests
+  - API regression suite: `11` tests
+  - focused extraction/normalization/AI-runtime/source-runner tests passed
+- Known issues: a real OpenAI/web collection was not launched, so live bank
+  response quality, latency, and cost still require the next targeted Admin
+  recollection check. Usage is persisted under
+  `openai-official-product-grounding` for that review.
+- Next step: run a targeted recollection for one previously weak product,
+  compare its collected candidate to `Verify with AI`, and inspect Usage before
+  deciding whether to widen the live rerun scope.
 
 ## 2026-07-30 - US Product Collection Failure Hardening
 

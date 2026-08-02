@@ -169,6 +169,7 @@ def run_review_ai_verification(
     allowed_domains = load_registered_bank_domains(
         connection,
         bank_code=str(candidate.get("bank_code") or ""),
+        country_code=_string_or_none(candidate.get("country_code")),
         preferred_urls=[
             _string_or_none(_mapping(detail.get("source_context")).get("source_url")),
         ],
@@ -180,6 +181,12 @@ def run_review_ai_verification(
             message="No registered official bank domain is available for this candidate.",
         )
 
+    request_payload = build_ai_verification_payload(detail=detail, allowed_domains=allowed_domains)
+    requested_field_names = [
+        str(item.get("field_name") or "")
+        for item in _dict_list(request_payload.get("fields_to_verify"))
+        if str(item.get("field_name") or "").strip()
+    ]
     model_execution_id = new_id("modelexec")
     model_id = configured_model_id()
     started_at = utc_now()
@@ -189,6 +196,8 @@ def run_review_ai_verification(
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "allowed_domains": allowed_domains,
         "verification_contract_version": "review-ai-verification-v1",
+        "requested_field_names": requested_field_names,
+        "requested_field_count": len(requested_field_names),
     }
     _insert_model_execution(
         connection,
@@ -200,7 +209,6 @@ def run_review_ai_verification(
         started_at=started_at,
     )
 
-    request_payload = build_ai_verification_payload(detail=detail, allowed_domains=allowed_domains)
     try:
         raw_result, provider_metadata = invoke_model(
             instructions=_verification_instructions(),
@@ -320,6 +328,7 @@ def load_registered_bank_domains(
     connection: Connection,
     *,
     bank_code: str,
+    country_code: str | None = None,
     preferred_urls: list[str | None] | None = None,
 ) -> list[str]:
     rows = connection.execute(
@@ -329,16 +338,18 @@ def load_registered_bank_domains(
             SELECT 0 AS source_order, homepage_url AS source_url
             FROM bank
             WHERE bank_code = %(bank_code)s
+              AND (%(country_code)s IS NULL OR country_code = %(country_code)s)
             UNION ALL
             SELECT 1 AS source_order, normalized_url AS source_url
             FROM source_registry_item
             WHERE bank_code = %(bank_code)s
+              AND (%(country_code)s IS NULL OR country_code = %(country_code)s)
               AND status = 'active'
         ) AS official_sources
         WHERE source_url IS NOT NULL
         ORDER BY source_order, source_url
         """,
-        {"bank_code": bank_code},
+        {"bank_code": bank_code, "country_code": country_code},
     ).fetchall()
     registered_domains = normalize_official_domains(
         [str(row["source_url"]) for row in rows if row.get("source_url")]
@@ -718,6 +729,9 @@ def _record_verification_audit(
     allowed_domains: list[str],
 ) -> None:
     proposed_fields = sorted(_mapping((result or {}).get("proposed_corrections")).keys())
+    actor_type = str(actor.get("actor_type") or "user")
+    if actor_type not in {"system", "user", "service", "scheduler"}:
+        actor_type = "user"
     connection.execute(
         """
         INSERT INTO audit_event (
@@ -750,7 +764,7 @@ def _record_verification_audit(
             %(audit_event_id)s,
             'review',
             %(event_type)s,
-            'user',
+            %(actor_type)s,
             %(actor_id)s,
             %(actor_role_snapshot)s,
             'review_task',
@@ -776,6 +790,7 @@ def _record_verification_audit(
         {
             "audit_event_id": new_id("audit"),
             "event_type": event_type,
+            "actor_type": actor_type,
             "actor_id": _string_or_none(actor.get("user_id")),
             "actor_role_snapshot": _string_or_none(actor.get("role")),
             "target_id": str(review_task.get("review_task_id") or ""),

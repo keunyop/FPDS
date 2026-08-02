@@ -636,7 +636,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_dynamic_product_type_stays_in_review_even_in_phase1_mode(self) -> None:
+    def test_dynamic_product_type_without_official_ai_grounding_stays_in_review(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -682,8 +682,110 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_action, "review_queued")
             self.assertEqual(source_result.candidate_state, "in_review")
-            self.assertEqual(source_result.review_reason_code, "manual_sampling_review")
-            self.assertIn("manual_sampling_review", source_result.queue_reason_codes)
+            self.assertEqual(source_result.review_reason_code, "ai_grounding_insufficient")
+            self.assertIn("ai_grounding_insufficient", source_result.queue_reason_codes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_officially_grounded_dynamic_product_can_auto_validate(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-official-ai")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            official_source = {
+                "url": "https://bank.example/mortgages/fixed-five-year",
+                "title": "Five-year fixed mortgage",
+            }
+
+            def grounded(field_name: str, quote: str) -> dict[str, object]:
+                return {
+                    "source_field_name": field_name,
+                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_verification_status": "match",
+                    "official_web_sources": [official_source],
+                    "official_evidence_quote": quote,
+                }
+
+            candidate = {
+                **input_item.normalized_candidate_record,
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "subtype_code": "other",
+                "product_name": "Five-Year Fixed Mortgage",
+                "validation_issue_codes": [],
+                "candidate_payload": {
+                    "status": "active",
+                    "last_verified_at": "2026-08-01T12:00:00+00:00",
+                    "bank_name": "Example Bank",
+                    "product_name": "Five-Year Fixed Mortgage",
+                    "mortgage_rate": 4.25,
+                    "rate_type": "fixed",
+                    "term_length_text": "5 years",
+                },
+                "field_mapping_metadata": {
+                    "product_name": grounded("product_name", "Five-Year Fixed Mortgage"),
+                    "mortgage_rate": grounded("mortgage_rate", "5-year fixed rate 4.25%"),
+                    "rate_type": grounded("rate_type", "5-year fixed rate 4.25%"),
+                    "term_length_text": grounded("term_length_text", "5-year fixed rate 4.25%"),
+                },
+            }
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "BANK-MTG-001",
+                    "source_metadata": {
+                        "product_type": "mortgage",
+                        "product_type_dynamic": True,
+                        "discovery_role": "detail",
+                        "expected_fields": [
+                            "product_name",
+                            "mortgage_rate",
+                            "rate_type",
+                            "term_length_text",
+                        ],
+                    },
+                    "normalized_candidate_record": candidate,
+                    "field_evidence_links": [
+                        _evidence("product_name", "Five-Year Fixed Mortgage", "chunk-mtg-name"),
+                        _evidence("mortgage_rate", "4.25", "chunk-mtg-rate"),
+                        _evidence("rate_type", "fixed", "chunk-mtg-rate-type"),
+                        _evidence("term_length_text", "5 years", "chunk-mtg-term"),
+                    ],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-dyn-official-ai",
+                inputs=[input_item],
+                taxonomy_registry={},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.82,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                    ai_auto_approve_min_verified_ratio=0.8,
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertEqual(source_result.validation_status, "pass")
+            self.assertGreaterEqual(source_result.source_confidence or 0, 0.82)
+            assessment = source_result.model_execution_record["execution_metadata"]["collection_ai_assessment"]
+            self.assertTrue(assessment["eligible"])
+            self.assertEqual(assessment["verified_ratio"], 1.0)
+            self.assertTrue(assessment["product_identity_verified"])
+            self.assertIsNone(source_result.review_task_record)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1076,6 +1178,7 @@ class ValidationRoutingPersistenceTests(unittest.TestCase):
                         {"policy_key": "AUTO_APPROVE_MIN_CONFIDENCE", "policy_value": {"value": 0.95}},
                         {"policy_key": "REVIEW_WARNING_CONFIDENCE_FLOOR", "policy_value": {"value": 0.7}},
                         {"policy_key": "FORCE_REVIEW_ISSUE_CODES", "policy_value": ["required_field_missing", "conflicting_evidence"]},
+                        {"policy_key": "AI_AUTO_APPROVE_MIN_VERIFIED_FIELD_RATIO", "policy_value": {"value": 0.85}},
                     ]
                 ),
                 "",
@@ -1101,6 +1204,7 @@ class ValidationRoutingPersistenceTests(unittest.TestCase):
         self.assertEqual(len(artifacts), 1)
         self.assertEqual(taxonomy["savings"], {"standard", "high_interest", "other"})
         self.assertEqual(config.auto_approve_min_confidence, 0.95)
+        self.assertEqual(config.ai_auto_approve_min_verified_ratio, 0.85)
         self.assertEqual(persist_result.review_task_count, 1)
         self.assertEqual(runner.last_variables()["review_queued_count"], "1")
 

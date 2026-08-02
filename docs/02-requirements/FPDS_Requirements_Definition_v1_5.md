@@ -550,9 +550,18 @@ Minimum later capability:
 
 Current boundary:
 - this capability is now implemented in live `WBS 5.16` for the admin registry and collection pipeline
-- the live runtime now lets operators define additional deposit product types, attach them to bank coverage, and run homepage-first discovery plus generic AI fallback through manual review
-- public publish, dashboard aggregation, and auto-approval semantics remain constrained to the existing reviewed canonical flow until later slices widen those downstream surfaces intentionally
-- Product Owner approval on `2026-07-14` widens the Public Product Grid to review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products. This does not widen auto-approval: lending candidates continue to require review before entering the public aggregate snapshot.
+- the live runtime lets operators define additional product types, attach them
+  to bank coverage, and run homepage-first discovery plus official-domain AI
+  extraction, validation, and bounded review remediation;
+- dynamic and lending candidates are no longer manual-review-only: they may use
+  the normal audited auto-approval path only when official AI grounding verifies
+  product identity, at least two decision fields, and at least `80%` of assessed
+  decision fields, with every existing validation and force-review gate still
+  passing;
+- Product Owner approval on `2026-07-14` widened the Public Product Grid to
+  approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products.
+  Approval may now be human or policy-qualified system approval; unapproved
+  candidates remain non-public.
 
 ### FR-ADM-018 Country Registry Management
 
@@ -695,6 +704,50 @@ Minimum requirements:
 
 ### FR-AI-007 Human-in-the-Loop Routing
 낮은 신뢰도, 규칙 충돌, 근거 불충분 상황은 review queue로 라우팅되어야 한다.
+
+### FR-AI-008 Collection Official-Source Grounding
+
+When an external AI provider is configured, candidate-producing detail-source
+collection must apply a current official-domain grounding pass to standard and
+operator-defined Product Types, not only to dynamic fallback types.
+
+- live search is restricted to the selected bank registry's official domains;
+- the complete active Product Type field contract and exact product identity
+  are supplied;
+- an AI value is accepted only with both a provider-consulted allowlisted URL
+  and an exact quote from the freshly persisted evidence chunk, and only after
+  the same canonical type and numeric safe-range checks used by review edits;
+- cited sources, model execution, and usage remain privately traceable;
+- unavailable, failed, ambiguous, off-domain, uncited, or snapshot-ungrounded
+  results keep the deterministic value or omission and continue through normal
+  validation and, when necessary, human review;
+- grounding may remove blanket manual review only when the persisted assessment
+  verifies product identity, at least two decision fields, and the configured
+  assessed-field ratio; it never bypasses validation errors, force-review
+  issues, canonical type/range checks, product-boundary guards, or the audited
+  canonical/aggregate path.
+
+### FR-AI-009 Collection and Existing Review Queue AI Correction and Threshold Approval
+
+After normal collection validation and promotion, the system must run a bounded
+Review Detail official-domain verification pass across active `queued` and
+`deferred` detail candidates when the provider and processing policy are
+enabled. The same workflow may be run explicitly against an existing queue.
+
+- only sanitized, cited `mismatch` values may update the candidate; canonical
+  type/range checks remain mandatory;
+- the verification pass-rate denominator is every requested field, including
+  omitted or `unverified` fields;
+- a passed field is an official-source `match` or a contract-safe mismatch that
+  was successfully applied;
+- automatic approval requires pass rate `>= 80%`, verified `product_name`, at
+  least one official source, and no unapplied safe correction;
+- lower-scoring, failed, ambiguous, or identity-unverified candidates remain in
+  Review for an operator decision;
+- completed attempts and threshold assessments are reused after runner restart,
+  and a configured per-run candidate limit bounds cost and blast radius;
+- every verification, correction, threshold assessment, approval, usage record,
+  and aggregate refresh must retain append-only audit/correlation lineage.
 
 ---
 
@@ -1277,7 +1330,15 @@ Later follow-on requirement:
 Phase 1 확정 상품군은 chequing, savings, gic이다.
 
 ### BR-001A Deferred Product Type Extensibility
-FPDS now supports operator-defined product types for the admin registry and collection pipeline, with the matching AI-assisted discovery contract plus generic extraction, normalization, validation, and vocabulary fallback rules. Those dynamic types remain review-first and are not implicitly widened into downstream public publish behavior without later approved slices. The approved Public Loan slice exposes only review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products.
+FPDS supports operator-defined product types for the admin registry and
+collection pipeline, with AI-assisted discovery plus generic extraction,
+normalization, validation, and vocabulary fallback rules. Dynamic types remain
+evidence-first, but are not blanket review-only: official-source AI grounding
+can make them eligible for the normal audited auto-approval path, and the
+collection AI autopilot may safely correct and threshold-approve remaining
+review candidates. The approved Public Loan slice exposes approved `mortgage`,
+`personal-loan`, and `line-of-credit` canonical products regardless of whether
+approval came from a human or the policy-qualified system path.
 
 ### BR-002 Phase 2 Country Constraint
 Phase 2 확정 범위는 일본 Big 5 은행의 수신상품이다.

@@ -47,6 +47,7 @@ from worker.pipeline.fpds_normalization.service import (
     _looks_like_non_value_rewards,
     _looks_like_expired_promotional_customer_field,
     _normalize_term_rate_table,
+    _official_grounding_mapping_metadata,
     _percentage_value_absent_from_evidence,
     _rate_field_suppression_reason,
     _rate_evidence_is_account_context,
@@ -63,6 +64,38 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_official_grounding_metadata_is_preserved_for_review_trace(self) -> None:
+        field = NormalizationExtractedField(
+            field_name="standard_rate",
+            candidate_value=3.25,
+            value_type="decimal",
+            confidence=0.93,
+            extraction_method="openai_official_grounding",
+            source_document_id="src-001",
+            source_snapshot_id="snap-001",
+            evidence_chunk_id="chunk-001",
+            evidence_text_excerpt="Current annual interest rate is 3.25%.",
+            anchor_type="section",
+            anchor_value="rates",
+            page_no=None,
+            chunk_index=1,
+            field_metadata={
+                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_verification_status": "mismatch",
+                "official_web_sources": [
+                    {"url": "https://bank.example/product", "title": "Official product"}
+                ],
+                "evidence_quote": "Current annual interest rate is 3.25%.",
+                "rationale": "Current official detail confirms the rate.",
+            },
+        )
+
+        metadata = _official_grounding_mapping_metadata(field)
+
+        self.assertEqual(metadata["official_verification_status"], "mismatch")
+        self.assertEqual(metadata["official_web_sources"][0]["url"], "https://bank.example/product")
+        self.assertEqual(metadata["official_evidence_quote"], "Current annual interest rate is 3.25%.")
+
     def test_incomplete_description_lead_in_is_rejected(self) -> None:
         self.assertTrue(
             _looks_like_non_value_description(

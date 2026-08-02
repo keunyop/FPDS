@@ -4,6 +4,7 @@ import argparse
 from datetime import UTC, datetime
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -11,12 +12,59 @@ from typing import Any
 from urllib.parse import urlparse
 
 from api_service.aggregate_refresh import launch_aggregate_refresh_runner
+from api_service.ai_verification import llm_provider_configured
 from api_service.candidate_auto_promotion import promote_auto_validated_candidates
+from api_service.collection_ai_autopilot import (
+    load_active_collection_review_task_ids,
+    load_collection_ai_autopilot_policy,
+    remediate_collection_review_task,
+)
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.security import new_id
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+_WORKER_DIAGNOSTIC_MAX_CHARS = 1_600
+_CREDENTIAL_URL_RE = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^\s/@:]+):([^\s/@]+)@")
+_SECRET_ASSIGNMENT_RE = re.compile(
+    r"(?i)\b(password|passwd|token|secret|api[_-]?key|access[_-]?key)\s*([=:])\s*([^\s|,;]+)"
+)
+
+
+class WorkerStageError(RuntimeError):
+    def __init__(
+        self,
+        *,
+        stage_name: str,
+        failure_kind: str,
+        diagnostic: str | None = None,
+        return_code: int | None = None,
+        timeout_seconds: int | None = None,
+    ) -> None:
+        self.stage_name = stage_name
+        self.failure_kind = failure_kind
+        self.diagnostic = diagnostic
+        self.return_code = return_code
+        self.timeout_seconds = timeout_seconds
+        if failure_kind == "timeout":
+            message = f"{stage_name} timed out after {timeout_seconds} seconds."
+        else:
+            message = f"{stage_name} failed with exit code {return_code}."
+        if diagnostic:
+            message = f"{message} Worker diagnostic: {diagnostic}"
+        super().__init__(message)
+
+    def to_run_metadata(self) -> dict[str, Any]:
+        return {
+            "failed_stage": self.stage_name,
+            "stage_failure": {
+                "stage_name": self.stage_name,
+                "failure_kind": self.failure_kind,
+                "return_code": self.return_code,
+                "timeout_seconds": self.timeout_seconds,
+                "diagnostic": self.diagnostic,
+            },
+        }
 
 
 def main() -> int:
@@ -29,7 +77,12 @@ def main() -> int:
         try:
             _run_group(plan=plan, group=group)
         except Exception as exc:  # pragma: no cover - defensive background-path handling
-            _mark_run_failed(run_id=str(group["run_id"]), stage_name="source_collection", error_summary=str(exc))
+            _mark_run_failed(
+                run_id=str(group["run_id"]),
+                stage_name="source_collection",
+                error_summary=str(exc),
+                failure_metadata=_stage_failure_metadata(exc),
+            )
     return 0
 
 
@@ -154,12 +207,15 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     )
     _persist_end_to_end_source_summary(run_id=run_id, summary=run_summary)
     promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
-    if promotion_result["promoted_count"]:
+    ai_autopilot_result = _run_collection_review_ai_autopilot_for_run(run_id=run_id, plan=plan)
+    if promotion_result["promoted_count"] or ai_autopilot_result["approved_count"]:
         launch_result = launch_aggregate_refresh_runner()
         print(
             (
                 f"[source-collection-runner] run {run_id} auto-promoted "
-                f"{promotion_result['promoted_count']} candidate(s); aggregate refresh launch={launch_result['launched']}"
+                f"{promotion_result['promoted_count']} validation candidate(s), AI-approved "
+                f"{ai_autopilot_result['approved_count']} review candidate(s); "
+                f"aggregate refresh launch={launch_result['launched']}"
             ),
             flush=True,
         )
@@ -184,9 +240,9 @@ def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
         timeout_stdout = _subprocess_output_text(exc.stdout)
         timeout_stderr = _subprocess_output_text(exc.stderr)
         if timeout_stdout:
-            print(timeout_stdout, end="")
+            print(_redact_worker_output(timeout_stdout), end="")
         if timeout_stderr:
-            print(timeout_stderr, end="", file=sys.stderr)
+            print(_redact_worker_output(timeout_stderr), end="", file=sys.stderr)
         recovered_output = _completed_stage_output(timeout_stdout)
         if recovered_output is not None:
             print(
@@ -195,13 +251,23 @@ def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:
                 flush=True,
             )
             return recovered_output
-        raise RuntimeError(f"{stage_name} timed out after {timeout_seconds} seconds.") from exc
+        raise WorkerStageError(
+            stage_name=stage_name,
+            failure_kind="timeout",
+            timeout_seconds=timeout_seconds,
+            diagnostic=_bounded_worker_diagnostic(timeout_stderr, timeout_stdout),
+        ) from exc
     if completed.stdout:
-        print(completed.stdout, end="")
+        print(_redact_worker_output(completed.stdout), end="")
     if completed.stderr:
-        print(completed.stderr, end="", file=sys.stderr)
+        print(_redact_worker_output(completed.stderr), end="", file=sys.stderr)
     if completed.returncode != 0:
-        raise RuntimeError(f"{stage_name} failed with exit code {completed.returncode}.")
+        raise WorkerStageError(
+            stage_name=stage_name,
+            failure_kind="nonzero_exit",
+            return_code=completed.returncode,
+            diagnostic=_bounded_worker_diagnostic(completed.stderr, completed.stdout),
+        )
     stdout = completed.stdout.strip()
     if not stdout:
         return {}
@@ -215,6 +281,41 @@ def _subprocess_output_text(value: str | bytes | None) -> str:
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
     return value or ""
+
+
+def _bounded_worker_diagnostic(*values: str) -> str | None:
+    raw_value = next((value for value in values if value and value.strip()), "")
+    if not raw_value:
+        return None
+    redacted = _redact_worker_output(raw_value)
+    lines = [" ".join(line.split()) for line in redacted.splitlines() if line.strip()]
+    if not lines:
+        return None
+    diagnostic = " | ".join(lines[-8:])
+    if len(diagnostic) > _WORKER_DIAGNOSTIC_MAX_CHARS:
+        diagnostic = f"...{diagnostic[-(_WORKER_DIAGNOSTIC_MAX_CHARS - 3):]}"
+    return diagnostic
+
+
+def _redact_worker_output(value: str) -> str:
+    redacted = _CREDENTIAL_URL_RE.sub(r"\1[redacted]@", value)
+    return _SECRET_ASSIGNMENT_RE.sub(r"\1\2[redacted]", redacted)
+
+
+def _stage_failure_metadata(exc: BaseException) -> dict[str, Any]:
+    if isinstance(exc, WorkerStageError):
+        return exc.to_run_metadata()
+    diagnostic = _bounded_worker_diagnostic(str(exc))
+    return {
+        "failed_stage": "source_collection",
+        "stage_failure": {
+            "stage_name": "source_collection",
+            "failure_kind": "runner_error",
+            "return_code": None,
+            "timeout_seconds": None,
+            "diagnostic": diagnostic,
+        },
+    }
 
 
 def _completed_stage_output(stdout: str) -> dict[str, Any] | None:
@@ -250,6 +351,126 @@ def _promote_auto_validated_candidates_for_run(*, run_id: str, plan: dict[str, A
             run_id=run_id,
             request_context={"request_id": plan.get("request_id")},
         )
+
+
+def _run_collection_review_ai_autopilot_for_run(*, run_id: str, plan: dict[str, Any]) -> dict[str, Any]:
+    if not llm_provider_configured():
+        return {
+            "status": "provider_unavailable",
+            "run_id": run_id,
+            "examined_count": 0,
+            "approved_count": 0,
+            "review_retained_count": 0,
+            "failed_count": 0,
+            "items": [],
+        }
+
+    settings = Settings.from_env()
+    try:
+        with open_connection(settings) as connection:
+            policy = load_collection_ai_autopilot_policy(connection)
+            if not policy["enabled"]:
+                return {
+                    "status": "disabled",
+                    "run_id": run_id,
+                    "examined_count": 0,
+                    "approved_count": 0,
+                    "review_retained_count": 0,
+                    "failed_count": 0,
+                    "items": [],
+                    "policy": policy,
+                }
+            review_task_ids = load_active_collection_review_task_ids(
+                connection,
+                run_id=run_id,
+                limit=int(policy["max_candidates"]),
+            )
+    except Exception as exc:  # pragma: no cover - fail-soft background DB boundary
+        return {
+            "status": "failed",
+            "run_id": run_id,
+            "examined_count": 0,
+            "approved_count": 0,
+            "review_retained_count": 0,
+            "failed_count": 1,
+            "items": [],
+            "error_summary": str(exc),
+        }
+
+    items: list[dict[str, Any]] = []
+    for review_task_id in review_task_ids:
+        try:
+            with open_connection(settings) as connection:
+                items.append(
+                    remediate_collection_review_task(
+                        connection,
+                        review_task_id=review_task_id,
+                        approval_threshold=float(policy["approval_threshold"]),
+                        request_context={
+                            "request_id": plan.get("request_id"),
+                            "user_agent": "source-collection-runner",
+                        },
+                    )
+                )
+        except Exception as exc:  # keep the candidate in Review and continue the run
+            items.append(
+                {
+                    "review_task_id": review_task_id,
+                    "status": "failed",
+                    "approved": False,
+                    "error_summary": str(exc),
+                }
+            )
+
+    approved_count = sum(1 for item in items if item.get("approved") is True)
+    failed_count = sum(1 for item in items if item.get("status") in {"failed", "verification_failed"})
+    review_retained_count = sum(1 for item in items if item.get("status") == "review_retained")
+    result = {
+        "status": "completed",
+        "run_id": run_id,
+        "examined_count": len(items),
+        "approved_count": approved_count,
+        "review_retained_count": review_retained_count,
+        "failed_count": failed_count,
+        "items": items,
+        "policy": policy,
+    }
+    try:
+        with open_connection(settings) as connection:
+            connection.execute(
+                """
+                UPDATE ingestion_run
+                SET run_metadata = run_metadata || %(run_metadata)s::jsonb
+                WHERE run_id = %(run_id)s
+                """,
+                {
+                    "run_id": run_id,
+                    "run_metadata": json.dumps(
+                        {
+                            "collection_ai_autopilot": {
+                                "status": result["status"],
+                                "examined_count": result["examined_count"],
+                                "approved_count": result["approved_count"],
+                                "review_retained_count": result["review_retained_count"],
+                                "failed_count": result["failed_count"],
+                                "policy": policy,
+                            }
+                        },
+                        ensure_ascii=True,
+                        sort_keys=True,
+                    ),
+                },
+            )
+    except Exception as exc:  # remediation outcome is safe even if run telemetry lags
+        result["telemetry_persistence_error"] = str(exc)
+    print(
+        (
+            f"[source-collection-runner] run {run_id} AI review autopilot examined {len(items)} candidate(s), "
+            f"approved {approved_count}, retained {review_retained_count}, failed {failed_count}"
+        ),
+        flush=True,
+    )
+    return result
 
 
 def _stage_timeout_seconds_from_env() -> int:
@@ -571,13 +792,21 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
                 "discovery_keywords": item.get("discovery_keywords", []),
                 "fallback_policy": item.get("fallback_policy"),
                 "discovery_metadata": item.get("discovery_metadata", {}),
+                "normalized_source_url": item["source_url"],
+                "official_domain_allowlist": allowed_domains,
             }
             for item in sources
         ],
     }
 
 
-def _mark_run_failed(*, run_id: str, stage_name: str, error_summary: str) -> None:
+def _mark_run_failed(
+    *,
+    run_id: str,
+    stage_name: str,
+    error_summary: str,
+    failure_metadata: dict[str, Any] | None = None,
+) -> None:
     settings = Settings.from_env()
     with open_connection(settings) as connection:
         connection.execute(
@@ -594,7 +823,10 @@ def _mark_run_failed(*, run_id: str, stage_name: str, error_summary: str) -> Non
             {
                 "run_id": run_id,
                 "error_summary": error_summary,
-                "run_metadata": json.dumps({"pipeline_stage": stage_name}, ensure_ascii=True),
+                "run_metadata": json.dumps(
+                    {"pipeline_stage": stage_name, **(failure_metadata or {})},
+                    ensure_ascii=True,
+                ),
                 "completed_at": datetime.now(UTC),
             },
         )

@@ -1,5 +1,5 @@
 {
-  "registry_version": "2026-07-30",
+  "registry_version": "2026-08-02",
   "bank_code": "BMO",
   "country_code": "CA",
   "product_type": "chequing",
@@ -27,7 +27,11 @@
       "product_type_description": null,
       "discovery_keywords": [],
       "fallback_policy": null,
-      "discovery_metadata": {}
+      "discovery_metadata": {},
+      "normalized_source_url": "https://www.bmo.com/practical",
+      "official_domain_allowlist": [
+        "bmo.com"
+      ]
     },
     {
       "source_id": "BMO-CHQ-006",
@@ -46,7 +50,11 @@
       "product_type_description": null,
       "discovery_keywords": [],
       "fallback_policy": null,
-      "discovery_metadata": {}
+      "discovery_metadata": {},
+      "normalized_source_url": "https://www.bmo.com/rates",
+      "official_domain_allowlist": [
+        "bmo.com"
+      ]
     },
     {
       "source_id": "BMO-CHQ-007",
@@ -65,7 +73,11 @@
       "product_type_description": null,
       "discovery_keywords": [],
       "fallback_policy": null,
-      "discovery_metadata": {}
+      "discovery_metadata": {},
+      "normalized_source_url": "https://www.bmo.com/terms",
+      "official_domain_allowlist": [
+        "bmo.com"
+      ]
     }
   ]
 }

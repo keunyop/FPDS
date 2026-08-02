@@ -112,6 +112,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
 ```
 
 Create the first operator account:
@@ -168,6 +169,14 @@ cd api/service
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
 - Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists execution/usage/sources/audit context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
+- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Its pass rate is `(official matches + safely applied mismatches) / all requested fields`; omitted/unverified fields fail, product name must pass, and unapplied corrections block approval. Candidates at `>= 80%` use the existing review approval and country aggregate-refresh path; all others remain in human review.
+- New collection runs now apply that same contract automatically to bounded
+  active `queued`/`deferred` detail candidates left after normal validation.
+  The policy defaults to enabled, is capped at `200` candidates per run, and
+  reuses completed attempts after a runner restart. Failed, sub-threshold,
+  identity-unverified, or ambiguous candidates remain in Review; eligible
+  candidates are system-approved through the existing canonical/audit/country
+  aggregate path.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
 - Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
 - Completed collection runs with `partial_completion_flag=true` expose the same retry path, while clean completed runs remain non-retryable.
@@ -213,6 +222,11 @@ cd api/service
 - Homepage-first collection still preserves the existing active detail scope when no replacement detail rows are found, and the queued background runner now reuses that preserved active detail scope for collection instead of incorrectly closing the run as a no-detail partial completion.
 - Bank-wide source-catalog collect now launches one background runner process for the selected collection plan and lets that runner process bank/product groups sequentially. This keeps bulk collection inside the dev DB session-pool budget while the per-stage watchdog still closes a hung worker stage as `failed` instead of leaving it indefinitely `started`.
 - Downstream worker stages launched by `source_collection_runner` now have a configurable `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` watchdog. If a worker stage hangs past that limit, the run is closed as `failed` with a timeout summary instead of remaining indefinitely `started`. A process that has already emitted a complete JSON result with `persistence.run_state=completed` is recovered after the watchdog terminates it; partial, malformed, or nonterminal output still fails closed.
+- Non-zero exits and unrecoverable timeouts retain the exact `failed_stage`,
+  failure kind, return code or timeout, and a bounded worker diagnostic in run
+  metadata. Credential-bearing URLs and common secret assignments are redacted
+  from both runner output and persisted diagnostics, so Runs can expose the
+  actionable DB or worker error without relying on a transient console log.
 - Snapshot capture now supports a targeted headless-browser PDF fallback for domains listed in `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS`. It covers blocked or timed-out direct requests, explicit rate pages that return only a JavaScript shell, and product pages that expose unresolved dynamic rate placeholders instead of customer-visible numbers. Current defaults include BMO, CIBC, Simplii, and Tangerine, whose official rate surfaces exhibited those bounded failure modes. The stored snapshot content type becomes `application/pdf`, which the downstream parse stage already supports, while HTML-only fetch paths still reject non-HTML fallback payloads so homepage discovery does not accidentally score a PDF error page as HTML. A successful direct snapshot remains the fail-soft result if optional browser rendering itself fails.
 - Homepage-first discovery now uses bounded hybrid scoring over the candidate set instead of AI-only fallback after heuristic failure: deterministic candidate generation still happens first, but the API layer now runs AI parallel candidate scoring when configured, uses stronger product-type-description terms in heuristic scoring, validates tentative detail pages with page-level evidence scoring, and persists generated-source `discovery_metadata` for explainability.
 - Homepage scoring keeps the first `h1` as the primary product identity and stores later headings separately. Generic pages with multiple product variants carry `multi_product_family_overview`, refinance/renewal advice or servicing flows cannot become product details, and lending support links under unrelated account paths are dropped before evidence merging.
@@ -224,6 +238,15 @@ cd api/service
 - The bank list payload now includes its attached coverage items so `/admin/banks` can drive multi-bank bulk collect without reopening each bank detail modal first.
 - Homepage-first source generation can still use committed fallback discovery hints from the repo baselines when link extraction comes up empty, but those hints no longer write rows back into the live DB automatically.
 - Source collection plans now carry generated-source discovery metadata into the worker registry payload so the runtime `source_document.source_metadata` stays aligned with the source registry explanation fields.
+- Source collection plans also carry the canonicalized official-domain
+  allowlist and each normalized source URL into extraction. When OpenAI is
+  configured, every candidate-producing detail source—not only a dynamic
+  Product Type—runs a required official-domain web grounding pass over the
+  complete active field contract. A returned value is retained only when its
+  cited URL was actually consulted and its exact quote is present in the fresh
+  evidence chunk; otherwise the existing evidence-first value or reviewable
+  omission remains. Model usage and consulted sources are persisted with the
+  extraction execution, and AI failure does not bypass validation or review.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Snapshot capture now runs source fetches concurrently inside the same run, and the shared fetch timeout baseline moved to `90` seconds to better tolerate slower Big 5 pages without stretching bank-wide collection wall-clock time linearly per source.
@@ -232,7 +255,7 @@ cd api/service
   `ingestion_run.country_code`; mixed-country or invalid run scopes fail before
   persistence instead of relying on a database constraint failure.
 - `POST /api/admin/sources` and `PATCH /api/admin/sources/:sourceId` are intentionally kept as read-only error responses in the MVP so the live operator flow stays centered on `/api/admin/banks` and `/api/admin/source-catalog`.
-- Dynamic product-type onboarding is now live for the admin registry and collection pipeline: `/api/admin/product-types` now supports list/create/detail/update/delete for operator-defined types, delete is blocked when bank coverage or generated sources still reference the type, bank coverage writes validate against the registry, source collection plans carry product-type definitions into the worker stages, and non-canonical types use the generic AI extraction or normalization fallback path with safe manual-review routing.
+- Dynamic product-type onboarding is live for the admin registry and collection pipeline: `/api/admin/product-types` supports list/create/detail/update/delete for operator-defined types, delete is blocked when bank coverage or generated sources still reference the type, bank coverage writes validate against the registry, source collection plans carry product-type definitions into worker stages, and non-canonical types use generic AI extraction/normalization plus official-grounding eligibility. Insufficiently grounded candidates remain safely review-routed.
 - Candidate-producing scope is restricted to `detail` sources. Generated `supporting_html`, `supporting_pdf`, and linked-document sources may be fetched, parsed, and merged as evidence, but cannot define standalone products. Product-matched generic supporting rate pages can fill missing or invalid savings/GIC rate fields.
 - Named product detail recovery now requires title/heading identity strong enough to survive plural navigation noise, while generic marketing/action pages remain excluded. Deposit support discovery also drops mutual-fund, prospectus, fund-facts, and governance/reporting links before they can contaminate savings or GIC rate evidence.
 - Snapshot reuse is source-document scoped even when checksums match, so identical WAF/error responses from different URLs retain separate failure lineage. Repeated snapshots of a shared URL preserve its established `detail` metadata when a later collection scope sees that URL only as supporting evidence.

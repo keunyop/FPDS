@@ -161,6 +161,25 @@ Source Documents:
 
 ### 5.6 Stage 5. Extraction
 
+Current official-grounding baseline:
+- deterministic retrieval/extraction remains the fail-safe base path;
+- when the OpenAI provider is configured, every candidate-producing `detail`
+  source receives one required live-search comparison restricted to the
+  collection registry's canonical official-domain allowlist;
+- the request includes the exact product identity, complete active Product
+  Type field contract, current extracted values, and at most 24 prioritized
+  fresh evidence chunks;
+- an AI field is accepted only when its URL is present in the provider's
+  consulted sources and its exact evidence quote exists in the selected fresh
+  chunk; contract coercion, normalization cleanup, validation, and review
+  routing still run afterward;
+- supporting/entry sources do not run this product-level pass, and provider
+  failure leaves deterministic extraction intact rather than failing open.
+- dynamic/lending detail candidates persist a separate grounding assessment
+  over product identity and decision-critical typed fields. Verified identity,
+  at least two verified fields, and the configured ratio are required before
+  the normal Phase 1 auto-validation policy may consider the candidate.
+
 - 입력: chunk set, canonical schema context, taxonomy registry
 - 처리:
   - extraction agent가 구조화 field 후보를 만든다.
@@ -222,6 +241,12 @@ Source Documents:
   - Prototype에서는 모든 candidate를 review queue로 보낸다.
   - Phase 1에서는 config 기반 auto-approve를 허용한다.
   - active `FORCE_REVIEW_ISSUE_CODES`에 걸리거나 warning confidence floor를 넘지 못하면 review 강제다.
+  - dynamic/lending candidate는 blanket review가 아니라 persisted official
+    grounding assessment를 추가 gate로 사용한다. assessment가 부족하면
+    `ai_grounding_insufficient`로 review를 유지한다.
+  - normal routing 후 남은 active detail review는 enabled policy의 bounded
+    collection AI autopilot을 거치며, full-field `80%` 미만은 review 상태를
+    그대로 유지한다.
   - Golden fixture는 명시적 fixture mode의 회귀 테스트에만 사용하며 live candidate의 evidence conflict, requiredness, type validation, confidence 또는 review routing을 우회하지 않는다.
 - 출력:
   - review task 또는 approval marker
@@ -235,6 +260,10 @@ Source Documents:
   - `AUTO_APPROVE_MIN_CONFIDENCE`
   - `REVIEW_WARNING_CONFIDENCE_FLOOR`
   - `FORCE_REVIEW_ISSUE_CODES`
+  - `AI_AUTO_APPROVE_MIN_VERIFIED_FIELD_RATIO`
+  - `COLLECTION_AI_REVIEW_AUTOPILOT_ENABLED`
+  - `COLLECTION_AI_REVIEW_AUTO_APPROVAL_MIN_PASS_RATE`
+  - `COLLECTION_AI_REVIEW_AUTOPILOT_MAX_CANDIDATES`
   - `DISCONTINUED_ABSENCE_RUN_THRESHOLD`
 
 ### 5.10 Stage 9. Canonical Upsert and Change Assessment

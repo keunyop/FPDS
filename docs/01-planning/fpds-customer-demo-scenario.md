@@ -69,6 +69,7 @@
 | `fpds-homepage-ai-parallel-scorer` | homepage-first source discovery에서 후보 link scoring | OpenAI 설정이 있을 때 사용 | prompt/completion token과 estimated cost 기록 |
 | `fpds-heuristic-extractor` | chequing/savings/GIC field extraction | 사용 안 함 | execution record는 남고 token은 0 |
 | `fpds-heuristic-normalizer` | canonical mapping, subtype/taxonomy, evidence link 구성 | 사용 안 함 | execution record는 남고 token은 0 |
-| `fpds-dynamic-product-extractor` | 전문 parser가 없는 operator-added product type extraction fallback | 사용 가능 | token/cost 기록, manual review 우선 |
-| `fpds-dynamic-product-normalizer` | dynamic product canonical fallback | 사용 가능 | token/cost 기록, manual review 우선 |
+| `fpds-official-product-grounding-agent` | 모든 candidate-producing detail source의 공식 도메인 field 검증/교정 | OpenAI 설정 시 사용 | fresh chunk exact quote와 provider-consulted official URL 필수 |
+| `fpds-dynamic-product-normalizer` | dynamic product canonical fallback | 사용 가능 | 공식 grounding 평가와 기존 validation gate를 통과한 경우에만 auto-validation 가능 |
+| `review_verification_agent` | 수집 후 남은 active detail Review의 full-field 재검증/안전 교정 | policy enabled 시 bounded 사용 | 전체 requested field의 80% 이상, verified identity, no unapplied correction일 때만 system approval |
 | Validation/routing policy | required field, confidence, issue code, auto-promotion/review 결정 | 사용 안 함 | LLM token 없음 |

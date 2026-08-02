@@ -43,6 +43,9 @@ _STRING_ARRAY_OVERRIDE_FIELDS = {"target_customer_tags"}
 _RATE_OVERRIDE_FIELDS = {
     "standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate", "highest_rate"
 }
+_LENDING_RATE_OVERRIDE_FIELDS = {
+    "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "mortgage_rate", "interest_rate"
+}
 _MONTHLY_FEE_OVERRIDE_FIELDS = {"monthly_fee", "public_display_fee"}
 _STRING_OVERRIDE_FIELDS = {
     "product_name", "description_short", "fee_waiver_condition", "promotional_period_text",
@@ -719,6 +722,12 @@ def apply_review_decision(
             "product_version_id": product_result["product_version_id"] if product_result else None,
             "change_event_types": product_result["change_event_types"] if product_result else [],
             "changed_fields": changed_fields,
+            "ai_model_execution_id": actor.get("ai_model_execution_id"),
+            "ai_auto_approval_assessment": (
+                actor.get("ai_auto_approval_assessment")
+                if isinstance(actor.get("ai_auto_approval_assessment"), dict)
+                else None
+            ),
         },
     )
     return {
@@ -1166,6 +1175,9 @@ def _record_review_audit_event(
     user_agent: str | None,
     payload: dict[str, Any],
 ) -> None:
+    actor_type = str(actor.get("actor_type") or "user")
+    if actor_type not in {"system", "user", "service", "scheduler"}:
+        actor_type = "user"
     connection.execute(
         """
         INSERT INTO audit_event (
@@ -1196,7 +1208,7 @@ def _record_review_audit_event(
             %(audit_event_id)s,
             'review',
             %(event_type)s,
-            'user',
+            %(actor_type)s,
             %(actor_id)s,
             %(actor_role_snapshot)s,
             'review_task',
@@ -1220,6 +1232,7 @@ def _record_review_audit_event(
         {
             "audit_event_id": new_id("audit"),
             "event_type": event_type,
+            "actor_type": actor_type,
             "actor_id": actor.get("user_id"),
             "actor_role_snapshot": actor.get("role"),
             "target_id": target_id,
@@ -1675,6 +1688,15 @@ def _serialize_field_mapping(value: Any) -> dict[str, Any]:
         "canonical_value_type": _string_or_none(mapping.get("canonical_value_type")),
         "canonical_unit": _string_or_none(mapping.get("canonical_unit")),
         "field_note": _string_or_none(mapping.get("field_note")),
+        "model_execution_id": _string_or_none(mapping.get("model_execution_id")),
+        "ai_verification_status": _string_or_none(mapping.get("ai_verification_status")),
+        "ai_verification_rationale": _string_or_none(mapping.get("ai_verification_rationale")),
+        "ai_verification_sources": (
+            mapping.get("ai_verification_sources")
+            if isinstance(mapping.get("ai_verification_sources"), list)
+            else []
+        ),
+        "ai_verification_corrected_at": _string_or_none(mapping.get("ai_verification_corrected_at")),
     }
 
 
@@ -1729,6 +1751,8 @@ def _normalize_typed_override_value(*, field_name: str, value: Any) -> Any:
         if decimal_value < 0:
             raise _invalid_override_range(field_name)
         if field_name in _RATE_OVERRIDE_FIELDS and decimal_value >= Decimal("25"):
+            raise _invalid_override_range(field_name)
+        if field_name in _LENDING_RATE_OVERRIDE_FIELDS and decimal_value >= Decimal("100"):
             raise _invalid_override_range(field_name)
         if field_name in _MONTHLY_FEE_OVERRIDE_FIELDS and decimal_value > Decimal("500"):
             raise _invalid_override_range(field_name)

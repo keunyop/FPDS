@@ -6,7 +6,7 @@ platform with separate authenticated Admin and anonymous Public experiences.
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-07-30`:
+As of `2026-08-01`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -15,7 +15,7 @@ As of `2026-07-30`:
 - `WBS 3.2` snapshot capture and persistence are complete
 - `WBS 3.3` parsing/chunking is complete with live dev verification and parsed-document reuse verification
 - `WBS 3.4` evidence retrieval is complete with metadata-only live verification and vector-assisted fallback behavior verification
-- `WBS 3.5` extraction flow is complete with extracted-draft artifacts, `model_execution` and zero-token heuristic usage persistence, and unit verification
+- `WBS 3.5` extraction flow is complete with extracted-draft artifacts, evidence-linked official-domain AI grounding for detail products when OpenAI is configured, zero-token heuristic fallback, `model_execution`/usage persistence, and unit verification
 - `WBS 3.6` normalization mapping is complete with `normalized_candidate`, `field_evidence_link`, and live dev verification
 - `WBS 3.7` validation/confidence routing is complete with candidate revalidation, `review_task` creation, and live dev verification
 - `WBS 3.8` internal result viewer is complete as a static prototype viewer plus live-exportable viewer payload
@@ -65,6 +65,13 @@ As of `2026-07-30`:
 - `WBS 4.9` usage dashboard v1 is now complete with provider/stage/search filters, richer scope coverage signals, concentration shares, trend deltas, and denser anomaly drilldown context on `/admin/usage`
 - `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
 - `WBS 4.11` Review Detail AI verification is now complete: authorized reviewers can force a live search of registered official bank domains, compare official facts with the collected candidate, inspect cited match/mismatch/unverified results, and selectively stage contract-safe corrections without auto-approving or publishing
+- Admin collection now applies the same official-domain live-search discipline during detail-product extraction: every active Product Type receives the complete field contract, and an AI value is accepted only when it has a consulted allowlisted URL plus an exact quote from the freshly captured evidence chunk; provider failures fall back to the existing evidence-first path without bypassing review or publication gates
+- Existing active Review Queue candidates can be batch-verified against official bank domains: contract-safe mismatches update only the candidate, full-field pass rate uses every requested field as its denominator, and only candidates at or above the Product Owner-approved `80%` threshold with verified product identity are approved through the normal canonical/audit/aggregate path; lower scores remain in Review
+- New collections use that AI judgment automatically: officially grounded
+  dynamic/lending candidates can enter normal auto-promotion, and a bounded
+  post-validation autopilot verifies and safely corrects remaining detail
+  reviews before approving only `>=80%` full-field passes. Provider failures,
+  ambiguity, validation errors, and lower scores stay in Review.
 - `WBS 5.1` Big 5 source registry is now complete with a committed Canada Big 5 registry catalog and per-bank `chequing`, `savings`, and `gic` source baselines
 - `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification
@@ -92,7 +99,7 @@ As of `2026-07-30`:
 - a Python worker project under `worker/` with discovery and pipeline stages
 - working prototype ingestion code for discovery, preflight drift checks, scheduled registry refresh artifacts, snapshot capture, parse/chunk, and evidence retrieval stages
 - a pgvector-ready evidence retrieval bootstrap that keeps vector scope limited to `evidence_chunk` and preserves metadata-only fallback
-- working prototype extraction code that turns retrieval matches into sparse extracted drafts with evidence-link drafts
+- working extraction code that turns retrieval matches into sparse extracted drafts and, when configured, cross-checks detail products through official-domain live search before retaining evidence-linked field drafts
 - working prototype normalization code that maps extracted drafts into canonical candidate rows and candidate-level evidence links
 - working prototype validation/routing code that recomputes candidate validation, updates candidate state, and creates prototype review tasks
 - working prototype result-viewer export code and a static prototype viewer shell for read-only inspection
@@ -228,8 +235,8 @@ Out of scope for the current FPDS build:
 - `WBS 5.12` locale rollout is now implemented and gives the repo EN/KO/JA locale-aware public and admin shells with query-preserved locale switching, locale-aware labels, and locale-aware date or number formatting for UI-owned copy
 - `WBS 5.13` freshness/metric note wording is now implemented and gives the repo locale-aware public methodology/freshness note cards plus clearer dashboard note wording for snapshot timing, metric semantics, exclusion rules, and public evidence non-exposure
 - `WBS 5.15` source registry admin MVP is now implemented and gives the repo a live DB-backed bank and source-catalog flow with `/admin/banks` as the primary operator surface for both bank setup and coverage management, compatibility redirects for `/admin/source-catalog`, read-only `/admin/sources`, `GET/POST/PATCH /api/admin/banks`, `GET/POST/PATCH /api/admin/source-catalog`, and `POST /api/admin/source-catalog/collect`
-- `WBS 5.16` operator-managed product type onboarding is now implemented for the admin and collection pipeline: `/admin/product-types` manages all product types as DB rows, bank coverage pickers are registry-driven, homepage-first discovery uses stored product type definitions, hybrid candidate scoring, and page-level evidence validation, and product types without specialized parser support flow through generic AI extraction plus normalization fallback into manual review instead of public publish
-- a Canada retail lending Product Type baseline is now registered for Admin-run source collection with `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`; these types use generic AI extraction and manual review fallback until lending-specific parsers and public publish behavior are separately approved
+- `WBS 5.16` operator-managed product type onboarding is implemented for the admin and collection pipeline: `/admin/product-types` manages all product types as DB rows, bank coverage is registry-driven, discovery uses stored definitions, and types without specialized parsers use generic AI extraction plus official-grounding eligibility instead of blanket manual review
+- the Canada retail lending baseline (`credit-card`, `mortgage`, `personal-loan`, `line-of-credit`) uses the same evidence, validation, official-AI threshold, canonical, audit, and Public aggregate boundaries as other active product types
 - a recognized Canadian financial-institution baseline is now registered for Admin-run source collection with 28 active Canadian bank/direct-bank/credit-union profiles, logo metadata for bank screens, and 196 active source-catalog coverage rows across 7 active Product Types
 - discovery preflight drift checks and scheduled refresh artifact generation are now available under `worker/discovery/`
 - the Python worker baseline and parser dependencies are now tracked in `pyproject.toml`

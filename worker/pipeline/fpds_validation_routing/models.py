@@ -36,6 +36,7 @@ class ValidationRoutingConfig:
     auto_approve_min_confidence: float
     review_warning_confidence_floor: float
     force_review_issue_codes: set[str]
+    ai_auto_approve_min_verified_ratio: float = 0.8
 
 
 @dataclass(frozen=True)

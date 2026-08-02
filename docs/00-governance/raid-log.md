@@ -31,7 +31,7 @@ Rules:
 | R-002 | High | Open | PDF-heavy sources can still produce unstable parse quality and weak field extraction. | Preserve raw artifacts, keep supporting-merge and manual review options available, and verify PDF-heavy banks explicitly. | AI/Data |
 | R-003 | High | Open | BX-PF environment or contract readiness can still delay true publish readiness. | Keep interface-first behavior, mock-safe dev posture, and explicit pending or retry semantics until live readiness is confirmed. | Product Owner, Backend |
 | R-004 | Medium | Open | Public aggregate refresh, snapshot freshness, and canonical truth can drift if queue or retry behavior regresses. | Keep dashboard health visibility, retry flow, and latest-successful serving fallback in place. | Backend |
-| R-005 | Medium | Open | LLM, browser automation, and source collection costs may grow faster than expected during Big 5 hardening. | Use usage dashboard signals, bounded collection behavior, and targeted reruns instead of broad reruns by default. | Product Owner, Backend |
+| R-005 | Medium | Open | LLM, browser automation, source collection, and queue-remediation costs may grow faster than expected during cross-bank hardening. | Keep official grounding to one call per detail candidate plus one bounded residual-review attempt, cap autopilot candidates per run, reuse completed assessments, persist usage, and monitor the Usage dashboard before widening the cap. | Product Owner, Backend |
 | R-006 | High | Open | Delivery capacity remains tight relative to ongoing data, UI, QA, and docs work. | Keep slices small, protect scope boundaries, and avoid reopening settled baselines without clear value. | Product Owner, Tech Lead |
 
 ---

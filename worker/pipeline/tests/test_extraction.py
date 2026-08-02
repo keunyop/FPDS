@@ -14,6 +14,7 @@ from worker.pipeline.fpds_extraction.persistence import ExtractionDatabaseConfig
 from worker.pipeline.fpds_extraction.service import (
     _DEFAULT_EXTRACTABLE_FIELDS,
     ExtractionService,
+    _ai_candidate_value_is_contract_safe,
     _append_included_transactions_fallback,
     _append_fee_waiver_fallback,
     _append_labeled_numeric_extension_fallback,
@@ -40,16 +41,61 @@ from worker.pipeline.fpds_extraction.service import (
     _extract_tax_benefits,
     _extract_transaction_fee,
     _extract_withdrawal_limit_text,
+    _exact_quote_is_grounded,
+    _filter_official_web_sources,
     _infer_currency,
     _looks_like_navigation_description,
     _looks_like_non_product_summary,
     _resolve_field_names,
     _uses_dynamic_product_type,
+    _validated_field_sources,
 )
 from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, build_object_store
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_official_grounding_requires_exact_snapshot_quote_and_consulted_allowlisted_source(self) -> None:
+        self.assertTrue(_ai_candidate_value_is_contract_safe(field_name="standard_rate", value="3.25"))
+        self.assertFalse(_ai_candidate_value_is_contract_safe(field_name="standard_rate", value="30.00"))
+        self.assertTrue(_ai_candidate_value_is_contract_safe(field_name="mortgage_rate", value="4.25"))
+        self.assertFalse(_ai_candidate_value_is_contract_safe(field_name="mortgage_rate", value="100.00"))
+        self.assertFalse(_ai_candidate_value_is_contract_safe(field_name="monthly_fee", value="501.00"))
+        self.assertTrue(
+            _exact_quote_is_grounded(
+                quote="Minimum deposit: $500.",
+                excerpt="Open an account. Minimum deposit: $500.",
+            )
+        )
+        self.assertFalse(
+            _exact_quote_is_grounded(
+                quote="Minimum deposit: $5,000.",
+                excerpt="Open an account. Minimum deposit: $500.",
+            )
+        )
+        self.assertFalse(
+            _exact_quote_is_grounded(
+                quote="$500",
+                excerpt="Open an account. Minimum deposit: $500.",
+            )
+        )
+        provider_sources = _filter_official_web_sources(
+            [
+                {"url": "https://www.bank.example/product", "title": "Product"},
+                {"url": "https://untrusted.example/product", "title": "Untrusted"},
+            ],
+            allowed_domains=["bank.example"],
+        )
+        self.assertEqual(provider_sources, [{"url": "https://www.bank.example/product", "title": "Product"}])
+        validated = _validated_field_sources(
+            [
+                {"url": "https://www.bank.example/product", "title": "Product"},
+                {"url": "https://bank.example/not-consulted", "title": "Not consulted"},
+            ],
+            provider_source_by_url={item["url"]: item for item in provider_sources},
+            allowed_domains=["bank.example"],
+        )
+        self.assertEqual(validated, provider_sources)
+
     def test_promotional_period_fallback_recovers_duration_from_any_product_chunk(self) -> None:
         context = ExtractionDocumentContext(
             source_id="BANK-SAV-001",
@@ -5977,6 +6023,117 @@ class ExtractionServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_standard_product_type_uses_official_web_grounding_when_configured(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("extraction-standard-official-grounding")
+        try:
+            context = ExtractionDocumentContext(
+                source_id="TD-SAV-001",
+                parsed_document_id="parsed-standard-grounding-001",
+                source_document_id="src-standard-grounding-001",
+                snapshot_id="snap-standard-grounding-001",
+                bank_code="TD",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={
+                    "product_type": "savings",
+                    "discovery_role": "detail",
+                    "expected_fields": ["product_name", "eligibility_text"],
+                    "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/saving-investing/every-day-savings-account",
+                    "official_domain_allowlist": ["td.com"],
+                },
+            )
+            candidates = [
+                EvidenceChunkCandidate(
+                    evidence_chunk_id="chunk-standard-grounding-001",
+                    parsed_document_id=context.parsed_document_id,
+                    chunk_index=0,
+                    anchor_type="section",
+                    anchor_value="td-every-day-savings-account",
+                    page_no=None,
+                    source_language="en",
+                    evidence_excerpt=(
+                        "TD Every Day Savings Account\n"
+                        "Available to Canadian residents who meet TD account-opening requirements."
+                    ),
+                    retrieval_metadata={},
+                    source_document_id=context.source_document_id,
+                    source_snapshot_id=context.snapshot_id,
+                    bank_code="TD",
+                    country_code="CA",
+                    source_type="html",
+                )
+            ]
+            storage_config = ExtractionStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                extraction_object_prefix="extracted",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ExtractionService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            official_url = context.source_metadata["normalized_source_url"]
+            with (
+                patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch(
+                    "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
+                    return_value=(
+                        {
+                            "summary": "Current official product evidence confirms the eligibility field.",
+                            "fields": [
+                                {
+                                    "field_name": "eligibility_text",
+                                    "status": "mismatch",
+                                    "has_verified_value": True,
+                                    "verified_value_json": '"Canadian residents who meet TD account-opening requirements."',
+                                    "evidence_chunk_id": "chunk-standard-grounding-001",
+                                    "evidence_quote": "Available to Canadian residents who meet TD account-opening requirements.",
+                                    "confidence": 0.91,
+                                    "rationale": "The exact product page states the requirement.",
+                                    "sources": [{"url": official_url, "title": "TD Every Day Savings Account"}],
+                                }
+                            ],
+                        },
+                        {
+                            "model_id": "gpt-5.6-luna",
+                            "prompt_tokens": 140,
+                            "completion_tokens": 38,
+                            "provider_request_id": "resp-standard-grounding-001",
+                            "web_search_sources": [
+                                {"url": official_url, "title": "TD Every Day Savings Account"}
+                            ],
+                        },
+                    ),
+                ) as invoke_model,
+            ):
+                result = service.extract_documents(
+                    run_id="run-standard-grounding-001",
+                    inputs=[ExtractionInput(context=context, candidates=candidates)],
+                )
+
+            source_result = result.source_results[0]
+            fields_by_name = {item.field_name: item for item in source_result.extracted_fields}
+            self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-official-product-grounding-agent")
+            self.assertEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
+            self.assertEqual(
+                fields_by_name["eligibility_text"].field_metadata["official_web_sources"][0]["url"],
+                official_url,
+            )
+            call = invoke_model.call_args.kwargs
+            self.assertTrue(call["require_web_search"])
+            self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
+            self.assertIn("monthly_fee", call["payload"]["requested_fields"])
+            self.assertEqual(
+                source_result.model_execution_record["execution_metadata"]["official_grounding_contract_version"],
+                "collection-official-grounding-v1",
+            )
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_dynamic_product_type_uses_ai_fallback_when_configured(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-dynamic-service")
         try:
@@ -5996,6 +6153,8 @@ class ExtractionServiceTests(unittest.TestCase):
                     "product_type_description": "Tax-free savings deposit account for retail customers.",
                     "expected_fields": ["product_name", "minimum_deposit", "eligibility_text"],
                     "fallback_policy": "generic_ai_review",
+                    "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/tfsa-savings",
+                    "official_domain_allowlist": ["td.com"],
                 },
             )
             candidates = [
@@ -6038,14 +6197,23 @@ class ExtractionServiceTests(unittest.TestCase):
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
                         {
-                            "summary": "AI mapped one dynamic product eligibility field.",
-                            "field_candidates": [
+                            "summary": "Official TD evidence confirms the eligibility field.",
+                            "fields": [
                                 {
                                     "field_name": "eligibility_text",
-                                    "candidate_value": "Canadian residents aged 18 or older.",
-                                    "value_type": "string",
+                                    "status": "mismatch",
+                                    "has_verified_value": True,
+                                    "verified_value_json": '"Canadian residents aged 18 or older."',
                                     "evidence_chunk_id": "chunk-dyn-001",
+                                    "evidence_quote": "Available to Canadian residents aged 18 or older.",
                                     "confidence": 0.83,
+                                    "rationale": "The current official product page states the eligibility directly.",
+                                    "sources": [
+                                        {
+                                            "url": "https://www.td.com/ca/en/personal-banking/products/tfsa-savings",
+                                            "title": "TD TFSA Savings Account",
+                                        }
+                                    ],
                                 }
                             ],
                         },
@@ -6054,6 +6222,12 @@ class ExtractionServiceTests(unittest.TestCase):
                             "prompt_tokens": 120,
                             "completion_tokens": 34,
                             "provider_request_id": "resp-dyn-001",
+                            "web_search_sources": [
+                                {
+                                    "url": "https://www.td.com/ca/en/personal-banking/products/tfsa-savings",
+                                    "title": "TD TFSA Savings Account",
+                                }
+                            ],
                         },
                     ),
                 ),
@@ -6067,11 +6241,11 @@ class ExtractionServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             extracted_by_field = {item.field_name: item for item in source_result.extracted_fields}
-            self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-dynamic-product-extractor")
-            self.assertEqual(source_result.usage_record["usage_metadata"]["usage_mode"], "openai-dynamic-product-extraction")
+            self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-official-product-grounding-agent")
+            self.assertEqual(source_result.usage_record["usage_metadata"]["usage_mode"], "openai-official-product-grounding")
             self.assertEqual(extracted_by_field["eligibility_text"].candidate_value, "Canadian residents aged 18 or older.")
-            self.assertEqual(extracted_by_field["eligibility_text"].extraction_method, "openai_dynamic_extractor")
-            self.assertIn("AI mapped one dynamic product eligibility field.", source_result.runtime_notes)
+            self.assertEqual(extracted_by_field["eligibility_text"].extraction_method, "openai_official_grounding")
+            self.assertIn("Official TD evidence confirms the eligibility field.", source_result.runtime_notes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -6098,6 +6272,8 @@ class ExtractionServiceTests(unittest.TestCase):
                     "expected_fields": ["product_name", "return_structure", "term_options", "principal_protection"],
                     "fallback_policy": "generic_ai_review",
                     "discovery_metadata": {"page_title": "Progressive GIC Search Tool - BMO"},
+                    "normalized_source_url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic-search",
+                    "official_domain_allowlist": ["bmo.com"],
                 },
             )
             candidates = [
@@ -6147,13 +6323,19 @@ class ExtractionServiceTests(unittest.TestCase):
                     return_value=(
                         {
                             "summary": "No grounded GIC product details were present in the evidence chunks.",
-                            "field_candidates": [],
+                            "fields": [],
                         },
                         {
                             "model_id": "gpt-5.6-luna",
                             "prompt_tokens": 160,
                             "completion_tokens": 18,
                             "provider_request_id": "resp-bmo-gic-nav",
+                            "web_search_sources": [
+                                {
+                                    "url": "https://www.bmo.com/main/personal/investments/gic/progressive-gic-search",
+                                    "title": "Progressive GIC Search Tool",
+                                }
+                            ],
                         },
                     ),
                 ),

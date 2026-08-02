@@ -52,6 +52,7 @@ def main() -> int:
                     generated_source_ids=[],
                     collection_source_ids=[],
                     target_source_ids=[],
+                    failure=exc,
                 ),
             )
     return 0
@@ -297,8 +298,9 @@ def _catalog_run_metadata(
     generated_source_ids: list[str],
     collection_source_ids: list[str],
     target_source_ids: list[str],
+    failure: BaseException | None = None,
 ) -> dict[str, Any]:
-    return {
+    metadata = {
         "pipeline_stage": "source_catalog_collection",
         "collection_id": str(plan["collection_id"]),
         "correlation_id": str(plan["correlation_id"]),
@@ -316,6 +318,9 @@ def _catalog_run_metadata(
         "target_source_ids": target_source_ids,
         "source_ids": collection_source_ids,
     }
+    if failure is not None:
+        metadata.update(source_collection_runner._stage_failure_metadata(failure))
+    return metadata
 
 
 def _actor_from_plan(plan: dict[str, Any]) -> dict[str, Any]:

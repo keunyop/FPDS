@@ -46,6 +46,9 @@ Files:
 - `migrations/0028_source_catalog_coverage_evidence.sql`: preserves the
   official Product Type coverage URL that justified each catalog row so
   collection can start from that verified route
+- `migrations/0029_collection_ai_autopilot_policy.sql`: enables bounded
+  collection-time AI review remediation and the official-grounding thresholds
+  that allow dynamic/lending candidates to use normal policy auto-approval
 
 How to apply when a database is available:
 
@@ -73,6 +76,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
 ```
 
 Notes:
@@ -93,3 +97,7 @@ Notes:
 - Apply `0028` before relying on AI onboarding coverage evidence as the
   collection entry route. Existing catalog rows remain valid with a null
   coverage URL and continue to use bounded homepage discovery.
+- Apply `0029` to persist the Product Owner-approved collection AI autopilot,
+  80% official-grounding thresholds, and per-run cost bound. Code defaults to
+  the same enabled policy so deployment does not silently revert to blanket
+  manual review if the migration and runtime roll out together.

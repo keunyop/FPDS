@@ -17,5 +17,17 @@
   "review_task_id": "review-134d5e08a0809aa0",
   "runtime_notes": [
     "Candidate routed to review in `prototype` mode with primary reason `manual_sampling_review`."
-  ]
+  ],
+  "collection_ai_assessment": {
+    "required": false,
+    "eligible": true,
+    "threshold": 0.8,
+    "assessed_fields": [],
+    "verified_fields": [],
+    "unverified_fields": [],
+    "verified_ratio": 1.0,
+    "product_identity_verified": false,
+    "official_sources": [],
+    "reason_codes": []
+  }
 }

@@ -10,7 +10,7 @@
   "candidate_run_id": "run-3603",
   "normalization_model_execution_id": "modelexec-normalize-001",
   "validation_model_execution_id": "modelexec-3172f4c93249d4af",
-  "started_at": "2026-07-30T05:04:05.241105+00:00",
+  "started_at": "2026-08-02T13:17:53.654656+00:00",
   "routing_config": {
     "routing_mode": "prototype",
     "auto_approve_min_confidence": 1.0,
@@ -18,7 +18,20 @@
     "force_review_issue_codes": [
       "conflicting_evidence",
       "required_field_missing"
-    ]
+    ],
+    "ai_auto_approve_min_verified_ratio": 0.8
+  },
+  "collection_ai_assessment": {
+    "required": false,
+    "eligible": true,
+    "threshold": 0.8,
+    "assessed_fields": [],
+    "verified_fields": [],
+    "unverified_fields": [],
+    "verified_ratio": 1.0,
+    "product_identity_verified": false,
+    "official_sources": [],
+    "reason_codes": []
   },
   "candidate_before": {
     "candidate_id": "cand-001",

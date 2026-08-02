@@ -97,6 +97,38 @@ def promote_auto_validated_candidates(
                 }
             )
             continue
+        collection_ai_assessment = _coerce_mapping(row.get("collection_ai_assessment"))
+        if _requires_collection_ai_grounding(row) and not _collection_ai_assessment_is_eligible(
+            collection_ai_assessment
+        ):
+            reason_code = "ai_grounding_insufficient"
+            review_task_id = _queue_candidate_for_review(
+                connection,
+                row=row,
+                queue_reason_code=reason_code,
+                issue_codes=[reason_code],
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="in_review",
+                reason_code=reason_code,
+                reason_text="Dynamic candidate lacked the persisted official-source AI assessment required for automatic publication.",
+                review_task_id=review_task_id,
+                event_payload={
+                    "source_confidence": float(row["source_confidence"]),
+                    "collection_ai_assessment": collection_ai_assessment,
+                },
+            )
+            skipped_items.append(
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
+            )
+            continue
         discovery_role = str(row.get("discovery_role") or "").strip().lower()
         if not discovery_role:
             reason_code = "source_role_missing"
@@ -369,11 +401,23 @@ def _load_candidate_rows(
             nc.validation_issue_codes,
             nc.source_confidence,
             nc.candidate_payload,
+            validation_ai.collection_ai_assessment,
             sd.source_metadata ->> 'discovery_role' AS discovery_role,
             sd.source_metadata AS source_metadata
         FROM normalized_candidate AS nc
         JOIN source_document AS sd
           ON sd.source_document_id = nc.source_document_id
+        LEFT JOIN LATERAL (
+            SELECT me.execution_metadata -> 'collection_ai_assessment' AS collection_ai_assessment
+            FROM model_execution AS me
+            WHERE me.run_id = nc.run_id
+              AND me.source_document_id = nc.source_document_id
+              AND me.stage_name = 'validation_routing'
+              AND me.execution_status = 'completed'
+              AND me.execution_metadata ->> 'candidate_id' = nc.candidate_id
+            ORDER BY me.completed_at DESC NULLS LAST, me.started_at DESC
+            LIMIT 1
+        ) AS validation_ai ON true
         WHERE nc.candidate_state = 'auto_validated'
           AND nc.validation_status = 'pass'
           AND nc.source_confidence >= %(min_confidence)s
@@ -412,6 +456,34 @@ def _has_ambiguous_product_boundary(source_metadata: object) -> bool:
         if str(code).strip()
     }
     return "multi_product_family_overview" in reason_codes
+
+
+def _requires_collection_ai_grounding(row: dict[str, Any]) -> bool:
+    return str(row.get("product_type") or "").strip().lower() not in {"chequing", "savings", "gic"}
+
+
+def _collection_ai_assessment_is_eligible(assessment: dict[str, Any]) -> bool:
+    verified_fields = _coerce_string_list(assessment.get("verified_fields"))
+    official_sources = assessment.get("official_sources")
+    has_official_source = isinstance(official_sources, list) and any(
+        isinstance(source, dict) and str(source.get("url") or "").strip()
+        for source in official_sources
+    )
+    try:
+        verified_ratio = float(assessment.get("verified_ratio") or 0.0)
+        threshold = float(assessment.get("threshold") or 0.8)
+    except (TypeError, ValueError):
+        return False
+    return (
+        assessment.get("contract_version") == "collection-official-grounding-v1"
+        and assessment.get("required") is True
+        and assessment.get("eligible") is True
+        and assessment.get("product_identity_verified") is True
+        and has_official_source
+        and "product_name" in verified_fields
+        and len(set(verified_fields)) >= 2
+        and verified_ratio >= threshold
+    )
 
 
 def _non_product_source_reason(source_metadata: object) -> str | None:
@@ -824,6 +896,7 @@ def _record_candidate_auto_promotion_audit_event(
                     "validation_status": str(row["validation_status"]),
                     "validation_issue_codes": _coerce_string_list(row.get("validation_issue_codes")),
                     "auto_approve_min_confidence": policy["auto_approve_min_confidence"],
+                    "collection_ai_assessment": _coerce_mapping(row.get("collection_ai_assessment")),
                 },
                 ensure_ascii=True,
                 sort_keys=True,

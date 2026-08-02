@@ -435,6 +435,7 @@ def _normalize_candidate(
                 "evidence_chunk_id": field.evidence_chunk_id,
                 "normalization_method": "canonical_rate_safety_filter",
                 "suppressed_reason": rate_suppression_reason,
+                **_official_grounding_mapping_metadata(field),
             }
             runtime_notes.append(
                 f"Suppressed `{field_name}` value `{field.candidate_value}` because it is not a canonical annual deposit rate: {rate_suppression_reason}."
@@ -451,6 +452,7 @@ def _normalize_candidate(
             "evidence_chunk_id": field.evidence_chunk_id,
             "normalization_method": "heuristic_canonical_mapping",
             **mapping_contract_metadata(field_name),
+            **_official_grounding_mapping_metadata(field),
         }
         if field_name in _CORE_FIELDS:
             continue
@@ -492,6 +494,11 @@ def _normalize_candidate(
                 "evidence_chunk_id": extracted_field.evidence_chunk_id if extracted_field is not None else None,
                 "normalization_method": "dynamic_ai_canonical_mapping",
                 **mapping_contract_metadata(field_name),
+                **(
+                    _official_grounding_mapping_metadata(extracted_field)
+                    if extracted_field is not None
+                    else {}
+                ),
             }
         if dynamic_payload.get("product_name") not in {None, ""}:
             product_name = _coalesce_string(dynamic_payload.get("product_name"), product_name)
@@ -5145,6 +5152,19 @@ def _clean_promotional_period_fields(candidate_payload: dict[str, object]) -> No
     )
     if lowered.startswith("why choose") or not any(token in lowered for token in period_tokens):
         candidate_payload.pop("promotional_period_text", None)
+
+
+def _official_grounding_mapping_metadata(field: NormalizationExtractedField) -> dict[str, object]:
+    metadata = field.field_metadata if isinstance(field.field_metadata, dict) else {}
+    if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v1":
+        return {}
+    return {
+        "official_grounding_contract_version": "collection-official-grounding-v1",
+        "official_verification_status": metadata.get("official_verification_status"),
+        "official_web_sources": list(metadata.get("official_web_sources") or []),
+        "official_evidence_quote": metadata.get("evidence_quote"),
+        "official_rationale": metadata.get("rationale"),
+    }
 
 
 def _field_value(extracted_by_field: dict[str, NormalizationExtractedField], field_name: str) -> object | None:
