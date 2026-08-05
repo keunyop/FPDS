@@ -169,6 +169,10 @@ cd api/service
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
 - Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists execution/usage/sources/audit context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
+- Review AI official-domain lookup explicitly types the optional country
+  parameter in its PostgreSQL query, so psycopg prepared statements preserve
+  the session/candidate country boundary without raising an ambiguous-parameter
+  server error before model execution begins.
 - The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Its pass rate is `(official matches + safely applied mismatches) / all requested fields`; omitted/unverified fields fail, product name must pass, and unapplied corrections block approval. Candidates at `>= 80%` use the existing review approval and country aggregate-refresh path; all others remain in human review.
 - New collection runs now apply that same contract automatically to bounded
   active `queued`/`deferred` detail candidates left after normal validation.
@@ -211,8 +215,15 @@ cd api/service
 - US discovery keeps the canonical `chequing` and `gic` codes but uses
   country-local `checking` and certificate-of-deposit/CD vocabulary. Product
   links and evidence embedded in bounded JSON-valued `data-*` component
-  attributes are recognized, including pages whose visible shell is a ZIP or
-  county gate.
+  attributes or non-executable JSON/JSON-LD scripts are recognized, including
+  server-rendered application-state pages and pages whose visible shell is a
+  ZIP or county gate. Script-derived URLs still pass the normal official-domain,
+  source-role, page-evidence, and product-boundary checks.
+- Country-local identity vocabulary is merged with the canonical identity
+  baseline instead of being limited to heuristic scoring. This lets an
+  allowlisted US `auto loan` route satisfy canonical `personal-loan` identity
+  without allowing attribute-only terms such as `debit card` to become a
+  chequing product identity.
 - HTML candidates already found unreachable during page validation are not
   reintroduced as supporting sources, and supporting paths that conflict with
   the run source language are excluded before snapshot collection. A source
@@ -230,11 +241,18 @@ cd api/service
 - Snapshot capture now supports a targeted headless-browser PDF fallback for domains listed in `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS`. It covers blocked or timed-out direct requests, explicit rate pages that return only a JavaScript shell, and product pages that expose unresolved dynamic rate placeholders instead of customer-visible numbers. Current defaults include BMO, CIBC, Simplii, and Tangerine, whose official rate surfaces exhibited those bounded failure modes. The stored snapshot content type becomes `application/pdf`, which the downstream parse stage already supports, while HTML-only fetch paths still reject non-HTML fallback payloads so homepage discovery does not accidentally score a PDF error page as HTML. A successful direct snapshot remains the fail-soft result if optional browser rendering itself fails.
 - Homepage-first discovery now uses bounded hybrid scoring over the candidate set instead of AI-only fallback after heuristic failure: deterministic candidate generation still happens first, but the API layer now runs AI parallel candidate scoring when configured, uses stronger product-type-description terms in heuristic scoring, validates tentative detail pages with page-level evidence scoring, and persists generated-source `discovery_metadata` for explainability.
 - Homepage scoring keeps the first `h1` as the primary product identity and stores later headings separately. Generic pages with multiple product variants carry `multi_product_family_overview`, refinance/renewal advice or servicing flows cannot become product details, and lending support links under unrelated account paths are dropped before evidence merging.
+- Page scoring uses the normalized official URL path as bounded identity
+  evidence and applies login/comparison/legal negatives only when they are
+  prominent in that route, title, or primary heading. Shared navigation and
+  serialized application state therefore cannot erase otherwise coherent
+  structured product/pricing evidence. A high-confidence official product
+  title plus structured application payload may recover an unrendered body,
+  subject to the existing hard scope vetoes.
 - Link exclusions are URL- and CTA-aware: action, login, application, comparison, and promotion flows remain excluded, while ordinary product-card prose such as “mortgage offers stable payments” is not rejected by an `offer` substring.
 - Explicit `application`, `prequalification`, account-opening, and internal `shadow-site` paths are excluded from both detail and supporting source plans so stale/operator flows do not create recurring partial runs.
 - Seeded supporting hints pass through the same current scope filter as homepage-discovered links; calculators, servicing/help pages, onboarding/join flows, forms repositories, editorial/tips pages, stale action flows, and wrong-product support cannot remain active merely because an older committed registry listed them.
 - Seed detail hints may preserve a useful source ID, priority, or extra field request, but they cannot narrow the active Product Type field contract. Generated detail rows use the union of hint fields and the current Product Type baseline so older seeds cannot silently omit fee waivers, minimum balances, rates, or other reviewer-facing decision fields.
-- A singular named-product heading/title with explicit attributes may survive plural SEO or related-product headings at the normal confirmed-detail threshold; generic plural/category headings remain family overviews and cannot produce lending candidates.
+- A singular named-product heading/title with explicit attributes may survive plural SEO or related-product headings at the normal confirmed-detail threshold. A plural `Personal Loans` product remains singular when its sections describe uses such as consolidation or home improvement; two distinct subtype sections such as Auto Loan and Student Loan still establish a family boundary. Generic plural/category headings remain family overviews and cannot produce lending candidates.
 - The bank list payload now includes its attached coverage items so `/admin/banks` can drive multi-bank bulk collect without reopening each bank detail modal first.
 - Homepage-first source generation can still use committed fallback discovery hints from the repo baselines when link extraction comes up empty, but those hints no longer write rows back into the live DB automatically.
 - Source collection plans now carry generated-source discovery metadata into the worker registry payload so the runtime `source_document.source_metadata` stays aligned with the source registry explanation fields.
@@ -260,7 +278,10 @@ cd api/service
 - Named product detail recovery now requires title/heading identity strong enough to survive plural navigation noise, while generic marketing/action pages remain excluded. Deposit support discovery also drops mutual-fund, prospectus, fund-facts, and governance/reporting links before they can contaminate savings or GIC rate evidence.
 - Snapshot reuse is source-document scoped even when checksums match, so identical WAF/error responses from different URLs retain separate failure lineage. Repeated snapshots of a shared URL preserve its established `detail` metadata when a later collection scope sees that URL only as supporting evidence.
 - Review edit-approve applies the executable field contract to manual values: booleans and list fields retain their JSON types, numeric fields reject negative or implausible values, and fee/rate overrides cannot bypass the same safety boundary used by automated normalization.
-- Auto-promotion independently rejects discovery-marked non-product service/editorial sources and queues multi-product-boundary candidates for review even if an older validator labeled them pass. Review diagnosis recommends `defer` for an unsplit family page rather than asking an operator to approve a composite product.
+- Auto-promotion independently rejects discovery-marked non-product service/editorial sources and queues both deterministic multi-product boundaries and AI-identified family hubs for review even if an older validator labeled them pass. The collection review autopilot excludes the same hubs. Review diagnosis recommends `defer` for an unsplit family page rather than asking an operator to approve a composite product.
+- No-detail Partial summaries prefer the bounded rejection aggregate and the
+  decisive rejected product URL over an incidental earlier hub fetch error, so
+  Runs exposes the actual promotion failure on the next attempt.
 - Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.

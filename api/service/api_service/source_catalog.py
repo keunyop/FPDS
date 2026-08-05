@@ -14,7 +14,7 @@ import sys
 from typing import TYPE_CHECKING, Any
 import urllib.error
 import urllib.request
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
@@ -3859,8 +3859,14 @@ def _deposit_family_overview_can_be_detail(
         or candidate.heuristic_score <= 0
         or page_evidence.negative_signal_count > 0
         or not page_evidence.product_identity_match
-        or "title_semantic_match" not in page_evidence.page_evidence_reason_codes
-        or page_evidence.page_evidence_score < 3
+        or not {
+            "title_semantic_match",
+            "url_product_identity_signal",
+        }.intersection(page_evidence.page_evidence_reason_codes)
+        or page_evidence.page_evidence_score < 4
+        or "structured_component_evidence" not in page_evidence.page_evidence_reason_codes
+        or "product_type_semantic_match" not in page_evidence.page_evidence_reason_codes
+        or "pricing_or_feature_signal" not in page_evidence.page_evidence_reason_codes
     ):
         return False
     ai_reasons = set(_coerce_reason_codes(ai_score.reason_codes))
@@ -3913,6 +3919,14 @@ def _high_confidence_detail_overrides_low_page_score(
     ):
         return False
     named_title_and_heading = _page_has_specific_singular_product_identity(page_evidence)
+    structured_product_route = (
+        ai_score.relevance_score >= 9.0
+        and page_evidence.product_identity_match
+        and "title_semantic_match" in reason_codes
+        and "structured_component_evidence" in reason_codes
+        and page_evidence.page_evidence_score >= 3
+        and page_evidence.negative_signal_count == 0
+    )
     return (
         (
             page_evidence.product_identity_match
@@ -3935,6 +3949,7 @@ def _high_confidence_detail_overrides_low_page_score(
                 )
             )
         )
+        or structured_product_route
     ) and page_evidence.negative_signal_count <= 2
 
 
@@ -4030,6 +4045,16 @@ def _build_detail_discovery_metadata(
                     if ai_score is not None
                     and ai_score.predicted_role == "supporting_html"
                     and _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
+                    else ""
+                ),
+                (
+                    "high_confidence_structured_product_route"
+                    if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE
+                    and _high_confidence_detail_overrides_low_page_score(
+                        candidate=candidate,
+                        ai_score=ai_score,
+                        page_evidence=page_evidence,
+                    )
                     else ""
                 ),
             ]
@@ -4192,9 +4217,15 @@ def _score_page_evidence(
             list(_DISCOVERY_PROFILE_TERMS.get(_canonical_product_type_code(product_type), ())),
         )
     primary_heading_match = _term_hits(primary_heading, identity_terms)
+    normalized_url_path = re.sub(r"[-_/]+", " ", unquote(urlparse(raw_url).path).lower())
+    url_identity_match = _term_hits(normalized_url_path, identity_terms)
     body_match = _term_hits(body_text, semantic_terms)
     attribute_hits = _distinct_term_hits(" ".join([heading_text, body_text]), attribute_terms)
-    negative_hits = _negative_term_hits(" ".join([title_text, heading_text, body_text]))
+    # Global navigation and serialized application state routinely contain
+    # Sign in, Compare, Legal, and Terms links on otherwise valid product
+    # pages. Treat those words as negative only when they are prominent in the
+    # requested route, title, or primary heading.
+    negative_hits = _negative_term_hits(" ".join([raw_url, title_text, primary_heading]))
     scope_exclusion_reason = _source_scope_exclusion_reason(
         product_type=product_type,
         fingerprint=" ".join([raw_url, title_text, primary_heading]).lower(),
@@ -4209,7 +4240,7 @@ def _score_page_evidence(
 
     score = 0
     reason_codes: list[str] = []
-    product_identity_match = bool(title_match or primary_heading_match)
+    product_identity_match = bool(title_match or primary_heading_match or url_identity_match)
     if product_identity_match:
         reason_codes.append("product_identity_signal")
     if structured_sections:
@@ -4222,6 +4253,9 @@ def _score_page_evidence(
     if primary_heading_match:
         score += 3
         reason_codes.append("detail_page_layout_signal")
+    if url_identity_match:
+        score += 1
+        reason_codes.append("url_product_identity_signal")
     if body_match:
         score += 1
         reason_codes.append("product_type_semantic_match")
@@ -4426,16 +4460,46 @@ def _looks_like_multi_product_family_overview(
         ),
         "credit-card": ("credit card", "visa", "mastercard", "cash back", "rewards"),
         "mortgage": ("mortgage", "fixed-rate", "fixed rate", "convertible", "rental", "improvements", "second mortgage"),
-        "personal-loan": ("loan",),
+        "personal-loan": (),
         "line-of-credit": ("line of credit", "home equity", "student", "professional"),
     }[normalized_type]
-    variant_headings = {
+    normalized_secondary_headings = {
         _collapse_whitespace(heading).lower()
         for heading in secondary_headings
-        if any(term in _collapse_whitespace(heading).lower() for term in variant_terms)
+        if _collapse_whitespace(heading)
     }
-    if len(variant_headings) >= 2:
-        return True
+    if normalized_type == "personal-loan":
+        # Repeated headings such as "Personal loan rates" and "Personal loan
+        # calculator" describe one offering. Only distinct lending subtypes
+        # establish a multi-product boundary.
+        personal_loan_subtypes = {
+            "personal": ("personal loan",),
+            "auto": ("auto loan", "auto financing", "car loan", "vehicle loan"),
+            "student": ("student loan",),
+            "registered": ("rrsp loan",),
+            "consolidation": ("debt consolidation loan", "consolidation loan"),
+            "home-improvement": ("home improvement loan", "home renovation loan", "home reno loan"),
+            "recreational": ("recreational vehicle", "rv loan"),
+        }
+        represented_subtypes = {
+            subtype
+            for subtype, markers in personal_loan_subtypes.items()
+            if any(
+                marker in heading
+                for marker in markers
+                for heading in normalized_secondary_headings
+            )
+        }
+        if len(represented_subtypes) >= 2:
+            return True
+    else:
+        variant_headings = {
+            heading
+            for heading in normalized_secondary_headings
+            if any(term in heading for term in variant_terms)
+        }
+        if len(variant_headings) >= 2:
+            return True
 
     normalized_body = _collapse_whitespace(body_text).lower()
     category_match = re.search(r"\bselect\s+categor(?:y|ies)\b", normalized_body)
@@ -5318,8 +5382,6 @@ def _product_type_description_terms(product_type_definition: dict[str, Any]) -> 
 def _product_type_identity_keywords(product_type: str, product_type_definition: dict[str, Any]) -> list[str]:
     canonical_product_type = _canonical_product_type_code(product_type)
     curated_hints = list(_PRODUCT_TYPE_IDENTITY_HINTS.get(canonical_product_type, ()))
-    if curated_hints:
-        return curated_hints
 
     identity_nouns = (
         "account",
@@ -5336,11 +5398,42 @@ def _product_type_identity_keywords(product_type: str, product_type_definition: 
         canonical_product_type.replace("-", " "),
         *_product_type_keywords(product_type_definition),
     ]
-    return _dedupe_preserve_order(
-        [
+    canonical_identity_markers = {
+        "chequing": ("account",),
+        "savings": ("account",),
+        "gic": ("gic", "deposit", "certificate", "cd"),
+        "credit-card": ("card",),
+        "mortgage": ("mortgage", "home loan"),
+        "personal-loan": ("loan",),
+        "line-of-credit": (
+            "line of credit",
+            "personal line",
+            "home equity line",
+            "student line",
+            "professional line",
+            "heloc",
+        ),
+    }.get(canonical_product_type)
+    if canonical_identity_markers is None:
+        definition_hints = [
             item
             for item in candidates
             if item and (any(noun in item for noun in identity_nouns) or len(item.split()) >= 2)
+        ]
+    else:
+        definition_hints = [
+            item
+            for item in candidates
+            if item
+            and any(
+                bool(re.search(r"\bcd\b", item)) if marker == "cd" else marker in item
+                for marker in canonical_identity_markers
+            )
+        ]
+    return _dedupe_preserve_order(
+        [
+            *curated_hints,
+            *definition_hints,
         ]
     )
 

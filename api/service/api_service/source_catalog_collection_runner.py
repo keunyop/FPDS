@@ -266,7 +266,19 @@ def _no_detail_sources_summary(discovery_notes: list[str]) -> str:
     ]
     if not notable_notes:
         return base
-    return f"{base} {notable_notes[0]}"
+    priority_prefixes = (
+        "Detail rejection summary:",
+        "Rejected detail ",
+        "Homepage discovery candidate validation rejected all tentative detail pages.",
+    )
+    decisive_notes = [
+        note
+        for prefix in priority_prefixes
+        for note in notable_notes
+        if note.startswith(prefix)
+    ]
+    selected_notes = _dedupe_preserve_order(decisive_notes)[:2] or notable_notes[:1]
+    return f"{base} {' '.join(selected_notes)}"
 
 
 def _dedupe_preserve_order(values: list[str]) -> list[str]:

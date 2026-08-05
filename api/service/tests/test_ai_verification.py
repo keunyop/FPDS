@@ -186,8 +186,13 @@ class AiVerificationTests(TestCase):
             ),
             ["bank.example", "rates.bank.example"],
         )
-        domain_query = next(params for sql, params in connection.calls if "SELECT source_url FROM (" in sql)
+        domain_sql, domain_query = next(
+            (sql, params)
+            for sql, params in connection.calls
+            if "SELECT source_url FROM (" in sql
+        )
         self.assertEqual(domain_query["country_code"], "CA")
+        self.assertEqual(domain_sql.count("%(country_code)s::text"), 4)
 
     def test_build_payload_excludes_read_only_fields(self):
         payload = build_ai_verification_payload(

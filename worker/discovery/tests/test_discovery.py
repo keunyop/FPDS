@@ -78,6 +78,42 @@ class UrlUtilsTests(unittest.TestCase):
             ],
         )
 
+    def test_extract_links_reads_bounded_json_script_routes(self) -> None:
+        payload = {
+            "products": [
+                {
+                    "title": "Atlas High Interest Savings",
+                    "url": "https://www.atlas.example/banking/savings-account/",
+                },
+                {
+                    "headline": "Harbor Fixed Mortgage",
+                    "cta": {"targetUrl": "/mortgages/fixed-rate/"},
+                },
+                {"title": "Template", "targetUrl": "/products/{productId}/"},
+                {"title": "Decorative asset", "_path": "/assets/product-card.png"},
+            ]
+        }
+        html = (
+            f'<script type="application/json" id="ssr-state">{json.dumps(payload)}</script>'
+            '<script>{"title":"Executable config","url":"/must-not-run"}</script>'
+        )
+
+        links = extract_links(html, base_url="https://www.atlas.example/")
+
+        self.assertEqual(
+            [(link.normalized_url, link.anchor_text) for link in links],
+            [
+                (
+                    "https://www.atlas.example/banking/savings-account",
+                    "Atlas High Interest Savings",
+                ),
+                (
+                    "https://www.atlas.example/mortgages/fixed-rate",
+                    "Harbor Fixed Mortgage",
+                ),
+            ],
+        )
+
     def test_extract_structured_text_sections_reads_component_copy(self) -> None:
         payload = {
             "title": "Advantage Savings",
@@ -91,6 +127,22 @@ class UrlUtilsTests(unittest.TestCase):
             [
                 "Advantage Savings",
                 "$8 monthly fee, waived with an eligible balance.",
+            ],
+        )
+
+    def test_extract_structured_text_sections_reads_json_script_copy(self) -> None:
+        payload = {
+            "title": "Harbor Fixed Mortgage",
+            "description": "A five-year fixed mortgage with monthly payment options.",
+            "config": {"endpoint": "https://api.harbor.example/internal"},
+        }
+        html = f'<script type="application/ld+json">{json.dumps(payload)}</script>'
+
+        self.assertEqual(
+            extract_structured_text_sections(html),
+            [
+                "Harbor Fixed Mortgage",
+                "A five-year fixed mortgage with monthly payment options.",
             ],
         )
 

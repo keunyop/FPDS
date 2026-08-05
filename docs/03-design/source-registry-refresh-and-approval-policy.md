@@ -193,7 +193,10 @@ Current live product-type onboarding note:
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
 - Country-local discovery vocabulary is allowed without renaming canonical
   Product Type codes. In the US, canonical `chequing` is discovered as
-  checking and canonical `gic` as certificates of deposit/CDs.
+  checking, canonical `gic` as certificates of deposit/CDs, and canonical
+  `personal-loan` may use auto/student/installment-loan identity terms. Local
+  identity nouns are merged narrowly; attribute-only terms do not establish a
+  different product identity.
 - Dynamic component catalogs may expose official links and product copy only
   inside JSON-valued `data-*` attributes. Discovery and parsing may read those
   values only with fixed size/node/count limits and the normal same-domain,
@@ -291,11 +294,30 @@ Current repository state:
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is role-aware and limited to `detail`. Existing bank-specific merges remain supported, while generated product-matched supporting HTML can now provide generic savings or GIC rate evidence without becoming a candidate itself
 - generated collection allowlists canonicalize only a leading `www.` host label so official apex redirects remain bounded. Supporting links under an unrelated product path are excluded, and multi-product family pages carry an explicit ambiguous-boundary reason that prevents automatic canonical publication.
+- homepage discovery may recover bounded routes and product copy from
+  non-executable `application/json` and `application/ld+json` script payloads
+  when a server-rendered application shell exposes no ordinary anchors. Only
+  recognized link keys are read, payload/link/node limits are enforced, and
+  every recovered URL remains subject to the same official-domain, exclusion,
+  source-role, page-evidence, review, and publication boundaries as an HTML
+  anchor.
+- page-level evidence may use the normalized official URL path as a bounded
+  product-identity signal. Login/comparison/legal words count against a page
+  only when prominent in the route, title, or primary heading; shared
+  navigation and serialized application state do not independently disqualify
+  coherent product and pricing evidence.
 - allowlisted snapshot capture may replace direct HTML with a browser-rendered PDF when an explicit rate page is only a JavaScript shell or a product page retains a recognizable unresolved rate placeholder. The fallback is value-agnostic, remains on the same official URL/domain, records the fetch method in snapshot headers, and fails soft to the direct snapshot so downstream missing-field validation still protects publication.
 - retail discovery treats explicit commercial URL/title signals as hard scope vetoes across deposit and lending types. Successful rediscovery also revalidates previously generated detail rows and inactivates stale rows that now match a deterministic hard-scope veto, so an old commercial detail cannot survive merely because it was excluded before current candidate evaluation. Plural family identities such as a generic credit-cards heading plus multiple named variants are classified as `multi_product_family_overview`; lending family overviews are evidence-only rather than standalone candidates, while any review-first family handling remains blocked from auto-publication.
 - explicit application/prequalification routes and internal `shadow-site` mirrors are hard source-scope vetoes. Their absence must not make a run partial because they are operator journeys or stale internal mirrors, not evidence sources.
 - a confirmed singular product heading/title with explicit attributes may override a family marker caused only by plural SEO copy or related-product headings; generic plural/category identities remain supporting-only.
+- plural wording alone does not make one branded lending offering a family.
+  Repeated personal-loan use cases remain one product, while distinct subtype
+  sections remain a family boundary. AI `hub_page_not_detail` sources allowed
+  as deposit fallback are treated as ambiguous by validation, API
+  auto-promotion, and the collection review autopilot.
 - rejected detail candidates retain a bounded diagnostic summary with URL, AI role/score, page score, title/H1, and reason codes so Operations can distinguish a weak source from a discovery-policy defect without reopening raw worker logs.
+- when no detail survives, the run summary prioritizes that rejection aggregate
+  and a representative rejected detail over incidental hub-fetch noise.
 - seed detail hints retain discovery continuity but cannot reduce the current Product Type expected-field baseline; generated details request the union so stale seed metadata cannot create structurally incomplete approved products.
 - operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
 - the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`

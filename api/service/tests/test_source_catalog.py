@@ -125,6 +125,157 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(gic["product_type_code"], "gic")
         self.assertIn("certificate of deposit", gic["discovery_keywords"])
 
+    def test_structured_deposit_shell_uses_route_identity_without_global_nav_penalty(self) -> None:
+        definition = localize_product_type_definition(
+            country_code="US",
+            definition=_product_type_definition("savings"),
+        )
+        html = """
+        <html><head><title>Example Bank Online</title></head><body>
+          <nav>Sign in Compare Legal Terms and Conditions</nav>
+          <script type="application/ld+json">
+            {
+              "name": "Savings Account",
+              "description": "Earn interest on your balance with no monthly fee and flexible withdrawals."
+            }
+          </script>
+        </body></html>
+        """
+        raw_url = "https://www.examplebank.com/banking/savings-account"
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url=raw_url,
+                fetch_policy=SimpleNamespace(),
+                product_type="savings",
+                product_type_definition=definition,
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url=raw_url,
+            raw_url=raw_url,
+            anchor_text="Savings Accounts",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=raw_url,
+            predicted_role="supporting_html",
+            relevance_score=7.0,
+            confidence_band="medium",
+            reason_codes=["product_type_semantic_match", "hub_page_not_detail"],
+            short_rationale="Official savings family route.",
+        )
+
+        self.assertEqual(evidence.negative_signal_count, 0)
+        self.assertTrue(evidence.product_identity_match)
+        self.assertIn("url_product_identity_signal", evidence.page_evidence_reason_codes)
+        self.assertGreaterEqual(evidence.page_evidence_score, 4)
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+            )
+        )
+
+    def test_us_localized_auto_loan_identity_promotes_other_bank_detail(self) -> None:
+        definition = localize_product_type_definition(
+            country_code="US",
+            definition=_product_type_definition("personal-loan"),
+        )
+        html = """
+        <html><head><title>Auto Loan Refinancing | Example Bank</title></head><body>
+          <h1>Goodbye overpaying. Hello refinancing.</h1>
+          <nav>Sign in Compare Legal Terms and Conditions</nav>
+          <script type="application/json">
+            {"description": "Refinance an auto loan with a fixed interest rate, monthly payment, term, and repayment details."}
+          </script>
+        </body></html>
+        """
+        raw_url = "https://www.examplebank.com/auto-financing/refinance"
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url=raw_url,
+                fetch_policy=SimpleNamespace(),
+                product_type="personal-loan",
+                product_type_definition=definition,
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url=raw_url,
+            raw_url=raw_url,
+            anchor_text="Auto refinancing",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=4,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=raw_url,
+            predicted_role="detail",
+            relevance_score=8.5,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="Official auto-loan refinancing product page.",
+        )
+
+        self.assertTrue(evidence.product_identity_match)
+        self.assertIn("title_semantic_match", evidence.page_evidence_reason_codes)
+        self.assertEqual(evidence.negative_signal_count, 0)
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_high_confidence_structured_product_route_can_survive_unrendered_body(self) -> None:
+        html = """
+        <html><head><title>Mortgage Loans | Example Bank</title></head><body>
+          <script type="application/json">{"description": "official product content"}</script>
+        </body></html>
+        """
+        raw_url = "https://www.examplebank.com/borrow/home"
+        with patch("api_service.source_catalog.fetch_text", return_value=html):
+            evidence = _score_page_evidence(
+                raw_url=raw_url,
+                fetch_policy=SimpleNamespace(),
+                product_type="mortgage",
+                product_type_definition=_product_type_definition("mortgage"),
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url=raw_url,
+            raw_url=raw_url,
+            anchor_text="Home mortgage",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=3,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=raw_url,
+            predicted_role="detail",
+            relevance_score=9.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+            short_rationale="Official mortgage product route.",
+        )
+
+        self.assertEqual(evidence.page_evidence_score, 3)
+        self.assertIn("structured_component_evidence", evidence.page_evidence_reason_codes)
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
     def test_location_gate_can_use_structured_product_evidence_without_promoting_a_family_hub(self) -> None:
         structured_payload = json.dumps(
             {
@@ -1261,12 +1412,18 @@ class SourceCatalogTests(unittest.TestCase):
             short_rationale="Official GIC family overview.",
         )
         evidence = PageEvidenceAssessment(
-            page_evidence_score=3,
-            page_evidence_reason_codes=["product_identity_signal", "title_semantic_match"],
+            page_evidence_score=4,
+            page_evidence_reason_codes=[
+                "product_identity_signal",
+                "title_semantic_match",
+                "structured_component_evidence",
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+            ],
             page_title="GICs | Example Bank",
             primary_heading=None,
             heading_match=False,
-            attribute_signal_count=0,
+            attribute_signal_count=2,
             negative_signal_count=0,
             product_identity_match=True,
         )
@@ -1564,6 +1721,69 @@ class SourceCatalogTests(unittest.TestCase):
                 allow_family_overview=False,
             )
         )
+
+    def test_personal_loans_name_and_use_case_sections_remain_one_product(self) -> None:
+        detail_html = """
+        <html><head><title>No-fee Personal Loans up to $30,000 | Example Bank</title></head><body>
+          <h1>Example Bank Personal Loans</h1>
+          <h2>Choose how to use your personal loan</h2>
+          <h2>Loans for debt consolidation</h2>
+          <h2>Loans for home improvement</h2>
+          <h2>Personal loan calculator</h2>
+          <p>Choose a fixed interest rate, loan amount, term, and monthly payment.</p>
+        </body></html>
+        """
+        raw_url = "https://www.examplebank.com/personal-loans"
+        with patch("api_service.source_catalog.fetch_text", return_value=detail_html):
+            evidence = _score_page_evidence(
+                raw_url=raw_url,
+                fetch_policy=SimpleNamespace(),
+                product_type="personal-loan",
+                product_type_definition=_product_type_definition("personal-loan"),
+            )
+
+        candidate = HomepageCandidate(
+            normalized_url=raw_url,
+            raw_url=raw_url,
+            anchor_text="Personal Loans",
+            source_type="html",
+            origin="homepage_or_hub_link",
+            heuristic_score=5,
+            supporting_signal=False,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=raw_url,
+            predicted_role="detail",
+            relevance_score=10.0,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match", "pricing_or_feature_signal"],
+            short_rationale="One personal-loan offering with multiple use cases.",
+        )
+
+        self.assertNotIn("multi_product_family_overview", evidence.page_evidence_reason_codes)
+        self.assertTrue(_candidate_promotes_to_detail(candidate=candidate, ai_score=ai_score, page_evidence=evidence))
+
+    def test_distinct_personal_loan_subtypes_still_mark_family_boundary(self) -> None:
+        family_html = """
+        <html><head><title>Personal Loans | Example Bank</title></head><body>
+          <h1>Personal Loans</h1>
+          <h2>Auto Loan</h2><p>Finance a vehicle.</p>
+          <h2>Student Loan</h2><p>Finance education.</p>
+        </body></html>
+        """
+        with patch("api_service.source_catalog.fetch_text", return_value=family_html):
+            evidence = _score_page_evidence(
+                raw_url="https://www.examplebank.com/loans",
+                fetch_policy=SimpleNamespace(),
+                product_type="personal-loan",
+                product_type_definition=_product_type_definition("personal-loan"),
+            )
+
+        self.assertIn("multi_product_family_overview", evidence.page_evidence_reason_codes)
 
     def test_high_confidence_named_card_survives_plural_seo_title_and_cross_sell_headings(self) -> None:
         detail_html = """
@@ -1882,6 +2102,90 @@ class SourceCatalogTests(unittest.TestCase):
         rates_row = next(item for item in result.rows if item["normalized_url"] == rates_url)
         self.assertEqual(rates_row["discovery_role"], "supporting_html")
         self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "deterministic_supporting_fallback")
+
+    def test_homepage_discovery_promotes_json_script_routes_across_banks_and_product_types(self) -> None:
+        cases = (
+            {
+                "bank_code": "ATLAS",
+                "bank_name": "Atlas Bank",
+                "product_type": "savings",
+                "homepage_url": "https://www.atlas.example/",
+                "detail_url": "https://www.atlas.example/banking/high-interest-savings",
+                "product_name": "Atlas High Interest Savings",
+            },
+            {
+                "bank_code": "HARBOR",
+                "bank_name": "Harbor Bank",
+                "product_type": "mortgage",
+                "homepage_url": "https://www.harbor.example/",
+                "detail_url": "https://www.harbor.example/mortgages/fixed-rate",
+                "product_name": "Harbor Fixed Mortgage",
+            },
+        )
+        for case in cases:
+            with self.subTest(bank_code=case["bank_code"], product_type=case["product_type"]):
+                homepage_html = (
+                    '<script type="application/json" id="ssr-state">'
+                    + json.dumps(
+                        {
+                            "cards": [
+                                {
+                                    "title": case["product_name"],
+                                    "targetUrl": case["detail_url"],
+                                }
+                            ]
+                        }
+                    )
+                    + "</script>"
+                )
+                ai_result = AiParallelScoringResult(
+                    scores={
+                        case["detail_url"]: AiParallelCandidateScore(
+                            candidate_url=case["detail_url"],
+                            predicted_role="detail",
+                            relevance_score=9.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match"],
+                            short_rationale="Official named product detail page.",
+                        )
+                    },
+                    notes=[],
+                )
+                detail_evidence = PageEvidenceAssessment(
+                    page_evidence_score=8,
+                    page_evidence_reason_codes=[
+                        "product_identity_signal",
+                        "title_semantic_match",
+                        "pricing_or_feature_signal",
+                    ],
+                    page_title=case["product_name"],
+                    primary_heading=case["product_name"],
+                    heading_match=True,
+                    attribute_signal_count=3,
+                    negative_signal_count=0,
+                )
+
+                with (
+                    patch(
+                        "api_service.source_catalog.fetch_text",
+                        side_effect=lambda url, _policy: homepage_html if url == case["homepage_url"] else "<html></html>",
+                    ),
+                    patch("api_service.source_catalog._score_candidate_links_with_ai", return_value=ai_result),
+                    patch("api_service.source_catalog._score_page_evidence", return_value=detail_evidence),
+                ):
+                    result = _generate_sources_from_homepage(
+                        bank_code=case["bank_code"],
+                        bank_name=case["bank_name"],
+                        country_code="US",
+                        product_type=case["product_type"],
+                        product_type_definition=_product_type_definition(case["product_type"]),
+                        homepage_url=case["homepage_url"],
+                        source_language="en",
+                    )
+
+                detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+                self.assertEqual([item["normalized_url"] for item in detail_rows], [case["detail_url"]])
+                self.assertEqual(len(result.detail_source_ids), 1)
 
     def test_product_faq_minimum_is_supporting_evidence_not_a_detail_candidate(self) -> None:
         detail_url = "https://www.examplebank.ca/investments/gic"

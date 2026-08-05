@@ -58,6 +58,17 @@ As of `2026-08-01`:
   headings cannot become product names. Migration `0028` and five audited Bank
   of America coverage URLs are applied in shared dev; a normal five-type run
   completed `30/30` sources with no partial run.
+- Dynamic homepage discovery now reads bounded, non-executable JSON and
+  JSON-LD application-state payloads as well as anchors and `data-*` component
+  JSON. This recovers official product routes from server-rendered shells while
+  preserving the existing domain, page-evidence, product-boundary, review, and
+  publication gates.
+- Page evidence now treats an official product URL as bounded identity evidence,
+  ignores shared navigation `Sign in`/`Compare`/legal copy as a page-level
+  negative, and merges country-local identity vocabulary such as US `auto
+  loan`. Plural product names with several use cases remain one product, while
+  genuinely distinct family variants and AI-identified family hubs stay
+  review-bound.
 - `WBS 4.5` run status is now complete with session-protected run list/detail APIs, protected `/admin/runs` and `/admin/runs/:runId` routes, run-level error summary, source processing summary, related review-task links, and usage summary
 - `WBS 4.6` change history is now complete with a session-protected change-history API, a protected `/admin/changes` route, canonical event chronology, changed-field summaries, review/run drilldowns, and manual-override audit context
 - `WBS 4.7` audit log baseline is now complete with a session-protected audit-log API, a protected `/admin/audit` route, append-only review/auth/trace history, and review/run drilldowns

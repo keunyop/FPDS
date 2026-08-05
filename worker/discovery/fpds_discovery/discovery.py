@@ -19,7 +19,9 @@ PERSONALIZED_DISCOVERY_KEYWORDS = ("discovery.td.com", "find-the-account", "reco
 _STRUCTURED_ATTRIBUTE_MAX_CHARS = 1_000_000
 _STRUCTURED_LINK_MAX = 256
 _STRUCTURED_NODE_MAX = 20_000
-_STRUCTURED_LINK_KEYS = {"href", "url"}
+_STRUCTURED_SCRIPT_TYPES = {"application/json", "application/ld+json"}
+_STRUCTURED_SCRIPT_MAX_COUNT = 8
+_STRUCTURED_LINK_KEYS = {"href", "targeturl", "url"}
 _STRUCTURED_LABEL_KEYS = ("content", "label", "title", "name", "headline")
 _STRUCTURED_TEXT_KEYS = {
     "body",
@@ -413,10 +415,24 @@ class _LinkExtractor(HTMLParser):
         self.links: list[ExtractedLink] = []
         self._current_href: str | None = None
         self._text_parts: list[str] = []
+        self._structured_script_parts: list[str] | None = None
+        self._structured_script_chars = 0
+        self._structured_script_count = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_map = dict(attrs)
         self._extract_structured_attribute_links(attrs)
+        if tag == "script":
+            script_type = str(attr_map.get("type") or "").strip().lower()
+            if (
+                not attr_map.get("src")
+                and script_type in _STRUCTURED_SCRIPT_TYPES
+                and self._structured_script_count < _STRUCTURED_SCRIPT_MAX_COUNT
+            ):
+                self._structured_script_parts = []
+                self._structured_script_chars = 0
+                self._structured_script_count += 1
+            return
         if tag != "a":
             return
         href = attr_map.get("href")
@@ -426,6 +442,12 @@ class _LinkExtractor(HTMLParser):
         self._text_parts = []
 
     def handle_data(self, data: str) -> None:
+        if self._structured_script_parts is not None:
+            if self._structured_script_chars + len(data) > _STRUCTURED_ATTRIBUTE_MAX_CHARS:
+                self._structured_script_parts = None
+            else:
+                self._structured_script_parts.append(data)
+                self._structured_script_chars += len(data)
         if self._current_href is None:
             return
         stripped = data.strip()
@@ -433,6 +455,19 @@ class _LinkExtractor(HTMLParser):
             self._text_parts.append(stripped)
 
     def handle_endtag(self, tag: str) -> None:
+        if tag == "script":
+            if self._structured_script_parts is not None:
+                raw_payload = "".join(self._structured_script_parts).strip()
+                if raw_payload:
+                    try:
+                        payload = json.loads(raw_payload)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                    else:
+                        self._extract_structured_payload_links(payload)
+            self._structured_script_parts = None
+            self._structured_script_chars = 0
+            return
         if tag != "a" or self._current_href is None:
             return
 
@@ -480,35 +515,38 @@ class _LinkExtractor(HTMLParser):
                 payload = json.loads(value)
             except (json.JSONDecodeError, TypeError):
                 continue
-            node_count = 0
-            stack: list[tuple[Any, str | None, str]] = [(payload, None, "")]
-            while stack and node_count < _STRUCTURED_NODE_MAX and len(self.links) < _STRUCTURED_LINK_MAX:
-                node, parent_key, inherited_label = stack.pop()
-                node_count += 1
-                if isinstance(node, dict):
-                    label = next(
-                        (
-                            str(node[key])
-                            for key in _STRUCTURED_LABEL_KEYS
-                            if isinstance(node.get(key), str) and str(node[key]).strip()
-                        ),
-                        inherited_label,
-                    )
-                    for key, item in node.items():
-                        normalized_key = str(key).lower()
-                        if isinstance(item, str) and (
-                            normalized_key in _STRUCTURED_LINK_KEYS
-                            or (normalized_key == "path" and str(parent_key or "").lower() == "learnmore")
-                        ):
-                            self._append_link(item.strip(), label)
-                        elif isinstance(item, (dict, list)):
-                            stack.append((item, str(key), label))
-                elif isinstance(node, list):
-                    stack.extend(
-                        (item, parent_key, inherited_label)
-                        for item in reversed(node)
-                        if isinstance(item, (dict, list))
-                    )
+            self._extract_structured_payload_links(payload)
+
+    def _extract_structured_payload_links(self, payload: Any) -> None:
+        node_count = 0
+        stack: list[tuple[Any, str | None, str]] = [(payload, None, "")]
+        while stack and node_count < _STRUCTURED_NODE_MAX and len(self.links) < _STRUCTURED_LINK_MAX:
+            node, parent_key, inherited_label = stack.pop()
+            node_count += 1
+            if isinstance(node, dict):
+                label = next(
+                    (
+                        str(node[key])
+                        for key in _STRUCTURED_LABEL_KEYS
+                        if isinstance(node.get(key), str) and str(node[key]).strip()
+                    ),
+                    inherited_label,
+                )
+                for key, item in node.items():
+                    normalized_key = str(key).lower()
+                    if isinstance(item, str) and (
+                        normalized_key in _STRUCTURED_LINK_KEYS
+                        or (normalized_key == "path" and str(parent_key or "").lower() == "learnmore")
+                    ):
+                        self._append_link(item.strip(), label)
+                    elif isinstance(item, (dict, list)):
+                        stack.append((item, str(key), label))
+            elif isinstance(node, list):
+                stack.extend(
+                    (item, parent_key, inherited_label)
+                    for item in reversed(node)
+                    if isinstance(item, (dict, list))
+                )
 
 
 def _strip_embedded_html(value: str) -> str:
@@ -530,8 +568,12 @@ class _StructuredTextExtractor(HTMLParser):
         self.sections: list[str] = []
         self._seen: set[str] = set()
         self._total_chars = 0
+        self._structured_script_parts: list[str] | None = None
+        self._structured_script_chars = 0
+        self._structured_script_count = 0
 
-    def handle_starttag(self, _tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attr_map = dict(attrs)
         for name, raw_value in attrs:
             value = (raw_value or "").strip()
             if (
@@ -545,24 +587,61 @@ class _StructuredTextExtractor(HTMLParser):
                 payload = json.loads(value)
             except (json.JSONDecodeError, TypeError):
                 continue
-            node_count = 0
-            stack: list[Any] = [payload]
-            while (
-                stack
-                and node_count < _STRUCTURED_NODE_MAX
-                and len(self.sections) < _STRUCTURED_TEXT_MAX
-                and self._total_chars < _STRUCTURED_TEXT_TOTAL_CHARS
+            self._extract_structured_payload_text(payload)
+        if tag == "script":
+            script_type = str(attr_map.get("type") or "").strip().lower()
+            if (
+                not attr_map.get("src")
+                and script_type in _STRUCTURED_SCRIPT_TYPES
+                and self._structured_script_count < _STRUCTURED_SCRIPT_MAX_COUNT
             ):
-                node = stack.pop()
-                node_count += 1
-                if isinstance(node, dict):
-                    for key, item in node.items():
-                        if isinstance(item, str) and str(key).lower() in _STRUCTURED_TEXT_KEYS:
-                            self._append(item)
-                        elif isinstance(item, (dict, list)):
-                            stack.append(item)
-                elif isinstance(node, list):
-                    stack.extend(item for item in reversed(node) if isinstance(item, (dict, list)))
+                self._structured_script_parts = []
+                self._structured_script_chars = 0
+                self._structured_script_count += 1
+
+    def handle_data(self, data: str) -> None:
+        if self._structured_script_parts is None:
+            return
+        if self._structured_script_chars + len(data) > _STRUCTURED_ATTRIBUTE_MAX_CHARS:
+            self._structured_script_parts = None
+            return
+        self._structured_script_parts.append(data)
+        self._structured_script_chars += len(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "script":
+            return
+        if self._structured_script_parts is not None:
+            raw_payload = "".join(self._structured_script_parts).strip()
+            if raw_payload:
+                try:
+                    payload = json.loads(raw_payload)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+                else:
+                    self._extract_structured_payload_text(payload)
+        self._structured_script_parts = None
+        self._structured_script_chars = 0
+
+    def _extract_structured_payload_text(self, payload: Any) -> None:
+        node_count = 0
+        stack: list[Any] = [payload]
+        while (
+            stack
+            and node_count < _STRUCTURED_NODE_MAX
+            and len(self.sections) < _STRUCTURED_TEXT_MAX
+            and self._total_chars < _STRUCTURED_TEXT_TOTAL_CHARS
+        ):
+            node = stack.pop()
+            node_count += 1
+            if isinstance(node, dict):
+                for key, item in node.items():
+                    if isinstance(item, str) and str(key).lower() in _STRUCTURED_TEXT_KEYS:
+                        self._append(item)
+                    elif isinstance(item, (dict, list)):
+                        stack.append(item)
+            elif isinstance(node, list):
+                stack.extend(item for item in reversed(node) if isinstance(item, (dict, list)))
 
     def _append(self, value: str) -> None:
         text = _strip_embedded_html(value)

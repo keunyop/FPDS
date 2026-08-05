@@ -151,6 +151,21 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             "Homepage discovery produced no detail sources eligible for collection. Homepage discovery completed but no candidate-producing detail sources were identified.",
         )
 
+    def test_no_detail_summary_prioritizes_decisive_rejection_diagnostics(self) -> None:
+        summary = source_catalog_collection_runner._no_detail_sources_summary(
+            [
+                "AI parallel scorer evaluated 32 candidate link(s).",
+                "Page evidence was unavailable for https://example.com/article: HTTP 503.",
+                "Homepage discovery candidate validation rejected all tentative detail pages.",
+                "Detail rejection summary: page_evidence_below_threshold=1, page_fetch_unavailable=31.",
+                "Rejected detail https://example.com/product: reason=page_evidence_below_threshold; ai=detail/9.0.",
+            ]
+        )
+
+        self.assertIn("Detail rejection summary:", summary)
+        self.assertIn("Rejected detail https://example.com/product", summary)
+        self.assertNotIn("HTTP 503", summary)
+
     def test_run_group_metadata_infers_lending_product_family(self) -> None:
         connection = _Connection()
         plan = {

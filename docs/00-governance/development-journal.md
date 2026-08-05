@@ -92,6 +92,135 @@ Read before coding:
 
 ## 4. Recent Entries
 
+## 2026-08-04 - Retried Partial Run Evidence-Scoring Fix
+
+- WBS: `5.15`, `5.16`, cross-bank collection reliability hardening
+- Status: done
+- Goal: re-analyze the newly retried Partial runs after JSON route discovery
+  was repaired, correct the remaining shared discovery defects, and preserve a
+  genuine no-product Partial outcome.
+- RCA: the retry proved JSON link recovery itself was working: Citi
+  credit-card completed cleanly with `27/27` sources and `18` candidates, and
+  Capital One savings completed `3/3` with one candidate. Six product routes
+  were then rejected by shared page-evidence rules: Citi checking/savings/CD
+  app shells were penalized by global navigation words, Citi mortgage had an
+  official title/path but an unrendered body, Citi `PERSONAL LOANS` use-case
+  sections were mistaken for distinct loan products, and Capital One's US
+  `Auto Loan Refinancing` identity was present in localized discovery
+  vocabulary but absent from canonical identity matching. Citi line-of-credit
+  had no named official product among `32` scored links and is a genuine
+  no-detail Partial rather than a code defect.
+- Outcome: page evidence now recognizes bounded official route identity,
+  limits weak negative words to prominent route/title/H1 context, merges
+  country-local identity nouns, and distinguishes personal-loan use cases from
+  distinct subtypes. High-confidence structured official product routes can
+  survive an unrendered body without bypassing hard business/editorial/service
+  vetoes. Deposit family fallback remains collection-capable but both
+  validation and API promotion/autopilot force AI-identified hubs to Review.
+  No-detail run summaries now prefer decisive rejection diagnostics over an
+  incidental earlier `503` hub fetch.
+- Read-only live verification: replaying the persisted AI roles/scores against
+  the current official pages promoted all six previously false-negative URLs.
+  Page scores changed from `1→4` for Citi savings/checking, `2→7` for Citi CD,
+  `3→4` for Citi mortgage, and `0→6` for Capital One auto refinance; Citi
+  personal-loan reached `10` without the false family marker.
+- Not done: no shared-dev collection was launched and no historical run,
+  source, candidate, review, canonical, aggregate, or Public state was mutated.
+- Key files: `api_service/source_catalog.py`, the source-catalog runner,
+  candidate promotion/review autopilot, worker validation routing, their tests,
+  runtime READMEs, and the source-registry policy.
+- Verification:
+  - focused source-catalog/runner/promotion/autopilot modules: `162/162`
+  - focused validation-routing module: `31/31`
+  - full API suite: `342/342`
+  - full worker suite: `409/409`
+  - API regression suite: `11/11`
+  - worker regression suite: `2/2`
+  - current official-page plus persisted-AI promotion matrix: `6/6`
+- Known issues: Citi line-of-credit should remain Partial until an official
+  named consumer line-of-credit product or an approved coverage URL exists.
+  Family fallback candidates are deliberately Review-bound rather than
+  silently published.
+- Next step: after the updated API/runner code is active, retry only the six
+  fixable Partial scopes through the normal Admin path; do not retry the Citi
+  line-of-credit scope merely to force a green run.
+
+## 2026-08-04 - Dynamic Homepage JSON Discovery Partial-Run Fix
+
+- WBS: `5.15`, `5.16`, cross-bank collection reliability hardening
+- Status: done
+- Goal: diagnose the latest Admin product-collection runs that completed
+  Partial and prevent the same discovery failure across other banks and
+  Product Types.
+- RCA: all seven Citibank US runs in
+  `collection_3vEVaRVKq1F58QBx` completed with zero source scope and
+  `no_detail_sources_discovered`. The direct homepage fetch was successful and
+  returned `232,663` characters, but Citi exposes its product routes inside an
+  `application/ld+json` graph and an `application/json` SSR-state payload
+  rather than ordinary anchors or `data-*` JSON. The shared discovery parser
+  therefore returned zero links even though the payload contained checking,
+  savings, CD, credit-card, mortgage, and personal-loan routes. All seven
+  catalog rows also had null coverage URLs and no preserved generated detail
+  source, so the runner had no fallback scope.
+- Outcome: shared HTML discovery now reads recognized `href`, `url`, and
+  `targetUrl` values plus bounded product copy from non-executable JSON/JSON-LD
+  scripts. Payload size, script count, node count, template rejection, and
+  total link/text limits remain enforced. Recovered URLs still pass the same
+  HTTPS/official-domain, scope-exclusion, product-role, page-evidence, review,
+  and publication gates. The repaired parser recovered `22` allowed links and
+  `12` product-related links from the current Citi response. Cross-bank tests
+  cover both savings and mortgage; executable scripts and unresolved template
+  URLs remain ignored, while genuine no-detail collection results still remain
+  Partial.
+- Not done: the seven historical Partial run rows were not mutated or retried;
+  no candidate, review, canonical product, aggregate, or Public state changed.
+- Key files: `worker/discovery/fpds_discovery/discovery.py`, worker discovery
+  tests, API source-catalog tests, worker/API READMEs, root README, and the
+  source-registry operating policy.
+- Verification:
+  - focused JSON component/script and cross-bank source-generation tests: `5/5`
+  - worker discovery suite: `50/50`
+  - worker pipeline suite: `358/358`
+  - worker regression suite: `2/2`
+  - API suite: `335/335`
+  - API regression suite: `11/11`
+  - current Citi read-only reproduction: `22` allowed links, including
+    checking, savings, CD, credit-card, mortgage, and personal-loan routes
+- Known issues: an active catalog row for a Product Type the bank does not
+  actually offer may still correctly end as no-detail Partial; the fix does not
+  invent a product or treat a family/service page as a named lending product.
+- Next step: retry the affected Citi Partial runs through the normal Admin retry
+  path when the Product Owner wants shared-dev run/candidate state refreshed.
+
+## 2026-08-02 - Review Detail AI Verification Country-Query Fix
+
+- WBS: `4.11`, Review Detail reliability
+- Status: done
+- Goal: diagnose and fix the `500 Internal Server Error` returned by Review
+  Detail `Verify with AI`.
+- RCA: `load_registered_bank_domains` used the optional country placeholder in
+  `%(country_code)s IS NULL` without a PostgreSQL type. Psycopg sent it as an
+  untyped prepared parameter, so PostgreSQL raised `AmbiguousParameter` before
+  the model execution row or OpenAI request could start. The supplied traceback
+  for `review-0c21d130b42857a0` and rollback-only runtime reproduction matched
+  the same line and exception.
+- Outcome: both bank-homepage and active-source country predicates now cast the
+  placeholder to `text`. The regression asserts all four placeholder uses stay
+  typed. A real-DB diagnostic with a local model stub passed for the affected
+  review and five newly queued US reviews; every transaction was rolled back.
+- Not done: no live provider retry, candidate correction, review decision, or
+  canonical/Public mutation was performed.
+- Key files: `api_service/ai_verification.py`, its focused tests, and the API
+  runtime README.
+- Verification: API full suite `334/334`, API regression `11/11`, focused
+  AI/review tests `39/39`, real-DB stub reproduction `6/6` with rollback, and
+  restarted dev API `/healthz` returned `ok` on port `4000`.
+- Known issues: the failed HTTP request predates model-execution persistence,
+  so it correctly has no AI execution or usage record.
+- Next step: retry `Verify with AI` from the existing Review Detail session;
+  normal provider latency and the existing `110s` Admin proxy timeout still
+  apply.
+
 ## 2026-08-02 - BOAN Mortgage Run RCA and Failure Diagnostics
 
 - WBS: `5.15`, `5.16`, collection reliability hardening

@@ -453,7 +453,7 @@ def _compute_validation_issue_codes(
             ]
             if str(code).strip()
         }
-        if "multi_product_family_overview" in discovery_reason_codes:
+        if discovery_reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"}):
             issues.add("ambiguous_product_boundary")
 
     required_identity = {

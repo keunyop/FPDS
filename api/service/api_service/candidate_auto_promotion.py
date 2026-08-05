@@ -455,7 +455,7 @@ def _has_ambiguous_product_boundary(source_metadata: object) -> bool:
         ]
         if str(code).strip()
     }
-    return "multi_product_family_overview" in reason_codes
+    return bool(reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"}))
 
 
 def _requires_collection_ai_grounding(row: dict[str, Any]) -> bool:

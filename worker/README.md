@@ -23,9 +23,15 @@ Runtime invariants:
   snapshot, parse/chunk, extraction, normalization, and validation persistence
   all write that country and reject mixed-country scopes before DB work
 - HTML discovery reads ordinary anchors plus bounded JSON component links from
-  `data-*` attributes; parser version `fpds-parse-chunk-v3` also retains
-  bounded component text as `structured_component` evidence when a visible
-  location gate hides the product copy
+  `data-*` attributes and non-executable `application/json` or
+  `application/ld+json` scripts. The same official-domain and product-boundary
+  checks apply to every recovered URL. Parser version `fpds-parse-chunk-v3`
+  also retains bounded component/script text as `structured_component`
+  evidence when the visible HTML shell hides the product copy
+- validation treats both deterministic `multi_product_family_overview` and AI
+  `hub_page_not_detail` discovery evidence as an ambiguous product boundary;
+  either condition routes a candidate to Review rather than auto-validating a
+  family page as one product
 - market defaults are country-owned (`CA -> CAD`, `US -> USD`); an unknown
   country remains explicit instead of silently inheriting CAD
 - product-title extraction prefers high-confidence official location-gated

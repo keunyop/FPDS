@@ -317,6 +317,22 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
+    def test_ai_identified_family_hub_is_queued_before_canonical_promotion(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_metadata"] = {
+            "discovery_metadata": {"selection_reason_codes": ["hub_page_not_detail"]}
+        }
+        connection = _Connection(
+            [_policy_rows(), [candidate], None, {"review_task_id": "review-boundary"}, None]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
+        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
     def test_non_product_service_source_is_rejected_before_canonical_promotion(self) -> None:
         candidate = _candidate_row()
         candidate["source_metadata"] = {

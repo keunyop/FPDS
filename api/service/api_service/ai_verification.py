@@ -338,12 +338,12 @@ def load_registered_bank_domains(
             SELECT 0 AS source_order, homepage_url AS source_url
             FROM bank
             WHERE bank_code = %(bank_code)s
-              AND (%(country_code)s IS NULL OR country_code = %(country_code)s)
+              AND (%(country_code)s::text IS NULL OR country_code = %(country_code)s::text)
             UNION ALL
             SELECT 1 AS source_order, normalized_url AS source_url
             FROM source_registry_item
             WHERE bank_code = %(bank_code)s
-              AND (%(country_code)s IS NULL OR country_code = %(country_code)s)
+              AND (%(country_code)s::text IS NULL OR country_code = %(country_code)s::text)
               AND status = 'active'
         ) AS official_sources
         WHERE source_url IS NOT NULL

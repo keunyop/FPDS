@@ -73,8 +73,9 @@ class CollectionAiAutopilotTests(TestCase):
         result = load_active_collection_review_task_ids(connection, run_id="run-001", limit=5000)
 
         self.assertEqual(result, ["review-001", "review-002"])
-        _sql, params = connection.calls[0]
+        sql, params = connection.calls[0]
         self.assertEqual(params, {"run_id": "run-001", "limit": 1000})
+        self.assertIn("hub_page_not_detail", sql)
 
     def test_verifies_corrects_assesses_and_approves_eligible_review(self):
         first_execution = {
