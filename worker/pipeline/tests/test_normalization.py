@@ -39,6 +39,8 @@ from worker.pipeline.fpds_normalization.service import (
     _find_dynamic_numeric_evidence_context,
     _infer_target_customer_tags,
     _dynamic_numeric_value_is_ungrounded,
+    _field_is_comparison_calculator_copy,
+    _infer_subtype_code,
     _looks_like_invalid_application_method,
     _looks_like_broad_page_copy,
     _looks_like_non_rate_numeric_context,
@@ -52,6 +54,8 @@ from worker.pipeline.fpds_normalization.service import (
     _rate_field_suppression_reason,
     _rate_evidence_is_account_context,
     _refine_product_name_from_source_metadata,
+    _suppress_unverified_dynamic_fields,
+    _suppress_uncombined_savings_rate_boost,
 )
 from worker.pipeline.fpds_normalization.storage import (
     NormalizationStorageConfig,
@@ -64,6 +68,40 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_unverified_lending_copy_is_omitted_while_official_fact_is_kept(self) -> None:
+        payload = {
+            "status": "active",
+            "product_name": "Example Card",
+            "annual_fee": 0.0,
+            "credit_limit_text": "Automatic account alerts",
+        }
+        normalized_values = {
+            "annual_fee": 0.0,
+            "credit_limit_text": "Automatic account alerts",
+        }
+        mappings = {
+            "annual_fee": {
+                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_verification_status": "match",
+                "official_evidence_quote": "$0 annual fee",
+                "official_web_sources": [{"url": "https://bank.example/card"}],
+            },
+            "credit_limit_text": {"normalization_method": "dynamic_ai_canonical_mapping"},
+        }
+        notes: list[str] = []
+
+        _suppress_unverified_dynamic_fields(
+            candidate_payload=payload,
+            normalized_values_for_links=normalized_values,
+            field_mapping_metadata=mappings,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["annual_fee"], 0.0)
+        self.assertNotIn("credit_limit_text", payload)
+        self.assertEqual(mappings["credit_limit_text"]["suppressed_reason"], "official_grounding_missing")
+        self.assertTrue(any("credit_limit_text" in note for note in notes))
+
     def test_official_grounding_metadata_is_preserved_for_review_trace(self) -> None:
         field = NormalizationExtractedField(
             field_name="standard_rate",
@@ -81,6 +119,7 @@ class NormalizationServiceTests(unittest.TestCase):
             chunk_index=1,
             field_metadata={
                 "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_grounding_method": "deterministic_labeled_origin",
                 "official_verification_status": "mismatch",
                 "official_web_sources": [
                     {"url": "https://bank.example/product", "title": "Official product"}
@@ -93,6 +132,7 @@ class NormalizationServiceTests(unittest.TestCase):
         metadata = _official_grounding_mapping_metadata(field)
 
         self.assertEqual(metadata["official_verification_status"], "mismatch")
+        self.assertEqual(metadata["official_grounding_method"], "deterministic_labeled_origin")
         self.assertEqual(metadata["official_web_sources"][0]["url"], "https://bank.example/product")
         self.assertEqual(metadata["official_evidence_quote"], "Current annual interest rate is 3.25%.")
 
@@ -993,6 +1033,109 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["promotional_rate"], 4.6)
         self.assertEqual(payload["public_display_rate"], 4.6)
         self.assertEqual(metadata["standard_rate"]["normalization_method"], "savings_labeled_header_standard_rate_alignment")
+
+    def test_savings_apy_header_survives_separate_referral_rate_boost(self) -> None:
+        excerpt = (
+            "Online Savings Account 3.40% Annual Percentage Yield. No fees. No minimum deposit. "
+            "Refer a friend and you both could earn a 1.00% APY rate boost for 3 months."
+        )
+        link = NormalizationEvidenceLink(
+            field_name="promotional_rate",
+            candidate_value="3.40",
+            evidence_chunk_id="chunk-marcus-header",
+            evidence_text_excerpt=excerpt,
+            source_document_id="source-marcus-savings",
+            source_snapshot_id="snapshot-marcus-savings",
+            citation_confidence=0.95,
+            model_execution_id=None,
+            anchor_type="document",
+            anchor_value="Document",
+            page_no=None,
+            chunk_index=0,
+        )
+        payload = {
+            "promotional_rate": 3.4,
+            "public_display_rate": 3.4,
+            "promotional_period_text": "3 months",
+            "introductory_rate_flag": True,
+        }
+        metadata: dict[str, object] = {}
+        values: dict[str, object] = dict(payload)
+        links = [link]
+        notes: list[str] = []
+
+        _align_savings_labeled_header_standard_rate(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+        _suppress_uncombined_savings_rate_boost(
+            product_type_family="savings",
+            candidate_payload=payload,
+            field_mapping_metadata=metadata,
+            normalized_values_for_links=values,
+            evidence_links_for_output=links,
+            runtime_notes=notes,
+        )
+
+        self.assertEqual(payload["standard_rate"], 3.4)
+        self.assertEqual(payload["public_display_rate"], 3.4)
+        self.assertNotIn("promotional_rate", payload)
+        self.assertNotIn("promotional_period_text", payload)
+        self.assertNotIn("introductory_rate_flag", payload)
+        self.assertEqual(
+            metadata["promotional_rate"]["suppressed_reason"],
+            "incremental_rate_boost_not_total_apy",
+        )
+
+    def test_savings_subtype_uses_country_domestic_currency(self) -> None:
+        us_subtype, _ = _infer_subtype_code(
+            product_type="savings",
+            country_code="US",
+            currency="USD",
+            candidate_payload={"product_name": "Online Savings Account"},
+        )
+        canadian_usd_subtype, _ = _infer_subtype_code(
+            product_type="savings",
+            country_code="CA",
+            currency="USD",
+            candidate_payload={"product_name": "U.S. Dollar Savings Account"},
+        )
+
+        self.assertEqual(us_subtype, "standard")
+        self.assertEqual(canadian_usd_subtype, "foreign_currency")
+
+    def test_comparison_calculator_values_do_not_become_product_terms(self) -> None:
+        context = (
+            "Choose up to 4 banks to compare. This calculator is for illustrative purposes only. "
+            "Rates of the selected banks reflect similar products with a minimum balance of $2,500. "
+            "Calculated values assume principal and interest remain on deposit."
+        )
+
+        self.assertTrue(
+            _field_is_comparison_calculator_copy(
+                field_name="minimum_balance",
+                value=2500,
+                context=context,
+            )
+        )
+        self.assertTrue(
+            _field_is_comparison_calculator_copy(
+                field_name="interest_calculation_method",
+                value="Calculated values assume principal remains on deposit.",
+                context=context,
+            )
+        )
+        self.assertFalse(
+            _field_is_comparison_calculator_copy(
+                field_name="minimum_deposit",
+                value=0,
+                context="No minimum deposit.",
+            )
+        )
 
     def test_fractional_year_term_normalizes_without_becoming_five_year(self) -> None:
         rows = _normalize_term_rate_table("1 Year 3.15%, 1.5 Year 3.25%, 5 Years 3.65%")
@@ -3516,6 +3659,82 @@ class NormalizationServiceTests(unittest.TestCase):
             self.assertEqual(candidate["candidate_payload"]["eligibility_text"], "Available to Canadian residents aged 18 or older.")
             self.assertLess(source_result.source_confidence or 1.0, 0.75)
             self.assertIn("AI normalized TFSA-specific eligibility and subtype.", source_result.runtime_notes)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_dynamic_lending_service_omits_unofficial_values_before_validation(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("normalization-dynamic-lending-grounding-filter")
+        try:
+            storage_config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            base = _build_input()
+            input_item = NormalizationInput(
+                **{
+                    **base.__dict__,
+                    "source_id": "BANK-CARD-001",
+                    "source_metadata": {
+                        "product_type": "credit-card",
+                        "product_type_dynamic": True,
+                        "expected_fields": [
+                            "product_name",
+                            "annual_fee",
+                            "purchase_interest_rate",
+                            "rewards_summary",
+                        ],
+                    },
+                    "schema_context": {"product_family": "lending", "product_type": "credit-card"},
+                    "extracted_fields": [
+                        _field("product_family", "lending", "string", 0.99),
+                        _field("product_type", "credit-card", "string", 0.99),
+                        _field("country_code", "CA", "string", 0.99),
+                        _field("bank_code", "TD", "string", 0.99),
+                        _field("source_language", "en", "string", 0.99),
+                        _field("currency", "CAD", "string", 0.99),
+                        _field("product_name", "Example Card", "string", 0.88),
+                        _field("annual_fee", "0.00", "decimal", 0.86, evidence_chunk_id="chunk-card-fee"),
+                        _field(
+                            "rewards_summary",
+                            "Earn 2 points per $1 on eligible purchases.",
+                            "string",
+                            0.82,
+                            evidence_chunk_id="chunk-card-rewards",
+                        ),
+                    ],
+                    "evidence_links": [
+                        _evidence("annual_fee", "0.00", "chunk-card-fee"),
+                        _evidence(
+                            "rewards_summary",
+                            "Earn 2 points per $1 on eligible purchases.",
+                            "chunk-card-rewards",
+                        ),
+                    ],
+                }
+            )
+
+            with patch("worker.pipeline.fpds_normalization.service.llm_provider_configured", return_value=False):
+                result = service.normalize_inputs(
+                    run_id="run-dynamic-lending-grounding-filter",
+                    inputs=[input_item],
+                )
+
+            source_result = result.source_results[0]
+            candidate = source_result.normalized_candidate_record
+            self.assertNotIn("annual_fee", candidate["candidate_payload"])
+            self.assertNotIn("rewards_summary", candidate["candidate_payload"])
+            self.assertEqual(
+                candidate["field_mapping_metadata"]["rewards_summary"]["suppressed_reason"],
+                "official_grounding_missing",
+            )
+            self.assertIn("required_field_missing", candidate["validation_issue_codes"])
         finally:
             rmtree(temp_path, ignore_errors=True)
 

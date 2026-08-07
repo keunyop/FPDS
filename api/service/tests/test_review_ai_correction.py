@@ -157,6 +157,118 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertIn("product_identity_unverified", assessment["reason_codes"])
         self.assertIn("verification_pass_rate_below_threshold", assessment["reason_codes"])
 
+    def test_auto_approval_uses_v2_approval_fields_not_legacy_optional_denominator(self):
+        source = [{"url": "https://bank.example/product", "title": "Official product"}]
+        assessment = assess_review_ai_auto_approval(
+            execution_status="completed",
+            execution_metadata={
+                "requested_field_names": ["product_name", "annual_fee", "description_short", "notes"],
+                "approval_field_names": ["product_name", "annual_fee"],
+                "hard_blocking_issue_codes": [],
+                "verification_result": {
+                    "source_count": 1,
+                    "proposed_corrections": {},
+                    "fields": [
+                        {"field_name": "product_name", "status": "match", "sources": source},
+                        {"field_name": "annual_fee", "status": "match", "sources": source},
+                        {"field_name": "description_short", "status": "unverified", "sources": []},
+                        {"field_name": "notes", "status": "unverified", "sources": []},
+                    ],
+                },
+            },
+        )
+
+        self.assertTrue(assessment["eligible"])
+        self.assertEqual(assessment["requested_field_count"], 2)
+        self.assertEqual(assessment["pass_rate"], 1.0)
+
+    def test_auto_approval_accepts_exact_official_detail_h1_when_search_leaves_identity_unverified(self):
+        source = [{"url": "https://bank.example/card", "title": "Official card"}]
+        assessment = assess_review_ai_auto_approval(
+            execution_status="completed",
+            execution_metadata={
+                "approval_field_names": ["product_name", "annual_fee"],
+                "hard_blocking_issue_codes": [],
+                "authoritative_identity_evidence": {
+                    "verified": True,
+                    "basis": "exact_official_detail_h1",
+                    "source_url": "https://bank.example/card",
+                },
+                "allowed_domains": ["bank.example"],
+                "verification_result": {
+                    "source_count": 1,
+                    "proposed_corrections": {},
+                    "fields": [
+                        {"field_name": "product_name", "status": "unverified", "sources": []},
+                        {"field_name": "annual_fee", "status": "match", "sources": source},
+                    ],
+                },
+            },
+        )
+
+        self.assertTrue(assessment["eligible"])
+        self.assertEqual(assessment["pass_rate"], 1.0)
+        self.assertEqual(
+            assessment["product_identity_verification_basis"],
+            "exact_official_detail_h1",
+        )
+
+    def test_auto_approval_reuses_exact_origin_fee_when_review_ai_abstains(self):
+        assessment = assess_review_ai_auto_approval(
+            execution_status="completed",
+            execution_metadata={
+                "approval_field_names": ["product_name", "annual_fee"],
+                "hard_blocking_issue_codes": [],
+                "authoritative_identity_evidence": {
+                    "verified": True,
+                    "basis": "exact_official_detail_h1",
+                    "source_url": "https://cards.bank.example/card",
+                },
+                "authoritative_field_evidence": {
+                    "annual_fee": {
+                        "verified": True,
+                        "basis": "exact_official_detail_labeled_fee",
+                        "source_url": "https://cards.bank.example/card",
+                    }
+                },
+                "allowed_domains": ["bank.example"],
+                "verification_result": {
+                    "source_count": 0,
+                    "proposed_corrections": {},
+                    "fields": [
+                        {"field_name": "product_name", "status": "unverified", "sources": []},
+                        {"field_name": "annual_fee", "status": "unverified", "sources": []},
+                    ],
+                },
+            },
+        )
+
+        self.assertTrue(assessment["eligible"])
+        self.assertEqual(assessment["pass_rate"], 1.0)
+        self.assertEqual(assessment["authoritative_origin_fields"], ["annual_fee"])
+        self.assertNotIn("official_source_missing", assessment["reason_codes"])
+
+    def test_auto_approval_rejects_non_field_resolvable_hard_issue(self):
+        source = [{"url": "https://bank.example/product", "title": "Official product"}]
+        assessment = assess_review_ai_auto_approval(
+            execution_status="completed",
+            execution_metadata={
+                "approval_field_names": ["product_name", "annual_fee"],
+                "hard_blocking_issue_codes": ["ambiguous_product_boundary"],
+                "verification_result": {
+                    "source_count": 1,
+                    "proposed_corrections": {},
+                    "fields": [
+                        {"field_name": "product_name", "status": "match", "sources": source},
+                        {"field_name": "annual_fee", "status": "match", "sources": source},
+                    ],
+                },
+            },
+        )
+
+        self.assertFalse(assessment["eligible"])
+        self.assertIn("hard_validation_issue_unresolved", assessment["reason_codes"])
+
     def test_applies_verified_mismatch_without_changing_review_or_candidate_state(self):
         connection = _RecordingConnection()
         corrected_at = datetime(2026, 8, 1, 18, 0, tzinfo=UTC)

@@ -9,7 +9,12 @@ from typing import Any
 from api_service import source_collection_runner
 from api_service.config import Settings
 from api_service.db import open_connection
-from api_service.source_catalog import _canonical_product_type_code, _materialize_sources_for_catalog_item, _product_type_scope_codes
+from api_service.source_catalog import (
+    _canonical_product_type_code,
+    _materialize_sources_for_catalog_item,
+    _product_type_scope_codes,
+    repair_catalog_coverage_route,
+)
 from api_service.source_registry import (
     _insert_collection_run_row,
     _is_candidate_producing_collection_source,
@@ -82,23 +87,90 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             group=_run_group_with_empty_collection_scope(group),
             pipeline_stage="source_catalog_collection",
         )
+        catalog_row = {
+            "catalog_item_id": group["catalog_item_id"],
+            "bank_code": group["bank_code"],
+            "bank_name": group["bank_name"],
+            "country_code": group["country_code"],
+            "product_type": group["product_type"],
+            "homepage_url": group["homepage_url"],
+            "normalized_homepage_url": group["normalized_homepage_url"],
+            "coverage_source_url": group.get("coverage_source_url"),
+            "coverage_source_metadata": group.get("coverage_source_metadata") or {},
+            "source_language": group["source_language"],
+        }
         materialized = _materialize_sources_for_catalog_item(
             connection,
-            row={
-                "catalog_item_id": group["catalog_item_id"],
-                "bank_code": group["bank_code"],
-                "bank_name": group["bank_name"],
-                "country_code": group["country_code"],
-                "product_type": group["product_type"],
-                "homepage_url": group["homepage_url"],
-                "normalized_homepage_url": group["normalized_homepage_url"],
-                "coverage_source_url": group.get("coverage_source_url"),
-                "source_language": group["source_language"],
-            },
+            row=catalog_row,
             run_id=str(group["run_id"]),
             correlation_id=str(plan["correlation_id"]),
             request_id=plan.get("request_id"),
         )
+        initial_discovery_notes = list(materialized.discovery_notes)
+        existing_scope_before_repair = _load_active_collection_scope(
+            connection,
+            bank_code=str(group["bank_code"]),
+            product_type=str(group["product_type"]),
+        )
+        if not materialized.detail_source_ids and not existing_scope_before_repair["target_source_ids"]:
+            repair = repair_catalog_coverage_route(
+                connection,
+                row=catalog_row,
+                actor=_actor_from_plan(plan),
+                request_context={"request_id": plan.get("request_id")},
+                run_id=str(group["run_id"]),
+                correlation_id=str(plan["correlation_id"]),
+            )
+            initial_discovery_notes.extend(repair.notes)
+            if repair.status == "current_offering" and repair.coverage_source_url:
+                catalog_row = {
+                    **catalog_row,
+                    "coverage_source_url": repair.coverage_source_url,
+                    "coverage_source_metadata": repair.coverage_source_metadata,
+                }
+                materialized = _materialize_sources_for_catalog_item(
+                    connection,
+                    row=catalog_row,
+                    run_id=str(group["run_id"]),
+                    correlation_id=str(plan["correlation_id"]),
+                    request_id=plan.get("request_id"),
+                )
+                materialized = type(materialized)(
+                    generated_rows=materialized.generated_rows,
+                    discovery_notes=_dedupe_preserve_order(
+                        [*initial_discovery_notes, *materialized.discovery_notes]
+                    ),
+                    detail_source_ids=materialized.detail_source_ids,
+                    model_execution_records=materialized.model_execution_records,
+                    usage_records=materialized.usage_records,
+                )
+            elif repair.status == "not_currently_offered":
+                materialized_metadata = _catalog_run_metadata(
+                    plan=plan,
+                    group=group,
+                    discovery_status="product_not_currently_offered",
+                    discovery_notes=_dedupe_preserve_order(initial_discovery_notes),
+                    generated_source_ids=[],
+                    collection_source_ids=[],
+                    target_source_ids=[],
+                )
+                _mark_run_finished(
+                    connection=connection,
+                    run_id=str(group["run_id"]),
+                    run_state="completed",
+                    partial_completion_flag=False,
+                    error_summary=None,
+                    run_metadata=materialized_metadata,
+                )
+                return
+            else:
+                materialized = type(materialized)(
+                    generated_rows=materialized.generated_rows,
+                    discovery_notes=_dedupe_preserve_order(initial_discovery_notes),
+                    detail_source_ids=materialized.detail_source_ids,
+                    model_execution_records=materialized.model_execution_records,
+                    usage_records=materialized.usage_records,
+                )
         discovery_notes = list(materialized.discovery_notes)
         generated_rows = list(materialized.generated_rows)
         generated_source_ids = [

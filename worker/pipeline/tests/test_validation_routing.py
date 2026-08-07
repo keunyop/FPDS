@@ -836,6 +836,99 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_grounded_dynamic_product_treats_empty_optional_terms_as_omissions(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-optional-omission")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            official_source = {
+                "url": "https://bank.example/cards/example-card",
+                "title": "Example Card",
+            }
+
+            def grounded(field_name: str, quote: str) -> dict[str, object]:
+                return {
+                    "source_field_name": field_name,
+                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_verification_status": "match",
+                    "official_web_sources": [official_source],
+                    "official_evidence_quote": quote,
+                }
+
+            candidate = {
+                **input_item.normalized_candidate_record,
+                "product_family": "lending",
+                "product_type": "credit-card",
+                "subtype_code": "other",
+                "product_name": "Example Card",
+                "validation_issue_codes": [],
+                "candidate_payload": {
+                    "status": "active",
+                    "last_verified_at": "2026-08-01T12:00:00+00:00",
+                    "bank_name": "Example Bank",
+                    "product_name": "Example Card",
+                    "annual_fee": 0.0,
+                },
+                "field_mapping_metadata": {
+                    "product_name": grounded("product_name", "Example Card"),
+                    "annual_fee": grounded("annual_fee", "$0 annual fee"),
+                },
+            }
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "source_id": "BANK-CARD-001",
+                    "source_metadata": {
+                        "product_type": "credit-card",
+                        "product_type_dynamic": True,
+                        "discovery_role": "detail",
+                        "expected_fields": [
+                            "product_name",
+                            "annual_fee",
+                            "purchase_interest_rate",
+                            "rewards_summary",
+                        ],
+                    },
+                    "normalized_candidate_record": candidate,
+                    "field_evidence_links": [
+                        _evidence("product_name", "Example Card", "chunk-card-name"),
+                        _evidence("annual_fee", "0.0", "chunk-card-fee"),
+                    ],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-dyn-card-optional-omission",
+                inputs=[input_item],
+                taxonomy_registry={},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=0.82,
+                    review_warning_confidence_floor=0.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence"},
+                    ai_auto_approve_min_verified_ratio=0.8,
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertNotIn("required_field_missing", source_result.validation_issue_codes)
+            assessment = source_result.model_execution_record["execution_metadata"]["collection_ai_assessment"]
+            self.assertEqual(assessment["assessed_fields"], ["annual_fee", "product_name"])
+            self.assertEqual(assessment["verified_ratio"], 1.0)
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_dynamic_product_type_no_grounded_detail_routes_as_partial_source_failure(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-no-grounded-detail")
         try:

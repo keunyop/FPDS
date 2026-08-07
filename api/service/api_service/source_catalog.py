@@ -4,6 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import hashlib
+import html as html_lib
 from html.parser import HTMLParser
 import json
 import os
@@ -43,7 +44,12 @@ from worker.discovery.fpds_discovery.discovery import (
 )
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
 from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
-from worker.pipeline.fpds_ai_runtime import estimated_cost_usd
+from worker.pipeline.fpds_ai_runtime import (
+    configured_model_id,
+    estimated_cost_usd,
+    invoke_openai_json_schema,
+    llm_provider_configured,
+)
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -367,6 +373,34 @@ _DISCOVERY_SECONDARY_HUB_PAGE_MAX = 8
 _AI_DISCOVERY_MAX_CANDIDATES = 48
 _PAGE_EVIDENCE_MAX_CANDIDATES = 32
 _AUTHORITATIVE_CATALOG_DETAIL_BONUS = 6
+_COVERAGE_ROUTE_RESOLUTION_SCHEMA_NAME = "source_catalog_coverage_route_resolution_v1"
+_COVERAGE_ROUTE_RESOLUTION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "status",
+        "summary",
+        "coverage_source_url",
+        "current_offering_quote",
+        "relationship_source_url",
+        "relationship_quote",
+        "not_offered_source_url",
+        "not_offered_quote",
+    ],
+    "properties": {
+        "status": {
+            "type": "string",
+            "enum": ["current_offering", "not_currently_offered", "uncertain"],
+        },
+        "summary": {"type": "string"},
+        "coverage_source_url": {"type": ["string", "null"]},
+        "current_offering_quote": {"type": ["string", "null"]},
+        "relationship_source_url": {"type": ["string", "null"]},
+        "relationship_quote": {"type": ["string", "null"]},
+        "not_offered_source_url": {"type": ["string", "null"]},
+        "not_offered_quote": {"type": ["string", "null"]},
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -402,6 +436,14 @@ class CatalogItemMaterializationResult:
     detail_source_ids: list[str]
     model_execution_records: tuple[dict[str, Any], ...] = ()
     usage_records: tuple[dict[str, Any], ...] = ()
+
+
+@dataclass(frozen=True)
+class CoverageRouteRepairResult:
+    status: str
+    coverage_source_url: str | None
+    coverage_source_metadata: dict[str, Any]
+    notes: list[str]
 
 
 @dataclass(frozen=True)
@@ -560,6 +602,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             COUNT(DISTINCT sri.source_id) AS generated_source_count
         FROM source_registry_catalog_item AS sci
         LEFT JOIN source_registry_item AS sri
@@ -573,7 +616,8 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             sci.product_type,
             sci.status,
             sci.coverage_source_url,
-            sci.normalized_coverage_source_url
+            sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata
         ORDER BY sci.bank_code, sci.product_type
         """,
         {"bank_codes": bank_codes or [""], "country_code": filters.country_code},
@@ -586,6 +630,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
                 "product_type": str(item["product_type"]),
                 "status": str(item["status"]),
                 "coverage_source_url": item.get("coverage_source_url"),
+                "coverage_source_metadata": _mapping(item.get("coverage_source_metadata")),
                 "generated_source_count": int(item["generated_source_count"] or 0),
             }
         )
@@ -647,6 +692,7 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
             status,
             coverage_source_url,
             normalized_coverage_source_url,
+            coverage_source_metadata,
             change_reason,
             created_at,
             updated_at
@@ -714,6 +760,7 @@ def create_bank_profile(
     logo_alt_text = _normalize_logo_alt_text(payload.get("logo_alt_text"), bank_name=bank_name, logo_url=logo_url)
     initial_coverage_product_types = list(payload.get("initial_coverage_product_types") or [])
     initial_coverage_source_urls = dict(payload.get("initial_coverage_source_urls") or {})
+    initial_coverage_source_metadata = dict(payload.get("initial_coverage_source_metadata") or {})
     existing_by_homepage = connection.execute(
         """
         SELECT bank_code
@@ -795,6 +842,7 @@ def create_bank_profile(
                 "status": (_clean_text(payload.get("status")) or "active").lower(),
                 "change_reason": _clean_text(payload.get("change_reason")),
                 "coverage_source_url": initial_coverage_source_urls.get(str(product_type)),
+                "coverage_source_metadata": initial_coverage_source_metadata.get(str(product_type)) or {},
             },
             actor=actor,
             request_context=request_context,
@@ -1069,6 +1117,7 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             ptr.product_family,
             sci.change_reason,
             sci.created_at,
@@ -1100,6 +1149,7 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1159,6 +1209,7 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1186,6 +1237,7 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             sci.change_reason,
             sci.created_at,
             sci.updated_at,
@@ -1264,9 +1316,11 @@ def create_source_catalog_item(
     ).fetchone()
     if not bank_row:
         raise SourceRegistryError(status_code=404, code="bank_profile_not_found", message="Select a valid bank before creating source catalog coverage.")
+    coverage_source_metadata = _mapping(payload.get("coverage_source_metadata"))
     coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
         payload.get("coverage_source_url"),
         normalized_homepage_url=str(bank_row["normalized_homepage_url"] or bank_row["homepage_url"]),
+        coverage_source_metadata=coverage_source_metadata,
     )
 
     existing = connection.execute(
@@ -1298,6 +1352,7 @@ def create_source_catalog_item(
             status,
             coverage_source_url,
             normalized_coverage_source_url,
+            coverage_source_metadata,
             change_reason,
             created_at,
             updated_at
@@ -1310,6 +1365,7 @@ def create_source_catalog_item(
             %(status)s,
             %(coverage_source_url)s,
             %(normalized_coverage_source_url)s,
+            %(coverage_source_metadata)s::jsonb,
             %(change_reason)s,
             %(created_at)s,
             %(updated_at)s
@@ -1323,6 +1379,7 @@ def create_source_catalog_item(
             "status": (_clean_text(payload.get("status")) or "active").lower(),
             "coverage_source_url": coverage_source_url,
             "normalized_coverage_source_url": normalized_coverage_source_url,
+            "coverage_source_metadata": json.dumps(coverage_source_metadata, ensure_ascii=True),
             "change_reason": _clean_text(payload.get("change_reason")),
             "created_at": now,
             "updated_at": now,
@@ -1340,6 +1397,7 @@ def create_source_catalog_item(
             "bank_code": bank_code,
             "product_type": product_type,
             "coverage_source_url": coverage_source_url,
+            "coverage_source_verification_status": coverage_source_metadata.get("verification_status"),
         },
     )
     detail = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
@@ -1366,6 +1424,7 @@ def update_source_catalog_item(
             status,
             coverage_source_url,
             normalized_coverage_source_url,
+            coverage_source_metadata,
             change_reason
         FROM source_registry_catalog_item
         WHERE catalog_item_id = %(catalog_item_id)s
@@ -1411,9 +1470,13 @@ def update_source_catalog_item(
 
     updated_status = (_clean_text(payload.get("status", existing["status"])) or "active").lower()
     updated_change_reason = _clean_text(payload.get("change_reason", existing["change_reason"]))
+    coverage_source_metadata = _mapping(
+        payload.get("coverage_source_metadata", existing.get("coverage_source_metadata"))
+    )
     coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
         payload.get("coverage_source_url", existing.get("coverage_source_url")),
         normalized_homepage_url=str(bank_row["normalized_homepage_url"] or bank_row["homepage_url"]),
+        coverage_source_metadata=coverage_source_metadata,
     )
     diff_summary = _build_catalog_diff_summary(existing, {"bank_code": bank_code, "product_type": product_type, "status": updated_status})
     connection.execute(
@@ -1426,6 +1489,7 @@ def update_source_catalog_item(
             status = %(status)s,
             coverage_source_url = %(coverage_source_url)s,
             normalized_coverage_source_url = %(normalized_coverage_source_url)s,
+            coverage_source_metadata = %(coverage_source_metadata)s::jsonb,
             change_reason = %(change_reason)s,
             updated_at = %(updated_at)s
         WHERE catalog_item_id = %(catalog_item_id)s
@@ -1438,6 +1502,7 @@ def update_source_catalog_item(
             "status": updated_status,
             "coverage_source_url": coverage_source_url,
             "normalized_coverage_source_url": normalized_coverage_source_url,
+            "coverage_source_metadata": json.dumps(coverage_source_metadata, ensure_ascii=True),
             "change_reason": updated_change_reason,
             "updated_at": utc_now(),
         },
@@ -1454,6 +1519,7 @@ def update_source_catalog_item(
             "bank_code": bank_code,
             "product_type": product_type,
             "coverage_source_url": coverage_source_url,
+            "coverage_source_verification_status": coverage_source_metadata.get("verification_status"),
         },
     )
     detail = load_source_catalog_detail(connection, catalog_item_id=catalog_item_id)
@@ -1483,6 +1549,7 @@ def start_source_catalog_collection(
             sci.status,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
+            sci.coverage_source_metadata,
             ptr.product_family,
             b.bank_name,
             b.homepage_url,
@@ -1580,6 +1647,7 @@ def _build_source_catalog_collection_plan(
                 "homepage_url": str(row["homepage_url"]),
                 "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
                 "coverage_source_url": row.get("coverage_source_url"),
+                "coverage_source_metadata": _mapping(row.get("coverage_source_metadata")),
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -1675,6 +1743,7 @@ def _materialize_sources_for_catalog_item(
         product_type_definition=product_type_definition,
         homepage_url=str(row["homepage_url"]),
         coverage_source_url=_clean_text(row.get("coverage_source_url")),
+        coverage_source_metadata=_mapping(row.get("coverage_source_metadata")),
         source_language=str(row.get("source_language") or "en"),
         run_id=run_id,
         correlation_id=correlation_id,
@@ -1718,13 +1787,11 @@ def _materialize_sources_for_catalog_item(
         discovery_notes.append(
             f"Deactivated {rejected_detail_count} previously generated detail source(s) that failed current detail-page validation."
         )
-    hard_scope_excluded_count = 0
-    if generation_result.detail_source_ids:
-        hard_scope_excluded_count = _deactivate_hard_scope_excluded_generated_detail_sources(
-            connection,
-            bank_code=bank_code,
-            product_type=product_type,
-        )
+    hard_scope_excluded_count = _deactivate_hard_scope_excluded_generated_detail_sources(
+        connection,
+        bank_code=bank_code,
+        product_type=product_type,
+    )
     if hard_scope_excluded_count:
         discovery_notes.append(
             f"Deactivated {hard_scope_excluded_count} previously generated detail source(s) with deterministic hard-scope exclusions."
@@ -1742,6 +1809,562 @@ def _materialize_sources_for_catalog_item(
         model_execution_records=generation_result.model_execution_records,
         usage_records=generation_result.usage_records,
     )
+
+
+def repair_catalog_coverage_route(
+    connection: Connection,
+    *,
+    row: dict[str, Any],
+    actor: dict[str, Any],
+    request_context: dict[str, Any],
+    run_id: str,
+    correlation_id: str | None,
+    invoke_model: Any | None = None,
+) -> CoverageRouteRepairResult:
+    """Resolve a missing/stale product route after bounded homepage discovery is exhausted."""
+    if not llm_provider_configured():
+        return CoverageRouteRepairResult(
+            status="uncertain",
+            coverage_source_url=None,
+            coverage_source_metadata={},
+            notes=["Coverage-route repair was unavailable because the OpenAI provider was not configured."],
+        )
+
+    product_type = _canonical_product_type_code(row["product_type"])
+    definition = localize_product_type_definition(
+        country_code=str(row["country_code"]),
+        definition=require_product_type_definition(
+            connection,
+            product_type_code=product_type,
+            active_only=False,
+        ),
+    )
+    model_id = configured_model_id()
+    started_at = datetime.now(UTC)
+    provider_metadata: dict[str, Any] = {}
+    raw_result: dict[str, Any] = {}
+    execution_status = "completed"
+    error_summary: str | None = None
+    try:
+        resolver = invoke_model or invoke_openai_json_schema
+        raw_result, provider_metadata = resolver(
+            instructions=_coverage_route_resolution_instructions(),
+            payload={
+                "bank_code": str(row["bank_code"]),
+                "bank_name": str(row["bank_name"]),
+                "country_code": str(row["country_code"]),
+                "homepage_url": str(row["homepage_url"]),
+                "product_type": product_type,
+                "product_type_definition": {
+                    "display_name": _product_type_label(definition),
+                    "description": str(definition.get("description") or ""),
+                    "discovery_keywords": _product_type_keywords(definition),
+                },
+                "existing_coverage_source_url": _clean_text(row.get("coverage_source_url")),
+                "existing_coverage_route_rejected_by_retail_detail_discovery": bool(
+                    _clean_text(row.get("coverage_source_url"))
+                ),
+            },
+            schema_name=_COVERAGE_ROUTE_RESOLUTION_SCHEMA_NAME,
+            schema=_COVERAGE_ROUTE_RESOLUTION_SCHEMA,
+            model_id=model_id,
+            require_web_search=True,
+        )
+        result = _sanitize_coverage_route_resolution(
+            raw_result=raw_result,
+            provider_metadata=provider_metadata,
+            bank_name=str(row["bank_name"]),
+            homepage_url=str(row["homepage_url"]),
+            product_type=product_type,
+            product_type_definition=definition,
+        )
+    except Exception as exc:
+        execution_status = "failed"
+        error_summary = str(exc)[:800]
+        result = CoverageRouteRepairResult(
+            status="uncertain",
+            coverage_source_url=None,
+            coverage_source_metadata={},
+            notes=[f"Coverage-route repair was inconclusive: {error_summary}"],
+        )
+    completed_at = datetime.now(UTC)
+
+    model_execution_id = _coverage_route_model_execution_id(
+        run_id=run_id,
+        catalog_item_id=str(row["catalog_item_id"]),
+    )
+    execution_metadata = {
+        "bank_code": str(row["bank_code"]),
+        "country_code": str(row["country_code"]),
+        "product_type": product_type,
+        "catalog_item_id": str(row["catalog_item_id"]),
+        "correlation_id": correlation_id,
+        "request_id": request_context.get("request_id"),
+        "resolution_status": result.status,
+        "coverage_source_url": result.coverage_source_url,
+        "resolution_summary": _clean_text(raw_result.get("summary")),
+        "provider_resolution": {
+            key: (_clean_text(raw_result.get(key)) or None)
+            for key in (
+                "status",
+                "coverage_source_url",
+                "current_offering_quote",
+                "relationship_source_url",
+                "relationship_quote",
+                "not_offered_source_url",
+                "not_offered_quote",
+            )
+        },
+        "web_search_sources": list(provider_metadata.get("web_search_sources") or [])[:40],
+    }
+    if error_summary:
+        execution_metadata["error_summary"] = error_summary
+    prompt_tokens = int(provider_metadata.get("prompt_tokens") or 0)
+    completion_tokens = int(provider_metadata.get("completion_tokens") or 0)
+    _persist_source_catalog_usage_records(
+        connection,
+        model_execution_records=[
+            {
+                "model_execution_id": model_execution_id,
+                "run_id": run_id,
+                "source_document_id": None,
+                "stage_name": "source_catalog_coverage_resolution",
+                "agent_name": "fpds-coverage-route-resolver",
+                "model_id": str(provider_metadata.get("model_id") or model_id),
+                "execution_status": execution_status,
+                "execution_metadata": execution_metadata,
+                "started_at": started_at.isoformat(),
+                "completed_at": completed_at.isoformat(),
+            }
+        ],
+        usage_records=(
+            [
+                {
+                    "llm_usage_id": _build_source_catalog_ai_usage_id(model_execution_id),
+                    "model_execution_id": model_execution_id,
+                    "run_id": run_id,
+                    "candidate_id": None,
+                    "provider_request_id": provider_metadata.get("provider_request_id"),
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "estimated_cost": estimated_cost_usd(
+                        prompt_tokens=prompt_tokens,
+                        completion_tokens=completion_tokens,
+                    ),
+                    "usage_metadata": {
+                        "usage_mode": "openai-source-catalog-coverage-resolution",
+                        "provider": str(provider_metadata.get("provider") or "openai"),
+                        "model_id": str(provider_metadata.get("model_id") or model_id),
+                    },
+                    "recorded_at": completed_at.isoformat(),
+                }
+            ]
+            if provider_metadata
+            else []
+        ),
+    )
+
+    now = utc_now()
+    if result.status == "current_offering" and result.coverage_source_url:
+        normalized_url = normalize_source_url(result.coverage_source_url)
+        connection.execute(
+            """
+            UPDATE source_registry_catalog_item
+            SET
+                status = 'active',
+                coverage_source_url = %(coverage_source_url)s,
+                normalized_coverage_source_url = %(normalized_coverage_source_url)s,
+                coverage_source_metadata = %(coverage_source_metadata)s::jsonb,
+                change_reason = 'ai_verified_current_coverage_route',
+                updated_at = %(updated_at)s
+            WHERE catalog_item_id = %(catalog_item_id)s
+            """,
+            {
+                "catalog_item_id": str(row["catalog_item_id"]),
+                "coverage_source_url": result.coverage_source_url,
+                "normalized_coverage_source_url": normalized_url,
+                "coverage_source_metadata": json.dumps(result.coverage_source_metadata, ensure_ascii=True),
+                "updated_at": now,
+            },
+        )
+        _record_catalog_audit_event(
+            connection,
+            actor=actor,
+            request_context=request_context,
+            event_type="source_catalog_coverage_route_repaired",
+            target_id=str(row["catalog_item_id"]),
+            target_type="source_registry_catalog_item",
+            diff_summary=f"Verified current coverage route for `{row['catalog_item_id']}`.",
+            metadata={
+                "bank_code": str(row["bank_code"]),
+                "product_type": product_type,
+                "coverage_source_url": result.coverage_source_url,
+                "coverage_domain": result.coverage_source_metadata.get("coverage_domain"),
+                "model_execution_id": model_execution_id,
+            },
+        )
+    elif result.status == "not_currently_offered":
+        connection.execute(
+            """
+            UPDATE source_registry_catalog_item
+            SET
+                status = 'inactive',
+                coverage_source_metadata = %(coverage_source_metadata)s::jsonb,
+                change_reason = 'ai_verified_product_not_currently_offered',
+                updated_at = %(updated_at)s
+            WHERE catalog_item_id = %(catalog_item_id)s
+            """,
+            {
+                "catalog_item_id": str(row["catalog_item_id"]),
+                "coverage_source_metadata": json.dumps(result.coverage_source_metadata, ensure_ascii=True),
+                "updated_at": now,
+            },
+        )
+        _record_catalog_audit_event(
+            connection,
+            actor=actor,
+            request_context=request_context,
+            event_type="source_catalog_coverage_deactivated",
+            target_id=str(row["catalog_item_id"]),
+            target_type="source_registry_catalog_item",
+            diff_summary=f"Deactivated unavailable coverage `{row['catalog_item_id']}`.",
+            metadata={
+                "bank_code": str(row["bank_code"]),
+                "product_type": product_type,
+                "evidence_url": result.coverage_source_metadata.get("not_offered_source_url"),
+                "model_execution_id": model_execution_id,
+            },
+        )
+    return result
+
+
+def _coverage_route_resolution_instructions() -> str:
+    return (
+        "You repair one FPDS retail-consumer bank Product Type coverage route using live web search. Find the current official "
+        "public retail product or product-family page, including an official consumer brand domain when the legal bank "
+        "uses a different customer-facing domain. A current offering requires a current product/detail/catalog "
+        "page, not an article, investor page, historical announcement, help-only page, login, application flow, "
+        "legacy servicing page, transaction-banking page, corporate cash-management page, institutional product, "
+        "or business/commercial product. In the United States, the supplied GIC Product Type means a consumer "
+        "Certificate of Deposit/CD, not a corporate term deposit. If the payload says an existing route was rejected "
+        "by retail detail discovery, do not reuse it unless the page itself contains unambiguous retail-consumer "
+        "product evidence. Return an exact short quote from the product page that names the Product Type. "
+        "When the route is on another domain, also return a consulted official page and exact quote proving that "
+        "the brand/product is provided by or is a brand of the supplied bank. If official current evidence instead "
+        "explicitly says the product was sold, transferred, discontinued, is no longer offered, or no longer accepts "
+        "customers, return not_currently_offered with that exact quote. Absence from navigation is not enough; use "
+        "uncertain unless positive current or retirement evidence exists. Never invent a URL or quote. Prefer HTML "
+        "evidence pages and return only URLs actually consulted during web search."
+    )
+
+
+def _sanitize_coverage_route_resolution(
+    *,
+    raw_result: dict[str, Any],
+    provider_metadata: dict[str, Any],
+    bank_name: str,
+    homepage_url: str,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+) -> CoverageRouteRepairResult:
+    status = str(raw_result.get("status") or "uncertain").strip()
+    summary = _clean_text(raw_result.get("summary")) or "Coverage resolver returned no summary."
+    consulted_keys = {
+        key
+        for source in provider_metadata.get("web_search_sources") or []
+        for key in [_coverage_citation_key(source.get("url"))]
+        if key
+    }
+    if not consulted_keys:
+        raise ValueError("Coverage resolver returned no consulted web sources.")
+
+    identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
+    homepage_host = _normalized_hostname(urlparse(homepage_url).hostname or "")
+    if status == "current_offering":
+        coverage_url = _validated_consulted_https_url(
+            raw_result.get("coverage_source_url"),
+            consulted_keys=consulted_keys,
+            require_consulted=False,
+        )
+        if infer_source_type(coverage_url) != "html":
+            raise ValueError("Current coverage route must be an HTML page.")
+        current_quote = _required_coverage_quote(raw_result.get("current_offering_quote"))
+        if not _coverage_quote_identifies_product_type(
+            current_quote,
+            identity_terms=identity_terms,
+        ):
+            raise ValueError("Current offering quote did not identify the requested Product Type.")
+        _require_exact_quote_on_page(url=coverage_url, quote=current_quote)
+        coverage_host = _normalized_hostname(urlparse(coverage_url).hostname or "")
+        route_scope_reason = _source_scope_exclusion_reason(
+            product_type=product_type,
+            # Scope the proposed route from its own evidence. The resolver summary
+            # may explain why a prior business route was rejected; including that
+            # narrative here can incorrectly taint a valid consumer replacement.
+            fingerprint=f"{coverage_url} {current_quote}",
+        )
+        if route_scope_reason:
+            raise ValueError(
+                f"Current coverage route failed retail Product Type scope: {route_scope_reason}."
+            )
+
+        relationship_url = _clean_text(raw_result.get("relationship_source_url"))
+        relationship_quote = _clean_text(raw_result.get("relationship_quote"))
+        if coverage_host != homepage_host:
+            relationship_url = _validated_consulted_https_url(
+                relationship_url,
+                consulted_keys=consulted_keys,
+                require_consulted=False,
+            )
+            relationship_host = _normalized_hostname(urlparse(relationship_url).hostname or "")
+            if relationship_host not in {homepage_host, coverage_host}:
+                raise ValueError("Brand relationship evidence must be on the bank or coverage domain.")
+            relationship_quote = _required_coverage_quote(relationship_quote)
+            if not _quote_identifies_bank(relationship_quote, bank_name=bank_name):
+                raise ValueError("Brand relationship quote did not identify the bank.")
+            if relationship_host != coverage_host and not _quote_identifies_coverage_domain(
+                relationship_quote,
+                coverage_host=coverage_host,
+            ):
+                raise ValueError("Brand relationship quote did not identify the coverage brand domain.")
+            _require_quote_evidence(
+                url=relationship_url,
+                quote=relationship_quote,
+                consulted_keys=consulted_keys,
+            )
+        else:
+            relationship_url = relationship_url or coverage_url
+            relationship_quote = relationship_quote or bank_name
+
+        metadata = {
+            "verification_status": "verified",
+            "verification_method": "ai_web_search_exact_quote",
+            "homepage_domain": homepage_host,
+            "coverage_domain": coverage_host,
+            "relationship_source_url": relationship_url,
+            "relationship_quote": relationship_quote,
+            "current_offering_quote": current_quote,
+            "verified_at": utc_now().isoformat(),
+            "resolution_summary": summary,
+        }
+        return CoverageRouteRepairResult(
+            status=status,
+            coverage_source_url=coverage_url,
+            coverage_source_metadata=metadata,
+            notes=[
+                f"AI web resolution verified a current official coverage route on `{coverage_host}`.",
+                summary,
+            ],
+        )
+
+    if status == "not_currently_offered":
+        evidence_url = _validated_consulted_https_url(
+            raw_result.get("not_offered_source_url"),
+            consulted_keys=consulted_keys,
+            require_consulted=False,
+        )
+        evidence_quote = _required_coverage_quote(raw_result.get("not_offered_quote"))
+        lowered_quote = evidence_quote.lower()
+        retirement_terms = (
+            "no longer",
+            "stop accepting",
+            "stopped accepting",
+            "discontinued",
+            "transferred",
+            "transfer of",
+            "sold",
+            "sale of",
+            "ceased",
+            "winding down",
+            "wind down",
+        )
+        retirement_identity_terms = list(identity_terms)
+        if product_type == "personal-loan":
+            retirement_identity_terms.extend(["loan", "loans", "unsecured loan"])
+        if not _coverage_quote_identifies_product_type(
+            evidence_quote,
+            identity_terms=retirement_identity_terms,
+        ) or not any(term in lowered_quote for term in retirement_terms):
+            raise ValueError("Not-offered evidence lacked both product identity and an explicit retirement signal.")
+        evidence_host = _normalized_hostname(urlparse(evidence_url).hostname or "")
+        if evidence_host != homepage_host:
+            relationship_url = _validated_consulted_https_url(
+                raw_result.get("relationship_source_url"),
+                consulted_keys=consulted_keys,
+                require_consulted=False,
+            )
+            relationship_quote = _required_coverage_quote(raw_result.get("relationship_quote"))
+            relationship_host = _normalized_hostname(urlparse(relationship_url).hostname or "")
+            regulator_evidence = _is_authoritative_government_domain(evidence_host)
+            if relationship_host not in {homepage_host, evidence_host} and not regulator_evidence:
+                raise ValueError(
+                    "Retirement relationship evidence must be on the bank/brand domain or paired with government evidence."
+                )
+            if not _quote_identifies_bank(relationship_quote, bank_name=bank_name):
+                raise ValueError("Retirement relationship quote did not identify the bank.")
+            if relationship_host not in {homepage_host, evidence_host} and not _quote_identifies_coverage_domain(
+                relationship_quote,
+                coverage_host=relationship_host,
+            ):
+                raise ValueError("Retirement relationship quote did not identify the evidence brand domain.")
+            if regulator_evidence and relationship_host not in {homepage_host, evidence_host} and not _quote_identifies_coverage_domain(
+                evidence_quote,
+                coverage_host=relationship_host,
+            ):
+                raise ValueError("Government retirement evidence did not identify the official bank brand.")
+            _require_quote_evidence(
+                url=relationship_url,
+                quote=relationship_quote,
+                consulted_keys=consulted_keys,
+            )
+        _require_quote_evidence(
+            url=evidence_url,
+            quote=evidence_quote,
+            consulted_keys=consulted_keys,
+        )
+        metadata = {
+            "verification_status": "verified_not_currently_offered",
+            "verification_method": "ai_web_search_exact_quote",
+            "homepage_domain": homepage_host,
+            "not_offered_source_url": evidence_url,
+            "not_offered_quote": evidence_quote,
+            "verified_at": utc_now().isoformat(),
+            "resolution_summary": summary,
+        }
+        return CoverageRouteRepairResult(
+            status=status,
+            coverage_source_url=None,
+            coverage_source_metadata=metadata,
+            notes=["Official evidence verified that this Product Type is not currently offered.", summary],
+        )
+
+    return CoverageRouteRepairResult(
+        status="uncertain",
+        coverage_source_url=None,
+        coverage_source_metadata={},
+        notes=["AI web resolution could not verify a current product route or explicit retirement evidence.", summary],
+    )
+
+
+def _validated_consulted_https_url(
+    value: Any,
+    *,
+    consulted_keys: set[str],
+    require_consulted: bool = True,
+) -> str:
+    cleaned = _required_text(value, "coverage evidence URL")
+    normalized = normalize_source_url(cleaned)
+    parsed = urlparse(normalized)
+    if parsed.scheme.lower() != "https" or not parsed.hostname:
+        raise ValueError("Coverage evidence URL must be public HTTPS.")
+    if require_consulted and _coverage_citation_key(normalized) not in consulted_keys:
+        raise ValueError("Coverage evidence URL was not present in consulted web-search sources.")
+    return normalized
+
+
+def _coverage_citation_key(value: Any) -> str:
+    cleaned = _clean_text(value)
+    if not cleaned:
+        return ""
+    try:
+        normalized = normalize_source_url(cleaned)
+    except ValueError:
+        return ""
+    parsed = urlparse(normalized)
+    host = _normalized_hostname(parsed.hostname or "")
+    path = re.sub(r"/+", "/", unquote(parsed.path or "/")).rstrip("/") or "/"
+    return f"{host}{path}".lower()
+
+
+def _required_coverage_quote(value: Any) -> str:
+    quote = _clean_text(value)
+    if quote:
+        # Web-search providers sometimes preserve Markdown presentation from a
+        # rendered heading even though the official HTML contains only its text.
+        quote = re.sub(r"^(?:#{1,6}\s+|>\s+|[-*]\s+)", "", quote).strip()
+    if not quote or len(quote) < 8 or len(quote) > 600:
+        raise ValueError("Coverage evidence quote must contain 8 to 600 characters.")
+    return _collapse_whitespace(quote)
+
+
+def _require_exact_quote_on_page(*, url: str, quote: str) -> None:
+    host = _normalized_hostname(urlparse(url).hostname or "")
+    html_text = fetch_text(url, DiscoveryFetchPolicy(allowed_domains=(host,)))
+    page_text = _collapse_whitespace(
+        html_lib.unescape(re.sub(r"<[^>]+>", " ", html_text))
+    ).lower()
+    normalized_quote = _collapse_whitespace(html_lib.unescape(quote)).lower()
+    if normalized_quote not in page_text:
+        raise ValueError("Coverage evidence quote was not found in the freshly fetched official page.")
+
+
+def _require_quote_evidence(*, url: str, quote: str, consulted_keys: set[str]) -> None:
+    if infer_source_type(url) == "pdf":
+        if _coverage_citation_key(url) not in consulted_keys:
+            raise ValueError("PDF coverage evidence was not present in consulted web-search sources.")
+        return
+    _require_exact_quote_on_page(url=url, quote=quote)
+
+
+def _quote_identifies_bank(quote: str, *, bank_name: str) -> bool:
+    quote_tokens = set(re.findall(r"[a-z0-9]+", quote.lower()))
+    bank_tokens = [
+        token
+        for token in re.findall(r"[a-z0-9]+", bank_name.lower())
+        if token not in {"bank", "banking", "national", "association", "na", "usa", "us"}
+    ]
+    if not bank_tokens:
+        return False
+    required_count = 1 if len(bank_tokens) == 1 else 2
+    return len(set(bank_tokens).intersection(quote_tokens)) >= required_count
+
+
+def _quote_identifies_coverage_domain(quote: str, *, coverage_host: str) -> bool:
+    host_tokens = [
+        token
+        for token in re.findall(r"[a-z0-9]+", coverage_host.lower())
+        if token not in {"www", "com", "org", "net", "bank", "banking", "co"}
+    ]
+    if not host_tokens:
+        return False
+    quote_tokens = set(re.findall(r"[a-z0-9]+", quote.lower()))
+    return any(token in quote_tokens for token in host_tokens)
+
+
+def _coverage_quote_identifies_product_type(
+    quote: str,
+    *,
+    identity_terms: list[str],
+) -> bool:
+    replacements = {
+        "accounts": "account",
+        "cards": "card",
+        "certificates": "certificate",
+        "deposits": "deposit",
+        "gics": "gic",
+        "loans": "loan",
+        "mortgages": "mortgage",
+        "cds": "cd",
+    }
+
+    def normalize(value: str) -> str:
+        tokens = re.findall(r"[a-z0-9]+", value.lower())
+        return " ".join(replacements.get(token, token) for token in tokens)
+
+    normalized_quote = normalize(quote)
+    return any(normalize(term) in normalized_quote for term in identity_terms if normalize(term))
+
+
+def _is_authoritative_government_domain(hostname: str) -> bool:
+    normalized = _normalized_hostname(hostname)
+    return normalized.endswith(".gov") or ".gov." in normalized
+
+
+def _coverage_route_model_execution_id(*, run_id: str, catalog_item_id: str) -> str:
+    digest = hashlib.sha256(
+        f"{run_id}|{catalog_item_id}|coverage_route_resolution".encode("utf-8")
+    ).hexdigest()[:20]
+    return f"modelexec-{digest}"
 
 
 def _deactivate_rejected_generated_detail_sources(
@@ -2052,6 +2675,7 @@ def _generate_sources_from_homepage(
     homepage_url: str,
     source_language: str,
     coverage_source_url: str | None = None,
+    coverage_source_metadata: dict[str, Any] | None = None,
     run_id: str | None = None,
     correlation_id: str | None = None,
     request_id: str | None = None,
@@ -2069,9 +2693,15 @@ def _generate_sources_from_homepage(
     verified_coverage_source_url, normalized_coverage_source_url = _normalize_coverage_source_url(
         coverage_source_url,
         normalized_homepage_url=normalized_homepage_url,
+        coverage_source_metadata=coverage_source_metadata,
     )
 
-    fetch_policy = DiscoveryFetchPolicy(allowed_domains=_discovery_allowed_domains(hostname))
+    allowed_domains = _coverage_allowed_domains(
+        normalized_homepage_url=normalized_homepage_url,
+        normalized_coverage_source_url=normalized_coverage_source_url,
+        coverage_source_metadata=coverage_source_metadata,
+    )
+    fetch_policy = DiscoveryFetchPolicy(allowed_domains=allowed_domains)
     detail_links: list[tuple[int, Any]] = []
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
@@ -2090,7 +2720,12 @@ def _generate_sources_from_homepage(
         homepage_fetch_error = str(exc)
         discovery_notes.append(f"Homepage fetch was unavailable: {homepage_fetch_error}")
 
-    homepage_links = _extract_allowed_links(html_text=homepage_html, base_url=normalized_homepage_url, hostname=hostname)
+    homepage_links = _extract_allowed_links(
+        html_text=homepage_html,
+        base_url=normalized_homepage_url,
+        hostname=hostname,
+        allowed_domains=allowed_domains,
+    )
     if homepage_html and not homepage_links:
         discovery_notes.append("Homepage fetch succeeded but no allowed detail or supporting links were extracted.")
         if _looks_like_javascript_shell(homepage_html):
@@ -2188,7 +2823,12 @@ def _generate_sources_from_homepage(
         except Exception as exc:
             discovery_notes.append(f"Hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
-        for link in _extract_allowed_links(html_text=page_html, base_url=resolved_page_url, hostname=hostname):
+        for link in _extract_allowed_links(
+            html_text=page_html,
+            base_url=resolved_page_url,
+            hostname=hostname,
+            allowed_domains=allowed_domains,
+        ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
                 continue
@@ -2243,7 +2883,12 @@ def _generate_sources_from_homepage(
             discovery_notes.append(f"Secondary hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
         expanded_secondary_hub_count += 1
-        for link in _extract_allowed_links(html_text=page_html, base_url=resolved_page_url, hostname=hostname):
+        for link in _extract_allowed_links(
+            html_text=page_html,
+            base_url=resolved_page_url,
+            hostname=hostname,
+            allowed_domains=allowed_domains,
+        ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
                 continue
@@ -2348,6 +2993,7 @@ def _generate_sources_from_homepage(
         normalized_homepage_url=normalized_homepage_url,
         homepage_fetch_error=homepage_fetch_error,
         candidates=html_candidates,
+        allowed_domains=allowed_domains,
         run_id=run_id,
         correlation_id=correlation_id,
         request_id=request_id,
@@ -3024,6 +3670,7 @@ def _score_candidate_links_with_ai(
     normalized_homepage_url: str,
     homepage_fetch_error: str | None,
     candidates: list[HomepageCandidate],
+    allowed_domains: tuple[str, ...] | None = None,
     run_id: str | None = None,
     correlation_id: str | None = None,
     request_id: str | None = None,
@@ -3072,6 +3719,7 @@ def _score_candidate_links_with_ai(
                 "homepage_url": homepage_url,
                 "normalized_homepage_url": normalized_homepage_url,
                 "homepage_fetch_error": homepage_fetch_error,
+                "allowed_domains": list(allowed_domains or ()),
                 "candidate_links": candidate_links,
             },
         )
@@ -3110,7 +3758,7 @@ def _score_candidate_links_with_ai(
 
     notes = [str(resolution.get("summary") or "").strip()] if str(resolution.get("summary") or "").strip() else []
     hostname = urlparse(normalized_homepage_url).hostname or ""
-    allowed_domains = _discovery_allowed_domains(hostname)
+    bounded_allowed_domains = allowed_domains or _discovery_allowed_domains(hostname)
     scores: dict[str, AiParallelCandidateScore] = {}
     valid_candidate_urls = {item.normalized_url for item in candidates}
     for item in resolution.get("candidate_scores", []):
@@ -3123,7 +3771,7 @@ def _score_candidate_links_with_ai(
         if normalized_url not in valid_candidate_urls:
             notes.append(f"AI scored an unbounded candidate for {candidate_label}; the score was ignored.")
             continue
-        if not host_matches_allowed_domains(parsed_hostname, allowed_domains):
+        if not host_matches_allowed_domains(parsed_hostname, bounded_allowed_domains):
             notes.append(f"AI scored an out-of-scope URL for {candidate_label}; the score was ignored.")
             continue
         if infer_source_type(normalized_url) != "html":
@@ -3209,7 +3857,7 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
     request_body = {
         "model": model_id,
         "instructions": (
-            "You score bounded Canadian bank candidate URLs for homepage-first product discovery. "
+            "You score bounded bank candidate URLs for homepage-first product discovery in the supplied country. "
             "Do not invent URLs. Score only the candidate links provided. "
             "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type. "
             "Use a relevance_score from 0 to 10. A detail page must describe one named financial product; category lists, rates or fee tables, calculators, "
@@ -4528,12 +5176,18 @@ def _negative_term_hits(text: str) -> int:
     return sum(1 for term in _PAGE_NEGATIVE_KEYWORDS if term in fingerprint)
 
 
-def _extract_allowed_links(*, html_text: str, base_url: str, hostname: str) -> list[Any]:
-    allowed_domains = _discovery_allowed_domains(hostname)
+def _extract_allowed_links(
+    *,
+    html_text: str,
+    base_url: str,
+    hostname: str,
+    allowed_domains: tuple[str, ...] | None = None,
+) -> list[Any]:
+    bounded_domains = allowed_domains or _discovery_allowed_domains(hostname)
     allowed_links: list[Any] = []
     for link in extract_links(html_text, base_url=base_url):
         link_hostname = urlparse(link.normalized_url).hostname
-        if not link_hostname or not host_matches_allowed_domains(link_hostname, allowed_domains):
+        if not link_hostname or not host_matches_allowed_domains(link_hostname, bounded_domains):
             continue
         allowed_links.append(link)
     return allowed_links
@@ -4544,6 +5198,28 @@ def _discovery_allowed_domains(hostname: str) -> tuple[str, ...]:
     if normalized.startswith("www."):
         normalized = normalized[4:]
     return (normalized,)
+
+
+def _coverage_allowed_domains(
+    *,
+    normalized_homepage_url: str,
+    normalized_coverage_source_url: str | None,
+    coverage_source_metadata: dict[str, Any] | None,
+) -> tuple[str, ...]:
+    homepage_host = urlparse(normalized_homepage_url).hostname or ""
+    domains = list(_discovery_allowed_domains(homepage_host))
+    if not normalized_coverage_source_url:
+        return tuple(domains)
+    coverage_host = urlparse(normalized_coverage_source_url).hostname or ""
+    normalized_coverage_host = _normalized_hostname(coverage_host)
+    if normalized_coverage_host and normalized_coverage_host not in domains:
+        metadata = _mapping(coverage_source_metadata)
+        if (
+            metadata.get("verification_status") == "verified"
+            and _normalized_hostname(str(metadata.get("coverage_domain") or "")) == normalized_coverage_host
+        ):
+            domains.append(normalized_coverage_host)
+    return tuple(domains)
 
 
 def _dedupe_page_candidates(items: list[tuple[int, str, str]]) -> list[tuple[int, str, str]]:
@@ -5047,7 +5723,16 @@ def _has_unrelated_product_type_signal(*, product_type: str, fingerprint: str) -
     exclusions = _PRODUCT_TYPE_EXCLUSION_KEYWORDS.get(product_type, ())
     if not any(keyword in fingerprint for keyword in exclusions):
         return False
-    product_terms = _product_type_keywords({"product_type_code": product_type, "display_name": product_type, "discovery_keywords": [product_type]})
+    canonical_type = _canonical_product_type_code(product_type)
+    product_terms = tuple(
+        dict.fromkeys(
+            (
+                canonical_type,
+                canonical_type.replace("-", " "),
+                *_PRODUCT_TYPE_IDENTITY_HINTS.get(canonical_type, ()),
+            )
+        )
+    )
     return not any(term and term in fingerprint for term in product_terms)
 
 
@@ -5140,6 +5825,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         for keyword in (
             "/resource-centre/",
             "/resource-center/",
+            "/article/",
             "/articles/",
             "/blog/",
             "/thejuice/",
@@ -5152,7 +5838,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         if segment
     }
     if any(
-        segment == "blog"
+        segment in {"article", "articles", "blog"}
         or segment.endswith("-blog")
         or segment.startswith("blog-")
         or segment.startswith(("what-is-", "what-are-", "how-does-", "how-to-choose-", "rules-of-"))
@@ -5203,6 +5889,10 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             "commercial banking",
             "/corporate-banking",
             "corporate banking",
+            "/transaction-banking",
+            "transaction banking",
+            "corporate cash management",
+            "global liquidity management solutions",
             "business credit",
             "business card",
             "business loan",
@@ -5553,6 +6243,7 @@ def _serialize_source_catalog_row(row: dict[str, Any], *, bank_row: dict[str, An
         "product_type": str(row["product_type"]),
         "status": str(row["status"]),
         "coverage_source_url": row.get("coverage_source_url"),
+        "coverage_source_metadata": _mapping(row.get("coverage_source_metadata")),
         "homepage_url": bank_row.get("homepage_url"),
         "normalized_homepage_url": bank_row.get("normalized_homepage_url"),
         "logo_url": bank_row.get("logo_url"),
@@ -5781,6 +6472,19 @@ def _clean_text(value: Any) -> str | None:
     return cleaned or None
 
 
+def _mapping(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, dict) else {}
+
+
+def _normalized_hostname(value: str) -> str:
+    candidate = value.strip().lower().rstrip(".")
+    if "://" in candidate:
+        candidate = urlparse(candidate).hostname or ""
+    if candidate.startswith("www."):
+        candidate = candidate[4:]
+    return candidate
+
+
 def _normalize_country_code(value: Any) -> str:
     normalized = (_clean_text(value) or "CA").upper()
     if len(normalized) != 2 or not normalized.isascii() or not normalized.isalpha():
@@ -5843,6 +6547,7 @@ def _normalize_coverage_source_url(
     value: Any,
     *,
     normalized_homepage_url: str,
+    coverage_source_metadata: dict[str, Any] | None = None,
 ) -> tuple[str | None, str | None]:
     cleaned = _clean_text(value)
     if cleaned is None:
@@ -5864,11 +6569,30 @@ def _normalize_coverage_source_url(
             code="coverage_source_url_invalid",
             message="coverage_source_url must be a valid public HTTPS URL.",
         )
-    if not host_matches_allowed_domains(parsed.hostname, _discovery_allowed_domains(homepage_host)):
+    same_homepage_domain = host_matches_allowed_domains(
+        parsed.hostname,
+        _discovery_allowed_domains(homepage_host),
+    )
+    metadata = _mapping(coverage_source_metadata)
+    verified_cross_domain = (
+        metadata.get("verification_status") == "verified"
+        and metadata.get("verification_method") in {
+            "ai_web_search_exact_quote",
+            "ai_bank_onboarding_web_search",
+        }
+        and _normalized_hostname(str(metadata.get("coverage_domain") or ""))
+        == _normalized_hostname(parsed.hostname)
+        and bool(_clean_text(metadata.get("relationship_source_url")))
+        and bool(_clean_text(metadata.get("relationship_quote")))
+    )
+    if not same_homepage_domain and not verified_cross_domain:
         raise SourceRegistryError(
             status_code=422,
             code="coverage_source_domain_mismatch",
-            message="coverage_source_url must be on the bank's official homepage domain.",
+            message=(
+                "coverage_source_url must be on the bank's official homepage domain or carry "
+                "verified official brand-domain relationship evidence."
+            ),
         )
     return candidate, normalized
 

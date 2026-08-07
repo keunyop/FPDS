@@ -289,6 +289,10 @@ _SUPPORTING_EXTRACTABLE_FIELDS = {
     "term_rate_table",
     "post_maturity_interest_rate",
 }
+_EXACT_ORIGIN_GROUNDING_METHODS = {
+    "heuristic_labeled_fee",
+    "heuristic_labeled_fee_fallback",
+}
 _PRODUCT_TITLE_KEYWORDS = (
     "account",
     "accounts",
@@ -304,6 +308,11 @@ _PRODUCT_TITLE_KEYWORDS = (
     "bundle",
     "cashable",
     "redeemable",
+    "card",
+    "mortgage",
+    "loan",
+    "line of credit",
+    "heloc",
 )
 _NAVIGATION_NOISE_MARKERS = (
     "all chequing accounts",
@@ -499,6 +508,15 @@ class ExtractionService:
                 requested_fields=field_names,
             )
             runtime_notes = list(retrieval_result.runtime_notes)
+            extracted_fields, exact_origin_grounded_count = _apply_exact_origin_grounding(
+                context=context,
+                extracted_fields=extracted_fields,
+            )
+            if exact_origin_grounded_count:
+                runtime_notes.append(
+                    "Accepted "
+                    f"{exact_origin_grounded_count} exact labeled field(s) from the verified official detail-page snapshot."
+                )
             agent_name = self.agent_name
             model_id = self.model_id
             usage_metadata: dict[str, object] = {
@@ -745,14 +763,24 @@ def _resolve_field_names(
     product_type = _infer_product_type(context)
     product_type_family = _canonical_product_type_family(product_type)
     product_default_fields = _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type) or _PRODUCT_TYPE_DEFAULT_FIELDS.get(product_type_family or "")
+    expected_fields = [
+        str(field_name).strip()
+        for field_name in context.source_metadata.get("expected_fields", [])
+        if str(field_name).strip()
+    ]
+    if product_type not in _CANONICAL_PRODUCT_TYPES and expected_fields:
+        # Operator-defined product contracts are authoritative. Falling back
+        # to every deposit extraction field inflated a credit-card request
+        # from 11 registered fields to roughly 50 unrelated fields and made
+        # official grounding both noisy and needlessly expensive.
+        product_default_fields = set(expected_fields)
     fields: list[str] = []
     for field_name in default_fields:
         if product_default_fields is not None and field_name not in product_default_fields:
             continue
         if field_name not in fields:
             fields.append(field_name)
-    for field_name in context.source_metadata.get("expected_fields", []):
-        normalized = str(field_name).strip()
+    for normalized in expected_fields:
         registered_contract = field_contract(normalized)
         if (
             product_type in _CANONICAL_PRODUCT_TYPES
@@ -2283,21 +2311,54 @@ def _is_reference_rate_margin_only(text: str) -> bool:
 
 def _extract_labeled_extension_fee(*, field_name: str, text: str) -> str | None:
     normalized = _normalize_text(text)
+    candidates: list[tuple[int, int, str]] = []
     for label in _numeric_extension_labels(field_name):
         escaped_label = re.escape(label)
         patterns = (
-            rf"\b{escaped_label}\b[\s\S]{{0,50}}?\$\s*(?P<fee>\d{{1,3}}(?:,\d{{3}})*(?:\.\d{{1,2}})?)",
-            rf"\$\s*(?P<fee>\d{{1,3}}(?:,\d{{3}})*(?:\.\d{{1,2}})?)[\s\S]{{0,35}}?\b{escaped_label}\b",
+            rf"(?P<label>\b{escaped_label}\b)[\s\S]{{0,50}}?\$\s*(?P<fee>\d{{1,3}}(?:,\d{{3}})*(?:\.\d{{1,2}})?)",
+            rf"\$\s*(?P<fee>\d{{1,3}}(?:,\d{{3}})*(?:\.\d{{1,2}})?)[\s\S]{{0,35}}?(?P<label>\b{escaped_label}\b)",
         )
-        for pattern in patterns:
-            match = re.search(pattern, normalized, flags=re.IGNORECASE)
-            if match is None:
-                continue
-            context_window = normalized[max(0, match.start() - 80):min(len(normalized), match.end() + 80)].lower()
-            if any(marker in context_window for marker in ("gift", "welcome bonus", "cash bonus", "minimum deposit")):
-                continue
-            return _normalize_decimal(match.group("fee"))
-    return None
+        for pattern_index, pattern in enumerate(patterns):
+            for match in re.finditer(pattern, normalized, flags=re.IGNORECASE):
+                context_window = normalized[max(0, match.start() - 80):min(len(normalized), match.end() + 80)].lower()
+                if any(marker in context_window for marker in ("gift", "welcome bonus", "cash bonus", "minimum deposit")):
+                    continue
+                fee_start, fee_end = match.span("fee")
+                prior_boundaries = (
+                    normalized.rfind(";", 0, fee_start),
+                    normalized.rfind("\n", 0, fee_start),
+                    normalized.rfind(". ", 0, fee_start),
+                )
+                clause_start = max(prior_boundaries) + 1
+                following_boundaries = tuple(
+                    boundary
+                    for boundary in (
+                        normalized.find(";", fee_end),
+                        normalized.find("\n", fee_end),
+                        normalized.find(". ", fee_end),
+                        normalized.find(".", fee_end),
+                    )
+                    if boundary >= 0
+                )
+                clause_end = min(following_boundaries) if following_boundaries else len(normalized)
+                fee_context = normalized[clause_start:clause_end].lower()
+                if any(
+                    marker in fee_context
+                    for marker in (
+                        "authorized user",
+                        "additional user",
+                        "additional card",
+                        "supplementary card",
+                        "employee card",
+                    )
+                ):
+                    continue
+                label_start, label_end = match.span("label")
+                distance = max(label_start - fee_end, fee_start - label_end, 0)
+                candidates.append((distance, pattern_index, _normalize_decimal(match.group("fee"))))
+    if not candidates:
+        return None
+    return min(candidates)[2]
 
 
 def _build_derived_field(
@@ -2473,6 +2534,15 @@ def _clean_title_candidate(value: str) -> str:
         cleaned,
         flags=re.IGNORECASE,
     ).strip()
+    generic_pipe_suffix = re.match(r"^(?P<title>.+?)\s+\|\s+[^|]{2,60}$", cleaned)
+    if generic_pipe_suffix is not None:
+        title_without_suffix = _normalize_text(generic_pipe_suffix.group("title"))
+        normalized_title = title_without_suffix.lower()
+        if any(keyword in normalized_title for keyword in _PRODUCT_TITLE_KEYWORDS):
+            # Product-page SEO titles commonly append the bank brand or a
+            # marketing suffix after a pipe. The product-bearing prefix is the
+            # stable identity; the suffix is not part of the product name.
+            cleaned = title_without_suffix
     cleaned = re.sub(
         r"^(?:accounts?|investments?)\s+(?=.+\b(?:account|gic|certificate|card|mortgage|loan)\b)",
         "",
@@ -2887,14 +2957,116 @@ def _uses_official_ai_grounding(context: ExtractionDocumentContext) -> bool:
     return bool(_official_domain_allowlist(context))
 
 
-def _official_domain_allowlist(context: ExtractionDocumentContext) -> list[str]:
+def _apply_exact_origin_grounding(
+    *,
+    context: ExtractionDocumentContext,
+    extracted_fields: list[ExtractedFieldCandidate],
+) -> tuple[list[ExtractedFieldCandidate], int]:
+    """Ground exact labeled numeric facts from a verified official detail snapshot.
+
+    Provider web citations remain required for AI-proposed facts. This path is
+    intentionally narrower: it only accepts an already captured currency fee
+    whose own label and value were parsed from a high-confidence, identity-
+    matched detail page on an explicitly configured official bank domain.
+    """
+
+    if not _uses_dynamic_product_type(context):
+        return extracted_fields, 0
+    metadata = context.source_metadata
+    if str(metadata.get("discovery_role") or "detail").strip().lower() != "detail":
+        return extracted_fields, 0
+    discovery = metadata.get("discovery_metadata")
+    if not isinstance(discovery, dict) or discovery.get("product_identity_match") is not True:
+        return extracted_fields, 0
+    try:
+        page_evidence_score = float(discovery.get("page_evidence_score") or 0)
+        negative_signal_count = int(discovery.get("negative_signal_count") or 0)
+    except (TypeError, ValueError):
+        return extracted_fields, 0
+    if page_evidence_score < 7 or negative_signal_count != 0:
+        return extracted_fields, 0
+
+    allowed_domains = _configured_official_domain_allowlist(context)
+    origin_url = _canonical_official_source_url(
+        metadata.get("normalized_source_url") or metadata.get("source_url")
+    )
+    if not origin_url or not _url_matches_official_domains(origin_url, allowed_domains=allowed_domains):
+        return extracted_fields, 0
+    expected_fields = {
+        str(field_name).strip()
+        for field_name in metadata.get("expected_fields", [])
+        if str(field_name).strip()
+    }
+    if not expected_fields:
+        return extracted_fields, 0
+
+    source_title = _normalize_text(
+        str(discovery.get("page_title") or discovery.get("primary_heading") or origin_url)
+    )[:300]
+    grounded_fields: list[ExtractedFieldCandidate] = []
+    grounded_count = 0
+    for field in extracted_fields:
+        contract = field_contract(field.field_name)
+        exact_labeled_currency_fee = (
+            field.field_name in expected_fields
+            and contract is not None
+            and contract.value_type == "decimal"
+            and contract.unit == "currency_amount"
+            and field.extraction_method in _EXACT_ORIGIN_GROUNDING_METHODS
+            and field.evidence_chunk_id is not None
+            and bool(_normalize_text(str(field.evidence_text_excerpt or "")))
+        )
+        if not exact_labeled_currency_fee:
+            grounded_fields.append(field)
+            continue
+        evidence_quote = _normalize_text(str(field.evidence_text_excerpt or ""))[:500]
+        grounded_fields.append(
+            replace(
+                field,
+                confidence=max(field.confidence, 0.9),
+                field_metadata={
+                    **field.field_metadata,
+                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_verification_status": "match",
+                    "official_web_sources": [{"url": origin_url, "title": source_title}],
+                    "evidence_quote": evidence_quote,
+                    "rationale": (
+                        "Exact field label and decimal value were captured from the verified "
+                        "identity-matched official detail-page snapshot."
+                    ),
+                    "official_grounding_method": "deterministic_labeled_origin",
+                    "dynamic_product_type": True,
+                },
+            )
+        )
+        grounded_count += 1
+    return grounded_fields, grounded_count
+
+
+def _configured_official_domain_allowlist(context: ExtractionDocumentContext) -> list[str]:
     configured = context.source_metadata.get("official_domain_allowlist")
     values = list(configured) if isinstance(configured, (list, tuple, set)) else []
+    domains: list[str] = []
+    for value in values:
+        raw = str(value or "").strip()
+        if not raw:
+            continue
+        parsed = urlsplit(raw if "://" in raw else f"https://{raw}")
+        host = (parsed.hostname or "").strip(".").lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if host and "." in host and host not in domains:
+            domains.append(host)
+    return domains[:20]
+
+
+def _official_domain_allowlist(context: ExtractionDocumentContext) -> list[str]:
+    domains = _configured_official_domain_allowlist(context)
+    values: list[object] = []
     values.extend(
         str(context.source_metadata.get(key) or "")
         for key in ("normalized_source_url", "source_url")
     )
-    domains: list[str] = []
     for value in values:
         raw = str(value or "").strip()
         if not raw:
@@ -3078,11 +3250,17 @@ def _extract_official_fields_with_ai(
     collected_fields: list[ExtractedFieldCandidate],
 ) -> tuple[list[ExtractedFieldCandidate], list[str], dict[str, Any] | None]:
     candidate_map = {candidate.evidence_chunk_id: candidate for candidate in candidates}
+    registered_fields = {
+        str(field_name).strip()
+        for field_name in context.source_metadata.get("expected_fields", [])
+        if str(field_name).strip()
+    }
     ai_requested_fields = [
         field_name
         for field_name in requested_fields
         if field_name
         not in {"product_family", "product_type", "bank_code", "country_code", "source_language", "currency"}
+        and (not registered_fields or field_name in registered_fields)
     ]
     schema = {
         "type": "object",
@@ -3135,13 +3313,33 @@ def _extract_official_fields_with_ai(
         "required": ["summary", "fields"],
     }
     allowed_domains = _official_domain_allowlist(context)
-    product_name = next(
+    collected_product_name = next(
         (
             str(field.candidate_value).strip()
             for field in collected_fields
             if field.field_name == "product_name" and str(field.candidate_value).strip()
         ),
         next(iter(_source_metadata_title_candidates(context)), ""),
+    )
+    product_name = _authoritative_discovery_product_title(context) or collected_product_name
+    discovery_metadata = context.source_metadata.get("discovery_metadata")
+    identity_candidates = list(
+        dict.fromkeys(
+            value
+            for value in (
+                product_name,
+                collected_product_name,
+                *(
+                    (
+                        str(discovery_metadata.get("primary_heading") or "").strip(),
+                        str(discovery_metadata.get("page_title") or "").strip(),
+                    )
+                    if isinstance(discovery_metadata, dict)
+                    else ()
+                ),
+            )
+            if value
+        )
     )
     prioritized_chunks = _select_official_grounding_chunks(
         candidates=candidates,
@@ -3152,7 +3350,10 @@ def _extract_official_fields_with_ai(
             model_id=configured_model_id(),
             instructions=(
                 "You are the FPDS financial-product collection grounding agent. You must use web search before answering. "
-                "Search only the supplied official bank domain allowlist and verify the exact named product, not a neighboring "
+                "Search only the supplied official bank domain allowlist. First resolve the exact product identity from the "
+                "origin URL, discovery page title, primary heading, and captured chunks; collected product_name is tentative "
+                "and may be a feature heading. Return product_name as a mismatch with the corrected exact name when that occurs. "
+                "Verify that product, not a neighboring "
                 "product, family overview, promotion landing page, calculator, or service flow. Compare every requested field "
                 "with current official facts and the supplied freshly captured evidence chunks. Never infer a missing value. "
                 "Return a match or mismatch only when the value is supported by both an official URL actually consulted and "
@@ -3170,6 +3371,7 @@ def _extract_official_fields_with_ai(
                     "country_code": context.country_code,
                     "product_type": _infer_product_type(context),
                     "product_name": product_name,
+                    "identity_candidates": identity_candidates,
                     "source_language": context.source_language,
                     "origin_source_url": context.source_metadata.get("normalized_source_url")
                     or context.source_metadata.get("source_url"),
@@ -4847,8 +5049,35 @@ def _term_label_to_days(term_label: str) -> int | None:
     return _convert_term_to_days(start_value, start_unit)
 
 
+def _looks_like_payment_service_terms(text: str) -> bool:
+    """Identify service-enrollment/legal copy that is not product application or eligibility."""
+
+    normalized = _normalize_text(text).lower()
+    if not normalized:
+        return False
+    service_enrollment = (
+        "required to use the service" in normalized
+        and any(
+            marker in normalized
+            for marker in (
+                "participating financial institution",
+                "recipient's email address",
+                "recipient’s email address",
+                "payments to recipients",
+            )
+        )
+    )
+    payment_disclaimer = (
+        "payments to recipients" in normalized
+        and "not intended for the purchase of goods" in normalized
+    )
+    return service_enrollment or payment_disclaimer
+
+
 def _extract_application_method(text: str) -> str | None:
     normalized = _normalize_text(text)
+    if _looks_like_payment_service_terms(normalized):
+        return None
     if any(
         marker in normalized.lower()
         for marker in (
@@ -5006,6 +5235,13 @@ def _extract_promotional_period_text(*, context: ExtractionDocumentContext, text
 
 def _extract_deposit_insurance(text: str) -> str | None:
     normalized = _normalize_text(text)
+    lowered_normalized = normalized.lower()
+    if (
+        "not fdic insured" in lowered_normalized
+        and "not a deposit" in lowered_normalized
+        and any(marker in lowered_normalized for marker in ("investment product", "insurance product"))
+    ):
+        return None
     full_name_membership = re.search(
         r"(?P<sentence>[A-Z][A-Za-z0-9&.'’\-]*(?:\s+[A-Z][A-Za-z0-9&.'’\-]*){0,7}\s+"
         r"(?:is|are)\s+(?:a\s+)?members?\s+of\s+(?:the\s+)?Canada\s+Deposit\s+Insurance\s+Corporation"
@@ -5130,8 +5366,21 @@ def _extract_eligibility_text(text: str) -> str | None:
     normalized = _normalize_text(text)
     if not normalized:
         return None
+    if _looks_like_payment_service_terms(normalized):
+        return None
 
     lowered_text = normalized.lower()
+    if "monthly service fee" in lowered_text and (
+        "qualifying linked" in lowered_text
+        or "fee waiver" in lowered_text
+        or "fee will apply" in lowered_text
+        or re.search(r"\botherwise\s+(?:an?\s+)?\$\s*\d", lowered_text)
+    ):
+        # Fee-waiver ownership, balance, and linked-account conditions explain
+        # pricing. They do not establish who may open the current product, and
+        # an adjacent product's fee block must not leak its final sentence into
+        # this candidate's eligibility.
+        return None
     if any(
         marker in lowered_text
         for marker in (
@@ -5244,6 +5493,10 @@ def _extract_eligibility_text(text: str) -> str | None:
             and any(marker in lowered for marker in ("rebate", "discount", "pay as low as", "as low as"))
             and not any(marker in lowered for marker in ("resident", "age of majority", "years or older", "must be"))
         ):
+            continue
+        if re.search(r"\bqualifying\s+linked\b.{0,80}\baccounts?\s+include\b", lowered):
+            # A list of linked accounts that qualifies for a fee waiver is not
+            # the customer eligibility rule for opening the current product.
             continue
         if (
             re.search(r"\b(?:apply|open)\b", lowered)

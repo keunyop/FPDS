@@ -25,7 +25,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-08-01`:
+As of `2026-08-06`:
 - `WBS 5` is the active stage
 - US collection-failure hardening is complete, fully regression tested, and
   verified through audited shared-dev Bank of America recollection after
@@ -55,7 +55,7 @@ As of `2026-08-01`:
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
 - the FPDS Admin accuracy audit has retracted confirmed unsafe legacy/live candidates through audited remediation and added exact percentage evidence, promotion/standard-rate, fee, currency, source-role, and product-boundary guards; its representative recollection checkpoints remain documented in the recent entries
-- Review Detail supports CSRF-protected, role-gated AI verification against country-scoped registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; interactive verification remains advisory, while collection and existing-queue remediation use the Product Owner-approved 80% full-field threshold for system approval
+- Review Detail supports CSRF-protected, role-gated AI verification against country-scoped registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; interactive verification remains advisory, while collection and existing-queue remediation use the Product Owner-approved 80% approval-field threshold over identity plus populated/blocking decision fields
 - configured detail-product collection now uses the same required official-domain live-search discipline across standard and dynamic Product Types, while accepting a field only when a provider-consulted official URL and an exact quote from the fresh evidence chunk both support it
 - latest source/review hardening blocks multi-product family composites, fixes rate-first schedule pairing and `www`/apex redirects, excludes service/advice and cross-product sources, verified named Haventree mortgage discovery, and completed the approved audited retraction of two unsafe historical candidates
 - the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
@@ -91,6 +91,217 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-08-06 - JCBN Interrupted Collection Recovery And Rerun
+
+- WBS: `5.15`, `5.16`, Admin collection operations
+- Status: recovery complete; replacement collection running
+- Goal: recover an orphaned JPMorgan Chase Bank collection and rerun the same
+  six US Product Type scopes without losing run history.
+- Why now: `collection_9QPRjT2ksDHtn9Lo` had one completed Chequing run and
+  five runs left in `started` after its background runner terminated during
+  Credit Card extraction.
+- Outcome: the five nonterminal runs were closed with an explicit
+  `background_runner_terminated` failure record, linked as `retried`, and
+  preserved with their original run IDs. Replacement collection
+  `collection_XbLwUNvRZiBfN1SC` was launched for the same JCBN `chequing`,
+  `credit-card`, `gic`, `line-of-credit`, `mortgage`, and `savings` catalog
+  items. Its background runner progressed the first Chequing scope through 15
+  successful snapshot sources and into `parse_chunk` at handoff.
+- Not done: did not approve or publish any candidate and did not change
+  collection pipeline behavior. The replacement collection was still running
+  at the end of this operational slice.
+- Key files: `docs/00-governance/development-journal.md`, runtime collection
+  plans/logs under `tmp/source-catalog-collections/`
+- Decisions: reran all six originally selected scopes, including the previously
+  completed Chequing scope, while linking only the five interrupted runs to
+  their matching replacement run IDs.
+- Verification:
+  - original collection poll: terminal with `completed=1`, `retried=5`, and no
+    `started` run
+  - replacement collection poll: six new `started` run IDs under
+    `collection_XbLwUNvRZiBfN1SC`
+  - replacement log: source-catalog runner completed Chequing snapshot capture
+    with `15/15` successful sources and launched `fpds_parse_chunk`
+  - process inspection: replacement source-catalog runner remained alive after
+    launch
+- Known issues: a parent background-runner termination is not automatically
+  reconciled on API/runtime restart, so a future recurrence can again leave
+  persisted `started` rows until an operator recovery action is taken.
+- Next step: monitor `collection_XbLwUNvRZiBfN1SC` to terminal state and inspect
+  any failed or partial scope through Admin Runs.
+
+## 2026-08-06 - Goldman Sachs Coverage Repair and Zero-Review Recollection
+
+- WBS: `5.15`, `5.16`, low-touch source coverage, normalization, and automatic
+  approval reliability
+- Status: done in code, shared-dev data, documentation, migration, and running
+  API process
+- Goal: diagnose Goldman Sachs Bank USA runs that all ended Partial and make an
+  ordinary Admin collection complete through audited automatic approval unless
+  current official evidence is genuinely unavailable or ambiguous.
+- RCA: the three catalog rows came from a July 31 v1 bank-onboarding execution
+  with null coverage routes. The registered `goldmansachs.com` homepage is a
+  corporate site, while current US consumer deposits are served by Marcus on
+  `marcus.com`; the old same-domain-only policy made Savings/CD discovery
+  structurally impossible. The onboarding result also retained legacy Personal
+  Loan coverage even though official evidence says the portfolio was sold or
+  wound down. The runner was a fresh subprocess and already loaded current disk
+  code, so the API not being restarted did not cause the observed run failures.
+- Coverage-flow outcome: migration `0031_catalog_coverage_route_evidence.sql`
+  adds private relationship/current-offering evidence metadata. AI onboarding
+  v3 and one-shot no-detail repair may now accept a product-specific official
+  consumer-brand domain only with exact bank-relationship evidence. The same
+  repair deactivates coverage and clean-closes a run only on explicit official
+  sale/transfer/wind-down/discontinuation evidence; absence remains fail-closed.
+  Corporate transaction-banking routes and narrative contamination from a
+  rejected prior route are excluded, and Markdown heading citations are
+  normalized before exact-quote validation.
+- Extraction/routing outcome: a review candidate is superseded when an exact
+  identity in the same run is already approved. Savings normalization now uses
+  the run country's domestic currency for subtype, recognizes ongoing APY
+  product headers separately from referral offers, omits an incremental rate
+  boost when no total promotional APY is stated, and rejects comparison-
+  calculator balances/assumptions as product terms.
+- Controlled shared-dev results:
+  - Personal Loan run
+    `run_20260806_035200_gsbu_personal-loan_collect_5i4KWU1_` completed with
+    `partial=false`, `product_not_currently_offered`, no candidate/review, and
+    inactive catalog coverage backed by official retirement evidence.
+  - CD run `run_20260806_035804_gsbu_gic_collect_f1ChdoZJ` completed with
+    `partial=false`; `High-Yield Certificates of Deposit` passed validation and
+    auto-approved with the official 6-month through 6-year rate table and `$500`
+    minimum deposit. Its catalog route is the verified Marcus CD page.
+  - Savings run `run_20260806_041005_gsbu_savings_collect_uHvIHQ21` completed
+    with `partial=false`; `Online Savings Account` passed and auto-approved as
+    US `standard`, `standard_rate=3.40`, `public_display_rate=3.40`, and
+    `minimum_deposit=0`. The false `$2,500` calculator balance, calculator
+    method, and uncombined referral boost are absent.
+  - Goldman active Review Queue is `0`. Canonical state is one active Savings
+    product and one active CD family; the earlier wrong `foreign_currency`
+    Savings version is superseded rather than duplicated.
+- Restart finding and action: the prior API/uvicorn process had been running
+  since August 2, before this slice. This stale process did not explain the old
+  runner failures, but it did require restart so future Admin launch plans carry
+  `coverage_source_metadata`. Only the verified localhost port-4000 FPDS API
+  process tree was restarted; the replacement listener returned `/healthz = ok`.
+- Key files: source catalog/onboarding/collection runner services and tests,
+  normalization service/tests, migration `0031`, API/Worker/DB runbooks,
+  requirements, source/workflow/field/review design, decision D-031, and R-001.
+- Verification:
+  - migration `0031` applied to shared dev and catalog metadata queried
+  - focused source catalog/runner/onboarding/collection modules: `180/180`
+  - normalization module after Goldman safeguards: `148/148`
+  - full API suite: `356/356`
+  - full Worker suite: `416/416`
+  - controlled DB reconciliation for run, candidate, review, catalog, canonical,
+    and product-version state
+- Known issues: provider search latency can make a single external-source run
+  exceed the helper's first 240-second wait window even while the persisted run
+  is healthy; the second bounded poll observed normal completion. Uncertain or
+  inaccessible official evidence intentionally remains Partial/Review.
+- Next step: monitor later bank expansions for new legal-bank/consumer-brand
+  relationships and add evidence-bound regressions rather than broadening the
+  allowed-domain set globally.
+
+## 2026-08-05 - Citibank Review Queue v2 Remediation and Recollection
+
+- WBS: `5.15`, `5.16`, low-touch collection and audited queue remediation
+- Status: done
+- Authorized operation: the Product Owner approved normal processing of the
+  current Citibank Review Queue. The operation was restricted to US bank code
+  `CN`; the 74 active non-Citibank reviews were unchanged.
+- Policy rollout: migration `0030_collection_approval_field_policy.sql` applied
+  successfully. V1 approval policy rows are inactive and both v2 `80%` policy
+  rows are active.
+- Existing queue remediation: batch `citibank-review-v2-20260805` processed all
+  19 original tasks, applied six cited contract-safe corrections, approved two
+  products, retained 17 below-threshold/hard-blocked tasks, and completed both
+  aggregate requests. Exact batch reconciliation records 19 v2 assessments,
+  two eligible decisions, and `$0.119946` estimated usage.
+- Controlled recollection: collection `collection_xqNNmn5f82L6Eeu6` completed
+  all five authorized scopes. Chequing safely produced no detail candidate;
+  Credit Card captured `27/27` sources, reduced them to 18 candidates, and
+  auto-validated 10; GIC produced one review; Personal Loan reduced 12 sources
+  to two candidates with one auto-validation; Savings produced two reviews.
+  The collection persisted 23 candidates and 12 review tasks in total. Two
+  residual card reviews were approved by collection autopilot.
+- Additional reusable fixes: Review AI may now accept an exact persisted
+  official detail-page H1 as product identity only when discovery recorded an
+  identity match, AI returned `unverified` rather than `mismatch`, and the page
+  is not a checking/savings composite. Stale-review coalescing also accepts an
+  exact normalized source URL only when the new run produced one review
+  candidate for that URL. Dry-run projected four additional safe approvals;
+  the live reassessment approved those same four and completed one US aggregate
+  snapshot. Six older same-URL duplicates were auditably superseded without
+  approving their proposals.
+- Final state: Citibank active Review fell from 19 to 8. The remaining set is
+  one combined chequing boundary, four cards without a separately verified
+  material fact or exact identity evidence, one location/rate-dependent CD,
+  and two savings candidates with unresolved rate or product-boundary facts.
+  Citibank canonical state has 16 active credit cards and two active personal
+  loans. Credit cards remain outside the approved Public projection scope;
+  the approved personal loan is present in snapshot `agg_QU6E1uDNx_66wUkc`.
+- Audit and verification:
+  - migration history and active v2 policy rows verified
+  - 19 original tasks received v2 assessments; no execution errors
+  - four authoritative-identity approvals and six stale-review supersessions
+    have normal review/audit lineage
+  - all six aggregate requests created by the two explicit remediation approval
+    passes completed; collection-time promotions used their normal refresh path
+  - full API suite: `348/348`
+  - focused identity, approval and supersession modules after the final safety
+    change: `38/38`
+- Next step: the remaining eight items need genuinely new official facts or a
+  corrected single-product source. Re-running AI against unchanged evidence is
+  intentionally not treated as progress.
+
+## 2026-08-05 - Citibank Collection Auto-Approval Flow Repair
+
+- WBS: `5.15`, `5.16`, collection quality and low-touch review automation
+- Status: done in code and documentation; production/shared-dev rollout is
+  intentionally pending Product Owner deployment and data-operation approval
+- Goal: make normal operator-triggered collection reach audited automatic
+  approval unless product identity/boundary or a material financial fact is
+  genuinely unsafe.
+- RCA: shared-dev has 19 active Citibank reviews. Seventeen include missing
+  required fields, two deposit pages are true multi-product boundaries, and
+  two personal-loan candidates have cross-field/evidence failures. Dynamic
+  extraction expanded an 11-field credit-card contract to roughly 50 generic
+  fields; lending H1/title terms were not eligible as authoritative product
+  identities, so feature labels could reach official grounding first; and
+  residual Review AI counted optional and operational fields in a typical
+  15-field approval denominator.
+- Outcome: added a shared decision-field policy, scoped dynamic
+  extraction/grounding to the registered contract, made card/loan/mortgage
+  discovery titles eligible as authoritative identity, omitted ungrounded
+  lending attributes, and introduced Review AI v2 with an identity plus
+  populated/blocking decision-field denominator and explicit hard blockers.
+  Migration `0030_collection_approval_field_policy.sql` records the new policy;
+  v1 Review AI executions are not reused after rollout.
+- Key files: `worker/pipeline/fpds_approval_policy.py`, extraction,
+  normalization and validation services, Review AI/autopilot services,
+  regression tests, migration `0030`, and the aligned requirements, design,
+  runbook, decision and risk records.
+- Verification:
+  - full Worker suite: `413/413`
+  - full API suite: `346/346`
+  - explicit API and Worker regressions: `11/11` and `2/2`
+  - final focused normalization suite after grounding-order repair: `145/145`
+  - final `git diff --check`: passed; generated fixture diffs were removed
+  - read-only v2 field-set projection across all 19 Citibank reviews: card
+    approval sets reduced from 15 fields to 2–6 without removing identity or
+    populated material facts
+- Known issues: the current 19 Citibank reviews still reflect the pre-v2
+  contract because migration `0030`, deployment and recollection/remediation
+  were not applied. True combined checking/savings pages, inaccessible CD
+  rates/locations, and absent official product identity remain legitimate
+  human-review cases.
+- Data safety: diagnosis and the v2 projection were read-only. No shared-dev
+  review, canonical, aggregate or Public state was mutated.
+- Next step: after deployment approval, apply migration `0030`, deploy Worker
+  and API together, then run a controlled Citibank recollection or an explicitly
+  authorized v2 remediation of the existing queue.
 
 ## 2026-08-04 - Retried Partial Run Evidence-Scoring Fix
 

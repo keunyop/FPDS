@@ -52,6 +52,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                 "review_task_id": "review-old",
                 "previous_review_state": "queued",
                 "replacement_candidate_id": "cand-new",
+                "supersession_basis": "unique_normalized_source_url",
             }
         ]
         connection = MagicMock()
@@ -71,10 +72,54 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             )
 
         self.assertEqual(count, 1)
+        supersede_sql = connection.execute.call_args_list[0].args[0]
+        self.assertIn("new_source_candidate_count = 1", supersede_sql)
+        self.assertIn("sd.normalized_source_url = newest.normalized_source_url", supersede_sql)
         audit_sql, audit_params = connection.execute.call_args_list[1].args
         self.assertIn("stale_review_auto_superseded", audit_sql)
         self.assertEqual(audit_params["review_task_id"], "review-old")
         self.assertIn('"replacement_candidate_id": "cand-new"', audit_params["event_payload"])
+        self.assertIn(
+            '"supersession_basis": "unique_normalized_source_url"',
+            audit_params["event_payload"],
+        )
+
+    def test_same_run_approved_candidate_supersedes_exact_review_duplicate(self) -> None:
+        stale_cursor = MagicMock()
+        stale_cursor.fetchall.return_value = [
+            {
+                "candidate_id": "cand-review",
+                "previous_candidate_state": "in_review",
+                "review_task_id": "review-duplicate",
+                "previous_review_state": "queued",
+                "replacement_candidate_id": "cand-approved",
+            }
+        ]
+        connection = MagicMock()
+        connection.execute.side_effect = [stale_cursor, MagicMock()]
+        manager = MagicMock()
+        manager.__enter__.return_value = connection
+        manager.__exit__.return_value = False
+
+        with (
+            patch("api_service.source_collection_runner.Settings.from_env", return_value=MagicMock()),
+            patch("api_service.source_collection_runner.open_connection", return_value=manager),
+            patch("api_service.source_collection_runner.new_id", return_value="audit-approved-duplicate"),
+        ):
+            count = source_collection_runner._supersede_reviews_covered_by_approved_candidates_for_run(
+                run_id="run-current",
+                plan={"request_id": "req-current"},
+            )
+
+        self.assertEqual(count, 1)
+        supersede_sql = connection.execute.call_args_list[0].args[0]
+        self.assertIn("nc.run_id = %(run_id)s", supersede_sql)
+        self.assertIn("nc.subtype_code = approved.subtype_code", supersede_sql)
+        self.assertIn("lower(nc.product_name) = approved.normalized_product_name", supersede_sql)
+        audit_sql, audit_params = connection.execute.call_args_list[1].args
+        self.assertIn("approved_duplicate_review_auto_superseded", audit_sql)
+        self.assertEqual(audit_params["review_task_id"], "review-duplicate")
+        self.assertIn('"replacement_candidate_id": "cand-approved"', audit_params["event_payload"])
 
     def _workspace_temp_path(self, name: str) -> Path:
         path = Path.cwd() / "tmp" / "test-source-collection-runner" / name
@@ -176,6 +221,10 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary") as persist_summary,
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
+            patch(
+                "api_service.source_collection_runner._supersede_reviews_covered_by_approved_candidates_for_run",
+                return_value=0,
+            ),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
             patch(
                 "api_service.source_collection_runner._run_collection_review_ai_autopilot_for_run",
@@ -305,6 +354,10 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary"),
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
+            patch(
+                "api_service.source_collection_runner._supersede_reviews_covered_by_approved_candidates_for_run",
+                return_value=0,
+            ),
             patch("api_service.source_collection_runner._promote_auto_validated_candidates_for_run", return_value={"promoted_count": 0}),
             patch(
                 "api_service.source_collection_runner._run_collection_review_ai_autopilot_for_run",

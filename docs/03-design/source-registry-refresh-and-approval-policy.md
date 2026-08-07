@@ -168,10 +168,15 @@ Current AI bank-onboarding note:
 - existing identities and homepage domains are excluded again on the server;
   the requested set is rejected unless every bank remains fully valid
 - coverage is created only for active Product Type registry codes supported by
-  a current page on the bank's official domain
-- each AI-created coverage row preserves that verified same-domain page as
-  private `coverage_source_url` evidence; collection starts there before
-  bounded homepage fallback and never accepts a cross-domain route
+  a current official retail page. The page may be on a separate consumer-brand
+  domain only when a consulted page on the bank or brand domain contains an
+  exact quote proving the brand/product relationship to the registered bank
+- each AI-created coverage row preserves the verified page as private
+  `coverage_source_url` evidence and stores bounded verification metadata,
+  including the product-specific domain, current-offering quote, relationship
+  quote, consulted sources, and model lineage. Collection starts there before
+  bounded homepage fallback; the additional domain is not shared with other
+  banks or Product Types
 - a directly verified same-domain logo is preferred; the homepage-domain
   favicon is the only automatic fallback
 - all bank and coverage writes are atomic and usage/audit records remain
@@ -195,8 +200,10 @@ Current live product-type onboarding note:
   Product Type codes. In the US, canonical `chequing` is discovered as
   checking, canonical `gic` as certificates of deposit/CDs, and canonical
   `personal-loan` may use auto/student/installment-loan identity terms. Local
-  identity nouns are merged narrowly; attribute-only terms do not establish a
-  different product identity.
+  identity nouns are merged narrowly; they also prevent an explicit HELOC or
+  certificate-of-deposit route from being rejected solely because its parent
+  path contains a sibling family word such as `mortgage` or `savings`.
+  Attribute-only terms do not establish a different product identity.
 - Dynamic component catalogs may expose official links and product copy only
   inside JSON-valued `data-*` attributes. Discovery and parsing may read those
   values only with fixed size/node/count limits and the normal same-domain,
@@ -207,11 +214,13 @@ Current live product-type onboarding note:
 - Operator-managed product types without specialized parser support, including
   the current lending baseline, continue through generic AI
   extraction/normalization. They may use normal policy auto-approval only when
-  the persisted official-grounding assessment verifies product identity, at
-  least two decision fields, and at least `80%` of assessed decision fields;
-  otherwise they remain in Review. Approved `mortgage`, `personal-loan`, and
-  `line-of-credit` products are included in the Public aggregate snapshot;
-  unapproved candidates remain non-public.
+  the persisted official-grounding assessment verifies product identity plus
+  one product-defining fact (two fields total) and at least `80%` of populated
+  decision fields. Empty optional fields are omissions and ungrounded lending
+  attributes are suppressed; otherwise the candidate remains in Review.
+  Approved `mortgage`, `personal-loan`, and `line-of-credit` products are
+  included in the Public aggregate snapshot; unapproved candidates remain
+  non-public.
 - Source collection plans and extraction artifacts must carry `product_family` from the product type registry so lending candidates are not normalized as deposits.
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
@@ -234,8 +243,14 @@ For this policy, `collect` means:
 8. promote policy-clear `auto_validated` candidates through the audited canonical upsert path
 9. when enabled, AI-verify and safely correct a bounded set of active detail
    review tasks left by this run
-10. system-approve only candidates meeting the full-field threshold and queue
-    the normal country aggregate refresh; retain every other candidate in Review
+10. system-approve only candidates meeting the approval-field threshold with
+    no hard boundary/taxonomy/partial-source blocker, and queue the normal
+    country aggregate refresh; retain every other candidate in Review
+11. when no eligible detail source remains, perform one bounded current-coverage
+    repair. A verified current route is persisted and discovery is retried once;
+    explicit official retirement evidence deactivates that catalog coverage and
+    closes the run as `product_not_currently_offered` without Partial; an
+    uncertain result remains a no-detail Partial
 
 Configured collection extraction performs a bounded current-official-source
 grounding pass for each candidate-producing detail source before normalization.
@@ -243,10 +258,25 @@ The registry supplies the canonical official-domain allowlist and normalized
 origin URL. Values remain eligible only when a consulted allowlisted URL and
 an exact quote from the fresh captured chunk agree; provider failure falls back
 to deterministic extraction and does not weaken review or publication gates.
+An exact labeled currency fee on an identity-matched, high-confidence official
+`detail` snapshot may be grounded deterministically under the narrower field
+contract rule; it still requires an explicitly configured official domain,
+co-located label/value evidence, and all normal validation and publication
+gates. When several fees share a chunk, the nearest label/value pair wins and
+authorized-user, additional-card, supplementary-card, and employee-card fees
+are excluded from the base product fee. Editorial paths, including singular
+`/article/` routes, remain outside
+candidate-producing scope even when their copy discusses the requested product.
 For dynamic/lending candidates, this grounding also produces a persisted
 decision-field eligibility assessment. A passing assessment removes the old
 blanket manual-review rule but does not remove any validator, force-review,
 source-role, product-boundary, canonical, audit, or aggregate-refresh guard.
+Residual Review AI uses only identity plus populated or blocking decision
+fields as its denominator. It does not penalize absent optional fields or reuse
+the superseded full-request-set assessment contract. If Review AI abstains on
+an unchanged fee already carrying the narrow exact-origin contract, the
+assessment may reuse that persisted evidence after the registered-domain check;
+an explicit mismatch remains fail-closed.
 
 Important rules:
 - the run must persist which source rows were selected so the collection scope is reproducible later
@@ -260,6 +290,12 @@ Important rules:
 - only `detail` sources create primary standalone candidates; supporting and linked sources remain evidence-only even when selected or auto-included
 - AI-classified `supporting_html` pages should be retained when they provide product-matched rate/fee/term evidence, and normalization may merge their grounded fields into the related detail candidate
 - retail collection scope must reject clearly business/commercial/corporate product pages before they become generated detail sources
+- cross-domain collection is allowed only for the single verified catalog
+  coverage domain carried with its relationship evidence; ordinary discovered
+  links remain bounded to the registered bank homepage domain
+- route validation uses only the proposed URL and current-offering quote for
+  Product Type scope. Explanatory model prose about a rejected prior route must
+  not taint the replacement route
 - seed-backed detail hints with low page evidence remain eligible only when page validation has no negative signal; low-evidence pages with negative signals should not become candidate-producing detail sources and should rely on later rerun/source correction instead
 - a source-catalog bulk collect should enqueue the selected bank/product groups as one collection plan and process those groups sequentially inside one background runner process; the deeper source-collection stages still apply per-stage timeouts, but the plan-level runner should avoid launching one DB-connected process per group and exhausting the session pool
 - snapshot checksum reuse is scoped to the same source document. Different URLs that return the same WAF, consent, or error body remain independently attributable and cannot borrow one another's successful snapshot identity
@@ -364,3 +400,4 @@ The following are intentionally out of scope for the first source-registry admin
 | 2026-07-22 | Made detail expected fields additive over the active Product Type contract and extended dynamic-rate recovery to double-bracket rate/APR placeholders |
 | 2026-07-30 | Added the official-evidence, duplicate, logo-fallback, active-coverage, and atomicity rules for AI bank onboarding |
 | 2026-07-30 | Separated customer-facing bank display names from legal entity names and exact ranking labels; rejected fixed-width US regulatory abbreviations as registry display names |
+| 2026-08-06 | Excluded singular editorial article routes, preserved explicit local Product Type identity across sibling route vocabulary, and allowed narrowly bounded exact-origin grounding for labeled currency fees |

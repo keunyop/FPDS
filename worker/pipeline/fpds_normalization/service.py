@@ -14,6 +14,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
 from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import (
     canonical_value_type,
@@ -524,7 +525,6 @@ def _normalize_candidate(
             field_mapping_metadata=field_mapping_metadata,
             runtime_notes=runtime_notes,
         )
-
         # Numeric fields on operator-defined product types require exact
         # unit-bearing evidence whether introduced by extraction or the AI
         # mapping pass.
@@ -664,6 +664,14 @@ def _normalize_candidate(
         evidence_links_for_output=evidence_links_for_output,
         runtime_notes=runtime_notes,
     )
+    _suppress_uncombined_savings_rate_boost(
+        product_type_family=product_type_family,
+        candidate_payload=candidate_payload,
+        field_mapping_metadata=field_mapping_metadata,
+        normalized_values_for_links=normalized_values_for_links,
+        evidence_links_for_output=evidence_links_for_output,
+        runtime_notes=runtime_notes,
+    )
     _align_ongoing_additive_bonus_total(
         product_type_family=product_type_family,
         candidate_payload=candidate_payload,
@@ -706,6 +714,7 @@ def _normalize_candidate(
 
     subtype_code, source_subtype_label = _infer_subtype_code(
         product_type=product_type_family,
+        country_code=country_code,
         currency=currency,
         candidate_payload=candidate_payload,
     )
@@ -743,6 +752,13 @@ def _normalize_candidate(
         candidate_payload=candidate_payload,
         field_mapping_metadata=field_mapping_metadata,
     )
+    if dynamic_product_type and product_type_family not in {"chequing", "savings", "gic"}:
+        _suppress_unverified_dynamic_fields(
+            candidate_payload=candidate_payload,
+            normalized_values_for_links=normalized_values_for_links,
+            field_mapping_metadata=field_mapping_metadata,
+            runtime_notes=runtime_notes,
+        )
 
     validation_issue_codes = _compute_validation_issue_codes(
         product_type=product_type,
@@ -949,20 +965,23 @@ def _compute_validation_issue_codes(
         if candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
             issues.append("inconsistent_cross_field_logic")
     if dynamic_product_type:
-        non_core_fields = [
+        populated_decision_fields = populated_dynamic_decision_fields(
+            product_type=product_type,
+            expected_fields=expected_fields or [],
+            candidate_payload=candidate_payload,
+        )
+        contractless_meaningful_values = [
             value
             for field_name, value in candidate_payload.items()
             if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label", "subtype_code"}
         ]
-        if not any(_has_meaningful_value(value) for value in non_core_fields):
+        if not populated_decision_fields and (
+            bool(expected_fields)
+            or not any(_has_meaningful_value(value) for value in contractless_meaningful_values)
+        ):
             issues.append("required_field_missing")
         if subtype_code in {None, ""}:
             issues.append("ambiguous_mapping")
-        if any(
-            candidate_payload.get(field_name) in {None, ""}
-            for field_name in _dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields or [])
-        ):
-            issues.append("required_field_missing")
 
     conflicting_fields = defaultdict(set)
     for link in evidence_links:
@@ -1007,17 +1026,6 @@ def _has_gic_term_evidence(candidate_payload: dict[str, object]) -> bool:
         )
         for row in rows
     )
-
-
-def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
-    normalized_type = str(product_type or "").strip().lower()
-    priority = {
-        "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
-        "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
-        "personal-loan": {"product_name", "interest_rate", "loan_amount_text", "term_length_text"},
-        "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
-    }.get(normalized_type, {"product_name"})
-    return [field_name for field_name in expected_fields if field_name in priority]
 
 
 def _apply_rate_evidence_fallback(
@@ -1108,8 +1116,8 @@ def _align_savings_labeled_header_standard_rate(
         return
     pattern = re.compile(
         r"(?<![\d.])(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%\s*"
-        r"(?:[^a-z0-9]{0,18})\s*interest\s+rate\b[\s\S]{0,100}?"
-        r"(?:monthly\s+(?:account\s+)?fee|minimum\s+balance)",
+        r"(?:[^a-z0-9]{0,18})\s*(?:interest\s+rate|annual\s+percentage\s+yield|apy)\b[\s\S]{0,100}?"
+        r"(?:monthly\s+(?:account\s+)?fee|minimum\s+balance|no\s+fees?|no\s+minimum\s+deposit)",
         flags=re.IGNORECASE,
     )
     ranked: list[tuple[float, int, NormalizationEvidenceLink, Decimal]] = []
@@ -1319,6 +1327,58 @@ def _align_advertised_promotional_total(
 
     runtime_notes.append(
         f"Aligned the advertised promotional total and public display rate to `{float(total_rate)}`."
+    )
+
+
+def _suppress_uncombined_savings_rate_boost(
+    *,
+    product_type_family: str | None,
+    candidate_payload: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    evidence_links_for_output: list[NormalizationEvidenceLink],
+    runtime_notes: list[str],
+) -> None:
+    """Do not publish an incremental APY boost as the total promotional APY."""
+
+    if product_type_family != "savings" or _as_decimal(candidate_payload.get("promotional_rate")) is None:
+        return
+    mapping = dict(field_mapping_metadata.get("promotional_rate") or {})
+    if mapping.get("normalization_method") in {
+        "advertised_promotional_total_alignment",
+        "advertised_promotional_component_alignment",
+    }:
+        return
+    contexts = [
+        _normalize_text(link.evidence_text_excerpt)
+        for link in evidence_links_for_output
+        if _normalize_text(link.evidence_text_excerpt)
+    ]
+    if not any(re.search(r"\b\d{1,2}(?:\.\d{1,4})?\s*%\s*(?:apy\s+)?rate\s+boost\b", text, re.IGNORECASE) for text in contexts):
+        return
+    promotional_rate = _as_decimal(candidate_payload.get("promotional_rate"))
+    if any(advertised_promotional_total_rate(text) == promotional_rate for text in contexts):
+        return
+
+    for field_name in ("promotional_rate", "promotional_period_text", "introductory_rate_flag"):
+        candidate_payload.pop(field_name, None)
+        normalized_values_for_links.pop(field_name, None)
+        field_mapping = dict(field_mapping_metadata.get(field_name) or {})
+        field_mapping.update(
+            {
+                "normalized_value": None,
+                "normalization_method": "incremental_rate_boost_safety",
+                "suppressed_reason": "incremental_rate_boost_not_total_apy",
+            }
+        )
+        field_mapping_metadata[field_name] = field_mapping
+    evidence_links_for_output[:] = [
+        link
+        for link in evidence_links_for_output
+        if link.field_name not in {"promotional_rate", "promotional_period_text", "introductory_rate_flag"}
+    ]
+    runtime_notes.append(
+        "Omitted an incremental APY rate boost because the official page did not state the resulting total promotional APY."
     )
 
 
@@ -2747,6 +2807,50 @@ def _enforce_dynamic_field_contract(
         )
 
 
+def _suppress_unverified_dynamic_fields(
+    *,
+    candidate_payload: dict[str, object],
+    normalized_values_for_links: dict[str, object],
+    field_mapping_metadata: dict[str, object],
+    runtime_notes: list[str],
+) -> None:
+    """Omit ungrounded dynamic attributes instead of publishing noisy guesses."""
+
+    suppressed_fields: list[str] = []
+    for field_name in list(candidate_payload):
+        if field_name in _DYNAMIC_OPERATIONAL_FIELDS:
+            continue
+        metadata = field_mapping_metadata.get(field_name)
+        mapping = metadata if isinstance(metadata, dict) else {}
+        sources = mapping.get("official_web_sources")
+        officially_grounded = (
+            mapping.get("official_grounding_contract_version") == "collection-official-grounding-v1"
+            and str(mapping.get("official_verification_status") or "") in {"match", "mismatch"}
+            and bool(str(mapping.get("official_evidence_quote") or "").strip())
+            and isinstance(sources, list)
+            and any(isinstance(source, dict) and str(source.get("url") or "").strip() for source in sources)
+        )
+        if officially_grounded:
+            continue
+        candidate_payload.pop(field_name, None)
+        normalized_values_for_links.pop(field_name, None)
+        mapping.update(
+            {
+                "normalized_value": None,
+                "normalization_method": "dynamic_official_grounding_filter",
+                "suppressed_reason": "official_grounding_missing",
+            }
+        )
+        field_mapping_metadata[field_name] = mapping
+        suppressed_fields.append(field_name)
+    if suppressed_fields:
+        runtime_notes.append(
+            "Omitted unverified dynamic-product fields pending official grounding: "
+            + ", ".join(sorted(suppressed_fields))
+            + "."
+        )
+
+
 def _clean_product_context_fields(
     *,
     product_type_family: str | None,
@@ -2818,6 +2922,10 @@ def _clean_product_context_fields(
             value=value,
             context=evidence_context,
         ) or _money_value_is_non_fee_context(
+            field_name=field_name,
+            value=value,
+            context=evidence_context,
+        ) or _field_is_comparison_calculator_copy(
             field_name=field_name,
             value=value,
             context=evidence_context,
@@ -3197,7 +3305,8 @@ def _standard_rate_evidence_is_promotional(*, field_name: str, value: object, co
         value_pattern = re.escape(f"{numeric_value.normalize():f}")
         if re.search(
             rf"(?<![\d.]){value_pattern}0*\s*%\s*(?:[†‡*^◊ⓘ]|\[[^\]]{{0,30}}\])*\s*"
-            r"interest rate[\s\S]{0,100}?(?:monthly fee|minimum balance)",
+            r"(?:interest rate|annual percentage yield|apy)[\s\S]{0,100}?"
+            r"(?:monthly fee|minimum balance|no fees?|no minimum deposit)",
             lowered,
             flags=re.IGNORECASE,
         ):
@@ -3804,6 +3913,36 @@ def _money_value_is_non_fee_context(*, field_name: str, value: object, context: 
                 "spend $",
             )
         ):
+            return True
+    return False
+
+
+def _field_is_comparison_calculator_copy(*, field_name: str, value: object, context: str) -> bool:
+    if field_name not in {"minimum_balance", "interest_calculation_method"}:
+        return False
+    normalized = _normalize_text(context).lower()
+    if not normalized:
+        return False
+    comparison_markers = (
+        "choose up to 4 banks to compare",
+        "this calculator is for illustrative purposes only",
+        "rates of the selected banks",
+        "similar products at the select banks",
+        "national average is based on",
+    )
+    if not any(marker in normalized for marker in comparison_markers):
+        return False
+    if field_name == "interest_calculation_method":
+        return True
+    expected = _as_decimal(value)
+    if expected is None:
+        return False
+    for match in re.finditer(
+        r"minimum balance of(?: at least)?\s*\$\s*(?P<amount>\d[\d,]*(?:\.\d{1,2})?)",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        if _as_decimal(match.group("amount").replace(",", "")) == expected:
             return True
     return False
 
@@ -4736,6 +4875,7 @@ def _normalize_dynamic_fields_with_ai(
 def _infer_subtype_code(
     *,
     product_type: str | None,
+    country_code: str | None,
     currency: str | None,
     candidate_payload: dict[str, object],
 ) -> tuple[str | None, str | None]:
@@ -4765,7 +4905,8 @@ def _infer_subtype_code(
         )
     ).lower()
     if product_type == "savings":
-        if currency and currency != "CAD":
+        domestic_currency = default_currency_for_country(country_code)
+        if currency and domestic_currency and currency != domestic_currency:
             return "foreign_currency", None
         if any(token in text for token in ("premium", "high interest", "hisa")):
             return "high_interest", None
@@ -5160,6 +5301,7 @@ def _official_grounding_mapping_metadata(field: NormalizationExtractedField) -> 
         return {}
     return {
         "official_grounding_contract_version": "collection-official-grounding-v1",
+        "official_grounding_method": metadata.get("official_grounding_method"),
         "official_verification_status": metadata.get("official_verification_status"),
         "official_web_sources": list(metadata.get("official_web_sources") or []),
         "official_evidence_quote": metadata.get("evidence_quote"),

@@ -555,9 +555,10 @@ Current boundary:
   extraction, validation, and bounded review remediation;
 - dynamic and lending candidates are no longer manual-review-only: they may use
   the normal audited auto-approval path only when official AI grounding verifies
-  product identity, at least two decision fields, and at least `80%` of assessed
-  decision fields, with every existing validation and force-review gate still
-  passing;
+  product identity plus at least one product-defining fact (two verified fields
+  total), and at least `80%` of populated decision fields, with every existing
+  validation and force-review gate still passing. Empty optional fields are
+  omissions, and ungrounded lending values are removed rather than published;
 - Product Owner approval on `2026-07-14` widened the Public Product Grid to
   approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products.
   Approval may now be human or policy-qualified system approval; unapproved
@@ -601,6 +602,10 @@ Minimum behavior:
 - every bank requires an official homepage and current official evidence for
   at least one coverage item selected only from active Product Type registry
   rows
+- a coverage page may use a separate official consumer-brand domain only when
+  an exact consulted quote on the bank or brand domain proves that the brand or
+  product is provided by the registered bank; that evidence is private and
+  scoped to the one bank/Product Type coverage row
 - a verified same-domain logo is retained when available; otherwise the
   official-domain favicon is the controlled resilience fallback
 - all requested banks and their grounded coverage rows are created atomically;
@@ -711,7 +716,9 @@ When an external AI provider is configured, candidate-producing detail-source
 collection must apply a current official-domain grounding pass to standard and
 operator-defined Product Types, not only to dynamic fallback types.
 
-- live search is restricted to the selected bank registry's official domains;
+- live search is restricted to the selected bank registry's official homepage
+  domain plus any product-specific consumer-brand domain whose relationship is
+  already verified and persisted on the selected catalog coverage;
 - the complete active Product Type field contract and exact product identity
   are supplied;
 - an AI value is accepted only with both a provider-consulted allowlisted URL
@@ -722,10 +729,16 @@ operator-defined Product Types, not only to dynamic fallback types.
   results keep the deterministic value or omission and continue through normal
   validation and, when necessary, human review;
 - grounding may remove blanket manual review only when the persisted assessment
-  verifies product identity, at least two decision fields, and the configured
-  assessed-field ratio; it never bypasses validation errors, force-review
-  issues, canonical type/range checks, product-boundary guards, or the audited
-  canonical/aggregate path.
+  verifies product identity plus one product-defining fact (two fields total)
+  and the configured populated decision-field ratio; it never bypasses
+  validation errors, force-review issues, canonical type/range checks,
+  product-boundary guards, or the audited canonical/aggregate path.
+- when collection has no eligible detail source, it must make at most one
+  bounded coverage-repair attempt. A verified current route is persisted and
+  retried in the same run. Explicit official evidence that the product was sold,
+  transferred, wound down, or discontinued deactivates stale coverage and
+  completes cleanly as `product_not_currently_offered`; mere absence or an
+  uncertain answer remains reviewable/Partial and must not be treated as proof.
 
 ### FR-AI-009 Collection and Existing Review Queue AI Correction and Threshold Approval
 
@@ -736,18 +749,31 @@ enabled. The same workflow may be run explicitly against an existing queue.
 
 - only sanitized, cited `mismatch` values may update the candidate; canonical
   type/range checks remain mandatory;
-- the verification pass-rate denominator is every requested field, including
-  omitted or `unverified` fields;
+- the verification pass-rate denominator is the v2 approval-field set:
+  `product_name`, populated material fields, and missing/suspect fields that
+  currently block approval; empty optional and operational fields are excluded;
 - a passed field is an official-source `match` or a contract-safe mismatch that
-  was successfully applied;
+  was successfully applied. `product_name` may also pass when the persisted
+  source is a detail page, discovery recorded `product_identity_match=true`,
+  and the candidate name exactly matches the page H1 after punctuation/symbol
+  normalization. This fallback applies only to AI `unverified`, never
+  `mismatch`, and excludes cross-product checking/savings identities;
 - automatic approval requires pass rate `>= 80%`, verified `product_name`, at
-  least one official source, and no unapplied safe correction;
-- lower-scoring, failed, ambiguous, or identity-unverified candidates remain in
-  Review for an operator decision;
-- completed attempts and threshold assessments are reused after runner restart,
-  and a configured per-run candidate limit bounds cost and blast radius;
+  least one official source, no unapplied safe correction, and no unresolved
+  ambiguous product boundary, invalid taxonomy, or partial source failure;
+- lower-scoring, failed, hard-blocked, or identity-unverified candidates remain
+  in Review for an operator decision;
+- only completed attempts under the current approval contract are reused after
+  runner restart, and a configured per-run candidate limit bounds cost and
+  blast radius;
 - every verification, correction, threshold assessment, approval, usage record,
   and aggregate refresh must retain append-only audit/correlation lineage.
+- a rerun must leave at most one active review for an exact logical name. It may
+  also supersede an older same-URL review when the new run produced exactly one
+  active review candidate for that URL; multi-candidate pages are excluded.
+- when the same run already approved an exact bank/family/type/subtype/name
+  identity, another candidate for that identity is superseded and its review is
+  rejected as covered rather than asking the operator to approve it twice.
 
 ---
 

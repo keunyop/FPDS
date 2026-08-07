@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from worker.pipeline.fpds_approval_policy import dynamic_repair_fields
+
 
 def build_review_diagnosis(
     *,
@@ -253,18 +255,20 @@ def _priority_expected_fields(
                 ("standard_rate", "base_12_month_rate", "public_display_rate", "highest_rate", "promotional_rate")
             )
         return missing
-    type_priority = {
-        "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
-        "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
-        "personal-loan": {"product_name", "interest_rate", "loan_amount_text", "term_length_text"},
-        "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
-    }.get(normalized_type)
-    if type_priority is not None:
-        return [
+    if normalized_type in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
+        missing_fields: list[str] = []
+        add_if_missing("product_name")
+        missing_fields.extend(missing)
+        missing_fields.extend(
             field_name
-            for field_name in expected_fields
-            if field_name in type_priority and is_empty_review_value(payload.get(field_name))
-        ]
+            for field_name in dynamic_repair_fields(
+                product_type=product_type,
+                expected_fields=expected_fields,
+                candidate_payload=payload,
+            )
+            if is_empty_review_value(payload.get(field_name))
+        )
+        return list(dict.fromkeys(missing_fields))
     return [field_name for field_name in expected_fields if field_name not in optional_fields]
 
 

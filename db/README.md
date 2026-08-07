@@ -49,6 +49,12 @@ Files:
 - `migrations/0029_collection_ai_autopilot_policy.sql`: enables bounded
   collection-time AI review remediation and the official-grounding thresholds
   that allow dynamic/lending candidates to use normal policy auto-approval
+- `migrations/0030_collection_approval_field_policy.sql`: replaces the
+  all-requested-field approval denominator with identity plus populated or
+  blocking decision fields; empty optional fields are explicit omissions
+- `migrations/0031_catalog_coverage_route_evidence.sql`: adds private structured
+  evidence for verified product-specific consumer-brand coverage domains and
+  explicit not-currently-offered catalog outcomes
 
 How to apply when a database is available:
 
@@ -77,6 +83,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sq
 psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
 ```
 
 Notes:
@@ -101,3 +109,7 @@ Notes:
   80% official-grounding thresholds, and per-run cost bound. Code defaults to
   the same enabled policy so deployment does not silently revert to blanket
   manual review if the migration and runtime roll out together.
+- Apply `0030` to keep the 80% safety threshold while changing its denominator
+  to approval-relevant fields. Identity and an official source remain
+  mandatory, and ambiguous product boundaries, partial source failures, and
+  invalid taxonomy remain hard blockers.

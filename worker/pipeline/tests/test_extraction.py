@@ -14,6 +14,7 @@ from worker.pipeline.fpds_extraction.persistence import ExtractionDatabaseConfig
 from worker.pipeline.fpds_extraction.service import (
     _DEFAULT_EXTRACTABLE_FIELDS,
     ExtractionService,
+    _apply_exact_origin_grounding,
     _ai_candidate_value_is_contract_safe,
     _append_included_transactions_fallback,
     _append_fee_waiver_fallback,
@@ -36,6 +37,7 @@ from worker.pipeline.fpds_extraction.service import (
     _extract_interest_calculation_method,
     _extract_interest_rate_summary,
     _extract_included_transactions,
+    _extract_labeled_extension_fee,
     _extract_notes_text,
     _extract_promotional_period_text,
     _extract_tax_benefits,
@@ -95,6 +97,86 @@ class ExtractionServiceTests(unittest.TestCase):
             allowed_domains=["bank.example"],
         )
         self.assertEqual(validated, provider_sources)
+
+    def test_exact_labeled_dynamic_fact_is_grounded_from_verified_official_origin(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-CARD-001",
+            parsed_document_id="parsed-card-001",
+            source_document_id="src-card-001",
+            snapshot_id="snap-card-001",
+            bank_code="BANK",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["product_name", "annual_fee"],
+                "normalized_source_url": "https://cards.bank.example/products/cash-back",
+                "official_domain_allowlist": ["bank.example"],
+                "discovery_metadata": {
+                    "page_title": "Cash Back Credit Card | Example Bank",
+                    "primary_heading": "Cash Back Credit Card",
+                    "product_identity_match": True,
+                    "page_evidence_score": 10,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        annual_fee = ExtractedFieldCandidate(
+            field_name="annual_fee",
+            candidate_value="0.00",
+            value_type="decimal",
+            confidence=0.64,
+            extraction_method="heuristic_labeled_fee",
+            source_document_id="src-card-001",
+            source_snapshot_id="snap-card-001",
+            evidence_chunk_id="chunk-card-fee",
+            evidence_text_excerpt="ANNUAL FEE $0",
+            anchor_type="section",
+            anchor_value="annual-fee",
+            page_no=None,
+            chunk_index=7,
+            field_metadata={},
+        )
+
+        grounded, count = _apply_exact_origin_grounding(
+            context=context,
+            extracted_fields=[annual_fee],
+        )
+
+        self.assertEqual(count, 1)
+        self.assertEqual(grounded[0].confidence, 0.9)
+        self.assertEqual(
+            grounded[0].field_metadata["official_grounding_method"],
+            "deterministic_labeled_origin",
+        )
+        self.assertEqual(
+            grounded[0].field_metadata["official_web_sources"],
+            [
+                {
+                    "url": "https://cards.bank.example/products/cash-back",
+                    "title": "Cash Back Credit Card | Example Bank",
+                }
+            ],
+        )
+
+        untrusted_context = ExtractionDocumentContext(
+            **{
+                **context.__dict__,
+                "source_metadata": {
+                    **context.source_metadata,
+                    "official_domain_allowlist": ["different.example"],
+                },
+            }
+        )
+        ungrounded, ungrounded_count = _apply_exact_origin_grounding(
+            context=untrusted_context,
+            extracted_fields=[annual_fee],
+        )
+        self.assertEqual(ungrounded_count, 0)
+        self.assertNotIn("official_grounding_contract_version", ungrounded[0].field_metadata)
 
     def test_promotional_period_fallback_recovers_duration_from_any_product_chunk(self) -> None:
         context = ExtractionDocumentContext(
@@ -786,6 +868,56 @@ class ExtractionServiceTests(unittest.TestCase):
         ]
         self.assertEqual(_extract_document_title(context=context, candidates=candidates), "U.S. Dollar Savings Account")
 
+    def test_lending_discovery_identity_beats_feature_heading(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-CN-CRE-001",
+            parsed_document_id="parsed-citi-strata",
+            source_document_id="src-citi-strata",
+            snapshot_id="snap-citi-strata",
+            bank_code="CN",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_type_dynamic": True,
+                "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"],
+                "discovery_metadata": {
+                    "primary_heading": "Citi Strata ℠ Card",
+                    "page_title": "Citi Strata℠ Card | Citi.com",
+                    "ai_predicted_role": "detail",
+                    "ai_confidence_band": "high",
+                    "ai_parallel_score": 10,
+                },
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-citi-feature",
+            parsed_document_id=context.parsed_document_id,
+            chunk_index=0,
+            anchor_type="section",
+            anchor_value="alerts",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt="Automatic account alerts\nStay updated on your balance and payments.",
+            retrieval_metadata={},
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            bank_code="CN",
+            country_code="US",
+            source_type="html",
+        )
+
+        self.assertEqual(_extract_document_title(context=context, candidates=[candidate]), "Citi Strata ℠ Card")
+        self.assertEqual(
+            _resolve_field_names(
+                context=context,
+                override_field_names=None,
+                default_fields=_DEFAULT_EXTRACTABLE_FIELDS,
+            ),
+            ["product_name", "annual_fee", "purchase_interest_rate"],
+        )
+
     def test_high_confidence_detail_h1_beats_audience_seo_title(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-CHQ-YOUTH",
@@ -1014,6 +1146,53 @@ class ExtractionServiceTests(unittest.TestCase):
         )
 
         self.assertIsNone(application_method)
+
+    def test_payment_service_terms_are_not_product_application_or_eligibility(self) -> None:
+        service_terms = (
+            "Enrollment at a participating financial institution using an eligible checking account "
+            "is required to use the service. Enroll in the mobile app. Payments to recipients you know "
+            "are not intended for the purchase of goods."
+        )
+
+        self.assertIsNone(_extract_application_method(service_terms))
+        self.assertIsNone(_extract_eligibility_text(service_terms))
+
+    def test_linked_account_fee_waiver_list_is_not_product_eligibility(self) -> None:
+        self.assertIsNone(
+            _extract_eligibility_text(
+                "Qualifying linked checking accounts include premium and private-client accounts."
+            )
+        )
+        self.assertIsNone(
+            _extract_eligibility_text(
+                "Savings Account: $0 Monthly Service Fee when you link a qualifying checking account. "
+                "Otherwise a $5 Monthly Service Fee will apply. Qualifying linked checking accounts "
+                "include premium accounts. For personal accounts, there must be a common owner."
+            )
+        )
+
+    def test_annual_fee_prefers_nearest_label_and_excludes_authorized_user_fee(self) -> None:
+        self.assertEqual(
+            _extract_labeled_extension_fee(
+                field_name="annual_fee",
+                text="$795 annual fee; $195 for each authorized user.",
+            ),
+            "795.00",
+        )
+        self.assertIsNone(
+            _extract_labeled_extension_fee(
+                field_name="annual_fee",
+                text="Annual fee $195 for each authorized user.",
+            )
+        )
+
+    def test_investment_risk_disclaimer_is_not_deposit_insurance(self) -> None:
+        self.assertIsNone(
+            _extract_deposit_insurance(
+                "INVESTMENT AND INSURANCE PRODUCTS ARE NOT FDIC INSURED, NOT A DEPOSIT OR OTHER "
+                "OBLIGATION OF THE BANK, AND ARE SUBJECT TO INVESTMENT RISKS."
+            )
+        )
 
     def test_standard_rate_does_not_use_promotional_rate_and_nonregistered_offer_is_scoped(self) -> None:
         context = ExtractionDocumentContext(
@@ -2305,6 +2484,10 @@ class ExtractionServiceTests(unittest.TestCase):
         )
         self.assertEqual(_clean_title_candidate("CIBC EasyBuilder GIC⑩"), "CIBC EasyBuilder GIC")
         self.assertEqual(_clean_title_candidate("CIBC Flexible GIC㈢"), "CIBC Flexible GIC")
+        self.assertEqual(
+            _clean_title_candidate("Amazon Visa Credit Card | Example Bank"),
+            "Amazon Visa Credit Card",
+        )
 
     def test_included_transactions_accepts_legal_marker_before_per_month(self) -> None:
         self.assertEqual(_extract_included_transactions("6 Debits legal disclaimer 1 / Month"), 6)
@@ -6126,7 +6309,7 @@ class ExtractionServiceTests(unittest.TestCase):
             call = invoke_model.call_args.kwargs
             self.assertTrue(call["require_web_search"])
             self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
-            self.assertIn("monthly_fee", call["payload"]["requested_fields"])
+            self.assertEqual(call["payload"]["requested_fields"], ["product_name", "eligibility_text"])
             self.assertEqual(
                 source_result.model_execution_record["execution_metadata"]["official_grounding_contract_version"],
                 "collection-official-grounding-v1",
@@ -6360,11 +6543,10 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertIn("No grounded GIC product details were present in the evidence chunks.", source_result.runtime_notes)
             self.assertEqual(len(source_result.evidence_links), 0)
             requested_fields = source_result.model_execution_record["execution_metadata"]["requested_fields"]
-            self.assertIn("standard_rate", requested_fields)
-            self.assertIn("public_display_rate", requested_fields)
-            self.assertIn("minimum_deposit", requested_fields)
-            self.assertIn("term_length_text", requested_fields)
-            self.assertIn("term_length_days", requested_fields)
+            self.assertEqual(
+                requested_fields,
+                ["product_name", "return_structure", "term_options", "principal_protection"],
+            )
         finally:
             rmtree(temp_path, ignore_errors=True)
 

@@ -27,7 +27,7 @@ Rules:
 
 | ID | Priority | State | Risk | Current Response | Owner |
 |---|---|---|---|---|---|
-| R-001 | High | Open | Bank source structure varies by bank and product type, so extraction and normalization quality can still drift across expansions. | Keep evidence-first review fallback, source-specific hardening, and schema-aligned validation active. | Tech Lead, AI/Data |
+| R-001 | High | Open | Bank source structure varies by bank and product type, including legal-bank homepages that delegate retail products to a separate consumer brand, so discovery, extraction, and normalization quality can still drift across expansions. | Keep evidence-first review fallback, evidence-bound consumer-brand routes, one-shot stale-coverage repair, source-specific hardening, country-aware financial semantics, authoritative discovery identity, omission of ungrounded attributes, and schema-aligned validation active. | Tech Lead, AI/Data |
 | R-002 | High | Open | PDF-heavy sources can still produce unstable parse quality and weak field extraction. | Preserve raw artifacts, keep supporting-merge and manual review options available, and verify PDF-heavy banks explicitly. | AI/Data |
 | R-003 | High | Open | BX-PF environment or contract readiness can still delay true publish readiness. | Keep interface-first behavior, mock-safe dev posture, and explicit pending or retry semantics until live readiness is confirmed. | Product Owner, Backend |
 | R-004 | Medium | Open | Public aggregate refresh, snapshot freshness, and canonical truth can drift if queue or retry behavior regresses. | Keep dashboard health visibility, retry flow, and latest-successful serving fallback in place. | Backend |

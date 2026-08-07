@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from api_service import source_catalog_collection_runner, source_collection_runner
-from api_service.source_catalog import CatalogItemMaterializationResult
+from api_service.source_catalog import CatalogItemMaterializationResult, CoverageRouteRepairResult
 
 
 class _Cursor:
@@ -134,6 +134,15 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 "api_service.source_catalog_collection_runner._load_active_collection_scope",
                 return_value={"collection_source_ids": [], "target_source_ids": []},
             ),
+            patch(
+                "api_service.source_catalog_collection_runner.repair_catalog_coverage_route",
+                return_value=CoverageRouteRepairResult(
+                    status="uncertain",
+                    coverage_source_url=None,
+                    coverage_source_metadata={},
+                    notes=["Coverage route remained uncertain."],
+                ),
+            ),
             patch("api_service.source_catalog_collection_runner.prepare_source_collection") as prepare_collection,
             patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group") as run_group,
         ):
@@ -165,6 +174,66 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         self.assertIn("Detail rejection summary:", summary)
         self.assertIn("Rejected detail https://example.com/product", summary)
         self.assertNotIn("HTTP 503", summary)
+
+    def test_run_group_closes_verified_retired_product_without_partial_failure(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-retired",
+            "correlation_id": "corr-retired",
+            "request_id": "req-retired",
+            "actor": {"user_id": "usr-admin", "role": "admin"},
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-retired",
+            "catalog_item_id": "catalog-us-gsbu-personal-loan",
+            "bank_code": "GSBU",
+            "bank_name": "Goldman Sachs Bank USA",
+            "country_code": "US",
+            "product_type": "personal-loan",
+            "product_family": "lending",
+            "source_language": "en",
+            "homepage_url": "https://www.goldmansachs.com/",
+            "normalized_homepage_url": "https://www.goldmansachs.com/",
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch(
+                "api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item",
+                return_value=CatalogItemMaterializationResult(
+                    generated_rows=[],
+                    discovery_notes=["Homepage discovery found no detail sources."],
+                    detail_source_ids=[],
+                ),
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner._load_active_collection_scope",
+                return_value={"collection_source_ids": [], "target_source_ids": []},
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner.repair_catalog_coverage_route",
+                return_value=CoverageRouteRepairResult(
+                    status="not_currently_offered",
+                    coverage_source_url=None,
+                    coverage_source_metadata={"verification_status": "verified_not_currently_offered"},
+                    notes=["Official evidence verified that this Product Type is not currently offered."],
+                ),
+            ),
+            patch("api_service.source_catalog_collection_runner.prepare_source_collection") as prepare_collection,
+            patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group") as run_group,
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        prepare_collection.assert_not_called()
+        run_group.assert_not_called()
+        update_call = next(params for sql, params in connection.calls if "UPDATE ingestion_run" in sql)
+        self.assertEqual(update_call["run_state"], "completed")
+        self.assertFalse(update_call["partial_completion_flag"])
+        self.assertIsNone(update_call["error_summary"])
+        run_metadata = json.loads(str(update_call["run_metadata"]))
+        self.assertEqual(run_metadata["discovery_status"], "product_not_currently_offered")
 
     def test_run_group_metadata_infers_lending_product_family(self) -> None:
         connection = _Connection()
@@ -200,6 +269,15 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             patch(
                 "api_service.source_catalog_collection_runner._load_active_collection_scope",
                 return_value={"collection_source_ids": [], "target_source_ids": []},
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner.repair_catalog_coverage_route",
+                return_value=CoverageRouteRepairResult(
+                    status="uncertain",
+                    coverage_source_url=None,
+                    coverage_source_metadata={},
+                    notes=["Coverage route remained uncertain."],
+                ),
             ),
         ):
             source_catalog_collection_runner._run_group(plan=plan, group=group)

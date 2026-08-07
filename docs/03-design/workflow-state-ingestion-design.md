@@ -166,9 +166,10 @@ Current official-grounding baseline:
 - when the OpenAI provider is configured, every candidate-producing `detail`
   source receives one required live-search comparison restricted to the
   collection registry's canonical official-domain allowlist;
-- the request includes the exact product identity, complete active Product
-  Type field contract, current extracted values, and at most 24 prioritized
-  fresh evidence chunks;
+- the request includes authoritative discovery identity candidates, the
+  registered active Product Type field contract, current extracted values,
+  and at most 24 prioritized fresh evidence chunks; the collected product
+  name remains tentative until the official pass confirms or corrects it;
 - an AI field is accepted only when its URL is present in the provider's
   consulted sources and its exact evidence quote exists in the selected fresh
   chunk; contract coercion, normalization cleanup, validation, and review
@@ -176,9 +177,17 @@ Current official-grounding baseline:
 - supporting/entry sources do not run this product-level pass, and provider
   failure leaves deterministic extraction intact rather than failing open.
 - dynamic/lending detail candidates persist a separate grounding assessment
-  over product identity and decision-critical typed fields. Verified identity,
-  at least two verified fields, and the configured ratio are required before
-  the normal Phase 1 auto-validation policy may consider the candidate.
+  over product identity and populated decision-critical fields. Verified
+  identity plus at least one product-defining fact (two fields total) and the
+  configured ratio are required before normal Phase 1 auto-validation may
+  consider the candidate. Empty optional fields are omissions; ungrounded
+  lending attributes are removed before routing.
+- if materialization leaves no eligible detail source, the catalog runner may
+  invoke one audited live-search coverage repair. A verified current
+  consumer-brand route is persisted with relationship evidence and discovery
+  resumes once. Explicit retirement evidence deactivates the stale coverage and
+  terminates the run as a clean no-current-product outcome; uncertainty retains
+  `no_detail_sources_discovered` Partial semantics.
 
 - 입력: chunk set, canonical schema context, taxonomy registry
 - 처리:
@@ -196,6 +205,18 @@ Current official-grounding baseline:
   - partial extraction만 가능하면 다음 단계에서 validation/review routing으로 보낸다.
 
 ### 5.7 Stage 6. Normalization
+
+Current cross-country deposit safeguards:
+- domestic/foreign-currency subtype inference uses the run country's configured
+  market default (`CA/CAD`, `US/USD`) rather than treating every non-CAD account
+  as foreign currency;
+- a compact product header such as `APY + no fees/no minimum deposit` may
+  establish the ongoing savings rate even when a later referral offer appears
+  in the same document;
+- an incremental `APY rate boost` is not published as a total promotional APY
+  unless the official source states the resulting total, and comparison-
+  calculator assumptions cannot become product minimum-balance or interest-
+  calculation terms.
 
 - 입력: extracted draft, taxonomy registry, canonical schema v1
 - 처리:
@@ -236,6 +257,16 @@ Current official-grounding baseline:
 
 ### 5.9 Stage 8. Review Routing
 
+Current approval rule: residual Review AI v2 verifies `product_name` plus
+populated or blocking decision fields. Empty optional/operational fields are
+outside the denominator. System approval requires at least `80%`, an official
+source, no unapplied correction, and no unresolved ambiguous product boundary,
+invalid taxonomy, or partial source failure. Earlier full-request-set attempts
+are not reused. If search leaves `product_name` unverified, an exact normalized
+match to the persisted official detail-page H1 may establish identity when
+discovery also recorded `product_identity_match=true`; an explicit mismatch or
+cross-product deposit page remains fail-closed.
+
 - 입력: candidate, validation result, confidence score, routing config
 - 처리:
   - Prototype에서는 모든 candidate를 review queue로 보낸다.
@@ -245,8 +276,11 @@ Current official-grounding baseline:
     grounding assessment를 추가 gate로 사용한다. assessment가 부족하면
     `ai_grounding_insufficient`로 review를 유지한다.
   - normal routing 후 남은 active detail review는 enabled policy의 bounded
-    collection AI autopilot을 거치며, full-field `80%` 미만은 review 상태를
-    그대로 유지한다.
+    collection AI autopilot을 거치며, approval-field `80%` 미만이거나 hard
+    blocker가 남으면 review 상태를 그대로 유지한다.
+  - rerun은 exact logical-name 중복을 정리하며, 새 run이 동일 normalized
+    detail URL에 active review 후보를 정확히 하나만 만들었을 때는 공식
+    이름 정정 전의 오래된 task도 audit와 함께 supersede한다.
   - Golden fixture는 명시적 fixture mode의 회귀 테스트에만 사용하며 live candidate의 evidence conflict, requiredness, type validation, confidence 또는 review routing을 우회하지 않는다.
 - 출력:
   - review task 또는 approval marker

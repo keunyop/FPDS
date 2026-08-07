@@ -126,6 +126,13 @@ def _candidate(
             {
                 "product_type": product_type,
                 "source_url": f"https://{host}/{'mortgages' if product_type == 'mortgage' else 'savings'}",
+                "current_offering_quote": (
+                    "Current mortgage products are available."
+                    if product_type == "mortgage"
+                    else "Current savings accounts are available."
+                ),
+                "relationship_source_url": f"https://{host}/",
+                "relationship_quote": f"{name} provides these products.",
             }
             for product_type in coverage
         ],
@@ -291,6 +298,48 @@ class BankAiOnboardingTests(unittest.TestCase):
 
         self.assertEqual(captured.exception.code, "bank_ai_results_insufficient")
 
+    def test_sanitizer_accepts_verified_official_consumer_brand_domain(self) -> None:
+        candidate = _candidate(
+            rank=1,
+            name="Goldman Sachs Bank USA",
+            host="goldmansachs.com",
+            coverage=["savings"],
+        )
+        candidate["legal_name"] = "Goldman Sachs Bank USA"
+        candidate["coverage"] = [
+            {
+                "product_type": "savings",
+                "source_url": "https://www.marcus.com/us/en/savings",
+                "current_offering_quote": "Online Savings Account",
+                "relationship_source_url": "https://www.marcus.com/us/en/faqs",
+                "relationship_quote": "Marcus by Goldman Sachs is a brand of Goldman Sachs Bank USA.",
+            }
+        ]
+        raw = _raw_result([candidate])
+        raw["country_code"] = "US"
+
+        result = sanitize_bank_ai_onboarding_result(
+            raw_result=raw,
+            country_code="US",
+            requested_count=1,
+            active_product_types={"savings"},
+            existing_banks=[],
+            sources=[
+                *_sources(),
+                {"url": "https://goldmansachs.com/", "title": "Goldman Sachs"},
+                {"url": "https://www.marcus.com/us/en/savings", "title": "Marcus Savings"},
+                {"url": "https://www.marcus.com/us/en/faqs", "title": "Marcus FAQs"},
+            ],
+        )
+
+        coverage = result["candidates"][0]["coverage"][0]
+        self.assertEqual(coverage["source_url"], "https://www.marcus.com/us/en/savings")
+        self.assertEqual(coverage["source_metadata"]["coverage_domain"], "marcus.com")
+        self.assertEqual(
+            coverage["source_metadata"]["verification_method"],
+            "ai_bank_onboarding_web_search",
+        )
+
     def test_sanitizer_rejects_us_regulatory_abbreviation_as_display_name(self) -> None:
         raw = _raw_result(
             [
@@ -406,6 +455,10 @@ class BankAiOnboardingTests(unittest.TestCase):
         self.assertEqual(
             create_bank_profile.call_args_list[0].kwargs["payload"]["initial_coverage_source_urls"],
             {"savings": "https://alpha.example/savings"},
+        )
+        self.assertEqual(
+            create_bank_profile.call_args_list[0].kwargs["payload"]["initial_coverage_source_metadata"]["savings"]["coverage_domain"],
+            "alpha.example",
         )
         self.assertTrue(invoke_model.call_args.kwargs["require_web_search"])
         self.assertTrue(any("INSERT INTO model_execution" in sql for sql, _params in connection.calls))

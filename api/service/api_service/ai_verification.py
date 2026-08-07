@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import sys
 from typing import Any, TYPE_CHECKING
+import unicodedata
 from urllib.parse import urlsplit, urlunsplit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -19,12 +20,14 @@ from api_service.review_detail import (
     _normalize_override_payload,
 )
 from api_service.security import new_id, utc_now
+from worker.pipeline.fpds_approval_policy import dynamic_repair_fields, is_populated
 from worker.pipeline.fpds_ai_runtime import (
     configured_model_id,
     estimated_cost_usd,
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.pipeline.fpds_field_contract import field_contract
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -48,6 +51,34 @@ AI_VERIFICATION_READ_ONLY_FIELDS = {
     "candidate_id",
     "run_id",
     "review_task_id",
+    "currency",
+    "source_subtype_label",
+    "status",
+    "subtype_code",
+    "tags",
+    "target_customer_tags",
+}
+AI_VERIFICATION_MATERIAL_STRING_FIELDS = {
+    "amortization_text",
+    "collateral_text",
+    "credit_limit_text",
+    "fee_waiver_condition",
+    "fees_text",
+    "interest_rate_summary",
+    "loan_amount_text",
+    "minimum_payment_text",
+    "monthly_payment_text",
+    "payment_frequency",
+    "prepayment_privileges",
+    "rate_type",
+    "rewards_summary",
+    "security_requirement",
+    "term_length_text",
+}
+AI_VERIFICATION_HARD_BLOCKERS = {
+    "ambiguous_product_boundary",
+    "invalid_taxonomy_code",
+    "partial_source_failure",
 }
 AI_VERIFICATION_TERMINAL_BLOCKED_STATES = {"rejected"}
 
@@ -182,11 +213,17 @@ def run_review_ai_verification(
         )
 
     request_payload = build_ai_verification_payload(detail=detail, allowed_domains=allowed_domains)
+    identity_evidence = authoritative_identity_evidence(detail)
     requested_field_names = [
         str(item.get("field_name") or "")
         for item in _dict_list(request_payload.get("fields_to_verify"))
         if str(item.get("field_name") or "").strip()
     ]
+    field_evidence = authoritative_field_evidence(
+        detail,
+        field_names=requested_field_names,
+        allowed_domains=allowed_domains,
+    )
     model_execution_id = new_id("modelexec")
     model_id = configured_model_id()
     started_at = utc_now()
@@ -195,9 +232,17 @@ def run_review_ai_verification(
         "candidate_id": str(review_task.get("candidate_id") or ""),
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "allowed_domains": allowed_domains,
-        "verification_contract_version": "review-ai-verification-v1",
+        "verification_contract_version": "review-ai-verification-v2",
         "requested_field_names": requested_field_names,
+        "approval_field_names": requested_field_names,
         "requested_field_count": len(requested_field_names),
+        "hard_blocking_issue_codes": sorted(
+            AI_VERIFICATION_HARD_BLOCKERS.intersection(
+                _string_list(candidate.get("validation_issue_codes"))
+            )
+        ),
+        "authoritative_identity_evidence": identity_evidence,
+        "authoritative_field_evidence": field_evidence,
     }
     _insert_model_execution(
         connection,
@@ -414,13 +459,42 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
         }
     ]
     seen_fields = {"product_name"}
-    for item in _dict_list(detail.get("review_field_items"))[:AI_VERIFICATION_MAX_FIELDS]:
+    review_field_items = _dict_list(detail.get("review_field_items"))
+    expected_fields = _string_list(source_context.get("expected_fields"))
+    candidate_payload = _mapping(candidate.get("candidate_payload"))
+    product_type = str(candidate.get("product_type") or "")
+    dynamic_fields = set(
+        dynamic_repair_fields(
+            product_type=product_type,
+            expected_fields=expected_fields,
+            candidate_payload=candidate_payload,
+        )
+        if product_type not in {"chequing", "savings", "gic"}
+        else []
+    )
+    for item in review_field_items[:AI_VERIFICATION_MAX_FIELDS]:
         field_name = str(item.get("field_name") or "").strip()
         if (
             not field_name
             or field_name in seen_fields
             or field_name in AI_VERIFICATION_READ_ONLY_FIELDS
         ):
+            continue
+        effective_value = item.get("effective_value")
+        contract = field_contract(field_name)
+        approval_relevant = (
+            bool(item.get("missing"))
+            or bool(item.get("suspect"))
+            or field_name in dynamic_fields
+            or (
+                is_populated(effective_value)
+                and (
+                    (contract is not None and contract.value_type != "string")
+                    or field_name in AI_VERIFICATION_MATERIAL_STRING_FIELDS
+                )
+            )
+        )
+        if not approval_relevant:
             continue
         seen_fields.add(field_name)
         review_fields.append(
@@ -451,10 +525,144 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
             "product_name": str(candidate.get("product_name") or ""),
             "currency": str(candidate.get("currency") or ""),
             "origin_source_url": _string_or_none(source_context.get("source_url")),
+            "authoritative_identity_evidence": authoritative_identity_evidence(detail),
         },
         "fields_to_verify": review_fields[:AI_VERIFICATION_MAX_FIELDS],
-        "collected_candidate_payload": _mapping(candidate.get("candidate_payload")),
+        "approval_policy": {
+            "contract_version": "review-ai-verification-v2",
+            "rule": "official product identity plus populated or blocking decision fields",
+            "empty_optional_fields_are_omissions": True,
+        },
+        "collected_candidate_payload": candidate_payload,
     }
+
+
+def authoritative_identity_evidence(detail: dict[str, Any]) -> dict[str, Any]:
+    """Verify identity from an exact official detail-page H1 match."""
+
+    candidate = _mapping(detail.get("candidate"))
+    source_context = _mapping(detail.get("source_context"))
+    discovery = _mapping(source_context.get("discovery_assessment"))
+    product_name = str(candidate.get("product_name") or "").strip()
+    primary_heading = str(discovery.get("primary_heading") or "").strip()
+    product_type = str(candidate.get("product_type") or "").strip().lower()
+    normalized_name = _normalize_identity_text(product_name)
+    normalized_heading = _normalize_identity_text(primary_heading)
+    exact_identity_match = normalized_name == normalized_heading
+    descriptor_identity_match = _identity_differs_only_by_product_descriptor(
+        normalized_name,
+        normalized_heading,
+        product_type=product_type,
+    )
+    cross_product_boundary = (
+        product_type in {"chequing", "savings"}
+        and any(token in normalized_name for token in ("checking", "chequing"))
+        and "savings" in normalized_name
+    )
+    verified = bool(
+        source_context.get("discovery_role") == "detail"
+        and discovery.get("product_identity_match") is True
+        and normalized_name
+        and (exact_identity_match or descriptor_identity_match)
+        and not cross_product_boundary
+    )
+    return {
+        "verified": verified,
+        "basis": (
+            "exact_official_detail_h1"
+            if verified and exact_identity_match
+            else "official_detail_h1_product_descriptor_equivalent"
+            if verified
+            else None
+        ),
+        "candidate_value": product_name or None,
+        "primary_heading": primary_heading or None,
+        "source_url": _string_or_none(source_context.get("source_url")),
+        "cross_product_boundary": cross_product_boundary,
+    }
+
+
+def _identity_differs_only_by_product_descriptor(
+    normalized_name: str,
+    normalized_heading: str,
+    *,
+    product_type: str,
+) -> bool:
+    if not normalized_name or not normalized_heading or normalized_name == normalized_heading:
+        return False
+    descriptor_by_type = {
+        "chequing": ("chequing account", "checking account"),
+        "savings": ("savings account",),
+        "gic": ("guaranteed investment certificate", "certificate of deposit", "gic", "cd"),
+        "credit-card": ("credit card", "card"),
+        "mortgage": ("mortgage",),
+        "line-of-credit": ("line of credit", "credit line", "heloc"),
+        "personal-loan": ("personal loan",),
+        "auto-loan": ("auto loan", "vehicle loan", "car loan"),
+        "student-loan": ("student loan",),
+        "business-loan": ("business loan",),
+        "home-equity-loan": ("home equity loan",),
+    }
+    for descriptor in descriptor_by_type.get(product_type, (product_type.replace("-", " "),)):
+        for shorter, longer in (
+            (normalized_heading, normalized_name),
+            (normalized_name, normalized_heading),
+        ):
+            if len(shorter.split()) >= 2 and longer == f"{shorter} {descriptor}":
+                return True
+    return False
+
+
+def authoritative_field_evidence(
+    detail: dict[str, Any],
+    *,
+    field_names: list[str],
+    allowed_domains: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Return persisted exact-origin fee evidence safe to reuse after AI abstains."""
+
+    candidate = _mapping(detail.get("candidate"))
+    candidate_payload = _mapping(candidate.get("candidate_payload"))
+    mappings = _mapping(candidate.get("field_mapping_metadata"))
+    evidence: dict[str, dict[str, Any]] = {}
+    for field_name in dict.fromkeys(field_names):
+        if field_name == "product_name" or field_name not in candidate_payload:
+            continue
+        metadata = _mapping(mappings.get(field_name))
+        sources = [
+            source
+            for source in _source_list(metadata.get("official_web_sources"))
+            if _url_matches_allowed_domains(
+                str(source.get("url") or ""),
+                allowed_domains=allowed_domains,
+            )
+        ]
+        if (
+            metadata.get("official_grounding_contract_version") != "collection-official-grounding-v1"
+            or metadata.get("official_grounding_method") != "deterministic_labeled_origin"
+            or metadata.get("official_verification_status") != "match"
+            or not str(metadata.get("official_evidence_quote") or "").strip()
+            or not sources
+            or metadata.get("normalized_value") != candidate_payload.get(field_name)
+        ):
+            continue
+        source = sources[0]
+        evidence[field_name] = {
+            "verified": True,
+            "basis": "exact_official_detail_labeled_fee",
+            "candidate_value": candidate_payload.get(field_name),
+            "source_url": str(source.get("url") or ""),
+            "source_title": str(source.get("title") or source.get("url") or ""),
+            "evidence_quote": str(metadata.get("official_evidence_quote") or "")[:500],
+        }
+    return evidence
+
+
+def _normalize_identity_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return " ".join(
+        "".join(character if character.isalnum() else " " for character in normalized).split()
+    )
 
 
 def sanitize_ai_verification_result(
@@ -826,7 +1034,8 @@ def _verification_instructions() -> str:
         "You are the FPDS financial-product verification agent. You must use web search before answering. "
         "Search only the supplied official bank domain allowlist and verify the exact named product, not a "
         "neighboring product, family overview, promotion landing page, calculator, or service flow. Compare "
-        "each requested canonical field with current official facts. Never infer a missing value. Mark a field "
+        "each requested approval field with current official facts. Empty optional fields were intentionally omitted from this "
+        "request and must not count against the product. Never infer a missing value. Mark a field "
         "unverified when the exact current fact is absent, ambiguous, personalized, dynamic, expired, or belongs "
         "to another product. Preserve canonical units: rates are numeric percentage points per annum, money is "
         "numeric in product currency, durations/counts are integers, booleans are true/false, and structured "

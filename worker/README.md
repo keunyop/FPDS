@@ -34,6 +34,14 @@ Runtime invariants:
   family page as one product
 - market defaults are country-owned (`CA -> CAD`, `US -> USD`); an unknown
   country remains explicit instead of silently inheriting CAD
+- savings subtype inference compares the candidate currency with that country
+  default, so a US/USD account is domestic while a CA/USD account is foreign
+  currency
+- savings normalization treats an explicit APY product header as the ongoing
+  rate even when a later referral offer appears in the same document. An
+  incremental APY rate boost is omitted from the total promotional-rate field
+  unless a resulting total is stated, and comparison-calculator balances and
+  assumptions are excluded from product terms
 - product-title extraction prefers high-confidence official location-gated
   page identity and removes SEO action suffixes while rejecting legal
   documents, enrollment CTAs, calculators, and other non-product headings
@@ -43,7 +51,19 @@ Runtime invariants:
   supplement a field only when the provider actually consulted an allowlisted
   official URL and the model returns an exact quote from the freshly captured
   evidence chunk. Supporting sources remain evidence-only, and provider
-  unavailability falls back to the existing heuristic extraction path.
-- dynamic/lending candidates that verify official product identity, at least
-  two decision fields, and the configured `80%` decision-field ratio may use
-  normal Phase 1 auto-validation; insufficient grounding remains review-bound
+  unavailability falls back to the existing heuristic extraction path. A
+  co-located labeled currency fee may be grounded directly from a verified,
+  identity-matched official detail snapshot only when the origin belongs to an
+  explicitly configured bank-domain allowlist; rates and prose do not use this
+  fallback.
+- dynamic/lending extraction is limited to the registered Product Type field
+  contract. Ungrounded lending attributes are omitted instead of publishing
+  heuristic feature copy.
+- descriptive-field extraction rejects adjacent service and disclosure copy:
+  payment-service enrollment terms are not product application or eligibility,
+  linked-account fee-waiver lists are not customer eligibility, and investment
+  risk disclaimers are not deposit insurance.
+- dynamic/lending candidates that verify official product identity plus at
+  least one product-defining fact (two verified fields total), and the
+  configured `80%` populated decision-field ratio, may use normal Phase 1
+  auto-validation; insufficient grounding remains review-bound

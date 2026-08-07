@@ -511,10 +511,13 @@ Rules:
   names/aliases/homepage domains, and requires consulted citations for ranking,
   official homepage, and every coverage item
 - accepts coverage codes only when the Product Type row is active and the
-  cited page is on the bank's official domain
-- persists each accepted coverage citation as the catalog row's
-  `coverage_source_url`; collection gives that exact verified route priority
-  while legacy null rows retain homepage discovery
+  cited page is on the bank's official domain, or on an official consumer-brand
+  domain with a consulted exact quote proving its relationship to the bank
+- persists each accepted citation as `coverage_source_url` plus private
+  `coverage_source_metadata` containing the verification status, scoped domain,
+  current-offering and relationship evidence, consulted sources, and model
+  lineage; collection gives that exact verified route priority while legacy
+  null rows retain homepage discovery and one bounded repair opportunity
 - uses a directly verified same-domain logo when present, otherwise the
   official-domain `/favicon.ico` fallback
 - rejects the whole operation when fewer than `count` valid banks remain
@@ -648,16 +651,19 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 
 - applies only sanitized cited mismatches to the queued candidate and preserves
   review state while scoring;
-- calculates `(match + applied mismatch) / requested fields`, so omitted model
-  fields and `unverified` results count against the score;
+- calculates `(match + applied mismatch) / approval fields`, where approval
+  fields are `product_name` plus populated or blocking decision fields; empty
+  optional and operational fields are not requested and do not lower the score;
 - requires verified `product_name`, an official source, no remaining correction,
-  and score `>= 0.80` for automatic approval;
+  no hard product-boundary/taxonomy/partial-source blocker, and score `>= 0.80`
+  for automatic approval;
 - invokes the existing review decision and country aggregate-refresh contracts
   for eligible candidates; lower scores remain `queued`/`deferred`;
 - persists the assessment in `model_execution.execution_metadata` and emits
   `review_ai_corrections_applied` plus normal verification/approval audit events.
-- reuses a completed attempt and assessment after runner restart, and bounds
-  automatic calls with `COLLECTION_AI_REVIEW_AUTOPILOT_MAX_CANDIDATES`.
+- reuses only a completed attempt and assessment under the current v2 contract
+  after runner restart, and bounds automatic calls with
+  `COLLECTION_AI_REVIEW_AUTOPILOT_MAX_CANDIDATES`.
 
 ### 5.4 Review Decision Routes
 

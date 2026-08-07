@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from api_service.ai_verification import (
     AiVerificationError,
+    authoritative_field_evidence,
+    authoritative_identity_evidence,
     build_ai_verification_payload,
     load_registered_bank_domains,
     load_latest_ai_verification,
@@ -157,6 +159,79 @@ def _detail():
 
 
 class AiVerificationTests(TestCase):
+    def test_authoritative_identity_requires_exact_detail_h1_and_rejects_composite_deposit(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {"product_type": "credit-card", "product_name": "Citi Simplicity® Credit Card"}
+        )
+        detail["source_context"].update(
+            {
+                "discovery_role": "detail",
+                "discovery_assessment": {
+                    "product_identity_match": True,
+                    "primary_heading": "Citi Simplicity ® Credit Card",
+                },
+            }
+        )
+
+        evidence = authoritative_identity_evidence(detail)
+
+        self.assertTrue(evidence["verified"])
+        self.assertEqual(evidence["basis"], "exact_official_detail_h1")
+
+        detail["candidate"]["product_name"] = "Amazon Visa Credit Card"
+        detail["source_context"]["discovery_assessment"]["primary_heading"] = "Amazon Visa"
+        evidence = authoritative_identity_evidence(detail)
+        self.assertTrue(evidence["verified"])
+        self.assertEqual(evidence["basis"], "official_detail_h1_product_descriptor_equivalent")
+
+        detail["candidate"]["product_name"] = "Amazon Visa Premium"
+        evidence = authoritative_identity_evidence(detail)
+        self.assertFalse(evidence["verified"])
+
+        detail["candidate"].update(
+            {"product_type": "savings", "product_name": "Regular Checking & Citi Savings"}
+        )
+        detail["source_context"]["discovery_assessment"]["primary_heading"] = (
+            "Regular Checking & Citi Savings"
+        )
+        evidence = authoritative_identity_evidence(detail)
+        self.assertFalse(evidence["verified"])
+        self.assertTrue(evidence["cross_product_boundary"])
+
+    def test_authoritative_field_evidence_requires_persisted_exact_origin_contract(self):
+        detail = _detail()
+        detail["candidate"]["candidate_payload"]["annual_fee"] = 0.0
+        detail["candidate"]["field_mapping_metadata"] = {
+            "annual_fee": {
+                "normalized_value": 0.0,
+                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_grounding_method": "deterministic_labeled_origin",
+                "official_verification_status": "match",
+                "official_evidence_quote": "ANNUAL FEE $0",
+                "official_web_sources": [
+                    {"url": "https://cards.bank.example/card", "title": "Example Card"}
+                ],
+            }
+        }
+
+        evidence = authoritative_field_evidence(
+            detail,
+            field_names=["product_name", "annual_fee"],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(evidence["annual_fee"]["basis"], "exact_official_detail_labeled_fee")
+        self.assertNotIn("product_name", evidence)
+        self.assertEqual(
+            authoritative_field_evidence(
+                detail,
+                field_names=["annual_fee"],
+                allowed_domains=["different.example"],
+            ),
+            {},
+        )
+
     def test_normalize_official_domains_keeps_registered_hosts_only(self):
         self.assertEqual(
             normalize_official_domains(
@@ -201,9 +276,61 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             [item["field_name"] for item in payload["fields_to_verify"]],
-            ["product_name", "standard_rate", "monthly_fee", "currency"],
+            ["product_name", "standard_rate", "monthly_fee"],
         )
         self.assertEqual(payload["official_domain_allowlist"], ["bank.example"])
+        self.assertTrue(payload["approval_policy"]["empty_optional_fields_are_omissions"])
+
+    def test_build_payload_excludes_empty_optional_dynamic_fields(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {
+                "product_family": "lending",
+                "product_type": "credit-card",
+                "product_name": "Example Card",
+                "candidate_payload": {
+                    "product_name": "Example Card",
+                    "annual_fee": 0.0,
+                    "description_short": "Collected marketing copy",
+                },
+            }
+        )
+        detail["source_context"]["expected_fields"] = [
+            "product_name",
+            "annual_fee",
+            "purchase_interest_rate",
+            "description_short",
+        ]
+        detail["review_field_items"] = [
+            {
+                "field_name": "annual_fee",
+                "label": "Annual Fee",
+                "effective_value": 0.0,
+                "missing": False,
+                "suspect": False,
+            },
+            {
+                "field_name": "purchase_interest_rate",
+                "label": "Purchase Interest Rate",
+                "effective_value": None,
+                "missing": False,
+                "suspect": False,
+            },
+            {
+                "field_name": "description_short",
+                "label": "Description",
+                "effective_value": "Collected marketing copy",
+                "missing": False,
+                "suspect": False,
+            },
+        ]
+
+        payload = build_ai_verification_payload(detail=detail, allowed_domains=["bank.example"])
+
+        self.assertEqual(
+            [item["field_name"] for item in payload["fields_to_verify"]],
+            ["product_name", "annual_fee"],
+        )
 
     def test_run_rejects_read_only_actor_before_provider_or_database_work(self):
         connection = _RecordingConnection()
@@ -413,6 +540,15 @@ class AiVerificationTests(TestCase):
             connection.execution_metadata["verification_result"]["proposed_corrections"],
             {"standard_rate": 3.25},
         )
+        self.assertEqual(
+            connection.execution_metadata["verification_contract_version"],
+            "review-ai-verification-v2",
+        )
+        self.assertEqual(
+            connection.execution_metadata["approval_field_names"],
+            ["product_name", "standard_rate", "monthly_fee"],
+        )
+        self.assertEqual(connection.execution_metadata["hard_blocking_issue_codes"], [])
         audit = next(params for sql, params in connection.calls if "INSERT INTO audit_event" in sql)
         self.assertEqual(audit["event_type"], "review_ai_verification_completed")
         self.assertEqual(audit["diff_summary"], "standard_rate")

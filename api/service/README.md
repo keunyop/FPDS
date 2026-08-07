@@ -113,6 +113,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sq
 psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
 ```
 
 Create the first operator account:
@@ -173,14 +175,18 @@ cd api/service
   parameter in its PostgreSQL query, so psycopg prepared statements preserve
   the session/candidate country boundary without raising an ambiguous-parameter
   server error before model execution begins.
-- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Its pass rate is `(official matches + safely applied mismatches) / all requested fields`; omitted/unverified fields fail, product name must pass, and unapplied corrections block approval. Candidates at `>= 80%` use the existing review approval and country aggregate-refresh path; all others remain in human review.
+- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v2 requests only `product_name` plus populated or blocking decision fields; empty optional and operational fields do not enter the denominator. Official matches and safely applied mismatches pass. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee may likewise reuse its persisted exact-origin official grounding when Review AI abstains. AI mismatches, non-detail sources, and checking/savings composites cannot use these fallbacks. Unverified approval fields, unapplied corrections, ambiguous product boundaries, invalid taxonomy, and partial sources block approval. Candidates at `>= 80%` use the existing review approval and country aggregate-refresh path; all others remain in human review.
 - New collection runs now apply that same contract automatically to bounded
   active `queued`/`deferred` detail candidates left after normal validation.
   The policy defaults to enabled, is capped at `200` candidates per run, and
-  reuses completed attempts after a runner restart. Failed, sub-threshold,
-  identity-unverified, or ambiguous candidates remain in Review; eligible
-  candidates are system-approved through the existing canonical/audit/country
-  aggregate path.
+  reuses only completed v2 attempts after a runner restart. Failed,
+  sub-threshold, identity-unverified, hard-blocked, or ambiguous candidates
+  remain in Review; eligible candidates are system-approved through the
+  existing canonical/audit/country aggregate path.
+- After a rerun, an older active detail review is auditably superseded when its
+  logical name matches the new candidate or its normalized source URL has
+  exactly one new active review candidate. The URL fallback permits corrected
+  official naming without collapsing a genuine multi-product page.
 - Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
 - Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
 - Completed collection runs with `partial_completion_flag=true` expose the same retry path, while clean completed runs remain non-retryable.
@@ -203,10 +209,17 @@ cd api/service
 - Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
 - Existing bank homepage values are no longer auto-repaired from committed seed data during runtime reads or admin writes; reset and replay flows now preserve intentionally empty operator-managed state.
 - Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, and queues the homepage-discovery plus materialization work on a background API-side runner before the deeper worker stages continue.
-- AI-created coverage now preserves its verified same-domain official
-  `coverage_source_url` on the catalog row and gives that route first priority
-  during bounded discovery. Migration `0028` is required before this contract
-  is enabled; legacy rows with no evidence URL retain homepage fallback.
+- AI-created coverage preserves its verified official `coverage_source_url` on
+  the catalog row and gives that route first priority during bounded discovery.
+  A separate consumer-brand domain is accepted only with exact official bank-
+  relationship evidence stored in `coverage_source_metadata`; the additional
+  domain applies only to that bank/Product Type route. Migrations `0028` and
+  `0031` are required; legacy rows with no evidence URL retain homepage fallback.
+- When no eligible detail source remains, the catalog runner makes one bounded
+  live-search repair. A verified route is persisted and materialized once in
+  the same run. Explicit sale, transfer, wind-down, or discontinuation evidence
+  deactivates stale coverage and completes as `product_not_currently_offered`
+  without Partial; uncertainty still fails closed as no-detail Partial.
 - The queued collection runner forwards that coverage route through the
   materialization boundary. Exact verified coverage pages may use a narrowly
   relaxed location-gate evidence threshold only with high AI support,
@@ -231,6 +244,10 @@ cd api/service
   partial-source failure.
 - Source catalog collect now creates `ingestion_run` rows immediately and returns a fast queued response so `/admin/banks` and compatibility source-catalog actions no longer wait on homepage discovery or candidate-page validation before responding.
 - Homepage-first collection still preserves the existing active detail scope when no replacement detail rows are found, and the queued background runner now reuses that preserved active detail scope for collection instead of incorrectly closing the run as a no-detail partial completion.
+- After promotion and Review AI, an in-run review candidate is automatically
+  superseded when an exact same bank/family/type/subtype/name candidate in that
+  run is already approved, preventing a second operator decision for the same
+  product.
 - Bank-wide source-catalog collect now launches one background runner process for the selected collection plan and lets that runner process bank/product groups sequentially. This keeps bulk collection inside the dev DB session-pool budget while the per-stage watchdog still closes a hung worker stage as `failed` instead of leaving it indefinitely `started`.
 - Downstream worker stages launched by `source_collection_runner` now have a configurable `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` watchdog. If a worker stage hangs past that limit, the run is closed as `failed` with a timeout summary instead of remaining indefinitely `started`. A process that has already emitted a complete JSON result with `persistence.run_state=completed` is recovered after the watchdog terminates it; partial, malformed, or nonterminal output still fails closed.
 - Non-zero exits and unrecoverable timeouts retain the exact `failed_stage`,
@@ -263,7 +280,10 @@ cd api/service
   complete active field contract. A returned value is retained only when its
   cited URL was actually consulted and its exact quote is present in the fresh
   evidence chunk; otherwise the existing evidence-first value or reviewable
-  omission remains. Model usage and consulted sources are persisted with the
+  omission remains. A co-located labeled currency fee from an identity-matched,
+  high-confidence official detail snapshot may use the narrower deterministic
+  exact-origin contract; rates and prose remain provider-grounded or omitted.
+  Model usage and consulted sources are persisted with the
   extraction execution, and AI failure does not bypass validation or review.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.

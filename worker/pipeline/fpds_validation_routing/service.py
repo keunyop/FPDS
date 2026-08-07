@@ -6,6 +6,7 @@ from hashlib import sha256
 import json
 import re
 
+from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
 from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
 from worker.pipeline.fpds_rate_safety import (
     advertised_promotional_total_rate,
@@ -640,16 +641,19 @@ def _compute_validation_issue_codes(
     if requiredness_type == "gic" and candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
         issues.add("inconsistent_cross_field_logic")
     if dynamic_product_type:
-        non_core_values = [
+        populated_decision_fields = populated_dynamic_decision_fields(
+            product_type=product_type,
+            expected_fields=expected_fields or [],
+            candidate_payload=candidate_payload,
+        )
+        contractless_meaningful_values = [
             value
             for field_name, value in candidate_payload.items()
             if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label", "subtype_code"}
         ]
-        if not any(_has_meaningful_value(value) for value in non_core_values):
-            issues.add("required_field_missing")
-        if any(
-            candidate_payload.get(field_name) in {None, ""}
-            for field_name in _dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields or [])
+        if not populated_decision_fields and (
+            bool(expected_fields)
+            or not any(_has_meaningful_value(value) for value in contractless_meaningful_values)
         ):
             issues.add("required_field_missing")
 
@@ -740,17 +744,6 @@ def _has_gic_term_evidence(candidate_payload: dict[str, object]) -> bool:
         )
         for row in rows
     )
-
-
-def _dynamic_priority_fields(*, product_type: str | None, expected_fields: list[str]) -> list[str]:
-    normalized_type = str(product_type or "").strip().lower()
-    priority = {
-        "credit-card": {"product_name", "annual_fee", "purchase_interest_rate"},
-        "mortgage": {"product_name", "mortgage_rate", "rate_type", "term_length_text"},
-        "personal-loan": {"product_name", "interest_rate", "loan_amount_text", "term_length_text"},
-        "line-of-credit": {"product_name", "interest_rate", "credit_limit_text", "secured_flag"},
-    }.get(normalized_type, {"product_name"})
-    return [field_name for field_name in expected_fields if field_name in priority]
 
 
 def _resolve_validation_status(validation_issue_codes: list[str]) -> str:
@@ -929,9 +922,12 @@ def _assess_collection_ai_grounding(
     product_type = _string_or_none(candidate_record.get("product_type"))
     mapping_metadata = candidate_record.get("field_mapping_metadata")
     mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
-    priority_fields = set(_dynamic_priority_fields(product_type=product_type, expected_fields=expected_fields))
-    priority_fields.add("product_name")
-    assessed_fields = set(priority_fields)
+    decision_fields = populated_dynamic_decision_fields(
+        product_type=product_type,
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+    )
+    assessed_fields = {"product_name", *decision_fields}
     for field_name in expected_fields:
         value = candidate_payload.get(field_name)
         contract = field_contract(field_name)

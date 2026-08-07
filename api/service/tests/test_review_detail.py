@@ -192,7 +192,7 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["recommended_action"], "edit_approve")
         self.assertEqual(
             {item["field_name"] for item in diagnosis["affected_fields"]},
-            {"product_name", "interest_rate", "loan_amount_text", "fees_text", "monthly_payment_text", "security_requirement", "prepayment_privileges"},
+            {"product_name", "loan_amount_text", "fees_text", "monthly_payment_text", "security_requirement", "prepayment_privileges"},
         )
 
     def test_optional_expected_fields_do_not_force_edit(self) -> None:

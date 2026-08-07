@@ -4,6 +4,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from api_service.collection_ai_autopilot import (
+    _load_latest_verification_execution,
     load_active_collection_review_task_ids,
     load_collection_ai_autopilot_policy,
     remediate_collection_review_task,
@@ -45,6 +46,17 @@ def _detail():
 
 
 class CollectionAiAutopilotTests(TestCase):
+    def test_reuses_only_v2_approval_contract_execution(self):
+        connection = _QueryConnection([])
+
+        self.assertIsNone(
+            _load_latest_verification_execution(connection, review_task_id="review-001")
+        )
+
+        sql, params = connection.calls[0]
+        self.assertEqual(params, {"review_task_id": "review-001"})
+        self.assertIn("review-ai-verification-v2", sql)
+
     def test_policy_defaults_enable_low_touch_review_and_bounds_values(self):
         connection = _QueryConnection(
             [

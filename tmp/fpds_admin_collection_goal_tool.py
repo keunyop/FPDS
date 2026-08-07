@@ -23,6 +23,7 @@ from api_service.review_detail import load_review_task_detail
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.source_catalog import start_source_catalog_collection
 from api_service.source_catalog import _deactivate_rejected_generated_detail_sources
+from api_service.source_collection_runner import _supersede_stale_logical_reviews_for_run
 from worker.pipeline.fpds_normalization.supporting_merge import _extract_current_gic_rate_values
 
 GOLDEN_PATH = REPO_ROOT / "worker" / "pipeline" / "tests" / "fixtures" / "golden" / "canada_big5_deposit_products_golden_2026-05-23.json"
@@ -62,6 +63,8 @@ def main() -> int:
     deactivate_parser.add_argument("--bank-code", required=True)
     deactivate_parser.add_argument("--product-type", required=True)
     deactivate_parser.add_argument("--url", action="append", required=True)
+    supersede_parser = subparsers.add_parser("supersede-stale")
+    supersede_parser.add_argument("--run-id", action="append", required=True)
     gic_check_parser = subparsers.add_parser("gic-evidence-check")
     gic_check_parser.add_argument("--review-task-id", required=True)
     audit_parser = subparsers.add_parser("audit")
@@ -131,6 +134,23 @@ def main() -> int:
                 normalized_urls=args.url,
             )
         _print_json({"deactivated_count": count, "urls": args.url})
+        return 0
+    if args.command == "supersede-stale":
+        request_id = f"stale-review-supersession-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
+        counts = {
+            run_id: _supersede_stale_logical_reviews_for_run(
+                run_id=run_id,
+                plan={"request_id": request_id},
+            )
+            for run_id in args.run_id
+        }
+        _print_json(
+            {
+                "request_id": request_id,
+                "superseded_by_run": counts,
+                "superseded_count": sum(counts.values()),
+            }
+        )
         return 0
     if args.command == "gic-evidence-check":
         with open_connection(settings) as connection:

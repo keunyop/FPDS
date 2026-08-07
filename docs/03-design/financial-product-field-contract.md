@@ -81,24 +81,68 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 40. Review Detail AI verification may propose a correction only when a current official source from the registered bank domain supports the exact field and the value passes the same manual-override coercion and range checks. Unsupported or ambiguous facts remain `unverified`, and verification never guesses or publishes by itself. A verification attempt does not directly approve a candidate; the separate audited assessment in rule 43 may authorize system approval only after its identity, coverage, source, and safe-correction gates all pass.
 41. Configured collection applies official-domain AI grounding to every
     candidate-producing detail source, including standard Product Types. The
-    model receives the exact product identity, complete active field contract,
-    current collected values, and bounded fresh evidence chunks. A grounded
+    model receives authoritative discovery identity candidates, the registered
+    active field contract, current collected values, and bounded fresh evidence
+    chunks. The discovered `product_name` is tentative until official grounding
+    confirms or corrects it; a feature heading must not outrank a corroborated
+    detail-page title/H1. A grounded
     value may replace or supplement extraction only when the cited URL appears
     in the provider's consulted allowlisted sources and an exact returned quote
     exists in the selected evidence chunk, then passes the canonical type and
     numeric safe-range checks used by review edits. Supporting pages remain
     evidence-only; provider failure keeps the deterministic extraction result
-    and normal validation/review routing.
+    and normal validation/review routing. A deterministic currency-fee fact may
+    carry the same grounding contract without a provider citation only when
+    its own field label and value are co-located in one fresh evidence chunk,
+    the source is an identity-matched high-confidence `detail` page with no
+    negative page signal, the field belongs to the active Product Type
+    contract, and the origin URL matches an explicitly configured official
+    bank-domain allowlist. This exception does not apply to inferred prose,
+    unlabeled numbers, supporting pages, or a domain inferred only from the
+    fetched URL.
 42. Dynamic/lending auto-validation requires a persisted collection grounding
-    assessment. `product_name`, at least one additional decision field, and at
-    least `80%` of assessed priority/typed fields must carry accepted official
-    grounding metadata. This eligibility does not remove requiredness,
-    confidence, force-review, source-role, or product-boundary checks.
-43. Collection residual-review automation uses the full requested Review field
-    set as its denominator. Only official matches and successfully applied safe
-    mismatches pass; unverified or omitted fields fail. Verified identity, at
-    least one official source, no unapplied correction, and `>=80%` are required
-    for system approval.
+    assessment. `product_name`, at least one populated product-defining fact
+    (two verified fields total), and at least `80%` of populated decision/typed
+    fields must carry accepted official grounding metadata. A missing optional
+    fact is an omission, not a validation error. A lending value without the
+    accepted grounding metadata is removed before validation rather than
+    published as heuristic copy. This eligibility does not remove confidence,
+    force-review, source-role, type/range, or product-boundary checks.
+43. Collection residual-review automation uses an approval-field set as its
+    denominator: verified `product_name`, fields currently populated with
+    material values, and fields marked missing/suspect because they block the
+    candidate. Empty optional and operational fields are excluded. Only official
+    matches and successfully applied safe mismatches pass; an unverified
+    approval field fails. At least one official source, no unapplied correction,
+    no unresolved hard blocker (`ambiguous_product_boundary`,
+    `invalid_taxonomy_code`, or `partial_source_failure`), and `>=80%` are
+    required for system approval. Older full-request-set assessments are not
+    reused under this contract. When Review AI abstains with `unverified`, an
+    unchanged currency fee may reuse the persisted exact-origin grounding from
+    rule 41 after the registered-domain check; an AI `mismatch` cannot use this
+    fallback.
+44. Product identity may use persisted origin evidence when Review AI returns
+    only `unverified`: the source must be an official detail page, discovery
+    must record `product_identity_match=true`, and the candidate name must equal
+    the primary H1 after Unicode, case, punctuation, and trademark-symbol
+    normalization or differ only by a trailing descriptor registered for that
+    Product Type (for example, `Credit Card`). An AI `mismatch`, missing H1,
+    an unrelated marketing suffix, non-detail source, or a
+    checking/savings composite cannot use this identity fallback. A separate
+    official fact is still required for dynamic/lending auto-approval.
+45. Deposit rate and subtype semantics are market-relative and evidence-local.
+    Domestic currency comes from the candidate country rather than a global CAD
+    assumption. A labeled ongoing APY remains `standard_rate` when a separate
+    referral offer exists later in the page. An incremental `rate boost` is not
+    a total `promotional_rate` without an explicit total, and comparison-
+    calculator balances or assumptions are omitted from product terms.
+46. Descriptive fields remain scoped to the current financial product. Payment-
+    service enrollment and purchase disclaimers cannot populate
+    `application_method` or `eligibility_text`; a list of linked accounts that
+    qualifies for a fee waiver is not customer eligibility; and an investment-
+    product "not FDIC insured / not a deposit" disclaimer cannot populate
+    `deposit_insurance`. These exclusions are semantic and apply across banks
+    and Product Types.
 
 ## Runtime Validation
 

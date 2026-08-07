@@ -30,7 +30,7 @@ else:  # pragma: no cover - keeps unit tests lightweight.
 
 AI_BANK_ONBOARDING_STAGE = "bank_registry_onboarding"
 AI_BANK_ONBOARDING_AGENT = "fpds_bank_onboarding"
-AI_BANK_ONBOARDING_SCHEMA_NAME = "fpds_bank_registry_onboarding_v2"
+AI_BANK_ONBOARDING_SCHEMA_NAME = "fpds_bank_registry_onboarding_v3"
 AI_BANK_ONBOARDING_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -98,10 +98,19 @@ AI_BANK_ONBOARDING_SCHEMA: dict[str, Any] = {
                         "items": {
                             "type": "object",
                             "additionalProperties": False,
-                            "required": ["product_type", "source_url"],
+                            "required": [
+                                "product_type",
+                                "source_url",
+                                "current_offering_quote",
+                                "relationship_source_url",
+                                "relationship_quote",
+                            ],
                             "properties": {
                                 "product_type": {"type": "string"},
                                 "source_url": {"type": "string"},
+                                "current_offering_quote": {"type": "string"},
+                                "relationship_source_url": {"type": "string"},
+                                "relationship_quote": {"type": "string"},
                             },
                         },
                     },
@@ -164,7 +173,7 @@ def run_bank_ai_onboarding(
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "existing_bank_count": len(existing_banks),
         "active_product_type_count": len(product_types),
-        "onboarding_contract_version": "bank-registry-onboarding-v2",
+        "onboarding_contract_version": "bank-registry-onboarding-v3",
     }
     _insert_model_execution(
         connection,
@@ -302,6 +311,10 @@ def run_bank_ai_onboarding(
                         "initial_coverage_product_types": candidate["coverage_product_types"],
                         "initial_coverage_source_urls": {
                             item["product_type"]: item["source_url"]
+                            for item in candidate["coverage"]
+                        },
+                        "initial_coverage_source_metadata": {
+                            item["product_type"]: item["source_metadata"]
                             for item in candidate["coverage"]
                         },
                     },
@@ -583,17 +596,61 @@ def sanitize_bank_ai_onboarding_result(
         for raw_coverage in _dict_list(raw_candidate.get("coverage")):
             product_type = str(raw_coverage.get("product_type") or "").strip().lower()
             source_url = _string_or_none(raw_coverage.get("source_url"))
+            current_offering_quote = _string_or_none(raw_coverage.get("current_offering_quote"))
+            relationship_source_url = _string_or_none(raw_coverage.get("relationship_source_url"))
+            relationship_quote = _string_or_none(raw_coverage.get("relationship_quote"))
             if (
                 not product_type
                 or product_type not in active_product_types
                 or product_type in covered_types
                 or not source_url
                 or _citation_key(source_url) not in consulted_keys
-                or not _same_official_domain(homepage_url, source_url)
+                or not current_offering_quote
+                or not relationship_source_url
+                or _citation_key(relationship_source_url) not in consulted_keys
+                or not relationship_quote
+                or not _relationship_quote_identifies_candidate(
+                    relationship_quote,
+                    bank_name=bank_name,
+                    legal_name=legal_name,
+                )
+            ):
+                continue
+            coverage_host = _hostname(source_url)
+            relationship_host = _hostname(relationship_source_url)
+            if (
+                not coverage_host
+                or not relationship_host
+                or relationship_host not in {homepage_host, coverage_host}
+                or (
+                    coverage_host != homepage_host
+                    and relationship_host != coverage_host
+                    and not _relationship_quote_identifies_coverage_domain(
+                        relationship_quote,
+                        coverage_host=coverage_host,
+                    )
+                )
             ):
                 continue
             covered_types.add(product_type)
-            coverage.append({"product_type": product_type, "source_url": source_url})
+            coverage.append(
+                {
+                    "product_type": product_type,
+                    "source_url": source_url,
+                    "current_offering_quote": current_offering_quote,
+                    "relationship_source_url": relationship_source_url,
+                    "relationship_quote": relationship_quote,
+                    "source_metadata": {
+                        "verification_status": "verified",
+                        "verification_method": "ai_bank_onboarding_web_search",
+                        "homepage_domain": homepage_host,
+                        "coverage_domain": coverage_host,
+                        "relationship_source_url": relationship_source_url,
+                        "relationship_quote": relationship_quote,
+                        "current_offering_quote": current_offering_quote,
+                    },
+                }
+            )
         if not coverage:
             continue
 
@@ -693,7 +750,13 @@ def _bank_ai_onboarding_instructions() -> str:
         "`legal_name_source_url`, and preserve the ranking source's exact unedited label as `ranking_name`. "
         "The legal-name source must be an official bank or government regulator page actually consulted. "
         "Classify coverage only from the supplied Product Type codes and only when a current official "
-        "bank page explicitly shows that product family. Give an exact official source URL for each coverage item. "
+        "product/detail/catalog page explicitly shows that product family. Give its exact source URL and a short "
+        "exact current_offering_quote naming the Product Type. The product route may use a separate official consumer "
+        "brand domain. For every coverage item, give a consulted relationship_source_url and exact relationship_quote "
+        "proving that the product or brand is provided by, owned by, or a brand of the bank; this evidence must be on "
+        "the bank homepage domain or product domain. Historical announcements, educational articles, help-only pages, "
+        "legacy servicing pages, login/application flows, and sold, transferred, or discontinued products are not "
+        "current coverage. "
         "Provide an official same-domain logo asset only when directly verified; otherwise return null so FPDS can "
         "use its controlled favicon fallback. Every ranking, homepage, logo, and coverage source URL must be a URL "
         "actually consulted during web search. Never invent a bank, URL, rank, asset value, date, coverage type, "
@@ -1103,6 +1166,51 @@ def _same_official_domain(left: str, right: str) -> bool:
         or left_host.endswith(f".{right_host}")
         or right_host.endswith(f".{left_host}")
     )
+
+
+def _relationship_quote_identifies_candidate(
+    quote: str,
+    *,
+    bank_name: str,
+    legal_name: str,
+) -> bool:
+    quote_tokens = set(re.findall(r"[a-z0-9]+", quote.casefold()))
+    ignored = {
+        "bank", "banking", "national", "association", "na", "usa", "us",
+        "legal", "entity", "inc", "incorporated", "corp", "corporation", "llc",
+    }
+    candidate_tokens = [
+        token
+        for token in re.findall(r"[a-z0-9]+", bank_name.casefold())
+        if token not in ignored
+    ]
+    if not candidate_tokens:
+        candidate_tokens = [
+            token
+            for token in re.findall(r"[a-z0-9]+", legal_name.casefold())
+            if token not in ignored
+        ]
+    distinctive_tokens = set(candidate_tokens)
+    if not distinctive_tokens:
+        return False
+    required_count = 1 if len(distinctive_tokens) == 1 else 2
+    return len(distinctive_tokens.intersection(quote_tokens)) >= required_count
+
+
+def _relationship_quote_identifies_coverage_domain(
+    quote: str,
+    *,
+    coverage_host: str,
+) -> bool:
+    host_tokens = [
+        token
+        for token in re.findall(r"[a-z0-9]+", coverage_host.casefold())
+        if token not in {"www", "com", "org", "net", "bank", "banking", "co"}
+    ]
+    if not host_tokens:
+        return False
+    quote_tokens = set(re.findall(r"[a-z0-9]+", quote.casefold()))
+    return any(token in quote_tokens for token in host_tokens)
 
 
 def _favicon_url(homepage_url: str) -> str:

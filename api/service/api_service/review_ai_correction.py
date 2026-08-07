@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from typing import Any, TYPE_CHECKING
+from urllib.parse import urlsplit
 
 from api_service.review_detail import MUTATION_ROLES, ReviewTaskError, _normalize_override_payload
 from api_service.security import new_id, utc_now
@@ -22,11 +23,16 @@ def assess_review_ai_auto_approval(
 ) -> dict[str, Any]:
     metadata = _mapping(execution_metadata)
     verification_result = _mapping(metadata.get("verification_result"))
+    approval_field_source = (
+        metadata.get("approval_field_names")
+        if isinstance(metadata.get("approval_field_names"), list)
+        else metadata.get("requested_field_names")
+    )
     requested_fields = [
         str(item).strip()
-        for item in metadata.get("requested_field_names", [])
+        for item in approval_field_source or []
         if str(item).strip()
-    ] if isinstance(metadata.get("requested_field_names"), list) else []
+    ] if isinstance(approval_field_source, list) else []
     requested_fields = list(dict.fromkeys(requested_fields))
     fields_by_name = {
         str(item.get("field_name") or "").strip(): item
@@ -34,16 +40,49 @@ def assess_review_ai_auto_approval(
         if str(item.get("field_name") or "").strip()
     }
     applied_corrections = _mapping(verification_result.get("applied_corrections"))
+    authoritative_identity = _mapping(metadata.get("authoritative_identity_evidence"))
+    authoritative_fields = _mapping(metadata.get("authoritative_field_evidence"))
     passed_fields = []
+    origin_identity_passed = False
+    origin_field_passes: list[str] = []
     for field_name in requested_fields:
         item = fields_by_name.get(field_name, {})
         status = str(item.get("status") or "")
         has_official_source = bool(_source_list(item.get("sources")))
-        if has_official_source and (
-            status == "match"
-            or (status == "mismatch" and field_name in applied_corrections and item.get("applied") is True)
+        identity_verified_from_origin = bool(
+            field_name == "product_name"
+            and status == "unverified"
+            and authoritative_identity.get("verified") is True
+            and authoritative_identity.get("basis") == "exact_official_detail_h1"
+            and authoritative_identity.get("source_url")
+            and _url_matches_allowed_domains(
+                str(authoritative_identity.get("source_url") or ""),
+                metadata.get("allowed_domains"),
+            )
+        )
+        origin_field = _mapping(authoritative_fields.get(field_name))
+        field_verified_from_origin = bool(
+            field_name != "product_name"
+            and status == "unverified"
+            and origin_field.get("verified") is True
+            and origin_field.get("basis") == "exact_official_detail_labeled_fee"
+            and origin_field.get("source_url")
+            and _url_matches_allowed_domains(
+                str(origin_field.get("source_url") or ""),
+                metadata.get("allowed_domains"),
+            )
+        )
+        if identity_verified_from_origin or field_verified_from_origin or (
+            has_official_source
+            and (
+                status == "match"
+                or (status == "mismatch" and field_name in applied_corrections and item.get("applied") is True)
+            )
         ):
             passed_fields.append(field_name)
+            origin_identity_passed = origin_identity_passed or identity_verified_from_origin
+            if field_verified_from_origin:
+                origin_field_passes.append(field_name)
 
     requested_count = len(requested_fields)
     passed_count = len(passed_fields)
@@ -59,8 +98,19 @@ def assess_review_ai_auto_approval(
         reason_codes.append("product_identity_unverified")
     if remaining_corrections:
         reason_codes.append("corrections_not_applied")
-    if int(verification_result.get("source_count") or 0) <= 0:
+    if (
+        int(verification_result.get("source_count") or 0) <= 0
+        and not origin_identity_passed
+        and not origin_field_passes
+    ):
         reason_codes.append("official_source_missing")
+    hard_blocking_issue_codes = [
+        str(item).strip()
+        for item in metadata.get("hard_blocking_issue_codes", [])
+        if str(item).strip()
+    ] if isinstance(metadata.get("hard_blocking_issue_codes"), list) else []
+    if hard_blocking_issue_codes:
+        reason_codes.append("hard_validation_issue_unresolved")
     if pass_rate < threshold:
         reason_codes.append("verification_pass_rate_below_threshold")
     eligible = not reason_codes
@@ -75,8 +125,32 @@ def assess_review_ai_auto_approval(
             field_name for field_name in requested_fields if field_name not in set(passed_fields)
         ],
         "product_identity_verified": product_identity_verified,
+        "product_identity_verification_basis": (
+            "exact_official_detail_h1"
+            if origin_identity_passed
+            else "review_ai_official_source"
+            if product_identity_verified
+            else None
+        ),
+        "authoritative_origin_fields": origin_field_passes,
+        "hard_blocking_issue_codes": hard_blocking_issue_codes,
         "reason_codes": reason_codes,
     }
+
+
+def _url_matches_allowed_domains(url: str, value: object) -> bool:
+    host = (urlsplit(url).hostname or "").strip(".").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    allowed_domains = [
+        str(item).strip(".").lower()
+        for item in value
+        if str(item).strip()
+    ] if isinstance(value, list) else []
+    return bool(
+        host
+        and any(host == domain or host.endswith(f".{domain}") for domain in allowed_domains)
+    )
 
 
 def persist_review_ai_auto_approval_assessment(
@@ -239,7 +313,7 @@ def apply_review_ai_corrections(
             "ai_verification_sources": _source_list(verification_field.get("sources")),
             "ai_verification_corrected_at": corrected_at.isoformat(),
             "ai_verification_contract_version": str(
-                execution_metadata.get("verification_contract_version") or "review-ai-verification-v1"
+                execution_metadata.get("verification_contract_version") or "review-ai-verification-v2"
             ),
         }
 

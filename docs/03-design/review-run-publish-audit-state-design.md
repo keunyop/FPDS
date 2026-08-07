@@ -86,6 +86,7 @@ This document applies the already-approved baseline decisions below.
 | `deferred` | approve | `approved` | persist decision reason, actor, timestamp |
 | `deferred` | edit & approve | `edited` | persist override diff, actor, timestamp |
 | `queued` or `deferred` | newer candidate from the same detail source is approved | `rejected` | mark the older candidate `superseded`, persist `superseded_by_approved_candidate`, emit system audit |
+| `queued` or `deferred` | rerun creates one active review candidate for the same normalized detail URL | `rejected` | mark the older candidate `superseded`, persist `superseded_by_newer_logical_candidate`, retain the newer review; do not apply when the URL produced multiple review candidates |
 
 ### 3.5 Review Action Semantics
 
@@ -149,13 +150,22 @@ The review task should support at least these reason codes.
 
 Phase 1 auto-approval is implemented as an audited system path, not as an invisible state flip. `auto_validated` pass candidates that meet the live field type/unit contract, product requiredness, confidence, evidence, and force-review policy are promoted through the same canonical upsert/change-event path as human approval. Candidates that pass validation but match non-product page guards are audit-logged and rejected, while force-review policy hits are routed back into a review task. Golden fixtures do not change live validation or approval eligibility; unavailable required official facts remain reviewable rather than being filled or bypassed.
 
+A catalog run that proves through official evidence that its configured Product
+Type is no longer offered may complete without a candidate, review task, or
+Partial flag. This is a positive retirement outcome with catalog deactivation
+and audit/model lineage, not a silent interpretation of missing navigation.
+Within a run, a review candidate whose exact logical identity is already covered
+by an approved candidate is superseded and its review rejected as redundant.
+
 Dynamic and lending candidates additionally require a persisted official AI
-grounding assessment with verified product identity, at least two verified
-decision fields, and the configured assessed-field ratio. Remaining active
-detail reviews are eligible for one bounded collection-autopilot verification:
-safe cited mismatches may update only the candidate, and system approval occurs
-only at the configured full-field pass rate with no unapplied correction.
-Provider failure or any insufficient result preserves the Review state.
+grounding assessment with verified product identity plus one product-defining
+fact (two verified fields total) and the configured populated decision-field
+ratio. Remaining active detail reviews are eligible for one bounded
+collection-autopilot verification: safe cited mismatches may update only the
+candidate, and system approval occurs only at the configured approval-field
+pass rate with no unapplied correction or hard source/taxonomy blocker. Empty
+optional fields do not lower the score. Provider failure or any insufficient
+result preserves the Review state.
 
 ---
 
@@ -381,7 +391,7 @@ Every audit event must support at least the following fields.
 | `review_task_requeued` | user/system | deferred task resumed | include requeue reason |
 | `candidate_auto_promoted` | system | policy promotes an `auto_validated` pass candidate | include confidence policy, candidate id, product/version id, and change-event types |
 | `candidate_auto_promotion_skipped` | system | policy blocks auto-promotion for review or rejection | include skip reason, previous/new candidate state, and review task id when queued |
-| `stale_review_auto_superseded` | system | a newer candidate from the same detail source is approved | include old/new candidate ids and previous review/candidate states |
+| `stale_review_auto_superseded` | system | a newer candidate is approved, matches the exact logical identity, or is the sole new review candidate for the same normalized detail URL | include old/new candidate ids, replacement run, matching basis, and previous review/candidate states |
 | `evidence_trace_viewed` | user | reviewer opens sensitive trace context | include review task/product context |
 | `review_ai_verification_completed` | user/system | official-domain verification completes | include review/candidate/model ids, allowed domains, cited sources, result summary, and correction field names |
 | `review_ai_verification_failed` | user/system | official-domain verification fails | include review/candidate/model ids and safe failure reason |

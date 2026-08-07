@@ -55,6 +55,7 @@ from api_service.source_catalog import (
     create_source_catalog_item,
     load_bank_list,
     normalize_bank_filters,
+    repair_catalog_coverage_route,
     start_source_catalog_collection,
     update_bank_profile,
 )
@@ -742,6 +743,45 @@ class SourceCatalogTests(unittest.TestCase):
                 product_type="mortgage",
                 fingerprint="https://www.examplebank.ca/mortgages/refinance-mortgage",
             )
+        )
+
+    def test_singular_article_route_is_out_of_product_candidate_scope(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint=(
+                    "https://www.examplebank.com/personal/investments/learning-and-insights/article/"
+                    "strategic-moves-for-cd-maturities Certificate of deposit maturity strategies"
+                ),
+            ),
+            "non_product_editorial_page",
+        )
+
+    def test_product_identity_terms_override_sibling_route_vocabulary(self) -> None:
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="line-of-credit",
+                fingerprint=(
+                    "https://www.examplebank.com/personal/mortgage/refinance/equity "
+                    "We offer a home equity line of credit (HELOC)."
+                ),
+            )
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint=(
+                    "https://www.examplebank.com/personal/savings/bank-cd "
+                    "Open a certificate of deposit with a fixed term."
+                ),
+            )
+        )
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="line-of-credit",
+                fingerprint="https://www.examplebank.com/personal/mortgage/jumbo Jumbo mortgage",
+            ),
+            "other_product_type",
         )
 
     def test_educational_slug_patterns_are_out_of_product_scope(self) -> None:
@@ -2344,6 +2384,270 @@ class SourceCatalogTests(unittest.TestCase):
                 normalized_homepage_url="https://www.atlasbank.ca/",
             )
 
+    def test_verified_brand_domain_coverage_route_is_allowed_without_broadening_unverified_urls(self) -> None:
+        metadata = {
+            "verification_status": "verified",
+            "verification_method": "ai_web_search_exact_quote",
+            "coverage_domain": "marcus.com",
+            "relationship_source_url": "https://www.marcus.com/us/en/faqs",
+            "relationship_quote": "Marcus by Goldman Sachs is a brand of Goldman Sachs Bank USA.",
+        }
+
+        self.assertEqual(
+            _normalize_coverage_source_url(
+                "https://www.marcus.com/us/en/savings",
+                normalized_homepage_url="https://www.goldmansachs.com/",
+                coverage_source_metadata=metadata,
+            ),
+            (
+                "https://www.marcus.com/us/en/savings",
+                "https://www.marcus.com/us/en/savings",
+            ),
+        )
+        with self.assertRaisesRegex(SourceRegistryError, "verified official brand-domain"):
+            _normalize_coverage_source_url(
+                "https://unrelated.example/savings",
+                normalized_homepage_url="https://www.goldmansachs.com/",
+                coverage_source_metadata=metadata,
+            )
+
+    @patch("api_service.source_catalog._record_catalog_audit_event")
+    @patch("api_service.source_catalog._require_exact_quote_on_page")
+    @patch("api_service.source_catalog.llm_provider_configured", return_value=True)
+    @patch(
+        "api_service.source_catalog.require_product_type_definition",
+        return_value={
+            "product_type_code": "savings",
+            "display_name": "Savings account",
+            "description": "Retail savings accounts",
+            "discovery_keywords": ["savings account"],
+        },
+    )
+    def test_coverage_route_repair_persists_verified_cross_domain_evidence(
+        self,
+        _definition: MagicMock,
+        _configured: MagicMock,
+        _quote_check: MagicMock,
+        audit: MagicMock,
+    ) -> None:
+        connection = _QueuedConnection([None, None, None])
+
+        def invoke_model(**_kwargs):
+            return (
+                {
+                    "status": "current_offering",
+                    "summary": (
+                        "Marcus currently offers savings accounts for Goldman Sachs Bank USA; "
+                        "the prior Transaction Banking route was rejected."
+                    ),
+                    "coverage_source_url": "https://www.marcus.com/us/en/savings",
+                    "current_offering_quote": "## Online Savings Account",
+                    "relationship_source_url": "https://www.marcus.com/us/en/faqs",
+                    "relationship_quote": "Marcus by Goldman Sachs is a brand of Goldman Sachs Bank USA.",
+                    "not_offered_source_url": None,
+                    "not_offered_quote": None,
+                },
+                {
+                    "provider": "openai",
+                    "model_id": "test-model",
+                    "provider_request_id": "resp-route-001",
+                    "prompt_tokens": 100,
+                    "completion_tokens": 50,
+                    "web_search_sources": [
+                        {"url": "https://www.marcus.com/us/en/savings", "title": "Savings"},
+                        {"url": "https://www.marcus.com/us/en/faqs", "title": "FAQs"},
+                    ],
+                },
+            )
+
+        result = repair_catalog_coverage_route(
+            connection,
+            row={
+                "catalog_item_id": "catalog-us-gsbu-savings",
+                "bank_code": "GSBU",
+                "bank_name": "Goldman Sachs Bank USA",
+                "country_code": "US",
+                "product_type": "savings",
+                "homepage_url": "https://www.goldmansachs.com/",
+                "coverage_source_url": None,
+            },
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-route-001"},
+            run_id="run-route-001",
+            correlation_id="corr-route-001",
+            invoke_model=invoke_model,
+        )
+
+        self.assertEqual(result.status, "current_offering")
+        self.assertEqual(result.coverage_source_metadata["coverage_domain"], "marcus.com")
+        route_update = next(
+            params
+            for sql, params in connection.calls
+            if "ai_verified_current_coverage_route" in sql
+        )
+        self.assertEqual(route_update["coverage_source_url"], "https://www.marcus.com/us/en/savings")
+        self.assertIn('"verification_status": "verified"', str(route_update["coverage_source_metadata"]))
+        _quote_check.assert_any_call(
+            url="https://www.marcus.com/us/en/savings",
+            quote="Online Savings Account",
+        )
+        audit.assert_called_once()
+
+    @patch("api_service.source_catalog._record_catalog_audit_event")
+    @patch("api_service.source_catalog._require_exact_quote_on_page")
+    @patch("api_service.source_catalog.llm_provider_configured", return_value=True)
+    @patch(
+        "api_service.source_catalog.require_product_type_definition",
+        return_value={
+            "product_type_code": "personal-loan",
+            "display_name": "Personal loan",
+            "description": "Retail unsecured personal loans",
+            "discovery_keywords": ["personal loan"],
+        },
+    )
+    def test_coverage_route_repair_deactivates_explicitly_retired_pdf_evidence(
+        self,
+        _definition: MagicMock,
+        _configured: MagicMock,
+        _quote_check: MagicMock,
+        audit: MagicMock,
+    ) -> None:
+        connection = _QueuedConnection([None, None, None])
+        evidence_url = "https://www.federalreserve.gov/consumerscommunities/files/goldman-sachs-strategic-plan.pdf"
+        relationship_url = "https://www.marcus.com/us/en/faqs"
+
+        def invoke_model(**_kwargs):
+            return (
+                {
+                    "status": "not_currently_offered",
+                    "summary": "The bank ceased originating consumer installment loans.",
+                    "coverage_source_url": None,
+                    "current_offering_quote": None,
+                    "relationship_source_url": relationship_url,
+                    "relationship_quote": "Marcus by Goldman Sachs is a brand of Goldman Sachs Bank USA.",
+                    "not_offered_source_url": evidence_url,
+                    "not_offered_quote": (
+                        "Marcus is in the process of winding down its offering of online consumer personal loan products in 2023."
+                    ),
+                },
+                {
+                    "provider": "openai",
+                    "model_id": "test-model",
+                    "provider_request_id": "resp-route-retired",
+                    "prompt_tokens": 90,
+                    "completion_tokens": 40,
+                    "web_search_sources": [
+                        {"url": evidence_url, "title": "Federal Reserve strategic plan"},
+                        {"url": relationship_url, "title": "Marcus FAQs"},
+                    ],
+                },
+            )
+
+        result = repair_catalog_coverage_route(
+            connection,
+            row={
+                "catalog_item_id": "catalog-us-gsbu-personal-loan",
+                "bank_code": "GSBU",
+                "bank_name": "Goldman Sachs Bank USA",
+                "country_code": "US",
+                "product_type": "personal-loan",
+                "homepage_url": "https://www.goldmansachs.com/",
+                "coverage_source_url": None,
+            },
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-route-retired"},
+            run_id="run-route-retired",
+            correlation_id="corr-route-retired",
+            invoke_model=invoke_model,
+        )
+
+        self.assertEqual(result.status, "not_currently_offered")
+        retired_update = next(
+            params
+            for sql, params in connection.calls
+            if "ai_verified_product_not_currently_offered" in sql
+        )
+        self.assertEqual(retired_update["catalog_item_id"], "catalog-us-gsbu-personal-loan")
+        self.assertIn('"verification_status": "verified_not_currently_offered"', str(retired_update["coverage_source_metadata"]))
+        audit.assert_called_once()
+
+    @patch("api_service.source_catalog._record_catalog_audit_event")
+    @patch("api_service.source_catalog._require_exact_quote_on_page")
+    @patch("api_service.source_catalog.llm_provider_configured", return_value=True)
+    @patch(
+        "api_service.source_catalog.require_product_type_definition",
+        return_value={
+            "product_type_code": "gic",
+            "display_name": "Certificate of Deposit (CD)",
+            "description": "Retail consumer certificates of deposit",
+            "discovery_keywords": ["certificate of deposit", "cd"],
+        },
+    )
+    def test_coverage_route_repair_rejects_transaction_banking_term_deposit(
+        self,
+        _definition: MagicMock,
+        _configured: MagicMock,
+        _quote_check: MagicMock,
+        audit: MagicMock,
+    ) -> None:
+        connection = _QueuedConnection([None, None])
+        route_url = "https://www.goldmansachs.com/what-we-do/transaction-banking/"
+
+        def invoke_model(**_kwargs):
+            return (
+                {
+                    "status": "current_offering",
+                    "summary": "Transaction Banking offers corporate term deposits.",
+                    "coverage_source_url": route_url,
+                    "current_offering_quote": "Deposit products include Term Deposits.",
+                    "relationship_source_url": None,
+                    "relationship_quote": None,
+                    "not_offered_source_url": None,
+                    "not_offered_quote": None,
+                },
+                {
+                    "provider": "openai",
+                    "model_id": "test-model",
+                    "provider_request_id": "resp-route-corporate",
+                    "prompt_tokens": 80,
+                    "completion_tokens": 30,
+                    "web_search_sources": [{"url": route_url, "title": "Transaction Banking"}],
+                },
+            )
+
+        result = repair_catalog_coverage_route(
+            connection,
+            row={
+                "catalog_item_id": "catalog-us-gsbu-gic",
+                "bank_code": "GSBU",
+                "bank_name": "Goldman Sachs Bank USA",
+                "country_code": "US",
+                "product_type": "gic",
+                "homepage_url": "https://www.goldmansachs.com/",
+                "coverage_source_url": None,
+            },
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-route-corporate"},
+            run_id="run-route-corporate",
+            correlation_id="corr-route-corporate",
+            invoke_model=invoke_model,
+        )
+
+        self.assertEqual(result.status, "uncertain")
+        self.assertTrue(any("non_consumer_business_page" in note for note in result.notes))
+        self.assertFalse(any("ai_verified_current_coverage_route" in sql for sql, _params in connection.calls))
+        audit.assert_not_called()
+
+    def test_coverage_route_metadata_migration_is_additive(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0031_catalog_coverage_route_evidence.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("ADD COLUMN IF NOT EXISTS coverage_source_metadata jsonb", migration_sql)
+        self.assertIn("jsonb_typeof(coverage_source_metadata) = 'object'", migration_sql)
+        self.assertIn("0031_catalog_coverage_route_evidence.sql", migration_sql)
+
     def test_create_bank_profile_accepts_homepage_without_scheme(self) -> None:
         connection = _QueuedConnection([None, None])
 
@@ -2801,6 +3105,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "homepage_url": "https://www.atlasbank.ca",
                 "normalized_homepage_url": "https://www.atlasbank.ca",
                 "coverage_source_url": None,
+                "coverage_source_metadata": {},
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -3108,6 +3413,10 @@ class SourceCatalogTests(unittest.TestCase):
                 ),
             ),
             patch("api_service.source_catalog._upsert_source_registry_rows") as upsert_rows,
+            patch(
+                "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
+                return_value=0,
+            ) as deactivate_hard_scope,
         ):
             result = _materialize_sources_for_catalog_item(
                 connection,
@@ -3127,6 +3436,11 @@ class SourceCatalogTests(unittest.TestCase):
             result.discovery_notes,
         )
         upsert_rows.assert_not_called()
+        deactivate_hard_scope.assert_called_once_with(
+            connection,
+            bank_code="BMO",
+            product_type="chequing",
+        )
         self.assertEqual(connection.calls, [])
 
     def test_start_source_catalog_collection_queues_background_work_before_detail_outcome_is_known(self) -> None:

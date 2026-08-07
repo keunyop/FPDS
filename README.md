@@ -77,12 +77,18 @@ As of `2026-08-01`:
 - `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
 - `WBS 4.11` Review Detail AI verification is now complete: authorized reviewers can force a live search of registered official bank domains, compare official facts with the collected candidate, inspect cited match/mismatch/unverified results, and selectively stage contract-safe corrections without auto-approving or publishing
 - Admin collection now applies the same official-domain live-search discipline during detail-product extraction: every active Product Type receives the complete field contract, and an AI value is accepted only when it has a consulted allowlisted URL plus an exact quote from the freshly captured evidence chunk; provider failures fall back to the existing evidence-first path without bypassing review or publication gates
-- Existing active Review Queue candidates can be batch-verified against official bank domains: contract-safe mismatches update only the candidate, full-field pass rate uses every requested field as its denominator, and only candidates at or above the Product Owner-approved `80%` threshold with verified product identity are approved through the normal canonical/audit/aggregate path; lower scores remain in Review
+- Existing active Review Queue candidates can be batch-verified against official bank domains: contract-safe mismatches update only the candidate, the approval denominator contains verified product identity plus populated or blocking decision fields, and only candidates at or above the Product Owner-approved `80%` threshold are approved through the normal canonical/audit/aggregate path. Empty optional fields are omissions; unresolved hard source/taxonomy boundaries and lower scores remain in Review
 - New collections use that AI judgment automatically: officially grounded
   dynamic/lending candidates can enter normal auto-promotion, and a bounded
   post-validation autopilot verifies and safely corrects remaining detail
-  reviews before approving only `>=80%` full-field passes. Provider failures,
-  ambiguity, validation errors, and lower scores stay in Review.
+  reviews before approving only `>=80%` approval-field passes. Provider
+  failures, ambiguous product boundaries, invalid taxonomy, partial sources,
+  unresolved material facts, and lower scores stay in Review. An exact match
+  between the candidate identity and the persisted official detail-page H1 may
+  satisfy identity when web search leaves it unverified, but never when AI
+  reports a mismatch or the page crosses product boundaries. A rerun also
+  supersedes an older same-URL task when the new URL has exactly one review
+  candidate, so corrected punctuation or naming does not duplicate the Queue.
 - `WBS 5.1` Big 5 source registry is now complete with a committed Canada Big 5 registry catalog and per-bank `chequing`, `savings`, and `gic` source baselines
 - `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification

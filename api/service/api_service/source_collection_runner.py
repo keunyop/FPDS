@@ -208,6 +208,18 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     _persist_end_to_end_source_summary(run_id=run_id, summary=run_summary)
     promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
     ai_autopilot_result = _run_collection_review_ai_autopilot_for_run(run_id=run_id, plan=plan)
+    approved_duplicate_review_count = _supersede_reviews_covered_by_approved_candidates_for_run(
+        run_id=run_id,
+        plan=plan,
+    )
+    if approved_duplicate_review_count:
+        print(
+            (
+                f"[source-collection-runner] run {run_id} superseded "
+                f"{approved_duplicate_review_count} in-run review duplicate(s) covered by an approved candidate"
+            ),
+            flush=True,
+        )
     if promotion_result["promoted_count"] or ai_autopilot_result["approved_count"]:
         launch_result = launch_aggregate_refresh_runner()
         print(
@@ -616,8 +628,11 @@ def _persist_end_to_end_source_summary(*, run_id: str, summary: dict[str, Any]) 
 def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any]) -> int:
     """Leave one active task per exact logical product after a newer rerun.
 
-    This only coalesces detail-source tasks with the same bank, family, type, and
-    product name. It does not approve or reject the product proposal itself.
+    This coalesces detail-source tasks with the same logical name. It also
+    accepts an exact source-URL match when the new run produced only one active
+    review candidate for that URL, allowing an authoritative name correction to
+    replace the stale task without collapsing a multi-product page. It does not
+    approve or reject the product proposal itself.
     """
     decided_at = datetime.now(UTC)
     settings = Settings.from_env()
@@ -638,6 +653,15 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                     nc.product_family,
                     nc.product_type,
                     lower(nc.product_name) AS normalized_product_name,
+                    sd.normalized_source_url,
+                    COUNT(*) OVER (
+                        PARTITION BY
+                            nc.country_code,
+                            nc.bank_code,
+                            nc.product_family,
+                            nc.product_type,
+                            sd.normalized_source_url
+                    ) AS new_source_candidate_count,
                     nc.created_at
                 FROM normalized_candidate AS nc
                 JOIN review_task AS rt
@@ -663,14 +687,18 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                     nc.candidate_state AS previous_candidate_state,
                     rt.review_task_id,
                     rt.review_state AS previous_review_state,
-                    newest.candidate_id AS replacement_candidate_id
+                    newest.candidate_id AS replacement_candidate_id,
+                    CASE
+                        WHEN lower(nc.product_name) = newest.normalized_product_name
+                        THEN 'exact_logical_name'
+                        ELSE 'unique_normalized_source_url'
+                    END AS supersession_basis
                 FROM newest
                 JOIN normalized_candidate AS nc
                   ON nc.country_code = newest.country_code
                  AND nc.bank_code = newest.bank_code
                  AND nc.product_family = newest.product_family
                  AND nc.product_type = newest.product_type
-                 AND lower(nc.product_name) = newest.normalized_product_name
                  AND (
                     nc.created_at < newest.created_at
                     OR (nc.created_at = newest.created_at AND nc.candidate_id < newest.candidate_id)
@@ -682,6 +710,14 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                 WHERE rt.review_state IN ('queued', 'deferred')
                   AND nc.candidate_state = 'in_review'
                   AND COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') = 'detail'
+                  AND (
+                    lower(nc.product_name) = newest.normalized_product_name
+                    OR (
+                        newest.new_source_candidate_count = 1
+                        AND newest.normalized_source_url <> ''
+                        AND sd.normalized_source_url = newest.normalized_source_url
+                    )
+                  )
                 FOR UPDATE OF nc, rt
             ),
             superseded_candidates AS (
@@ -726,7 +762,7 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                     %(audit_event_id)s, 'review', 'stale_review_auto_superseded', 'system',
                     'review_task', %(review_task_id)s, %(previous_state)s, 'rejected',
                     'superseded_by_newer_logical_candidate',
-                    'A newer detail-source candidate represents the same bank, product type, and product name.',
+                    'A newer detail-source candidate supersedes this stale logical or source-version review.',
                     %(stale_run_id)s, %(candidate_id)s, %(review_task_id)s,
                     %(request_id)s, 'Resolved an older logical duplicate review task.',
                     %(request_id)s, %(event_payload)s::jsonb, %(occurred_at)s
@@ -744,6 +780,149 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                             "replacement_candidate_id": str(stale["replacement_candidate_id"]),
                             "replacement_run_id": run_id,
                             "previous_candidate_state": str(stale["previous_candidate_state"]),
+                            "supersession_basis": str(stale["supersession_basis"]),
+                        },
+                        ensure_ascii=True,
+                        sort_keys=True,
+                    ),
+                    "occurred_at": decided_at,
+                },
+            )
+    return len(stale_rows)
+
+
+def _supersede_reviews_covered_by_approved_candidates_for_run(
+    *,
+    run_id: str,
+    plan: dict[str, Any],
+) -> int:
+    """Close same-run review duplicates after an exact logical peer is approved.
+
+    Multiple official detail URLs can describe the same product. This guard is
+    deliberately narrower than ordinary stale-review coalescing: bank, family,
+    Product Type, subtype, normalized product name, and run must all match.
+    """
+    decided_at = datetime.now(UTC)
+    settings = Settings.from_env()
+    with open_connection(settings) as connection:
+        stale_rows = connection.execute(
+            """
+            WITH approved AS (
+                SELECT DISTINCT ON (
+                    country_code,
+                    bank_code,
+                    product_family,
+                    product_type,
+                    subtype_code,
+                    lower(product_name)
+                )
+                    candidate_id,
+                    country_code,
+                    bank_code,
+                    product_family,
+                    product_type,
+                    subtype_code,
+                    lower(product_name) AS normalized_product_name
+                FROM normalized_candidate
+                WHERE run_id = %(run_id)s
+                  AND candidate_state = 'approved'
+                ORDER BY
+                    country_code,
+                    bank_code,
+                    product_family,
+                    product_type,
+                    subtype_code,
+                    lower(product_name),
+                    updated_at DESC,
+                    candidate_id DESC
+            ),
+            stale AS (
+                SELECT
+                    nc.candidate_id,
+                    nc.candidate_state AS previous_candidate_state,
+                    rt.review_task_id,
+                    rt.review_state AS previous_review_state,
+                    approved.candidate_id AS replacement_candidate_id
+                FROM approved
+                JOIN normalized_candidate AS nc
+                  ON nc.run_id = %(run_id)s
+                 AND nc.country_code = approved.country_code
+                 AND nc.bank_code = approved.bank_code
+                 AND nc.product_family = approved.product_family
+                 AND nc.product_type = approved.product_type
+                 AND nc.subtype_code = approved.subtype_code
+                 AND lower(nc.product_name) = approved.normalized_product_name
+                 AND nc.candidate_id <> approved.candidate_id
+                JOIN review_task AS rt
+                  ON rt.candidate_id = nc.candidate_id
+                JOIN source_document AS sd
+                  ON sd.source_document_id = nc.source_document_id
+                WHERE nc.candidate_state = 'in_review'
+                  AND rt.review_state IN ('queued', 'deferred')
+                  AND COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') = 'detail'
+                FOR UPDATE OF nc, rt
+            ),
+            superseded_candidates AS (
+                UPDATE normalized_candidate AS nc
+                SET
+                    candidate_state = 'superseded',
+                    review_reason_code = 'superseded_by_approved_logical_candidate',
+                    updated_at = %(decided_at)s
+                FROM stale
+                WHERE nc.candidate_id = stale.candidate_id
+                RETURNING nc.candidate_id
+            ),
+            resolved_reviews AS (
+                UPDATE review_task AS rt
+                SET
+                    review_state = 'rejected',
+                    queue_reason_code = 'superseded_by_approved_logical_candidate',
+                    updated_at = %(decided_at)s
+                FROM stale
+                WHERE rt.review_task_id = stale.review_task_id
+                RETURNING rt.review_task_id
+            )
+            SELECT stale.*
+            FROM stale
+            JOIN superseded_candidates USING (candidate_id)
+            JOIN resolved_reviews USING (review_task_id)
+            ORDER BY stale.review_task_id
+            """,
+            {"run_id": run_id, "decided_at": decided_at},
+        ).fetchall()
+        for stale in stale_rows:
+            connection.execute(
+                """
+                INSERT INTO audit_event (
+                    audit_event_id, event_category, event_type, actor_type,
+                    target_type, target_id, previous_state, new_state,
+                    reason_code, reason_text, run_id, candidate_id,
+                    review_task_id, request_id, diff_summary, source_ref,
+                    event_payload, occurred_at
+                )
+                VALUES (
+                    %(audit_event_id)s, 'review', 'approved_duplicate_review_auto_superseded', 'system',
+                    'review_task', %(review_task_id)s, %(previous_state)s, 'rejected',
+                    'superseded_by_approved_logical_candidate',
+                    'An approved candidate from the same run covers this exact logical product review.',
+                    %(run_id)s, %(candidate_id)s, %(review_task_id)s,
+                    %(request_id)s, 'Resolved a same-run logical duplicate review task.',
+                    %(request_id)s, %(event_payload)s::jsonb, %(occurred_at)s
+                )
+                """,
+                {
+                    "audit_event_id": new_id("audit"),
+                    "review_task_id": str(stale["review_task_id"]),
+                    "previous_state": str(stale["previous_review_state"]),
+                    "run_id": run_id,
+                    "candidate_id": str(stale["candidate_id"]),
+                    "request_id": plan.get("request_id"),
+                    "event_payload": json.dumps(
+                        {
+                            "replacement_candidate_id": str(stale["replacement_candidate_id"]),
+                            "replacement_run_id": run_id,
+                            "previous_candidate_state": str(stale["previous_candidate_state"]),
+                            "supersession_basis": "same_run_exact_logical_identity",
                         },
                         ensure_ascii=True,
                         sort_keys=True,

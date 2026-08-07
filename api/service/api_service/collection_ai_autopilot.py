@@ -279,6 +279,7 @@ def _load_latest_verification_execution(
         FROM model_execution
         WHERE stage_name = 'ai_verification'
           AND execution_metadata ->> 'review_task_id' = %(review_task_id)s
+          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v2'
         ORDER BY started_at DESC, model_execution_id DESC
         LIMIT 1
         """,
