@@ -158,13 +158,17 @@ Within a run, a review candidate whose exact logical identity is already covered
 by an approved candidate is superseded and its review rejected as redundant.
 
 Dynamic and lending candidates additionally require a persisted official AI
-grounding assessment with verified product identity plus one product-defining
-fact (two verified fields total) and the configured populated decision-field
-ratio. Remaining active detail reviews are eligible for one bounded
+grounding assessment with verified product identity and every selected
+type-specific essential (`100%` of the bounded set). Missing essentials
+independently block both system and human approval. Remaining active detail
+reviews are eligible for one bounded
 collection-autopilot verification: safe cited mismatches may update only the
 candidate, and system approval occurs only at the configured approval-field
-pass rate with no unapplied correction or hard source/taxonomy blocker. Empty
-optional fields do not lower the score. Provider failure or any insufficient
+pass rate with no unapplied correction or hard identity/taxonomy/type/range/
+conflict/ambiguity blocker. Optional omissions and partial-source/confidence
+warnings alone do not create Review work. APR
+ranges, formulas, and representative examples are retained with their disclosed
+assumptions in `interest_rate_summary`; provider failure or any insufficient
 result preserves the Review state.
 
 ---

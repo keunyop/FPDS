@@ -16,6 +16,7 @@ from worker.pipeline.fpds_extraction.service import (
     ExtractionService,
     _apply_exact_origin_grounding,
     _ai_candidate_value_is_contract_safe,
+    _ai_verified_value_is_supported_by_quote,
     _append_included_transactions_fallback,
     _append_fee_waiver_fallback,
     _append_labeled_numeric_extension_fallback,
@@ -25,12 +26,14 @@ from worker.pipeline.fpds_extraction.service import (
     _append_rate_fallback_fields,
     _append_promotional_period_fallback,
     _clean_title_candidate,
+    _coerce_ai_candidate_value,
     _extract_candidate_value,
     _extract_application_method,
     _extract_deposit_insurance,
     _extract_description,
     _extract_document_title,
     _extract_eligibility_text,
+    _extract_early_withdrawal_penalty,
     _extract_fee_waiver_condition,
     _field_evidence_semantic_score,
     _extract_from_matches,
@@ -56,6 +59,41 @@ from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, bui
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_ai_comparison_prose_is_not_cut_mid_condition(self) -> None:
+        waiver = (
+            "Any one of the following per statement cycle: make $500 or more in total qualifying direct deposits; "
+            "maintain a total combined ledger balance of $500 or more in related accounts; have a credit card, "
+            "mortgage, or consumer loan; have a linked small business checking account; be a student; or be an "
+            "account owner under age 25 or age 62 and older."
+        )
+
+        self.assertEqual(
+            _coerce_ai_candidate_value(
+                field_name="fee_waiver_condition",
+                value=waiver,
+                value_type="string",
+            ),
+            waiver,
+        )
+        self.assertIsNone(
+            _coerce_ai_candidate_value(
+                field_name="fee_waiver_condition",
+                value="incomplete waiver clause " * 30,
+                value_type="string",
+            )
+        )
+
+    def test_early_withdrawal_penalty_requires_a_quantified_official_term(self) -> None:
+        self.assertEqual(
+            _extract_early_withdrawal_penalty(
+                "An early withdrawal penalty of 90 days of interest applies when you withdraw before maturity."
+            ),
+            "An early withdrawal penalty of 90 days of interest applies when you withdraw before maturity.",
+        )
+        self.assertIsNone(
+            _extract_early_withdrawal_penalty("An early withdrawal penalty may apply. See disclosures."),
+        )
+
     def test_official_grounding_requires_exact_snapshot_quote_and_consulted_allowlisted_source(self) -> None:
         self.assertTrue(_ai_candidate_value_is_contract_safe(field_name="standard_rate", value="3.25"))
         self.assertFalse(_ai_candidate_value_is_contract_safe(field_name="standard_rate", value="30.00"))
@@ -78,6 +116,29 @@ class ExtractionServiceTests(unittest.TestCase):
             _exact_quote_is_grounded(
                 quote="$500",
                 excerpt="Open an account. Minimum deposit: $500.",
+            )
+        )
+        self.assertFalse(
+            _exact_quote_is_grounded(
+                quote="Minimum deposit ... $500.",
+                excerpt="Open an account. Minimum deposit is $500.",
+            )
+        )
+        self.assertTrue(
+            _ai_verified_value_is_supported_by_quote(
+                field_name="monthly_fee",
+                value=12.0,
+                evidence_quote="The $12 monthly maintenance fee is waived for students.",
+            )
+        )
+        self.assertFalse(
+            _ai_verified_value_is_supported_by_quote(
+                field_name="fee_waiver_condition",
+                value=(
+                    "The $12 monthly maintenance fee is waived for students; "
+                    "the waiver expires on the anticipated graduation date."
+                ),
+                evidence_quote="The $12 monthly maintenance fee is waived for students.",
             )
         )
         provider_sources = _filter_official_web_sources(
@@ -177,6 +238,123 @@ class ExtractionServiceTests(unittest.TestCase):
         )
         self.assertEqual(ungrounded_count, 0)
         self.assertNotIn("official_grounding_contract_version", ungrounded[0].field_metadata)
+
+    def test_exact_lending_comparison_facts_are_grounded_from_verified_official_origin(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="AUTO-BANK-LOAN-001",
+            parsed_document_id="parsed-loan-001",
+            source_document_id="src-loan-001",
+            snapshot_id="snap-loan-001",
+            bank_code="BANK",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "personal-loan",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": [
+                    "product_name",
+                    "interest_rate_summary",
+                    "loan_amount_text",
+                    "term_length_text",
+                ],
+                "normalized_source_url": "https://bank.example/personal-loans",
+                "official_domain_allowlist": ["bank.example"],
+                "discovery_metadata": {
+                    "page_title": "Personal Loans | Example Bank",
+                    "primary_heading": "Personal Loans",
+                    "product_identity_match": True,
+                    "page_evidence_score": 10,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        field_specs = (
+            (
+                "interest_rate_summary",
+                "APR from 9.99% to 17.49% for applicants who meet the stated credit and autopay conditions.",
+                "heuristic_rate_summary",
+            ),
+            (
+                "loan_amount_text",
+                "Personal loan amounts range from $2,000 to $30,000.",
+                "heuristic_text",
+            ),
+            (
+                "term_length_text",
+                "Repay your personal loan over a 12 month to 60 month term.",
+                "heuristic_term_text",
+            ),
+        )
+        fields = [
+            ExtractedFieldCandidate(
+                field_name=field_name,
+                candidate_value=evidence,
+                value_type="string",
+                confidence=0.64,
+                extraction_method=method,
+                source_document_id="src-loan-001",
+                source_snapshot_id="snap-loan-001",
+                evidence_chunk_id=f"chunk-{field_name}",
+                evidence_text_excerpt=evidence,
+                anchor_type="section",
+                anchor_value=field_name,
+                page_no=None,
+                chunk_index=1,
+                field_metadata={},
+            )
+            for field_name, evidence, method in field_specs
+        ]
+
+        grounded, count = _apply_exact_origin_grounding(context=context, extracted_fields=fields)
+
+        self.assertEqual(count, 3)
+        self.assertTrue(
+            all(
+                field.field_metadata["official_grounding_method"]
+                == "deterministic_lending_comparison_origin"
+                for field in grounded
+            )
+        )
+
+    def test_numeric_apr_summary_preserves_disclosed_qualifiers(self) -> None:
+        summary = _extract_interest_rate_summary(
+            "Citi Personal Loan APR can be as low as 9.99% or as high as 17.49%. "
+            "Rates as of February 14, 2026; excellent credit and Auto Deduct discount assumptions apply."
+        )
+
+        self.assertIn("9.99%", summary or "")
+        self.assertIn("17.49%", summary or "")
+        self.assertIn("Rates as of", summary or "")
+
+    def test_masked_mortgage_template_is_not_an_interest_rate_summary(self) -> None:
+        summary = _extract_interest_rate_summary(
+            "Down payment 5% or more of purchase price. Input ZIP code. "
+            "30-year fixed Rate X.XXX% APR X.XXX% Points X.XXX Monthly Payment $XXXX."
+        )
+
+        self.assertIsNone(summary)
+
+    def test_term_length_preserves_disclosed_upper_bound(self) -> None:
+        value, *_ = _extract_candidate_value(
+            context=ExtractionDocumentContext(
+                source_id="AUTO-BANK-LOAN-001",
+                parsed_document_id="parsed-loan-001",
+                source_document_id="src-loan-001",
+                snapshot_id="snap-loan-001",
+                bank_code="BANK",
+                country_code="US",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "personal-loan"},
+            ),
+            field_name="term_length_text",
+            excerpt="Personal loans have loan terms up to 60 months.",
+            anchor_value="loan-terms",
+        )
+
+        self.assertEqual(value, "Up to 60 months")
 
     def test_promotional_period_fallback_recovers_duration_from_any_product_chunk(self) -> None:
         context = ExtractionDocumentContext(
@@ -6312,7 +6490,7 @@ class ExtractionServiceTests(unittest.TestCase):
             self.assertEqual(call["payload"]["requested_fields"], ["product_name", "eligibility_text"])
             self.assertEqual(
                 source_result.model_execution_record["execution_metadata"]["official_grounding_contract_version"],
-                "collection-official-grounding-v1",
+                "collection-official-grounding-v2",
             )
         finally:
             rmtree(temp_path, ignore_errors=True)

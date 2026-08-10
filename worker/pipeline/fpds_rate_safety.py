@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 import re
 
-MAX_CANONICAL_ANNUAL_DEPOSIT_RATE = Decimal("25")
+MAX_CANONICAL_ANNUAL_DEPOSIT_RATE = Decimal("10")
 RATE_EVIDENCE_CONTEXT_RADIUS = 240
 
 _NON_ANNUAL_RETURN_MARKERS = (
@@ -82,6 +82,11 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "fx markup",
     "atm convenience fee",
     "abm convenience fee",
+    "atm assessment fee",
+    "abm assessment fee",
+    "point of sale & atm assessment fee",
+    "point of sale and atm assessment fee",
+    "assessment fee per transaction",
     "hypothetical return",
     "illustrative return",
     "scenario return",
@@ -179,6 +184,36 @@ _ADVERTISED_PROMOTIONAL_TOTAL_PATTERNS = (
     ),
 )
 
+_UNRESOLVED_FINANCIAL_PLACEHOLDER_RE = re.compile(
+    r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\brate\[[0-9]+\]\."
+    r"|(?<![a-z0-9])(?:\$\s*)?[x*]{2,}(?:\.[x*]+)?\s*%?(?![a-z0-9]))",
+    re.IGNORECASE,
+)
+_RATE_LABEL = (
+    r"(?:apr|annual\s+percentage\s+rate|apy|annual\s+percentage\s+yield|interest\s+rate|"
+    r"mortgage\s+rate|(?:bank\s+)?prime(?:\s+rate)?|rate)"
+)
+_NUMERIC_PERCENTAGE = r"\d{1,3}(?:\.\d{1,6})?\s*%"
+_EXPLICIT_RATE_PERCENTAGE_PATTERNS = (
+    re.compile(rf"\b{_RATE_LABEL}\b[^\d%]{{0,24}}{_NUMERIC_PERCENTAGE}", re.IGNORECASE),
+    re.compile(rf"{_NUMERIC_PERCENTAGE}[^\w%]{{0,12}}\b{_RATE_LABEL}\b", re.IGNORECASE),
+)
+
+
+def contains_unresolved_financial_placeholder(value: object) -> bool:
+    """Return true for masked/template values that must never be public facts."""
+
+    return bool(_UNRESOLVED_FINANCIAL_PLACEHOLDER_RE.search(str(value or "")))
+
+
+def contains_explicit_rate_percentage(value: object) -> bool:
+    """Require a numeric percentage tied locally to a rate/APR/APY label."""
+
+    text = str(value or "")
+    if contains_unresolved_financial_placeholder(text):
+        return False
+    return any(pattern.search(text) is not None for pattern in _EXPLICIT_RATE_PERCENTAGE_PATTERNS)
+
 
 def canonical_deposit_rate_suppression_reason(
     *,
@@ -187,12 +222,13 @@ def canonical_deposit_rate_suppression_reason(
     reference_date: date | None = None,
 ) -> str | None:
     decimal_value = _to_decimal(value)
-    if decimal_value is not None and decimal_value >= MAX_CANONICAL_ANNUAL_DEPOSIT_RATE:
-        return "implausible_annual_deposit_rate"
+    implausible_value = (
+        decimal_value is not None and decimal_value >= MAX_CANONICAL_ANNUAL_DEPOSIT_RATE
+    )
 
     normalized_context = _normalize_context(context)
     if not normalized_context:
-        return None
+        return "implausible_annual_deposit_rate" if implausible_value else None
     if expired_promotional_offer_end_date(normalized_context, reference_date=reference_date) is not None:
         return "expired_promotional_offer"
     if any(marker in normalized_context for marker in _NON_ANNUAL_RETURN_MARKERS):
@@ -217,7 +253,7 @@ def canonical_deposit_rate_suppression_reason(
         normalized_context,
     ):
         return "non_annual_return_context"
-    return None
+    return "implausible_annual_deposit_rate" if implausible_value else None
 
 
 def bounded_rate_evidence_context(

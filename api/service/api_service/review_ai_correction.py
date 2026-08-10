@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 ACTIVE_REVIEW_STATES = {"queued", "deferred"}
-AUTO_APPROVAL_THRESHOLD = 0.8
+AUTO_APPROVAL_THRESHOLD = 1.0
 
 
 def assess_review_ai_auto_approval(
@@ -65,7 +65,11 @@ def assess_review_ai_auto_approval(
             field_name != "product_name"
             and status == "unverified"
             and origin_field.get("verified") is True
-            and origin_field.get("basis") == "exact_official_detail_labeled_fee"
+            and origin_field.get("basis")
+            in {
+                "exact_official_detail_labeled_fee",
+                "exact_official_detail_lending_comparison",
+            }
             and origin_field.get("source_url")
             and _url_matches_allowed_domains(
                 str(origin_field.get("source_url") or ""),
@@ -276,6 +280,7 @@ def apply_review_ai_corrections(
         for item in _mapping_list(verification_result.get("fields"))
         if item.get("can_apply") is True
         and str(item.get("status") or "") == "mismatch"
+        and str(item.get("evidence_quote") or "").strip()
         and _source_list(item.get("sources"))
     }
     normalized_corrections = {
@@ -311,9 +316,10 @@ def apply_review_ai_corrections(
             "ai_verification_status": "applied_mismatch",
             "ai_verification_rationale": str(verification_field.get("rationale") or ""),
             "ai_verification_sources": _source_list(verification_field.get("sources")),
+            "official_evidence_quote": str(verification_field.get("evidence_quote") or "")[:700],
             "ai_verification_corrected_at": corrected_at.isoformat(),
             "ai_verification_contract_version": str(
-                execution_metadata.get("verification_contract_version") or "review-ai-verification-v2"
+                execution_metadata.get("verification_contract_version") or "review-ai-verification-v7"
             ),
         }
 

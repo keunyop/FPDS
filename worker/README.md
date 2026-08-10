@@ -54,8 +54,10 @@ Runtime invariants:
   unavailability falls back to the existing heuristic extraction path. A
   co-located labeled currency fee may be grounded directly from a verified,
   identity-matched official detail snapshot only when the origin belongs to an
-  explicitly configured bank-domain allowlist; rates and prose do not use this
-  fallback.
+  explicitly configured bank-domain allowlist. A qualified lending rate summary
+  and its amount/limit/term/rate-type companions may use the same path only when
+  their value and qualifying context are co-located in that snapshot; scalar
+  rates and general prose do not use this fallback.
 - dynamic/lending extraction is limited to the registered Product Type field
   contract. Ungrounded lending attributes are omitted instead of publishing
   heuristic feature copy.
@@ -63,7 +65,52 @@ Runtime invariants:
   payment-service enrollment terms are not product application or eligibility,
   linked-account fee-waiver lists are not customer eligibility, and investment
   risk disclaimers are not deposit insurance.
-- dynamic/lending candidates that verify official product identity plus at
-  least one product-defining fact (two verified fields total), and the
-  configured `80%` populated decision-field ratio, may use normal Phase 1
-  auto-validation; insufficient grounding remains review-bound
+- current Deposit and Lending collection resolves identity plus comparison
+  essentials from the versioned `(country_code, product_type)` profile in
+  `fpds_market_profile.py`. Canada retains fee/balance/transaction Chequing and
+  rate/term/deposit/redeemability GIC semantics. US Checking uses fee,
+  opening/minimum balance, and a conditional fee-waiver/qualifying-activity
+  fact. US Savings additionally requires a complete waiver for a positive fee
+  and an assumption-preserving summary for conditional APYs; US CDs use APY/rate schedule, term, opening deposit, and quantified
+  early-withdrawal penalty; US Mortgage requires an assumption-bearing
+  percentage rate/APR summary, rate type, and term. US Credit Card and Line of
+  Credit also have explicit market ownership even where today's required facts
+  match Canada's current minimums. An explicitly named new country fails closed
+  until its profiles are registered; only country-less legacy calls retain the
+  Canada baseline. Unknown Product Types fail closed on a registered
+  rate-plus-decision contract.
+- Country scope also applies to URLs, not only database rows. Explicit
+  other-market paths/locales, subdomains, and country-code TLDs are excluded
+  from entry, seed, detail, and supporting evidence even when both markets use
+  the same official parent domain.
+- Supporting-source planning is bounded before fetch to exact-product
+  descendants/companions, Product-Type-compatible rate/APR pages, and relevant
+  essential-fact FAQs/disclosures. Educational, servicing, application,
+  transfer, investment, sibling-product, and conflicting Product-Type routes
+  are excluded. Collection official grounding v2 rejects ellipsized quotes,
+  requires every proposed number in the quote, and requires complete waiver,
+  penalty, security, and qualified-rate prose rather than model extrapolation.
+- dynamic/lending candidates must verify official product identity and `100%`
+  of the selected essential facts. Optional marketing or operational fields are
+  outside collection and Review by default. A partial-source or legacy
+  confidence warning alone does not block a complete candidate; missing,
+  contradictory, invalid, or ambiguously mapped essentials remain Review-bound.
+- APR ranges, reference-rate formulas, and representative mortgage examples
+  stay in `interest_rate_summary` with their disclosed assumptions instead of
+  being collapsed into a misleading scalar. Unknown dynamic types fail closed
+  until their registry defines a percentage field plus another decision field.
+- US Personal Loan and vehicle-loan representative APR examples also retain
+  any official model-year/vehicle-age, LTV, down-payment, credit,
+  origination-fee, rate-change, relationship/autopay-discount qualification,
+  and existing-customer assumptions; omission is Review-bound.
+- masked/template financial values (`X.XXX%`, `$XXXX`, unresolved RDS/rate
+  tokens) never satisfy comparison quality. A textual rate summary needs a
+  concrete percentage adjacent to Rate, APR, APY, or an explicit reference-rate
+  label; unrelated percentages such as down payment, transaction/conversion
+  fees, or ATM/ABM assessment fees do not count.
+- AI-grounded comparison prose uses field-specific safe bounds. Fee-waiver,
+  penalty, tier, and qualified-rate text is retained as a complete condition or
+  omitted for Review; it is never blindly sliced mid-word or mid-clause.
+- country-specific Public projections retain only the resolved comparison
+  fields plus identity, status/freshness, and official product link. Broader
+  normalized copy remains private for Admin evidence and audit.

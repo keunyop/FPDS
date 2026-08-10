@@ -39,6 +39,7 @@ class AggregateRefreshServiceTests(unittest.TestCase):
             "https://www.bmo.com/main/personal/investments/gic/",
         )
         self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["base_12_month_rate"], 4.5)
+        self.assertTrue(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["non_redeemable_flag"])
         self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["application_method"], "Apply online or in branch.")
         self.assertEqual(projection_by_product_id["gic-bmo-1y"]["refresh_metadata"]["term_rate_table"][0]["term_label"], "12 months")
         self.assertEqual(projection_by_product_id["gic-scotia-4y"]["term_bucket"], "over_3y")
@@ -102,6 +103,129 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         self.assertEqual(projection["public_display_rate"], 4.49)
         self.assertEqual(projection["refresh_metadata"]["mortgage_rate"], "4.49%")
         self.assertEqual(projection["refresh_metadata"]["amortization_text"], "Up to 30 years")
+
+    def test_incomplete_active_lending_product_is_excluded_from_public_projection(self) -> None:
+        result = AggregateRefreshService().build_snapshot(
+            snapshot_id="agg-loan-incomplete",
+            refresh_scope="phase1_public",
+            country_code="US",
+            canonical_rows=[
+                _row(
+                    product_id="loan-incomplete",
+                    bank_code="CIBC",
+                    product_family="lending",
+                    product_type="personal-loan",
+                    subtype_code="other",
+                    product_name="Citi Personal Loan",
+                    last_changed_at="2026-08-07T00:00:00+00:00",
+                    payload={"monthly_payment_text": "Monthly payments"},
+                )
+            ],
+            refreshed_at="2026-08-08T12:00:00+00:00",
+        )
+
+        self.assertEqual(result.projection_rows, [])
+        self.assertEqual(
+            result.refresh_metadata["source_counts"]["excluded_incomplete_comparison_rows"],
+            1,
+        )
+
+    def test_incomplete_active_deposit_product_is_excluded_from_public_projection(self) -> None:
+        result = AggregateRefreshService().build_snapshot(
+            snapshot_id="agg-deposit-incomplete",
+            refresh_scope="phase1_public",
+            country_code="CA",
+            canonical_rows=[
+                _row(
+                    product_id="savings-incomplete",
+                    bank_code="CIBC",
+                    product_type="savings",
+                    subtype_code="standard",
+                    product_name="Incomplete Savings",
+                    last_changed_at="2026-08-07T00:00:00+00:00",
+                    payload={"standard_rate": 2.5, "minimum_balance": 0},
+                )
+            ],
+            refreshed_at="2026-08-08T12:00:00+00:00",
+        )
+
+        self.assertEqual(result.projection_rows, [])
+        self.assertEqual(result.refresh_metadata["source_counts"]["excluded_incomplete_comparison_rows"], 1)
+
+    def test_us_market_profiles_drive_public_projection_and_metadata(self) -> None:
+        result = AggregateRefreshService().build_snapshot(
+            snapshot_id="agg-us-market-profiles",
+            refresh_scope="phase1_public",
+            country_code="US",
+            canonical_rows=[
+                _row(
+                    product_id="checking-no-fee",
+                    bank_code="TD",
+                    country_code="US",
+                    product_type="chequing",
+                    subtype_code="standard",
+                    product_name="No Fee Checking",
+                    last_changed_at="2026-08-09T00:00:00+00:00",
+                    payload={
+                        "monthly_fee": 0,
+                        "minimum_deposit": 25,
+                        "eligibility_text": "Misclassified transfer limit",
+                        "description_short": "Navigation copy",
+                        "application_method": "Apply online",
+                        "target_customer_tags": ["unverified-segment"],
+                    },
+                ),
+                _row(
+                    product_id="cd-12-month",
+                    bank_code="TD",
+                    country_code="US",
+                    product_type="gic",
+                    subtype_code="other",
+                    product_name="12 Month CD",
+                    last_changed_at="2026-08-09T00:00:00+00:00",
+                    payload={
+                        "term_rate_table": [{"term_label": "12 months", "rate": 4.1}],
+                        "minimum_deposit": 500,
+                        "early_withdrawal_penalty": "90 days of interest for terms of 12 months or less.",
+                    },
+                ),
+                _row(
+                    product_id="line-of-credit",
+                    bank_code="TD",
+                    country_code="US",
+                    product_family="lending",
+                    product_type="line-of-credit",
+                    subtype_code="other",
+                    product_name="Personal Line of Credit",
+                    last_changed_at="2026-08-09T00:00:00+00:00",
+                    payload={
+                        "interest_rate_summary": "Prime + 2.00% variable rate",
+                        "credit_limit_text": "$5,000-$50,000",
+                        "secured_flag": False,
+                        "fees_text": "Navigation and application copy",
+                    },
+                ),
+            ],
+            refreshed_at="2026-08-09T12:00:00+00:00",
+        )
+
+        self.assertEqual(
+            {row["product_id"] for row in result.projection_rows},
+            {"checking-no-fee", "cd-12-month", "line-of-credit"},
+        )
+        checking_row = next(row for row in result.projection_rows if row["product_id"] == "checking-no-fee")
+        self.assertNotIn("eligibility_text", checking_row["refresh_metadata"])
+        self.assertNotIn("description_short", checking_row["refresh_metadata"])
+        self.assertNotIn("application_method", checking_row["refresh_metadata"])
+        self.assertEqual(checking_row["target_customer_tags"], [])
+        cd_row = next(row for row in result.projection_rows if row["product_id"] == "cd-12-month")
+        self.assertEqual(
+            cd_row["refresh_metadata"]["early_withdrawal_penalty"],
+            "90 days of interest for terms of 12 months or less.",
+        )
+        line_row = next(row for row in result.projection_rows if row["product_id"] == "line-of-credit")
+        self.assertEqual(line_row["refresh_metadata"]["credit_limit_text"], "$5,000-$50,000")
+        self.assertNotIn("fees_text", line_row["refresh_metadata"])
 
 
 class AggregateRefreshPersistenceTests(unittest.TestCase):
@@ -200,7 +324,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="package",
             product_name="RBC Student Banking",
             last_changed_at="2026-04-10T00:00:00+00:00",
-            payload={"public_display_rate": 1.0, "monthly_fee": 0, "minimum_balance": 0, "target_customer_tags": ["student"]},
+            payload={"public_display_rate": 1.0, "monthly_fee": 0, "minimum_balance": 0, "included_transactions": 25, "target_customer_tags": ["student"]},
         ),
         _row(
             product_id="chq-cibc-smart",
@@ -209,7 +333,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="standard",
             product_name="CIBC Smart Account",
             last_changed_at="2026-03-20T00:00:00+00:00",
-            payload={"public_display_rate": 0.5, "monthly_fee": 4.95, "minimum_balance": 1500},
+            payload={"public_display_rate": 0.5, "monthly_fee": 4.95, "minimum_balance": 1500, "included_transactions": 12},
         ),
         _row(
             product_id="chq-scotia-premium",
@@ -218,7 +342,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="premium",
             product_name="Scotiabank Ultimate Package",
             last_changed_at="2026-04-11T00:00:00+00:00",
-            payload={"public_display_rate": 0.75, "monthly_fee": 14.99, "minimum_balance": 4000},
+            payload={"public_display_rate": 0.75, "monthly_fee": 14.99, "minimum_balance": 4000, "unlimited_transactions_flag": True},
         ),
         _row(
             product_id="chq-td-everyday",
@@ -227,7 +351,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="standard",
             product_name="TD Everyday Chequing Account",
             last_changed_at="2026-04-01T00:00:00+00:00",
-            payload={"monthly_fee": 16.95, "minimum_balance": 5000},
+            payload={"monthly_fee": 16.95, "minimum_balance": 5000, "included_transactions": 25},
         ),
         _row(
             product_id="sav-td-epremium",
@@ -236,7 +360,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="high_interest",
             product_name="TD ePremium Savings Account",
             last_changed_at="2026-03-25T00:00:00+00:00",
-            payload={"public_display_rate": 3.2, "minimum_balance": 5000},
+            payload={"public_display_rate": 3.2, "monthly_fee": 0, "minimum_balance": 5000},
         ),
         _row(
             product_id="sav-rbc-high",
@@ -245,7 +369,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="high_interest",
             product_name="RBC High Interest eSavings",
             last_changed_at="2026-04-05T00:00:00+00:00",
-            payload={"public_display_rate": 2.7, "minimum_balance": 0},
+            payload={"public_display_rate": 2.7, "monthly_fee": 0, "minimum_balance": 0},
         ),
         _row(
             product_id="sav-bmo-standard",
@@ -254,7 +378,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="standard",
             product_name="BMO Savings Builder",
             last_changed_at="2026-04-08T00:00:00+00:00",
-            payload={"public_display_rate": 1.5, "minimum_balance": 100},
+            payload={"public_display_rate": 1.5, "monthly_fee": 0, "minimum_balance": 100},
         ),
         _row(
             product_id="gic-bmo-1y",
@@ -267,6 +391,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
                 "public_display_rate": 4.5,
                 "minimum_deposit": 500,
                 "term_length_days": 365,
+                "non_redeemable_flag": True,
                 "source_url": "https://www.bmo.com/main/personal/investments/gic/",
                 "base_12_month_rate": 4.5,
                 "eligibility_text": "Canadian residents who meet BMO account opening requirements.",
@@ -292,7 +417,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="non_redeemable",
             product_name="Scotiabank 4 Year GIC",
             last_changed_at="2026-03-01T00:00:00+00:00",
-            payload={"public_display_rate": 4.2, "minimum_deposit": 5000, "term_length_days": 1460},
+            payload={"public_display_rate": 4.2, "minimum_deposit": 5000, "term_length_days": 1460, "non_redeemable_flag": True},
         ),
         _row(
             product_id="gic-td-short",
@@ -301,7 +426,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="redeemable",
             product_name="TD 6 Month Cashable GIC",
             last_changed_at="2026-04-03T00:00:00+00:00",
-            payload={"public_display_rate": 4.3, "minimum_deposit": 250, "term_length_days": 180},
+            payload={"public_display_rate": 4.3, "minimum_deposit": 250, "term_length_days": 180, "redeemable_flag": True},
         ),
         _row(
             product_id="sav-cibc-inactive",
@@ -327,6 +452,7 @@ def _row(
     payload: dict[str, object],
     product_family: str = "deposit",
     status: str = "active",
+    country_code: str = "CA",
 ) -> CanonicalAggregateRow:
     bank_name = {
         "RBC": "Royal Bank of Canada",
@@ -339,13 +465,13 @@ def _row(
         product_id=product_id,
         bank_code=bank_code,
         bank_name=bank_name,
-        country_code="CA",
+        country_code=country_code,
         product_family=product_family,
         product_type=product_type,
         subtype_code=subtype_code,
         product_name=product_name,
         source_language="en",
-        currency="CAD",
+        currency="USD" if country_code == "US" else "CAD",
         status=status,
         last_verified_at="2026-04-12T00:00:00+00:00",
         last_changed_at=last_changed_at,

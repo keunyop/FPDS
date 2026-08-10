@@ -42,6 +42,7 @@ class CandidateSafetyRemediationTests(unittest.TestCase):
                     "product_version_id": "pv-bad",
                     "product_id": "prod-bad",
                     "product_status": "active",
+                    "country_code": "US",
                 }
             ]
         )
@@ -66,6 +67,7 @@ class CandidateSafetyRemediationTests(unittest.TestCase):
         self.assertTrue(any("status = 'inactive'" in sql for sql, _params in connection.calls))
         self.assertTrue(any("candidate_safety_retracted" in sql for sql, _params in connection.calls))
         queue_refresh.assert_called_once()
+        self.assertEqual(queue_refresh.call_args.kwargs["country_code"], "US")
 
 
 if __name__ == "__main__":

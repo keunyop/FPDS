@@ -3,14 +3,21 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 import json
+from pathlib import Path
 import re
+import sys
 from typing import TYPE_CHECKING, Any
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
+    sys.path.insert(0, str(REPO_ROOT))
 
 from api_service.aggregate_refresh import queue_auto_promotion_aggregate_refresh_request
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.review_detail import _apply_canonical_approval, _approved_product_name, _coerce_mapping
 from api_service.security import new_id, utc_now
+from worker.pipeline.fpds_approval_policy import comparison_quality
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -19,6 +26,7 @@ else:  # pragma: no cover
 
 
 DEFAULT_AUTO_PROMOTION_LIMIT = 1000
+_NON_BLOCKING_AUTOMATION_ISSUES = {"partial_source_failure", "low_confidence"}
 AUTO_PROMOTION_ACTOR = {
     "actor_type": "system",
     "role": "system",
@@ -51,7 +59,6 @@ def promote_auto_validated_candidates(
     rows = _load_candidate_rows(
         connection,
         run_id=run_id,
-        min_confidence=policy["auto_approve_min_confidence"],
         limit=limit,
     )
     active_actor = {**AUTO_PROMOTION_ACTOR, **(actor or {})}
@@ -63,7 +70,11 @@ def promote_auto_validated_candidates(
     for row in rows:
         candidate_id = str(row["candidate_id"])
         issue_codes = _coerce_string_list(row.get("validation_issue_codes"))
-        force_review_hits = sorted(set(issue_codes).intersection(policy["force_review_issue_codes"]))
+        force_review_hits = sorted(
+            set(issue_codes)
+            .intersection(policy["force_review_issue_codes"])
+            .difference(_NON_BLOCKING_AUTOMATION_ISSUES)
+        )
         if force_review_hits:
             review_task_id = _queue_candidate_for_review(
                 connection,
@@ -94,6 +105,48 @@ def promote_auto_validated_candidates(
                     "skip_reason": "force_review_issue_code",
                     "action": "queued_for_review",
                     "issue_codes": force_review_hits,
+                }
+            )
+            continue
+        source_metadata = _coerce_mapping(row.get("source_metadata"))
+        quality = comparison_quality(
+            product_type=str(row.get("product_type") or ""),
+            country_code=str(row.get("country_code") or ""),
+            expected_fields=_coerce_string_list(source_metadata.get("expected_fields")),
+            candidate_payload=_coerce_mapping(row.get("candidate_payload")),
+        )
+        if quality.applicable and (not quality.contract_defined or not quality.complete):
+            reason_code = "comparison_fields_missing"
+            review_task_id = _queue_candidate_for_review(
+                connection,
+                row=row,
+                queue_reason_code=reason_code,
+                issue_codes=["required_field_missing"],
+                decided_at=decided_at,
+            )
+            _record_candidate_auto_promotion_skip_audit_event(
+                connection,
+                actor=active_actor,
+                request_context=active_context,
+                row=row,
+                decided_at=decided_at,
+                previous_state="auto_validated",
+                new_state="in_review",
+                reason_code=reason_code,
+                reason_text="Candidate lacked mandatory comparison-grade rate, price, amount, or term fields.",
+                review_task_id=review_task_id,
+                event_payload={
+                    "contract_defined": quality.contract_defined,
+                    "missing_fields": list(quality.missing_fields),
+                    "source_confidence": float(row["source_confidence"]),
+                },
+            )
+            skipped_items.append(
+                {
+                    "candidate_id": candidate_id,
+                    "skip_reason": reason_code,
+                    "action": "queued_for_review",
+                    "missing_fields": list(quality.missing_fields),
                 }
             )
             continue
@@ -370,14 +423,11 @@ def _load_candidate_rows(
     connection: Connection,
     *,
     run_id: str | None,
-    min_confidence: float,
     limit: int | None,
 ) -> list[dict[str, Any]]:
     limit_clause = "LIMIT %(limit)s" if limit is not None else ""
     run_filter_clause = "AND nc.run_id = %(run_id)s" if run_id is not None else ""
-    params: dict[str, Any] = {
-        "min_confidence": min_confidence,
-    }
+    params: dict[str, Any] = {}
     if run_id is not None:
         params["run_id"] = run_id
     if limit is not None:
@@ -419,8 +469,7 @@ def _load_candidate_rows(
             LIMIT 1
         ) AS validation_ai ON true
         WHERE nc.candidate_state = 'auto_validated'
-          AND nc.validation_status = 'pass'
-          AND nc.source_confidence >= %(min_confidence)s
+          AND nc.validation_status IN ('pass', 'warning')
           {run_filter_clause}
           AND NOT EXISTS (
               SELECT 1
@@ -471,11 +520,11 @@ def _collection_ai_assessment_is_eligible(assessment: dict[str, Any]) -> bool:
     )
     try:
         verified_ratio = float(assessment.get("verified_ratio") or 0.0)
-        threshold = float(assessment.get("threshold") or 0.8)
+        threshold = float(assessment.get("threshold") or 1.0)
     except (TypeError, ValueError):
         return False
     return (
-        assessment.get("contract_version") == "collection-official-grounding-v1"
+        assessment.get("contract_version") == "collection-official-grounding-v2"
         and assessment.get("required") is True
         and assessment.get("eligible") is True
         and assessment.get("product_identity_verified") is True

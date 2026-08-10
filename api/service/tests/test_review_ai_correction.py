@@ -45,7 +45,7 @@ class _RecordingConnection:
             "execution_metadata": {
                 "review_task_id": "review-001",
                 "candidate_id": "candidate-001",
-                "verification_contract_version": "review-ai-verification-v1",
+                "verification_contract_version": "review-ai-verification-v7",
                 "verification_result": {
                     "overall_status": "differences_found",
                     "fields": [
@@ -54,6 +54,7 @@ class _RecordingConnection:
                             "status": "mismatch",
                             "confidence": 0.97,
                             "rationale": "Current official rate.",
+                            "evidence_quote": "Example Savings APY is 3.25%.",
                             "sources": [
                                 {"url": "https://bank.example/rates", "title": "Official rates"},
                             ],
@@ -100,7 +101,7 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertEqual(metadata["review_task_id"], "review-001")
         self.assertEqual(metadata["auto_approval_assessment"], assessment)
 
-    def test_auto_approval_accepts_exactly_eighty_percent_with_verified_identity(self):
+    def test_auto_approval_rejects_eighty_percent_when_one_essential_is_unverified(self):
         source = [{"url": "https://bank.example/product", "title": "Official product"}]
         assessment = assess_review_ai_auto_approval(
             execution_status="completed",
@@ -131,9 +132,10 @@ class ReviewAiCorrectionTests(TestCase):
                 },
             },
         )
-        self.assertTrue(assessment["eligible"])
+        self.assertFalse(assessment["eligible"])
         self.assertEqual(assessment["pass_rate"], 0.8)
         self.assertEqual(assessment["passed_field_count"], 4)
+        self.assertIn("verification_pass_rate_below_threshold", assessment["reason_codes"])
 
     def test_auto_approval_rejects_missing_identity_and_omitted_model_fields(self):
         source = [{"url": "https://bank.example/product", "title": "Official product"}]
@@ -157,7 +159,7 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertIn("product_identity_unverified", assessment["reason_codes"])
         self.assertIn("verification_pass_rate_below_threshold", assessment["reason_codes"])
 
-    def test_auto_approval_uses_v2_approval_fields_not_legacy_optional_denominator(self):
+    def test_auto_approval_uses_current_approval_fields_not_legacy_optional_denominator(self):
         source = [{"url": "https://bank.example/product", "title": "Official product"}]
         assessment = assess_review_ai_auto_approval(
             execution_status="completed",
@@ -248,6 +250,50 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertEqual(assessment["authoritative_origin_fields"], ["annual_fee"])
         self.assertNotIn("official_source_missing", assessment["reason_codes"])
 
+    def test_auto_approval_reuses_exact_origin_lending_fields_when_review_ai_abstains(self):
+        requested_fields = [
+            "product_name",
+            "interest_rate_summary",
+            "loan_amount_text",
+            "term_length_text",
+        ]
+        assessment = assess_review_ai_auto_approval(
+            execution_status="completed",
+            execution_metadata={
+                "approval_field_names": requested_fields,
+                "hard_blocking_issue_codes": [],
+                "authoritative_identity_evidence": {
+                    "verified": True,
+                    "basis": "exact_official_detail_h1",
+                    "source_url": "https://bank.example/personal-loans",
+                },
+                "authoritative_field_evidence": {
+                    field_name: {
+                        "verified": True,
+                        "basis": "exact_official_detail_lending_comparison",
+                        "source_url": "https://bank.example/personal-loans",
+                    }
+                    for field_name in requested_fields[1:]
+                },
+                "allowed_domains": ["bank.example"],
+                "verification_result": {
+                    "source_count": 0,
+                    "proposed_corrections": {},
+                    "fields": [
+                        {"field_name": field_name, "status": "unverified", "sources": []}
+                        for field_name in requested_fields
+                    ],
+                },
+            },
+        )
+
+        self.assertTrue(assessment["eligible"])
+        self.assertEqual(assessment["pass_rate"], 1.0)
+        self.assertEqual(
+            assessment["authoritative_origin_fields"],
+            ["interest_rate_summary", "loan_amount_text", "term_length_text"],
+        )
+
     def test_auto_approval_rejects_non_field_resolvable_hard_issue(self):
         source = [{"url": "https://bank.example/product", "title": "Official product"}]
         assessment = assess_review_ai_auto_approval(
@@ -293,6 +339,7 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertEqual(mapping["extraction_method"], "review_ai_verification")
         self.assertEqual(mapping["model_execution_id"], "modelexec-001")
         self.assertEqual(mapping["ai_verification_sources"][0]["url"], "https://bank.example/rates")
+        self.assertEqual(mapping["official_evidence_quote"], "Example Savings APY is 3.25%.")
         self.assertNotIn("candidate_state", candidate_update)
 
         task_update = next(params for sql, params in connection.calls if sql.startswith("UPDATE review_task"))
@@ -320,6 +367,23 @@ class ReviewAiCorrectionTests(TestCase):
         verification = connection.row["execution_metadata"]["verification_result"]
         verification["fields"][0]["can_apply"] = False
         verification["fields"][0]["sources"] = []
+
+        result = apply_review_ai_corrections(
+            connection,
+            review_task_id="review-001",
+            model_execution_id="modelexec-001",
+            actor={"actor_type": "system", "role": "admin"},
+            request_context={"request_id": "batch-001"},
+        )
+
+        self.assertFalse(result["applied"])
+        self.assertFalse(any(sql.startswith("UPDATE normalized_candidate") for sql, _ in connection.calls))
+        self.assertFalse(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
+
+    def test_ignores_correction_without_exact_evidence_quote(self):
+        connection = _RecordingConnection()
+        verification = connection.row["execution_metadata"]["verification_result"]
+        verification["fields"][0]["evidence_quote"] = ""
 
         result = apply_review_ai_corrections(
             connection,

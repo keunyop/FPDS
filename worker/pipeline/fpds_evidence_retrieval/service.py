@@ -56,6 +56,13 @@ _FIELD_HINTS: dict[str, tuple[str, ...]] = {
     "term_length_days": ("term", "year", "month", "days"),
     "redeemable_flag": ("redeemable", "cashable", "early redemption"),
     "non_redeemable_flag": ("non-redeemable", "non redeemable", "non-cashable", "non cashable"),
+    "early_withdrawal_penalty": (
+        "early withdrawal penalty",
+        "penalty for early withdrawal",
+        "withdraw before maturity",
+        "days of interest",
+        "months of interest",
+    ),
     "compounding_frequency": ("compounded", "compounding", "compound interest"),
     "payout_option": ("paid monthly", "paid annually", "at maturity", "interest paid"),
     "registered_plan_supported": ("tfsa", "rrsp", "rrif", "registered plan", "registered account"),

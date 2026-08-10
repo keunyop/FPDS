@@ -38,7 +38,7 @@ As of `2026-08-01`:
 - Current cross-bank accuracy hardening requires exact percentage evidence, separates regular rates from time/eligibility-limited promotional totals and ongoing bonuses, preserves foreign-product currency, requires direct and cross-field-consistent monthly fees, and prevents adjacent product, family-page, investment-fund, FX, index-return, calculator, or WAF content from becoming public product facts. Snapshot metadata preserves established detail ownership across shared supporting fetches, manual review overrides use the executable type/range contract, and the collection watchdog can recover only a fully persisted terminal result emitted before timeout. Confirmed unsafe historical/live candidates are retracted through audited remediation before corrected recollection.
 - Latest decision-field hardening maps flattened horizontal comparison tables back to the target product column, separates a positive recurring fee from its balance-qualified `$0` outcome, preserves material savings balance tiers and transaction fees, ranks explicit multi-step qualification evidence over marketing summaries, and carries exact account-wide unlimited-transaction facts from official supporting sources. Cross-sell audience offers, account-switching services, incomplete fragments, award copy, and repeated application CTAs are removed from customer-facing fields without inventing missing values.
 - Public now has separate Deposit and Loan catalog routes. Loan accepts review-approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products through the same aggregate snapshot and public-only data boundary; candidates that still require review remain non-public.
-- Public country readiness is now implemented end to end: bank-owned ISO alpha-2 country codes flow through canonical approval and country-specific aggregate refresh into Public APIs and URL state. The header selects among countries with active latest snapshots, the footer owns EN/KO/JA language selection, and current collection scope remains Canada.
+- Public country readiness is now implemented end to end: bank-owned ISO alpha-2 country codes flow through canonical approval and country-specific aggregate refresh into Public APIs and URL state. The header selects among countries with active latest snapshots, the footer owns EN/KO/JA language selection, and current governed collection scope includes Canada and the United States; each later country remains fail-closed until its own product profiles and fixtures are registered.
 - Admin is now country-scoped from sign-in: operators select an enabled country before authentication, the server stores it in the session, the shell keeps the working country visible, and bank/source/collection/run/review/change/usage operations are constrained to that country. Stable product/candidate/run IDs remain opaque; country is enforced through business keys, foreign keys, and lookup indexes.
 - Admin administrators can now manage that login allowlist from `/admin/countries`: countries are selected from a prepared ISO catalog, activation is audited, and reversible deactivation preserves historical data while protecting the current and final active country.
 - The authenticated Admin header now switches the current server-side session among active countries with confirmation, CSRF protection, and audit history, then returns to Overview in the same language to prevent country-owned screen context from leaking across markets.
@@ -76,19 +76,36 @@ As of `2026-08-01`:
 - `WBS 4.9` usage dashboard v1 is now complete with provider/stage/search filters, richer scope coverage signals, concentration shares, trend deltas, and denser anomaly drilldown context on `/admin/usage`
 - `WBS 4.10` operational scenario QA is now complete with automated review-to-history verification across review decision, change history, audit log, and run detail linkage, plus refreshed admin typecheck and production build evidence
 - `WBS 4.11` Review Detail AI verification is now complete: authorized reviewers can force a live search of registered official bank domains, compare official facts with the collected candidate, inspect cited match/mismatch/unverified results, and selectively stage contract-safe corrections without auto-approving or publishing
-- Admin collection now applies the same official-domain live-search discipline during detail-product extraction: every active Product Type receives the complete field contract, and an AI value is accepted only when it has a consulted allowlisted URL plus an exact quote from the freshly captured evidence chunk; provider failures fall back to the existing evidence-first path without bypassing review or publication gates
-- Existing active Review Queue candidates can be batch-verified against official bank domains: contract-safe mismatches update only the candidate, the approval denominator contains verified product identity plus populated or blocking decision fields, and only candidates at or above the Product Owner-approved `80%` threshold are approved through the normal canonical/audit/aggregate path. Empty optional fields are omissions; unresolved hard source/taxonomy boundaries and lower scores remain in Review
+- Admin collection applies official-domain live-search discipline to a bounded
+  product-type contract: identity plus only the facts customers need to compare
+  that Deposit or Loan type. An AI value is accepted only with an allowlisted
+  consulted URL and exact quote from fresh evidence; optional marketing and
+  operational copy is not requested by default.
+- Existing active Review Queue candidates can be batch-verified against official
+  bank domains. Contract-safe mismatches update only the candidate, and system
+  approval requires verified identity plus `100%` of the smaller essential-field
+  set through the normal canonical/audit/aggregate path.
 - New collections use that AI judgment automatically: officially grounded
   dynamic/lending candidates can enter normal auto-promotion, and a bounded
   post-validation autopilot verifies and safely corrects remaining detail
-  reviews before approving only `>=80%` approval-field passes. Provider
-  failures, ambiguous product boundaries, invalid taxonomy, partial sources,
-  unresolved material facts, and lower scores stay in Review. An exact match
+  reviews before approving complete essential-field passes. Missing,
+  contradictory, invalid, or ambiguous essential facts stay in Review; a
+  partial-source or legacy confidence warning alone is non-blocking when the
+  essentials pass. An exact match
   between the candidate identity and the persisted official detail-page H1 may
   satisfy identity when web search leaves it unverified, but never when AI
   reports a mismatch or the page crosses product boundaries. A rerun also
   supersedes an older same-URL task when the new URL has exactly one review
   candidate, so corrected punctuation or naming does not duplicate the Queue.
+- Collection/publication essentials are now resolved by one versioned
+  `(country_code, product_type)` market profile. Canada keeps its existing
+  comparison contract; all governed US types have explicit US ownership, with
+  Checking, Savings, CDs, Mortgage, and Personal Loan using distinct US
+  decision semantics. The resolved profile drives discovery fields,
+  validation, AI repair, manual approval, aggregate eligibility, and Public
+  labels while retaining `100%` official grounding and fail-closed publication.
+  Country overrides expose only essential facts to Public; masked rate
+  templates and unrelated percentages cannot satisfy publication quality.
 - `WBS 5.1` Big 5 source registry is now complete with a committed Canada Big 5 registry catalog and per-bank `chequing`, `savings`, and `gic` source baselines
 - `WBS 5.2` chequing parser expansion is now complete with catalog-backed source-id resolution across the Big 5 registries, chequing-specific extraction fields, schema-aligned chequing subtype normalization, and unit verification
 - `WBS 5.3` savings parser expansion is now complete with savings-specific retrieval hints, extraction coverage for tiering or withdrawal or registered fields, and unit verification

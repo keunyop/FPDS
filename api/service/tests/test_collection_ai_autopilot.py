@@ -46,7 +46,7 @@ def _detail():
 
 
 class CollectionAiAutopilotTests(TestCase):
-    def test_reuses_only_v2_approval_contract_execution(self):
+    def test_reuses_only_current_essential_field_contract_execution(self):
         connection = _QueryConnection([])
 
         self.assertIsNone(
@@ -55,7 +55,7 @@ class CollectionAiAutopilotTests(TestCase):
 
         sql, params = connection.calls[0]
         self.assertEqual(params, {"review_task_id": "review-001"})
-        self.assertIn("review-ai-verification-v2", sql)
+        self.assertIn("review-ai-verification-v7", sql)
 
     def test_policy_defaults_enable_low_touch_review_and_bounds_values(self):
         connection = _QueryConnection(

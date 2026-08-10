@@ -6,7 +6,10 @@ from hashlib import sha256
 import json
 import re
 
-from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
+from worker.pipeline.fpds_approval_policy import (
+    comparison_assessment_fields,
+    comparison_quality,
+)
 from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
 from worker.pipeline.fpds_rate_safety import (
     advertised_promotional_total_rate,
@@ -47,6 +50,37 @@ _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _MAX_MONTHLY_OR_TRANSACTION_FEE = Decimal("500")
 _MAX_ANNUAL_CARD_FEE = Decimal("2000")
+_MORTGAGE_SCENARIO_MARKER_GROUPS = (
+    ("down payment",),
+    ("loan of $", "loan amount"),
+    ("purchase transaction", "refinance transaction"),
+    ("day lock", "rate lock"),
+    ("ltv", "loan-to-value", "loan to value"),
+    ("fico", "credit score"),
+    ("owner-occupied", "owner occupied", "occupancy"),
+    ("discount point", "points"),
+    ("rates change daily", "rate may change", "rate can change"),
+)
+_PERSONAL_LOAN_SCENARIO_MARKER_GROUPS = (
+    ("ltv", "loan-to-value", "loan to value"),
+    ("down payment",),
+    ("credit history", "credit profile", "credit score", "excellent credit"),
+    ("model year", "vehicle age"),
+    ("origination fee",),
+    ("relationship discount", "autopay discount", "automatic payment discount", "auto deduct discount"),
+    ("automatic payments", "automatic payment", "autopay", "auto pay", "auto deduct"),
+    ("qualifying checking", "qualifying deposit account", "qualifying account"),
+    ("existing customer", "existing bank customer"),
+    ("rates are subject to change", "rate may change", "rate can change"),
+)
+_SAVINGS_RATE_QUALIFICATION_MARKER_GROUPS = (
+    ("only available on new", "new savings account", "do not have an existing", "within the past 30 days"),
+    ("within 30 days",),
+    ("balance of at least", "minimum daily balance"),
+    ("standard interest rate will be applied", "standard rate will apply"),
+    ("apy shown is accurate as of", "rates as of", "rate is accurate as of"),
+    ("rate is variable", "variable and may change", "subject to change"),
+)
 _SUMMARY_MESSAGES = {
     "ambiguous_product_boundary": "The source page contains multiple product sections that cannot be safely merged into one product.",
     "required_field_missing": "One or more required fields are missing.",
@@ -585,9 +619,72 @@ def _compute_validation_issue_codes(
             issues.add("invalid_term_value")
 
     requiredness_type = product_type_family or product_type
-    if requiredness_type == "chequing":
-        if not any(candidate_payload.get(field_name) not in {None, ""} for field_name in (*_FEE_FIELDS, "fee_waiver_condition")):
+    quality = comparison_quality(
+        product_type=product_type,
+        country_code=_string_or_none(candidate_record.get("country_code")),
+        expected_fields=expected_fields or [],
+        candidate_payload=candidate_payload,
+    )
+    if quality.applicable and (not quality.contract_defined or not quality.complete):
+        issues.add("required_field_missing")
+        if quality.missing_fields:
+            runtime_notes.append(
+                "Essential-field publication requires verified values for: "
+                + ", ".join(f"`{field_name}`" for field_name in quality.missing_fields)
+                + "."
+            )
+        else:
+            runtime_notes.append(
+                "Essential-field publication is blocked because this product type has no rate-plus-decision contract."
+            )
+    elif quality.applicable:
+        required_evidence_fields = {"product_name", *quality.satisfied_fields}
+        unevidenced_fields = sorted(required_evidence_fields.difference(directly_evidenced_fields))
+        if unevidenced_fields:
             issues.add("required_field_missing")
+            runtime_notes.append(
+                "Essential-field publication requires direct evidence links for: "
+                + ", ".join(f"`{field_name}`" for field_name in unevidenced_fields)
+                + "."
+            )
+
+    if (
+        _string_or_none(candidate_record.get("country_code")) == "US"
+        and (product_type_family or product_type) == "mortgage"
+        and not _rate_scenario_is_preserved(
+            candidate_record,
+            candidate_payload,
+            marker_groups=_MORTGAGE_SCENARIO_MARKER_GROUPS,
+        )
+    ):
+        issues.add("inconsistent_cross_field_logic")
+        runtime_notes.append(
+            "US mortgage publication requires the rate summary to preserve every material scenario assumption stated by its official evidence."
+        )
+    if (
+        _string_or_none(candidate_record.get("country_code")) == "US"
+        and (product_type_family or product_type) == "personal-loan"
+        and not _rate_scenario_is_preserved(
+            candidate_record,
+            candidate_payload,
+            marker_groups=_PERSONAL_LOAN_SCENARIO_MARKER_GROUPS,
+        )
+    ):
+        issues.add("inconsistent_cross_field_logic")
+        runtime_notes.append(
+            "US personal-loan publication requires a representative APR/rate summary to preserve every material pricing assumption stated by its official evidence."
+        )
+    if (
+        _string_or_none(candidate_record.get("country_code")) == "US"
+        and (product_type_family or product_type) == "savings"
+        and not _qualified_savings_rate_is_preserved(candidate_record, candidate_payload)
+    ):
+        issues.add("inconsistent_cross_field_logic")
+        runtime_notes.append(
+            "US savings publication requires a conditional APY summary to preserve every material new-customer, balance, fallback-rate, date, and variability condition stated by its official evidence."
+        )
+
+    if requiredness_type == "chequing":
         monthly_fee = _as_decimal(candidate_payload.get("monthly_fee"), field_name="monthly_fee")
         public_display_fee = _as_decimal(
             candidate_payload.get("public_display_fee"), field_name="public_display_fee"
@@ -613,52 +710,29 @@ def _compute_validation_issue_codes(
             included_transactions is not None and included_transactions > 0
         ):
             issues.add("inconsistent_cross_field_logic")
-    if requiredness_type == "savings":
-        if not _has_any_savings_rate(candidate_payload):
-            issues.add("required_field_missing")
-        if (
-            candidate_payload.get("promotional_rate") not in {None, ""}
-            and not _has_ongoing_savings_rate(candidate_payload)
-        ):
-            issues.add("required_field_missing")
-    if requiredness_type == "gic":
-        if (
-            not any(candidate_payload.get(field_name) not in {None, ""} for field_name in _RATE_FIELDS)
-            and not _has_dynamic_gic_rate_mechanism(candidate_payload)
-        ):
-            issues.add("required_field_missing")
-        if candidate_payload.get("minimum_deposit") in {None, ""}:
-            issues.add("required_field_missing")
-        if (
-            candidate_payload.get("term_length_days") in {None, ""}
-            and candidate_payload.get("term_length_text") in {None, ""}
-            and not _has_gic_term_evidence(candidate_payload)
-        ):
-            issues.add("required_field_missing")
-
-    if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
+    if requiredness_type == "mortgage" and any(
+        marker in str(candidate_record.get("product_name") or "").lower()
+        for marker in ("home equity line of credit", "heloc")
+    ):
+        issues.add("invalid_taxonomy_code")
+        runtime_notes.append(
+            "A home equity line of credit belongs to the line-of-credit profile and cannot publish from a mortgage run."
+        )
+    redeemable_flag = candidate_payload.get("redeemable_flag")
+    non_redeemable_flag = candidate_payload.get("non_redeemable_flag")
+    if (
+        isinstance(redeemable_flag, bool)
+        and isinstance(non_redeemable_flag, bool)
+        and redeemable_flag == non_redeemable_flag
+    ):
         issues.add("inconsistent_cross_field_logic")
     if requiredness_type == "gic" and candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
         issues.add("inconsistent_cross_field_logic")
-    if dynamic_product_type:
-        populated_decision_fields = populated_dynamic_decision_fields(
-            product_type=product_type,
-            expected_fields=expected_fields or [],
-            candidate_payload=candidate_payload,
-        )
-        contractless_meaningful_values = [
-            value
-            for field_name, value in candidate_payload.items()
-            if field_name not in {"status", "last_verified_at", "bank_name", "product_name", "source_subtype_label", "subtype_code"}
-        ]
-        if not populated_decision_fields and (
-            bool(expected_fields)
-            or not any(_has_meaningful_value(value) for value in contractless_meaningful_values)
-        ):
-            issues.add("required_field_missing")
 
     conflicting_values: dict[str, set[str]] = {}
     for link in field_evidence_links:
+        if link.field_name not in {"product_name", *quality.assessed_fields}:
+            continue
         conflicting_values.setdefault(link.field_name, set()).add(link.candidate_value.strip())
     if any(len(values) > 1 for values in conflicting_values.values()):
         issues.add("conflicting_evidence")
@@ -678,6 +752,70 @@ def _compute_validation_issue_codes(
         issues.add("partial_source_failure")
 
     return sorted(issues)
+
+
+def _rate_scenario_is_preserved(
+    candidate_record: dict[str, object],
+    candidate_payload: dict[str, object],
+    *,
+    marker_groups: tuple[tuple[str, ...], ...],
+) -> bool:
+    summary = " ".join(str(candidate_payload.get("interest_rate_summary") or "").lower().split())
+    if not summary:
+        return True
+    mapping_metadata = candidate_record.get("field_mapping_metadata")
+    mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
+    rate_mapping = mappings.get("interest_rate_summary")
+    if not isinstance(rate_mapping, dict):
+        return True
+    evidence = " ".join(
+        str(
+            rate_mapping.get("official_evidence_quote")
+            or rate_mapping.get("evidence_quote")
+            or ""
+        ).lower().split()
+    )
+    if not evidence:
+        return True
+    for alternatives in marker_groups:
+        if any(marker in evidence for marker in alternatives) and not any(
+            marker in summary for marker in alternatives
+        ):
+            return False
+    return True
+
+
+def _qualified_savings_rate_is_preserved(
+    candidate_record: dict[str, object],
+    candidate_payload: dict[str, object],
+) -> bool:
+    mapping_metadata = candidate_record.get("field_mapping_metadata")
+    mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
+    evidence_parts: list[str] = []
+    for field_name in (
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+    ):
+        mapping = mappings.get(field_name)
+        if not isinstance(mapping, dict):
+            continue
+        evidence_parts.append(
+            str(mapping.get("official_evidence_quote") or mapping.get("evidence_quote") or "")
+        )
+    evidence = " ".join(" ".join(evidence_parts).lower().split())
+    required_groups = [
+        alternatives
+        for alternatives in _SAVINGS_RATE_QUALIFICATION_MARKER_GROUPS
+        if any(marker in evidence for marker in alternatives)
+    ]
+    if not required_groups:
+        return True
+    summary = " ".join(str(candidate_payload.get("interest_rate_summary") or "").lower().split())
+    if not summary:
+        return False
+    return all(any(marker in summary for marker in alternatives) for alternatives in required_groups)
 
 
 def _has_any_savings_rate(candidate_payload: dict[str, object]) -> bool:
@@ -843,7 +981,6 @@ def _route_candidate(
         "required_field_missing",
         "conflicting_evidence",
         "ambiguous_mapping",
-        "partial_source_failure",
     ):
         if code in validation_issue_codes and code not in queue_reason_codes:
             queue_reason_codes.append(code)
@@ -851,14 +988,22 @@ def _route_candidate(
     if dynamic_product_type and not ai_grounding_eligible and "ai_grounding_insufficient" not in queue_reason_codes:
         queue_reason_codes.append("ai_grounding_insufficient")
 
-    force_review = any(code in routing_config.force_review_issue_codes for code in validation_issue_codes)
-    warning_requires_review = validation_status == "warning" and source_confidence < routing_config.review_warning_confidence_floor
-    passes_phase1_auto = (
-        source_confidence >= routing_config.auto_approve_min_confidence
-        and validation_status != "error"
-        and not force_review
-        and not warning_requires_review
+    blocking_issue_codes = {
+        "ambiguous_product_boundary",
+        "required_field_missing",
+        "invalid_taxonomy_code",
+        "invalid_numeric_range",
+        "invalid_field_type",
+        "invalid_term_value",
+        "conflicting_evidence",
+        "ambiguous_mapping",
+        "inconsistent_cross_field_logic",
+    }
+    force_review = any(
+        code in routing_config.force_review_issue_codes and code in blocking_issue_codes
+        for code in validation_issue_codes
     )
+    passes_phase1_auto = validation_status != "error" and not force_review
 
     if dynamic_product_type and not ai_grounding_eligible:
         review_required = True
@@ -867,8 +1012,6 @@ def _route_candidate(
             queue_reason_codes.append("manual_sampling_review")
         review_required = True
     else:
-        if source_confidence < routing_config.auto_approve_min_confidence and "low_confidence" not in queue_reason_codes:
-            queue_reason_codes.append("low_confidence")
         review_required = not passes_phase1_auto
         if review_required and not queue_reason_codes:
             queue_reason_codes.append("manual_sampling_review")
@@ -898,10 +1041,10 @@ def _assess_collection_ai_grounding(
 ) -> dict[str, object]:
     """Decide whether official AI evidence can replace blanket manual review.
 
-    The assessment intentionally ignores optional marketing copy. It covers
-    product identity, known decision-priority fields, and every populated
-    typed numeric/boolean/structured field in the registered product contract.
-    Validation and force-review policies still run independently afterward.
+    The assessment intentionally ignores optional marketing and operational
+    copy. It covers only product identity and one usable field for every
+    essential comparison requirement. Validation and safety rules still run
+    independently afterward.
     """
 
     normalized_threshold = max(0.0, min(1.0, float(threshold)))
@@ -922,18 +1065,19 @@ def _assess_collection_ai_grounding(
     product_type = _string_or_none(candidate_record.get("product_type"))
     mapping_metadata = candidate_record.get("field_mapping_metadata")
     mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
-    decision_fields = populated_dynamic_decision_fields(
+    quality = comparison_quality(
         product_type=product_type,
+        country_code=_string_or_none(candidate_record.get("country_code")),
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
+    )
+    decision_fields = comparison_assessment_fields(
+        product_type=product_type,
+        country_code=_string_or_none(candidate_record.get("country_code")),
         expected_fields=expected_fields,
         candidate_payload=candidate_payload,
     )
     assessed_fields = {"product_name", *decision_fields}
-    for field_name in expected_fields:
-        value = candidate_payload.get(field_name)
-        contract = field_contract(field_name)
-        if value in (None, "", [], {}) or contract is None or contract.value_type == "string":
-            continue
-        assessed_fields.add(field_name)
 
     verified_fields: list[str] = []
     official_sources: dict[str, dict[str, str]] = {}
@@ -948,7 +1092,7 @@ def _assess_collection_ai_grounding(
             if isinstance(source, dict) and str(source.get("url") or "").strip()
         ] if isinstance(sources, list) else []
         if (
-            metadata.get("official_grounding_contract_version") == "collection-official-grounding-v1"
+            metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
             and str(metadata.get("official_verification_status") or "") in {"match", "mismatch"}
             and str(metadata.get("official_evidence_quote") or "").strip()
             and valid_sources
@@ -972,12 +1116,14 @@ def _assess_collection_ai_grounding(
         reason_codes.append("verified_field_count_below_minimum")
     if not official_sources:
         reason_codes.append("official_source_missing")
+    if not quality.contract_defined or not quality.complete:
+        reason_codes.append("essential_fields_missing")
     if verified_ratio < normalized_threshold:
         reason_codes.append("verified_field_ratio_below_threshold")
     return {
         "required": True,
         "eligible": not reason_codes,
-        "contract_version": "collection-official-grounding-v1",
+        "contract_version": "collection-official-grounding-v2",
         "threshold": normalized_threshold,
         "minimum_verified_field_count": 2,
         "assessed_fields": assessed,

@@ -6,7 +6,7 @@ import unittest
 
 from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
-from api_service.review_detail import ReviewRequestContext, apply_review_decision
+from api_service.review_detail import ReviewRequestContext, ReviewTaskError, apply_review_decision
 from api_service.run_status import load_run_status_detail
 
 
@@ -40,6 +40,53 @@ class _QueuedConnection:
 
 
 class OpsScenarioQATests(unittest.TestCase):
+    def test_review_cannot_approve_incomplete_lending_product(self) -> None:
+        connection = _QueuedConnection(
+            [
+                {
+                    "review_task_id": "rt-loan-incomplete",
+                    "candidate_id": "cand-loan-incomplete",
+                    "run_id": "run-loan-incomplete",
+                    "product_id": None,
+                    "review_state": "queued",
+                    "queue_reason_code": "required_field_missing",
+                    "country_code": "US",
+                    "bank_code": "CITI",
+                    "product_family": "lending",
+                    "product_type": "personal-loan",
+                    "subtype_code": "other",
+                    "product_name": "Citi Personal Loan",
+                    "source_language": "en",
+                    "currency": "USD",
+                    "candidate_payload": {
+                        "product_name": "Citi Personal Loan",
+                        "monthly_payment_text": "Monthly payments",
+                        "status": "active",
+                    },
+                }
+            ]
+        )
+
+        with self.assertRaises(ReviewTaskError) as raised:
+            apply_review_decision(
+                connection,
+                review_task_id="rt-loan-incomplete",
+                action_type="approve",
+                actor={"user_id": "usr-001", "role": "admin"},
+                reason_code=None,
+                reason_text=None,
+                override_payload=None,
+                context=ReviewRequestContext(
+                    request_id="req-loan-incomplete",
+                    ip_address="127.0.0.1",
+                    user_agent="ops-scenario-test",
+                ),
+            )
+
+        self.assertEqual(raised.exception.status_code, 422)
+        self.assertEqual(raised.exception.code, "essential_fields_missing")
+        self.assertEqual(len(connection.calls), 1)
+
     def test_review_edit_approve_emits_change_and_audit_side_effects(self) -> None:
         decided_at = datetime(2026, 4, 13, 23, 30, tzinfo=UTC)
         connection = _QueuedConnection(
@@ -61,7 +108,9 @@ class OpsScenarioQATests(unittest.TestCase):
                     "currency": "CAD",
                     "candidate_payload": {
                         "product_name": "TD Every Day Savings Account",
+                        "standard_rate": 1.25,
                         "monthly_fee": 5,
+                        "minimum_balance": 0,
                         "notes": None,
                         "status": "active",
                     },
@@ -77,7 +126,9 @@ class OpsScenarioQATests(unittest.TestCase):
                     "last_changed_at": decided_at,
                     "normalized_payload": {
                         "product_name": "TD Every Day Savings Account",
+                        "standard_rate": 1.25,
                         "monthly_fee": 5,
+                        "minimum_balance": 0,
                         "notes": None,
                         "status": "active",
                     },
@@ -189,7 +240,9 @@ class OpsScenarioQATests(unittest.TestCase):
                     "currency": "CAD",
                     "candidate_payload": {
                         "product_name": "TD Every Day Savings Account",
+                        "standard_rate": 1.25,
                         "monthly_fee": 5,
+                        "minimum_balance": 0,
                         "status": "active",
                     },
                 },
@@ -204,7 +257,9 @@ class OpsScenarioQATests(unittest.TestCase):
                     "last_changed_at": decided_at,
                     "normalized_payload": {
                         "product_name": "TD Every Day Savings Account",
+                        "standard_rate": 1.25,
                         "monthly_fee": 5,
+                        "minimum_balance": 0,
                         "status": "active",
                     },
                 },
@@ -287,6 +342,8 @@ class OpsScenarioQATests(unittest.TestCase):
                     "candidate_payload": {
                         "product_name": "Benefits",
                         "monthly_fee": 16.95,
+                        "minimum_balance": 0,
+                        "included_transactions": 25,
                         "status": "active",
                     },
                 },
@@ -302,6 +359,8 @@ class OpsScenarioQATests(unittest.TestCase):
                     "normalized_payload": {
                         "product_name": "Benefits",
                         "monthly_fee": 16.95,
+                        "minimum_balance": 0,
+                        "included_transactions": 25,
                         "status": "active",
                     },
                 },
@@ -374,6 +433,8 @@ class OpsScenarioQATests(unittest.TestCase):
                     "candidate_payload": {
                         "product_name": "Plus Chequing Account",
                         "monthly_fee": 16.95,
+                        "minimum_balance": 0,
+                        "included_transactions": 25,
                         "status": "active",
                     },
                 },
@@ -389,6 +450,8 @@ class OpsScenarioQATests(unittest.TestCase):
                     "normalized_payload": {
                         "product_name": "Plus Chequing Account",
                         "monthly_fee": 16.95,
+                        "minimum_balance": 0,
+                        "included_transactions": 25,
                         "status": "active",
                     },
                 },

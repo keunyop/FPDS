@@ -32,7 +32,8 @@ def retract_invalid_candidates(
             rt.review_state,
             pv.product_version_id,
             cp.product_id,
-            cp.status AS product_status
+            cp.status AS product_status,
+            COALESCE(cp.country_code, nc.country_code) AS country_code
         FROM normalized_candidate AS nc
         JOIN source_document AS sd
           ON sd.source_document_id = nc.source_document_id
@@ -176,18 +177,30 @@ def retract_invalid_candidates(
         )
         items.append({"candidate_id": candidate_id, "product_id": product_id, "product_deactivated": product_deactivated})
 
-    aggregate_refresh = None
+    aggregate_refreshes: list[dict[str, Any]] = []
     if deactivated_product_ids:
-        aggregate_refresh = request_manual_aggregate_refresh(
-            connection,
-            actor=actor,
-            request_context={**request_context, "remediation_candidate_ids": normalized_ids},
+        country_codes = sorted(
+            {
+                str(row["country_code"] or "CA").strip().upper()
+                for row in rows
+                if row.get("product_id") and str(row.get("product_status")) == "active"
+            }
         )
+        for country_code in country_codes:
+            aggregate_refreshes.append(
+                request_manual_aggregate_refresh(
+                    connection,
+                    actor=actor,
+                    request_context={**request_context, "remediation_candidate_ids": normalized_ids},
+                    country_code=country_code,
+                )
+            )
     return {
         "remediated_count": len(items),
         "deactivated_product_ids": sorted(set(deactivated_product_ids)),
         "items": items,
-        "aggregate_refresh": aggregate_refresh,
+        "aggregate_refresh": aggregate_refreshes[0] if len(aggregate_refreshes) == 1 else None,
+        "aggregate_refreshes": aggregate_refreshes,
     }
 
 

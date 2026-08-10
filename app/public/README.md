@@ -31,24 +31,36 @@ decorative gradients, synthetic scores, and recommendation language are avoided.
 Home uses real snapshot values rather than invented illustration data. Catalog
 cards are product-family-aware records with visible institution identity, one
 primary metric, up to two supporting facts, and clear Compare and Details
-actions. Filters are progressively disclosed, sort controls stay close to the
-results, and unavailable values remain explicitly unavailable.
+actions. The metrics follow the resolved country-product essential contract.
+Canada shows Chequing fee/balance/transactions and GIC
+rate/term/minimum-deposit/redeemability. US Checking shows
+fee/opening-or-minimum-balance/fee-waiver activity, US CDs show
+rate/term/minimum-deposit/early-withdrawal penalty, and US Mortgage keeps its
+assumption-bearing rate/APR summary visible. Savings, Personal Loan, and Line
+of Credit likewise use their market profile. Incomplete governed products are
+excluded during aggregate refresh. Filters are progressively
+disclosed and sort controls stay close to the results.
 
 Selecting up to four products opens a responsive comparison ledger. Differences
-are highlighted without declaring a winner, and product-specific facts,
-application method, and official-bank links remain visible. The comparison
+are highlighted without declaring a winner, and only the type-specific
+essential facts plus official-bank links remain visible. The comparison
 stacks on mobile and never requires horizontal document scrolling.
 
 Detail pages prioritize product identity and three decision-relevant facts,
 then show only available canonical facts and conditions. Deposit details may
 include an estimated-interest calculator and an approved term-rate table.
 Lending details may include rate type, term, amortization, payment, prepayment,
-amount or limit, and security when those fields are approved.
+amount or limit, and security when those fields are approved by the resolved
+market profile. For country-specific overrides, optional Admin candidate copy
+outside that profile is not projected to Public. Masked/template rates and
+unrelated percentages never qualify as displayable rate facts.
 
 The header uses a compact country selector backed by countries represented in
 their latest completed active public snapshots. Country changes reset
 country-owned bank and product filters rather than carrying invalid scope
-across markets. The current published and collection scope remains Canada.
+across markets. The current governed published and collection scope includes
+Canada and the United States; later countries remain fail-closed until their
+market profiles and fixtures are registered.
 
 ## Localization, States, and Accessibility
 

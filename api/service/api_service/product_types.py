@@ -4,13 +4,21 @@ from collections import Counter
 from dataclasses import dataclass
 import json
 import os
+from pathlib import Path
 import re
+import sys
 from typing import TYPE_CHECKING, Any
 import urllib.error
 import urllib.request
 
 from api_service.errors import SourceRegistryError
 from api_service.security import new_id, utc_now
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
+    sys.path.insert(0, str(REPO_ROOT))
+
+from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -30,84 +38,13 @@ _GENERIC_EXPECTED_FIELDS = (
     "notes",
 )
 _DEPOSIT_EXPECTED_FIELDS_BY_TYPE = {
-    "chequing": (
-        "product_name", "description_short", "monthly_fee", "public_display_fee", "fee_waiver_condition",
-        "minimum_balance", "included_transactions", "transaction_fee", "unlimited_transactions_flag", "interac_e_transfer_included",
-        "overdraft_available", "cheque_book_info", "student_plan_flag", "newcomer_plan_flag",
-        "eligibility_text", "application_method", "deposit_insurance", "notes",
-    ),
-    "savings": (
-        "product_name", "description_short", "standard_rate", "base_12_month_rate", "public_display_rate",
-        "promotional_rate", "promotional_period_text", "introductory_rate_flag", "monthly_fee", "minimum_balance",
-        "interest_calculation_method", "interest_payment_frequency", "tiered_rate_flag", "tier_definition_text",
-        "withdrawal_limit_text", "registered_flag", "term_rate_table", "eligibility_text", "application_method",
-        "deposit_insurance", "notes",
-    ),
-    "gic": (
-        "product_name", "description_short", "standard_rate", "base_12_month_rate", "public_display_rate",
-        "promotional_rate", "minimum_deposit", "term_length_text", "term_length_days", "term_rate_table",
-        "interest_rate_summary",
-        "redeemable_flag", "non_redeemable_flag", "compounding_frequency", "payout_option",
-        "registered_plan_supported", "eligibility_text", "application_method", "post_maturity_interest_rate",
-        "tax_benefits", "deposit_insurance", "notes",
-    ),
+    product_type: collection_fields_for_product_type(product_type=product_type)
+    for product_type in ("chequing", "savings", "gic")
 }
 _SUPPORTED_PRODUCT_FAMILIES = {"deposit", "lending"}
 _LENDING_EXPECTED_FIELDS_BY_TYPE = {
-    "credit-card": (
-        "product_name",
-        "description_short",
-        "annual_fee",
-        "purchase_interest_rate",
-        "cash_advance_rate",
-        "balance_transfer_rate",
-        "rewards_summary",
-        "eligibility_text",
-        "application_method",
-        "credit_limit_text",
-        "notes",
-    ),
-    "mortgage": (
-        "product_name",
-        "description_short",
-        "mortgage_rate",
-        "rate_type",
-        "term_length_text",
-        "amortization_text",
-        "payment_frequency",
-        "prepayment_privileges",
-        "eligibility_text",
-        "application_method",
-        "notes",
-    ),
-    "personal-loan": (
-        "product_name",
-        "description_short",
-        "interest_rate",
-        "interest_rate_summary",
-        "loan_amount_text",
-        "term_length_text",
-        "monthly_payment_text",
-        "security_requirement",
-        "eligibility_text",
-        "application_method",
-        "fees_text",
-        "notes",
-    ),
-    "line-of-credit": (
-        "product_name",
-        "description_short",
-        "interest_rate",
-        "interest_rate_summary",
-        "credit_limit_text",
-        "secured_flag",
-        "collateral_text",
-        "minimum_payment_text",
-        "eligibility_text",
-        "application_method",
-        "fees_text",
-        "notes",
-    ),
+    product_type: collection_fields_for_product_type(product_type=product_type)
+    for product_type in ("credit-card", "mortgage", "personal-loan", "line-of-credit")
 }
 _STOPWORDS = {
     "able",

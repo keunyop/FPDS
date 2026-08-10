@@ -116,7 +116,7 @@ function ProductCompareCard({
   selected: boolean;
 }) {
   const copy = getPublicMessages(locale);
-  const metrics = buildComparisonMetrics(product, locale);
+  const metrics = buildComparisonMetrics(product, locale).slice(0, 3);
   const [primaryMetric, ...secondaryMetrics] = metrics;
   const tags = product.target_customer_tag_labels.slice(0, 2);
   const detailHref = buildProductDetailHref(filters, product.product_id);
@@ -162,7 +162,10 @@ function ProductCompareCard({
         <dl className="border-y border-border">
           <div className="py-4">
             <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-verification">{primaryMetric.label}</dt>
-            <dd className="mt-1 break-words font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums">{primaryMetric.value}</dd>
+            <dd className={cn(
+              "mt-1 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums",
+              product.product_family === "lending" && product.public_display_rate === null ? "text-lg" : "text-3xl"
+            )}>{primaryMetric.value}</dd>
           </div>
           <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
             {secondaryMetrics.map((metric) => (
@@ -269,11 +272,11 @@ function buildCompareRows(product: PublicProduct, locale: string) {
   const typeAware = buildComparisonMetrics(product, locale);
   return [
     { key: "type", label: copy.grid.productTypes, value: product.product_type_label },
-    { key: "primary", label: typeAware[0].label, value: typeAware[0].value },
-    { key: "secondary", label: typeAware[1].label, value: typeAware[1].value },
-    { key: "tertiary", label: typeAware[2].label, value: typeAware[2].value },
-    { key: "entry", label: copy.compare.entryAmount, value: formatEntryAmount(product, locale) },
-    { key: "application", label: copy.compare.application, value: product.application_method ?? copy.common.notDisclosed },
+    ...typeAware.map((metric, index) => ({
+      key: `essential-${index}`,
+      label: metric.label,
+      value: metric.value
+    }))
   ];
 }
 
@@ -290,37 +293,75 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
-      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
-      { label: copy.grid.metricKeyDetail, value: buildKeyDetail(product, locale) }
+      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance ?? product.minimum_deposit, product.currency, locale) },
+      product.country_code === "US"
+        ? { label: marketMetricLabel("feeWaiver", locale), value: product.fee_waiver_condition ?? copy.common.notDisclosed }
+        : { label: essentialMetricLabel("transactions", locale), value: formatTransactions(product, locale) }
     ];
   }
 
   if (product.product_type === "gic") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
-      { label: copy.grid.metricTerm, value: formatTerm(product.term_length_days, locale) },
-      { label: copy.grid.metricMinDeposit, value: formatCurrency(product.minimum_deposit, product.currency, locale) }
+      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: copy.grid.metricTerm, value: formatProductTerm(product, locale) },
+      { label: copy.grid.metricMinDeposit, value: formatCurrency(product.minimum_deposit, product.currency, locale) },
+      product.country_code === "US"
+        ? { label: marketMetricLabel("earlyWithdrawalPenalty", locale), value: product.early_withdrawal_penalty ?? copy.common.notDisclosed }
+        : { label: essentialMetricLabel("redeemability", locale), value: formatRedeemability(product, locale) }
     ];
   }
 
-  if (product.product_family === "lending") {
+  if (product.product_type === "mortgage") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
+      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
       { label: loanMetricLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
-      { label: loanMetricLabel("term", locale), value: product.term_length_text ?? copy.common.notDisclosed }
+      { label: loanMetricLabel("term", locale), value: formatProductTerm(product, locale) }
+    ];
+  }
+
+  if (product.product_type === "personal-loan") {
+    return [
+      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: essentialMetricLabel("loanAmount", locale), value: product.loan_amount_text ?? copy.common.notDisclosed },
+      { label: loanMetricLabel("term", locale), value: formatProductTerm(product, locale) }
+    ];
+  }
+
+  if (product.product_type === "line-of-credit") {
+    return [
+      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: essentialMetricLabel("creditLimit", locale), value: product.credit_limit_text ?? copy.common.notDisclosed },
+      { label: essentialMetricLabel("security", locale), value: formatSecurity(product, locale) }
     ];
   }
 
   return [
-    { label: copy.grid.metricDisplayRate, value: formatRate(product.public_display_rate, locale) },
+    { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+    { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
     { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
-    { label: copy.grid.metricKeyDetail, value: buildKeyDetail(product, locale) }
   ];
 }
 
-function buildKeyDetail(product: PublicProduct, locale: string) {
-  const copy = getPublicMessages(locale);
-  return product.product_highlight_badge_label ?? product.subtype_label ?? product.target_customer_tag_labels[0] ?? copy.common.notDisclosed;
+function formatProductRate(product: PublicProduct, locale: string) {
+  if (product.public_display_rate !== null) {
+    return formatRate(product.public_display_rate, locale);
+  }
+  if (product.country_code === "US" && product.product_type === "mortgage" && product.interest_rate_summary) {
+    return product.interest_rate_summary;
+  }
+  return product.mortgage_rate
+    ?? product.interest_rate
+    ?? product.interest_rate_summary
+    ?? getPublicMessages(locale).common.notDisclosed;
+}
+
+function marketMetricLabel(field: "earlyWithdrawalPenalty" | "feeWaiver", locale: string) {
+  const labels = {
+    en: { earlyWithdrawalPenalty: "Early withdrawal penalty", feeWaiver: "Fee waiver / qualifying activity" },
+    ko: { earlyWithdrawalPenalty: "중도 인출 위약금", feeWaiver: "수수료 면제 조건" },
+    ja: { earlyWithdrawalPenalty: "中途解約ペナルティ", feeWaiver: "手数料免除条件" }
+  };
+  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
 }
 
 function loanMetricLabel(field: "rateType" | "term", locale: string) {
@@ -330,6 +371,69 @@ function loanMetricLabel(field: "rateType" | "term", locale: string) {
     ja: { rateType: "金利タイプ", term: "期間" }
   };
   return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
+}
+
+function essentialMetricLabel(field: "creditLimit" | "loanAmount" | "redeemability" | "security" | "transactions", locale: string) {
+  const labels = {
+    en: { creditLimit: "Credit limit", loanAmount: "Loan amount", redeemability: "Redeemability", security: "Security", transactions: "Included transactions" },
+    ko: { creditLimit: "신용 한도", loanAmount: "대출 금액", redeemability: "중도해지 가능 여부", security: "담보 여부", transactions: "포함 거래 횟수" },
+    ja: { creditLimit: "利用限度額", loanAmount: "借入額", redeemability: "中途解約可否", security: "担保", transactions: "無料取引回数" }
+  };
+  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
+}
+
+function formatTransactions(product: PublicProduct, locale: string) {
+  if (product.unlimited_transactions_flag === true) {
+    return locale === "ko" ? "무제한" : locale === "ja" ? "無制限" : "Unlimited";
+  }
+  if (product.included_transactions !== null) {
+    const count = new Intl.NumberFormat(getIntlLocale(locale)).format(product.included_transactions);
+    return locale === "ko" ? `월 ${count}회` : locale === "ja" ? `月${count}回` : `${count} / month`;
+  }
+  return getPublicMessages(locale).common.notDisclosed;
+}
+
+function formatRedeemability(product: PublicProduct, locale: string) {
+  const redeemable = product.redeemable_flag ?? (product.non_redeemable_flag === null ? null : !product.non_redeemable_flag);
+  if (redeemable === null) {
+    return getPublicMessages(locale).common.notDisclosed;
+  }
+  if (redeemable) {
+    return locale === "ko" ? "중도해지 가능" : locale === "ja" ? "中途解約可能" : "Redeemable";
+  }
+  return locale === "ko" ? "중도해지 불가" : locale === "ja" ? "中途解約不可" : "Non-redeemable";
+}
+
+function formatSecurity(product: PublicProduct, locale: string) {
+  const stated = product.security_requirement ?? product.collateral_text;
+  if (stated) {
+    return stated;
+  }
+  if (product.secured_flag === null) {
+    return getPublicMessages(locale).common.notDisclosed;
+  }
+  if (product.secured_flag) {
+    return locale === "ko" ? "담보 필요" : locale === "ja" ? "担保あり" : "Secured";
+  }
+  return locale === "ko" ? "무담보" : locale === "ja" ? "無担保" : "Unsecured";
+}
+
+function formatProductTerm(product: PublicProduct, locale: string) {
+  if (product.term_length_text) {
+    return product.term_length_text;
+  }
+  if (product.term_length_days !== null) {
+    return formatTerm(product.term_length_days, locale);
+  }
+  const rows = product.term_rate_table;
+  const firstRow = rows[0];
+  if (rows.length === 1 && firstRow) {
+    return firstRow.term_label ?? formatTerm(firstRow.term_length_days, locale);
+  }
+  if (rows.length > 1) {
+    return locale === "ko" ? `${rows.length}개 기간` : locale === "ja" ? `${rows.length}期間` : `${rows.length} terms`;
+  }
+  return getPublicMessages(locale).common.notDisclosed;
 }
 
 function buildProductDetailHref(filters: ProductGridPageFilters, productId: string) {
@@ -347,11 +451,6 @@ function formatCurrency(value: number | null, currency: string, locale: string) 
     currency: safeCurrency,
     maximumFractionDigits: Number.isInteger(value) ? 0 : 2
   }).format(value);
-}
-
-function formatEntryAmount(product: PublicProduct, locale: string) {
-  const amount = product.minimum_deposit ?? product.minimum_balance;
-  return formatCurrency(amount, product.currency, locale);
 }
 
 function formatRate(value: number | null, locale: string) {

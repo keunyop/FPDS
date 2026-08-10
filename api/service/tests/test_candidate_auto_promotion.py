@@ -62,7 +62,9 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
         "source_confidence": 0.94,
         "candidate_payload": {
             "product_name": "TD Every Day Savings Account",
+            "standard_rate": 1.25,
             "monthly_fee": 0,
+            "minimum_balance": 0,
             "status": "active",
         },
         "discovery_role": "detail",
@@ -75,7 +77,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         invalid_assessments = [
             None,
             {
-                "contract_version": "collection-official-grounding-v1",
+                "contract_version": "collection-official-grounding-v2",
                 "required": True,
                 "eligible": True,
                 "threshold": 0.8,
@@ -97,6 +99,13 @@ class CandidateAutoPromotionTests(unittest.TestCase):
                         "collection_ai_assessment": assessment,
                     }
                 )
+                candidate["candidate_payload"] = {
+                    "product_name": "Five-Year Fixed Mortgage",
+                    "mortgage_rate": 4.25,
+                    "rate_type": "fixed",
+                    "term_length_text": "5 years",
+                    "status": "active",
+                }
                 connection = _Connection(
                     [_policy_rows(), [candidate], None, {"review_task_id": "review-ai-grounding"}, None]
                 )
@@ -107,6 +116,44 @@ class CandidateAutoPromotionTests(unittest.TestCase):
                 self.assertEqual(result["skipped_items"][0]["skip_reason"], "ai_grounding_insufficient")
                 self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
                 self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
+    def test_incomplete_lending_candidate_returns_to_review_even_with_eligible_ai_assessment(self) -> None:
+        candidate = _candidate_row()
+        candidate.update(
+            {
+                "product_family": "lending",
+                "product_type": "personal-loan",
+                "product_name": "Example Personal Loan",
+                "candidate_payload": {
+                    "product_name": "Example Personal Loan",
+                    "monthly_payment_text": "Monthly",
+                    "status": "active",
+                },
+                "collection_ai_assessment": {
+                    "contract_version": "collection-official-grounding-v2",
+                    "required": True,
+                    "eligible": True,
+                    "threshold": 0.8,
+                    "verified_ratio": 1.0,
+                    "product_identity_verified": True,
+                    "verified_fields": ["product_name", "monthly_payment_text"],
+                    "official_sources": [{"url": "https://bank.example/loans"}],
+                },
+            }
+        )
+        connection = _Connection(
+            [_policy_rows(), [candidate], None, {"review_task_id": "review-comparison"}, None]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "comparison_fields_missing")
+        self.assertEqual(
+            result["skipped_items"][0]["missing_fields"],
+            ["interest_rate", "loan_amount_text", "term_length_text"],
+        )
+        self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
     def test_pass_candidate_promotes_to_canonical_with_audit_and_refresh(self) -> None:
         decided_at = datetime(2026, 5, 13, 12, 0, tzinfo=UTC)
@@ -168,7 +215,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
                 "subtype_code": "other",
                 "product_name": "Five-Year Fixed Mortgage",
                 "collection_ai_assessment": {
-                    "contract_version": "collection-official-grounding-v1",
+                    "contract_version": "collection-official-grounding-v2",
                     "required": True,
                     "eligible": True,
                     "threshold": 0.8,

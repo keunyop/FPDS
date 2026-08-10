@@ -553,12 +553,54 @@ Current boundary:
 - the live runtime lets operators define additional product types, attach them
   to bank coverage, and run homepage-first discovery plus official-domain AI
   extraction, validation, and bounded review remediation;
-- dynamic and lending candidates are no longer manual-review-only: they may use
-  the normal audited auto-approval path only when official AI grounding verifies
-  product identity plus at least one product-defining fact (two verified fields
-  total), and at least `80%` of populated decision fields, with every existing
-  validation and force-review gate still passing. Empty optional fields are
-  omissions, and ungrounded lending values are removed rather than published;
+- current Deposit and Lending collection resolves one versioned executable
+  contract by `(country_code, product_type)` across discovery, extraction,
+  validation, approval, aggregate, and Public. Canada retains the D-034
+  contract. US Checking uses fee + opening/minimum balance and requires a
+  waiver/qualifying-activity fact only when the recurring fee is positive; it
+  does not require a Canadian-style transaction count. US Savings uses ongoing
+  APY + fee + opening/minimum balance, requires a complete waiver condition
+  when the recurring fee is positive, and carries every disclosed
+  new-customer, qualifying-balance/timing, fallback-rate, as-of-date, and
+  variability condition for a conditional APY. US CDs use APY/rate schedule + term +
+  minimum opening deposit + early-withdrawal penalty rather than Canadian
+  redeemability. US Mortgage requires an assumption-preserving percentage
+  rate/APR summary + rate type + term, and US Personal Loan requires APR/rate
+  range + amount range + term range. US Credit Card and Line of Credit retain
+  the current fee/rate and rate/limit/security minimums as explicit US-owned
+  profiles so their Public projection and future changes do not inherit an
+  unrelated market silently. Canada and country-less legacy calls retain the
+  Canada baseline; an explicitly named new country remains fail-closed until
+  its country/product profiles are registered. Unknown Product Types still
+  fail closed on a registered rate-plus-decision contract;
+- a country-scoped run must reject entry, seed, detail, supporting, and PDF URLs
+  whose explicit path/locale, subdomain, or country-code TLD identifies another
+  market, even when both countries share the bank's official parent domain.
+  Existing generated rows that violate this boundary are inactivated with
+  audit lineage before they can produce or support a candidate;
+- a candidate may use the normal audited auto-approval path only when product
+  identity and `100%` of its selected essentials are valid and officially
+  grounded. Optional marketing and operational fields are not requested by
+  default and their absence does not create Review work. A missing,
+  contradictory, invalid, or ambiguous essential remains Review-bound, while a
+  partial-source or legacy confidence warning alone is non-blocking. Ungrounded
+  values are removed rather than published. Masked/template values such as
+  `X.XXX%`, `$XXXX`, or unresolved rate-service tokens never satisfy a rate
+  requirement; a textual rate summary must tie a concrete percentage locally
+  to a Rate, APR, APY, or reference-rate label. Transaction, conversion,
+  point-of-sale, and ATM/ABM assessment-fee percentages are explicitly not
+  product rates. For an explicit country
+  override, Public receives only the resolved essential fields plus product
+  identity, status/freshness, and the official product link; optional captured
+  copy remains private Admin/audit data and is not projected. Essential prose
+  such as fee waivers, penalties, tiers, and qualified rate summaries must use
+  a field-appropriate bound and remain a complete condition; a blind
+  fixed-width value cut mid-word or mid-clause remains Review-bound. A US
+  personal/vehicle-loan representative APR must also retain any disclosed
+  model-year/vehicle-age, LTV, down-payment, credit, origination-fee, and
+  rate-change assumptions. A displayed lending discount must retain its
+  qualifying-account, automatic-payment, relationship, and existing-customer
+  conditions rather than exposing only the discounted APR;
 - Product Owner approval on `2026-07-14` widened the Public Product Grid to
   approved `mortgage`, `personal-loan`, and `line-of-credit` canonical products.
   Approval may now be human or policy-qualified system approval; unapproved
@@ -724,13 +766,19 @@ operator-defined Product Types, not only to dynamic fallback types.
 - an AI value is accepted only with both a provider-consulted allowlisted URL
   and an exact quote from the freshly persisted evidence chunk, and only after
   the same canonical type and numeric safe-range checks used by review edits;
+- a fresh, identity-matched, high-confidence official detail snapshot may
+  deterministically preserve a co-located qualified lending rate summary and
+  its amount/limit/term/rate-type context; ranges, formulas, and representative
+  examples must not be converted to a scalar rate;
 - cited sources, model execution, and usage remain privately traceable;
 - unavailable, failed, ambiguous, off-domain, uncited, or snapshot-ungrounded
   results keep the deterministic value or omission and continue through normal
   validation and, when necessary, human review;
 - grounding may remove blanket manual review only when the persisted assessment
   verifies product identity plus one product-defining fact (two fields total)
-  and the configured populated decision-field ratio; it never bypasses
+  and the configured assessment-field ratio. Missing type-specific comparison
+  fields remain in that denominator and independently block approval; grounding
+  never bypasses
   validation errors, force-review issues, canonical type/range checks,
   product-boundary guards, or the audited canonical/aggregate path.
 - when collection has no eligible detail source, it must make at most one
@@ -749,19 +797,30 @@ enabled. The same workflow may be run explicitly against an existing queue.
 
 - only sanitized, cited `mismatch` values may update the candidate; canonical
   type/range checks remain mandatory;
-- the verification pass-rate denominator is the v2 approval-field set:
-  `product_name`, populated material fields, and missing/suspect fields that
-  currently block approval; empty optional and operational fields are excluded;
+- the verification pass-rate denominator is the v5 essential-field set:
+  `product_name` plus one selected field for every type-specific comparison
+  requirement; empty marketing and operational fields are excluded;
 - a passed field is an official-source `match` or a contract-safe mismatch that
   was successfully applied. `product_name` may also pass when the persisted
   source is a detail page, discovery recorded `product_identity_match=true`,
   and the candidate name exactly matches the page H1 after punctuation/symbol
   normalization. This fallback applies only to AI `unverified`, never
   `mismatch`, and excludes cross-product checking/savings identities;
-- automatic approval requires pass rate `>= 80%`, verified `product_name`, at
+- automatic approval requires pass rate `100%`, verified `product_name`, at
   least one official source, no unapplied safe correction, and no unresolved
-  ambiguous product boundary, invalid taxonomy, or partial source failure;
-- lower-scoring, failed, hard-blocked, or identity-unverified candidates remain
+  ambiguous product boundary, invalid taxonomy/type/range, evidence conflict,
+  ambiguous mapping, or incomplete type-specific comparison contract;
+- a Review AI `match` or `mismatch` requires a short exact official quote. A
+  separate rate/fee/disclosure page must name the exact candidate product in
+  that quote, while the exact persisted origin detail URL may establish the
+  product boundary without repeating the name. Ellipsized/composite quotes and
+  Product-Type-conflicting source routes are invalid. Every numeric token in a
+  proposed financial value must occur in the quote, and a decision-critical
+  waiver, penalty, or qualified-rate value must occur there in full.
+  Same-bank-domain evidence for another product or extrapolated prose is
+  `unverified` and cannot be applied. Collection official grounding follows
+  the same v2 quote contract before normalization;
+- incomplete, failed, hard-blocked, or identity-unverified candidates remain
   in Review for an operator decision;
 - only completed attempts under the current approval contract are reused after
   runner restart, and a configured per-run candidate limit bounds cost and
@@ -774,6 +833,11 @@ enabled. The same workflow may be run explicitly against an existing queue.
 - when the same run already approved an exact bank/family/type/subtype/name
   identity, another candidate for that identity is superseded and its review is
   rejected as covered rather than asking the operator to approve it twice.
+- canonical continuity within one country/bank/family/Product Type ignores
+  trademark and punctuation differences and a trailing generic `account`
+  descriptor, so an audience landing page cannot create a duplicate Public
+  row for the same product. Material subtype, security, term, or audience
+  product differences remain distinct.
 
 ---
 

@@ -25,7 +25,7 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
-As of `2026-08-06`:
+As of `2026-08-09`:
 - `WBS 5` is the active stage
 - US collection-failure hardening is complete, fully regression tested, and
   verified through audited shared-dev Bank of America recollection after
@@ -40,7 +40,8 @@ As of `2026-08-06`:
 - public grid, dashboard, locale rollout, source registry admin MVP, and operator-managed product type onboarding are already implemented
 - country is now a first-class bank/canonical/aggregate/Public dimension; the
   Public header selects active published countries, the footer owns language,
-  and current collection scope remains Canada
+  and current governed collection scope includes Canada and the United States;
+  later countries fail closed until their country-product profiles are added
 - Admin now requires an enabled working country at login, stores it in the
   server session, lets authenticated operators change it from the shell header,
   and scopes country-owned bank/source/collection/run/review/change/usage work
@@ -51,11 +52,21 @@ As of `2026-08-06`:
   environment context
 - Public Home, Deposit, Loan, comparison, detail, and Methodology now use the verified-record visual system and were production-verified against the live aggregate snapshot in EN, KO, and JA at desktop, tablet, and exact `390px`; `WBS 5.14` remains complete
 - recent work has focused on source collection hardening, aggregate refresh health, and registry state behavior
+- current Deposit and Lending collection is narrowed to identity plus explicit
+  type-specific comparison essentials; complete evidence-grounded candidates
+  follow the audited automatic canonical/aggregate path, while incomplete
+  active canonical rows are excluded from Public projection
+- existing CA/US Public data has been recollected and repaired: the live Public
+  API now returns `48/48` essential-complete products with no `Unavailable`
+  values; `53` unresolved newly collected candidates remain private in Review
+- qualified APR ranges, formulas, and representative examples remain
+  source-language `interest_rate_summary` values with assumptions rather than
+  being flattened to misleading scalar rates
 - the latest slice hardened multi-bank Runs/Review Queue behavior after B2B duplicate/noisy candidates and Bridgewater domain-alias failures; active Queue is reduced to four genuinely reviewable B2B products and Bridgewater Savings now collects successfully
 - the current collection-QA slice inspected CIBC, EQ Bank, Fairstone, and Canadian Tire runs and reviews; dynamic candidates now stay inside registered field contracts, false percentage/rate mappings and page-copy fields are suppressed, non-product editorial/service sources are rejected, and Review opens only concrete problem fields with concise decision controls
 - cross-bank field-contract hardening now keeps rates, money, booleans, and term schedules typed consistently, renders field-level notes in Admin review, reconstructs product-scoped official rate tables, and keeps unavailable official values in review instead of filling them from static fixtures or nearby products
 - the FPDS Admin accuracy audit has retracted confirmed unsafe legacy/live candidates through audited remediation and added exact percentage evidence, promotion/standard-rate, fee, currency, source-role, and product-boundary guards; its representative recollection checkpoints remain documented in the recent entries
-- Review Detail supports CSRF-protected, role-gated AI verification against country-scoped registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; interactive verification remains advisory, while collection and existing-queue remediation use the Product Owner-approved 80% approval-field threshold over identity plus populated/blocking decision fields
+- Review Detail supports CSRF-protected, role-gated AI verification against country-scoped registered official bank domains with cited comparisons, contract-safe correction staging, usage persistence, and append-only audit events; interactive verification remains advisory, while collection and existing-queue remediation require verified identity plus 100% of the smaller essential-field set and ignore optional omissions
 - configured detail-product collection now uses the same required official-domain live-search discipline across standard and dynamic Product Types, while accepting a field only when a provider-consulted official URL and an exact quote from the fresh evidence chunk both support it
 - latest source/review hardening blocks multi-product family composites, fixes rate-first schedule pairing and `www`/apex redirects, excludes service/advice and cross-product sources, verified named Haventree mortgage discovery, and completed the approved audited retraction of two unsafe historical candidates
 - the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
@@ -91,6 +102,308 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-08-09 - Country-Specific Collection And Publication Profiles
+
+- WBS: `5.24`, country-product collection/publication profiles, existing US
+  Public remediation
+- Status: complete in implementation, shared-dev migration/recollection,
+  aggregate refresh, Public readback, and regression verification
+- Goal: make Banks collection reach Public automatically when the smaller set
+  of country/product-specific comparison essentials has exact official
+  evidence, while routing only missing, contradictory, or unsafe essentials to
+  Review.
+- Outcome:
+  - introduced the versioned declarative `(country_code, product_type)` market
+    profile registry, preserved Canada behavior, added explicit US Checking,
+    Savings, CD, Mortgage, Personal Loan, Credit Card, and Line of Credit
+    profiles, and made future explicit countries fail closed until registered
+  - carried the profile through collection, validation, grounding, Review,
+    approval, aggregate eligibility, and essential-only Public projection;
+    added US CD early-withdrawal-penalty support
+  - added country-route isolation, exact-product supporting bundles,
+    non-product and masked-value rejection, US pricing-assumption completeness,
+    and canonical identity continuity across trademark/punctuation and a
+    trailing generic `account`
+  - bounded automatic supporting sources to selected-product companions,
+    compatible rate/APR pages, and relevant essential-fact disclosures/FAQs;
+    live TD runs used six sources instead of the earlier broad same-bank plans,
+    while unrelated Checking/application evidence no longer supplied Savings
+    facts
+  - upgraded Review AI to `review-ai-verification-v7` and collection grounding
+    to `collection-official-grounding-v2`: ellipsized/composite quotes,
+    Product-Type-conflicting routes, numeric values absent from the quote, and
+    decision-critical prose extending beyond the exact quote are rejected
+  - applied shared-dev migration `0034` and retracted confirmed unsafe US
+    Public rows with append-only remediation/audit history, including false or
+    incomplete rates/conditions, cross-country contamination, invalid product
+    taxonomy, scenario-truncated lending facts, and duplicate product variants
+  - terminal collection `collection_BOxLexnlgTi2sNhQ` finished `7/7` with no
+    partial/failure: `21` candidates, `20` private Review, `1` rejected, and
+    `0` active promoted product. The rejected Truist approval appended an
+    unsupported graduation-date expiry to a genuine student-waiver quote.
+  - proof collection `collection_2VG5tbk2eNbTvjR7` finished `5/5` with `35/35`
+    source successes, no partial/failure, `11` candidates, all `11` private in
+    Review, and `0` promoted products. No unsafe approval required remediation;
+    TD Savings remained Review-bound and the former false `0.02%` correction
+    from a Checking application route did not recur
+  - the final US cross-country source audit found `0` active route conflicts
+  - audited manual refresh request `aggreq_W82b0caQSGoB1FsY` completed as fresh
+    US snapshot `agg_ejocbYJer7SZD04R` with `11` active products and `31`
+    incomplete canonical rows excluded. Latest Public is `58/58`
+    essential-complete: US `11` and CA `47`, with `0` `Unavailable` values,
+    `0` duplicate groups, and `0` numeric type violations
+  - final US Public products are Capital One `MONEY Teen Checking Account with
+    Debit Card`; Citi `Citi Personal Loans`; TD `TD Beyond Checking: Premium
+    Banking`; Truist `Auto Refinance Loan Options & Competitive Rates`,
+    `Marine & Yacht Loans`, `New car loans`, and `Used Car Loans`; U.S. Bank
+    `Bank Smartly Checking for teens`, `Young adult & student checking`, and
+    `U.S. Bank Access Home Loan`; and Wells Fargo `Prime Checking`
+- Key files: `worker/pipeline/fpds_market_profile.py`,
+  `worker/pipeline/fpds_extraction/service.py`,
+  `worker/pipeline/fpds_validation_routing/service.py`,
+  `api/service/api_service/source_catalog.py`,
+  `api/service/api_service/ai_verification.py`,
+  `api/service/api_service/review_ai_correction.py`,
+  `api/service/api_service/public_products.py`, migrations `0032`-`0034`,
+  Public comparison/detail surfaces, active requirements/design/decision docs,
+  and `tmp/fpds_admin_collection_goal_tool.py`
+- Decisions: keep the `100%` essential-field and official-evidence gate; reduce
+  fields and source scope rather than weakening truth requirements. Country
+  differences belong in versioned profiles, not scattered conditionals.
+  Incomplete candidates remain private; no operator approval is fabricated.
+- Verification: focused exact-quote/Review suites `81` API tests and `342`
+  worker tests; full API `378/378`; full worker `462/462`; Public typecheck and
+  production build; shared-dev collection, source-isolation, aggregate,
+  essential-contract, Public API, duplicate, numeric-type, and audit-event
+  readbacks; helper `py_compile`; and `git diff --check`.
+- Known issues: genuinely incomplete US candidates remain private in Review;
+  no incomplete active Public projection is known.
+- Next step: continue ordinary source-quality operations from the evidence-first
+  Review queue; do not weaken the country profile or exact-evidence gates to
+  increase Public catalog size.
+
+## 2026-08-09 - Existing Public Catalog Recollection And Quality Repair
+
+- WBS: `5.15`, `5.16`, existing-data remediation, audited Banks recollection,
+  Public aggregate repair
+- Status: complete in shared-dev operations, runtime safety, regression tests,
+  and Public readback
+- Goal: repair the already-published weak catalog without requiring the Product
+  Owner to review every product, while retaining only evidence-grounded
+  comparison essentials in Public.
+- Starting state:
+  - latest CA/US Public snapshots contained `86` active products; only `35`
+    satisfied the new essential contract and `51` were incomplete
+  - active governed canonical data contained `102` products; `67` were
+    incomplete
+- Operational outcome:
+  - generated immediate safety snapshots that removed all `51` incomplete
+    Public rows before recollection
+  - retracted the unsupported Capital One Kids Savings `10%` candidate and a
+    WealthONE GIC candidate whose product identity was actually a High Interest
+    Savings Account; their products were inactivated with append-only
+    remediation audit events rather than deleting source evidence or history
+  - ran audited Banks collection `collection_gfmLJxN54Uo2H43M` across `32`
+    affected bank/product scopes: all `32` runs completed with no partial or
+    failed run; `78` candidates resulted in `27` approved, `50` in Review, and
+    `1` superseded candidate
+  - the `27` approved candidates included `21` contract-pass candidates and
+    `6` older AI-verification approvals that still lacked a new essential; the
+    aggregate contract correctly kept those six outside Public
+  - ran targeted semantic recollection
+    `collection_4sMFw9d8XWPA-fP8` for Capital One savings and WealthONE GIC;
+    the collection completed `2/2` runs and produced four candidates. Capital
+    One `360 Performance Savings` initially auto-promoted, while Kids Savings,
+    a duplicate feature page, and the unresolved WealthONE GIC stayed in Review
+  - direct official-page verification showed the Capital One APY rendered as
+    unavailable in captured HTML and the extracted `10` came from unrelated
+    `top 10%` mobile-app copy. The promoted candidate was therefore retracted
+    and its canonical product inactivated
+  - final snapshots are `agg_repair_final_20260809_ca` and
+    `agg_repair_verified_20260809_us`; the Public API now returns `47` CA plus
+    `1` US product, all `48/48` essential-complete, with zero `Unavailable`
+    values and zero numeric type violations. The remaining `64` incomplete
+    active canonical rows stay outside Public
+- Runtime hardening:
+  - annual Deposit rates at or above `10%` now require review instead of being
+    treated as a plausible context-free canonical rate; semantic non-rate
+    contexts still receive their more specific suppression reason
+  - candidate safety remediation now queues aggregate refresh separately for
+    every affected product country instead of silently defaulting US
+    retractions to CA
+  - the tracked admin collection helper now provides essential/Public audits,
+    collection outcome summaries, long-run activity diagnosis, and Public API
+    readback used for this repair
+- Review state: `53` newly collected unresolved candidates remain in Review
+  because an essential field could not be grounded; they are not visible in
+  Public. No operator approval was fabricated to increase catalog size.
+- Verification: API `365/365`; worker `439/439`; Public typecheck and production
+  build remained passed from the essential-field slice; live Public API
+  readback confirmed CA `47`, US `1`, fresh snapshots, and `0` unavailable
+  values; final essential audit confirmed Public `48/48` complete and `0`
+  incomplete; duplicate and numeric-type audit found `0` violations.
+- Known limitation: the official Capital One page renders its APY dynamically
+  as `NaN` to the server-side capture, so that savings product correctly remains
+  unavailable to Public until direct current APY evidence can be collected.
+- Next step: work Review only for the `53` candidates whose missing essential
+  can be resolved from an official source; ordinary complete Banks collections
+  require no operator action.
+
+## 2026-08-08 - Essential-Field Low-Touch Publication
+
+- WBS: `5.15`, `5.16`, collection automation, Review routing, Public product
+  quality
+- Status: complete in code, tests, active documentation, and shared-dev policy
+  migration
+- Goal: let a Banks collection reach FPDS Public without operator intervention
+  whenever the official source supports the minimum facts customers need to
+  compare that product type, and send only unresolved essentials to Review.
+- Why now: months of runs showed that broad collection contracts created many
+  empty or strange Public fields and unnecessary Review work without improving
+  the few facts customers actually compare.
+- Outcome:
+  - introduced one executable essential contract shared by source generation,
+    validation, collection/Review AI, automatic and manual approval, aggregate
+    projection, Public API, and Public UI
+  - Chequing now requires fee, minimum balance, and included/unlimited
+    transactions; Savings requires ongoing rate, fee, and minimum balance; GIC
+    requires rate, term, minimum deposit, and redeemability; Mortgage requires
+    rate/qualified summary, rate type, and term; Personal Loan requires rate/APR
+    summary, amount, and term; Line of Credit requires rate/formula summary,
+    limit, and security. Credit Card retains annual fee and purchase rate while
+    remaining outside current Public scope
+  - optional marketing/operational fields are no longer requested by default or
+    included in Review AI. Identity and every selected essential require direct
+    evidence and full official grounding; partial-source and legacy confidence
+    warnings alone no longer block a complete candidate
+  - aggregate refresh excludes incomplete active canonical rows for both
+    Deposit and Lending, derives Deposit display rates from standard/base/highest
+    rates or GIC schedules, and carries transaction, redeemability, and security
+    facts into the Public projection
+  - Public cards, comparison, and detail surfaces now use product-type-specific
+    essentials and no longer add optional application/entry rows or irrelevant
+    loan rate-type/term placeholders
+  - migration `0033_essential_field_low_touch_publication.sql` updated seven
+    Product Type contracts, `1,106` active source rows, the two AI thresholds to
+    `1.0`, and force-review policy to remove partial-source/confidence-only work
+- Not done: no existing candidate, canonical, Review, or Public projection data
+  was manually repaired, deleted, or recollected. Existing records improve when
+  the new runtime is deployed and the relevant collection/aggregate refresh runs.
+- Key files: `worker/pipeline/fpds_approval_policy.py`,
+  `worker/pipeline/fpds_validation_routing/service.py`,
+  `api/service/api_service/candidate_auto_promotion.py`,
+  `api/service/api_service/ai_verification.py`,
+  `worker/pipeline/fpds_aggregate_refresh/service.py`,
+  `app/public/src/components/fpds/public/product-compare-workspace.tsx`,
+  `app/public/src/components/fpds/public/product-detail-surface.tsx`, migration
+  `0033`, requirements, field contract, workflow, and decision D-034
+- Decisions: D-034 supersedes the broad populated-field and 80% current
+  contracts for governed types. The smaller field set must pass at 100%; zero
+  money values and explicit boolean states are valid only with evidence.
+- Verification: Worker `438/438`; API `365/365`; Public `pnpm run typecheck`;
+  Public production build with eight routes; shared-dev readback confirmed
+  migrations `0032` and `0033`, the seven narrowed registry contracts, v4
+  `1.0` AI policy rows, and force-review v2; `git diff --check` passed.
+- Known issues: official banks may still omit a true essential or split it
+  across unsupported source patterns; those products correctly remain in
+  Review. Existing Public data is not retroactively recollected by this slice.
+- Next step: deploy the runtime, then trigger representative Deposit and Loan
+  Banks collections and inspect automatic canonical/aggregate outcomes before
+  deciding whether a separately authorized legacy-data cleanup is needed.
+
+## 2026-08-08 - Cross-Country Comparison-Grade Product Collection
+
+- WBS: `5.15`, `5.16`, collection quality, review automation, Public aggregate
+  safety
+- Status: done in code, shared-dev migration, documentation, and representative
+  live recollection
+- Goal: explain and fix why US loan products could be approved without rate,
+  amount, or term facts, then make the same quality boundary reusable across
+  countries and operator-managed Product Types.
+- Why now: live Chase Mortgage and Citi Personal Loan candidates had official
+  rate disclosures in their evidence, but the populated-only approval policy
+  scored only fields that happened to be present. A product with an empty rate
+  could therefore receive a `100%` grounding ratio and become canonical.
+- Outcome:
+  - added a country-neutral comparison contract: credit card requires annual
+    fee + purchase rate; mortgage requires a numeric rate or percentage-bearing
+    qualified summary + rate type + term; personal loan requires a rate/APR
+    summary + amount + term; line of credit requires a rate/formula summary +
+    limit; unknown dynamic types fail closed without a percentage field and a
+    second decision field
+  - missing mandatory fields now enter validation and Review AI v4 assessment,
+    block automatic and human approval independently of the `80%` score, and
+    cannot be hidden as empty optional omissions
+  - extraction actively requests official rate/pricing/disclosure facts,
+    preserves rate ranges/formulas/examples with their conditions, carries
+    exact-product officially grounded lending rate summaries from supporting
+    sources, and may reuse a fresh high-confidence official detail snapshot
+    only for co-located qualified lending comparison facts
+  - Public serialization and lending cards/details/comparison now expose
+    `interest_rate_summary`; aggregate refresh excludes incomplete active
+    lending canonical rows and records the exclusion count
+  - migration `0032_comparison_grade_collection_quality.sql` was applied to
+    shared dev, updating lending registry contracts and activating v3
+    comparison policy rows while retaining the four bounded retail lending
+    types because type count was not the failure cause
+- Live verification:
+  - Chase collection `collection_C9cfG4mm6S1goKwj` completed with 14/14 source
+    successes. Five incomplete mortgage candidates received
+    `required_field_missing` and stayed in Review. `FHA Loan` alone passed with
+    fixed-rate, 30-year, and a qualified representative disclosure preserving
+    `5.75% / 6.5756% APR`, down payment, loan amount, payment, geography, lock,
+    LTV, and FICO assumptions
+  - first Citi control collection `collection_v4PelMBPUVv9wLb4` produced an
+    empty-core candidate that correctly failed with three missing comparison
+    fields instead of false approval
+  - after exact-origin recovery, Citi collection
+    `collection_XgfA274n6TUxXnEi` completed with a validation-pass candidate
+    containing `9.99% APR` with automatic-payment discount, `$2,000-$30,000`
+    amount context, and an up-to-60-month term. Review AI retained it rather
+    than auto-approving because the broader official search described a
+    `9.99%-17.49%` APR and `12-60` month range that was not fully backed by the
+    captured detail-page field quotes
+  - latest US Public snapshot `agg_KswzrzB8aXlmkDVS` is completed and non-stale;
+    it records `excluded_incomplete_comparison_rows=16`. The only projected
+    Chase/Citi lending item in the audited scope is the comparison-complete FHA
+    Loan with its qualified rate summary
+- Not done: did not force-approve Citi, invent its missing upper APR/term bound,
+  retract historical canonical rows, deactivate lending Product Types, or
+  expose private evidence. One intermediate Citi retry
+  `collection_B19cSuJ0t8s2ezMO` failed before candidate creation due a transient
+  shared-dev database connection termination and remains preserved as run
+  history.
+- Key files: `worker/pipeline/fpds_approval_policy.py`,
+  `worker/pipeline/fpds_extraction/service.py`,
+  `worker/pipeline/fpds_normalization/supporting_merge.py`,
+  `worker/pipeline/fpds_validation_routing/service.py`,
+  `worker/pipeline/fpds_aggregate_refresh/service.py`,
+  `api/service/api_service/ai_verification.py`,
+  `api/service/api_service/candidate_auto_promotion.py`,
+  `api/service/api_service/review_detail.py`,
+  `api/service/api_service/public_products.py`, Public product surfaces,
+  migration `0032`, requirements/design/decision/runbook documents, and focused
+  regression tests
+- Decisions: recorded D-033. Keep the four current lending types; reduce
+  published facts, not supported types. A qualified advertised floor or
+  representative example may be collected as labeled source-language text,
+  but conflicting or incomplete official disclosures remain review-bound.
+- Verification:
+  - Worker affected suites: `338` tests passed
+  - API affected suites: `89` tests passed
+  - Public `pnpm run typecheck` passed
+  - Public `pnpm run build` passed
+  - shared-dev migration `0032` committed successfully
+  - `git diff --check` passed
+- Known issues: Citi's current detail snapshot publishes an advertised floor
+  and maximum term, while Review AI found a broader range on other official
+  pages without field-level persisted quotes. The candidate is intentionally
+  retained in Review until those exact source facts are captured or an operator
+  accepts only the narrower disclosure.
+- Next step: when adding a new Product Type, define its percentage and second
+  decision field up front; use the same live audit to confirm either a complete
+  approved product or an explicit review-blocking source limitation.
 
 ## 2026-08-06 - JCBN Interrupted Collection Recovery And Rerun
 

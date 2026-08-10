@@ -72,12 +72,12 @@ class ReviewQueueTests(unittest.TestCase):
         )
         self.assertEqual(serialized["created_at"], "2026-04-13T12:00:00+00:00")
         self.assertEqual(serialized["source_role"], "detail")
-        self.assertEqual(serialized["missing_expected_fields"], ["standard_rate"])
+        self.assertEqual(serialized["missing_expected_fields"], ["standard_rate", "monthly_fee"])
         self.assertEqual(serialized["recommended_action"], "edit_approve")
         self.assertEqual(serialized["review_diagnosis"]["category"], "missing_fields")
         self.assertEqual(
             {item["field_name"] for item in serialized["review_diagnosis"]["affected_fields"]},
-            {"standard_rate"},
+            {"standard_rate", "monthly_fee"},
         )
 
     def test_supporting_source_review_is_recommended_for_rejection(self) -> None:

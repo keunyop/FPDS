@@ -177,11 +177,14 @@ Current official-grounding baseline:
 - supporting/entry sources do not run this product-level pass, and provider
   failure leaves deterministic extraction intact rather than failing open.
 - dynamic/lending detail candidates persist a separate grounding assessment
-  over product identity and populated decision-critical fields. Verified
-  identity plus at least one product-defining fact (two fields total) and the
-  configured ratio are required before normal Phase 1 auto-validation may
-  consider the candidate. Empty optional fields are omissions; ungrounded
-  lending attributes are removed before routing.
+  over product identity and decision-critical comparison fields. Verified
+  identity plus `100%` of the selected essential set are required before normal
+  Phase 1 auto-validation may consider the candidate. Missing comparison fields
+  independently block approval; optional marketing and operational fields are
+  outside the default request. APR ranges, rate formulas, and
+  representative examples remain qualified source-language summaries rather
+  than misleading scalar rates; ungrounded lending attributes are removed
+  before routing.
 - if materialization leaves no eligible detail source, the catalog runner may
   invoke one audited live-search coverage repair. A verified current
   consumer-brand route is persisted with relationship evidence and discovery
@@ -207,6 +210,16 @@ Current official-grounding baseline:
 ### 5.7 Stage 6. Normalization
 
 Current cross-country deposit safeguards:
+- collection resolves the versioned `(country_code, product_type)` market
+  profile once and carries its bounded fields through extraction, validation,
+  Review, approval, and Public eligibility. Canada uses the baseline contract;
+  US overrides checking transaction/redeemability assumptions with local
+  balance, waiver, APY, and early-withdrawal-penalty semantics; any other
+  explicitly named country fails closed until its profiles are registered;
+- source materialization and generated-link selection reject an explicit
+  other-country path/locale, subdomain, or country-code TLD even when both
+  countries share the same official parent domain; the active-scope DB read is
+  country-qualified and stale generated details are inactivated auditably;
 - domestic/foreign-currency subtype inference uses the run country's configured
   market default (`CA/CAD`, `US/USD`) rather than treating every non-CAD account
   as foreign currency;
@@ -257,15 +270,20 @@ Current cross-country deposit safeguards:
 
 ### 5.9 Stage 8. Review Routing
 
-Current approval rule: residual Review AI v2 verifies `product_name` plus
-populated or blocking decision fields. Empty optional/operational fields are
-outside the denominator. System approval requires at least `80%`, an official
-source, no unapplied correction, and no unresolved ambiguous product boundary,
-invalid taxonomy, or partial source failure. Earlier full-request-set attempts
+Current approval rule: residual Review AI v5 verifies `product_name` plus one
+selected field for every type-specific essential comparison requirement. Empty
+marketing/operational fields remain outside the request and denominator. System
+approval requires `100%`, an official source, no unapplied correction, and no
+unresolved identity/boundary/taxonomy/type/range/conflict/ambiguity blocker. A
+partial-source or legacy confidence warning alone is non-blocking. Earlier contract attempts
 are not reused. If search leaves `product_name` unverified, an exact normalized
 match to the persisted official detail-page H1 may establish identity when
 discovery also recorded `product_identity_match=true`; an explicit mismatch or
 cross-product deposit page remains fail-closed.
+
+The type-specific requirement above is selected by country as well as Product
+Type. Manual approval and aggregate refresh resolve the same versioned profile;
+there is no separate UI or publication interpretation.
 
 - 입력: candidate, validation result, confidence score, routing config
 - 처리:
@@ -276,7 +294,7 @@ cross-product deposit page remains fail-closed.
     grounding assessment를 추가 gate로 사용한다. assessment가 부족하면
     `ai_grounding_insufficient`로 review를 유지한다.
   - normal routing 후 남은 active detail review는 enabled policy의 bounded
-    collection AI autopilot을 거치며, approval-field `80%` 미만이거나 hard
+    collection AI autopilot을 거치며, essential-field `100%` 미만이거나 hard
     blocker가 남으면 review 상태를 그대로 유지한다.
   - rerun은 exact logical-name 중복을 정리하며, 새 run이 동일 normalized
     detail URL에 active review 후보를 정확히 하나만 만들었을 때는 공식

@@ -27,7 +27,7 @@ Rules:
 
 | ID | Priority | State | Risk | Current Response | Owner |
 |---|---|---|---|---|---|
-| R-001 | High | Open | Bank source structure varies by bank and product type, including legal-bank homepages that delegate retail products to a separate consumer brand, so discovery, extraction, and normalization quality can still drift across expansions. | Keep evidence-first review fallback, evidence-bound consumer-brand routes, one-shot stale-coverage repair, source-specific hardening, country-aware financial semantics, authoritative discovery identity, omission of ungrounded attributes, and schema-aligned validation active. | Tech Lead, AI/Data |
+| R-001 | High | Open | Bank source structure and customer decision semantics vary by country, bank, and product type. Legal-bank homepages may delegate retail products to a separate consumer brand, while one official parent domain may also host explicit routes for several countries, so discovery, extraction, and normalization quality can drift or cross-contaminate during expansion. | Resolve one versioned country-product profile at every collection/publication gate; hard-veto explicit other-market paths/locales, subdomains, and country-code TLDs even on shared domains; keep evidence-first review fallback, evidence-bound consumer-brand routes, one-shot stale-coverage repair, authoritative discovery identity, omission of ungrounded attributes, and schema-aligned validation active. Require an explicit profile/fixture slice before widening a new market. | Tech Lead, AI/Data |
 | R-002 | High | Open | PDF-heavy sources can still produce unstable parse quality and weak field extraction. | Preserve raw artifacts, keep supporting-merge and manual review options available, and verify PDF-heavy banks explicitly. | AI/Data |
 | R-003 | High | Open | BX-PF environment or contract readiness can still delay true publish readiness. | Keep interface-first behavior, mock-safe dev posture, and explicit pending or retry semantics until live readiness is confirmed. | Product Owner, Backend |
 | R-004 | Medium | Open | Public aggregate refresh, snapshot freshness, and canonical truth can drift if queue or retry behavior regresses. | Keep dashboard health visibility, retry flow, and latest-successful serving fallback in place. | Backend |
@@ -51,7 +51,7 @@ Rules:
 
 | ID | Priority | State | Issue | Current Impact | Next Action | Owner |
 |---|---|---|---|---|---|---|
-| I-001 | High | Open | Some source-specific gaps still remain after orchestration hardening, including known bank-page validation misses. | Individual banks can still land in review with real data-quality gaps after collection succeeds. | Fix bank-specific extraction or supporting-merge gaps one reproducible case at a time. | AI/Data, Backend |
+| I-001 | High | Monitoring | Some banks split comparison facts across a product detail page and separate official pricing/disclosure pages; live search may identify the broader fact without producing a field-level quote from the freshly captured detail snapshot. | Generic exact-product supporting merge now carries grounded lending rate summaries and companions plus US CD early-withdrawal penalties, while incomplete approval/Public exposure remains blocked. Banks whose dynamic pages still cannot yield a persisted quote remain in Review. | Add reproducible official source-role patterns to the country profile and supporting bundle one bank pattern at a time; never promote a broader live-search fact without a persisted exact quote. | AI/Data, Backend |
 | I-002 | Medium | Open | Historical migrations still seed some baseline rows on a fresh database even though runtime reseeding was removed. | Resettable runtime behavior is fixed, but fresh-DB bootstrap behavior is still broader than some operator reset cases. | Decide explicitly whether fresh databases should also start empty before changing migrations. | Product Owner, Backend |
 | I-003 | Medium | Open | Several active governance docs outside this slice still contain old encoding or readability problems. | Some startup docs are harder to inspect from the shell than they should be. | Clean remaining active docs in later docs-hygiene slices. | Tech Lead |
 
@@ -84,4 +84,6 @@ If an item is no longer shaping decisions, remove it.
 
 | Date | Change |
 |---|---|
+| 2026-08-08 | Updated I-001 for cross-page lending disclosure capture after Chase/Citi comparison-quality RCA; approval and Public projection now fail closed on incomplete comparison contracts |
+| 2026-08-09 | Added country-product profile mitigation to R-001 and moved I-001 to Monitoring after exact-product lending/CD supporting merge was implemented |
 | 2026-04-22 | Rewrote the RAID log as a short current-baseline document and removed stale closed design-stage items from the default path |

@@ -278,6 +278,7 @@ def _serialize_review_task_row(row: dict[str, Any]) -> dict[str, Any]:
         validation_status=str(row["validation_status"]),
         validation_issue_codes=_coerce_string_list(row.get("validation_issue_codes")),
         product_type=str(row["product_type"]),
+        country_code=str(row["country_code"]),
         source_metadata=source_metadata,
     )
     missing_expected_fields = [

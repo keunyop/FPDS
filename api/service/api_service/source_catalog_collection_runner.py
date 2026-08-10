@@ -13,6 +13,7 @@ from api_service.source_catalog import (
     _canonical_product_type_code,
     _materialize_sources_for_catalog_item,
     _product_type_scope_codes,
+    _url_country_scope_conflicts,
     repair_catalog_coverage_route,
 )
 from api_service.source_registry import (
@@ -110,6 +111,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         existing_scope_before_repair = _load_active_collection_scope(
             connection,
             bank_code=str(group["bank_code"]),
+            country_code=str(group["country_code"]),
             product_type=str(group["product_type"]),
         )
         if not materialized.detail_source_ids and not existing_scope_before_repair["target_source_ids"]:
@@ -186,17 +188,26 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 or _is_candidate_producing_source(item, product_type=str(group["product_type"]))
             )
             and str(item["status"]) != "removed"
+            and not _url_country_scope_conflicts(
+                country_code=str(group["country_code"]),
+                normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+            )
         ]
         target_source_ids = [
             str(item["source_id"])
             for item in generated_rows
             if _is_candidate_producing_source(item, product_type=str(group["product_type"]))
             and str(item["status"]) != "removed"
+            and not _url_country_scope_conflicts(
+                country_code=str(group["country_code"]),
+                normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+            )
         ]
         generated_target_source_ids = list(target_source_ids)
         active_scope = _load_active_collection_scope(
             connection,
             bank_code=str(group["bank_code"]),
+            country_code=str(group["country_code"]),
             product_type=str(group["product_type"]),
         )
         collection_source_ids = _dedupe_preserve_order(
@@ -284,7 +295,13 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     source_collection_runner._run_group(plan=collection_plan, group=collection_group)
 
 
-def _load_active_collection_scope(connection: Any, *, bank_code: str, product_type: str) -> dict[str, list[str]]:
+def _load_active_collection_scope(
+    connection: Any,
+    *,
+    bank_code: str,
+    country_code: str,
+    product_type: str,
+) -> dict[str, list[str]]:
     product_type = _canonical_product_type_code(product_type)
     rows = connection.execute(
         """
@@ -297,12 +314,14 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
             expected_fields
         FROM source_registry_item
         WHERE bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
           AND product_type = ANY(%(product_type_scope)s)
           AND status = 'active'
         ORDER BY source_id
         """,
         {
             "bank_code": bank_code,
+            "country_code": country_code,
             "product_type_scope": _product_type_scope_codes(product_type),
         },
     ).fetchall()
@@ -310,11 +329,19 @@ def _load_active_collection_scope(connection: Any, *, bank_code: str, product_ty
         str(row["source_id"])
         for row in rows
         if str(row["discovery_role"]) != "entry" or _is_candidate_producing_source(row, product_type=product_type)
+        if not _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=str(row.get("source_url") or ""),
+        )
     ]
     target_source_ids = [
         str(row["source_id"])
         for row in rows
         if _is_candidate_producing_source(row, product_type=product_type)
+        and not _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=str(row.get("source_url") or ""),
+        )
     ]
     return {
         "collection_source_ids": collection_source_ids,

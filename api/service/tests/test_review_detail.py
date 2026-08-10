@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import MagicMock
 
 from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items
 from api_service.review_detail import (
@@ -12,6 +13,7 @@ from api_service.review_detail import (
     _build_validation_issues,
     _changed_field_names,
     _collect_model_execution_ids,
+    _find_current_product,
     _is_empty_review_value,
     _normalize_override_payload,
     _serialize_field_mapping,
@@ -43,6 +45,30 @@ class _FailingAuditConnection:
 
 
 class ReviewDetailTests(unittest.TestCase):
+    def test_current_product_lookup_uses_comparison_identity_name(self) -> None:
+        cursor = MagicMock()
+        cursor.fetchone.return_value = None
+        connection = MagicMock()
+        connection.execute.return_value = cursor
+
+        result = _find_current_product(
+            connection,
+            review_row={
+                "product_id": None,
+                "country_code": "US",
+                "bank_code": "TB",
+                "product_family": "deposit",
+                "product_type": "chequing",
+                "product_name": "Truist One\u00ae Checking account",
+            },
+        )
+
+        self.assertIsNone(result)
+        sql, params = connection.execute.call_args.args
+        self.assertIn("regexp_replace(lower(cp.product_name), '[^[:alnum:]]+'", sql)
+        self.assertIn("'[[:space:]]+account$'", sql)
+        self.assertEqual(params["product_name"], "Truist One\u00ae Checking account")
+
     def test_review_diagnosis_prioritizes_suspect_fields_and_direct_edit(self) -> None:
         diagnosis = build_review_diagnosis(
             source_role="detail",
@@ -80,6 +106,30 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(
             {item["issue_type"] for item in diagnosis["affected_fields"]},
             {"unresolved_placeholder", "invalid_type", "cross_field_conflict"},
+        )
+
+    def test_review_diagnosis_flags_masked_mortgage_rate_template(self) -> None:
+        diagnosis = build_review_diagnosis(
+            source_role="detail",
+            expected_fields=["product_name", "interest_rate_summary"],
+            candidate_payload={
+                "product_name": "Example Fixed Mortgage",
+                "interest_rate_summary": "Down payment 5%. Rate X.XXX%; APR X.XXX%; Monthly Payment $XXXX.",
+            },
+            validation_status="error",
+            validation_issue_codes=["required_field_missing"],
+            product_type="mortgage",
+        )
+
+        self.assertEqual(diagnosis["category"], "suspect_fields")
+        self.assertIn(
+            {
+                "field_name": "interest_rate_summary",
+                "label": "Interest Rate Summary",
+                "issue_type": "unresolved_placeholder",
+                "current_value": "Down payment 5%. Rate X.XXX%; APR X.XXX%; Monthly Payment $XXXX.",
+            },
+            diagnosis["affected_fields"],
         )
 
     def test_review_diagnosis_ignores_brand_suffix_when_checking_source_identity(self) -> None:
@@ -192,7 +242,16 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["recommended_action"], "edit_approve")
         self.assertEqual(
             {item["field_name"] for item in diagnosis["affected_fields"]},
-            {"product_name", "loan_amount_text", "fees_text", "monthly_payment_text", "security_requirement", "prepayment_privileges"},
+            {
+                "product_name",
+                "interest_rate",
+                "loan_amount_text",
+                "term_length_text",
+                "fees_text",
+                "monthly_payment_text",
+                "security_requirement",
+                "prepayment_privileges",
+            },
         )
 
     def test_optional_expected_fields_do_not_force_edit(self) -> None:

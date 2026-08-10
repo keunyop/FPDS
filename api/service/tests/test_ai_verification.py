@@ -205,7 +205,7 @@ class AiVerificationTests(TestCase):
         detail["candidate"]["field_mapping_metadata"] = {
             "annual_fee": {
                 "normalized_value": 0.0,
-                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_grounding_contract_version": "collection-official-grounding-v2",
                 "official_grounding_method": "deterministic_labeled_origin",
                 "official_verification_status": "match",
                 "official_evidence_quote": "ANNUAL FEE $0",
@@ -230,6 +230,37 @@ class AiVerificationTests(TestCase):
                 allowed_domains=["different.example"],
             ),
             {},
+        )
+
+    def test_authoritative_field_evidence_accepts_qualified_lending_origin_contract(self):
+        detail = _detail()
+        detail["candidate"].update({"product_type": "personal-loan", "product_family": "lending"})
+        summary = "APR from 9.99% with the stated automatic-payment discount."
+        detail["candidate"]["candidate_payload"]["interest_rate_summary"] = summary
+        detail["candidate"]["field_mapping_metadata"] = {
+            "interest_rate_summary": {
+                "normalized_value": summary,
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_grounding_method": "deterministic_lending_comparison_origin",
+                "official_verification_status": "match",
+                "official_evidence_quote": (
+                    "Personal loan rates as low as 9.99% APR, including a 0.5% automatic-payment discount."
+                ),
+                "official_web_sources": [
+                    {"url": "https://bank.example/personal-loans", "title": "Personal Loans"}
+                ],
+            }
+        }
+
+        evidence = authoritative_field_evidence(
+            detail,
+            field_names=["interest_rate_summary"],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(
+            evidence["interest_rate_summary"]["basis"],
+            "exact_official_detail_lending_comparison",
         )
 
     def test_normalize_official_domains_keeps_registered_hosts_only(self):
@@ -276,12 +307,12 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             [item["field_name"] for item in payload["fields_to_verify"]],
-            ["product_name", "standard_rate", "monthly_fee"],
+            ["product_name", "standard_rate", "monthly_fee", "minimum_balance"],
         )
         self.assertEqual(payload["official_domain_allowlist"], ["bank.example"])
-        self.assertTrue(payload["approval_policy"]["empty_optional_fields_are_omissions"])
+        self.assertTrue(payload["approval_policy"]["empty_requested_fields_block_approval"])
 
-    def test_build_payload_excludes_empty_optional_dynamic_fields(self):
+    def test_build_payload_includes_missing_mandatory_dynamic_fields(self):
         detail = _detail()
         detail["candidate"].update(
             {
@@ -329,7 +360,44 @@ class AiVerificationTests(TestCase):
 
         self.assertEqual(
             [item["field_name"] for item in payload["fields_to_verify"]],
-            ["product_name", "annual_fee"],
+            ["product_name", "annual_fee", "purchase_interest_rate"],
+        )
+        self.assertTrue(payload["fields_to_verify"][2]["missing"])
+        self.assertEqual(payload["approval_policy"]["contract_version"], "review-ai-verification-v7")
+
+    def test_build_payload_requests_only_the_preferred_missing_rate_alternative(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "product_name": "Example Mortgage",
+                "candidate_payload": {
+                    "product_name": "Example Mortgage",
+                    "rate_type": "fixed",
+                    "term_length_text": "30 years",
+                },
+            }
+        )
+        detail["source_context"]["expected_fields"] = [
+            "product_name",
+            "mortgage_rate",
+            "interest_rate_summary",
+            "rate_type",
+            "term_length_text",
+        ]
+        detail["review_field_items"] = []
+
+        payload = build_ai_verification_payload(detail=detail, allowed_domains=["bank.example"])
+
+        self.assertEqual(
+            [item["field_name"] for item in payload["fields_to_verify"]],
+            [
+                "product_name",
+                "mortgage_rate",
+                "rate_type",
+                "term_length_text",
+            ],
         )
 
     def test_run_rejects_read_only_actor_before_provider_or_database_work(self):
@@ -384,6 +452,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": "3.25",
                         "confidence": 0.96,
                         "rationale": "The official product rate is 3.25%.",
+                        "evidence_quote": "Example Savings APY is 3.25%.",
                         "sources": [source],
                     },
                     {
@@ -393,6 +462,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": "999",
                         "confidence": 0.9,
                         "rationale": "Unsafe value.",
+                        "evidence_quote": "Example Savings monthly fee is $999.",
                         "sources": [source],
                     },
                     {
@@ -402,6 +472,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": '"OTHER"',
                         "confidence": 1,
                         "rationale": "Identity mutation must be ignored.",
+                        "evidence_quote": "Other Bank",
                         "sources": [source],
                     },
                     {
@@ -411,6 +482,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": '"unsupported"',
                         "confidence": 1,
                         "rationale": "Unknown fields must be ignored.",
+                        "evidence_quote": "unsupported",
                         "sources": [source],
                     },
                 ],
@@ -438,6 +510,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": "3.25",
                         "confidence": 0.9,
                         "rationale": "Unsupported.",
+                        "evidence_quote": "Example Savings APY is 3.25%.",
                         "sources": [{"url": "https://other.example/rates", "title": "Other"}],
                     }
                 ],
@@ -446,6 +519,133 @@ class AiVerificationTests(TestCase):
             sources=[{"url": "https://bank.example/rates", "title": "Official"}],
             allowed_domains=["bank.example"],
         )
+        self.assertEqual(result["fields"][0]["status"], "unverified")
+        self.assertEqual(result["proposed_corrections"], {})
+
+    def test_sanitize_result_rejects_same_bank_evidence_for_a_different_product(self):
+        source = {"url": "https://bank.example/rates", "title": "Official rates"}
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "The number belongs to a neighboring product.",
+                "fields": [
+                    {
+                        "field_name": "standard_rate",
+                        "status": "mismatch",
+                        "has_verified_value": True,
+                        "verified_value_json": "3.25",
+                        "confidence": 0.99,
+                        "rationale": "Official, but for a different product.",
+                        "evidence_quote": "Other Savings APY is 3.25%.",
+                        "sources": [source],
+                    }
+                ],
+            },
+            detail=_detail(),
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(result["fields"][0]["status"], "unverified")
+        self.assertEqual(result["proposed_corrections"], {})
+
+    def test_sanitize_result_rejects_exact_name_quote_from_other_product_route(self):
+        source = {
+            "url": "https://bank.example/checking/apply/essential-banking",
+            "title": "Official checking application",
+        }
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "The citation is on the wrong Product Type route.",
+                "fields": [
+                    {
+                        "field_name": "standard_rate",
+                        "status": "mismatch",
+                        "has_verified_value": True,
+                        "verified_value_json": "3.25",
+                        "confidence": 0.99,
+                        "rationale": "Wrong-route citation.",
+                        "evidence_quote": "Example Savings APY is 3.25%.",
+                        "sources": [source],
+                    }
+                ],
+            },
+            detail=_detail(),
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(result["fields"][0]["status"], "unverified")
+        self.assertEqual(result["proposed_corrections"], {})
+
+    def test_sanitize_result_rejects_ellipsized_evidence_quote(self):
+        source = {"url": "https://bank.example/rates", "title": "Official rates"}
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "An ellipsized composite is not an exact quote.",
+                "fields": [
+                    {
+                        "field_name": "standard_rate",
+                        "status": "mismatch",
+                        "has_verified_value": True,
+                        "verified_value_json": "3.25",
+                        "confidence": 0.99,
+                        "rationale": "Composite quote.",
+                        "evidence_quote": "Example Savings ... APY is 3.25%.",
+                        "sources": [source],
+                    }
+                ],
+            },
+            detail=_detail(),
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(result["fields"][0]["status"], "unverified")
+        self.assertEqual(result["proposed_corrections"], {})
+
+    def test_sanitize_result_rejects_comparison_prose_extended_beyond_quote(self):
+        detail = _detail()
+        detail["candidate"]["candidate_payload"]["fee_waiver_condition"] = None
+        detail["review_field_items"].append(
+            {
+                "field_name": "fee_waiver_condition",
+                "label": "Fee Waiver Condition",
+                "agent_value": None,
+                "effective_value": None,
+                "missing": True,
+                "suspect": False,
+                "issue_codes": ["required_field_missing"],
+                "field_note": None,
+            }
+        )
+        source = {
+            "url": "https://bank.example/example-savings",
+            "title": "Example Savings",
+        }
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "The proposed condition adds an unsupported expiry.",
+                "fields": [
+                    {
+                        "field_name": "fee_waiver_condition",
+                        "status": "mismatch",
+                        "has_verified_value": True,
+                        "verified_value_json": json.dumps(
+                            "The $12 monthly maintenance fee is waived for students; "
+                            "the waiver expires on the anticipated graduation date."
+                        ),
+                        "confidence": 0.99,
+                        "rationale": "The expiry is not in the quote.",
+                        "evidence_quote": "Example Savings waives the $12 monthly fee for students.",
+                        "sources": [source],
+                    }
+                ],
+            },
+            detail=detail,
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
         self.assertEqual(result["fields"][0]["status"], "unverified")
         self.assertEqual(result["proposed_corrections"], {})
 
@@ -462,6 +662,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": "3.25",
                         "confidence": 0.95,
                         "rationale": "The model mislabeled a difference.",
+                        "evidence_quote": "Example Savings APY is 3.25%.",
                         "sources": [source],
                     },
                     {
@@ -471,6 +672,7 @@ class AiVerificationTests(TestCase):
                         "verified_value_json": "0",
                         "confidence": 0.95,
                         "rationale": "The model mislabeled an equal value.",
+                        "evidence_quote": "Example Savings monthly fee is $0.",
                         "sources": [source],
                     },
                 ],
@@ -502,6 +704,7 @@ class AiVerificationTests(TestCase):
                             "verified_value_json": "3.25",
                             "confidence": 0.98,
                             "rationale": "Official current rate.",
+                            "evidence_quote": "Example Savings APY is 3.25%.",
                             "sources": [source],
                         }
                     ],
@@ -542,11 +745,11 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             connection.execution_metadata["verification_contract_version"],
-            "review-ai-verification-v2",
+            "review-ai-verification-v7",
         )
         self.assertEqual(
             connection.execution_metadata["approval_field_names"],
-            ["product_name", "standard_rate", "monthly_fee"],
+            ["product_name", "standard_rate", "monthly_fee", "minimum_balance"],
         )
         self.assertEqual(connection.execution_metadata["hard_blocking_issue_codes"], [])
         audit = next(params for sql, params in connection.calls if "INSERT INTO audit_event" in sql)

@@ -55,6 +55,18 @@ Files:
 - `migrations/0031_catalog_coverage_route_evidence.sql`: adds private structured
   evidence for verified product-specific consumer-brand coverage domains and
   explicit not-currently-offered catalog outcomes
+- `migrations/0032_comparison_grade_collection_quality.sql`: supersedes the
+  populated-only lending approval denominator, adds rate-summary coverage to
+  lending field registries, and activates comparison-grade AI policy notes
+- `migrations/0033_essential_field_low_touch_publication.sql`: narrows current
+  Deposit and Lending registry rows to type-specific comparison essentials,
+  requires complete essential grounding, and makes partial-source/confidence
+  warnings non-blocking by themselves
+- `migrations/0034_country_product_market_profiles.sql`: backfills active US
+  source rows to the versioned US comparison contract, records market-profile
+  lineage in discovery metadata, reclassifies governing documents as
+  supporting evidence, and removes known action/calculator detail rows from
+  active collection scope
 
 How to apply when a database is available:
 
@@ -85,6 +97,9 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_eviden
 psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
 ```
 
 Notes:
@@ -113,3 +128,17 @@ Notes:
   to approval-relevant fields. Identity and an official source remain
   mandatory, and ambiguous product boundaries, partial source failures, and
   invalid taxonomy remain hard blockers.
+- Apply `0032` to require rate/price plus the product-type-specific amount or
+  term facts independently of the 80% score. An APR range or conditional rate
+  formula remains source text in `interest_rate_summary`; it is not coerced to
+  a misleading scalar.
+- Apply `0033` to make the smaller essential-field contract authoritative for
+  new collection, Review, approval, and Public projection. It supersedes the
+  active 80% policies with 100% coverage of the smaller set and removes
+  `partial_source_failure` from force-review policy without weakening identity,
+  taxonomy, type/range, conflict, or ambiguity blockers.
+- Apply `0034` before the next US recollection so existing registry rows request
+  the US market-profile essentials and retain their profile key/version. The
+  migration changes source roles/status only for deterministic US legal,
+  enrollment, service, and calculator non-product patterns; canonical product
+  status still changes only through the audited remediation workflow.

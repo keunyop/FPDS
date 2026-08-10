@@ -7,10 +7,19 @@ import unittest
 from worker.pipeline.fpds_rate_safety import (
     advertised_promotional_total_rate,
     canonical_deposit_rate_suppression_reason,
+    contains_explicit_rate_percentage,
+    contains_unresolved_financial_placeholder,
 )
 
 
 class CanonicalDepositRateSafetyTests(unittest.TestCase):
+    def test_masked_financial_template_is_not_an_explicit_rate(self) -> None:
+        value = "Down payment 5%. Rate X.XXX%; APR X.XXX%; Monthly Payment $XXXX."
+
+        self.assertTrue(contains_unresolved_financial_placeholder(value))
+        self.assertFalse(contains_explicit_rate_percentage(value))
+        self.assertTrue(contains_explicit_rate_percentage("6.25% rate / 6.41% APR"))
+
     def test_prime_rate_is_not_a_canonical_deposit_rate(self) -> None:
         self.assertEqual(
             canonical_deposit_rate_suppression_reason(
@@ -27,6 +36,18 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
                 context=(
                     "Purchases with TD Access Card outside Canada. For foreign purchases, we add 3.5% "
                     "to your total after converting to Canadian dollars at the rate set by Visa International."
+                ),
+            ),
+            "non_annual_return_context",
+        )
+
+    def test_atm_assessment_percentage_is_not_a_deposit_rate(self) -> None:
+        self.assertEqual(
+            canonical_deposit_rate_suppression_reason(
+                value="3.0",
+                context=(
+                    "3% International Point of Sale & ATM assessment fee per transaction. "
+                    "Non-Truist ATMs may charge additional fees."
                 ),
             ),
             "non_annual_return_context",
@@ -118,12 +139,19 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
                     canonical_deposit_rate_suppression_reason(value="3.10", context=context),
                 )
 
+    def test_double_digit_deposit_rate_requires_review_without_direct_context(self) -> None:
+        self.assertEqual(
+            canonical_deposit_rate_suppression_reason(value="10"),
+            "implausible_annual_deposit_rate",
+        )
+        self.assertIsNone(canonical_deposit_rate_suppression_reason(value="9.99"))
+
     def test_corporate_ownership_percentage_is_not_a_deposit_rate(self) -> None:
         context = "List each person who owns or controls 25% or more of the voting shares of the corporation."
 
         self.assertEqual(
             canonical_deposit_rate_suppression_reason(value="25", context=context),
-            "implausible_annual_deposit_rate",
+            "non_annual_return_context",
         )
 
     def test_cashback_and_mortgage_prepayment_percentages_are_not_rates(self) -> None:

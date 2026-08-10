@@ -97,30 +97,37 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     the source is an identity-matched high-confidence `detail` page with no
     negative page signal, the field belongs to the active Product Type
     contract, and the origin URL matches an explicitly configured official
-    bank-domain allowlist. This exception does not apply to inferred prose,
-    unlabeled numbers, supporting pages, or a domain inferred only from the
-    fetched URL.
+    bank-domain allowlist. The same origin rule may preserve a lending
+    `interest_rate_summary`, `loan_amount_text`, `credit_limit_text`,
+    `term_length_text`, or mortgage `rate_type` only when the value and its
+    qualifying context are co-located in that verified detail-page excerpt.
+    Scalar lending rates, inferred prose, unlabeled numbers, supporting pages,
+    and a domain inferred only from the fetched URL remain outside this
+    exception.
 42. Dynamic/lending auto-validation requires a persisted collection grounding
-    assessment. `product_name`, at least one populated product-defining fact
-    (two verified fields total), and at least `80%` of populated decision/typed
-    fields must carry accepted official grounding metadata. A missing optional
-    fact is an omission, not a validation error. A lending value without the
+    assessment. `product_name` and one selected field for every mandatory
+    comparison requirement (`100%` of that bounded set) must carry accepted
+    official grounding metadata. A missing optional marketing fact is an
+    omission; a missing mandatory comparison fact is a validation error. A
+    lending value without the
     accepted grounding metadata is removed before validation rather than
     published as heuristic copy. This eligibility does not remove confidence,
     force-review, source-role, type/range, or product-boundary checks.
 43. Collection residual-review automation uses an approval-field set as its
-    denominator: verified `product_name`, fields currently populated with
-    material values, and fields marked missing/suspect because they block the
-    candidate. Empty optional and operational fields are excluded. Only official
+    denominator: verified `product_name` plus one selected field for every
+    mandatory comparison requirement. Empty optional marketing and operational
+    fields are excluded even when older registry rows still list them. Only official
     matches and successfully applied safe mismatches pass; an unverified
     approval field fails. At least one official source, no unapplied correction,
     no unresolved hard blocker (`ambiguous_product_boundary`,
-    `invalid_taxonomy_code`, or `partial_source_failure`), and `>=80%` are
-    required for system approval. Older full-request-set assessments are not
+    `invalid_taxonomy_code`, invalid type/range/term, evidence conflict,
+    ambiguous mapping, or inconsistent cross-field logic), and `100%` are
+    required for system approval. A partial-source or confidence warning alone
+    is non-blocking once the essentials pass. Older assessment contracts are not
     reused under this contract. When Review AI abstains with `unverified`, an
-    unchanged currency fee may reuse the persisted exact-origin grounding from
-    rule 41 after the registered-domain check; an AI `mismatch` cannot use this
-    fallback.
+    unchanged currency fee or qualified lending comparison field may reuse the
+    persisted exact-origin grounding from rule 41 after the registered-domain
+    check; an AI `mismatch` cannot use this fallback.
 44. Product identity may use persisted origin evidence when Review AI returns
     only `unverified`: the source must be an official detail page, discovery
     must record `product_identity_match=true`, and the candidate name must equal
@@ -143,6 +150,89 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     product "not FDIC insured / not a deposit" disclaimer cannot populate
     `deposit_insurance`. These exclusions are semantic and apply across banks
     and Product Types.
+47. Comparison-grade lending approval is independent of the percentage score.
+    Credit cards require `annual_fee` and `purchase_interest_rate`; mortgages
+    require `mortgage_rate` or a percentage-bearing `interest_rate_summary`,
+    plus `rate_type` and `term_length_text`; personal loans require
+    `interest_rate` or a percentage-bearing APR/rate summary, plus
+    `loan_amount_text` and `term_length_text`; lines of credit require a numeric
+    rate or percentage-bearing rate/formula summary plus `credit_limit_text`.
+    APR ranges, reference-rate formulas, and representative examples retain
+    their source-language assumptions in `interest_rate_summary` rather than
+    becoming one scalar. An unknown dynamic type fails closed until expected
+    fields provide at least one percentage field and another decision field.
+    Automatic promotion, human approval, and public projection each enforce the
+    same completeness boundary.
+48. D-034 narrows current default collection to the following executable
+    essentials: Chequing = fee + minimum balance + included/unlimited
+    transactions; Savings = ongoing rate + fee + minimum balance; GIC = rate +
+    term + minimum deposit + redeemability; Credit Card = annual fee + purchase
+    rate; Mortgage = rate/qualified summary + rate type + term; Personal Loan =
+    rate/APR summary + amount + term; Line of Credit = rate/formula summary +
+    limit + security. Alternative fields satisfy one requirement, not several.
+    Explicit zero money values and explicit boolean states are valid facts when
+    evidence-grounded. Default collection does not request optional copy.
+49. D-035 resolves that executable contract by `(country_code, product_type)`
+    before any collection, validation, Review, approval, or Public decision.
+    Canada retains rule 48. US Checking replaces transaction count with
+    opening/minimum balance and a fee-waiver or qualifying-activity requirement
+    when the grounded recurring fee is positive; explicit zero fee needs no
+    invented waiver. US Savings accepts an opening deposit as the relevant
+    balance fact, but a positive recurring fee requires its complete waiver
+    condition. A conditional APY also keeps new-customer eligibility,
+    balance/timing, fallback-rate, as-of-date, and variability conditions in
+    `interest_rate_summary`. US CDs replace redeemability with a quantified
+    `early_withdrawal_penalty`. US Mortgage requires a percentage-bearing
+    `interest_rate_summary` that preserves all stated ZIP, LTV, points, credit,
+    effective-date, and similar assumptions, plus rate type and term. US
+    Personal Loan keeps percentage-bearing APR/rate range, amount range, and
+    term range as source-language text. US Credit Card and Line of Credit own
+    explicit profiles even while their current minimum facts match rule 48, so
+    later market changes and essential-only Public projection remain isolated.
+    Canada and country-less legacy calls retain rule 48, but any other explicit
+    country fails closed until its profiles and fixtures are registered. A
+    versioned declarative override may
+    change only the market semantics; it never weakens product identity,
+    official evidence, type/range, conflict, ambiguity, or the `100%` gate.
+    Country ownership is also a source boundary: an explicit route, locale,
+    subdomain, or country-code TLD for another market is excluded from entry,
+    detail, seed, and supporting evidence even when the parent official domain
+    is shared by both countries.
+    Official detail, rate, fee, and disclosure documents may form one evidence
+    bundle only when every merged field retains exact-product field-level
+    evidence and its supporting source document id. Legal agreements,
+    enrollment/service flows, calculators, and generic hubs are never
+    standalone product identities.
+    Source planning bounds that bundle before fetch: only selected-product
+    descendants/companions, a Product-Type-compatible rate/APR page, or an
+    essential-fact FAQ/disclosure that identifies the selected product may be
+    included. Educational, servicing, application, transfer, investment,
+    sibling-product, and conflicting Product-Type routes are excluded.
+    AI evidence quotes cannot contain ellipses; every proposed numeric token
+    must occur in the quote, and decision-critical waiver, penalty, security,
+    or qualified-rate prose must be copied there in full.
+50. A percentage elsewhere on a page does not make a lending rate summary
+    usable. Masked/template values such as `X.XXX%`, `$XXXX`, `RDS%...`, or
+    unresolved rate tokens are invalid, and a usable textual summary must bind
+    a concrete numeric percentage locally to Rate, APR, APY, or an explicit
+    reference-rate formula. Transaction, currency-conversion, point-of-sale,
+    and ATM/ABM assessment-fee percentages are non-rate context and cannot
+    populate a deposit or lending rate. For a country-specific override, aggregate refresh
+    projects only its comparison fields plus product identity, status,
+    freshness, and official product link. Extra normalized copy remains in the
+    private candidate/evidence record for audit but cannot leak navigation,
+    calculator, transfer-limit, or misclassified eligibility text to Public.
+    Comparison-critical prose also uses a field-specific safe length and must
+    end as a complete sentence or condition. Never satisfy a requirement with
+    a fixed-width value cut mid-word or mid-clause; keep the full bounded value
+    or omit it for Review/AI repair.
+    The same assumption-preservation rule applies to a US Personal Loan or
+    vehicle-loan representative APR: model year/vehicle age, LTV, down payment,
+    credit assumptions, origination fees, and rate-change qualifiers stated in
+    official evidence remain attached to `interest_rate_summary`. When a
+    displayed lending rate includes a relationship or automatic-payment
+    discount, the qualifying account/payment and existing-customer conditions
+    remain attached as well.
 
 ## Runtime Validation
 

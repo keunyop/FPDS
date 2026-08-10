@@ -81,7 +81,7 @@ class NormalizationServiceTests(unittest.TestCase):
         }
         mappings = {
             "annual_fee": {
-                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_grounding_contract_version": "collection-official-grounding-v2",
                 "official_verification_status": "match",
                 "official_evidence_quote": "$0 annual fee",
                 "official_web_sources": [{"url": "https://bank.example/card"}],
@@ -118,7 +118,7 @@ class NormalizationServiceTests(unittest.TestCase):
             page_no=None,
             chunk_index=1,
             field_metadata={
-                "official_grounding_contract_version": "collection-official-grounding-v1",
+                "official_grounding_contract_version": "collection-official-grounding-v2",
                 "official_grounding_method": "deterministic_labeled_origin",
                 "official_verification_status": "mismatch",
                 "official_web_sources": [
@@ -1955,6 +1955,7 @@ class NormalizationServiceTests(unittest.TestCase):
             "prepayment_privileges": "Prepay up to 20% of the original principal each year.",
             "secured_flag": "Unsecured or secured variants are available.",
             "credit_limit_text": "Your limit is RDS%rate_placeholder% and subject to approval.",
+            "interest_rate_summary": "Down payment 5%. Rate X.XXX%; APR X.XXX%; Monthly Payment $XXXX.",
             "term_length_text": "Terms from 12 months to 96 months.",
             "term_length_days": 30,
             "fees_text": "A broad product page section " + "with repeated marketing details " * 8,
@@ -1987,6 +1988,7 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["prepayment_privileges"], "Prepay up to 20% of the original principal each year.")
         self.assertNotIn("secured_flag", payload)
         self.assertNotIn("credit_limit_text", payload)
+        self.assertNotIn("interest_rate_summary", payload)
         self.assertNotIn("term_length_days", payload)
         self.assertNotIn("fees_text", payload)
         self.assertNotIn("minimum_payment_text", payload)
@@ -4005,6 +4007,221 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertTrue(fields_by_name["standard_rate"]["field_metadata"]["generic_supporting_merge"])
+
+    def test_generic_supporting_merge_preserves_grounded_lending_rate_summary(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "personal-loan"},
+            "extracted_fields": [
+                _field_dict("product_name", "Citi Personal Loan", "string", 0.91),
+                _field_dict("loan_amount_text", "Up to $30,000", "string", 0.88),
+                _field_dict("term_length_text", "36, 48 or 60 months", "string", 0.88),
+            ],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        support_rate = _field_dict(
+            "interest_rate_summary",
+            "APR 9.99%-17.49%; rates as of February 14, 2026; excellent credit and autopay assumptions apply.",
+            "string",
+            0.94,
+            evidence_chunk_id="chunk-personal-loan-rate",
+        )
+        support_rate["evidence_text_excerpt"] = (
+            "Citi Personal Loan APR can be as low as 9.99% or as high as 17.49%. "
+            "Rates as of February 14, 2026; excellent credit and autopay assumptions apply."
+        )
+        support_rate["field_metadata"] = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": "https://bank.example/personal-loan/rates"}],
+            "evidence_quote": support_rate["evidence_text_excerpt"],
+        }
+        supporting_artifact = {"extracted_fields": [support_rate], "retrieval_result": {"matches": []}}
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-CITI-PL-001",
+            base_artifact=base_artifact,
+            supporting_artifacts={"AUTO-CITI-PL-RATES": supporting_artifact},
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertIn("9.99%-17.49%", fields_by_name["interest_rate_summary"]["candidate_value"])
+        self.assertEqual(
+            fields_by_name["interest_rate_summary"]["extraction_method"],
+            "generic_supporting_lending_rate_merge",
+        )
+        self.assertTrue(
+            fields_by_name["interest_rate_summary"]["field_metadata"]["generic_supporting_merge"]
+        )
+
+    def test_generic_lending_support_rejects_ungrounded_or_sibling_rate(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "mortgage"},
+            "extracted_fields": [_field_dict("product_name", "Chase Mortgage", "string", 0.9)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        sibling_rate = _field_dict(
+            "mortgage_rate",
+            "6.25",
+            "decimal",
+            0.94,
+            evidence_chunk_id="chunk-sibling-rate",
+        )
+        sibling_rate["evidence_text_excerpt"] = "Another Bank Mortgage example has a 6.25% interest rate."
+        sibling_rate["field_metadata"] = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": "https://bank.example/mortgage/rates"}],
+            "evidence_quote": sibling_rate["evidence_text_excerpt"],
+        }
+        ungrounded_target_rate = _field_dict(
+            "mortgage_rate",
+            "6.375",
+            "decimal",
+            0.92,
+            evidence_chunk_id="chunk-target-rate",
+        )
+        ungrounded_target_rate["evidence_text_excerpt"] = "Chase Mortgage example has a 6.375% rate."
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-CHASE-MTG-001",
+            base_artifact=base_artifact,
+            supporting_artifacts={
+                "AUTO-CHASE-MTG-SIBLING": {
+                    "extracted_fields": [sibling_rate, ungrounded_target_rate],
+                    "retrieval_result": {"matches": []},
+                }
+            },
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("interest_rate_summary", fields_by_name)
+
+    def test_generic_us_mortgage_support_preserves_official_rate_scenario(self) -> None:
+        base_artifact = {
+            "schema_context": {"product_type": "mortgage"},
+            "extracted_fields": [_field_dict("product_name", "FHA Loan", "string", 0.9)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        rate = _field_dict(
+            "interest_rate_summary",
+            "5.75% interest rate; 6.5756% APR",
+            "string",
+            0.99,
+            evidence_chunk_id="chunk-fha-rate",
+        )
+        rate["evidence_text_excerpt"] = (
+            "FHA Loan example: A 3.5% down payment on a 30-year fixed-rate loan of $250,000 "
+            "with an interest rate of 5.75% / 6.5756% APR. This is assuming a New Jersey "
+            "purchase transaction, 60-day lock, 96.5% LTV, 720 FICO, owner-occupied, "
+            "closest to zero discount points, and rates change daily."
+        )
+        rate["field_metadata"] = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": "https://bank.example/mortgage/fha-loan"}],
+            "evidence_quote": rate["evidence_text_excerpt"],
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-CHASE-FHA-001",
+            base_artifact=base_artifact,
+            supporting_artifacts={
+                "AUTO-CHASE-FHA-RATES": {"extracted_fields": [rate], "retrieval_result": {"matches": []}}
+            },
+        )
+
+        summary = next(
+            item["candidate_value"]
+            for item in merged["extracted_fields"]
+            if item["field_name"] == "interest_rate_summary"
+        )
+        self.assertIn("$250,000", summary)
+        self.assertIn("96.5% LTV", summary)
+        self.assertIn("720 FICO", summary)
+        self.assertIn("rates change daily", summary)
+
+    def test_generic_lending_support_merges_grounded_term_and_rate_type(self) -> None:
+        base_artifact = {
+            "schema_context": {
+                "product_type": "mortgage",
+                "expected_fields": ["interest_rate_summary", "rate_type", "term_length_text"],
+            },
+            "extracted_fields": [_field_dict("product_name", "Chase Fixed Mortgage", "string", 0.9)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        support_fields = []
+        for field_name, value in (("rate_type", "Fixed"), ("term_length_text", "30 years")):
+            item = _field_dict(field_name, value, "string", 0.93, evidence_chunk_id=f"chunk-{field_name}")
+            item["evidence_text_excerpt"] = (
+                "Chase Fixed Mortgage is a 30-year fixed-rate loan with published rate assumptions."
+            )
+            item["field_metadata"] = {
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_web_sources": [{"url": "https://bank.example/mortgages/rates"}],
+                "evidence_quote": item["evidence_text_excerpt"],
+            }
+            support_fields.append(item)
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-CHASE-MTG-001",
+            base_artifact=base_artifact,
+            supporting_artifacts={
+                "AUTO-CHASE-MTG-RATES": {"extracted_fields": support_fields, "retrieval_result": {"matches": []}}
+            },
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(fields_by_name["rate_type"]["candidate_value"], "Fixed")
+        self.assertEqual(fields_by_name["term_length_text"]["candidate_value"], "30 years")
+
+    def test_generic_us_cd_support_merges_grounded_early_withdrawal_penalty(self) -> None:
+        base_artifact = {
+            "schema_context": {
+                "product_type": "gic",
+                "expected_fields": ["term_rate_table", "minimum_deposit", "early_withdrawal_penalty"],
+            },
+            "extracted_fields": [_field_dict("product_name", "Example 12 Month CD", "string", 0.9)],
+            "evidence_links": [],
+            "runtime_notes": [],
+        }
+        penalty = _field_dict(
+            "early_withdrawal_penalty",
+            "An early withdrawal penalty of 90 days of interest applies before maturity.",
+            "string",
+            0.94,
+            evidence_chunk_id="chunk-cd-penalty",
+        )
+        penalty["evidence_text_excerpt"] = (
+            "Example 12 Month CD: An early withdrawal penalty of 90 days of interest applies before maturity."
+        )
+        penalty["field_metadata"] = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": "https://bank.example/cd/disclosures"}],
+            "evidence_quote": penalty["evidence_text_excerpt"],
+        }
+
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-EXAMPLE-CD-001",
+            base_artifact=base_artifact,
+            supporting_artifacts={
+                "AUTO-EXAMPLE-CD-DISCLOSURE": {
+                    "extracted_fields": [penalty],
+                    "retrieval_result": {"matches": []},
+                }
+            },
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertEqual(
+            fields_by_name["early_withdrawal_penalty"]["candidate_value"],
+            "An early withdrawal penalty of 90 days of interest applies before maturity.",
+        )
 
     def test_generic_savings_support_supplements_exact_product_monthly_fee(self) -> None:
         base_artifact = {

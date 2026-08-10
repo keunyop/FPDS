@@ -43,6 +43,8 @@ from worker.discovery.fpds_discovery.discovery import (
     extract_structured_text_sections,
 )
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
+from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type
+from worker.pipeline.fpds_market_profile import market_profile_metadata
 from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
 from worker.pipeline.fpds_ai_runtime import (
     configured_model_id,
@@ -1790,6 +1792,7 @@ def _materialize_sources_for_catalog_item(
     hard_scope_excluded_count = _deactivate_hard_scope_excluded_generated_detail_sources(
         connection,
         bank_code=bank_code,
+        country_code=str(row["country_code"]),
         product_type=product_type,
     )
     if hard_scope_excluded_count:
@@ -2406,6 +2409,7 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
     connection: Connection,
     *,
     bank_code: str,
+    country_code: str,
     product_type: str,
 ) -> int:
     rows = connection.execute(
@@ -2413,6 +2417,7 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
         SELECT source_id, normalized_url, source_name, discovery_metadata
         FROM source_registry_item
         WHERE bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
           AND product_type = ANY(%(product_type_scope)s)
           AND discovery_role = 'detail'
           AND status = 'active'
@@ -2421,6 +2426,7 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
         """,
         {
             "bank_code": bank_code,
+            "country_code": country_code,
             "product_type_scope": _product_type_scope_codes(product_type),
         },
     ).fetchall()
@@ -2438,7 +2444,14 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
                 metadata.get("primary_heading"),
             )
         )
-        reason = _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint)
+        reason = (
+            "other_country_market_route"
+            if _url_country_scope_conflicts(
+                country_code=country_code,
+                normalized_url=str(row.get("normalized_url") or ""),
+            )
+            else _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint)
+        )
         if reason is None:
             continue
         excluded_ids.append(str(row["source_id"]))
@@ -2736,6 +2749,8 @@ def _generate_sources_from_homepage(
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
         if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
             continue
+        if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+            continue
         if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
             continue
         score = _score_product_link(
@@ -2768,6 +2783,16 @@ def _generate_sources_from_homepage(
         if hub_score > 0:
             hub_pages.append((hub_score, link.normalized_url, link.resolved_url))
 
+    if verified_coverage_source_url and normalized_coverage_source_url:
+        if _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=normalized_coverage_source_url,
+        ):
+            discovery_notes.append(
+                f"Ignored coverage URL from an explicit different-country route: {normalized_coverage_source_url}."
+            )
+            verified_coverage_source_url = None
+            normalized_coverage_source_url = None
     if verified_coverage_source_url and normalized_coverage_source_url:
         coverage_link = ExtractedLink(
             href=verified_coverage_source_url,
@@ -2805,6 +2830,14 @@ def _generate_sources_from_homepage(
             f"Ignored excluded seed entry URL {seed_entry_url}; product discovery continued from official catalog links."
         )
         seed_entry_url = None
+    if seed_entry_url is not None and _url_country_scope_conflicts(
+        country_code=country_code,
+        normalized_url=seed_entry_url,
+    ):
+        discovery_notes.append(
+            f"Ignored seed entry URL from an explicit different-country route: {seed_entry_url}."
+        )
+        seed_entry_url = None
     if seed_entry_url is not None:
         seed_score = _score_catalog_hub_link(
             product_type=discovery_product_type,
@@ -2831,6 +2864,8 @@ def _generate_sources_from_homepage(
         ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+                continue
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
             if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
                 continue
@@ -2891,6 +2926,8 @@ def _generate_sources_from_homepage(
         ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
             if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+                continue
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
             if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
                 continue
@@ -2957,7 +2994,10 @@ def _generate_sources_from_homepage(
         or (unique_hub_pages[0][2] if unique_hub_pages else homepage_url)
     )
     product_type_label = _product_type_label(product_type_definition)
-    expected_fields = _product_type_expected_fields(product_type_definition)
+    expected_fields = _product_type_expected_fields(
+        product_type_definition,
+        country_code=country_code,
+    )
     html_candidates = _build_html_candidates(
         product_type=product_type,
         discovery_product_type=discovery_product_type,
@@ -2967,6 +3007,26 @@ def _generate_sources_from_homepage(
         seed_detail_hints=seed_detail_hints,
         verified_coverage_url=normalized_coverage_source_url,
     )
+    cross_country_candidate_count = sum(
+        1
+        for candidate in html_candidates
+        if _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=candidate.normalized_url,
+        )
+    )
+    html_candidates = [
+        candidate
+        for candidate in html_candidates
+        if not _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=candidate.normalized_url,
+        )
+    ]
+    if cross_country_candidate_count:
+        discovery_notes.append(
+            f"Excluded {cross_country_candidate_count} source candidate(s) from explicit different-country routes."
+        )
     homepage_self_candidate = _build_homepage_self_candidate(
         product_type=discovery_product_type,
         product_type_definition=product_type_definition,
@@ -3053,6 +3113,8 @@ def _generate_sources_from_homepage(
     if should_emit_context_rows:
         for hint in seed_supporting_hints:
             normalized_url = normalize_source_url(str(hint["source_url"]))
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=normalized_url):
+                continue
             if normalized_url in promoted_detail_urls or normalized_url in promoted_supporting_urls:
                 continue
             if not _seed_supporting_hint_is_relevant(
@@ -3118,6 +3180,13 @@ def _generate_sources_from_homepage(
                 product_type_definition=product_type_definition,
                 normalized_url=candidate.normalized_url,
                 anchor_text=candidate.anchor_text,
+            ):
+                continue
+            if not _supporting_source_is_bounded_to_selected_details(
+                product_type=discovery_product_type or product_type,
+                normalized_url=candidate.normalized_url,
+                anchor_text=candidate.anchor_text,
+                promoted_detail_urls=promoted_detail_urls,
             ):
                 continue
             source_rows.append(
@@ -3189,6 +3258,13 @@ def _generate_sources_from_homepage(
                 anchor_text=candidate.anchor_text,
             ):
                 continue
+            if not _supporting_source_is_bounded_to_selected_details(
+                product_type=discovery_product_type or product_type,
+                normalized_url=candidate.normalized_url,
+                anchor_text=candidate.anchor_text,
+                promoted_detail_urls=promoted_detail_urls,
+            ):
+                continue
             source_rows.append(
                 _build_generated_source_row(
                     bank_code=bank_code,
@@ -3224,6 +3300,8 @@ def _generate_sources_from_homepage(
                 f"Preserved {deterministic_supporting_count} deterministically relevant supporting HTML source(s) for evidence merging."
             )
         for _, link in unique_supporting_links:
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+                continue
             if link.normalized_url in promoted_detail_urls:
                 continue
             if link.normalized_url in promoted_supporting_urls:
@@ -3250,6 +3328,13 @@ def _generate_sources_from_homepage(
                 product_type_definition=product_type_definition,
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
+            ):
+                continue
+            if not _supporting_source_is_bounded_to_selected_details(
+                product_type=discovery_product_type or product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+                promoted_detail_urls=promoted_detail_urls,
             ):
                 continue
             source_rows.append(
@@ -3299,6 +3384,8 @@ def _generate_sources_from_homepage(
                 f"Excluded {locale_mismatch_supporting_count} supporting HTML source(s) that conflicted with the run source language."
             )
         for _, link in unique_pdf_links:
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+                continue
             if not _link_is_relevant_supporting_source(
                 product_type=product_type,
                 discovery_product_type=discovery_product_type,
@@ -3712,7 +3799,10 @@ def _score_candidate_links_with_ai(
                     "display_name": _product_type_label(product_type_definition),
                     "description": str(product_type_definition.get("description") or ""),
                     "discovery_keywords": _product_type_keywords(product_type_definition),
-                    "expected_fields": _product_type_expected_fields(product_type_definition),
+                    "expected_fields": _product_type_expected_fields(
+                        product_type_definition,
+                        country_code=country_code,
+                    ),
                     "fallback_policy": str(product_type_definition.get("fallback_policy") or "generic_ai_review"),
                 },
                 "source_language": source_language,
@@ -3992,7 +4082,10 @@ def _promote_detail_candidates(
     page_evidence_by_url: dict[str, PageEvidenceAssessment] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     product_type_label = _product_type_label(product_type_definition)
-    expected_fields = _product_type_expected_fields(product_type_definition)
+    expected_fields = _product_type_expected_fields(
+        product_type_definition,
+        country_code=country_code,
+    )
     notes: list[str] = []
     detail_rows: list[dict[str, Any]] = []
     promoted_count = 0
@@ -4123,7 +4216,13 @@ def _promote_detail_candidates(
                 if ai_score and ai_score.short_rationale
                 else f"Auto-generated {product_type_label} detail source from bank homepage"
             ),
-            expected_fields=list(dict.fromkeys([*candidate.expected_fields_hint, *expected_fields])),
+            expected_fields=list(
+                collection_fields_for_product_type(
+                    product_type=product_type,
+                    country_code=country_code,
+                    expected_fields=[*candidate.expected_fields_hint, *expected_fields],
+                )
+            ),
             discovery_metadata=metadata,
         )
         if candidate.seed_source_id:
@@ -4790,6 +4889,38 @@ def _url_locale_conflicts_source_language(*, normalized_url: str, source_languag
     return False
 
 
+def _url_country_scope_conflicts(*, country_code: str, normalized_url: str) -> bool:
+    """Reject an explicit market route that conflicts with the collection country.
+
+    Some banks serve Canada and the United States from one registered domain.
+    Domain allowlisting therefore is not enough: `/ca/...` must never enter a
+    US run and `/us/...` must never enter a Canada run. Unmarked shared legal or
+    disclosure paths remain eligible as supporting evidence.
+    """
+
+    requested = str(country_code or "").strip().lower()
+    if requested not in {"ca", "us"}:
+        return False
+    parsed = urlparse(str(normalized_url or ""))
+    hostname = str(parsed.hostname or "").lower().strip(".")
+    segments = [segment.lower().replace("_", "-") for segment in parsed.path.split("/") if segment]
+    explicit_markets: set[str] = set()
+    host_labels = [label for label in hostname.split(".") if label]
+    if host_labels and host_labels[0] in {"ca", "us"}:
+        explicit_markets.add(host_labels[0])
+    if hostname.endswith(".ca"):
+        explicit_markets.add("ca")
+    if hostname.endswith(".us"):
+        explicit_markets.add("us")
+    for segment in segments[:3]:
+        if segment in {"ca", "us"}:
+            explicit_markets.add(segment)
+        locale_match = re.fullmatch(r"[a-z]{2}-(ca|us)", segment)
+        if locale_match:
+            explicit_markets.add(locale_match.group(1))
+    return bool(explicit_markets and requested not in explicit_markets)
+
+
 def _page_is_audience_offer_hub(page_evidence: PageEvidenceAssessment) -> bool:
     """Identify audience benefits/offer hubs that mention accounts but are not one product."""
 
@@ -5353,7 +5484,13 @@ def _build_generated_source_row(
         "seed_source_flag": False,
         "redirect_target_url": None,
         "alias_urls": [],
-        "discovery_metadata": discovery_metadata or {},
+        "discovery_metadata": {
+            **(discovery_metadata or {}),
+            **market_profile_metadata(
+                country_code=country_code,
+                product_type=product_type,
+            ),
+        },
         "change_reason": "generated_from_bank_homepage",
     }
 
@@ -5587,6 +5724,91 @@ def _link_is_relevant_supporting_source(
     )
 
 
+def _supporting_source_is_bounded_to_selected_details(
+    *,
+    product_type: str,
+    normalized_url: str,
+    anchor_text: str = "",
+    promoted_detail_urls: set[str],
+) -> bool:
+    """Keep comparison support near a selected product or essential-fact page.
+
+    Bank navigation surfaces frequently make unrelated education, help,
+    servicing, transfer, investment, and sibling-product pages look relevant.
+    Those pages cannot establish an exact-product comparison fact and add
+    substantial latency, so keep selected-product companions plus bounded
+    rate/APR and product-fact FAQ pages.
+    """
+
+    canonical_type = _canonical_product_type_code(product_type)
+    governed_types = {
+        "chequing",
+        "savings",
+        "gic",
+        "mortgage",
+        "personal-loan",
+        "credit-card",
+        "line-of-credit",
+    }
+    if canonical_type not in governed_types:
+        return True
+    parsed = urlparse(normalized_url)
+    path = parsed.path.lower().rstrip("/")
+    path_tail = path.rsplit("/", 1)[-1]
+    rate_page = (
+        path_tail in {"rate", "rates", "interest-rate", "interest-rates", "apr"}
+        or path_tail.endswith(("-rate", "-rates", "-apr"))
+    )
+    if rate_page and not any(
+        segment in path.split("/")
+        for segment in ("business", "commercial", "mortgage", "mortgages", "loan", "loans", "credit-card", "credit-cards")
+    ):
+        if canonical_type in {"chequing", "savings", "gic"}:
+            return True
+    fingerprint = f"{normalized_url} {anchor_text}".lower()
+    lending_markers = {
+        "mortgage": ("mortgage", "home loan", "home-loan"),
+        "personal-loan": ("personal loan", "personal-loan", "personal-loans"),
+        "credit-card": ("credit card", "credit-card", "credit-cards"),
+        "line-of-credit": ("line of credit", "line-of-credit", "line-of-credits"),
+    }
+    if rate_page and canonical_type in lending_markers and any(
+        marker in fingerprint for marker in lending_markers[canonical_type]
+    ):
+        return True
+    if (
+        canonical_type == "gic"
+        and any(marker in path for marker in ("/faq/", "/faqs/", "/help/", "/help-centre/", "/help-center/"))
+        and any(marker in fingerprint for marker in ("gic", "guaranteed investment", "term deposit"))
+        and any(
+            marker in fingerprint
+            for marker in ("minimum balance", "minimum deposit", "minimum investment", "interest rate", "withdraw", "redeem", "maturity")
+        )
+    ):
+        return True
+    if (
+        canonical_type in lending_markers
+        and any(marker in path for marker in ("/faq/", "/faqs/", "/help/", "/help-centre/", "/help-center/"))
+        and any(marker in fingerprint for marker in lending_markers[canonical_type])
+        and any(
+            marker in fingerprint
+            for marker in ("rate", "apr", "amount", "term", "fee", "limit", "payment")
+        )
+    ):
+        return True
+    for detail_url in promoted_detail_urls:
+        detail = urlparse(detail_url)
+        if parsed.scheme != detail.scheme or parsed.netloc != detail.netloc:
+            continue
+        detail_path = detail.path.lower().rstrip("/")
+        if detail_path and (
+            path.startswith(f"{detail_path}/")
+            or path.startswith(f"{detail_path}-")
+        ):
+            return True
+    return False
+
+
 def _is_product_fact_support_link(*, normalized_url: str, anchor_text: str, product_score: int) -> bool:
     """Keep narrow official FAQ/help facts as evidence, never as product candidates."""
 
@@ -5642,6 +5864,23 @@ def _seed_supporting_hint_is_relevant(
         )
         if str(value or "").strip()
     )
+    path_tail = urlparse(source_url).path.lower().rstrip("/").rsplit("/", 1)[-1]
+    expected_fields = {
+        str(item or "").strip().lower()
+        for item in (hint.get("expected_fields") or [])
+        if str(item or "").strip()
+    }
+    if (
+        _canonical_product_type_code(discovery_product_type or product_type) == "chequing"
+        and path_tail in {"rate", "rates", "interest-rate", "interest-rates"}
+        and "chequing" in anchor_text.lower()
+        and expected_fields.intersection({"account_interest_rates", "chequing_account_list"})
+        and not _has_excluded_link_signal(normalized_url=source_url, anchor_text=anchor_text)
+    ):
+        # A curated cross-listing rate table may serve both Chequing and
+        # Savings. Require an explicit Chequing purpose/field declaration;
+        # ordinary discovered Savings pages do not receive this exception.
+        return True
     return _link_is_relevant_supporting_source(
         product_type=product_type,
         discovery_product_type=discovery_product_type,
@@ -5761,13 +6000,35 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
     explicit_slug_types = {
         "chequing": any(marker in source_slug for marker in ("chequing", "checking")),
         "savings": any(marker in source_slug for marker in ("savings", "saving")),
-        "gic": any(marker in source_slug for marker in ("gic", "term-deposit", "term_deposit")),
+        "gic": any(
+            marker in source_slug
+            for marker in ("gic", "term-deposit", "term_deposit", "bank-cd", "certificate-of-deposit")
+        ),
     }
     explicit_other_types = {key for key, matched in explicit_slug_types.items() if matched and key != canonical_type}
     if canonical_type in explicit_slug_types and explicit_other_types and not explicit_slug_types[canonical_type]:
         # A page's own slug is stronger identity evidence than global nav copy.
         # This prevents a chequing detail page from becoming a savings detail
         # merely because the common header also links to savings products.
+        return "other_product_type"
+    path_segments = {segment for segment in source_path.split("/") if segment}
+    explicit_path_types = {
+        "chequing": bool(path_segments.intersection({"chequing", "checking", "chequing-accounts", "checking-accounts"})),
+        "savings": bool(path_segments.intersection({"savings", "saving", "savings-accounts", "saving-accounts"})),
+        "gic": bool(
+            path_segments.intersection(
+                {"gic", "gics", "term-deposit", "term-deposits", "cd", "cds", "bank-cd", "certificate-of-deposit"}
+            )
+        ),
+    }
+    explicit_other_path_types = {
+        key for key, matched in explicit_path_types.items() if matched and key != canonical_type
+    }
+    if (
+        canonical_type in explicit_path_types
+        and explicit_other_path_types
+        and not explicit_path_types[canonical_type]
+    ):
         return "other_product_type"
     if "/content/" in normalized_fingerprint and "/content/dam/" not in normalized_fingerprint:
         # Public product pages can expose their Adobe/enterprise CMS backing
@@ -5917,6 +6178,17 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         )
     ):
         return "non_consumer_business_page"
+    if canonical_type == "mortgage" and any(
+        marker in normalized_fingerprint
+        for marker in (
+            "home-equity-line",
+            "home equity line of credit",
+            "heloc",
+        )
+    ):
+        # A HELOC can be linked from a mortgage hub or even live below a
+        # `/mortgage/` route, but its product identity is line-of-credit.
+        return "other_product_type"
     if any(keyword in fingerprint for keyword in ("investor", "investors", "shareholder", "shareholders")):
         return "non_product_or_investor_page"
     if any(keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS):
@@ -6183,12 +6455,23 @@ def _product_type_discovery_profile(product_type: str, product_type_definition: 
     return best_profile
 
 
-def _product_type_expected_fields(product_type_definition: dict[str, Any]) -> list[str]:
+def _product_type_expected_fields(
+    product_type_definition: dict[str, Any],
+    *,
+    country_code: str | None = None,
+) -> list[str]:
     fields = [str(item).strip() for item in product_type_definition.get("expected_fields", []) if str(item).strip()]
     product_type_code = str(product_type_definition.get("product_type_code") or "").strip()
     product_family = str(product_type_definition.get("product_family") or "deposit").strip().lower()
     baseline = list(expected_fields_for_product_type(product_type_code=product_type_code, product_family=product_family)) if product_type_code else []
-    return list(dict.fromkeys([*fields, *baseline])) or ["product_name", "description_short", "standard_rate", "monthly_fee", "notes"]
+    registered = list(dict.fromkeys([*fields, *baseline]))
+    return list(
+        collection_fields_for_product_type(
+            product_type=product_type_code,
+            country_code=country_code,
+            expected_fields=registered,
+        )
+    )
 
 
 def _product_type_label(product_type_definition: dict[str, Any]) -> str:

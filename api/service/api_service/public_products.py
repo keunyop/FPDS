@@ -356,6 +356,13 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
         "minimum_balance": serialize_decimal(row.get("minimum_balance")),
         "minimum_deposit": serialize_decimal(row.get("minimum_deposit")),
+        "fee_waiver_condition": _string_or_none(metadata.get("fee_waiver_condition")),
+        "included_transactions": _coerce_int(metadata.get("included_transactions")),
+        "unlimited_transactions_flag": _bool_or_none(metadata.get("unlimited_transactions_flag")),
+        "redeemable_flag": _bool_or_none(metadata.get("redeemable_flag")),
+        "non_redeemable_flag": _bool_or_none(metadata.get("non_redeemable_flag")),
+        "early_withdrawal_penalty": _string_or_none(metadata.get("early_withdrawal_penalty")),
+        "secured_flag": _bool_or_none(metadata.get("secured_flag")),
         "eligibility_text": _string_or_none(metadata.get("eligibility_text")),
         "application_method": _string_or_none(metadata.get("application_method")),
         "post_maturity_interest_rate": _string_or_none(metadata.get("post_maturity_interest_rate")),
@@ -364,6 +371,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "description_short": _string_or_none(metadata.get("description_short")),
         "mortgage_rate": _string_or_none(metadata.get("mortgage_rate")),
         "interest_rate": _string_or_none(metadata.get("interest_rate")),
+        "interest_rate_summary": _string_or_none(metadata.get("interest_rate_summary")),
         "rate_type": _string_or_none(metadata.get("rate_type")),
         "term_length_text": _string_or_none(metadata.get("term_length_text")),
         "amortization_text": _string_or_none(metadata.get("amortization_text")),
@@ -373,6 +381,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "monthly_payment_text": _string_or_none(metadata.get("monthly_payment_text")),
         "credit_limit_text": _string_or_none(metadata.get("credit_limit_text")),
         "security_requirement": _string_or_none(metadata.get("security_requirement")),
+        "collateral_text": _string_or_none(metadata.get("collateral_text")),
         "term_rate_table": _serialize_term_rate_table(metadata.get("term_rate_table")),
         "term_length_days": int(row["term_length_days"]) if row.get("term_length_days") is not None else None,
         "product_highlight_badge_code": badge_code,
@@ -395,6 +404,18 @@ def _string_or_none(value: Any) -> str | None:
         return None
     normalized = str(value).strip()
     return normalized or None
+
+
+def _bool_or_none(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "yes", "1"}:
+            return True
+        if normalized in {"false", "no", "0"}:
+            return False
+    return None
 
 
 def _serialize_term_rate_table(value: Any) -> list[dict[str, Any]]:

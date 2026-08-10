@@ -72,11 +72,13 @@ def _product_type_row(
 
 
 class ProductTypeRegistryTests(unittest.TestCase):
-    def test_chequing_default_fields_include_transaction_fee(self) -> None:
-        self.assertIn(
-            "transaction_fee",
-            expected_fields_for_product_type(product_type_code="chequing", product_family="deposit"),
-        )
+    def test_chequing_default_fields_are_limited_to_comparison_essentials(self) -> None:
+        fields = expected_fields_for_product_type(product_type_code="chequing", product_family="deposit")
+
+        self.assertIn("included_transactions", fields)
+        self.assertIn("minimum_balance", fields)
+        self.assertNotIn("transaction_fee", fields)
+        self.assertNotIn("fee_waiver_condition", fields)
 
     def test_load_product_type_list_serializes_operator_managed_fields(self) -> None:
         connection = _QueuedConnection(

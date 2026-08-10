@@ -4,11 +4,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import json
+from pathlib import Path
+import sys
 from typing import Any
 from typing import TYPE_CHECKING
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
+    sys.path.insert(0, str(REPO_ROOT))
+
 from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items, is_empty_review_value
 from api_service.security import new_id, utc_now
+from worker.pipeline.fpds_approval_policy import comparison_quality
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -55,7 +62,7 @@ _STRING_OVERRIDE_FIELDS = {
     "compounding_frequency", "payout_option", "cheque_book_info", "notes", "rate_type",
     "amortization_text", "payment_frequency", "prepayment_privileges", "rewards_summary",
     "credit_limit_text", "loan_amount_text", "monthly_payment_text", "security_requirement",
-    "collateral_text", "minimum_payment_text", "fees_text",
+    "collateral_text", "minimum_payment_text", "fees_text", "interest_rate_summary",
 }
 REVIEW_FIELD_PRIORITY = (
     "product_name",
@@ -268,6 +275,7 @@ def load_review_task_detail(
         validation_status=str(row["validation_status"]),
         validation_issue_codes=validation_issue_codes,
         product_type=str(row["product_type"]),
+        country_code=str(row["country_code"]),
         source_metadata=source_metadata,
     )
     review_field_items = build_review_field_items(
@@ -276,6 +284,7 @@ def load_review_task_detail(
         evidence_field_names=[str(item["field_name"]) for item in evidence_links],
         current_payload=_coerce_mapping(current_product.get("normalized_payload")) if current_product else None,
         product_type=str(row["product_type"]),
+        country_code=str(row["country_code"]),
         source_metadata=source_metadata,
     )
 
@@ -595,6 +604,20 @@ def apply_review_decision(
         **candidate_payload,
         **normalized_override_payload,
     }
+    if action_type in {"approve", "edit_approve"}:
+        quality = comparison_quality(
+            product_type=str(review_row.get("product_type") or ""),
+            country_code=str(review_row.get("country_code") or ""),
+            expected_fields=[],
+            candidate_payload=approved_payload,
+        )
+        if quality.applicable and (not quality.contract_defined or not quality.complete):
+            missing = ", ".join(quality.missing_fields) or "a registered rate-plus-decision contract"
+            raise ReviewTaskError(
+                status_code=422,
+                code="essential_fields_missing",
+                message=f"Approval requires essential comparison values for: {missing}.",
+            )
     approved_product_name = _approved_product_name(review_row=review_row, approved_payload=approved_payload)
     persisted_candidate_payload = {
         **approved_payload,
@@ -1421,7 +1444,21 @@ def _find_current_product(
           AND cp.bank_code = %(bank_code)s
           AND cp.product_family = %(product_family)s
           AND cp.product_type = %(product_type)s
-          AND lower(cp.product_name) = lower(%(product_name)s)
+          AND trim(
+                regexp_replace(
+                    regexp_replace(lower(cp.product_name), '[^[:alnum:]]+', ' ', 'g'),
+                    '[[:space:]]+account$',
+                    '',
+                    'g'
+                )
+              ) = trim(
+                regexp_replace(
+                    regexp_replace(lower(%(product_name)s), '[^[:alnum:]]+', ' ', 'g'),
+                    '[[:space:]]+account$',
+                    '',
+                    'g'
+                )
+              )
         ORDER BY cp.updated_at DESC
         LIMIT 1
         """,

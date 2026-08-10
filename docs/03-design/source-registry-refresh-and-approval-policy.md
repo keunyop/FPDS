@@ -214,13 +214,36 @@ Current live product-type onboarding note:
 - Operator-managed product types without specialized parser support, including
   the current lending baseline, continue through generic AI
   extraction/normalization. They may use normal policy auto-approval only when
-  the persisted official-grounding assessment verifies product identity plus
-  one product-defining fact (two fields total) and at least `80%` of populated
-  decision fields. Empty optional fields are omissions and ungrounded lending
-  attributes are suppressed; otherwise the candidate remains in Review.
+  the persisted official-grounding assessment verifies product identity and
+  `100%` of the type-specific essential comparison set. Empty optional
+  marketing and operational fields are not requested by default;
+  missing rate, price, amount, or term requirements are validation errors and
+  ungrounded lending attributes are suppressed. Unknown dynamic types require
+  a registry contract with a percentage field plus another decision field.
+  Otherwise the candidate remains in Review.
   Approved `mortgage`, `personal-loan`, and `line-of-credit` products are
   included in the Public aggregate snapshot; unapproved candidates remain
   non-public.
+- Collection-field selection is market-profile driven. The executable profile
+  key is `(country_code, product_type)` and its version/key are stored in
+  generated source discovery metadata. Canada uses the approved baseline
+  contract; US Checking/Savings/CD/Mortgage/Personal Loan use the D-035 market
+  overrides. A future country adds a bounded declarative profile and fixtures,
+  not scattered pipeline conditionals. An explicitly named country without a
+  profile and missing/unknown dynamic contracts fail closed.
+- US Savings treats a positive monthly fee exactly like US Checking for
+  comparison safety: the complete waiver condition is mandatory. A conditional
+  APY is publishable only with an `interest_rate_summary` that preserves the
+  official new-customer, qualifying-balance/timing, fallback-rate, as-of-date,
+  and variability context. A simple unconditional current APY does not require
+  invented qualifier prose. US lending relationship/autopay discounts retain
+  their qualifying account/payment and existing-customer conditions.
+- Every materialized and newly discovered URL must agree with the collection
+  country. An explicit other-country path/locale, subdomain, or country-code TLD
+  is a hard scope veto even when the bank uses the same official parent domain
+  for both markets. Existing generated detail rows that violate this boundary
+  are inactivated with audit lineage; seed, entry, supporting, and PDF routes
+  are filtered before fetch or merge.
 - Source collection plans and extraction artifacts must carry `product_family` from the product type registry so lending candidates are not normalized as deposits.
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
@@ -243,8 +266,9 @@ For this policy, `collect` means:
 8. promote policy-clear `auto_validated` candidates through the audited canonical upsert path
 9. when enabled, AI-verify and safely correct a bounded set of active detail
    review tasks left by this run
-10. system-approve only candidates meeting the approval-field threshold with
-    no hard boundary/taxonomy/partial-source blocker, and queue the normal
+10. system-approve only candidates meeting the complete essential-field
+    contract with no hard identity/boundary/taxonomy/type/range/conflict/
+    ambiguity blocker, and queue the normal
     country aggregate refresh; retain every other candidate in Review
 11. when no eligible detail source remains, perform one bounded current-coverage
     repair. A verified current route is persisted and discovery is retried once;
@@ -262,20 +286,26 @@ An exact labeled currency fee on an identity-matched, high-confidence official
 `detail` snapshot may be grounded deterministically under the narrower field
 contract rule; it still requires an explicitly configured official domain,
 co-located label/value evidence, and all normal validation and publication
-gates. When several fees share a chunk, the nearest label/value pair wins and
-authorized-user, additional-card, supplementary-card, and employee-card fees
-are excluded from the base product fee. Editorial paths, including singular
+gates. The same origin rule may preserve a qualified lending rate summary and
+its amount/limit/term/rate-type companions when both the value and qualifying
+context are co-located in that verified detail snapshot; it never converts a
+range, formula, or representative example to a scalar rate. When several fees
+share a chunk, the nearest label/value pair wins and authorized-user,
+additional-card, supplementary-card, and employee-card fees are excluded from
+the base product fee. Editorial paths, including singular
 `/article/` routes, remain outside
 candidate-producing scope even when their copy discusses the requested product.
 For dynamic/lending candidates, this grounding also produces a persisted
 decision-field eligibility assessment. A passing assessment removes the old
 blanket manual-review rule but does not remove any validator, force-review,
 source-role, product-boundary, canonical, audit, or aggregate-refresh guard.
-Residual Review AI uses only identity plus populated or blocking decision
-fields as its denominator. It does not penalize absent optional fields or reuse
-the superseded full-request-set assessment contract. If Review AI abstains on
-an unchanged fee already carrying the narrow exact-origin contract, the
-assessment may reuse that persisted evidence after the registered-domain check;
+Residual Review AI v7 uses identity plus one field for every mandatory
+comparison requirement as its denominator. It does not request or penalize
+absent optional marketing/operational fields, and it does not reuse earlier
+assessment contracts. A partial-source or confidence warning alone is
+non-blocking once all essentials pass. If Review AI abstains on
+an unchanged fee or qualified lending comparison field already carrying the
+narrow exact-origin contract, the assessment may reuse that persisted evidence after the registered-domain check;
 an explicit mismatch remains fail-closed.
 
 Important rules:
@@ -286,9 +316,24 @@ Important rules:
   bounded, credential-redacted diagnostic in private run metadata; a generic
   exit code alone is not sufficient operational evidence
 - `detail` sources are the default candidate-producing scope
-- supporting sources may still be fetched and parsed during the same run if the registry metadata says they support a selected detail source
+- supporting sources may still be fetched and parsed during the same run only
+  when they are bounded to the selected product: a detail descendant/companion,
+  a Product-Type-compatible rate/APR page, or a relevant essential-fact
+  FAQ/disclosure. Educational, servicing, application, transfer, investment,
+  sibling-product, and conflicting Product-Type routes are excluded before fetch
 - only `detail` sources create primary standalone candidates; supporting and linked sources remain evidence-only even when selected or auto-included
 - AI-classified `supporting_html` pages should be retained when they provide product-matched rate/fee/term evidence, and normalization may merge their grounded fields into the related detail candidate
+- official rate, pricing, disclosure, and terms pages are priority supporting
+  sources for lending. Collection AI must actively search them for missing
+  mandatory fields. A range, variable-rate formula, or representative example
+  is retained with all stated assumptions in `interest_rate_summary` and is not
+  coerced into one misleading scalar.
+- an exact-product official bundle may combine the detail page with a rate page,
+  fee schedule, and governing disclosure. Supporting sources never create
+  standalone candidates; every accepted companion keeps its own source
+  document and exact quote. US CD disclosures may contribute a quantified
+  early-withdrawal penalty, and lending support may contribute a qualified
+  rate summary plus grounded rate-type/term/amount companions.
 - retail collection scope must reject clearly business/commercial/corporate product pages before they become generated detail sources
 - cross-domain collection is allowed only for the single verified catalog
   coverage domain carried with its relationship evidence; ordinary discovered

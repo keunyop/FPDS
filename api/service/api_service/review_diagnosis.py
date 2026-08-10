@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
+import sys
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
+    sys.path.insert(0, str(REPO_ROOT))
 
 from worker.pipeline.fpds_approval_policy import dynamic_repair_fields
 
@@ -14,10 +20,12 @@ def build_review_diagnosis(
     validation_status: str,
     validation_issue_codes: list[str],
     product_type: str | None = None,
+    country_code: str | None = None,
     source_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     priority_fields = _priority_expected_fields(
         product_type=product_type,
+        country_code=country_code,
         expected_fields=expected_fields,
         candidate_payload=candidate_payload,
     )
@@ -98,6 +106,7 @@ def build_review_field_items(
     evidence_field_names: list[str],
     current_payload: dict[str, Any] | None,
     product_type: str | None = None,
+    country_code: str | None = None,
     source_metadata: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     effective_payload = {**candidate_payload, **(current_payload or {})}
@@ -115,6 +124,7 @@ def build_review_field_items(
     priority_fields = set(
         _priority_expected_fields(
             product_type=product_type,
+            country_code=country_code,
             expected_fields=expected_fields,
             candidate_payload=candidate_payload,
         )
@@ -193,83 +203,29 @@ def _attention_verb(count: int) -> str:
 def _priority_expected_fields(
     *,
     product_type: str | None,
+    country_code: str | None = None,
     expected_fields: list[str],
     candidate_payload: dict[str, Any] | None = None,
 ) -> list[str]:
-    optional_fields = {
-        "notes",
-        "description_short",
-        "rewards_summary",
-        "eligibility_text",
-        "application_method",
-        "fees_text",
-        "collateral_text",
-        "deposit_insurance",
-    }
     payload = candidate_payload or {}
+    requested = dynamic_repair_fields(
+        product_type=product_type,
+        country_code=country_code,
+        expected_fields=expected_fields,
+        candidate_payload=payload,
+    )
     normalized_type = str(product_type or "").strip().lower()
-    missing: list[str] = []
-
-    def add_if_missing(field_name: str) -> None:
-        if field_name in expected_fields and is_empty_review_value(payload.get(field_name)):
-            missing.append(field_name)
-
-    def add_missing_alternative(field_names: tuple[str, ...]) -> None:
-        available = [field_name for field_name in field_names if field_name in expected_fields]
-        if available and not any(not is_empty_review_value(payload.get(field_name)) for field_name in available):
-            missing.append(available[0])
-
-    if normalized_type == "chequing":
-        add_if_missing("product_name")
-        add_missing_alternative(("monthly_fee", "public_display_fee", "fee_waiver_condition"))
-        return missing
-    if normalized_type == "savings":
-        add_if_missing("product_name")
-        rate_fields = (
-            "standard_rate",
-            "base_12_month_rate",
-            "public_display_rate",
-            "promotional_rate",
-            "highest_rate",
-        )
-        add_missing_alternative(rate_fields)
-        if (
-            not is_empty_review_value(payload.get("promotional_rate"))
-            and not _has_ongoing_savings_rate(payload)
-        ):
-            ongoing_rate_field = next(
-                (field_name for field_name in ("standard_rate", "base_12_month_rate") if field_name in expected_fields),
-                None,
-            )
-            if ongoing_rate_field is not None and ongoing_rate_field not in missing:
-                missing.append(ongoing_rate_field)
-        return missing
-    if normalized_type == "gic":
-        add_if_missing("product_name")
-        add_if_missing("minimum_deposit")
-        term_rate_rows = payload.get("term_rate_table")
-        has_term_rate_rows = isinstance(term_rate_rows, list) and bool(term_rate_rows)
-        if not has_term_rate_rows:
-            add_missing_alternative(("term_length_text", "term_length_days"))
-            add_missing_alternative(
-                ("standard_rate", "base_12_month_rate", "public_display_rate", "highest_rate", "promotional_rate")
-            )
-        return missing
-    if normalized_type in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}:
-        missing_fields: list[str] = []
-        add_if_missing("product_name")
-        missing_fields.extend(missing)
-        missing_fields.extend(
+    if normalized_type in {"chequing", "savings", "gic"}:
+        requested = [field_name for field_name in requested if field_name in expected_fields]
+    if normalized_type == "savings" and _has_ongoing_savings_rate(payload):
+        requested = [
             field_name
-            for field_name in dynamic_repair_fields(
-                product_type=product_type,
-                expected_fields=expected_fields,
-                candidate_payload=payload,
-            )
-            if is_empty_review_value(payload.get(field_name))
-        )
-        return list(dict.fromkeys(missing_fields))
-    return [field_name for field_name in expected_fields if field_name not in optional_fields]
+            for field_name in requested
+            if field_name not in {"standard_rate", "base_12_month_rate", "public_display_rate"}
+        ]
+    if "product_name" in expected_fields:
+        requested.insert(0, "product_name")
+    return list(dict.fromkeys(requested))
 
 
 def _has_ongoing_savings_rate(payload: dict[str, Any]) -> bool:
@@ -315,7 +271,11 @@ def _suspect_reason(*, field_name: str, value: Any, product_type: str | None = N
     normalized = " ".join(value.lower().split())
     if field_name == "product_name" and re.match(r"^(?:see|view|check)\b.{0,50}\brates?\b", normalized):
         return "cta_copy"
-    if re.search(r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\])", normalized):
+    if re.search(
+        r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\]"
+        r"|(?<![a-z0-9])(?:\$\s*)?[x*]{2,}(?:\.[x*]+)?\s*%?(?![a-z0-9]))",
+        normalized,
+    ):
         return "unresolved_placeholder"
     if normalized in {"home", "go to main content", "skip to main content", "document go to main content", "document skip to main content", "learn more", "read more"}:
         return "navigation_copy"

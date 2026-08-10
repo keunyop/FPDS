@@ -5,6 +5,7 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+import re
 import sys
 from typing import Any, TYPE_CHECKING
 import unicodedata
@@ -27,7 +28,6 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
-from worker.pipeline.fpds_field_contract import field_contract
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -58,27 +58,15 @@ AI_VERIFICATION_READ_ONLY_FIELDS = {
     "tags",
     "target_customer_tags",
 }
-AI_VERIFICATION_MATERIAL_STRING_FIELDS = {
-    "amortization_text",
-    "collateral_text",
-    "credit_limit_text",
-    "fee_waiver_condition",
-    "fees_text",
-    "interest_rate_summary",
-    "loan_amount_text",
-    "minimum_payment_text",
-    "monthly_payment_text",
-    "payment_frequency",
-    "prepayment_privileges",
-    "rate_type",
-    "rewards_summary",
-    "security_requirement",
-    "term_length_text",
-}
 AI_VERIFICATION_HARD_BLOCKERS = {
     "ambiguous_product_boundary",
     "invalid_taxonomy_code",
-    "partial_source_failure",
+    "invalid_numeric_range",
+    "invalid_field_type",
+    "invalid_term_value",
+    "conflicting_evidence",
+    "ambiguous_mapping",
+    "inconsistent_cross_field_logic",
 }
 AI_VERIFICATION_TERMINAL_BLOCKED_STATES = {"rejected"}
 
@@ -232,7 +220,7 @@ def run_review_ai_verification(
         "candidate_id": str(review_task.get("candidate_id") or ""),
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "allowed_domains": allowed_domains,
-        "verification_contract_version": "review-ai-verification-v2",
+        "verification_contract_version": "review-ai-verification-v7",
         "requested_field_names": requested_field_names,
         "approval_field_names": requested_field_names,
         "requested_field_count": len(requested_field_names),
@@ -463,15 +451,13 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
     expected_fields = _string_list(source_context.get("expected_fields"))
     candidate_payload = _mapping(candidate.get("candidate_payload"))
     product_type = str(candidate.get("product_type") or "")
-    dynamic_fields = set(
-        dynamic_repair_fields(
-            product_type=product_type,
-            expected_fields=expected_fields,
-            candidate_payload=candidate_payload,
-        )
-        if product_type not in {"chequing", "savings", "gic"}
-        else []
+    essential_fields = dynamic_repair_fields(
+        product_type=product_type,
+        country_code=str(candidate.get("country_code") or ""),
+        expected_fields=expected_fields,
+        candidate_payload=candidate_payload,
     )
+    essential_field_set = set(essential_fields)
     for item in review_field_items[:AI_VERIFICATION_MAX_FIELDS]:
         field_name = str(item.get("field_name") or "").strip()
         if (
@@ -481,19 +467,7 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
         ):
             continue
         effective_value = item.get("effective_value")
-        contract = field_contract(field_name)
-        approval_relevant = (
-            bool(item.get("missing"))
-            or bool(item.get("suspect"))
-            or field_name in dynamic_fields
-            or (
-                is_populated(effective_value)
-                and (
-                    (contract is not None and contract.value_type != "string")
-                    or field_name in AI_VERIFICATION_MATERIAL_STRING_FIELDS
-                )
-            )
-        )
+        approval_relevant = field_name in essential_field_set
         if not approval_relevant:
             continue
         seen_fields.add(field_name)
@@ -502,10 +476,26 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
                 "field_name": field_name,
                 "label": str(item.get("label") or field_name),
                 "collected_value": item.get("effective_value"),
-                "missing": bool(item.get("missing")),
+                "missing": bool(item.get("missing"))
+                or (field_name in essential_field_set and not is_populated(item.get("effective_value"))),
                 "suspect": bool(item.get("suspect")),
                 "issue_codes": _string_list(item.get("issue_codes")),
                 "field_note": _string_or_none(item.get("field_note")),
+            }
+        )
+    for field_name in essential_fields:
+        if field_name in seen_fields or field_name in AI_VERIFICATION_READ_ONLY_FIELDS:
+            continue
+        seen_fields.add(field_name)
+        review_fields.append(
+            {
+                "field_name": field_name,
+                "label": _field_label(detail=detail, field_name=field_name),
+                "collected_value": candidate_payload.get(field_name),
+                "missing": not is_populated(candidate_payload.get(field_name)),
+                "suspect": False,
+                "issue_codes": ["required_field_missing"],
+                "field_note": "Required for essential-field publication.",
             }
         )
     return {
@@ -529,9 +519,9 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
         },
         "fields_to_verify": review_fields[:AI_VERIFICATION_MAX_FIELDS],
         "approval_policy": {
-            "contract_version": "review-ai-verification-v2",
-            "rule": "official product identity plus populated or blocking decision fields",
-            "empty_optional_fields_are_omissions": True,
+            "contract_version": "review-ai-verification-v7",
+            "rule": "official product identity plus every product-type essential field",
+            "empty_requested_fields_block_approval": True,
         },
         "collected_candidate_payload": candidate_payload,
     }
@@ -619,16 +609,32 @@ def authoritative_field_evidence(
     field_names: list[str],
     allowed_domains: list[str],
 ) -> dict[str, dict[str, Any]]:
-    """Return persisted exact-origin fee evidence safe to reuse after AI abstains."""
+    """Return persisted exact-origin comparison evidence safe after AI abstains."""
 
     candidate = _mapping(detail.get("candidate"))
     candidate_payload = _mapping(candidate.get("candidate_payload"))
     mappings = _mapping(candidate.get("field_mapping_metadata"))
+    product_type = str(candidate.get("product_type") or "").strip().lower().replace("_", "-")
+    lending_origin_fields = {
+        "mortgage": {"interest_rate_summary", "term_length_text", "rate_type"},
+        "personal-loan": {"interest_rate_summary", "loan_amount_text", "term_length_text"},
+        "line-of-credit": {"interest_rate_summary", "credit_limit_text"},
+    }
     evidence: dict[str, dict[str, Any]] = {}
     for field_name in dict.fromkeys(field_names):
         if field_name == "product_name" or field_name not in candidate_payload:
             continue
         metadata = _mapping(mappings.get(field_name))
+        grounding_method = str(metadata.get("official_grounding_method") or "")
+        exact_fee = grounding_method == "deterministic_labeled_origin"
+        exact_lending_fact = (
+            grounding_method == "deterministic_lending_comparison_origin"
+            and field_name in lending_origin_fields.get(product_type, set())
+            and (
+                field_name != "interest_rate_summary"
+                or "%" in str(candidate_payload.get(field_name) or "")
+            )
+        )
         sources = [
             source
             for source in _source_list(metadata.get("official_web_sources"))
@@ -638,8 +644,8 @@ def authoritative_field_evidence(
             )
         ]
         if (
-            metadata.get("official_grounding_contract_version") != "collection-official-grounding-v1"
-            or metadata.get("official_grounding_method") != "deterministic_labeled_origin"
+            metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2"
+            or not (exact_fee or exact_lending_fact)
             or metadata.get("official_verification_status") != "match"
             or not str(metadata.get("official_evidence_quote") or "").strip()
             or not sources
@@ -649,7 +655,11 @@ def authoritative_field_evidence(
         source = sources[0]
         evidence[field_name] = {
             "verified": True,
-            "basis": "exact_official_detail_labeled_fee",
+            "basis": (
+                "exact_official_detail_lending_comparison"
+                if exact_lending_fact
+                else "exact_official_detail_labeled_fee"
+            ),
             "candidate_value": candidate_payload.get(field_name),
             "source_url": str(source.get("url") or ""),
             "source_title": str(source.get("title") or source.get("url") or ""),
@@ -708,6 +718,7 @@ def sanitize_ai_verification_result(
         cited_sources = _dedupe_sources(cited_sources)
         collected_value = base_payload.get(field_name)
         verified_value: Any = None
+        evidence_quote = _compact_text(item.get("evidence_quote"), limit=700)
         has_verified_value = bool(item.get("has_verified_value"))
         if has_verified_value:
             try:
@@ -716,7 +727,15 @@ def sanitize_ai_verification_result(
                 status = "unverified"
                 has_verified_value = False
         if status in {"match", "mismatch"} and (
-            not cited_sources or not has_verified_value
+            not cited_sources
+            or not has_verified_value
+            or not _verification_evidence_is_exact_product(
+                detail=detail,
+                field_name=field_name,
+                verified_value=verified_value,
+                evidence_quote=evidence_quote,
+                cited_sources=cited_sources,
+            )
         ):
             status = "unverified"
             has_verified_value = False
@@ -751,6 +770,7 @@ def sanitize_ai_verification_result(
                 "verified_value": verified_value if has_verified_value else None,
                 "confidence": _confidence(item.get("confidence")),
                 "rationale": _compact_text(item.get("rationale"), limit=600),
+                "evidence_quote": evidence_quote,
                 "sources": cited_sources,
                 "can_apply": can_apply,
                 "proposed_value": proposed_value,
@@ -780,6 +800,80 @@ def sanitize_ai_verification_result(
         "proposed_corrections": proposed_corrections,
         "source_count": len(sources),
     }
+
+
+def _verification_evidence_is_exact_product(
+    *,
+    detail: dict[str, Any],
+    field_name: str,
+    verified_value: Any,
+    evidence_quote: str,
+    cited_sources: list[dict[str, str]],
+) -> bool:
+    """Reject same-bank citations that do not establish the exact product fact."""
+
+    if not evidence_quote or "..." in evidence_quote or "…" in evidence_quote:
+        return False
+    candidate = _mapping(detail.get("candidate"))
+    expected_product = (
+        str(verified_value or "")
+        if field_name == "product_name"
+        else str(candidate.get("product_name") or "")
+    )
+    normalized_product = _normalize_identity_text(expected_product)
+    normalized_quote = _normalize_identity_text(evidence_quote)
+    quote_names_product = bool(normalized_product and normalized_product in normalized_quote)
+    exact_origin_url = _canonical_source_url(
+        _mapping(detail.get("source_context")).get("source_url")
+    )
+    from api_service.source_catalog import _source_scope_exclusion_reason
+
+    product_type = str(candidate.get("product_type") or "")
+    compatible_sources = [
+        source
+        for source in cited_sources
+        if _canonical_source_url(source.get("url")) == exact_origin_url
+        or not _source_scope_exclusion_reason(
+            product_type=product_type,
+            fingerprint=f"{source.get('url') or ''} {source.get('title') or ''}".lower(),
+        )
+    ]
+    if not compatible_sources:
+        return False
+    cites_exact_origin = bool(
+        exact_origin_url
+        and any(
+            _canonical_source_url(source.get("url")) == exact_origin_url
+            for source in compatible_sources
+        )
+    )
+    if field_name == "product_name":
+        return quote_names_product
+    if not (quote_names_product or cites_exact_origin):
+        return False
+
+    if field_name in {
+        "early_withdrawal_penalty",
+        "fee_waiver_condition",
+        "interest_rate_summary",
+        "security_requirement",
+    }:
+        normalized_value = _compact_text(verified_value, limit=2000)
+        normalized_quote_text = _compact_text(evidence_quote, limit=2000)
+        if not normalized_value or normalized_value.casefold() not in normalized_quote_text.casefold():
+            return False
+
+    numeric_tokens = re.findall(r"\d+(?:\.\d+)?", str(verified_value).replace(",", ""))
+    if not numeric_tokens:
+        return True
+    normalized_financial_quote = evidence_quote.replace(",", "")
+    return all(
+        re.search(
+            rf"(?<!\d){re.escape(token.rstrip('0').rstrip('.') if '.' in token else token)}(?:\.0+)?(?!\d)",
+            normalized_financial_quote,
+        )
+        for token in numeric_tokens
+    )
 
 
 def _insert_model_execution(
@@ -1034,14 +1128,23 @@ def _verification_instructions() -> str:
         "You are the FPDS financial-product verification agent. You must use web search before answering. "
         "Search only the supplied official bank domain allowlist and verify the exact named product, not a "
         "neighboring product, family overview, promotion landing page, calculator, or service flow. Compare "
-        "each requested approval field with current official facts. Empty optional fields were intentionally omitted from this "
-        "request and must not count against the product. Never infer a missing value. Mark a field "
+        "each requested approval field with current official facts. A requested empty field is a mandatory repair target, not "
+        "an optional omission. Never infer a missing value. Mark a field "
         "unverified when the exact current fact is absent, ambiguous, personalized, dynamic, expired, or belongs "
         "to another product. Preserve canonical units: rates are numeric percentage points per annum, money is "
         "numeric in product currency, durations/counts are integers, booleans are true/false, and structured "
-        "term rates are JSON arrays. Put a JSON-encoded canonical value in verified_value_json only when the "
+        "term rates are JSON arrays. For interest_rate_summary, preserve a current official APR/rate range, reference-rate "
+        "formula, or representative example together with its disclosed term, credit, discount, date, and other assumptions; "
+        "when a discount affects the displayed rate, include its qualifying account, automatic-payment, relationship, and "
+        "existing-customer conditions; "
+        "for a conditional deposit APY, include new-customer eligibility, qualifying balance and timing, fallback-rate "
+        "outcome, as-of date, and variability when disclosed; "
+        "do not force a range or conditional example into one scalar rate. Put a JSON-encoded canonical value in "
+        "verified_value_json only when the "
         "official source states it directly. Every match or mismatch must cite at least one official source URL "
-        "actually consulted. Keep rationale concise and operational. Do not approve, publish, or recommend a "
+        "actually consulted and copy a short exact evidence_quote from that source. The quote must name the exact "
+        "product when the source is a separate rate/fee/disclosure page. Keep rationale concise and operational. "
+        "Do not approve, publish, or recommend a "
         "financial product."
     )
 
@@ -1071,6 +1174,7 @@ AI_VERIFICATION_SCHEMA: dict[str, Any] = {
                     "verified_value_json": {"type": "string"},
                     "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                     "rationale": {"type": "string"},
+                    "evidence_quote": {"type": "string"},
                     "sources": {
                         "type": "array",
                         "maxItems": 5,
@@ -1092,6 +1196,7 @@ AI_VERIFICATION_SCHEMA: dict[str, Any] = {
                     "verified_value_json",
                     "confidence",
                     "rationale",
+                    "evidence_quote",
                     "sources",
                 ],
             },

@@ -115,6 +115,9 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_eviden
 psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
 ```
 
 Create the first operator account:
@@ -175,7 +178,36 @@ cd api/service
   parameter in its PostgreSQL query, so psycopg prepared statements preserve
   the session/candidate country boundary without raising an ambiguous-parameter
   server error before model execution begins.
-- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v2 requests only `product_name` plus populated or blocking decision fields; empty optional and operational fields do not enter the denominator. Official matches and safely applied mismatches pass. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee may likewise reuse its persisted exact-origin official grounding when Review AI abstains. AI mismatches, non-detail sources, and checking/savings composites cannot use these fallbacks. Unverified approval fields, unapplied corrections, ambiguous product boundaries, invalid taxonomy, and partial sources block approval. Candidates at `>= 80%` use the existing review approval and country aggregate-refresh path; all others remain in human review.
+- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v7 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary`. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
+- Collection, Review, manual approval, and aggregate refresh resolve the same
+  versioned `(country_code, product_type)` market profile. Generated source
+  metadata records the profile key/version. US Checking does not inherit the
+  Canadian transaction-count requirement, US CDs use an early-withdrawal
+  penalty rather than redeemability, and US Mortgage requires its qualified
+  rate/APR summary. US Credit Card and Line of Credit remain explicit US-owned
+  profiles even when their current minimum facts match Canada. Explicitly new
+  countries remain publication-closed until their profiles are registered.
+  Active-scope reads and all entry/seed/detail/supporting URL selections also
+  enforce that country: explicit other-market paths/locales, subdomains, and
+  country-code TLDs are rejected even on a shared official parent domain, and
+  stale generated details are inactivated auditably.
+  Masked financial templates and unrelated percentages, including
+  transaction/conversion and ATM/ABM assessment fees, cannot satisfy a rate fact,
+  country-specific Public projection omits optional Admin candidate copy, and
+  comparison-critical prose is retained only within a field-specific safe bound
+  that does not cut a condition mid-word or mid-clause.
+  US personal/vehicle-loan representative APR summaries also preserve official
+  vehicle-age/model-year, LTV, down-payment, credit, origination-fee, and
+  rate-change assumptions plus relationship/autopay discount qualifications.
+  US Savings requires a complete waiver when its monthly fee is positive and
+  preserves new-customer, balance/timing, fallback-rate, date, and variability
+  context for a conditional APY.
+  The `100%` official-grounding and fail-closed gates are unchanged.
+- Canonical continuity normalizes presentation-only product-name differences
+  (trademark/punctuation and a trailing generic `account`) inside the same
+  country, bank, family, and Product Type. A later approved source versions the
+  existing product instead of creating a duplicate Public row; material subtype
+  differences remain separate.
 - New collection runs now apply that same contract automatically to bounded
   active `queued`/`deferred` detail candidates left after normal validation.
   The policy defaults to enabled, is capped at `200` candidates per run, and
@@ -282,7 +314,10 @@ cd api/service
   evidence chunk; otherwise the existing evidence-first value or reviewable
   omission remains. A co-located labeled currency fee from an identity-matched,
   high-confidence official detail snapshot may use the narrower deterministic
-  exact-origin contract; rates and prose remain provider-grounded or omitted.
+  exact-origin contract. Qualified lending rate summaries and their
+  amount/limit/term/rate-type companions may use the same path only when their
+  value and qualifying context are co-located; scalar rates and general prose
+  remain provider-grounded or omitted.
   Model usage and consulted sources are persisted with the
   extraction execution, and AI failure does not bypass validation or review.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.

@@ -24,6 +24,7 @@ from api_service.source_catalog import (
     _deactivate_rejected_generated_detail_sources,
     _dedupe_detail_rows_by_product_identity,
     _dedupe_generated_source_rows,
+    _supporting_source_is_bounded_to_selected_details,
     _extract_allowed_links,
     _generate_bank_code,
     _has_excluded_link_signal,
@@ -49,6 +50,7 @@ from api_service.source_catalog import (
     _seed_supporting_hint_is_relevant,
     _suppress_family_overviews_when_named_details_exist,
     _upsert_source_registry_rows,
+    _url_country_scope_conflicts,
     _url_locale_conflicts_source_language,
     create_bank_profile,
     delete_bank_profile,
@@ -111,6 +113,32 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_shared_bank_domain_rejects_explicit_other_country_route(self) -> None:
+        self.assertTrue(
+            _url_country_scope_conflicts(
+                country_code="US",
+                normalized_url="https://www.td.com/ca/en/personal-banking/products/checking",
+            )
+        )
+        self.assertTrue(
+            _url_country_scope_conflicts(
+                country_code="CA",
+                normalized_url="https://www.td.com/us/en/personal-banking/checking-accounts/beyond",
+            )
+        )
+        self.assertFalse(
+            _url_country_scope_conflicts(
+                country_code="US",
+                normalized_url="https://www.td.com/us/en/personal-banking/checking-accounts/beyond",
+            )
+        )
+        self.assertFalse(
+            _url_country_scope_conflicts(
+                country_code="US",
+                normalized_url="https://www.td.com/content/dam/tdb/document/pdf/personal-banking/dda-en.pdf",
+            )
+        )
+
     def test_us_discovery_localizes_checking_and_cd_without_mutating_canonical_codes(self) -> None:
         chequing = localize_product_type_definition(
             country_code="US",
@@ -784,6 +812,18 @@ class SourceCatalogTests(unittest.TestCase):
             "other_product_type",
         )
 
+    def test_mortgage_scope_rejects_heloc_even_below_mortgage_route(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="mortgage",
+                fingerprint=(
+                    "https://www.examplebank.com/personal/mortgage/home-equity-line-of-credit "
+                    "Home Equity Line of Credit (HELOC)"
+                ),
+            ),
+            "other_product_type",
+        )
+
     def test_educational_slug_patterns_are_out_of_product_scope(self) -> None:
         for path in (
             "savings-accounts/what-is-a-savings-account",
@@ -842,6 +882,18 @@ class SourceCatalogTests(unittest.TestCase):
                     "High Interest Savings Account navigation No Fee Chequing"
                 ),
             )
+        )
+
+    def test_explicit_deposit_route_rejects_other_product_application(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="savings",
+                fingerprint=(
+                    "https://www.examplebank.com/personal-banking/checking-accounts/apply/essential "
+                    "Example Savings APY is 3.25%."
+                ),
+            ),
+            "other_product_type",
         )
 
     def test_savings_and_gic_exclude_generic_transfer_and_mutual_fund_support(self) -> None:
@@ -2029,6 +2081,60 @@ class SourceCatalogTests(unittest.TestCase):
                 },
                 normalized_url="https://www.examplebank.ca/rates",
                 anchor_text="Compare all accounts",
+            )
+        )
+
+    def test_deposit_supporting_sources_stay_on_detail_routes_or_shared_rates(self) -> None:
+        details = {
+            "https://www.bank.example/savings/platinum",
+            "https://www.bank.example/savings/way2save",
+        }
+
+        self.assertTrue(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="savings",
+                normalized_url="https://www.bank.example/savings/platinum/fees",
+                promoted_detail_urls=details,
+            )
+        )
+        self.assertTrue(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="savings",
+                normalized_url="https://www.bank.example/savings/rates",
+                promoted_detail_urls=details,
+            )
+        )
+        self.assertFalse(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="savings",
+                normalized_url="https://www.bank.example/help/zelle-faqs",
+                promoted_detail_urls=details,
+            )
+        )
+        self.assertFalse(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="savings",
+                normalized_url="https://www.bank.example/business/fee-information",
+                promoted_detail_urls=details,
+            )
+        )
+
+    def test_lending_supporting_sources_keep_rates_and_drop_education_pages(self) -> None:
+        details = {"https://www.bank.example/personal/mortgage/fha-loan"}
+
+        self.assertTrue(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="mortgage",
+                normalized_url="https://www.bank.example/personal/mortgage/refinance-rates",
+                promoted_detail_urls=details,
+            )
+        )
+        self.assertFalse(
+            _supporting_source_is_bounded_to_selected_details(
+                product_type="mortgage",
+                normalized_url="https://www.bank.example/personal/mortgage/education/credit-score-guide",
+                anchor_text="What credit score is needed to buy a house?",
+                promoted_detail_urls=details,
             )
         )
 
@@ -3439,6 +3545,7 @@ class SourceCatalogTests(unittest.TestCase):
         deactivate_hard_scope.assert_called_once_with(
             connection,
             bank_code="BMO",
+            country_code="CA",
             product_type="chequing",
         )
         self.assertEqual(connection.calls, [])
@@ -4059,6 +4166,7 @@ class SourceCatalogTests(unittest.TestCase):
         count = _deactivate_hard_scope_excluded_generated_detail_sources(
             connection,
             bank_code="OAKEN",
+            country_code="CA",
             product_type="gic",
         )
 
@@ -4485,7 +4593,8 @@ class SourceCatalogTests(unittest.TestCase):
         detail_rows = [item for item in result.rows if item["source_id"] in {"CIBC-CHQ-002", "CIBC-CHQ-003"}]
         self.assertTrue(all(item["discovery_metadata"]["selection_path"] == "seed_hint_ai_unavailable_low_page_evidence" for item in detail_rows))
         self.assertTrue(all(item["discovery_metadata"]["ai_unavailable"] for item in detail_rows))
-        self.assertTrue(all("fee_waiver_condition" in item["expected_fields"] for item in detail_rows))
+        self.assertTrue(all("fee_waiver_condition" not in item["expected_fields"] for item in detail_rows))
+        self.assertTrue(all("included_transactions" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(all("minimum_balance" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(any("Deterministic homepage discovery fallback" in note for note in result.discovery_notes))
 

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 DEFAULT_COLLECTION_AI_REVIEW_LIMIT = 200
-DEFAULT_COLLECTION_AI_APPROVAL_THRESHOLD = 0.8
+DEFAULT_COLLECTION_AI_APPROVAL_THRESHOLD = 1.0
 COLLECTION_AI_ACTOR = {
     "actor_type": "system",
     "role": "admin",
@@ -279,7 +279,7 @@ def _load_latest_verification_execution(
         FROM model_execution
         WHERE stage_name = 'ai_verification'
           AND execution_metadata ->> 'review_task_id' = %(review_task_id)s
-          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v2'
+          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v7'
         ORDER BY started_at DESC, model_execution_id DESC
         LIMIT 1
         """,

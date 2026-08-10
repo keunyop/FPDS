@@ -260,7 +260,7 @@ FROM (
             force_review_issue_codes=_coerce_policy_codes(policy_map.get("FORCE_REVIEW_ISSUE_CODES")),
             ai_auto_approve_min_verified_ratio=_coerce_policy_number(
                 policy_map.get("AI_AUTO_APPROVE_MIN_VERIFIED_FIELD_RATIO"),
-                0.8,
+                1.0,
             ),
         )
 

@@ -136,6 +136,8 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["items"][0]["product_id"], "gic-bmo-1y")
         self.assertEqual(payload["items"][0]["product_url"], "https://www.bmo.com/main/personal/investments/gic/")
         self.assertEqual(payload["items"][0]["product_type_label"], "GIC")
+        self.assertTrue(payload["items"][0]["non_redeemable_flag"])
+        self.assertFalse(payload["items"][0]["redeemable_flag"])
         self.assertEqual(payload["items"][1]["product_id"], "gic-td-short")
         self.assertEqual(payload["freshness"]["status"], "fresh")
         self.assertEqual(payload["applied_filters"]["bank_code"], ["TD", "BMO"])
@@ -322,9 +324,12 @@ class PublicProductsTests(unittest.TestCase):
                 "public_display_rate": Decimal("4.49"),
                 "refresh_metadata": {
                     "mortgage_rate": "4.49%",
+                    "interest_rate_summary": "4.49% variable rate for a 5-year term.",
                     "rate_type": "Variable",
                     "term_length_text": "5 years",
                     "amortization_text": "Up to 30 years",
+                    "secured_flag": True,
+                    "collateral_text": "Residential property",
                 },
             }
         )
@@ -355,7 +360,13 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["total_items"], 1)
         self.assertEqual(payload["items"][0]["product_type_label"], "Mortgage")
         self.assertEqual(payload["items"][0]["mortgage_rate"], "4.49%")
+        self.assertEqual(
+            payload["items"][0]["interest_rate_summary"],
+            "4.49% variable rate for a 5-year term.",
+        )
         self.assertEqual(payload["items"][0]["term_length_text"], "5 years")
+        self.assertTrue(payload["items"][0]["secured_flag"])
+        self.assertEqual(payload["items"][0]["collateral_text"], "Residential property")
 
 
 def _latest_success_snapshot() -> dict[str, object]:
@@ -412,7 +423,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "term_bucket": None,
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 10, 0, 0, tzinfo=UTC),
-            "refresh_metadata": {},
+            "refresh_metadata": {"included_transactions": 25, "unlimited_transactions_flag": False},
             "product_url": "https://www.rbcroyalbank.com/accounts/student-banking.html",
         },
         {
@@ -549,7 +560,7 @@ def _projection_rows() -> list[dict[str, object]]:
             "term_bucket": "from_1y_to_3y",
             "last_verified_at": datetime(2026, 4, 12, 0, 0, tzinfo=UTC),
             "last_changed_at": datetime(2026, 4, 7, 0, 0, tzinfo=UTC),
-            "refresh_metadata": {},
+            "refresh_metadata": {"redeemable_flag": False, "non_redeemable_flag": True},
             "product_url": "https://www.bmo.com/main/personal/investments/gic/",
         },
         {

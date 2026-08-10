@@ -37,6 +37,13 @@ export type PublicProduct = {
   public_display_fee: number | null;
   minimum_balance: number | null;
   minimum_deposit: number | null;
+  fee_waiver_condition: string | null;
+  included_transactions: number | null;
+  unlimited_transactions_flag: boolean | null;
+  redeemable_flag: boolean | null;
+  non_redeemable_flag: boolean | null;
+  early_withdrawal_penalty: string | null;
+  secured_flag: boolean | null;
   eligibility_text: string | null;
   application_method: string | null;
   post_maturity_interest_rate: string | null;
@@ -45,6 +52,7 @@ export type PublicProduct = {
   description_short: string | null;
   mortgage_rate: string | null;
   interest_rate: string | null;
+  interest_rate_summary: string | null;
   rate_type: string | null;
   term_length_text: string | null;
   amortization_text: string | null;
@@ -54,6 +62,7 @@ export type PublicProduct = {
   monthly_payment_text: string | null;
   credit_limit_text: string | null;
   security_requirement: string | null;
+  collateral_text: string | null;
   term_rate_table: PublicTermRateRow[];
   term_length_days: number | null;
   product_highlight_badge_code: string | null;

@@ -24,6 +24,259 @@ _GOLDEN_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden" / "canada_b
 
 
 class ValidationRoutingServiceTests(unittest.TestCase):
+    def test_heloc_cannot_publish_from_mortgage_profile(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "US",
+                "bank_code": "JCBN",
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "subtype_code": "other",
+                "product_name": "Home Equity Line of Credit (HELOC)",
+                "currency": "USD",
+                "source_language": "en",
+                "field_mapping_metadata": {},
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-09T00:00:00+00:00",
+                "interest_rate_summary": "Variable APR of 8.25%.",
+                "rate_type": "Variable",
+                "term_length_text": "10-year draw period",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "Home Equity Line of Credit (HELOC)", "chunk-name"),
+                _evidence("interest_rate_summary", "Variable APR of 8.25%.", "chunk-rate"),
+                _evidence("rate_type", "Variable", "chunk-rate"),
+                _evidence("term_length_text", "10-year draw period", "chunk-term"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=["interest_rate_summary", "rate_type", "term_length_text"],
+        )
+
+        self.assertIn("invalid_taxonomy_code", issues)
+        self.assertTrue(any("line-of-credit profile" in note for note in runtime_notes))
+
+    def test_us_savings_conditional_apy_cannot_omit_official_qualification(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "US",
+                "bank_code": "WFBN",
+                "product_family": "deposit",
+                "product_type": "savings",
+                "subtype_code": "standard",
+                "product_name": "Platinum Savings",
+                "currency": "USD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    "standard_rate": {
+                        "official_evidence_quote": (
+                            "The APY shown is accurate as of 7/8/2026 and only available on new savings accounts. "
+                            "Reach a balance of at least $25,000 within 30 days and maintain that minimum daily balance; "
+                            "otherwise the standard interest rate will be applied. The rate is variable and may change."
+                        )
+                    }
+                },
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-09T00:00:00+00:00",
+                "standard_rate": 3.2,
+                "public_display_rate": 3.25,
+                "monthly_fee": 12,
+                "minimum_balance": 25000,
+                "fee_waiver_condition": "Waived with a $3,500 minimum daily balance.",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "Platinum Savings", "chunk-name"),
+                _evidence("standard_rate", "3.2", "chunk-rate"),
+                _evidence("public_display_rate", "3.25", "chunk-rate"),
+                _evidence("monthly_fee", "12", "chunk-fee"),
+                _evidence("minimum_balance", "25000", "chunk-rate"),
+                _evidence("fee_waiver_condition", "Waived with a $3,500 minimum daily balance.", "chunk-fee"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=[
+                "standard_rate",
+                "public_display_rate",
+                "monthly_fee",
+                "minimum_balance",
+                "fee_waiver_condition",
+                "interest_rate_summary",
+            ],
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("conditional APY summary" in note for note in runtime_notes))
+
+    def test_us_personal_loan_rate_summary_cannot_omit_relationship_discount_qualification(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "US",
+                "bank_code": "WFBN",
+                "product_family": "lending",
+                "product_type": "personal-loan",
+                "subtype_code": "other",
+                "product_name": "Personal Loans",
+                "currency": "USD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    "interest_rate_summary": {
+                        "official_evidence_quote": (
+                            "The lowest APR includes a 0.25% relationship discount. To qualify, an existing customer "
+                            "must have a qualifying checking account and make automatic payments from a deposit account."
+                        )
+                    }
+                },
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-09T00:00:00+00:00",
+                "interest_rate_summary": "Rates range from 6.74% to 26.74% APR and include a 0.25% relationship discount.",
+                "loan_amount_text": "$3,000 to $100,000",
+                "term_length_text": "12 to 84 months",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "Personal Loans", "chunk-name"),
+                _evidence(
+                    "interest_rate_summary",
+                    "Rates range from 6.74% to 26.74% APR and include a 0.25% relationship discount.",
+                    "chunk-rate",
+                ),
+                _evidence("loan_amount_text", "$3,000 to $100,000", "chunk-rate"),
+                _evidence("term_length_text", "12 to 84 months", "chunk-rate"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=["interest_rate_summary", "loan_amount_text", "term_length_text"],
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("pricing assumption" in note for note in runtime_notes))
+
+    def test_us_personal_loan_rate_summary_cannot_omit_official_example_assumptions(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "US",
+                "bank_code": "USBN",
+                "product_family": "lending",
+                "product_type": "personal-loan",
+                "subtype_code": "other",
+                "product_name": "Auto loan refinancing",
+                "currency": "USD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    "interest_rate_summary": {
+                        "official_evidence_quote": (
+                            "For $30,000 on a 1-year-old vehicle over 60 months with a $100 origination fee, "
+                            "APR is 8.55%; APR varies by model year, LTV, down payment, credit history, and fees."
+                        )
+                    }
+                },
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-09T00:00:00+00:00",
+                "interest_rate_summary": "Annual percentage rate (APR) of 8.55%.",
+                "loan_amount_text": "$30,000 amount financed",
+                "term_length_text": "60-month term",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "Auto loan refinancing", "chunk-name"),
+                _evidence("interest_rate_summary", "Annual percentage rate (APR) of 8.55%.", "chunk-rate"),
+                _evidence("loan_amount_text", "$30,000 amount financed", "chunk-rate"),
+                _evidence("term_length_text", "60-month term", "chunk-rate"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=["interest_rate_summary", "loan_amount_text", "term_length_text"],
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("pricing assumption" in note for note in runtime_notes))
+
+    def test_us_mortgage_rate_summary_cannot_omit_official_scenario_assumptions(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "US",
+                "bank_code": "JCBN",
+                "product_family": "lending",
+                "product_type": "mortgage",
+                "subtype_code": "other",
+                "product_name": "FHA Loan",
+                "currency": "USD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    "interest_rate_summary": {
+                        "official_evidence_quote": (
+                            "A 3.5% down payment on a 30-year fixed-rate loan of $250,000 at "
+                            "5.75% / 6.5756% APR assumes a 60-day lock, 96.5% LTV, 720 FICO, "
+                            "owner-occupied property, zero discount points, and rates change daily."
+                        )
+                    }
+                },
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-09T00:00:00+00:00",
+                "interest_rate_summary": "5.75% interest rate; 6.5756% APR",
+                "rate_type": "Fixed-rate",
+                "term_length_text": "30-year",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "FHA Loan", "chunk-name"),
+                _evidence("interest_rate_summary", "5.75% interest rate; 6.5756% APR", "chunk-rate"),
+                _evidence("rate_type", "Fixed-rate", "chunk-rate-type"),
+                _evidence("term_length_text", "30-year", "chunk-term"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=["interest_rate_summary", "rate_type", "term_length_text"],
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("scenario assumption" in note for note in runtime_notes))
+
+    def test_complete_essential_values_without_field_evidence_are_not_publishable(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "BANK",
+                "product_family": "deposit",
+                "product_type": "savings",
+                "subtype_code": "standard",
+                "product_name": "Untraced Savings",
+                "currency": "CAD",
+                "source_language": "en",
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-08T00:00:00+00:00",
+                "standard_rate": 2.5,
+                "monthly_fee": 0,
+                "minimum_balance": 0,
+            },
+            field_evidence_links=[],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={"savings": {"standard", "other"}},
+        )
+
+        self.assertIn("required_field_missing", issues)
+        self.assertTrue(any("direct evidence links" in note for note in runtime_notes))
+
     def test_dynamic_rate_without_direct_field_evidence_is_not_publishable(self) -> None:
         runtime_notes: list[str] = []
         issues = _compute_validation_issue_codes(
@@ -69,9 +322,16 @@ class ValidationRoutingServiceTests(unittest.TestCase):
                 "last_verified_at": "2026-07-22T00:00:00+00:00",
                 "minimum_deposit": 5000,
                 "term_length_text": "1 year",
-                "interest_rate_summary": "Variable interest rate linked to changes in Prime.",
+                "interest_rate_summary": "Variable interest rate linked to Prime + 0.25%.",
+                "redeemable_flag": True,
             },
-            field_evidence_links=[],
+            field_evidence_links=[
+                _evidence("product_name", "Prime-Linked GIC", "chunk-name"),
+                _evidence("interest_rate_summary", "Variable interest rate linked to Prime + 0.25%.", "chunk-rate"),
+                _evidence("term_length_text", "1 year", "chunk-term"),
+                _evidence("minimum_deposit", "5000", "chunk-deposit"),
+                _evidence("redeemable_flag", "true", "chunk-redeemable"),
+            ],
             runtime_notes=[],
             taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
         )
@@ -99,8 +359,15 @@ class ValidationRoutingServiceTests(unittest.TestCase):
                     {"term_label": "1 year", "term_length_days": 365, "rate": 2.7},
                     {"term_label": "2 years", "term_length_days": 730, "rate": 2.8},
                 ],
+                "non_redeemable_flag": True,
             },
-            field_evidence_links=[],
+            field_evidence_links=[
+                _evidence("product_name", "Multi-Term GIC", "chunk-name"),
+                _evidence("standard_rate", "2.7", "chunk-rate"),
+                _evidence("term_rate_table", "1 year 2.7%; 2 years 2.8%", "chunk-rate-table"),
+                _evidence("minimum_deposit", "1000", "chunk-deposit"),
+                _evidence("non_redeemable_flag", "true", "chunk-redeemable"),
+            ],
             runtime_notes=[],
             taxonomy_registry={"gic": {"redeemable", "non_redeemable", "market_linked", "other"}},
         )
@@ -124,6 +391,8 @@ class ValidationRoutingServiceTests(unittest.TestCase):
                 "last_verified_at": "2026-07-23T00:00:00+00:00",
                 "promotional_rate": 4.6,
                 "public_display_rate": 4.6,
+                "monthly_fee": 0,
+                "minimum_balance": 0,
             },
             field_evidence_links=[],
             runtime_notes=[],
@@ -148,9 +417,17 @@ class ValidationRoutingServiceTests(unittest.TestCase):
                 "last_verified_at": "2026-07-23T00:00:00+00:00",
                 "promotional_rate": 4.6,
                 "public_display_rate": 4.6,
+                "standard_rate": 0.3,
                 "regular_interest_rate": 0.3,
+                "monthly_fee": 0,
+                "minimum_balance": 0,
             },
-            field_evidence_links=[],
+            field_evidence_links=[
+                _evidence("product_name", "Tiered Promotional Savings Account", "chunk-name"),
+                _evidence("standard_rate", "0.3", "chunk-rate"),
+                _evidence("monthly_fee", "0", "chunk-fee"),
+                _evidence("minimum_balance", "0", "chunk-balance"),
+            ],
             runtime_notes=[],
             taxonomy_registry={"savings": {"standard", "other"}},
         )
@@ -222,6 +499,49 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
+    def test_complete_essentials_auto_validate_despite_partial_source_warning(self) -> None:
+        temp_path = _prepare_workspace_temp_dir("validation-routing-nonblocking-partial")
+        try:
+            storage_config = ValidationRoutingStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                validation_object_prefix="validated",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = ValidationRoutingService(
+                storage_config=storage_config,
+                object_store=build_object_store(storage_config),
+            )
+            input_item = _build_input()
+            input_item = ValidationInput(
+                **{
+                    **input_item.__dict__,
+                    "runtime_notes": ["An optional supporting source had a partial source failure."],
+                }
+            )
+
+            result = service.validate_and_route_inputs(
+                run_id="run-nonblocking-partial",
+                inputs=[input_item],
+                taxonomy_registry={"savings": {"standard", "high_interest", "youth", "foreign_currency", "other"}},
+                routing_config=ValidationRoutingConfig(
+                    routing_mode="phase1",
+                    auto_approve_min_confidence=1.0,
+                    review_warning_confidence_floor=1.0,
+                    force_review_issue_codes={"required_field_missing", "conflicting_evidence", "partial_source_failure"},
+                ),
+            )
+
+            source_result = result.source_results[0]
+            self.assertEqual(source_result.validation_status, "warning")
+            self.assertIn("partial_source_failure", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertEqual(source_result.candidate_state, "auto_validated")
+            self.assertEqual(source_result.queue_reason_codes, [])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_missing_required_rate_stays_error_and_queues_reason(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-error")
         try:
@@ -266,7 +586,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("validation_error", source_result.queue_reason_codes)
-            self.assertIn("partial_source_failure", source_result.queue_reason_codes)
+            self.assertNotIn("partial_source_failure", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -729,7 +1049,8 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_action, "review_queued")
             self.assertEqual(source_result.candidate_state, "in_review")
-            self.assertEqual(source_result.review_reason_code, "ai_grounding_insufficient")
+            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("ai_grounding_insufficient", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
@@ -757,7 +1078,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             def grounded(field_name: str, quote: str) -> dict[str, object]:
                 return {
                     "source_field_name": field_name,
-                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": "match",
                     "official_web_sources": [official_source],
                     "official_evidence_quote": quote,
@@ -836,7 +1157,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_grounded_dynamic_product_treats_empty_optional_terms_as_omissions(self) -> None:
+    def test_grounded_dynamic_product_missing_purchase_rate_cannot_auto_validate(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-optional-omission")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -859,7 +1180,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             def grounded(field_name: str, quote: str) -> dict[str, object]:
                 return {
                     "source_field_name": field_name,
-                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": "match",
                     "official_web_sources": [official_source],
                     "official_evidence_quote": quote,
@@ -921,11 +1242,15 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "auto_validated")
-            self.assertNotIn("required_field_missing", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertIn("required_field_missing", source_result.validation_issue_codes)
             assessment = source_result.model_execution_record["execution_metadata"]["collection_ai_assessment"]
-            self.assertEqual(assessment["assessed_fields"], ["annual_fee", "product_name"])
-            self.assertEqual(assessment["verified_ratio"], 1.0)
+            self.assertEqual(
+                assessment["assessed_fields"],
+                ["annual_fee", "product_name", "purchase_interest_rate"],
+            )
+            self.assertLess(assessment["verified_ratio"], 0.8)
+            self.assertEqual(assessment["unverified_fields"], ["purchase_interest_rate"])
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -992,7 +1317,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("partial_source_failure", source_result.validation_issue_codes)
             self.assertIn("required_field_missing", source_result.queue_reason_codes)
-            self.assertIn("partial_source_failure", source_result.queue_reason_codes)
+            self.assertNotIn("partial_source_failure", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1402,6 +1727,7 @@ def _build_input() -> ValidationInput:
             "product_name": "TD ePremium Savings Account",
             "standard_rate": 1.25,
             "monthly_fee": 0.0,
+            "minimum_balance": 0.0,
             "interest_payment_frequency": "monthly",
         },
         "field_mapping_metadata": {},
@@ -1423,7 +1749,9 @@ def _build_input() -> ValidationInput:
         source_metadata={"product_type": "savings"},
         normalized_candidate_record=candidate_record,
         field_evidence_links=[
+            _evidence("product_name", "TD ePremium Savings Account", "chunk-name"),
             _evidence("monthly_fee", "0.0", "chunk-fee"),
+            _evidence("minimum_balance", "0.0", "chunk-balance"),
             _evidence("standard_rate", "1.25", "chunk-rate"),
             _evidence("interest_payment_frequency", "monthly", "chunk-frequency"),
         ],
@@ -1481,6 +1809,7 @@ def _build_gic_input() -> ValidationInput:
         source_metadata={"product_type": "gic"},
         normalized_candidate_record=candidate_record,
         field_evidence_links=[
+            _evidence("product_name", "RBC 1 Year Non-Redeemable GIC", "chunk-gic-name"),
             _evidence("standard_rate", "3.8", "chunk-gic-rate"),
             _evidence("minimum_deposit", "500.0", "chunk-gic-rate"),
             _evidence("term_length_days", "365", "chunk-gic-rate"),
@@ -1541,6 +1870,7 @@ def _build_chequing_input() -> ValidationInput:
         source_metadata={"product_type": "chequing"},
         normalized_candidate_record=candidate_record,
         field_evidence_links=[
+            _evidence("product_name", "Plus Chequing Account", "chunk-chq-name"),
             _evidence("monthly_fee", "12.95", "chunk-chq-fee"),
             _evidence("minimum_balance", "3000.0", "chunk-chq-fee"),
             _evidence("included_transactions", "25", "chunk-chq-fee"),

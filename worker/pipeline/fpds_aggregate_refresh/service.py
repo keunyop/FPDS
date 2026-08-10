@@ -4,6 +4,9 @@ from collections import Counter
 from datetime import UTC, datetime, timedelta
 from typing import Iterable
 
+from worker.pipeline.fpds_approval_policy import comparison_quality
+from worker.pipeline.fpds_market_profile import country_product_profile
+
 from .models import AggregateRefreshResult, CanonicalAggregateRow
 
 _PRODUCT_TYPE_LABELS = {
@@ -49,12 +52,27 @@ class AggregateRefreshService:
             "bank_codes": sorted({item for item in (bank_codes or []) if item}),
             "product_types": sorted({item for item in (product_types or []) if item}),
         }
+        excluded_incomplete_rows = [
+            item
+            for item in canonical_rows
+            if item.status == "active"
+            and (
+                quality := comparison_quality(
+                    product_type=item.product_type,
+                    country_code=country_code,
+                    expected_fields=[],
+                    candidate_payload=item.canonical_payload,
+                )
+            ).applicable
+            and (not quality.contract_defined or not quality.complete)
+        ]
+        eligible_rows = [item for item in canonical_rows if item not in excluded_incomplete_rows]
         projection_rows = [
             self._build_projection_row(
                 snapshot_id=snapshot_id,
                 canonical_row=item,
             )
-            for item in canonical_rows
+            for item in eligible_rows
         ]
         active_rows = [item for item in projection_rows if item["status"] == "active"]
         source_change_cutoff_at = _latest_timestamp(
@@ -88,6 +106,7 @@ class AggregateRefreshService:
             },
             "source_counts": {
                 "projection_rows": len(projection_rows),
+                "excluded_incomplete_comparison_rows": len(excluded_incomplete_rows),
                 "active_rows": len(active_rows),
                 "metric_scopes": len(metric_snapshots),
                 "ranking_rows": len(ranking_rows),
@@ -115,14 +134,37 @@ class AggregateRefreshService:
         canonical_row: CanonicalAggregateRow,
     ) -> dict[str, object]:
         payload = dict(canonical_row.canonical_payload)
+        market_profile = country_product_profile(
+            country_code=canonical_row.country_code,
+            product_type=canonical_row.product_type,
+        )
+        public_field_allowlist = (
+            set(market_profile.collection_fields)
+            if market_profile is not None and market_profile.country_code != "*"
+            else None
+        )
+
+        def public_value(field_name: str) -> object | None:
+            if public_field_allowlist is not None and field_name not in public_field_allowlist:
+                return None
+            return payload.get(field_name)
+
         bank_name = canonical_row.bank_name or str(payload.get("bank_name") or canonical_row.bank_code)
         subtype_code = canonical_row.subtype_code or _coerce_string(payload.get("subtype_code"))
-        public_display_rate = _public_display_rate(payload=payload, product_family=canonical_row.product_family)
-        public_display_fee = _coerce_float(payload.get("public_display_fee"))
-        monthly_fee = _coerce_float(payload.get("monthly_fee"))
-        minimum_balance = _coerce_float(payload.get("minimum_balance"))
-        minimum_deposit = _coerce_float(payload.get("minimum_deposit"))
-        term_length_days = _coerce_int(payload.get("term_length_days"))
+        projection_payload = (
+            payload
+            if public_field_allowlist is None
+            else {field_name: payload.get(field_name) for field_name in public_field_allowlist}
+        )
+        public_display_rate = _public_display_rate(
+            payload=projection_payload,
+            product_family=canonical_row.product_family,
+        )
+        public_display_fee = _coerce_float(public_value("public_display_fee"))
+        monthly_fee = _coerce_float(public_value("monthly_fee"))
+        minimum_balance = _coerce_float(public_value("minimum_balance"))
+        minimum_deposit = _coerce_float(public_value("minimum_deposit"))
+        term_length_days = _coerce_int(public_value("term_length_days"))
         effective_fee = public_display_fee if public_display_fee is not None else monthly_fee
         product_url = _coerce_string(
             payload.get("product_url")
@@ -133,6 +175,7 @@ class AggregateRefreshService:
             payload=payload,
             product_version_id=canonical_row.product_version_id,
             product_url=product_url,
+            allowed_field_names=public_field_allowlist,
         )
         return {
             "snapshot_id": snapshot_id,
@@ -154,8 +197,16 @@ class AggregateRefreshService:
             "minimum_balance": minimum_balance,
             "minimum_deposit": minimum_deposit,
             "term_length_days": term_length_days,
-            "product_highlight_badge_code": _coerce_string(payload.get("product_highlight_badge_code")),
-            "target_customer_tags": _coerce_tags(payload.get("target_customer_tags")),
+            "product_highlight_badge_code": (
+                _coerce_string(payload.get("product_highlight_badge_code"))
+                if public_field_allowlist is None
+                else None
+            ),
+            "target_customer_tags": (
+                _coerce_tags(payload.get("target_customer_tags"))
+                if public_field_allowlist is None
+                else []
+            ),
             "fee_bucket": _fee_bucket(effective_fee),
             "minimum_balance_bucket": _minimum_balance_bucket(minimum_balance),
             "minimum_deposit_bucket": _minimum_deposit_bucket(minimum_deposit),
@@ -391,12 +442,14 @@ def _build_product_refresh_metadata(
     payload: dict[str, object],
     product_version_id: str | None,
     product_url: str | None,
+    allowed_field_names: set[str] | None = None,
 ) -> dict[str, object]:
     metadata: dict[str, object] = {
         "product_version_id": product_version_id,
         "product_url": product_url,
     }
     for field_name in (
+        "fee_waiver_condition",
         "eligibility_text",
         "application_method",
         "post_maturity_interest_rate",
@@ -406,6 +459,7 @@ def _build_product_refresh_metadata(
         "description_short",
         "mortgage_rate",
         "interest_rate",
+        "interest_rate_summary",
         "purchase_interest_rate",
         "rate_type",
         "term_length_text",
@@ -416,21 +470,49 @@ def _build_product_refresh_metadata(
         "monthly_payment_text",
         "security_requirement",
         "credit_limit_text",
-        "secured_flag",
         "collateral_text",
         "minimum_payment_text",
         "fees_text",
+        "early_withdrawal_penalty",
     ):
+        if allowed_field_names is not None and field_name not in allowed_field_names:
+            continue
         value = _coerce_string(payload.get(field_name))
         if value is not None:
             metadata[field_name] = value
 
-    for field_name in ("standard_rate", "base_12_month_rate"):
+    for field_name in ("standard_rate", "base_12_month_rate", "highest_rate"):
+        if allowed_field_names is not None and field_name not in allowed_field_names:
+            continue
         value = _coerce_float(payload.get(field_name))
         if value is not None:
             metadata[field_name] = value
 
-    term_rate_table = _coerce_term_rate_table(payload.get("term_rate_table"))
+    included_transactions = (
+        _coerce_int(payload.get("included_transactions"))
+        if allowed_field_names is None or "included_transactions" in allowed_field_names
+        else None
+    )
+    if included_transactions is not None:
+        metadata["included_transactions"] = included_transactions
+
+    for field_name in (
+        "unlimited_transactions_flag",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "secured_flag",
+    ):
+        if allowed_field_names is not None and field_name not in allowed_field_names:
+            continue
+        value = _coerce_bool(payload.get(field_name))
+        if value is not None:
+            metadata[field_name] = value
+
+    term_rate_table = (
+        _coerce_term_rate_table(payload.get("term_rate_table"))
+        if allowed_field_names is None or "term_rate_table" in allowed_field_names
+        else []
+    )
     if term_rate_table:
         metadata["term_rate_table"] = term_rate_table
         if "base_12_month_rate" not in metadata:
@@ -497,16 +579,36 @@ def _coerce_float(value: object) -> float | None:
         return None
 
 
+def _coerce_bool(value: object) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "yes", "1"}:
+            return True
+        if normalized in {"false", "no", "0"}:
+            return False
+    return None
+
+
 def _public_display_rate(*, payload: dict[str, object], product_family: str) -> float | None:
     direct = _coerce_rate(payload.get("public_display_rate"))
     if direct is not None:
         return direct
-    if product_family != "lending":
-        return None
-    for field_name in ("mortgage_rate", "interest_rate", "purchase_interest_rate"):
+    fallback_fields = (
+        ("mortgage_rate", "interest_rate", "purchase_interest_rate")
+        if product_family == "lending"
+        else ("standard_rate", "base_12_month_rate", "highest_rate")
+    )
+    for field_name in fallback_fields:
         rate = _coerce_rate(payload.get(field_name))
         if rate is not None:
             return rate
+    if product_family != "lending":
+        table = _coerce_term_rate_table(payload.get("term_rate_table"))
+        table_rates = [float(row["rate"]) for row in table if row.get("rate") is not None]
+        if table_rates:
+            return max(table_rates)
     return None
 
 

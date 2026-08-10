@@ -27,6 +27,8 @@ from worker.pipeline.fpds_evidence_retrieval.service import EvidenceRetrievalSer
 from worker.pipeline.fpds_rate_safety import (
     bounded_rate_evidence_context,
     canonical_deposit_rate_suppression_reason,
+    contains_explicit_rate_percentage,
+    contains_unresolved_financial_placeholder,
 )
 
 from .models import (
@@ -70,6 +72,7 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "term_length_days",
     "redeemable_flag",
     "non_redeemable_flag",
+    "early_withdrawal_penalty",
     "compounding_frequency",
     "payout_option",
     "registered_plan_supported",
@@ -150,6 +153,7 @@ _PRODUCT_TYPE_DEFAULT_FIELDS = {
         "term_length_days",
         "redeemable_flag",
         "non_redeemable_flag",
+        "early_withdrawal_penalty",
         "compounding_frequency",
         "payout_option",
         "registered_plan_supported",
@@ -646,7 +650,7 @@ class ExtractionService:
                     "extracted_storage_key": extracted_storage_key,
                     "metadata_storage_key": metadata_storage_key,
                     "official_grounding_contract_version": (
-                        "collection-official-grounding-v1" if ai_usage else None
+                        "collection-official-grounding-v2" if ai_usage else None
                     ),
                     "official_domain_allowlist": (
                         _official_domain_allowlist(context) if ai_usage else []
@@ -2166,6 +2170,7 @@ def _extract_candidate_value(
         "deposit_insurance",
         "tier_definition_text",
         "withdrawal_limit_text",
+        "early_withdrawal_penalty",
         "notes",
         "promotional_period_text",
     }:
@@ -2191,6 +2196,8 @@ def _extract_candidate_value(
             return _extract_tier_definition_text(text), "string", "heuristic_text", {}
         if field_name == "withdrawal_limit_text":
             return _extract_withdrawal_limit_text(context=context, text=text), "string", "heuristic_text", {}
+        if field_name == "early_withdrawal_penalty":
+            return _extract_early_withdrawal_penalty(text), "string", "heuristic_early_withdrawal_penalty", {}
         if field_name == "notes":
             return _extract_notes_text(text), "string", "heuristic_text", {}
         if field_name == "promotional_period_text":
@@ -2962,12 +2969,13 @@ def _apply_exact_origin_grounding(
     context: ExtractionDocumentContext,
     extracted_fields: list[ExtractedFieldCandidate],
 ) -> tuple[list[ExtractedFieldCandidate], int]:
-    """Ground exact labeled numeric facts from a verified official detail snapshot.
+    """Ground conservative comparison facts from a verified official detail snapshot.
 
     Provider web citations remain required for AI-proposed facts. This path is
-    intentionally narrower: it only accepts an already captured currency fee
-    whose own label and value were parsed from a high-confidence, identity-
-    matched detail page on an explicitly configured official bank domain.
+    intentionally narrow: it accepts an already captured labeled currency fee,
+    or a lending comparison fact whose value and qualifying context are in the
+    same evidence excerpt, from a high-confidence identity-matched detail page
+    on an explicitly configured official bank domain.
     """
 
     if not _uses_dynamic_product_type(context):
@@ -3005,6 +3013,7 @@ def _apply_exact_origin_grounding(
     )[:300]
     grounded_fields: list[ExtractedFieldCandidate] = []
     grounded_count = 0
+    product_type = _infer_product_type(context)
     for field in extracted_fields:
         contract = field_contract(field.field_name)
         exact_labeled_currency_fee = (
@@ -3016,31 +3025,112 @@ def _apply_exact_origin_grounding(
             and field.evidence_chunk_id is not None
             and bool(_normalize_text(str(field.evidence_text_excerpt or "")))
         )
-        if not exact_labeled_currency_fee:
+        exact_lending_comparison_fact = (
+            field.field_name in expected_fields
+            and _safe_exact_origin_lending_comparison_fact(
+                field,
+                product_type=product_type,
+            )
+        )
+        if not exact_labeled_currency_fee and not exact_lending_comparison_fact:
             grounded_fields.append(field)
             continue
-        evidence_quote = _normalize_text(str(field.evidence_text_excerpt or ""))[:500]
+        evidence_quote = _normalize_text(str(field.evidence_text_excerpt or ""))[:700]
+        grounding_method = (
+            "deterministic_lending_comparison_origin"
+            if exact_lending_comparison_fact
+            else "deterministic_labeled_origin"
+        )
         grounded_fields.append(
             replace(
                 field,
                 confidence=max(field.confidence, 0.9),
                 field_metadata={
                     **field.field_metadata,
-                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": "match",
                     "official_web_sources": [{"url": origin_url, "title": source_title}],
                     "evidence_quote": evidence_quote,
                     "rationale": (
-                        "Exact field label and decimal value were captured from the verified "
+                        "The comparison value and its qualifying context were captured from the verified "
+                        "identity-matched official detail-page snapshot."
+                        if exact_lending_comparison_fact
+                        else "Exact field label and decimal value were captured from the verified "
                         "identity-matched official detail-page snapshot."
                     ),
-                    "official_grounding_method": "deterministic_labeled_origin",
+                    "official_grounding_method": grounding_method,
                     "dynamic_product_type": True,
                 },
             )
         )
         grounded_count += 1
     return grounded_fields, grounded_count
+
+
+def _safe_exact_origin_lending_comparison_fact(
+    field: ExtractedFieldCandidate,
+    *,
+    product_type: str,
+) -> bool:
+    normalized_type = str(product_type or "").strip().lower().replace("_", "-")
+    if normalized_type not in {"mortgage", "personal-loan", "line-of-credit"}:
+        return False
+    if field.evidence_chunk_id is None:
+        return False
+    evidence = _normalize_text(str(field.evidence_text_excerpt or ""))
+    value = _normalize_text(str(field.candidate_value or ""))
+    if not evidence or not value:
+        return False
+
+    lowered = evidence.lower()
+    if field.field_name == "interest_rate_summary":
+        return (
+            field.extraction_method == "heuristic_rate_summary"
+            and "%" in value
+            and "%" in evidence
+            and bool(
+                re.search(
+                    r"\b(?:apr|annual percentage rate|interest rate|mortgage rate)\b",
+                    lowered,
+                )
+            )
+            and not any(
+                marker in lowered
+                for marker in (
+                    "cash back rate",
+                    "rewards rate",
+                    "return rate",
+                    "seller contribution",
+                    "down payment assistance",
+                )
+            )
+        )
+    if field.field_name == "loan_amount_text" and normalized_type == "personal-loan":
+        return (
+            field.extraction_method == "heuristic_text"
+            and "$" in value
+            and "$" in evidence
+            and bool(re.search(r"\b(?:loan amounts?|borrow|personal loans?)\b", lowered))
+        )
+    if field.field_name == "credit_limit_text" and normalized_type == "line-of-credit":
+        return (
+            field.extraction_method == "heuristic_text"
+            and "$" in value
+            and "$" in evidence
+            and bool(re.search(r"\b(?:credit limit|line amount|borrow|line of credit)\b", lowered))
+        )
+    if field.field_name == "term_length_text" and normalized_type in {"mortgage", "personal-loan"}:
+        return (
+            field.extraction_method == "heuristic_term_text"
+            and bool(re.search(r"\b\d{1,3}(?:[- ]?(?:month|year)|\s+(?:months|years))", value.lower()))
+            and bool(re.search(r"\b(?:term|repay|payment|mortgage|loan)\b", lowered))
+        )
+    if field.field_name == "rate_type" and normalized_type == "mortgage":
+        return (
+            field.extraction_method == "heuristic_text"
+            and bool(re.search(r"\b(?:fixed|variable|adjustable)[- ]rate\b", lowered))
+        )
+    return False
 
 
 def _configured_official_domain_allowlist(context: ExtractionDocumentContext) -> list[str]:
@@ -3355,13 +3445,25 @@ def _extract_official_fields_with_ai(
                 "and may be a feature heading. Return product_name as a mismatch with the corrected exact name when that occurs. "
                 "Verify that product, not a neighboring "
                 "product, family overview, promotion landing page, calculator, or service flow. Compare every requested field "
-                "with current official facts and the supplied freshly captured evidence chunks. Never infer a missing value. "
+                "with current official facts and the supplied freshly captured evidence chunks. Missing requested comparison "
+                "fields are mandatory extraction targets; actively locate them on official rate, pricing, disclosure, or terms "
+                "pages. Never infer a missing value. "
                 "Return a match or mismatch only when the value is supported by both an official URL actually consulted and "
                 "an exact quote copied from the selected evidence chunk. Otherwise return unverified. Preserve canonical units: "
                 "rates are numeric percentage points per annum, money is numeric in product currency, durations and counts are "
                 "integers, booleans are true or false, and structured term rates are JSON arrays. Put the JSON-encoded canonical "
-                "value in verified_value_json. Cashback, rewards, prepayment, equity, down-payment, fund returns, fees, and "
-                "personalized or expired offers are not product interest rates. Do not approve, publish, or recommend a product."
+                "value in verified_value_json. For interest_rate_summary, preserve a current official APR/rate range, "
+                "reference-rate formula, or representative example together with all disclosed assumptions such as term, "
+                "credit quality, discount, date, LTV, and rate lock; when a discount affects the displayed rate, also state "
+                "the disclosed qualifying account, automatic-payment, relationship, and existing-customer conditions. "
+                "For a conditional deposit APY, preserve new-customer eligibility, qualifying balance and timing, the "
+                "fallback rate outcome, the as-of date, and variability when the official source states them. "
+                "Do not collapse a conditional example to one scalar. "
+                "For fee_waiver_condition, return complete independently sufficient conditions and never truncate a list "
+                "or end mid-word; prefer one concise condition when a complete exhaustive list would be too long. "
+                "Cashback, rewards, prepayment, equity, down-payment, fund returns, transaction fees, ATM/ABM "
+                "assessment fees, other fee percentages, and personalized or expired offers are not product interest "
+                "rates. Do not approve, publish, or recommend a product."
             ),
             payload={
                 "verification_date": _utc_now_iso()[:10],
@@ -3450,6 +3552,12 @@ def _extract_official_fields_with_ai(
         )
         if candidate_value is None:
             continue
+        if not _ai_verified_value_is_supported_by_quote(
+            field_name=field_name,
+            value=candidate_value,
+            evidence_quote=evidence_quote,
+        ):
+            continue
         extracted_fields.append(
             ExtractedFieldCandidate(
                 field_name=field_name,
@@ -3466,7 +3574,7 @@ def _extract_official_fields_with_ai(
                 page_no=candidate.page_no,
                 chunk_index=candidate.chunk_index,
                 field_metadata={
-                    "official_grounding_contract_version": "collection-official-grounding-v1",
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": str(item.get("status")),
                     "official_web_sources": cited_sources,
                     "evidence_quote": evidence_quote[:500],
@@ -3587,7 +3695,50 @@ def _canonical_official_source_url(value: object) -> str:
 def _exact_quote_is_grounded(*, quote: str, excerpt: str) -> bool:
     normalized_quote = _normalize_text(quote).casefold()
     normalized_excerpt = _normalize_text(excerpt).casefold()
-    return len(normalized_quote) >= 8 and normalized_quote in normalized_excerpt
+    return (
+        len(normalized_quote) >= 8
+        and "..." not in normalized_quote
+        and "…" not in normalized_quote
+        and normalized_quote in normalized_excerpt
+    )
+
+
+_EXACT_QUOTE_PROSE_FIELDS = {
+    "early_withdrawal_penalty",
+    "fee_waiver_condition",
+    "interest_rate_summary",
+    "security_requirement",
+}
+
+
+def _ai_verified_value_is_supported_by_quote(
+    *,
+    field_name: str,
+    value: object,
+    evidence_quote: str,
+) -> bool:
+    """Keep AI corrections inside the exact quoted financial fact.
+
+    Numeric canonical values may be normalized, but every number must still
+    occur in the quote. Decision-critical prose stays source-language text and
+    therefore must be copied in full rather than extended by the model.
+    """
+
+    normalized_value = _normalize_text(_json_value_for_coercion(value))
+    normalized_quote = _normalize_text(evidence_quote)
+    if not normalized_value or not normalized_quote:
+        return False
+    if field_name in _EXACT_QUOTE_PROSE_FIELDS:
+        return normalized_value.casefold() in normalized_quote.casefold()
+    numeric_tokens = re.findall(r"\d+(?:\.\d+)?", normalized_value.replace(",", ""))
+    normalized_financial_quote = normalized_quote.replace(",", "")
+    return all(
+        re.search(
+            rf"(?<!\d){re.escape(token.rstrip('0').rstrip('.') if '.' in token else token)}(?:\.0+)?(?!\d)",
+            normalized_financial_quote,
+        )
+        for token in numeric_tokens
+    )
 
 
 def _json_value_for_coercion(value: object) -> str:
@@ -3656,7 +3807,19 @@ def _coerce_ai_candidate_value(*, field_name: str, value: str, value_type: str) 
             return json.loads(normalized)
         except json.JSONDecodeError:
             return None
-    return _normalize_text(normalized)[:280]
+    normalized_text = _normalize_text(normalized)
+    max_length = {
+        "early_withdrawal_penalty": 500,
+        "fee_waiver_condition": 500,
+        "interest_rate_summary": 700,
+        "tier_definition_text": 500,
+    }.get(field_name, 280)
+    if len(normalized_text) <= max_length:
+        return normalized_text
+    # Comparison-critical prose must never be made syntactically false by a
+    # blind character slice. Keep a complete sentence or fail closed so the
+    # field remains eligible for Review/AI repair.
+    return _bounded_description_text(normalized_text, max_length=max_length)
 
 
 def _infer_currency(*, context: ExtractionDocumentContext) -> str:
@@ -4830,6 +4993,17 @@ def _source_product_terms(context: ExtractionDocumentContext) -> tuple[str, ...]
 
 
 def _extract_term_length_text(text: str) -> str | None:
+    upper_bound = re.search(
+        r"\b(?:(?:loan|repayment|mortgage)\s+)?terms?\s+up\s+to\s+"
+        r"(?P<value>\d{1,3})\s*[- ]?(?P<unit>days?|months?|years?)\b",
+        _normalize_text(text),
+        flags=re.IGNORECASE,
+    )
+    if upper_bound is not None:
+        return (
+            f"Up to {upper_bound.group('value')} "
+            f"{_normalize_term_unit(upper_bound.group('unit'))}"
+        )
     term_list = re.search(
         r"(?P<terms>\b\d{1,2}(?:\s*,\s*\d{1,2}){2,}(?:\s*,?\s*(?:and|or)\s*\d{1,2})?\s*[- ]?year\s+terms?\b)",
         _normalize_text(text),
@@ -5359,6 +5533,48 @@ def _extract_interest_rate_summary(text: str) -> str | None:
             flags=re.IGNORECASE,
         ):
             return _normalize_text(sentence)[:280]
+    sentences = [item.strip() for item in re.split(r"(?<=[.!?])\s+", normalized) if item.strip()]
+    for index, sentence in enumerate(sentences):
+        lowered = sentence.lower()
+        if "%" not in sentence or not re.search(
+            r"\b(?:apr|annual percentage rate|interest rate|mortgage rate)\b",
+            lowered,
+        ):
+            continue
+        if any(
+            marker in lowered
+            for marker in (
+                "cash back rate",
+                "rewards rate",
+                "seller contribution",
+                "down payment assistance",
+            )
+        ):
+            continue
+        summary = sentence
+        if index + 1 < len(sentences):
+            qualifier = sentences[index + 1]
+            if any(
+                marker in qualifier.lower()
+                for marker in (
+                    "assum",
+                    "rate as of",
+                    "rates as of",
+                    "actual payment",
+                    "taxes",
+                    "insurance",
+                    "credit",
+                    "autopay",
+                    "auto deduct",
+                    "discount",
+                    "rate lock",
+                    "ltv",
+                )
+            ):
+                summary = f"{summary} {qualifier}"
+        normalized_summary = _normalize_text(summary)[:700]
+        if contains_explicit_rate_percentage(normalized_summary):
+            return normalized_summary
     return None
 
 
@@ -5667,8 +5883,7 @@ def _extract_tier_definition_text(text: str) -> str | None:
 
 
 def _contains_unresolved_rate_placeholder(text: str) -> bool:
-    lowered = text.lower()
-    return "rds%rate[" in lowered or re.search(r"\brate\[[0-9]+\]\.", lowered) is not None
+    return contains_unresolved_financial_placeholder(text)
 
 
 def _extract_withdrawal_limit_text(*, context: ExtractionDocumentContext, text: str) -> str | None:
@@ -5772,6 +5987,33 @@ def _extract_withdrawal_limit_text(*, context: ExtractionDocumentContext, text: 
     if best is None:
         return None
     return best[2]
+
+
+def _extract_early_withdrawal_penalty(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    for raw_sentence in re.split(r"(?<=[.!?])\s+|\n+", normalized):
+        sentence = _normalize_text(raw_sentence)
+        lowered = sentence.lower()
+        if not any(
+            marker in lowered
+            for marker in (
+                "early withdrawal penalty",
+                "penalty for early withdrawal",
+                "penalty may be imposed for early withdrawal",
+                "withdraw before maturity",
+                "withdrawal before maturity",
+            )
+        ):
+            continue
+        if re.search(
+            r"(?:\$\s*\d|\d+(?:\.\d+)?\s*%|\b\d+\s+(?:days?|months?)\s+(?:of\s+)?interest\b)",
+            sentence,
+            flags=re.IGNORECASE,
+        ):
+            return sentence[:500]
+    return None
 
 
 def _extract_transaction_fee(*, text: str, require_additional: bool = False) -> str | None:

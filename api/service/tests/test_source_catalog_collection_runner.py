@@ -52,6 +52,43 @@ class _ConnectionContext:
 
 
 class SourceCatalogCollectionRunnerTests(unittest.TestCase):
+    def test_active_scope_is_country_scoped_and_excludes_explicit_other_market_routes(self) -> None:
+        connection = _Connection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-TBNA-US",
+                        "discovery_role": "detail",
+                        "source_name": "TD Beyond Checking",
+                        "source_url": "https://www.td.com/us/en/personal-banking/checking-accounts/beyond",
+                        "purpose": "detail",
+                        "expected_fields": [],
+                    },
+                    {
+                        "source_id": "AUTO-TBNA-CA",
+                        "discovery_role": "detail",
+                        "source_name": "TD Canadian Chequing",
+                        "source_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/every-day-chequing-account",
+                        "purpose": "detail",
+                        "expected_fields": [],
+                    },
+                ]
+            ]
+        )
+
+        scope = source_catalog_collection_runner._load_active_collection_scope(
+            connection,
+            bank_code="TBNA",
+            country_code="US",
+            product_type="chequing",
+        )
+
+        self.assertEqual(scope["target_source_ids"], ["AUTO-TBNA-US"])
+        self.assertEqual(scope["collection_source_ids"], ["AUTO-TBNA-US"])
+        sql, params = connection.calls[0]
+        self.assertIn("country_code = %(country_code)s", sql)
+        self.assertEqual(params["country_code"], "US")
+
     def test_catalog_failure_metadata_retains_exact_worker_stage(self) -> None:
         failure = source_collection_runner.WorkerStageError(
             stage_name="fpds_snapshot",

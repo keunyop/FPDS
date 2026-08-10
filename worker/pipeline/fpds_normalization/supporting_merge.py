@@ -71,6 +71,7 @@ _SUPPORTING_ROLE_FIELDS = {
     "maximum_return",
     "minimum_deposit",
     "minimum_balance",
+    "early_withdrawal_penalty",
 }
 _EXPIRY_SENSITIVE_FIELDS = {
     "standard_rate",
@@ -219,12 +220,48 @@ def _build_generic_support_supplement(
     product_type_family = _canonical_product_type_family(
         str(base_artifact.get("schema_context", {}).get("product_type") or "")
     )
-    if product_type_family not in {"chequing", "savings", "gic"}:
+    if product_type_family not in {
+        "chequing",
+        "savings",
+        "gic",
+        "mortgage",
+        "personal-loan",
+        "line-of-credit",
+    }:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
 
     terms = _target_terms_from_artifact(base_artifact)
     if not terms and product_type_family != "gic":
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    if product_type_family in {"mortgage", "personal-loan", "line-of-credit"}:
+        rate_result = _build_generic_lending_rate_supplement(
+            target_source_id=target_source_id,
+            support_source_id=support_source_id,
+            supporting_artifact=supporting_artifact,
+            terms=terms,
+            product_type=product_type_family,
+            existing_fields=existing_fields,
+        )
+        companion_result = _build_generic_lending_companion_supplement(
+            target_source_id=target_source_id,
+            support_source_id=support_source_id,
+            supporting_artifact=supporting_artifact,
+            terms=terms,
+            product_type=product_type_family,
+            expected_fields={
+                str(field_name)
+                for field_name in base_artifact.get("schema_context", {}).get("expected_fields", [])
+            },
+            existing_fields={**existing_fields, **dict(rate_result["field_updates"])},
+        )
+        for key in ("field_updates", "evidence_updates"):
+            rate_result[key] = {**dict(rate_result[key]), **dict(companion_result[key])}
+        rate_result["runtime_notes"] = [
+            *list(rate_result["runtime_notes"]),
+            *list(companion_result["runtime_notes"]),
+        ]
+        return rate_result
 
     target_currency = _target_currency_from_artifact(base_artifact)
     matches = [
@@ -235,8 +272,24 @@ def _build_generic_support_supplement(
             match=match,
         )
     ]
+    expected_fields = {
+        str(field_name)
+        for field_name in base_artifact.get("schema_context", {}).get("expected_fields", [])
+    }
+    penalty_result = {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    if (
+        product_type_family == "gic"
+        and "early_withdrawal_penalty" in expected_fields
+        and "early_withdrawal_penalty" not in existing_fields
+    ):
+        penalty_result = _build_generic_cd_penalty_supplement(
+            target_source_id=target_source_id,
+            support_source_id=support_source_id,
+            supporting_artifact=supporting_artifact,
+            terms=terms,
+        )
     if not matches:
-        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+        return penalty_result
 
     if product_type_family == "chequing":
         return _build_generic_chequing_fee_supplement(
@@ -271,7 +324,7 @@ def _build_generic_support_supplement(
             *list(fee_result["runtime_notes"]),
         ]
         return rate_result
-    return _build_generic_gic_rate_supplement(
+    gic_result = _build_generic_gic_rate_supplement(
         target_source_id=target_source_id,
         support_source_id=support_source_id,
         matches=matches,
@@ -279,6 +332,325 @@ def _build_generic_support_supplement(
         existing_fields=existing_fields,
         allow_family_table_aggregation=_is_generic_gic_family_artifact(base_artifact),
     )
+    if penalty_result["field_updates"]:
+        for key in ("field_updates", "evidence_updates"):
+            gic_result[key] = {**dict(gic_result[key]), **dict(penalty_result[key])}
+        gic_result["runtime_notes"] = [
+            *list(gic_result["runtime_notes"]),
+            *list(penalty_result["runtime_notes"]),
+        ]
+    return gic_result
+
+
+def _build_generic_cd_penalty_supplement(
+    *,
+    target_source_id: str,
+    support_source_id: str,
+    supporting_artifact: dict[str, object],
+    terms: tuple[str, ...],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    if not terms:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    for raw_field in supporting_artifact.get("extracted_fields", []):
+        if not isinstance(raw_field, dict) or raw_field.get("field_name") != "early_withdrawal_penalty":
+            continue
+        metadata = raw_field.get("field_metadata")
+        field_metadata = metadata if isinstance(metadata, dict) else {}
+        evidence_quote = str(
+            field_metadata.get("evidence_quote")
+            or raw_field.get("evidence_text_excerpt")
+            or ""
+        ).strip()
+        official_sources = field_metadata.get("official_web_sources")
+        if not (
+            field_metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+            and str(field_metadata.get("official_verification_status") or "") in {"match", "mismatch"}
+            and evidence_quote
+            and isinstance(official_sources, list)
+            and any(isinstance(source, dict) and str(source.get("url") or "").strip() for source in official_sources)
+        ):
+            continue
+        normalized_quote = _normalize_text(evidence_quote)
+        if not any(term and term in normalized_quote for term in terms):
+            continue
+        candidate_value = str(raw_field.get("candidate_value") or "").strip()
+        normalized_value = _normalize_text(candidate_value)
+        if not (
+            any(marker in normalized_value for marker in ("early withdrawal", "withdraw before maturity", "withdrawal before maturity"))
+            and re.search(r"(?:\$\s*\d|\d+(?:\.\d+)?\s*%|\b\d+\s+(?:days?|months?)\s+(?:of\s+)?interest\b)", candidate_value, flags=re.IGNORECASE)
+        ):
+            continue
+        field_record = {
+            **raw_field,
+            "field_metadata": {
+                **field_metadata,
+                "supporting_source_id": support_source_id,
+                "supporting_merge": True,
+                "generic_supporting_merge": True,
+            },
+        }
+        link_record = {
+            "field_name": "early_withdrawal_penalty",
+            "candidate_value": candidate_value,
+            "evidence_chunk_id": raw_field.get("evidence_chunk_id"),
+            "evidence_text_excerpt": evidence_quote,
+            "source_document_id": raw_field.get("source_document_id"),
+            "source_snapshot_id": raw_field.get("source_snapshot_id"),
+            "citation_confidence": raw_field.get("confidence"),
+            "model_execution_id": None,
+            "anchor_type": raw_field.get("anchor_type"),
+            "anchor_value": raw_field.get("anchor_value"),
+            "page_no": raw_field.get("page_no"),
+            "chunk_index": raw_field.get("chunk_index"),
+        }
+        return {
+            "field_updates": {"early_withdrawal_penalty": field_record},
+            "evidence_updates": {"early_withdrawal_penalty": link_record},
+            "runtime_notes": [
+                f"Supplemented the missing CD early-withdrawal penalty for `{target_source_id}` from exact-product official supporting source `{support_source_id}`."
+            ],
+        }
+    return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+
+def _build_generic_lending_rate_supplement(
+    *,
+    target_source_id: str,
+    support_source_id: str,
+    supporting_artifact: dict[str, object],
+    terms: tuple[str, ...],
+    product_type: str,
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    """Carry exact-product, officially grounded lending rates across sources.
+
+    Lending rate pages often sit beside, rather than inside, the product detail
+    page. Only AI-grounded support fields with an official consulted URL and an
+    exact quote are eligible. Scalar rates are deliberately preserved as a
+    qualified source-language summary so ranges, examples, dates, credit
+    assumptions, and discounts are not flattened into a misleading number.
+    """
+
+    if "interest_rate_summary" in existing_fields:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    eligible_names = {
+        "interest_rate_summary",
+        "interest_rate",
+        "mortgage_rate",
+        "public_display_rate",
+        "annual_percentage_rate",
+        "apr",
+    }
+    ranked: list[tuple[float, dict[str, object], str]] = []
+    for raw_field in supporting_artifact.get("extracted_fields", []):
+        if not isinstance(raw_field, dict):
+            continue
+        field_name = str(raw_field.get("field_name") or "")
+        if field_name not in eligible_names:
+            continue
+        metadata = raw_field.get("field_metadata")
+        field_metadata = metadata if isinstance(metadata, dict) else {}
+        official_sources = field_metadata.get("official_web_sources")
+        evidence_quote = str(
+            field_metadata.get("evidence_quote")
+            or raw_field.get("evidence_text_excerpt")
+            or ""
+        ).strip()
+        officially_grounded = (
+            field_metadata.get("official_grounding_contract_version")
+            == "collection-official-grounding-v2"
+            and str(field_metadata.get("official_verification_status") or "")
+            in {"match", "mismatch"}
+            and bool(evidence_quote)
+            and isinstance(official_sources, list)
+            and any(
+                isinstance(source, dict) and str(source.get("url") or "").strip()
+                for source in official_sources
+            )
+        )
+        if not officially_grounded:
+            continue
+
+        candidate_value = str(raw_field.get("candidate_value") or "").strip()
+        rate_context = " ".join(value for value in (candidate_value, evidence_quote) if value)
+        if "%" not in rate_context or not _lending_rate_has_local_target_identity(
+            evidence_quote,
+            terms=terms,
+        ):
+            continue
+        try:
+            confidence = float(raw_field.get("confidence") or 0.0)
+        except (TypeError, ValueError):
+            confidence = 0.0
+        ranked.append((confidence, raw_field, evidence_quote))
+
+    if not ranked:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    _, source_field, evidence_quote = ranked[0]
+    source_name = str(source_field.get("field_name") or "")
+    source_value = str(source_field.get("candidate_value") or "").strip()
+    # US mortgage examples are commonly scenario-priced. Preserve the exact
+    # official sentence(s), including geography, LTV, credit, points, lock and
+    # other assumptions, instead of publishing a deceptively bare rate/APR.
+    summary = (
+        evidence_quote
+        if product_type == "mortgage"
+        else source_value if source_name == "interest_rate_summary" and "%" in source_value else evidence_quote
+    )
+    summary = _compact_lending_rate_summary(summary)
+    if not summary or "%" not in summary:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    source_metadata = source_field.get("field_metadata")
+    field_record = {
+        **source_field,
+        "field_name": "interest_rate_summary",
+        "candidate_value": summary,
+        "value_type": "string",
+        "extraction_method": "generic_supporting_lending_rate_merge",
+        "field_metadata": {
+            **(source_metadata if isinstance(source_metadata, dict) else {}),
+            "supporting_source_id": support_source_id,
+            "supporting_merge": True,
+            "generic_supporting_merge": True,
+            "supporting_original_field_name": source_name,
+        },
+    }
+    link_record = {
+        "field_name": "interest_rate_summary",
+        "candidate_value": summary,
+        "evidence_chunk_id": source_field.get("evidence_chunk_id"),
+        "evidence_text_excerpt": evidence_quote,
+        "source_document_id": source_field.get("source_document_id"),
+        "source_snapshot_id": source_field.get("source_snapshot_id"),
+        "citation_confidence": source_field.get("confidence"),
+        "model_execution_id": None,
+        "anchor_type": source_field.get("anchor_type"),
+        "anchor_value": source_field.get("anchor_value"),
+        "page_no": source_field.get("page_no"),
+        "chunk_index": source_field.get("chunk_index"),
+    }
+    return {
+        "field_updates": {"interest_rate_summary": field_record},
+        "evidence_updates": {"interest_rate_summary": link_record},
+        "runtime_notes": [
+            f"Supplemented the missing lending rate summary for `{target_source_id}` from exact-product official supporting source `{support_source_id}`."
+        ],
+    }
+
+
+def _build_generic_lending_companion_supplement(
+    *,
+    target_source_id: str,
+    support_source_id: str,
+    supporting_artifact: dict[str, object],
+    terms: tuple[str, ...],
+    product_type: str,
+    expected_fields: set[str],
+    existing_fields: dict[str, dict[str, object]],
+) -> dict[str, dict[str, dict[str, object]] | list[str]]:
+    allowed_by_type = {
+        "mortgage": {"rate_type", "term_length_text"},
+        "personal-loan": {"loan_amount_text", "term_length_text"},
+        "line-of-credit": {"credit_limit_text", "security_requirement", "collateral_text", "secured_flag"},
+    }
+    allowed_fields = allowed_by_type.get(product_type, set()).intersection(expected_fields)
+    allowed_fields.difference_update(existing_fields)
+    if not allowed_fields or not terms:
+        return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
+
+    field_updates: dict[str, dict[str, object]] = {}
+    evidence_updates: dict[str, dict[str, object]] = {}
+    for raw_field in supporting_artifact.get("extracted_fields", []):
+        if not isinstance(raw_field, dict):
+            continue
+        field_name = str(raw_field.get("field_name") or "")
+        if field_name not in allowed_fields or field_name in field_updates:
+            continue
+        metadata = raw_field.get("field_metadata")
+        field_metadata = metadata if isinstance(metadata, dict) else {}
+        evidence_quote = str(
+            field_metadata.get("evidence_quote")
+            or raw_field.get("evidence_text_excerpt")
+            or ""
+        ).strip()
+        official_sources = field_metadata.get("official_web_sources")
+        if not (
+            field_metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+            and str(field_metadata.get("official_verification_status") or "") in {"match", "mismatch"}
+            and evidence_quote
+            and isinstance(official_sources, list)
+            and any(isinstance(source, dict) and str(source.get("url") or "").strip() for source in official_sources)
+            and any(term and term in _normalize_text(evidence_quote) for term in terms)
+        ):
+            continue
+        candidate_value = raw_field.get("candidate_value")
+        if candidate_value in (None, "", [], {}):
+            continue
+        field_updates[field_name] = {
+            **raw_field,
+            "field_metadata": {
+                **field_metadata,
+                "supporting_source_id": support_source_id,
+                "supporting_merge": True,
+                "generic_supporting_merge": True,
+            },
+        }
+        evidence_updates[field_name] = {
+            "field_name": field_name,
+            "candidate_value": str(candidate_value),
+            "evidence_chunk_id": raw_field.get("evidence_chunk_id"),
+            "evidence_text_excerpt": evidence_quote,
+            "source_document_id": raw_field.get("source_document_id"),
+            "source_snapshot_id": raw_field.get("source_snapshot_id"),
+            "citation_confidence": raw_field.get("confidence"),
+            "model_execution_id": None,
+            "anchor_type": raw_field.get("anchor_type"),
+            "anchor_value": raw_field.get("anchor_value"),
+            "page_no": raw_field.get("page_no"),
+            "chunk_index": raw_field.get("chunk_index"),
+        }
+    return {
+        "field_updates": field_updates,
+        "evidence_updates": evidence_updates,
+        "runtime_notes": [
+            f"Supplemented exact-product lending comparison fields for `{target_source_id}` from official supporting source `{support_source_id}`: "
+            + ", ".join(f"`{field_name}`" for field_name in sorted(field_updates))
+            + "."
+        ]
+        if field_updates
+        else [],
+    }
+
+
+def _lending_rate_has_local_target_identity(excerpt: str, *, terms: tuple[str, ...]) -> bool:
+    normalized = _normalize_text(excerpt)
+    percent_positions = [match.start() for match in _PERCENT_RE.finditer(normalized)]
+    if not percent_positions:
+        return False
+    for term in terms:
+        if not term:
+            continue
+        start = normalized.find(term)
+        while start >= 0:
+            if any(abs(percent_position - start) <= 360 for percent_position in percent_positions):
+                return True
+            start = normalized.find(term, start + len(term))
+    return False
+
+
+def _compact_lending_rate_summary(value: str) -> str:
+    normalized = _WHITESPACE_RE.sub(" ", str(value or "")).strip()
+    if len(normalized) <= 700:
+        return normalized
+    percent_match = _PERCENT_RE.search(normalized)
+    if percent_match is None:
+        return ""
+    start = max(0, percent_match.start() - 280)
+    end = min(len(normalized), start + 700)
+    return normalized[start:end].strip()
 
 
 def _build_generic_savings_rate_supplement(
@@ -1569,7 +1941,14 @@ def _mentions_no_fee(excerpt: str) -> bool:
 
 def _canonical_product_type_family(product_type: str | None) -> str | None:
     normalized = str(product_type or "").strip().lower()
-    if normalized in {"chequing", "savings", "gic"}:
+    if normalized in {
+        "chequing",
+        "savings",
+        "gic",
+        "mortgage",
+        "personal-loan",
+        "line-of-credit",
+    }:
         return normalized
     if any(token in normalized for token in ("gic", "term-deposit", "term_deposit", "term deposit")):
         return "gic"
@@ -1577,6 +1956,12 @@ def _canonical_product_type_family(product_type: str | None) -> str | None:
         return "savings"
     if "chequing" in normalized or "checking" in normalized:
         return "chequing"
+    if "mortgage" in normalized:
+        return "mortgage"
+    if "personal" in normalized and "loan" in normalized:
+        return "personal-loan"
+    if "line" in normalized and "credit" in normalized:
+        return "line-of-credit"
     return None
 
 

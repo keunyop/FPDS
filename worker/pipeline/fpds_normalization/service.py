@@ -967,6 +967,7 @@ def _compute_validation_issue_codes(
     if dynamic_product_type:
         populated_decision_fields = populated_dynamic_decision_fields(
             product_type=product_type,
+            country_code=country_code,
             expected_fields=expected_fields or [],
             candidate_payload=candidate_payload,
         )
@@ -2824,7 +2825,7 @@ def _suppress_unverified_dynamic_fields(
         mapping = metadata if isinstance(metadata, dict) else {}
         sources = mapping.get("official_web_sources")
         officially_grounded = (
-            mapping.get("official_grounding_contract_version") == "collection-official-grounding-v1"
+            mapping.get("official_grounding_contract_version") == "collection-official-grounding-v2"
             and str(mapping.get("official_verification_status") or "") in {"match", "mismatch"}
             and bool(str(mapping.get("official_evidence_quote") or "").strip())
             and isinstance(sources, list)
@@ -4006,7 +4007,13 @@ def _looks_like_invalid_tax_benefit(*, field_name: str, value: str) -> bool:
 
 def _looks_like_unresolved_placeholder(value: str) -> bool:
     normalized = value.lower()
-    return bool(re.search(r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\])", normalized))
+    return bool(
+        re.search(
+            r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\]"
+            r"|(?<![a-z0-9])(?:\$\s*)?[x*]{2,}(?:\.[x*]+)?\s*%?(?![a-z0-9]))",
+            normalized,
+        )
+    )
 
 
 def _looks_like_wrong_frequency_context(*, field_name: str, value: str, context: str) -> bool:
@@ -4806,7 +4813,7 @@ def _normalize_dynamic_fields_with_ai(
                 "You are the FPDS Normalization Agent for operator-defined financial product types. "
                 "Map extracted fields into a conservative canonical candidate payload. "
                 "Keep only values grounded in the extracted inputs and return only fields listed in expected_fields. "
-                "Never map cashback, rewards, prepayment, equity, down-payment, or instalment-plan percentages to generic annual rate fields. "
+                "Never map cashback, rewards, prepayment, equity, down-payment, instalment-plan, transaction-fee, or ATM/ABM assessment percentages to generic annual rate fields. "
                 "Boolean fields must remain booleans, and navigation or whole-page marketing copy must be omitted. "
                 "Use subtype_code `other` unless the subtype is obvious from the product definition and extracted evidence."
             ),
@@ -5297,10 +5304,10 @@ def _clean_promotional_period_fields(candidate_payload: dict[str, object]) -> No
 
 def _official_grounding_mapping_metadata(field: NormalizationExtractedField) -> dict[str, object]:
     metadata = field.field_metadata if isinstance(field.field_metadata, dict) else {}
-    if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v1":
+    if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2":
         return {}
     return {
-        "official_grounding_contract_version": "collection-official-grounding-v1",
+        "official_grounding_contract_version": "collection-official-grounding-v2",
         "official_grounding_method": metadata.get("official_grounding_method"),
         "official_verification_status": metadata.get("official_verification_status"),
         "official_web_sources": list(metadata.get("official_web_sources") or []),
