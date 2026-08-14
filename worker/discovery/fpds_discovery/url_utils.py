@@ -1,11 +1,45 @@
 from __future__ import annotations
 
 from hashlib import sha1
-from urllib.parse import ParseResult, urlparse, urlunparse
+from urllib.parse import ParseResult, parse_qsl, urlencode, urlparse, urlunparse
+
+
+_SOURCE_IDENTITY_QUERY_KEYS = {
+    "accountid",
+    "accounttype",
+    "agreementid",
+    "cardid",
+    "disclosureid",
+    "documentid",
+    "market",
+    "product",
+    "productcode",
+    "productid",
+    "region",
+    "state",
+    "zip",
+    "zipcode",
+}
+_DISCLOSURE_IDENTITY_QUERY_KEYS = {"cid", "offerid", "pocd"}
+_DISCLOSURE_PATH_MARKERS = (
+    "agreement",
+    "disclosure",
+    "fee",
+    "pdf",
+    "pricing",
+    "rate",
+    "terms",
+)
 
 
 def normalize_source_url(url: str) -> str:
-    """Normalize TD source URLs for source identity and dedupe."""
+    """Normalize public source URLs without collapsing priced documents.
+
+    Tracking, presentation, and locale parameters do not define a source and
+    remain excluded. A bounded set of product/document and market parameters
+    is retained because many banks expose every card disclosure or local rate
+    sheet through one path whose query is the only official document identity.
+    """
     parsed = urlparse(url.strip())
     if parsed.scheme not in {"http", "https"}:
         raise ValueError(f"Unsupported URL scheme: {parsed.scheme or '<missing>'}")
@@ -19,7 +53,7 @@ def normalize_source_url(url: str) -> str:
         netloc=netloc,
         path=path,
         params="",
-        query="",
+        query=_normalize_identity_query(parsed.query, path=path),
         fragment="",
     )
     return urlunparse(normalized)
@@ -73,3 +107,22 @@ def _normalize_path(path: str) -> str:
     if path != "/" and path.endswith("/"):
         path = path[:-1]
     return path
+
+
+def _normalize_identity_query(query: str, *, path: str) -> str:
+    if not query:
+        return ""
+    lowered_path = path.lower()
+    disclosure_path = any(marker in lowered_path for marker in _DISCLOSURE_PATH_MARKERS)
+    kept: list[tuple[str, str]] = []
+    for key, value in parse_qsl(query, keep_blank_values=False):
+        normalized_key = key.strip().lower()
+        normalized_value = value.strip()
+        if not normalized_value:
+            continue
+        if normalized_key in _SOURCE_IDENTITY_QUERY_KEYS or (
+            disclosure_path and normalized_key in _DISCLOSURE_IDENTITY_QUERY_KEYS
+        ):
+            kept.append((normalized_key, normalized_value))
+    kept.sort(key=lambda item: (item[0], item[1]))
+    return urlencode(kept, doseq=True)

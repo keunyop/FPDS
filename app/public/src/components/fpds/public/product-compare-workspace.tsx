@@ -311,6 +311,13 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
     ];
   }
 
+  if (product.product_type === "credit-card") {
+    return [
+      { label: cardMetricLabel("annualFee", locale), value: formatCurrency(product.annual_fee, product.currency, locale) },
+      { label: cardMetricLabel("purchaseRate", locale), value: formatPurchaseRate(product, locale) }
+    ];
+  }
+
   if (product.product_type === "mortgage") {
     return [
       { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
@@ -369,6 +376,15 @@ function loanMetricLabel(field: "rateType" | "term", locale: string) {
     en: { rateType: "Rate type", term: "Term" },
     ko: { rateType: "금리 유형", term: "기간" },
     ja: { rateType: "金利タイプ", term: "期間" }
+  };
+  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
+}
+
+function cardMetricLabel(field: "annualFee" | "purchaseRate", locale: string) {
+  const labels = {
+    en: { annualFee: "Annual fee", purchaseRate: "Purchase interest rate" },
+    ko: { annualFee: "연회비", purchaseRate: "구매 금리" },
+    ja: { annualFee: "年会費", purchaseRate: "ショッピング金利" }
   };
   return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
 }
@@ -459,6 +475,10 @@ function formatRate(value: number | null, locale: string) {
     return copy.common.notDisclosed;
   }
   return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+}
+
+function formatPurchaseRate(product: PublicProduct, locale: string) {
+  return product.purchase_interest_rate_summary ?? formatRate(product.purchase_interest_rate, locale);
 }
 
 function normalizeCurrency(currency: string) {

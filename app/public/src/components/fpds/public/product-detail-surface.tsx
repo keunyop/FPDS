@@ -26,7 +26,12 @@ type DetailFact = {
 export function ProductDetailSurface({ apiUnavailable, detail, filters }: ProductDetailSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
-  const productsHref = buildPublicHref("/products", filters);
+  const fallbackCatalogPath = filters.catalogProductTypes.includes("credit-card")
+    ? "/cards"
+    : filters.catalogProductTypes.some((productType) => ["mortgage", "personal-loan", "line-of-credit"].includes(productType))
+      ? "/loans"
+      : "/products";
+  const productsHref = buildPublicHref(fallbackCatalogPath, filters);
 
   if (apiUnavailable || !detail) {
     return (
@@ -56,9 +61,13 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
   }
 
   const product = detail.product;
-  const catalogPath = product.product_family === "lending" ? "/loans" : "/products";
+  const catalogPath = product.product_type === "credit-card" ? "/cards" : product.product_family === "lending" ? "/loans" : "/products";
   const catalogHref = buildPublicHref(catalogPath, filters);
-  const backToCatalog = product.product_family === "lending" ? loanLabel("back", filters.locale) : copy.detail.backToList;
+  const backToCatalog = product.product_type === "credit-card"
+    ? cardLabel("back", filters.locale)
+    : product.product_family === "lending"
+      ? loanLabel("back", filters.locale)
+      : copy.detail.backToList;
   const metricCards = buildMetricCards(product, filters.locale);
   const detailFacts = buildDetailFacts(product, filters.locale);
   const disclosureDate = formatIsoDate(product.last_verified_at ?? detail.freshness.refreshed_at);
@@ -221,6 +230,13 @@ function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] 
     ];
   }
 
+  if (product.product_type === "credit-card") {
+    return [
+      { label: cardLabel("annualFee", locale), value: formatCurrency(product.annual_fee, product.currency, locale) },
+      { label: cardLabel("purchaseRate", locale), value: formatPurchaseRate(product, locale) }
+    ];
+  }
+
   if (product.product_type === "mortgage") {
     return [
       { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
@@ -254,6 +270,14 @@ function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] 
 
 function buildDetailFacts(product: PublicProduct, locale: string) {
   const facts: DetailFact[] = [];
+  if (product.product_type === "credit-card") {
+    addFact(facts, cardLabel("annualFee", locale), formatCurrency(product.annual_fee, product.currency, locale), locale);
+    addFact(facts, cardLabel("purchaseRate", locale), formatPurchaseRate(product, locale), locale);
+    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
+    addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
+    addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
+    return facts;
+  }
   if (product.product_family === "lending") {
     addFact(
       facts,
@@ -403,6 +427,15 @@ function loanLabel(key: "amortization" | "back" | "loanAmount" | "payment" | "pr
   return labels[locale as keyof typeof labels]?.[key] ?? labels.en[key];
 }
 
+function cardLabel(key: "annualFee" | "back" | "purchaseRate", locale: string) {
+  const labels = {
+    en: { annualFee: "Annual fee", back: "Back to credit card list", purchaseRate: "Purchase interest rate" },
+    ko: { annualFee: "연회비", back: "신용카드 목록으로", purchaseRate: "구매 금리" },
+    ja: { annualFee: "年会費", back: "クレジットカード一覧に戻る", purchaseRate: "ショッピング金利" }
+  };
+  return labels[locale as keyof typeof labels]?.[key] ?? labels.en[key];
+}
+
 function TermRateTable({
   currency,
   locale,
@@ -514,6 +547,10 @@ function formatRate(value: number | null, locale: string) {
     return copy.common.notDisclosed;
   }
   return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
+}
+
+function formatPurchaseRate(product: PublicProduct, locale: string) {
+  return product.purchase_interest_rate_summary ?? formatRate(product.purchase_interest_rate, locale);
 }
 
 function normalizeCurrency(currency: string) {

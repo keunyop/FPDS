@@ -569,7 +569,13 @@ Current boundary:
   range + amount range + term range. US Credit Card and Line of Credit retain
   the current fee/rate and rate/limit/security minimums as explicit US-owned
   profiles so their Public projection and future changes do not inherit an
-  unrelated market silently. Canada and country-less legacy calls retain the
+  unrelated market silently. For US cards, official `Purchase APR`, `APR for
+  Purchases`, and equivalent disclosure labels satisfy the purchase-rate
+  semantic only when the exact quote and product identity are grounded. A
+  disclosed range, introductory period, creditworthiness qualification, or
+  Prime Rate variability must also be preserved in source-language
+  `purchase_interest_rate_summary`; Public must not present the numeric lower
+  bound alone as the complete offer. Canada and country-less legacy calls retain the
   Canada baseline; an explicitly named new country remains fail-closed until
   its country/product profiles are registered. Unknown Product Types still
   fail closed on a registered rate-plus-decision contract;
@@ -578,6 +584,12 @@ Current boundary:
   market, even when both countries share the bank's official parent domain.
   Existing generated rows that violate this boundary are inactivated with
   audit lineage before they can produce or support a candidate;
+- after a detail product passes product-boundary checks, collection may follow
+  a bounded number of directly linked official pricing, fee, account-guide,
+  rate-table, or agreement companions for that product. Query parameters that
+  identify an offer, document, product, or market/location are part of the
+  source identity; tracking, locale, and presentation parameters are not.
+  Generic site legal pages and sibling Product Types remain ineligible;
 - a candidate may use the normal audited auto-approval path only when product
   identity and `100%` of its selected essentials are valid and officially
   grounded. Optional marketing and operational fields are not requested by
@@ -1426,9 +1438,12 @@ normalization, validation, and vocabulary fallback rules. Dynamic types remain
 evidence-first, but are not blanket review-only: official-source AI grounding
 can make them eligible for the normal audited auto-approval path, and the
 collection AI autopilot may safely correct and threshold-approve remaining
-review candidates. The approved Public Loan slice exposes approved `mortgage`,
-`personal-loan`, and `line-of-credit` canonical products regardless of whether
-approval came from a human or the policy-qualified system path.
+review candidates. The approved Public Credit Card and Loan slices expose
+approved `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
+canonical products regardless of whether approval came from a human or the
+policy-qualified system path. Active CA/US catalog coverage is collected on a
+recurring policy cadence, and interrupted promotion, Review recovery, or
+aggregate work is resumed without requiring routine operator action.
 
 ### BR-002 Phase 2 Country Constraint
 Phase 2 확정 범위는 일본 Big 5 은행의 수신상품이다.

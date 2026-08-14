@@ -6,6 +6,7 @@ type PublicDesignCopy = {
   compareBoundary: string;
   compareDifferences: string;
   coverage: string;
+  cardCoverage: string;
   depositCoverage: string;
   evidenceBoundary: string;
   fresh: string;
@@ -42,6 +43,7 @@ type PublicMessages = {
     products: string;
     methodology: string;
     loan: string;
+    card: string;
     localeLabel: string;
   };
   common: {
@@ -104,6 +106,7 @@ type PublicMessages = {
     descending: string;
     sortDefault: string;
     sortDisplayRate: string;
+    sortAnnualFee: string;
     sortMonthlyFee: string;
     sortMinimumBalance: string;
     sortMinimumDeposit: string;
@@ -222,6 +225,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       products: "Deposit",
       methodology: "Methodology",
       loan: "Loan",
+      card: "Credit cards",
       localeLabel: "Language"
     },
     common: {
@@ -284,6 +288,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       descending: "Descending",
       sortDefault: "Default",
       sortDisplayRate: "Interest rate",
+      sortAnnualFee: "Annual fee",
       sortMonthlyFee: "Monthly fee",
       sortMinimumBalance: "Minimum balance",
       sortMinimumDeposit: "Minimum deposit",
@@ -422,6 +427,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       products: "예금",
       methodology: "방법론",
       loan: "대출",
+      card: "신용카드",
       localeLabel: "언어"
     },
     common: {
@@ -484,6 +490,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       descending: "내림차순",
       sortDefault: "기본",
       sortDisplayRate: "표시 금리",
+      sortAnnualFee: "연회비",
       sortMonthlyFee: "월 수수료",
       sortMinimumBalance: "최소 잔액",
       sortMinimumDeposit: "최소 예치금",
@@ -622,6 +629,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       products: "預金",
       methodology: "データ基準",
       loan: "ローン",
+      card: "クレジットカード",
       localeLabel: "言語"
     },
     common: {
@@ -684,6 +692,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       descending: "降順",
       sortDefault: "標準",
       sortDisplayRate: "表示金利",
+      sortAnnualFee: "年会費",
       sortMonthlyFee: "月額手数料",
       sortMinimumBalance: "最低残高",
       sortMinimumDeposit: "最低預入額",
@@ -820,6 +829,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     compareBoundary: "FPDS compares published facts. It does not rank what is best for you.",
     compareDifferences: "Differences are emphasized only where a public field is available.",
     coverage: "Current coverage",
+    cardCoverage: "Credit cards",
     depositCoverage: "Chequing, savings and GIC",
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
     fresh: "Current snapshot",
@@ -855,6 +865,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     compareBoundary: "FPDS는 공개된 사실을 비교하며, 개인에게 가장 좋은 상품을 순위로 추천하지 않습니다.",
     compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
     coverage: "현재 제공 범위",
+    cardCoverage: "신용카드",
     depositCoverage: "입출금·저축·GIC",
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
     fresh: "최신 스냅샷",
@@ -890,6 +901,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     compareBoundary: "FPDS は公開された事実を比較し、個人に最適な商品をランキングしません。",
     compareDifferences: "公開項目がある場合だけ差を強調します。",
     coverage: "現在の掲載範囲",
+    cardCoverage: "クレジットカード",
     depositCoverage: "当座・普通預金・GIC",
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
     fresh: "最新スナップショット",
@@ -929,14 +941,43 @@ export function getPublicDesignCopy(locale: string): PublicDesignCopy {
   return PUBLIC_DESIGN_COPY[normalizePublicLocale(locale)];
 }
 
-export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan") {
+export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card" | "loan") {
   const copy = getPublicMessages(locale);
+  const designCopy = getPublicDesignCopy(locale);
   if (catalog === "deposit") {
     return {
       pageDescription: copy.grid.pageDescription,
       pageTitle: copy.grid.pageTitle,
       title: copy.grid.title,
       description: copy.grid.description,
+      coverage: designCopy.depositCoverage,
+    };
+  }
+  if (catalog === "card") {
+    if (normalizePublicLocale(locale) === "ko") {
+      return {
+        pageTitle: "FPDS 신용카드",
+        pageDescription: "선택한 국가의 검증된 신용카드 상품을 비교합니다.",
+        title: "신용카드 비교",
+        description: "최신 공개 스냅샷의 연회비와 구매 금리를 비교합니다.",
+        coverage: designCopy.cardCoverage,
+      };
+    }
+    if (normalizePublicLocale(locale) === "ja") {
+      return {
+        pageTitle: "FPDS クレジットカード",
+        pageDescription: "選択した国の検証済みクレジットカード商品を比較します。",
+        title: "クレジットカードを比較",
+        description: "最新の公開スナップショットで年会費とショッピング金利を比較します。",
+        coverage: designCopy.cardCoverage,
+      };
+    }
+    return {
+      pageTitle: "FPDS Credit Cards",
+      pageDescription: "Compare verified credit card products in the selected country.",
+      title: "Compare credit cards",
+      description: "Annual fees and purchase interest rates from the latest public snapshot.",
+      coverage: designCopy.cardCoverage,
     };
   }
   if (normalizePublicLocale(locale) === "ko") {
@@ -945,6 +986,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
       pageDescription: "선택한 국가의 대출 상품 카탈로그입니다.",
       title: "대출 상품",
       description: "최신 공개 스냅샷에서 활성 모기지, 개인 대출, 신용한도 대출 상품을 조회합니다.",
+      coverage: designCopy.loanCoverage,
     };
   }
   if (normalizePublicLocale(locale) === "ja") {
@@ -953,6 +995,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
       pageDescription: "選択した国のローン商品のカタログです。",
       title: "ローン商品",
       description: "最新の公開スナップショットから、有効な住宅ローン、個人ローン、ライン・オブ・クレジット商品を絞り込みます。",
+      coverage: designCopy.loanCoverage,
     };
   }
   return {
@@ -960,6 +1003,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "loan"
     pageDescription: "Compare mortgage, personal loan, and line of credit products in the selected country.",
     title: "Compare loans",
     description: "Mortgage, personal loan, and line of credit products from the latest public snapshot.",
+    coverage: designCopy.loanCoverage,
   };
 }
 

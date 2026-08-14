@@ -20,6 +20,7 @@ from api_service.review_detail import (
     ReviewTaskError,
     _normalize_override_payload,
 )
+from api_service.source_registry_utils import normalize_source_url
 from api_service.security import new_id, utc_now
 from worker.pipeline.fpds_approval_policy import dynamic_repair_fields, is_populated
 from worker.pipeline.fpds_ai_runtime import (
@@ -220,7 +221,7 @@ def run_review_ai_verification(
         "candidate_id": str(review_task.get("candidate_id") or ""),
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "allowed_domains": allowed_domains,
-        "verification_contract_version": "review-ai-verification-v7",
+        "verification_contract_version": "review-ai-verification-v17",
         "requested_field_names": requested_field_names,
         "approval_field_names": requested_field_names,
         "requested_field_count": len(requested_field_names),
@@ -519,7 +520,7 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
         },
         "fields_to_verify": review_fields[:AI_VERIFICATION_MAX_FIELDS],
         "approval_policy": {
-            "contract_version": "review-ai-verification-v7",
+            "contract_version": "review-ai-verification-v17",
             "rule": "official product identity plus every product-type essential field",
             "empty_requested_fields_block_approval": True,
         },
@@ -726,6 +727,22 @@ def sanitize_ai_verification_result(
             except (json.JSONDecodeError, TypeError, ValueError):
                 status = "unverified"
                 has_verified_value = False
+            if not is_populated(verified_value):
+                status = "unverified"
+                has_verified_value = False
+        if cited_sources and (
+            collected_value in (None, "") or field_name == "purchase_interest_rate_summary"
+        ):
+            derived_value = _derive_missing_exact_product_value(
+                detail=detail,
+                field_name=field_name,
+                evidence_quote=evidence_quote,
+                cited_sources=cited_sources,
+            )
+            if derived_value is not None:
+                verified_value = derived_value
+                has_verified_value = True
+                status = "mismatch"
         if status in {"match", "mismatch"} and (
             not cited_sources
             or not has_verified_value
@@ -802,6 +819,86 @@ def sanitize_ai_verification_result(
     }
 
 
+def _derive_missing_exact_product_value(
+    *,
+    detail: dict[str, Any],
+    field_name: str,
+    evidence_quote: str,
+    cited_sources: list[dict[str, str]],
+) -> Any:
+    """Recover two bounded US card facts when the model omitted its JSON flag.
+
+    This is intentionally narrower than normal AI correction: the citation
+    must be the candidate's exact official detail URL and the exact quote must
+    contain the complete labeled value. No neighboring catalog or generic fee
+    page can supply a value through this fallback.
+    """
+
+    candidate = _mapping(detail.get("candidate"))
+    if (
+        str(candidate.get("country_code") or "").upper() != "US"
+        or str(candidate.get("product_type") or "").lower() != "credit-card"
+    ):
+        return None
+    exact_origin_url = _source_identity_url(_mapping(detail.get("source_context")).get("source_url"))
+    cites_exact_origin = bool(
+        exact_origin_url
+        and any(
+            _source_identity_url(source.get("url")) == exact_origin_url
+            for source in cited_sources
+        )
+    )
+    normalized_product = _normalize_identity_text(str(candidate.get("product_name") or ""))
+    normalized_quote = _normalize_identity_text(evidence_quote)
+    cites_named_product_companion = bool(
+        normalized_product
+        and normalized_product in normalized_quote
+        and any(
+            re.search(
+                r"(?:agreement|disclosure|pricing|terms|/content/documents/creditcard/)",
+                str(source.get("url") or ""),
+                re.IGNORECASE,
+            )
+            for source in cited_sources
+        )
+    )
+    if not (cites_exact_origin or cites_named_product_companion):
+        return None
+    compact_quote = _compact_text(evidence_quote, limit=1400)
+    lowered_quote = compact_quote.casefold()
+    if not compact_quote or "..." in compact_quote:
+        return None
+    if field_name == "annual_fee":
+        if candidate.get("candidate_payload") and _mapping(candidate.get("candidate_payload")).get(field_name) not in (None, ""):
+            return None
+        if re.search(r"\bannual\s+fee\b\s*(?:is\s*)?\$\s*0(?:\.0+)?\b", lowered_quote):
+            return 0.0
+        if re.search(r"\bno\s+annual\s+fee\b", lowered_quote):
+            return 0.0
+        return None
+    if field_name != "purchase_interest_rate_summary":
+        return None
+    if not re.search(r"\b(?:intro(?:ductory)?\s+)?apr\b", lowered_quote):
+        return None
+    percentage_values = re.findall(r"(?<!\d)(\d{1,2}(?:\.\d{1,4})?)\s*%", compact_quote)
+    intro_range = bool(
+        len(percentage_values) >= 3
+        and "purchase" in lowered_quote
+        and re.search(r"\b(?:billing\s+cycles?|months?|days?)\b", lowered_quote)
+        and re.search(r"\b(?:variable\s+apr|apr\s+range|apr\b[^.]{0,100}\bto\b)\b", lowered_quote)
+    )
+    prime_formula = bool(
+        len(percentage_values) >= 4
+        and re.search(r"\bapr\b[^\n]{0,30}\bfor\s+purchases\b", lowered_quote)
+        and "prime rate" in lowered_quote
+        and re.search(r"\bas\s+of\s+\d{1,2}/\d{1,2}/\d{4}\b", lowered_quote)
+        and re.search(r"\bprime\s*\+\s*\d", lowered_quote)
+    )
+    if not (intro_range or prime_formula):
+        return None
+    return compact_quote
+
+
 def _verification_evidence_is_exact_product(
     *,
     detail: dict[str, Any],
@@ -823,7 +920,7 @@ def _verification_evidence_is_exact_product(
     normalized_product = _normalize_identity_text(expected_product)
     normalized_quote = _normalize_identity_text(evidence_quote)
     quote_names_product = bool(normalized_product and normalized_product in normalized_quote)
-    exact_origin_url = _canonical_source_url(
+    exact_origin_url = _source_identity_url(
         _mapping(detail.get("source_context")).get("source_url")
     )
     from api_service.source_catalog import _source_scope_exclusion_reason
@@ -832,7 +929,15 @@ def _verification_evidence_is_exact_product(
     compatible_sources = [
         source
         for source in cited_sources
-        if _canonical_source_url(source.get("url")) == exact_origin_url
+        if _source_identity_url(source.get("url")) == exact_origin_url
+        or (
+            quote_names_product
+            and re.search(
+                r"(?:agreement|disclosure|pricing|terms|/content/documents/creditcard/)",
+                str(source.get("url") or ""),
+                re.IGNORECASE,
+            )
+        )
         or not _source_scope_exclusion_reason(
             product_type=product_type,
             fingerprint=f"{source.get('url') or ''} {source.get('title') or ''}".lower(),
@@ -843,7 +948,7 @@ def _verification_evidence_is_exact_product(
     cites_exact_origin = bool(
         exact_origin_url
         and any(
-            _canonical_source_url(source.get("url")) == exact_origin_url
+            _source_identity_url(source.get("url")) == exact_origin_url
             for source in compatible_sources
         )
     )
@@ -862,6 +967,10 @@ def _verification_evidence_is_exact_product(
         normalized_quote_text = _compact_text(evidence_quote, limit=2000)
         if not normalized_value or normalized_value.casefold() not in normalized_quote_text.casefold():
             return False
+
+    if field_name == "annual_fee" and str(verified_value).strip() in {"0", "0.0"}:
+        if re.search(r"\bno\s+annual\s+fee\b", evidence_quote, re.IGNORECASE):
+            return True
 
     numeric_tokens = re.findall(r"\d+(?:\.\d+)?", str(verified_value).replace(",", ""))
     if not numeric_tokens:
@@ -1143,7 +1252,17 @@ def _verification_instructions() -> str:
         "verified_value_json only when the "
         "official source states it directly. Every match or mismatch must cite at least one official source URL "
         "actually consulted and copy a short exact evidence_quote from that source. The quote must name the exact "
-        "product when the source is a separate rate/fee/disclosure page. Keep rationale concise and operational. "
+        "product when the source is a separate rate/fee/disclosure page. Evidence quotes must be contiguous verbatim text: "
+        "never insert ellipses or combine non-adjacent fragments. Keep rationale concise and operational. "
+        "For an empty requested field, return mismatch with has_verified_value=true when the official source states "
+        "the value; empty does not mean unverified. For annual_fee, an exact '$0' or 'no annual fee' statement is the "
+        "canonical numeric value 0. For purchase_interest_rate_summary, return one concise source-language string that "
+        "preserves the introductory purchase APR and period, followed by the standard variable APR range and any stated "
+        "creditworthiness or Prime Rate qualification. Do not require an as-of date when the issuer does not disclose one. "
+        "Put each field's consulted official URL in that field's sources array, even if another field cites the same URL. "
+        "When a collected purchase_interest_rate_summary is incomplete or overstates the source, return mismatch with a "
+        "corrected verified value whenever the exact product agreement states the complete current purchase APR. In that "
+        "case the contiguous quote must include 'APR for Purchases', the Prime Rate formula, its as-of date, and the APR range. "
         "Do not approve, publish, or recommend a "
         "financial product."
     )
@@ -1238,6 +1357,16 @@ def _canonical_source_url(value: Any) -> str:
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         return ""
     return urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path or "/", parsed.query, ""))
+
+
+def _source_identity_url(value: Any) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    try:
+        return normalize_source_url(raw)
+    except ValueError:
+        return _canonical_source_url(raw)
 
 
 def _field_label(*, detail: dict[str, Any], field_name: str) -> str:

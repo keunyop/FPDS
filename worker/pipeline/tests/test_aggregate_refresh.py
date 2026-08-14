@@ -104,6 +104,35 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         self.assertEqual(projection["refresh_metadata"]["mortgage_rate"], "4.49%")
         self.assertEqual(projection["refresh_metadata"]["amortization_text"], "Up to 30 years")
 
+    def test_credit_card_projection_keeps_annual_fee_and_purchase_rate(self) -> None:
+        result = AggregateRefreshService().build_snapshot(
+            snapshot_id="agg-card-001",
+            refresh_scope="phase1_public",
+            country_code="CA",
+            canonical_rows=[
+                _row(
+                    product_id="card-001",
+                    bank_code="CIBC",
+                    product_family="lending",
+                    product_type="credit-card",
+                    subtype_code="other",
+                    product_name="CIBC Adapta Mastercard",
+                    last_changed_at="2026-08-11T00:00:00+00:00",
+                    payload={
+                        "annual_fee": 0,
+                        "purchase_interest_rate": 21.99,
+                    },
+                )
+            ],
+            refreshed_at="2026-08-12T12:00:00+00:00",
+        )
+
+        projection = result.projection_rows[0]
+
+        self.assertEqual(projection["public_display_rate"], 21.99)
+        self.assertEqual(projection["refresh_metadata"]["annual_fee"], 0.0)
+        self.assertEqual(projection["refresh_metadata"]["purchase_interest_rate"], "21.99")
+
     def test_incomplete_active_lending_product_is_excluded_from_public_projection(self) -> None:
         result = AggregateRefreshService().build_snapshot(
             snapshot_id="agg-loan-incomplete",
@@ -190,6 +219,21 @@ class AggregateRefreshServiceTests(unittest.TestCase):
                     },
                 ),
                 _row(
+                    product_id="card-apr-range",
+                    bank_code="TD",
+                    country_code="US",
+                    product_family="lending",
+                    product_type="credit-card",
+                    subtype_code="other",
+                    product_name="Rewards Card",
+                    last_changed_at="2026-08-09T00:00:00+00:00",
+                    payload={
+                        "annual_fee": 0,
+                        "purchase_interest_rate": 19.49,
+                        "purchase_interest_rate_summary": "Purchase APR 19.49%-27.49% variable, based on creditworthiness.",
+                    },
+                ),
+                _row(
                     product_id="line-of-credit",
                     bank_code="TD",
                     country_code="US",
@@ -211,7 +255,7 @@ class AggregateRefreshServiceTests(unittest.TestCase):
 
         self.assertEqual(
             {row["product_id"] for row in result.projection_rows},
-            {"checking-no-fee", "cd-12-month", "line-of-credit"},
+            {"checking-no-fee", "cd-12-month", "card-apr-range", "line-of-credit"},
         )
         checking_row = next(row for row in result.projection_rows if row["product_id"] == "checking-no-fee")
         self.assertNotIn("eligibility_text", checking_row["refresh_metadata"])
@@ -226,6 +270,11 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         line_row = next(row for row in result.projection_rows if row["product_id"] == "line-of-credit")
         self.assertEqual(line_row["refresh_metadata"]["credit_limit_text"], "$5,000-$50,000")
         self.assertNotIn("fees_text", line_row["refresh_metadata"])
+        card_row = next(row for row in result.projection_rows if row["product_id"] == "card-apr-range")
+        self.assertEqual(
+            card_row["refresh_metadata"]["purchase_interest_rate_summary"],
+            "Purchase APR 19.49%-27.49% variable, based on creditworthiness.",
+        )
 
 
 class AggregateRefreshPersistenceTests(unittest.TestCase):
@@ -290,7 +339,7 @@ class AggregateRefreshPersistenceTests(unittest.TestCase):
         load_variables = runner.variables_for_call(2)
         self.assertEqual(ensure_variables["attempted_at"], "2026-04-13T12:00:00+00:00")
         self.assertEqual(load_variables["bank_codes_json"], '["TD"]')
-        self.assertIn("cp.product_type IN ('mortgage', 'personal-loan', 'line-of-credit')", runner.calls[2][1])
+        self.assertIn("cp.product_type IN ('credit-card', 'mortgage', 'personal-loan', 'line-of-credit')", runner.calls[2][1])
         self.assertIn("public_product_projection", runner.calls[3][1])
         self.assertIn("dashboard_metric_snapshot", runner.calls[3][1])
 

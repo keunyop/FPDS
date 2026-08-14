@@ -209,6 +209,16 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - The aggregate snapshot may include lending only from review-approved canonical products. Candidates, deferred products, and raw evidence remain unavailable to the Public surface.
 - Deposit-only purpose cards and deposit amount/fee bucket controls are not shown in the Loan catalog.
 
+### 10.8.1 Public Credit Card Catalog
+
+- `/cards` uses annual fee and purchase APR as the minimum comparison facts and
+  shares the anonymous Public API, comparison workspace, detail route, locale,
+  and private-evidence boundary with the other catalogs.
+- When an issuer discloses a purchase-APR range or qualification, list,
+  comparison, and detail show the approved source-language summary rather than
+  presenting its numeric lower bound as the whole offer. The numeric value may
+  still support deterministic sorting.
+
 ### 10.9 Current Public Catalog Simplification
 
 Product Owner direction on `2026-07-18` supersedes the earlier visible Top 5, repeated purpose-entry, hidden bank-name, and always-expanded comparison presentation decisions while preserving the API, canonical-data, locale, and evidence boundaries:
@@ -279,6 +289,19 @@ These boundaries are the baseline for `5.6` aggregate projection generation and 
   state so country-owned codes cannot leak into the next market.
 - Direct URLs for a valid but unavailable country render the existing honest
   unavailable/empty state.
+
+### 10.12 Public Credit Card Catalog
+
+- `/cards` is a sibling catalog to Deposit and Loan and uses the same country,
+  locale, anonymous API, compact filters, result count, freshness, comparison,
+  and shared `/products/[productId]` detail boundary.
+- Only review-approved, active `credit-card` projections whose resolved market
+  profile contains both annual fee and purchase interest rate are shown.
+- Card list, comparison, and detail prioritize those two essentials. Annual fee
+  is a sort option; missing or ungrounded legacy card facts remain private
+  rather than rendering an unavailable placeholder.
+- The surface remains factual and non-recommendatory and never exposes raw
+  evidence, Review state, or internal traces.
 
 ## 11. Follow-On Items
 

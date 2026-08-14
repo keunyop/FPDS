@@ -21,7 +21,16 @@ _STRUCTURED_LINK_MAX = 256
 _STRUCTURED_NODE_MAX = 20_000
 _STRUCTURED_SCRIPT_TYPES = {"application/json", "application/ld+json"}
 _STRUCTURED_SCRIPT_MAX_COUNT = 8
-_STRUCTURED_LINK_KEYS = {"href", "targeturl", "url"}
+_STRUCTURED_LINK_KEYS = {
+    "agreementurl",
+    "disclosureurl",
+    "href",
+    "pricingurl",
+    "rateurl",
+    "targeturl",
+    "termsurl",
+    "url",
+}
 _STRUCTURED_LABEL_KEYS = ("content", "label", "title", "name", "headline")
 _STRUCTURED_TEXT_KEYS = {
     "body",
@@ -33,7 +42,48 @@ _STRUCTURED_TEXT_KEYS = {
     "name",
     "text",
     "title",
+    "accountname",
+    "cardname",
+    "productname",
 }
+_STRUCTURED_PRICING_KEYS = {
+    "annualfee",
+    "annualpercentagerate",
+    "annualpercentageyield",
+    "apr",
+    "apy",
+    "earlywithdrawalpenalty",
+    "feewaiver",
+    "interestrate",
+    "maintenancefee",
+    "minimumbalance",
+    "minimumdeposit",
+    "minimumopeningdeposit",
+    "monthlyfee",
+    "openingdeposit",
+    "penalty",
+    "purchaseapr",
+    "purchaseinterestrate",
+    "rate",
+    "ratetype",
+    "term",
+    "termlength",
+}
+_STRUCTURED_PRICING_LABEL_MARKERS = (
+    "annual fee",
+    "annual percentage",
+    "apr",
+    "apy",
+    "early withdrawal",
+    "interest rate",
+    "maintenance fee",
+    "minimum balance",
+    "minimum deposit",
+    "monthly fee",
+    "opening deposit",
+    "purchase rate",
+    "rate",
+)
 _STRUCTURED_TEXT_MAX = 128
 _STRUCTURED_TEXT_TOTAL_CHARS = 100_000
 
@@ -635,9 +685,30 @@ class _StructuredTextExtractor(HTMLParser):
             node = stack.pop()
             node_count += 1
             if isinstance(node, dict):
+                pricing_label = next(
+                    (
+                        _strip_embedded_html(str(node[key]))
+                        for key in _STRUCTURED_LABEL_KEYS
+                        if isinstance(node.get(key), str)
+                        and any(
+                            marker in _strip_embedded_html(str(node[key])).lower()
+                            for marker in _STRUCTURED_PRICING_LABEL_MARKERS
+                        )
+                    ),
+                    "",
+                )
                 for key, item in node.items():
-                    if isinstance(item, str) and str(key).lower() in _STRUCTURED_TEXT_KEYS:
+                    normalized_key = re.sub(r"[^a-z0-9]", "", str(key).lower())
+                    if isinstance(item, str) and normalized_key in _STRUCTURED_TEXT_KEYS:
                         self._append(item)
+                    elif isinstance(item, str) and normalized_key in _STRUCTURED_PRICING_KEYS:
+                        self._append(f"{_humanize_structured_key(str(key))}: {item}")
+                    elif (
+                        isinstance(item, (str, int, float))
+                        and pricing_label
+                        and normalized_key in {"amount", "displayvalue", "value"}
+                    ):
+                        self._append(f"{pricing_label}: {item}")
                     elif isinstance(item, (dict, list)):
                         stack.append(item)
             elif isinstance(node, list):
@@ -664,3 +735,9 @@ def extract_structured_text_sections(html_text: str) -> list[str]:
     parser = _StructuredTextExtractor()
     parser.feed(html_text)
     return parser.sections
+
+
+def _humanize_structured_key(value: str) -> str:
+    separated = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", value)
+    separated = re.sub(r"[_-]+", " ", separated)
+    return " ".join(separated.split())

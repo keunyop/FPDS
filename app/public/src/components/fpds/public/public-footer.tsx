@@ -31,6 +31,7 @@ function FooterContent() {
   const footerCopy = FOOTER_COPY[locale];
   const dashboardHref = buildScopedPublicHrefFromSearchParams("/dashboard", searchParams);
   const productsHref = buildScopedPublicHrefFromSearchParams("/products", searchParams);
+  const cardsHref = buildScopedPublicHrefFromSearchParams("/cards", searchParams);
   const loansHref = buildScopedPublicHrefFromSearchParams("/loans", searchParams);
   const methodologyHref = buildScopedPublicHrefFromSearchParams("/methodology", searchParams);
 
@@ -49,6 +50,7 @@ function FooterContent() {
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-background" aria-label="Footer navigation">
             <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
             <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
+            <FooterLink href={cardsHref}>{copy.nav.card}</FooterLink>
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
             <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
           </nav>

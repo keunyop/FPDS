@@ -625,7 +625,7 @@ def _load_canonical_scope_stats(connection: Any, *, country_code: str) -> dict[s
         WHERE country_code = %(country_code)s
           AND (
                 product_family = 'deposit'
-                OR product_type IN ('mortgage', 'personal-loan', 'line-of-credit')
+                OR product_type IN ('credit-card', 'mortgage', 'personal-loan', 'line-of-credit')
           )
         """,
         {"country_code": country_code},

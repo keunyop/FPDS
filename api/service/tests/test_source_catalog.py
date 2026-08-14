@@ -17,6 +17,7 @@ from api_service.source_catalog import (
     _build_source_catalog_collection_plan,
     _build_homepage_self_candidate,
     _generate_sources_from_homepage,
+    _generate_existing_detail_companion_rows,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
@@ -24,6 +25,7 @@ from api_service.source_catalog import (
     _deactivate_rejected_generated_detail_sources,
     _dedupe_detail_rows_by_product_identity,
     _dedupe_generated_source_rows,
+    _discover_detail_companion_links,
     _supporting_source_is_bounded_to_selected_details,
     _extract_allowed_links,
     _generate_bank_code,
@@ -808,6 +810,30 @@ class SourceCatalogTests(unittest.TestCase):
             _source_scope_exclusion_reason(
                 product_type="line-of-credit",
                 fingerprint="https://www.examplebank.com/personal/mortgage/jumbo Jumbo mortgage",
+            ),
+            "other_product_type",
+        )
+
+    def test_us_cd_detail_slug_overrides_savings_parent_route(self) -> None:
+        for slug in ("high-yield-cds", "no-penalty-cd", "cd-rates"):
+            with self.subTest(slug=slug):
+                self.assertIsNone(
+                    _source_scope_exclusion_reason(
+                        product_type="gic",
+                        fingerprint=(
+                            f"https://www.examplebank.com/us/en/savings/{slug} "
+                            "Certificate of Deposit rates and terms"
+                        ),
+                    )
+                )
+
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint=(
+                    "https://www.examplebank.com/us/en/savings/high-yield-savings "
+                    "High-Yield Savings Account"
+                ),
             ),
             "other_product_type",
         )
@@ -3218,6 +3244,7 @@ class SourceCatalogTests(unittest.TestCase):
                 "included_sources": [],
             },
             pipeline_stage="source_catalog_collection",
+            trigger_type="admin_source_collection",
             retry_of_run_id=None,
         )
         launch_runner.assert_called_once()
@@ -3518,6 +3545,10 @@ class SourceCatalogTests(unittest.TestCase):
                     detail_source_ids=[],
                 ),
             ),
+            patch(
+                "api_service.source_catalog._load_existing_detail_rows_for_companion_discovery",
+                return_value=[],
+            ),
             patch("api_service.source_catalog._upsert_source_registry_rows") as upsert_rows,
             patch(
                 "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
@@ -3698,6 +3729,91 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["discovery_metadata"]["selection_path"], "heuristic_plus_ai_plus_page_evidence")
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
+
+    def test_selected_card_details_preserve_query_identified_pricing_companions(self) -> None:
+        first_detail = "https://www.bankofamerica.com/credit-cards/products/travel-card"
+        second_detail = "https://www.bankofamerica.com/credit-cards/products/cash-card"
+        first_disclosure = (
+            "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline"
+            "?cId=4076236&isMobile=true&locale=en_US&poCd=D7"
+        )
+        second_disclosure = (
+            "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline"
+            "?cId=4078153&isMobile=true&locale=en_US&poCd=5R"
+        )
+        companions, notes = _discover_detail_companion_links(
+            detail_rows=[
+                {"normalized_url": first_detail, "raw_url": first_detail},
+                {"normalized_url": second_detail, "raw_url": second_detail},
+            ],
+            country_code="US",
+            product_type="credit-card",
+            fetch_policy=SimpleNamespace(),
+            hostname="www.bankofamerica.com",
+            allowed_domains=("bankofamerica.com",),
+            page_html_by_url={
+                first_detail: (
+                    f'<a href="{first_disclosure}">Pricing &amp; Terms</a>'
+                    '<a href="/privacy/online-privacy-notice">Privacy terms</a>'
+                    '<a href="/online-banking/service-agreement.go">Online Banking Service Agreement</a>'
+                ),
+                second_detail: f'<a href="{second_disclosure}">Details of Rate, Fee and Other Cost Information</a>',
+            },
+        )
+
+        self.assertEqual(len(companions), 2)
+        self.assertEqual(
+            {item.link.normalized_url for item in companions},
+            {
+                "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline?cid=4076236&pocd=D7",
+                "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline?cid=4078153&pocd=5R",
+            },
+        )
+        self.assertEqual(
+            {item.parent_detail_url for item in companions},
+            {first_detail, second_detail},
+        )
+        self.assertIn("2 exact-product", " ".join(notes))
+
+    def test_existing_active_detail_can_supply_new_pricing_companion(self) -> None:
+        homepage_url = "https://www.bank.example/"
+        detail_url = "https://www.bank.example/cards/existing-card"
+        disclosure_url = "https://www.bank.example/disclosures/card?offerId=offer-42&locale=en_US"
+
+        def fake_fetch(url: str, _policy: object) -> str:
+            normalized = normalize_source_url(url)
+            if normalized == normalize_source_url(homepage_url):
+                return "<html><body>Consumer banking</body></html>"
+            if normalized == detail_url:
+                return f'<a href="{disclosure_url}">Pricing and terms</a>'
+            raise AssertionError(f"Unexpected fetch: {url}")
+
+        with patch("api_service.source_catalog.fetch_text", side_effect=fake_fetch):
+            companions, notes = _generate_existing_detail_companion_rows(
+                bank_code="EX",
+                bank_name="Example Bank",
+                country_code="US",
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+                homepage_url=homepage_url,
+                source_language="en",
+                existing_detail_rows=[
+                    {"normalized_url": detail_url, "raw_url": detail_url},
+                ],
+            )
+
+        companion_rows = [
+            item
+            for item in companions
+            if item["discovery_metadata"].get("selection_path") == "selected_existing_detail_companion"
+        ]
+        self.assertEqual(len(companion_rows), 1)
+        self.assertEqual(
+            companion_rows[0]["normalized_url"],
+            "https://www.bank.example/disclosures/card?offerid=offer-42",
+        )
+        self.assertEqual(companion_rows[0]["discovery_metadata"]["parent_detail_url"], detail_url)
+        self.assertIn("1 exact-product", " ".join(notes))
 
     def test_generate_sources_starts_from_verified_coverage_url_and_embedded_json_links(self) -> None:
         homepage_url = "https://www.bank.example/"

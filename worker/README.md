@@ -90,6 +90,12 @@ Runtime invariants:
   are excluded. Collection official grounding v2 rejects ellipsized quotes,
   requires every proposed number in the quote, and requires complete waiver,
   penalty, security, and qualified-rate prose rather than model extrapolation.
+- Selected exact-product details may add at most two directly linked official
+  pricing/fee/agreement companions, with a 48-source scope cap. Offer,
+  document, product, and market query keys are retained as source identity;
+  campaign and presentation keys are discarded. Browser fallback covers the
+  registered US dynamic pricing domains and structured JSON extraction keeps
+  APY/APR/rate and fee keys that are not rendered as ordinary visible text.
 - dynamic/lending candidates must verify official product identity and `100%`
   of the selected essential facts. Optional marketing or operational fields are
   outside collection and Review by default. A partial-source or legacy
@@ -114,3 +120,10 @@ Runtime invariants:
 - country-specific Public projections retain only the resolved comparison
   fields plus identity, status/freshness, and official product link. Broader
   normalized copy remains private for Admin evidence and audit.
+- credit-card projection is enabled through the same completeness gate and
+  retains annual fee plus purchase interest rate for Public card list,
+  comparison, and detail. US Purchase APR ranges retain their exact disclosed
+  range and material creditworthiness/variable-rate qualification in
+  `purchase_interest_rate_summary`; the qualified summary is the governing US
+  card essential, and a scalar lower bound cannot replace it.
+  comparison, and detail rendering.

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 from api_service.aggregate_refresh import queue_review_aggregate_refresh_request
-from api_service.ai_verification import run_review_ai_verification
+from api_service.ai_verification import build_ai_verification_payload, run_review_ai_verification
 from api_service.review_ai_correction import (
     apply_review_ai_corrections,
     assess_review_ai_auto_approval,
@@ -144,6 +144,11 @@ def remediate_collection_review_task(
         }
 
     execution = _load_latest_verification_execution(connection, review_task_id=review_task_id)
+    if execution is not None and not _verification_matches_current_approval_fields(
+        execution=execution,
+        detail=detail,
+    ):
+        execution = None
     reused = execution is not None
     if execution is None:
         verification = run_review_ai_verification(
@@ -278,14 +283,36 @@ def _load_latest_verification_execution(
         SELECT model_execution_id, execution_status, execution_metadata
         FROM model_execution
         WHERE stage_name = 'ai_verification'
+          AND execution_status = 'completed'
           AND execution_metadata ->> 'review_task_id' = %(review_task_id)s
-          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v7'
+          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v17'
+          AND completed_at >= now() - interval '24 hours'
         ORDER BY started_at DESC, model_execution_id DESC
         LIMIT 1
         """,
         {"review_task_id": review_task_id},
     ).fetchone()
     return dict(row) if row else None
+
+
+def _verification_matches_current_approval_fields(
+    *,
+    execution: dict[str, Any],
+    detail: dict[str, Any],
+) -> bool:
+    metadata = _mapping(execution.get("execution_metadata"))
+    prior_fields = [
+        str(item).strip()
+        for item in metadata.get("approval_field_names", [])
+        if str(item).strip()
+    ] if isinstance(metadata.get("approval_field_names"), list) else []
+    current_payload = build_ai_verification_payload(detail=detail, allowed_domains=[])
+    current_fields = [
+        str(item.get("field_name") or "").strip()
+        for item in current_payload.get("fields_to_verify", [])
+        if isinstance(item, dict) and str(item.get("field_name") or "").strip()
+    ]
+    return prior_fields == current_fields
 
 
 def _load_verification_execution(

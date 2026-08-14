@@ -20,6 +20,7 @@ from worker.pipeline.fpds_extraction.service import (
     _append_included_transactions_fallback,
     _append_fee_waiver_fallback,
     _append_labeled_numeric_extension_fallback,
+    _append_purchase_apr_summary_fallback,
     _append_minimum_deposit_fallback,
     _append_monthly_fee_fallback,
     _append_unlimited_transactions_fallback,
@@ -41,7 +42,9 @@ from worker.pipeline.fpds_extraction.service import (
     _extract_interest_rate_summary,
     _extract_included_transactions,
     _extract_labeled_extension_fee,
+    _extract_labeled_extension_rate,
     _extract_notes_text,
+    _extract_purchase_interest_rate_summary,
     _extract_promotional_period_text,
     _extract_tax_benefits,
     _extract_transaction_fee,
@@ -59,6 +62,34 @@ from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, bui
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_us_purchase_apr_labels_extract_numeric_rate_and_full_range_summary(self) -> None:
+        evidence = (
+            "Annual Percentage Rate (APR) for Purchases: 19.49% to 27.49%, "
+            "based on your creditworthiness when you open your account. "
+            "After that, the APR will vary with the market based on the Prime Rate."
+        )
+
+        self.assertEqual(
+            _extract_labeled_extension_rate(field_name="purchase_interest_rate", text=evidence),
+            "19.49",
+        )
+        self.assertEqual(
+            _extract_purchase_interest_rate_summary(evidence),
+            evidence,
+        )
+        concise_evidence = "annual Percentage Rate: 18.24% - 28.24%"
+        self.assertEqual(
+            _extract_labeled_extension_rate(
+                field_name="purchase_interest_rate",
+                text=concise_evidence,
+            ),
+            "18.24",
+        )
+        self.assertEqual(
+            _extract_purchase_interest_rate_summary(concise_evidence),
+            concise_evidence,
+        )
+
     def test_ai_comparison_prose_is_not_cut_mid_condition(self) -> None:
         waiver = (
             "Any one of the following per statement cycle: make $500 or more in total qualifying direct deposits; "
@@ -951,6 +982,69 @@ class ExtractionServiceTests(unittest.TestCase):
                 "regular_interest_rate": "0.30",
                 "smart_interest_rate": "0.05",
                 "transaction_fee": "5.00",
+            },
+        )
+
+    def test_card_pricing_fallback_recovers_exact_detail_apr_range_and_fee(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="BANK-CARD-001",
+            parsed_document_id="parsed-card",
+            source_document_id="src-card",
+            snapshot_id="snap-card",
+            bank_code="BANK",
+            country_code="US",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_name": "Travel Rewards Credit Card",
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-card-pricing",
+            parsed_document_id="parsed-card",
+            chunk_index=4,
+            anchor_type="structured_component",
+            anchor_value="pricing",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt=(
+                "Travel Rewards Credit Card. Annual Fee: $0. "
+                "annual Percentage Rate: 18.24% - 28.24%"
+            ),
+            retrieval_metadata={},
+            source_document_id="src-card",
+            source_snapshot_id="snap-card",
+            bank_code="BANK",
+            country_code="US",
+            source_type="html",
+        )
+        extracted: list[ExtractedFieldCandidate] = []
+        requested = {
+            "annual_fee",
+            "purchase_interest_rate",
+            "purchase_interest_rate_summary",
+        }
+
+        _append_labeled_numeric_extension_fallback(
+            context=context,
+            candidates=[candidate],
+            requested_fields=requested,
+            extracted_fields=extracted,
+        )
+        _append_purchase_apr_summary_fallback(
+            context=context,
+            candidates=[candidate],
+            requested_fields=requested,
+            extracted_fields=extracted,
+        )
+
+        self.assertEqual(
+            {item.field_name: item.candidate_value for item in extracted},
+            {
+                "annual_fee": "0.00",
+                "purchase_interest_rate": "18.24",
+                "purchase_interest_rate_summary": "annual Percentage Rate: 18.24% - 28.24%",
             },
         )
 

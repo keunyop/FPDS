@@ -39,6 +39,24 @@ class UrlUtilsTests(unittest.TestCase):
         url = "https://www.td.com/ca/en/path/?utm_source=test#top"
         self.assertEqual(normalize_source_url(url), "https://www.td.com/ca/en/path")
 
+    def test_normalize_source_url_preserves_disclosure_document_identity(self) -> None:
+        url = (
+            "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline"
+            "?cId=4076236&isMobile=true&locale=en_US&poCd=D7&utm_source=test"
+        )
+        self.assertEqual(
+            normalize_source_url(url),
+            "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline?cid=4076236&pocd=D7",
+        )
+
+    def test_normalize_source_url_preserves_market_identity_but_not_campaign_id(self) -> None:
+        self.assertEqual(
+            normalize_source_url(
+                "https://www.wellsfargo.com/savings-cds/platinum/?zipCode=98101&cid=campaign#rates"
+            ),
+            "https://www.wellsfargo.com/savings-cds/platinum?zipcode=98101",
+        )
+
     def test_build_source_identity_and_id_are_stable(self) -> None:
         normalized = "https://www.td.com/ca/en/test"
         identity = build_source_identity("TD", normalized, "html")
@@ -57,6 +75,10 @@ class UrlUtilsTests(unittest.TestCase):
                     "title": "Travel Rewards",
                     "url": "https://www.bank.example/credit-cards/products/travel-rewards/",
                 },
+                {
+                    "title": "Travel Rewards Pricing and Terms",
+                    "disclosureUrl": "/disclosures/card?offerId=travel-42&locale=en_US",
+                },
                 {"title": "Template", "href": "/products/{productId}/"},
             ]
         }
@@ -74,6 +96,10 @@ class UrlUtilsTests(unittest.TestCase):
                 (
                     "https://www.bank.example/credit-cards/products/travel-rewards",
                     "Travel Rewards",
+                ),
+                (
+                    "https://www.bank.example/disclosures/card?offerid=travel-42",
+                    "Travel Rewards Pricing and Terms",
                 ),
             ],
         )
@@ -146,6 +172,26 @@ class UrlUtilsTests(unittest.TestCase):
             ],
         )
 
+    def test_extract_structured_text_sections_preserves_embedded_us_pricing_fields(self) -> None:
+        payload = {
+            "productName": "Travel Rewards Credit Card",
+            "purchaseApr": "19.49% to 29.49% variable APR",
+            "annualFee": "$0",
+            "rateCard": {"label": "Savings APY", "value": "4.10%"},
+        }
+        html = f"<div data-product='{json.dumps(payload)}'></div>"
+
+        self.assertEqual(
+            extract_structured_text_sections(html),
+            [
+                "Travel Rewards Credit Card",
+                "purchase Apr: 19.49% to 29.49% variable APR",
+                "annual Fee: $0",
+                "Savings APY",
+                "Savings APY: 4.10%",
+            ],
+        )
+
 
 class FetchPolicyTests(unittest.TestCase):
     def test_from_env_default_browser_allowlist_covers_known_dynamic_rate_hosts(self) -> None:
@@ -165,6 +211,16 @@ class FetchPolicyTests(unittest.TestCase):
                 "www.simplii.com",
                 "tangerine.ca",
                 "www.tangerine.ca",
+                "bankofamerica.com",
+                "capitalone.com",
+                "chase.com",
+                "citi.com",
+                "marcus.com",
+                "pnc.com",
+                "td.com",
+                "truist.com",
+                "usbank.com",
+                "wellsfargo.com",
             ),
         )
 
@@ -222,6 +278,16 @@ class FetchPolicyTests(unittest.TestCase):
                 "www.simplii.com",
                 "tangerine.ca",
                 "www.tangerine.ca",
+                "bankofamerica.com",
+                "capitalone.com",
+                "chase.com",
+                "citi.com",
+                "marcus.com",
+                "pnc.com",
+                "td.com",
+                "truist.com",
+                "usbank.com",
+                "wellsfargo.com",
             ),
         )
 
@@ -354,6 +420,51 @@ class FetchPolicyTests(unittest.TestCase):
         )
 
         self.assertTrue(_should_try_browser_rendered_rate_fallback(response, policy))
+
+    def test_us_product_pages_with_masked_or_location_gated_pricing_request_browser_rendering(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("bankofamerica.com", "wellsfargo.com"),
+            block_private_networks=False,
+            browser_fallback_domains=("bankofamerica.com", "wellsfargo.com"),
+        )
+        masked_fee = FetchedResponse(
+            body=b"<h1>Advantage Checking</h1><p>Monthly maintenance fee $XXXX or $0</p>",
+            final_url="https://www.bankofamerica.com/deposits/checking/advantage-banking/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-08-12T00:00:00+00:00",
+            redirect_count=0,
+        )
+        location_rate = FetchedResponse(
+            body=(
+                b"<h1>Premier Checking</h1><h2>Checking Interest Rates</h2>"
+                b"<p>Annual Percentage Yield (APY)</p><p>Change location</p>"
+            ),
+            final_url="https://www.wellsfargo.com/checking/premier/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-08-12T00:00:00+00:00",
+            redirect_count=0,
+        )
+        unresolved_card_fee = FetchedResponse(
+            body=(
+                b"<h1>Travel Rewards Credit Card</h1>"
+                b"<p>Annual Percentage Rate: 18.24% - 28.24%</p>"
+                b"{{{htmlEscaper INTEREST_RATES_FEES_STANDARD_ANNUAL_FEE_RESEARCH}}}"
+            ),
+            final_url="https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-08-12T00:00:00+00:00",
+            redirect_count=0,
+        )
+
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(masked_fee, policy))
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(location_rate, policy))
+        self.assertTrue(_should_try_browser_rendered_rate_fallback(unresolved_card_fee, policy))
 
     def test_failed_rendered_rate_fallback_keeps_direct_snapshot_with_diagnostics(self) -> None:
         policy = DiscoveryFetchPolicy(

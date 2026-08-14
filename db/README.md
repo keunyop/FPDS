@@ -67,6 +67,22 @@ Files:
   lineage in discovery metadata, reclassifies governing documents as
   supporting evidence, and removes known action/calculator detail rows from
   active collection scope
+- `migrations/0035_collection_publication_automation.sql`: adds the singleton
+  recurring collection/recovery policy used by the API scheduler
+- `migrations/0036_us_pricing_evidence_companions.sql`: moves active US card
+  sources to the current market profile and requests the range-preserving
+  `purchase_interest_rate_summary` alongside annual fee and purchase rate
+- `migrations/0037_us_pricing_companion_scope_cleanup.sql`: inactivates generic
+  online-banking service agreements mistakenly linked as pricing companions
+  while retaining their source history
+- `migrations/0038_us_cross_product_support_cleanup.sql`: inactivates legacy US
+  credit-card supporting rows that actually point to auto/vehicle-loan pages;
+  the runtime also excludes any future active supporting row with a conflicting
+  Product Type fingerprint
+- `migrations/0039_us_credit_card_apr_range_contract.sql`: makes the qualified
+  Purchase APR summary the preferred US credit-card rate requirement, leaving
+  an exact fixed scalar rate as a bounded alternative rather than reducing a
+  disclosed range to its lower endpoint
 
 How to apply when a database is available:
 
@@ -100,6 +116,11 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidenc
 psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0035_collection_publication_automation.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
 ```
 
 Notes:

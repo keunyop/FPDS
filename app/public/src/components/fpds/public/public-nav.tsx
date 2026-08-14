@@ -1,6 +1,6 @@
 "use client";
 
-import { House, Landmark, Search } from "lucide-react";
+import { CreditCard, House, Landmark, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
@@ -17,6 +17,7 @@ export function PublicNav() {
   const navItems: Array<{ href: PublicRoutePath; icon: ComponentType<{ className?: string }>; label: string }> = [
     { href: "/dashboard", icon: House, label: copy.nav.dashboard },
     { href: "/products", icon: Search, label: copy.nav.products },
+    { href: "/cards", icon: CreditCard, label: copy.nav.card },
     { href: "/loans", icon: Landmark, label: copy.nav.loan }
   ];
 

@@ -11,6 +11,7 @@ from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.source_catalog import (
     _canonical_product_type_code,
+    _has_unrelated_product_type_signal,
     _materialize_sources_for_catalog_item,
     _product_type_scope_codes,
     _url_country_scope_conflicts,
@@ -87,6 +88,11 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             collection_id=str(plan["collection_id"]),
             group=_run_group_with_empty_collection_scope(group),
             pipeline_stage="source_catalog_collection",
+            trigger_type=(
+                "scheduled_source_collection"
+                if str(plan.get("trigger_type") or "").startswith("scheduled_")
+                else "admin_source_collection"
+            ),
         )
         catalog_row = {
             "catalog_item_id": group["catalog_item_id"],
@@ -329,24 +335,49 @@ def _load_active_collection_scope(
         str(row["source_id"])
         for row in rows
         if str(row["discovery_role"]) != "entry" or _is_candidate_producing_source(row, product_type=product_type)
-        if not _url_country_scope_conflicts(
+        if _source_matches_active_product_scope(
+            row,
+            product_type=product_type,
             country_code=country_code,
-            normalized_url=str(row.get("source_url") or ""),
         )
     ]
     target_source_ids = [
         str(row["source_id"])
         for row in rows
         if _is_candidate_producing_source(row, product_type=product_type)
-        and not _url_country_scope_conflicts(
+        and _source_matches_active_product_scope(
+            row,
+            product_type=product_type,
             country_code=country_code,
-            normalized_url=str(row.get("source_url") or ""),
         )
     ]
     return {
         "collection_source_ids": collection_source_ids,
         "target_source_ids": target_source_ids,
     }
+
+
+def _source_matches_active_product_scope(
+    row: Any,
+    *,
+    product_type: str,
+    country_code: str,
+) -> bool:
+    normalized_row = dict(row) if not isinstance(row, dict) else row
+    source_url = str(normalized_row.get("source_url") or "")
+    if _url_country_scope_conflicts(
+        country_code=country_code,
+        normalized_url=source_url,
+    ):
+        return False
+    fingerprint = " ".join(
+        str(normalized_row.get(key) or "")
+        for key in ("source_url", "source_name", "purpose")
+    ).lower()
+    return not _has_unrelated_product_type_signal(
+        product_type=product_type,
+        fingerprint=fingerprint,
+    )
 
 
 def _is_candidate_producing_source(row: Any, *, product_type: str) -> bool:

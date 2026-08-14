@@ -14,6 +14,7 @@ from api_service.source_registry import (
     update_source_registry_item,
 )
 from api_service.errors import SourceRegistryError
+from api_service.source_registry_utils import normalize_source_url
 
 
 class _QueuedCursor:
@@ -62,6 +63,20 @@ def _product_type_definitions(*codes: str) -> dict[str, dict[str, object]]:
 
 
 class SourceRegistryTests(unittest.TestCase):
+    def test_source_url_keeps_pricing_document_identity_query_only(self) -> None:
+        self.assertEqual(
+            normalize_source_url(
+                "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline"
+                "?locale=en_US&poCd=D7&cId=4076236&utm_source=test"
+            ),
+            "https://www.bankofamerica.com/salesservices/getDisclosurePDFInline"
+            "?cid=4076236&pocd=D7",
+        )
+        self.assertEqual(
+            normalize_source_url("https://www.example.com/cards?cId=campaign&locale=en_US"),
+            "https://www.example.com/cards",
+        )
+
     def test_country_code_requires_iso_alpha_2_shape(self) -> None:
         self.assertEqual(_normalize_country_code(" us "), "US")
         with self.assertRaises(SourceRegistryError) as captured:

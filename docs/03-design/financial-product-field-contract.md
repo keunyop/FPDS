@@ -151,7 +151,10 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     `deposit_insurance`. These exclusions are semantic and apply across banks
     and Product Types.
 47. Comparison-grade lending approval is independent of the percentage score.
-    Credit cards require `annual_fee` and `purchase_interest_rate`; mortgages
+    Credit cards require `annual_fee` and a purchase-rate requirement. The US
+    profile prefers percentage-bearing `purchase_interest_rate_summary` and
+    permits an exact fixed `purchase_interest_rate` only as an alternative;
+    Canada retains `purchase_interest_rate`. Mortgages
     require `mortgage_rate` or a percentage-bearing `interest_rate_summary`,
     plus `rate_type` and `term_length_text`; personal loans require
     `interest_rate` or a percentage-bearing APR/rate summary, plus

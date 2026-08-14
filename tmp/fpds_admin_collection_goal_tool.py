@@ -17,8 +17,14 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from api_service.aggregate_refresh import launch_aggregate_refresh_runner, request_manual_aggregate_refresh
+from api_service.ai_verification import run_review_ai_verification
 from api_service.config import Settings
 from api_service.candidate_safety_remediation import retract_invalid_candidates
+from api_service.collection_ai_autopilot import (
+    load_collection_ai_autopilot_policy,
+    remediate_collection_review_task,
+)
+from api_service.collection_automation import run_collection_automation_cycle
 from api_service.db import open_connection
 from api_service.public_products import load_public_products, normalize_public_products_query
 from api_service.review_detail import load_review_task_detail
@@ -55,6 +61,17 @@ def main() -> int:
 
     subparsers.add_parser("state")
     subparsers.add_parser("apply-country-market-profiles")
+    subparsers.add_parser("apply-publication-automation")
+    subparsers.add_parser("apply-us-pricing-evidence")
+    subparsers.add_parser("apply-us-pricing-scope-cleanup")
+    subparsers.add_parser("apply-us-cross-product-support-cleanup")
+    subparsers.add_parser("apply-us-card-apr-contract")
+    subparsers.add_parser("automation-cycle")
+    targeted_review_parser = subparsers.add_parser("review-ai-remediate")
+    targeted_review_parser.add_argument("--review-task-id", action="append", required=True)
+    targeted_review_parser.add_argument("--force-new-verification", action="store_true")
+    model_execution_parser = subparsers.add_parser("model-execution")
+    model_execution_parser.add_argument("--model-execution-id", required=True)
     cross_country_parser = subparsers.add_parser("cross-country-source-audit")
     cross_country_parser.add_argument("--country-code", required=True)
     cross_country_parser.add_argument("--execute", action="store_true")
@@ -62,6 +79,9 @@ def main() -> int:
     public_audit_parser.add_argument("--product-id", action="append", default=[])
     essential_audit_parser = subparsers.add_parser("essential-audit")
     essential_audit_parser.add_argument("--brief", action="store_true")
+    readiness_parser = subparsers.add_parser("candidate-readiness-audit")
+    readiness_parser.add_argument("--country-code", action="append", default=[])
+    readiness_parser.add_argument("--brief", action="store_true")
     aggregate_audit_parser = subparsers.add_parser("aggregate-audit")
     aggregate_audit_parser.add_argument("--snapshot-id", required=True)
     aggregate_audit_parser.add_argument("--product-id", action="append", default=[])
@@ -156,6 +176,203 @@ def main() -> int:
             }
         )
         return 0
+    if args.command == "apply-publication-automation":
+        migration_path = REPO_ROOT / "db" / "migrations" / "0035_collection_publication_automation.sql"
+        with open_connection(settings) as connection:
+            connection.execute(migration_path.read_text(encoding="utf-8"))
+            rows = connection.execute(
+                """
+                SELECT policy_key, version_no, policy_value, active_flag
+                FROM processing_policy_config
+                WHERE policy_key LIKE 'COLLECTION_AUTOMATION_%'
+                ORDER BY policy_key, version_no DESC
+                """
+            ).fetchall()
+        _print_json(
+            {
+                "migration": migration_path.name,
+                "applied": True,
+                "policies": [_json_safe_row(row) for row in rows],
+            }
+        )
+        return 0
+    if args.command == "apply-us-pricing-evidence":
+        migration_path = REPO_ROOT / "db" / "migrations" / "0036_us_pricing_evidence_companions.sql"
+        with open_connection(settings) as connection:
+            connection.execute(migration_path.read_text(encoding="utf-8"))
+            rows = connection.execute(
+                """
+                SELECT
+                    product_type,
+                    count(*) AS active_source_count,
+                    count(*) FILTER (
+                        WHERE expected_fields ? 'purchase_interest_rate_summary'
+                    ) AS purchase_apr_summary_source_count,
+                    count(*) FILTER (
+                        WHERE discovery_metadata ->> 'market_profile_version' = '2026-08-12-v2'
+                    ) AS current_profile_count
+                FROM source_registry_item
+                WHERE country_code = 'US'
+                  AND status = 'active'
+                  AND product_type = 'credit-card'
+                GROUP BY product_type
+                """
+            ).fetchall()
+        _print_json(
+            {
+                "migration": migration_path.name,
+                "applied": True,
+                "us_credit_card_source_registry": [_json_safe_row(row) for row in rows],
+            }
+        )
+        return 0
+    if args.command == "apply-us-pricing-scope-cleanup":
+        migration_path = REPO_ROOT / "db" / "migrations" / "0037_us_pricing_companion_scope_cleanup.sql"
+        with open_connection(settings) as connection:
+            connection.execute(migration_path.read_text(encoding="utf-8"))
+            rows = connection.execute(
+                """
+                SELECT source_id, status, change_reason
+                FROM source_registry_item
+                WHERE country_code = 'US'
+                  AND change_reason = 'excluded_generic_service_agreement_companion_2026_08_12'
+                ORDER BY source_id
+                """
+            ).fetchall()
+        _print_json(
+            {
+                "migration": migration_path.name,
+                "applied": True,
+                "inactivated_sources": [dict(row) for row in rows],
+            }
+        )
+        return 0
+    if args.command == "apply-us-cross-product-support-cleanup":
+        migration_path = REPO_ROOT / "db" / "migrations" / "0038_us_cross_product_support_cleanup.sql"
+        with open_connection(settings) as connection:
+            connection.execute(migration_path.read_text(encoding="utf-8"))
+            rows = connection.execute(
+                """
+                SELECT source_id, product_type, status, change_reason
+                FROM source_registry_item
+                WHERE country_code = 'US'
+                  AND change_reason = 'excluded_cross_product_support_2026_08_12'
+                ORDER BY source_id
+                """
+            ).fetchall()
+        _print_json(
+            {
+                "migration": migration_path.name,
+                "applied": True,
+                "inactivated_sources": [dict(row) for row in rows],
+            }
+        )
+        return 0
+    if args.command == "apply-us-card-apr-contract":
+        migration_path = REPO_ROOT / "db" / "migrations" / "0039_us_credit_card_apr_range_contract.sql"
+        with open_connection(settings) as connection:
+            connection.execute(migration_path.read_text(encoding="utf-8"))
+            rows = connection.execute(
+                """
+                SELECT
+                    count(*) AS active_source_count,
+                    count(*) FILTER (
+                        WHERE expected_fields ? 'purchase_interest_rate_summary'
+                    ) AS purchase_apr_summary_source_count,
+                    count(*) FILTER (
+                        WHERE discovery_metadata ->> 'market_profile_version' = '2026-08-12-v2'
+                    ) AS current_profile_count
+                FROM source_registry_item
+                WHERE country_code = 'US'
+                  AND status = 'active'
+                  AND product_type = 'credit-card'
+                """
+            ).fetchall()
+        _print_json(
+            {
+                "migration": migration_path.name,
+                "applied": True,
+                "us_credit_card_source_registry": [_json_safe_row(row) for row in rows],
+            }
+        )
+        return 0
+    if args.command == "automation-cycle":
+        with open_connection(settings) as connection:
+            result = run_collection_automation_cycle(connection)
+        _print_json(result)
+        return 0
+    if args.command == "review-ai-remediate":
+        outcomes = []
+        approved = False
+        with open_connection(settings) as connection:
+            policy = load_collection_ai_autopilot_policy(connection)
+            for review_task_id in args.review_task_id:
+                if args.force_new_verification:
+                    detail = load_review_task_detail(
+                        connection,
+                        review_task_id=review_task_id,
+                        actor_role="admin",
+                    )
+                    if detail:
+                        run_review_ai_verification(
+                            connection,
+                            detail=detail,
+                            actor={
+                                "actor_type": "system",
+                                "role": "admin",
+                                "display_name": "FPDS targeted collection remediation",
+                            },
+                            request_context={
+                                "request_id": f"forced-review-ai-{review_task_id}",
+                                "ip_address": None,
+                                "user_agent": "fpds-admin-collection-goal-tool",
+                            },
+                        )
+                        connection.commit()
+                result = remediate_collection_review_task(
+                    connection,
+                    review_task_id=review_task_id,
+                    approval_threshold=float(policy["approval_threshold"]),
+                    request_context={
+                        "request_id": f"targeted-review-ai-{review_task_id}",
+                        "ip_address": None,
+                        "user_agent": "fpds-admin-collection-goal-tool",
+                    },
+                )
+                connection.commit()
+                outcomes.append(result)
+                approved = approved or bool(result.get("approved"))
+        aggregate_launch = launch_aggregate_refresh_runner() if approved else None
+        _print_json(
+            {
+                "policy": policy,
+                "outcomes": outcomes,
+                "aggregate_refresh_launch": aggregate_launch,
+            }
+        )
+        return 0
+    if args.command == "model-execution":
+        with open_connection(settings) as connection:
+            row = connection.execute(
+                """
+                SELECT
+                    model_execution_id,
+                    run_id,
+                    source_document_id,
+                    stage_name,
+                    agent_name,
+                    model_id,
+                    execution_status,
+                    execution_metadata,
+                    started_at,
+                    completed_at
+                FROM model_execution
+                WHERE model_execution_id = %(model_execution_id)s
+                """,
+                {"model_execution_id": args.model_execution_id},
+            ).fetchone()
+        _print_json(_json_safe_row(row) if row else None)
+        return 0
     if args.command == "cross-country-source-audit":
         country_code = str(args.country_code).strip().upper()
         with open_connection(settings) as connection:
@@ -210,6 +427,13 @@ def main() -> int:
     if args.command == "essential-audit":
         audit = load_essential_public_audit(settings)
         _print_json(_brief_essential_public_audit(audit) if args.brief else audit)
+        return 0
+    if args.command == "candidate-readiness-audit":
+        audit = load_candidate_readiness_audit(
+            settings,
+            country_codes=args.country_code,
+        )
+        _print_json(_brief_candidate_readiness_audit(audit) if args.brief else audit)
         return 0
     if args.command == "aggregate-audit":
         _print_json(
@@ -594,7 +818,7 @@ def load_essential_public_audit(settings: Settings) -> dict[str, Any]:
             WHERE cp.status = 'active'
               AND (
                     cp.product_family = 'deposit'
-                    OR cp.product_type IN ('mortgage', 'personal-loan', 'line-of-credit')
+                    OR cp.product_type IN ('credit-card', 'mortgage', 'personal-loan', 'line-of-credit')
                   )
             ORDER BY cp.country_code, cp.bank_code, cp.product_type, cp.product_name, cp.product_id
             """
@@ -707,6 +931,252 @@ def load_essential_public_audit(settings: Settings) -> dict[str, Any]:
     }
 
 
+def load_candidate_readiness_audit(
+    settings: Settings,
+    *,
+    country_codes: list[str],
+) -> dict[str, Any]:
+    """Summarize active candidate blockers under the current market profile."""
+
+    normalized_countries = sorted(
+        {
+            str(country_code).strip().upper()
+            for country_code in country_codes
+            if str(country_code).strip()
+        }
+    )
+    country_filter = "AND nc.country_code = ANY(%(country_codes)s::text[])" if normalized_countries else ""
+    with open_connection(settings) as connection:
+        rows = connection.execute(
+            f"""
+            SELECT
+                nc.candidate_id,
+                nc.run_id,
+                nc.country_code,
+                nc.bank_code,
+                nc.product_type,
+                nc.product_name,
+                nc.candidate_state,
+                nc.validation_status,
+                nc.validation_issue_codes,
+                nc.candidate_payload,
+                sd.source_metadata,
+                active_review.review_task_id,
+                active_review.review_state,
+                active_review.queue_reason_code,
+                verification.model_execution_id,
+                verification.execution_status AS verification_status,
+                verification.execution_metadata -> 'auto_approval_assessment' AS auto_approval_assessment
+            FROM normalized_candidate AS nc
+            JOIN source_document AS sd
+              ON sd.source_document_id = nc.source_document_id
+            LEFT JOIN LATERAL (
+                SELECT rt.review_task_id, rt.review_state, rt.queue_reason_code
+                FROM review_task AS rt
+                WHERE rt.candidate_id = nc.candidate_id
+                  AND rt.review_state IN ('queued', 'deferred')
+                ORDER BY rt.created_at DESC, rt.review_task_id DESC
+                LIMIT 1
+            ) AS active_review ON true
+            LEFT JOIN LATERAL (
+                SELECT me.model_execution_id, me.execution_status, me.execution_metadata
+                FROM model_execution AS me
+                WHERE me.stage_name = 'ai_verification'
+                  AND me.execution_metadata ->> 'review_task_id' = active_review.review_task_id
+                  AND me.execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v17'
+                ORDER BY me.started_at DESC, me.model_execution_id DESC
+                LIMIT 1
+            ) AS verification ON true
+            WHERE nc.candidate_state IN ('auto_validated', 'in_review')
+              {country_filter}
+            ORDER BY nc.country_code, nc.bank_code, nc.product_type, nc.product_name, nc.candidate_id
+            """,
+            {"country_codes": normalized_countries},
+        ).fetchall()
+        canonical_rows = connection.execute(
+            """
+            SELECT country_code, product_type, status, COUNT(*) AS product_count
+            FROM canonical_product
+            WHERE (%(country_codes)s::text[] IS NULL OR country_code = ANY(%(country_codes)s::text[]))
+            GROUP BY country_code, product_type, status
+            ORDER BY country_code, product_type, status
+            """,
+            {"country_codes": normalized_countries or None},
+        ).fetchall()
+        active_canonical_rows = connection.execute(
+            """
+            SELECT
+                cp.product_id,
+                cp.country_code,
+                cp.bank_code,
+                cp.product_type,
+                cp.product_name,
+                COALESCE(NULLIF(pv.normalized_payload, '{}'::jsonb), cp.current_snapshot_payload, '{}'::jsonb)
+                    AS canonical_payload
+            FROM canonical_product AS cp
+            LEFT JOIN product_version AS pv
+              ON pv.product_id = cp.product_id
+             AND pv.version_no = cp.current_version_no
+            WHERE cp.status = 'active'
+              AND (%(country_codes)s::text[] IS NULL OR cp.country_code = ANY(%(country_codes)s::text[]))
+            ORDER BY cp.country_code, cp.bank_code, cp.product_type, cp.product_name, cp.product_id
+            """,
+            {"country_codes": normalized_countries or None},
+        ).fetchall()
+
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        payload = dict(row.get("candidate_payload") or {})
+        source_metadata = dict(row.get("source_metadata") or {})
+        quality = comparison_quality(
+            product_type=str(row.get("product_type") or ""),
+            country_code=str(row.get("country_code") or ""),
+            expected_fields=_coerce_string_list(source_metadata.get("expected_fields")),
+            candidate_payload=payload,
+        )
+        issue_codes = _coerce_string_list(row.get("validation_issue_codes"))
+        hard_blockers = sorted(
+            set(issue_codes)
+            - {"partial_source_failure", "low_confidence", "required_field_missing"}
+        )
+        assessment = dict(row.get("auto_approval_assessment") or {})
+        items.append(
+            {
+                "candidate_id": str(row["candidate_id"]),
+                "run_id": str(row["run_id"]),
+                "country_code": str(row["country_code"]),
+                "bank_code": str(row["bank_code"]),
+                "product_type": str(row["product_type"]),
+                "product_name": str(row["product_name"]),
+                "candidate_state": str(row["candidate_state"]),
+                "validation_status": str(row["validation_status"]),
+                "issue_codes": issue_codes,
+                "hard_blockers": hard_blockers,
+                "review_task_id": row.get("review_task_id"),
+                "review_state": row.get("review_state"),
+                "queue_reason_code": row.get("queue_reason_code"),
+                "comparison_contract_defined": quality.contract_defined,
+                "comparison_complete": quality.complete,
+                "satisfied_fields": list(quality.satisfied_fields),
+                "missing_fields": list(quality.missing_fields),
+                "model_execution_id": row.get("model_execution_id"),
+                "verification_status": row.get("verification_status"),
+                "auto_approval_eligible": bool(assessment.get("eligible")),
+                "auto_approval_blockers": list(assessment.get("blockers") or []),
+            }
+        )
+
+    group_counts = Counter(
+        (
+            item["country_code"],
+            item["product_type"],
+            item["candidate_state"],
+            item["queue_reason_code"] or "none",
+        )
+        for item in items
+    )
+    missing_counts = Counter(
+        (item["country_code"], item["product_type"], missing_field)
+        for item in items
+        for missing_field in item["missing_fields"]
+    )
+    hard_blocker_counts = Counter(
+        (item["country_code"], item["product_type"], blocker)
+        for item in items
+        for blocker in item["hard_blockers"]
+    )
+    canonical_quality_counts: Counter[tuple[str, str, str]] = Counter()
+    incomplete_canonical_products: list[dict[str, Any]] = []
+    for row in active_canonical_rows:
+        quality = comparison_quality(
+            product_type=str(row["product_type"]),
+            country_code=str(row["country_code"]),
+            expected_fields=(),
+            candidate_payload=dict(row.get("canonical_payload") or {}),
+        )
+        complete = bool(quality.contract_defined and quality.complete)
+        canonical_quality_counts[
+            (
+                str(row["country_code"]),
+                str(row["product_type"]),
+                "complete" if complete else "incomplete",
+            )
+        ] += 1
+        if not complete:
+            incomplete_canonical_products.append(
+                {
+                    "product_id": str(row["product_id"]),
+                    "country_code": str(row["country_code"]),
+                    "bank_code": str(row["bank_code"]),
+                    "product_type": str(row["product_type"]),
+                    "product_name": str(row["product_name"]),
+                    "missing_fields": list(quality.missing_fields),
+                }
+            )
+    return {
+        "country_codes": normalized_countries or ["ALL"],
+        "active_candidate_count": len(items),
+        "candidate_state_counts": dict(sorted(Counter(item["candidate_state"] for item in items).items())),
+        "comparison_complete_count": sum(1 for item in items if item["comparison_complete"]),
+        "comparison_incomplete_count": sum(1 for item in items if not item["comparison_complete"]),
+        "complete_without_hard_blocker_count": sum(
+            1 for item in items if item["comparison_complete"] and not item["hard_blockers"]
+        ),
+        "current_verification_count": sum(1 for item in items if item["model_execution_id"]),
+        "auto_approval_eligible_count": sum(1 for item in items if item["auto_approval_eligible"]),
+        "canonical_state_counts": [
+            {
+                "country_code": str(row["country_code"]),
+                "product_type": str(row["product_type"]),
+                "status": str(row["status"]),
+                "count": int(row["product_count"]),
+            }
+            for row in canonical_rows
+        ],
+        "active_canonical_quality_counts": [
+            {
+                "country_code": key[0],
+                "product_type": key[1],
+                "quality": key[2],
+                "count": count,
+            }
+            for key, count in sorted(canonical_quality_counts.items())
+        ],
+        "incomplete_canonical_products": incomplete_canonical_products,
+        "groups": [
+            {
+                "country_code": key[0],
+                "product_type": key[1],
+                "candidate_state": key[2],
+                "queue_reason_code": key[3],
+                "count": count,
+            }
+            for key, count in sorted(group_counts.items())
+        ],
+        "missing_field_counts": [
+            {
+                "country_code": key[0],
+                "product_type": key[1],
+                "field": key[2],
+                "count": count,
+            }
+            for key, count in sorted(missing_counts.items())
+        ],
+        "hard_blocker_counts": [
+            {
+                "country_code": key[0],
+                "product_type": key[1],
+                "issue_code": key[2],
+                "count": count,
+            }
+            for key, count in sorted(hard_blocker_counts.items())
+        ],
+        "complete_candidates": [
+            item for item in items if item["comparison_complete"]
+        ],
+    }
+
+
 def _quality_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
     grouped: dict[str, dict[str, int]] = {}
     for item in items:
@@ -735,6 +1205,37 @@ def _brief_essential_public_audit(audit: dict[str, Any]) -> dict[str, Any]:
         },
         "incomplete_public_products": audit["incomplete_public_products"],
         "affected_scopes": audit["affected_scopes"],
+    }
+
+
+def _brief_candidate_readiness_audit(audit: dict[str, Any]) -> dict[str, Any]:
+    canonical_quality_counts = list(audit["active_canonical_quality_counts"])
+    return {
+        key: audit[key]
+        for key in (
+            "country_codes",
+            "active_candidate_count",
+            "candidate_state_counts",
+            "comparison_complete_count",
+            "comparison_incomplete_count",
+            "complete_without_hard_blocker_count",
+            "current_verification_count",
+            "auto_approval_eligible_count",
+        )
+    } | {
+        "active_canonical_complete_count": sum(
+            int(item["count"])
+            for item in canonical_quality_counts
+            if item["quality"] == "complete"
+        ),
+        "active_canonical_incomplete_count": sum(
+            int(item["count"])
+            for item in canonical_quality_counts
+            if item["quality"] == "incomplete"
+        ),
+        "active_canonical_quality_counts": canonical_quality_counts,
+        "missing_field_counts": audit["missing_field_counts"],
+        "hard_blocker_counts": audit["hard_blocker_counts"],
     }
 
 
@@ -1691,6 +2192,18 @@ def _serialize_accuracy_run(row: dict[str, Any]) -> dict[str, Any]:
 
 def _json_safe_row(row: dict[str, Any]) -> dict[str, Any]:
     return {str(key): value for key, value in dict(row).items()}
+
+
+def _coerce_string_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return [value] if value.strip() else []
+        return _coerce_string_list(parsed)
+    return []
 
 
 def _run_is_final(row: dict[str, Any]) -> bool:

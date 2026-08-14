@@ -958,6 +958,7 @@ def _insert_collection_run_row(
     collection_id: str,
     group: dict[str, Any],
     pipeline_stage: str = "source_collection",
+    trigger_type: str = "admin_source_collection",
     retry_of_run_id: str | None = None,
 ) -> None:
     started_at = utc_now()
@@ -975,6 +976,7 @@ def _insert_collection_run_row(
         "product_type": group["product_type"],
         "product_family": group.get("product_family", "deposit"),
         "source_language": group["source_language"],
+        "catalog_item_id": group.get("catalog_item_id"),
     }
     connection.execute(
         """
@@ -1001,7 +1003,7 @@ def _insert_collection_run_row(
             %(run_id)s,
             %(country_code)s,
             'started',
-            'admin_source_collection',
+            %(trigger_type)s,
             %(triggered_by)s,
             %(source_scope_count)s,
             0,
@@ -1020,7 +1022,7 @@ def _insert_collection_run_row(
         SET
             run_state = 'started',
             country_code = EXCLUDED.country_code,
-            trigger_type = 'admin_source_collection',
+            trigger_type = EXCLUDED.trigger_type,
             triggered_by = COALESCE(EXCLUDED.triggered_by, ingestion_run.triggered_by),
             source_scope_count = GREATEST(ingestion_run.source_scope_count, EXCLUDED.source_scope_count),
             source_success_count = 0,
@@ -1036,6 +1038,7 @@ def _insert_collection_run_row(
         {
             "run_id": run_id,
             "country_code": group["country_code"],
+            "trigger_type": trigger_type,
             "triggered_by": triggered_by,
             "source_scope_count": len(group["included_source_ids"]),
             "retry_of_run_id": retry_of_run_id,

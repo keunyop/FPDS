@@ -73,7 +73,9 @@ class DiscoveryFetchPolicy:
             (
                 "bmo.com,www.bmo.com,cibc.com,www.cibc.com,"
                 "rbcroyalbank.com,www.rbcroyalbank.com,"
-                "simplii.com,www.simplii.com,tangerine.ca,www.tangerine.ca"
+                "simplii.com,www.simplii.com,tangerine.ca,www.tangerine.ca,"
+                "bankofamerica.com,capitalone.com,chase.com,citi.com,marcus.com,"
+                "pnc.com,td.com,truist.com,usbank.com,wellsfargo.com"
             ),
         )
         browser_fallback_domains = tuple(
@@ -302,15 +304,45 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
     )
     if unresolved_rate_placeholder:
         return True
+    unresolved_pricing_placeholder = bool(
+        re.search(r"\b(?:nan|undefined|null)\s*%?\s*(?:apy|apr|interest rate)\b", lowered)
+        or re.search(r"\b(?:apy|apr)\s*[:=-]?\s*(?:nan|x{2,}|--+)\b", lowered)
+        or re.search(r"\$\s*x{2,}\b", lowered)
+        or re.search(r"\{\{\{?\s*htmlescaper\s+interest_rates_fees_", lowered)
+    )
+    if unresolved_pricing_placeholder:
+        return True
+    has_numeric_rate = bool(
+        re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s*%", visible_text)
+        or re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s+per\s+cent\b", visible_text, flags=re.IGNORECASE)
+    )
+    dynamic_pricing_surface = any(
+        marker in lowered
+        for marker in (
+            "annual percentage rate",
+            "annual percentage yield",
+            "checking interest rates",
+            "purchase apr",
+            "savings rate information",
+        )
+    )
+    location_or_loading_gate = any(
+        marker in lowered
+        for marker in (
+            "change location",
+            "enter your zip code",
+            "please check back later",
+            "select a location",
+            "you are viewing info for",
+        )
+    )
+    if dynamic_pricing_surface and location_or_loading_gate and not has_numeric_rate:
+        return True
     normalized_path = parsed.path.lower().replace("_", "-")
     if not any(marker in normalized_path for marker in ("interest-rate", "interest-rates", "/rates", "rate-sheet")):
         return False
     if not any(marker in lowered for marker in ("interest rate", "annual percentage rate", "rates")):
         return False
-    has_numeric_rate = bool(
-        re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s*%", visible_text)
-        or re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s+per\s+cent\b", visible_text, flags=re.IGNORECASE)
-    )
     return not has_numeric_rate
 
 

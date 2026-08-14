@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: "FPDS — Verified financial product records",
     template: "%s — FPDS"
   },
-  description: "Compare reviewed public facts for deposit and loan products by country."
+  description: "Compare reviewed public facts for deposit, credit card, and loan products by country."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

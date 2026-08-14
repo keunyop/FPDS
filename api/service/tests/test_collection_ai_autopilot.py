@@ -55,7 +55,9 @@ class CollectionAiAutopilotTests(TestCase):
 
         sql, params = connection.calls[0]
         self.assertEqual(params, {"review_task_id": "review-001"})
-        self.assertIn("review-ai-verification-v7", sql)
+        self.assertIn("review-ai-verification-v17", sql)
+        self.assertIn("execution_status = 'completed'", sql)
+        self.assertIn("interval '24 hours'", sql)
 
     def test_policy_defaults_enable_low_touch_review_and_bounds_values(self):
         connection = _QueryConnection(
@@ -181,7 +183,10 @@ class CollectionAiAutopilotTests(TestCase):
         execution = {
             "model_execution_id": "modelexec-001",
             "execution_status": "completed",
-            "execution_metadata": {"auto_approval_assessment": assessment},
+            "execution_metadata": {
+                "approval_field_names": ["product_name"],
+                "auto_approval_assessment": assessment,
+            },
         }
         with (
             patch("api_service.collection_ai_autopilot.load_review_task_detail", return_value=_detail()),

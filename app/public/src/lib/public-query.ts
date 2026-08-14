@@ -21,10 +21,11 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
-export type PublicRoutePath = "/dashboard" | "/products" | "/loans" | "/methodology" | `/products/${string}`;
+export type PublicRoutePath = "/dashboard" | "/products" | "/cards" | "/loans" | "/methodology" | `/products/${string}`;
 
 export const DEPOSIT_PRODUCT_TYPES = ["chequing", "savings", "gic"] as const;
 export const LOAN_PRODUCT_TYPES = ["mortgage", "personal-loan", "line-of-credit"] as const;
+export const CARD_PRODUCT_TYPES = ["credit-card"] as const;
 
 const SORT_OPTIONS = new Set([
   "default",
@@ -34,6 +35,7 @@ const SORT_OPTIONS = new Set([
   "monthly_fee",
   "minimum_balance",
   "minimum_deposit",
+  "annual_fee",
   "last_changed_at"
 ]);
 
@@ -179,7 +181,7 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
     params.set("term_bucket", state.termBucket);
   }
 
-  if (path === "/products" || path === "/loans") {
+  if (path === "/products" || path === "/cards" || path === "/loans") {
     if (state.sortBy && state.sortBy !== "default") {
       params.set("sort_by", state.sortBy);
     }

@@ -25,6 +25,53 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of `2026-08-12` (US pricing-evidence follow-up):
+- official US bank UI review confirmed that required pricing is commonly split
+  across a product hero or accordion, ZIP/state-specific tables, directly
+  linked fee/rate disclosures, query-addressed offer documents, and
+  product-named agreements rather than one static product page
+- exact-product detail discovery now follows at most two compatible pricing,
+  fee, rate-table, account-guide, or agreement companions per product; source
+  identity retains bounded offer/document/location query keys, US dynamic
+  pages can use browser capture, and structured payload parsing includes
+  APY/APR/fee keys
+- Review AI v17 invalidates a cached result when candidate approval fields
+  change and permits only bounded exact-quote repair from the exact product
+  route or a separately named exact-product agreement/disclosure
+- US cards require annual fee plus a qualified Purchase APR summary; Public
+  shows the entire intro/range/variable-rate qualification rather than a
+  synthetic lower-bound rate, and approved-origin fallback keeps an official
+  product link available without exposing private evidence
+- shared-dev migrations `0036` through `0039` are applied. Bank of America
+  Travel Rewards, Travel Rewards for Students, and Marcus High-Yield CDs were
+  automatically promoted from exact official evidence. Latest Public is
+  `77/77` essential-complete (`63` CA, `14` US), with zero incomplete rows and
+  zero US missing official product links; `108` incomplete canonical rows stay
+  private
+
+As of `2026-08-12`:
+- the CA/US Admin-to-Public gap investigation found no recurring product
+  scheduler, no global recovery sweep for pre-policy or interrupted candidates,
+  and a Public aggregate allowlist that omits credit cards
+- shared-dev started this slice with 171 active canonical products, only 60
+  satisfying the current essential comparison contract, and Public snapshots
+  containing 47 CA plus 11 US products
+- migration `0035_collection_publication_automation.sql` and the API runtime now
+  define a single-leader, policy-controlled loop for weekly active-catalog
+  collection, 24-hour failed/partial retry, stale-run recovery, orphan
+  auto-promotion, bounded current-v7 Review AI recovery, and pending aggregate
+  restart; automated runs and audit events retain the `scheduler` actor type
+- credit cards now use the existing D-034 completeness gate across aggregate,
+  Public API, `/cards`, comparison, and detail instead of being silently
+  filtered out
+- shared-dev migration, recovery, and aggregate refresh are complete: all 66
+  active canonical products that currently satisfy the essential contract are
+  in Public (`55` CA, including `7` cards; `11` US), with zero incomplete Public
+  rows; 111 incomplete active canonical rows remain private
+- the first scheduled six-scope US collection is progressing independently in
+  the background, and the scheduler continues bounded reconciliation of legacy
+  Review candidates without operator action
+
 As of `2026-08-09`:
 - `WBS 5` is the active stage
 - US collection-failure hardening is complete, fully regression tested, and
@@ -102,6 +149,157 @@ Read before coding:
 ---
 
 ## 4. Recent Entries
+
+## 2026-08-12 - US Pricing Evidence And Automatic Publication
+
+- WBS: `5.26`, US pricing/fee evidence collection and Public publication
+- Status: complete in implementation, targeted shared-dev remediation, live
+  aggregate/API readback, and regression verification; the independent broad
+  catalog runner remains observable through normal automation
+- Goal: align FPDS collection with how US banks actually expose mandatory rate
+  and fee information, then publish every repaired candidate that meets the
+  unchanged official-evidence gate without operator approval.
+- Why now: registered banks and candidate counts were high, but exact rates and
+  fees often lived outside the originally selected detail page. Query stripping,
+  static-only fetches, deposit-centric labels, range flattening, and stale AI
+  verification kept otherwise valid US products private.
+- Outcome:
+  - analyzed official Chase, Bank of America, Capital One, Wells Fargo, TD Bank,
+    U.S. Bank, and Marcus page/disclosure patterns and implemented bounded
+    detail-linked pricing companions, query-aware source identity, browser
+    fallback, structured pricing payload extraction, and cross-Product-Type
+    supporting-source exclusion
+  - added Purchase APR labels and `purchase_interest_rate_summary` across
+    extraction, normalization, validation, aggregate, API, and Public list,
+    comparison, and detail; migration `0039` makes the qualified summary the
+    preferred US card essential rather than treating a range lower bound as the
+    offer
+  - upgraded Review AI to v17 with current-field cache matching and an exact
+    US-card fallback limited to `$0`/no-annual-fee statements and named
+    exact-product Purchase APR disclosure quotes
+  - fixed nested US CD identity so an exact `*-cd`/`*-cds` product slug under a
+    bank's `/savings/` information architecture outranks the parent route
+  - added a safe Public product-link fallback from the approved candidate's
+    official origin when projection metadata and product-version evidence links
+    do not themselves contain a link
+  - applied shared-dev migrations `0036`-`0039`, re-ran the cleanup after broad
+    collection materialization, and confirmed all `93` active US card sources
+    request the v2 APR-summary contract
+  - automatically approved and published Bank of America Travel Rewards,
+    Travel Rewards for Students, and Marcus High-Yield CDs. The cards retain
+    `$0` annual fees and full disclosed APR text; Marcus retains `3.90%`,
+    `$500`, `6 months to 6 years`, and its early-withdrawal disclosure
+  - rechecked seven other complete-looking private US candidates through the
+    current official-domain/exact-quote workflow. All seven remained private
+    because one or more required fields could not be verified at 100%; six
+    additional complete-looking candidates retain explicit cross-field
+    inconsistency blockers
+  - latest Public audit is exact: canonical `185 = 77 complete + 108
+    incomplete`; Public `77 = 77 complete + 0 incomplete`. US Public has `14`
+    products (`5` checking, `2` cards, `1` CD, `1` mortgage, `5` personal/
+    vehicle loans), no `Unavailable` values, and no missing official links
+- Not done: did not bulk-approve the `78` incomplete active US canonical rows
+  or the `135` private active candidates. Their current missing field and
+  cross-field reasons remain available to Admin and the recurring recovery
+  loop; no source fact was inferred from a sibling product.
+- Key files: discovery URL/fetch/parser modules, source catalog and runner,
+  Review AI verification/correction, market profile and field contract,
+  aggregate/Public API/UI modules, migrations `0036`-`0039`, active design and
+  requirements docs, and `tmp/fpds_admin_collection_goal_tool.py`
+- Decisions: updated D-043; retained exact product identity, source-language
+  financial qualifications, 100% essential grounding, private raw evidence,
+  and fail-closed publication.
+- Verification:
+  - API full suite: `391` tests
+  - worker full suite: `471` tests
+  - Public: `pnpm run typecheck`; `pnpm run build` including `/cards`
+  - shared-dev targeted collections: two Bank of America cards and Marcus CD
+    approved with zero Review task for the CD
+  - live anonymous Public API: US `14`, zero unavailable values, zero missing
+    product links; exact card APR summaries and Marcus CD facts read back
+- Known issues: current official search still cannot fully verify seven
+  otherwise complete-looking legacy candidates; they remain Review-bound. The
+  older broad runner discovered 49 Chase card sources before the current
+  bounded process was loaded and continues through the guarded downstream
+  stages; future scheduled runs use the new selection rules.
+- Next step: no routine operator action is required. Keep the API runtime
+  deployed so the elected scheduler continues weekly collection, bounded
+  re-verification, and aggregate recovery.
+
+## 2026-08-12 - Continuous Collection-To-Public Recovery And Public Cards
+
+- WBS: `5.25`, Admin collection automation, existing-candidate reconciliation,
+  Public credit-card activation
+- Status: complete in implementation, shared-dev migration/recovery, Public
+  readback, full API/worker regression, and Public production build
+- Goal: explain why registered and collected CA/US products were not reaching
+  Public, publish every currently complete product, and remove routine operator
+  dependency from collection through aggregate refresh.
+- Why now: the Product Owner reported many Admin banks and collection results
+  but few Public products and explicitly authorized a process redesign plus
+  publication of the currently collected safe data.
+- Outcome:
+  - confirmed that registration and collection counts were not publication
+    counts: the latest five collections included rejected/superseded and Review
+    candidates, while only 60 of 171 active canonical rows met the current
+    country/Product Type essential contract at the start
+  - found three lifecycle defects: no recurring product-collection scheduler,
+    no global recovery after an interrupted/pre-policy promotion or Review
+    step, and an aggregate/Public allowlist that omitted credit cards despite
+    D-034 already defining their publication contract
+  - added migration `0035` and one advisory-lock-elected API scheduler leader
+    for weekly six-scope active-catalog collection, 24-hour failed/partial
+    retry, 12-hour abandoned-run closure, orphan auto-promotion, ten-task
+    current-v7 Review recovery, and pending aggregate restart
+  - preserved scheduler actor/trigger lineage and the existing 100% essential
+    official-evidence, canonical, audit, and country projection gates; failed
+    AI attempts can retry, while incomplete, ambiguous, and non-product rows
+    stay private
+  - enabled credit cards in aggregate loading and anonymous Public APIs; added
+    `/cards`, annual-fee sorting, purchase-rate list/compare/detail facts,
+    navigation, and EN/KO/JA copy
+  - applied migration `0035` to shared dev, recovered six abandoned runs,
+    promoted the orphan eligible candidate, processed bounded legacy Review
+    batches, and refreshed Public snapshots
+  - final essential audit is exact: active canonical `177 = 66 complete + 111
+    incomplete`; Public `66 = 66 complete + 0 incomplete`, with no affected
+    complete scope. Public grew from `58` to `66`: CA `55` (`16` chequing, `7`
+    credit card, `8` GIC, `3` line of credit, `4` mortgage, `17` savings) and US
+    `11` (`5` chequing, `1` mortgage, `5` personal loan)
+  - launched scheduled collection `collection_Z4Vbo8MwicqtqKgE` for six due US
+    bank/Product Type scopes; the final checkpoint was `3 completed / 3
+    started`, with the independent runner still progressing
+- Not done: did not force-publish the 111 incomplete canonical rows or legacy
+  candidates whose identity, required financial fact, exact official evidence,
+  or cross-field consistency is unresolved. No publication gate was weakened.
+- Key files: `db/migrations/0035_collection_publication_automation.sql`,
+  `api/service/api_service/collection_automation.py`,
+  `api/service/api_service/main.py`, aggregate/Public API modules,
+  `worker/pipeline/fpds_aggregate_refresh/*`, `app/public/src/app/cards/`,
+  shared Public catalog components, and this journal
+- Decisions: recorded D-042; kept normal collection weekly, failed/partial
+  retry at 24 hours, recovery work at ten candidates per 15-minute poll, and
+  cards on the already-approved annual-fee plus purchase-rate contract
+- Verification:
+  - API: `.venv\Scripts\python.exe -B -m unittest discover -s tests -p
+    "test_*.py"` (`383` tests)
+  - worker: `uv run python -B -m unittest discover -s worker -p "test_*.py"`
+    (`463` tests)
+  - Public: `pnpm run typecheck`; `pnpm run build` (includes `/cards`)
+  - live `/cards`: HTTP `200`, `7 products`, annual-fee and purchase-rate copy
+  - exact mobile emulation: `innerWidth=390`, `clientWidth=390`, document and
+    body `scrollWidth=390`; current title and seven-product snapshot rendered
+  - shared-dev `essential-audit --brief`: canonical `66/177` complete, Public
+    `66/66` complete, zero incomplete Public rows
+  - `git diff --check`
+- Known issues: the 50 legacy active US card rows are incomplete under the
+  current profile and correctly remain non-public; fresh scheduled recollection
+  and bounded Review recovery continue automatically rather than bulk-approving
+  them from stale data.
+- Next step: no routine Product Owner action is required. Keep the API runtime
+  deployed so the elected scheduler can finish the active US collection and
+  continue weekly collection/recovery; use Admin Review only for candidates
+  that remain genuinely ambiguous after automatic verification.
 
 ## 2026-08-09 - Country-Specific Collection And Publication Profiles
 
@@ -996,1080 +1194,3 @@ Read before coding:
   or published.
 - Next step: operator review of the corrected Bank of America candidates;
   publication remains outside this hardening slice.
-
-## 2026-07-30 - Admin Banks Logo Footprint Standardization
-
-- WBS: `5.15`, `5.23` UI hardening
-- Status: done
-- Goal: remove the large visual-size difference between square favicon assets
-  and wide bank wordmarks on the Admin Banks workflow.
-- Why now: the list, AI result, and detail preview each used separate
-  max-dimension renderers. A square source could occupy the full `40px` height
-  while a wide wordmark occupied only a shallow strip, despite sharing a row.
-- Outcome: all three locations now reuse one `BankLogoMark`. It preserves the
-  existing unframed presentation and source aspect ratio inside a `48x24`
-  `object-contain` image viewport and a stable `56x40` layout slot. Missing or
-  failed assets still fall back to the accessible bank-code mark.
-- Not done: no logo asset, bank record, API contract, Public component, frame,
-  background, or border was changed.
-- Key files:
-  `app/admin/src/components/fpds/admin/bank-logo-mark.tsx`,
-  `bank-registry-surface.tsx`, `bank-ai-onboarding-dialog-content.tsx`,
-  `bank-detail-dialog-content.tsx`, Admin README, and Admin IA.
-- Verification:
-  - `pnpm run typecheck` in `app/admin`
-  - `pnpm run build` in `app/admin`
-  - temporary production-style logo fixtures covering square, wide, tall, and
-    missing assets were visually inspected at `1440px`, `768px`, and exact
-    `390px`; alignment stayed stable with no cropping or document overflow
-  - temporary QA route, screenshots, browser profiles, and server artifacts
-    were removed
-- Known issues: visual mass cannot be mathematically identical across every
-  possible transparent logo artwork, but the shared viewport removes the
-  previous component-level size variance without distorting brand assets.
-- Next step: normal Product Owner visual review on the live Banks screen.
-
-## 2026-07-30 - AI Bank Display-Name Normalization
-
-- WBS: `5.23`
-- Status: done
-- Goal: prevent fixed-width regulatory ranking abbreviations from becoming
-  customer-facing bank names and correct the five affected US shared-dev rows.
-- Why now: the first US onboarding result stored Federal Reserve LBR labels
-  such as `JPMORGAN CHASE BK NA` directly in `bank.bank_name`, making valid
-  source abbreviations look like truncated UI data.
-- Outcome: the model contract now returns a customer-facing `bank_name`, full
-  `legal_name`, its official source, and the exact `ranking_name` separately.
-  US display names carrying the observed `BK`, `AMER`, `NA`, `N.A.`, or
-  `National Association` report/legal suffix patterns are rejected before
-  registry creation. Successful model execution and audit metadata retain the
-  legal and ranking name evidence.
-- Shared dev: corrected `BOAN`, `CN`, `JCBN`, `USBN`, and `WFBN` to `Bank of
-  America`, `Citibank`, `JPMorgan Chase Bank`, `U.S. Bank`, and `Wells Fargo
-  Bank`. Each exact change has a `bank_profile_updated` audit event containing
-  the old ranking label, official legal name, and Federal Reserve/OCC sources.
-- Not done: no bank code, homepage, logo URL, Product Type coverage, collection,
-  canonical product, or Public publication state was changed.
-- Key files: `api/service/api_service/bank_ai_onboarding.py`,
-  `api/service/tests/test_bank_ai_onboarding.py`, API/root README, requirements,
-  WBS, decision log, and source-registry policy.
-- Decisions: the registry owns a concise official customer-facing display name;
-  legal entity identity and ranking-source labels remain private evidence
-  rather than UI labels.
-- Verification:
-  - `.\\api\\service\\.venv\\Scripts\\python.exe -m unittest
-    api.service.tests.test_bank_ai_onboarding` (`10` tests)
-  - `$env:PYTHONPATH='api/service';
-    .\\api\\service\\.venv\\Scripts\\python.exe -m unittest discover -s
-    api/service/tests -p "test_*.py"` (`308` tests)
-  - shared-dev readback confirmed all five display names, logo alt text values,
-    and five `regulatory_abbreviation_normalized` audit events
-- Known issues: older completed model-execution records retain their original
-  provider response lineage but cannot retroactively gain the new structured
-  v2 name-evidence array; the corrective audit events hold that mapping.
-- Next step: deploy the API change before the next AI bank onboarding run.
-
-## 2026-07-30 - AI-Assisted Bank Registry Onboarding
-
-- WBS: `5.23`
-- Status: done
-- Goal: let an administrator add a selected number of the largest missing
-  banks for the current Admin header country, including homepage, logo, and
-  grounded Product Type coverage.
-- Outcome: Banks now exposes an admin-only `Add banks with AI` action. Its
-  EN/KO/JA modal selects `1` to `10`, displays the read-only working country,
-  explains duplicate exclusion and all-or-nothing behavior, and refreshes the
-  registry after a verified result.
-- Research and validation: the backend forces OpenAI Responses live web search,
-  requires one comparable current domestic size basis, collects complete
-  consulted-source metadata, excludes existing/duplicate identities and
-  domains, and accepts homepage, logo, and coverage evidence only from
-  bank-controlled domains. Coverage is limited to active Product Type rows;
-  an official-domain favicon is the controlled logo fallback.
-- Safety and state: country comes only from the authenticated session. The
-  mutation requires `admin` plus CSRF, writes the requested bank-plus-coverage
-  batch atomically, records standalone model usage and success/failure audit
-  context, and does not launch collection, approve canonical data, or publish.
-- Database: migration `0027_standalone_ai_operations.sql` makes ingestion
-  `run_id` optional for operational `model_execution` and `llm_usage_record`
-  rows. Product Owner authorization was received and the migration was applied
-  to the shared-dev `public` schema in one transaction. Post-check confirmed
-  the migration-history row and `YES` nullability for both `run_id` columns.
-  No bank rows were created and no AI provider call was made during activation.
-- Key files: `api/service/api_service/bank_ai_onboarding.py`,
-  `api/service/api_service/main.py`,
-  `app/admin/src/components/fpds/admin/bank-ai-onboarding-dialog-content.tsx`,
-  `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`,
-  `worker/pipeline/fpds_ai_runtime.py`, and migration `0027`.
-- Verification: focused onboarding/usage/AI-runtime tests passed; full API
-  suite passed `306`; full Worker suite passed `395`; Admin typecheck and
-  production build passed with `/admin/banks/ai-onboard`. Production-rendered
-  initial, pending, insufficient-evidence, and success states were inspected
-  in EN/KO/JA at desktop, tablet, and an iframe-enforced exact `390px`; the
-  temporary QA routes, screenshots, browser profiles, and server were removed.
-- Known issues: none in the implemented slice.
-- Next step: an administrator may run the first bounded onboarding request from
-  Banks in the intended working country; product collection remains a separate
-  follow-up action.
-
-## 2026-07-29 - Admin Header Working-Country Switch
-
-- WBS: `5.22`
-- Status: done
-- Goal: let an authenticated FPDS Admin operator change the active working
-  country directly from the persistent header without logging out.
-- Outcome: the former passive country badge is now an EN/KO/JA-aware dropdown
-  listing only active configured countries. Selecting a different country
-  opens a confirmation that explains the return to Overview and loss of
-  screen-local filters or unsaved work. Success returns to locale-preserving
-  `/admin`.
-- Security and state: `POST /api/admin/auth/country` validates the destination
-  against the active country registry, requires the current session and CSRF,
-  updates only that session's server-owned `country_code`, and records
-  `auth_country_switched` with previous and next country codes. Choosing the
-  current country is a no-op.
-- Boundary: the switch does not activate countries or mutate country-scoped
-  business data. Country registry configuration remains the separate
-  administrator-only `/admin/countries` workflow.
-- Key files: `app/admin/src/components/fpds/admin/admin-country-switcher.tsx`,
-  `app/admin/src/components/fpds/admin/admin-shell.tsx`,
-  `app/admin/src/app/admin/country-options/route.ts`,
-  `app/admin/src/app/admin/switch-country/route.ts`,
-  `api/service/api_service/auth.py`, `api/service/api_service/main.py`,
-  `api/service/api_service/models.py`, `api/service/tests/test_auth.py`.
-- Verification: API auth tests `9` passed; full API suite `297` passed; Admin
-  typecheck and production build passed; repository doctor and
-  `git diff --check` passed; desktop and exact `390px` shell rendering
-  inspected with no horizontal overflow.
-- Known issues: none.
-- Next step: operators can activate another country in `/admin/countries`,
-  sign in or switch to it, then configure that country's banks and collection
-  coverage through the existing country-scoped workflows.
-
-## 2026-07-29 - Admin Country Registry Management
-
-- WBS: `5.21`
-- Status: done
-- Goal: let administrators add and remove operational countries without
-  typing country identity or risking historical country-scoped data.
-- Outcome: `/admin/countries` now presents a prepared 249-entry ISO 3166-1
-  alpha-2 selector and a compact active-country list with localized names and
-  stable codes. The sidebar entry is visible only to `admin`.
-- Safety: removal is a reversible `inactive` transition. The current login
-  country and final active country are protected; deactivation revokes active
-  sessions for the affected country. Mutations require Admin role plus CSRF and
-  emit `country_activated` or `country_deactivated` config audit events.
-- Boundary: country activation only makes the country available at Admin
-  sign-in. It does not create banks, product types, collection coverage,
-  taxonomy, canonical products, or Public release readiness.
-- Database: migration `0026_country_registry_management.sql` adds the stored
-  English country-name fallback and lookup index; it was applied successfully
-  to dev and the active `CA / Canada` row was verified.
-- Verification: targeted country/auth unit tests passed (`14`), the complete
-  API service suite passed (`295`), and Admin typecheck plus production build
-  passed with the Countries page and both mutation proxy routes present.
-  Production component renders at `1440x1000` and exact `390x844` verified the
-  prepared selector, admin-only navigation, current-country protection, and
-  zero horizontal document overflow; the temporary dummy-data QA route and
-  browser profile were removed afterward.
-- Key files: `api/service/api_service/country_catalog.py`,
-  `api/service/api_service/countries.py`,
-  `db/migrations/0026_country_registry_management.sql`,
-  `app/admin/src/app/admin/countries/`, and
-  `app/admin/src/components/fpds/admin/country-registry-surface.tsx`.
-
-## 2026-07-29 - Admin Locale Dropdown Placement
-
-- WBS: `5.12` locale-rollout UX follow-on
-- Status: done
-- Goal: remove language selection from the authenticated Admin Header, place it
-  inside the sidebar Account menu, and replace the segmented auth-screen
-  locale control with the dropdown pattern already used by FPDS Public.
-- Outcome: `AdminLocaleSwitcher` is now one reusable Radix dropdown with
-  standalone and Account-menu presentations. Login and Signup show the
-  localized current language with EN/KO/JA options and an active checkmark.
-  Authenticated routes expose `Language` inside the sidebar footer Account menu;
-  the Header now retains only working-country and environment context.
-- Behavior: locale links continue to use the existing `buildAdminHref`
-  contract, preserving route and all non-locale query parameters. The controls
-  remain keyboard-operable, use visible localized labels, and meet the
-  40px/44px Admin target-size baseline.
-- Key files: `app/admin/src/components/admin-locale-switcher.tsx`,
-  `app/admin/src/components/fpds/admin/admin-shell.tsx`,
-  `app/admin/src/components/fpds/admin/admin-auth-frame.tsx`, and
-  `app/admin/src/lib/admin-i18n.ts`.
-- Verification: Admin typecheck and production build passed. Headless Chrome
-  verified the Korean Login dropdown at exact `390x844`, with viewport and
-  document widths both `390px`, all three locale options, correct document
-  language, and preservation of `next` plus an unrelated query parameter.
-  An authenticated `1440x1000` render verified zero Header locale controls and
-  keyboard opening of Account -> Language -> EN/KO/JA. An authenticated exact
-  `390x844` render also verified the Account language list remains fully inside
-  the viewport with no horizontal document overflow. Repo Doctor and `git
-  diff --check` passed.
-- Not done: supported locales, source-content translation, country selection,
-  authentication behavior, and per-user persisted locale preferences were not
-  changed.
-
-## 2026-07-29 - Country-Scoped Admin And Key Integrity
-
-- WBS: `5.20`, country-scoped Admin and worldwide key readiness
-- Status: done
-- Goal: require an explicit country before Admin login and make that selection
-  a real server-enforced operational boundary, while choosing a country-aware
-  key model that remains stable as FPDS expands beyond Canada.
-- Outcome: `GET /api/admin/auth/countries` exposes active operational country
-  codes from `country_registry`; login requires one, persists it on
-  `admin_auth_session`, returns it from session introspection, and displays the
-  localized country name/code in the Admin shell. The session country is fixed
-  until logout.
-- Scope enforcement: bank/source/catalog lists, direct entity reads and writes,
-  collection launches, run list/detail/retry, review list/detail/AI
-  verification/decisions, canonical change history, Public aggregate health,
-  and LLM usage derive country from the authenticated session. Cross-country
-  IDs are returned as not found, and conflicting bank mutation country values
-  are rejected.
-- Key decision: `product_id`, `candidate_id`, `run_id`, source/version IDs stay
-  stable technical IDs. Migration `0025_country_scoped_admin.sql` adds
-  country/bank composite integrity, country-aware source natural uniqueness,
-  country-qualified product identity indexes, run country lineage, and
-  `CA:BANK:product-type` generated product keys. `product_type_code` remains a
-  global semantic vocabulary; country-specific taxonomy and coverage keep the
-  country key.
-- Database: applied `0025` to dev successfully in one transaction. It backfilled
-  93 sessions, 610 ingestion runs, and 1,146 generated product keys. Post-check:
-  one active country, zero sessions/runs without country, zero source/bank
-  country mismatches, and one migration-history row.
-- UX: login country selection is first in the form, localized with
-  `Intl.DisplayNames`, keyboard/native-select accessible, and fail-closed when
-  countries cannot load. Compact auth layout now stacks locale selection below
-  the title to avoid narrow-screen pressure.
-- Documentation: requirements, security, API contract, canonical schema, ERD,
-  DB/API/Admin package docs, root status, decision `D-022`, and WBS `5.20` now
-  record the country-context and key policy.
-- Verification: API `288` tests and Worker `394` tests passed; Admin typecheck
-  and production build passed; Repo Doctor passed; live
-  `/api/admin/auth/countries` returned `CA`; production-rendered login was
-  visually checked at desktop `1440x1000`, compact `500x844`, and exact mobile
-  `390x844`. The exact mobile audit reported viewport, document, and body widths
-  of `390px`, with no horizontal overflow.
-- Not done: no non-Canada country was enabled and no collection/release scope
-  was expanded. Per-user country authorization and in-session country switching
-  remain future slices if operationally needed.
-- Key files: `db/migrations/0025_country_scoped_admin.sql`,
-  `api/service/api_service/auth.py`, `main.py`, country-scoped query modules,
-  `app/admin/src/components/fpds/admin/admin-login-form.tsx`,
-  `admin-shell.tsx`, and `admin-auth-frame.tsx`.
-- Next step: before onboarding another market, add its ISO code to
-  `country_registry` through an approved enablement migration and complete that
-  country's bank registry, taxonomy, regulatory/display, collection, and
-  release checklist.
-
-## 2026-07-29 - Country-Aware Public And Worldwide-Ready Data Boundary
-
-- WBS: `5.19`, country-aware Public foundation
-- Status: done
-- Goal: prepare FPDS for eventual worldwide bank-product coverage without
-  widening the current Canada collection scope, and replace the Public header
-  language control with a simple country selector while retaining language in
-  the footer.
-- Outcome: existing bank, candidate, canonical, aggregate, and public-projection
-  country fields now operate as one ISO 3166-1 alpha-2 boundary. Bank/source
-  mutations validate two-letter country codes. Review approvals and automatic
-  promotions enqueue their owned country, automatic promotion separates
-  mixed-country batches, and the aggregate runner claims the oldest pending
-  country/scope instead of always claiming Canada.
-- Public API: `GET /api/public/countries` and `countries[]` in
-  `GET /api/public/filters` expose only countries with active products in their
-  latest completed `phase1_public` snapshot. All existing products, detail,
-  summary, ranking, and scatter endpoints retain their per-country latest
-  snapshot boundary.
-- Public UX: the header now presents a compact no-flag country menu with
-  locale-aware `Intl.DisplayNames`; the footer is the only language-menu
-  location. Non-default country codes persist through Home, Deposit, Loan,
-  detail, and Methodology. A country change preserves locale but clears
-  country-owned filters, view settings, and pagination. Canada remains the
-  clean-URL default and the only currently collected market.
-- Documentation: the requirements and scope baseline now distinguish worldwide
-  long-term direction from current Canada scope. Decision `D-021`, WBS `5.19`,
-  API, aggregate, Public IA, metric, localization, package, route-manifest, and
-  root runtime docs record the new contract.
-- Key files: `api/service/api_service/public_products.py`,
-  `aggregate_refresh.py`, `aggregate_refresh_runner.py`,
-  `candidate_auto_promotion.py`, `review_detail.py`, source mutation boundaries,
-  `app/public/src/components/fpds/public/public-country-menu.tsx`,
-  `app/public/src/lib/public-query.ts`, and the Public countries proxy route.
-- Verification: focused country/API tests passed, and the full API suite passed
-  (`283`). Public `pnpm run typecheck` and production `pnpm run build`
-  passed, including `/api/public/countries`. Headless Chrome DevTools checks at
-  exact `390px` and `1440px` confirmed no horizontal document overflow, a
-  country-only header, a language-only footer, Korean document/country labels,
-  and `country_code=US` preservation across every shell link. Repo Doctor and
-  `git diff --check` passed.
-- Not done: no non-Canadian bank, product, source, taxonomy, or public snapshot
-  was created; no country was inferred from currency, locale, hostname, IP, or
-  browser location.
-- Next step: when the Product Owner approves the first non-Canadian market,
-  define its institution coverage, product taxonomy, evidence/validation rules,
-  operating/legal display requirements, and release acceptance as a separate
-  scope slice before collection.
-
-## 2026-07-29 - Persistent Codex Instructions And Task-Routed Document Reads
-
-- WBS: cross-cutting repository governance and harness documentation
-- Status: done
-- Goal: replace the repeated per-request Codex prompt with one repository-wide instruction baseline for FPDS Admin and Public, while keeping startup context complete and task-specific document reads efficient.
-- Outcome: root `AGENTS.md` now defines Product Owner authority, task-routed document reads, bounded `goal.md` use for substantive multi-step work, financial-data/evidence/security boundaries, Admin/Public UX quality, proportionate verification, documentation updates, and completion auditing. Because the root file applies to the whole repository, no duplicate Admin/Public instruction files were added.
-- Document routing: `README.md`, this journal, and `docs/README.md` are the substantive-work startup set. Requirements/scope, plan/WBS, decision/RAID, runtime READMEs, design docs, and the harness baseline are selected only when the current slice touches their authority. UI work still requires the design index, both frontend baselines, relevant surface/locale docs, and the affected package README. Archive material remains opt-in.
-- Decisions: replaced the open-ended "continue improving until satisfied" loop with explicit acceptance criteria and a bounded final audit; limited temporary `goal.md` to substantive multi-step work so trivial/read-only tasks do not create file churn; replaced permission to ignore inconvenient rules with a conflict/escalation rule that follows document authority; retained optional subagent use only for separable, non-overlapping work with main-agent verification.
-- Key files: `AGENTS.md`, `docs/README.md`, and `docs/00-governance/harness-engineering-baseline.md`.
-- Verification: `powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/harness/repo-doctor.ps1` passed; `git diff --check` passed. Full application builds were not run because no runtime code or contract changed.
-- Known issues: several older active planning/requirements files still have the encoding/readability debt already tracked as RAID `I-003`; this slice did not rewrite their product content.
-- Next step: use normal Codex requests without repeating the old role/process block; include only the task itself and any task-specific acceptance or Product Owner decision.
-
-## 2026-07-28 - FPDS Client Handoff Simplification
-
-- WBS: cross-cutting Admin UX and repository maintainability follow-on across `4.1`-`5.15`
-- Status: done
-- Goal: make the current FPDS Admin and repository understandable to a receiving client team without weakening review, collection, evidence, security, locale, or Public behavior.
-- Why now: the live feature set was complete enough for handoff, but abstract module navigation, repeated list summaries, always-visible advanced controls, numbered vendor filenames, obsolete route scaffolds, generated artifacts, and stale package entry docs made routine operation and code ownership harder to understand.
-- Outcome: the Admin shell now exposes Overview, Review, Runs, and Banks directly on desktop and mobile, with Sources, Product Types, Changes, Audit Log, Usage, and Public Health under `More tools`. Overview has one attention-led introduction; Review Queue and Runs keep common controls visible and disclose advanced state/sort/date filters; Banks leads with coverage and collection in a four-column list; Review Detail keeps recommendation and flagged fields visible while candidate facts, official-source metadata, AI detail, diff detail, evidence, and audit context remain available under disclosures. Run rows now combine state/error and identity/time context into five scan columns.
-- Structure: adapted Shadcnblocks assets now have semantic FPDS names under `components/fpds/admin/` (`admin-shell`, `admin-login-form`, `admin-modal`, `admin-stat-strip`). Current app route manifests map directly to live App Router files. Obsolete route-shell documents, partial API scaffold manifests/directories, empty placeholder areas, unreachable legacy Bank/Source Catalog/Banner/Public modules, unused UI primitives, unused Admin form dependencies, package metadata, bytecode, test outputs, and two accidental root screenshots were removed. Root `tmp/` evidence and the working prototype were deliberately retained.
-- Safety: every Admin page, compatibility redirect, and 21 browser proxy handlers remains. No API request/response shape, cookie, CSRF, RBAC, database schema, canonical product, evidence record, review decision, collection run, aggregate snapshot, or Public data boundary changed.
-- Documentation: root, docs, app, Admin, and API entrypoints now describe current runtime ownership and exact handoff commands. Admin IA and vendor adoption/override records describe the current navigation and semantic wrapper paths while historical entries retain their original provenance.
-- Key files: `app/admin/src/components/fpds/admin/admin-shell.tsx`, `review-queue-surface.tsx`, `review-queue-results.tsx`, `review-detail-surface.tsx`, `run-status-surface.tsx`, `bank-registry-surface.tsx`, both app route manifests, package/root READMEs, and `docs/03-design/admin-information-architecture.md`.
-- Decisions: keep the separate Admin/Public/API/Worker runtime boundaries; preserve redirect and proxy route folders; prefer progressive disclosure and semantic relocation over a risky App Router or backend reorganization; keep tracked root evidence even though it dominates repository size.
-- Verification: Admin typecheck and production build passed with the full route table including all compatibility pages and proxy handlers. Public typecheck and production build passed with all six functional routes. API full suite passed (`277`), Worker full suite passed (`394`), and the Foundation entrypoint passed Repo Doctor, baseline validation, both frontend typechecks, and both production builds. Both route manifests resolved every implementation path, and final `git diff --check` passed.
-- Known issues: this slice did not repeat live authenticated browser visual QA; the production-rendered EN/KO/JA desktop/tablet/390px baseline from the prior 2026-07-27 Admin/Public QA remains the visual reference. Dense detail tables still use bounded internal horizontal scrolling by design.
-- Next step: Product Owner/client walkthrough using `app/admin/README.md` and the root Client Handoff Map; no migration, data remediation, or external action is required.
-
-## 2026-07-28 - Review Detail Official-Domain AI Verification
-
-- WBS: `4.11`, Review and evidence operations
-- Status: done
-- Goal: let an authorized reviewer independently compare one collected candidate with current official bank facts, inspect evidence-backed differences, and stage safe corrections without weakening the existing human approval boundary.
-- Why now: Review Detail already exposed the candidate, trace, and manual override workflow, but reviewers still had to leave FPDS and manually repeat the official-source check before deciding.
-- Outcome: `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` now forces OpenAI Responses web search within the bank domains registered from its homepage and source documents. The strict structured result is reduced server-side to match/mismatch/unverified fields, official citations, confidence, rationale, and correction proposals that pass the existing override contract. The newest attempt is returned with Review Detail and repeated attempts remain append-only.
-- UI: Review Detail includes a compact EN/KO/JA verification band with provider, running, success, partial, unavailable, and failure states; field counts; collected-versus-official values; clickable official sources; and individual/all-safe correction staging. Staging only fills the existing reviewed-value form. The operator must still submit Edit & Approve.
-- Safety and audit: only `admin` and `reviewer` roles can run verification; the route requires the session CSRF token. Unknown/read-only result fields and non-official sources are discarded, unsupported facts become `unverified`, and provider/schema failures do not mutate the candidate. Model execution, token/cost usage, allowed domains, sources, result metadata, and completion/failure audit events are persisted.
-- Not done: no automatic approval, canonical product mutation, publish transition, public API exposure, or unrestricted web search was added. A live paid model call was not made as part of automated verification.
-- Key files: `api/service/api_service/ai_verification.py`, `api_service/main.py`, `worker/pipeline/fpds_ai_runtime.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, the Review Detail AI proxy route, API/worker tests, and the active API/IA/state/field-contract design documents.
-- Decisions: verification is advisory and evidence-first. Current official facts require a returned citation from the allowed bank domain; no citation means unverified. Corrections reuse the manual review coercion/range boundary and are never committed by the AI action itself.
-- Verification: focused AI/review tests passed (`38`). The full API suite passed (`277`) and the full Worker suite passed (`394`). The Foundation entrypoint passed Repo Doctor and baseline validation, Admin typecheck/build (`24` static pages plus the new AI proxy route), and Public typecheck/build (`7` pages). The Worker suite exposed an existing uninitialized promotional-component branch; the minimal fix now preserves an explicitly additive regular-plus-promotion total and its regression test passes. Foundation initially inspected Git-ignored Chrome QA user profiles under `tmp/chrome-*`; harness discovery now excludes only those generated browser profiles while retaining tracked `tmp` fixture checks.
-- Known issues: the live feature requires a configured OpenAI provider key and outbound access at runtime. Verification quality still depends on the bank publishing an accessible current official fact; inaccessible or ambiguous facts intentionally remain unverified.
-- Next step: Product Owner visual/operational review with a configured development provider and a representative queued task; no schema migration or canonical-data operation is required.
-
-## 2026-07-27 - FPDS Admin Evidence-Operations Design And Production QA
-
-- WBS: `4.1`-`5.15`, Admin UI/UX and visual design
-- Status: done
-- Goal: replace the generic indigo/card dashboard treatment with a compact B2B operations experience that leads from real attention signals to diagnosis and auditable action without changing API, canonical-data, authorization, review/run lifecycle, collection, or audit contracts.
-- Outcome: Admin now uses a cool mineral canvas, deep operational frame, restrained teal action color, centralized semantic states, fixed compact typography, and joined bands/dividers/data regions. The authenticated Overview opens with a real-data Operational Attention Rail spanning failed/partial runs, review workload, Public aggregate health, and access requests. Desktop module tabs and mobile bottom navigation are actual locale-preserving route links.
-- Workflow hierarchy: Review Queue scans bank, product, problem/action, severity/confidence, state/time, then technical IDs and has a dedicated mobile work-card view. Review Detail translates core EN/KO/JA controls, keeps source evidence untouched, and uses a sticky decision rail with dirty/mutation protection. Run Detail adds a numbered lifecycle strip and failure-first alert. Registries and source-catalog workflows use compact tables, joined summaries, guarded mutations, and accessible dialogs. Change History and Audit are chronology-first; Usage leads with cost, anomalies, concentration, and trend; Dashboard Health leads with the snapshot served to Public, freshness, and recovery.
-- Shell, auth, and states: Login and Signup share a secure two-zone entrance with 44px controls and live feedback; Signup is intentionally anonymous in middleware and removes the form after successful submission. Route loading/error recovery, global visible focus, reduced-motion, labelled keyboard-scrollable tables, 40px compact controls, semantic empty/disabled/loading/error states, and a code-native Admin mark/icon are shared. Auto-refresh visibly reports live/paused/last-refresh state and pauses for hidden tabs, focused editing, open dialogs, dirty forms, and in-progress mutations.
-- Localization: document language is set before hydration; protected-route, review/run, Usage, and registry links preserve locale; core operator UI and unavailable states support EN/KO/JA; numbers, currency, percentages, and dates use locale-aware formatting where presented. Evidence, source-derived text, URLs, IDs, reason codes, and operator-entered values stay unmodified.
-- Key files: `app/admin/src/app/globals.css`, `layout.tsx`, `loading.tsx`, `error.tsx`, `icon.svg`, `middleware.ts`, shared shell/auth/primitives under `app/admin/src/components/`, Admin workflow surfaces under `app/admin/src/components/fpds/admin/`, `app/admin/README.md`, `README.md`, and `docs/03-design/fpds-design-system.md`.
-- Verification: Admin `pnpm run typecheck` passed after the final fixes. Repeated production `pnpm run build` checks passed; the final build generated 24 application/static routes including `/icon.svg`. Anonymous and authenticated production renders were inspected at `1440px` and exact `390px` across Login, Signup, Overview, Review Queue, Review Detail, Runs, Run Detail, LLM Usage, and Dashboard Health in EN, KO, and JA. Browser audits confirmed the expected document `lang`, locale-preserving route links, no horizontal document overflow, no browser/runtime/resource errors, no sub-40px interactive targets, semantic page headings, and zero motion longer than 250ms under reduced-motion. Semantic foreground, muted, primary, sidebar, success, warning, and destructive colors measure at least `4.80:1` on their intended base surfaces. Final route checks returned `200` for anonymous Login/Signup, `307` with locale and destination preserved for an unauthenticated protected route, and `200` for API health.
-- Visual QA: Login and mobile Signup confirm the shared secure entrance, readable long Japanese labels, stable single-column collapse, and bounded vertical scroll. Authenticated QA confirmed a real-data Overview attention rail, failure/action-first Review Queue scanning, evidence and decision hierarchy in Review Detail, failure-first Runs summaries, the numbered Run lifecycle, cost/anomaly-first Usage, and served-snapshot-first Dashboard Health. The confirmation round fixed two material signal defects: auto-refresh copy now receives server-known locale so the first frame is localized, and completed runs with warning-only summaries use warning rather than destructive styling.
-- Not done: no API payload, database, canonical product, evidence, authorization, review decision, collection run, aggregate refresh, or audit record was changed as part of this design slice.
-- Known limitations: dense tables intentionally retain labelled internal horizontal scrolling on narrow screens. Source-derived financial content remains in its original language by policy.
-- Next step: normal Product Owner visual review; no additional implementation or operator action is required for this Admin design slice.
-
-## 2026-07-27 - FPDS Public Verified-Record Design And Production QA
-
-- WBS: `5.9`, `5.10`, `5.11`, `5.12`, `5.13`, `5.14`, Public UI/UX and visual design
-- Status: done
-- Goal: replace the generic dashboard/card treatment with a distinctive, evidence-grounded Public experience that makes coverage, comparison, freshness, and Canadian financial-institution records immediately legible without changing canonical data or recommendation safety.
-- Outcome: Public now uses a warm record-paper canvas, deep ink hierarchy, evergreen verification, maple selection/differences, ochre Loan cues, and a code-native FPDS ledger mark. Home opens with a localized market thesis and a signature source-to-review-to-public ledger populated by the live product count, bank count, coverage, and snapshot date. Deposit and Loan are equal next actions; ranking, bank composition, and optional like-for-like scatter remain grounded in the existing aggregate contract.
-- Catalog and comparison: Deposit and Loan heroes state exact coverage, result count, freshness, and verification state. Product-family record cards prioritize institution identity and type-aware facts. Filters and sorting share one record-set hierarchy. Selecting up to four products opens a responsive comparison ledger that highlights differing grounded values without declaring a winner, scoring eligibility, or recommending a product.
-- Detail and Methodology: product detail exposes the source-derived description, three primary facts, all available public facts and conditions, official-bank action, freshness, and methodology boundary. Previously omitted approved lending payment/security facts and source language are visible when available. Methodology now presents a four-step source-to-snapshot process plus comparison, ranking, freshness, and evidence-boundary rules.
-- Shell, states, and accessibility: the compact shell, footer, locale control, loading skeleton, error, empty, stale, fresh, and unavailable states share one visual vocabulary. EN/KO/JA set the document language before hydration. Controls use a 44px minimum target, keyboard focus is globally visible, headings are semantic, charts expose units plus a screen-reader data table, and reduced-motion removes long transitions.
-- Not done: no public API, canonical data, aggregate calculation, collection, review, evidence-exposure, personalization, application, or recommendation behavior changed.
-- Key files: `app/public/src/app/globals.css`, `layout.tsx`, `loading.tsx`, Public shell and surface components under `app/public/src/components/fpds/public/`, `app/public/src/lib/public-locale.ts`, `app/public/routes.manifest.json`, `app/public/README.md`, and the active Public design documents.
-- Verification: Public `pnpm run typecheck` and production `pnpm run build` passed with seven generated application routes. A production server backed by the live development Public API was inspected at `1440px`, `768px`, and exact `390px` across Home, Deposit, Loan, selected comparison, Deposit detail, Loan detail, and Methodology in EN, KO, and JA. Browser audits confirmed correct `lang`, no horizontal document overflow, no browser errors, semantic heading order, real two- and three-product comparison selection, and zero long-running motion under reduced-motion. Dense term rates and the mobile sort rail remain intentionally bounded internal scrollers.
-- Visual QA: production screenshots confirmed the verified-record first viewport, localized mobile catalogs, responsive comparison differences, family-specific detail hierarchy, and readable Methodology process. Final semantic colors meet WCAG AA contrast on the record-paper canvas; primary/deep-ink combinations exceed the minimum, and maple/warning accents were darkened to clear normal-text contrast.
-- Known limitations: institution and product content derived from official sources remains in its source language by policy. A small set of remote bank assets may fall back to the accessible unframed bank-code mark. These are explicit boundaries, not incomplete Public design work.
-- Next step: normal Product Owner visual review; no implementation or operator action is required to use the completed Public design locally.
-
-## 2026-07-22 - FPDS Admin Cross-Bank Collection Accuracy Audit (In Progress)
-
-- WBS: `5.5`, `5.6`, `5.15`, Operations Runs/Sources/Review Queue and public-data safety
-- Status: in progress; do not remove `goal.md` until the second-pass collections and final DB assertions complete
-- Goal: compare current collected products with official bank facts, remove unsafe persisted values through audited state transitions, fix reusable discovery/extraction/normalization/validation causes, and prove the fixes through fresh Admin-path recollection.
-- Baseline finding: collection `collection_RHYZCW5Kb3xR3N0v` had 226 sources and 49 candidates but exposed adjacent-product fees/rates, promo-as-standard rates, family-page product names, CAD defaults for foreign-currency products, typed-field violations, and byte-identical WAF response dedupe. Active public data also contained RBC fee swaps, Scotia fee/rate errors, Tangerine USD promo/currency errors, and 29 legacy scalar-type violations.
-- Data correction: supported remediation has rejected the confirmed unsafe candidates and deactivated their canonical products without patching canonical fields in place. This includes legacy typed violations, RBC/Scotia first-pass semantic failures, Simplii cross-product GIC evidence, and the review-only Scotia STEP candidate whose `20.0%` was absent from its evidence. Aggregate refresh was queued when public products changed. Current audit reports 45 active products, zero duplicate groups, and zero numeric type violations; corrected recollection must restore safe coverage.
-- Code outcome: product-scoped field ranking now separates adjacent sections; promotion totals, regular rates, and ongoing conditional bonuses have distinct semantics; percentages require their exact `%` token in evidence; foreign-currency identity is preserved; base monthly fees reject waivers/maxima/other charges; limited transactions do not become unlimited; multi-option terms remain structured; investment/FX/index/calculator percentages are deposit-rate vetoes; named detail recovery is bounded; mutual-fund/prospectus support links are excluded from deposit scopes; checksum dedupe is source-document scoped; established detail metadata survives later supporting snapshots; and manual review overrides retain canonical types/ranges. A completed persistence JSON emitted just before a watchdog timeout can now be recovered, while malformed or nonterminal output still fails closed.
-- Official comparison: RBC Day to Day/Advantage/VIP/U.S. Personal, Scotia chequing and savings products, Tangerine CAD/USD savings, Simplii HISA/USD savings, BMO/TD/CIBC deposit rates, and CIBC Costco card facts were checked against current official sources. Simplii USD 2.80% is a regular annual rate; HISA 4.60% is a five-month new-client promotional total, not a standard rate.
-- First recollection: `collection_U54xRozyEElj9IQM` covers 14 RBC, Scotia, Simplii, and Tangerine scopes. It reproduced and isolated the pre-fix defects; Scotia credit-card failed on a transient DB disconnect, and Simplii savings persisted complete validation output but was marked failed by the stage watchdog. Tangerine scopes are still finishing. These failed/affected scopes must be rerun with the final code.
-- Latest resume checkpoint (2026-07-23 UTC): final verification collection `collection_Zmqz2DgZiUgjSf0c` is still active. At the handoff it had 3/21 completed runs, 19 candidates, and 5 Review tasks; CIBC credit-card was capturing 29 sources. Do not stop its runner. BMO Chequing completed 28/28 sources and five named candidates, but four auto-approved candidates retained CDIC-navigation or short application-CTA contamination. BMO Savings completed five candidates but an educational HISA page became a false product, Premium CAD borrowed Performance Chequing's `$17.95`, Savings Amplifier mapped ongoing `0.50%` as the promotion instead of the labelled `4.75%`, and USD description text was incomplete. CIBC Chequing completed nine candidates/five reviews but the long-running pre-clean process retained audience hubs, the retired Smart Plus alias, a Student hub, missing Everyday 18 transactions, and noisy/incorrect waiver copy. Supported remediation retracted 16 affected candidates in these three scopes and deactivated their unsafe canonicals where present; audit history is preserved.
-- Latest reusable fixes: full-name CDIC statements stop at `Corporation (CDIC)` and strip Legal/appointment CTA prefixes; short application CTAs normalize to channels; educational HISA pages that introduce a differently named account remain family/supporting sources; supporting monthly fees require the target product identity near the amount; explicitly labelled promotional rates outrank adjacent ongoing rates without becoming the standard; incomplete possessive descriptions are suppressed. Focused regressions pass. Mandatory clean-process reruns after the active sequential plan: BMO Chequing, BMO Savings, and CIBC Chequing. `goal.md` contains candidate IDs, official values, and remaining completion criteria.
-- Verification so far: worker full suite 222 passed; API full suite 226 passed before the watchdog recovery addition, whose focused 13 tests pass; Admin/Public typecheck and production builds pass; foundation checks pass; `git diff --check` passes.
-- Next step: wait for the first plan to terminate, run ordered second-pass collections (Simplii chequing before its shared savings/GIC support URLs), verify field evidence and active Review Queue, restore safe BMO/TD/CIBC/Oaken coverage, rerun all tests/foundation checks, update README/docs, perform the final `goal.md` audit, then remove it only if every criterion is met.
-
-## 2026-07-21 - Cross-Bank Field Accuracy, Historical Safety Remediation, And Fresh Recollection
-
-- WBS: `5.5`, `5.6`, `5.15`, `4.2`, `4.5`, collection accuracy and Public safety
-- Status: done
-- Goal: audit live Admin Runs, Sources, Review Queue, candidates, and Public canonical output against current official bank information; remove confirmed unsafe historical data through audited workflows; implement reusable evidence-boundary rules; and prove the result through fresh Admin-path recollection.
-- Why now: the audit found National lending fields copied from adjacent government-loan, business-account, and car-loan sections; marketing slogans represented as collateral/security facts; a Platinum promotion end date represented as product `effective_date`; an expired Oaken 2023 banner represented as a current GIC term; multi-option compounding/payout text collapsed into scalar values; CIBC `96 months` and a `30-day rate guarantee` represented as loan term days; and exact active BMO/Bridgewater duplicates. Oaken's current rate table also exposed a general `$1,000` minimum that was not repeated on every reconstructed row.
-- Outcome: normalization now requires field-specific evidence semantics for security, fees, payment, eligibility, and application CTAs; rejects adjacent-product anchors and promotional expiry as product effective dates; keeps scalar term days only when evidence states the exact term/range boundary; removes expired term values together with expired rates; and avoids collapsing multi-option frequency text. Dynamic AI extraction is limited to detail pages, while entry/supporting/PDF sources stay deterministic and evidence-only. GIC parsing recognizes money-before-label minimums, reconstructs current rate tables, and applies one unambiguous page/section minimum to every row. Homepage self-candidates are rejected for term-specific/promotional GIC identities, preventing duplicate family candidates.
-- Official comparison: National student line of credit, self-employed mortgage, car loan, GIC, and Platinum facts were checked against their official pages. CIBC Green Vehicle and Personal Car Loan candidates were checked against their official detail pages. Oaken GIC values were checked against the current official rates page. Unavailable, dynamic, variable, or multi-product-boundary facts remain omitted and reviewable instead of being inferred.
-- Data correction: supported candidate-safety remediation inactivated CIBC products `prod_UQkzB4weXkdMEu5X` and `prod_PFoUAregwm5cimLD`, older exact duplicate products `prod_dLNhfKi2bgcG9KwL` (BMO) and `prod_osglZg2HaAPAEM1p` (Bridgewater), and rejected their unsafe/duplicate candidates with audit history preserved. Historical National candidates `cand-94cc2323cef38aba` and `cand-152fd51d851fdead` were also retracted after clean recollection. No canonical field was patched in place. Generated Oaken homepage source `AUTO-OAKEN-GIC-b3a6a73e7e` was deactivated through the supported rediscovery cleanup path.
-- Recollection: National/CIBC/Oaken collections `collection_pqHZBtIUMEFyMKRD`, `collection_sbi6fUU3JUtGHTL2`, `collection_MgEH5GF-dqB1a3dr`, and final Oaken `collection_JX1l21PUasAkY70-` verified the changes. National Platinum retained `$70`, `20.99%`, and `22.49%` values without a false effective date. National lending candidates no longer contain adjacent application/security fields. CIBC candidates contain no false `96`/`30` term days, donation text as a fee, or string-valued fixed rate. National GIC retained the official `$500` minimum while leaving the unavailable dynamic rate for review. Final Oaken produced one family candidate with one known support-page 404, current `3.40%` base/public rate, `$1,000` minimum, and 13 correctly aligned long-term, short-term-range, and cashable rows; every row carries the same official minimum and the family stays review-first because the page has multiple canonical product boundaries.
-- Review/Public state: active Review Queue is 10 explainable items: one manual-sampling Platinum candidate, one intentionally ambiguous Oaken family, and eight candidates missing official dynamic/unpublished required facts. Historical contaminated/duplicate reviews are no longer active. Aggregate snapshot `agg_20260721_accuracy_final` completed with 67 projections (58 active); the four remediated products are inactive while retained BMO/Bridgewater representatives remain active.
-- Key files: `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `api/service/api_service/source_catalog.py`, their tests, `worker/pipeline/README.md`, `docs/03-design/financial-product-field-contract.md`, and `tmp/fpds_admin_collection_goal_tool.py`.
-- Verification: Worker pipeline tests passed `161/161`; API tests passed `221/221`. Repository doctor and foundation validation passed; Admin typecheck/build generated 23 pages, Public typecheck/build generated 7 pages. DB assertions confirmed the final review queue, Oaken row-level values/evidence routing, source failure visibility, historical product status, and completed non-stale Public aggregate.
-- Known issues: Oaken's official `/open-an-investment/?productCode=gic-non-reg` supporting URL returns 404; it is non-candidate-producing and not needed for verified rate/minimum fields. National Rewards supporting hosts remain outside the explicit fetch allowlist. A separate inventory found legacy active canonical rows with older numeric-field type debt; mass retracting otherwise unverified products would remove material Public coverage, so this slice fixed confirmed unsafe rows and prevents recurrence rather than making a destructive blanket decision.
-- Next step: operators can approve Platinum after sampling, enter an official missing value when available, or defer the Oaken family until a product-splitting contract is approved. Any bulk remediation of the broader legacy canonical inventory should begin with bank-by-bank official recollection and Product Owner acceptance, not direct field mutation.
-
-## 2026-07-19 - Official-Source Collection Accuracy And Recollection Hardening
-
-- WBS: `5.5`, `5.15`, `4.2`, `4.3`, collection accuracy and operator safety
-- Status: done
-- Goal: inspect live Admin Runs, generated Sources, Review Queue, candidates, evidence, and canonical products; compare suspicious values with current official bank sources; fix reusable causes; and prove the result through fresh Admin-path recollection.
-- Why now: collection `collection_DRxrNFAAo17sGnfh` ended with 35 terminal runs, 32 partial runs, 126 source items, 14 candidates, and 12 queued reviews. Oaken Savings had auto-published an expired November 2023 sitewide 6% GIC banner as a current savings rate; Oaken Commercial GIC entered retail scope; two National card-family pages became fake products; National HISA inherited adjacent-product tier copy; CIBC prepayment percentages were published as mortgage rates; and an FNBC family page had produced a composite term-deposit product.
-- Outcome: explicit offer-end dates now suppress expired rate-sensitive fields before merge and cannot be reintroduced by generic evidence fallback. Normalization reads extraction artifacts from the same run only, current savings/GIC column-header tables are parsed without requiring a `%` suffix on every cell, GIC ranges retain their labels without a false single duration, adjacent-product anchors are removed across field types, and credit-card rate/fee cleanup requires matching label adjacency while leaving variable/template pricing omitted. Retail discovery applies commercial hard vetoes, inactivates stale generated details on rediscovery, recognizes explicit plural family identities without treating the uncountable word `savings` as plural, and keeps lending families evidence-only. Encrypted official PDFs now have the required `cryptography` runtime.
-- Data correction: supported candidate-safety remediation inactivated CIBC products `prod_H2A99WRqC_AK3npK` and `prod_IYB7_vDv7p0z54fs` plus FNBC product `prod_IAR52dJ--SkqWats`; aggregate request `aggreq_jTseDoiOOAY5Zhnx` completed. Four additional false/historical candidates (`cand-ef46b94fefa2e0e7`, `cand-45fc86ed3194b6fb`, `cand-74f812c1b789b2e9`, `cand-ab0a9ff702be7474`) were rejected with `candidate_safety_retracted` audit events. The Oaken commercial generated detail is now inactive with `hard_scope_exclusion:non_consumer_business_page`.
-- Recollection: `collection_NRUF920YsoPw070r` finished 4/4 runs. Interrupted-process retries created duplicate logical candidates, but the normal supersession path rejected the older duplicates; National HISA auto-published 0.55% with no false tier/description fields, National produced only the three named cards, and Oaken Savings updated canonical `prod_dBPQvs2khfvFrkt8` to version 3 at 2.80% using the official current rate table effective June 30, 2026. Final GIC collection `collection_nLTuniu3FKGL63x8` finished with one retail candidate `cand-1b153052c5603a40`: 3.35% one-year comparison rate, 13 grounded long/short/cashable rows, six range rows with no invented single duration, no 6% row, and no commercial candidate. It remains in Review because a family overview is intentionally an ambiguous canonical boundary.
-- Official comparison: Oaken Savings and GIC facts were checked against `https://www.oaken.com/en-ca/oaken-savings-account/`, `https://www.oaken.com/en-ca/savings-account-rates/`, and `https://www.oaken.com/en-ca/gic-rates/`. National HISA and named-card identity/field context were checked against `https://www.nbc.ca/personal/savings-investments/accounts/high-interest.html` and the official Platinum, Syncro, and World Elite pages. Current dynamic placeholders and variable prime-based expressions remain omitted/reviewable rather than converted into unsupported fixed values.
-- Key files: `worker/pipeline/fpds_rate_safety.py`, normalization service/supporting merge/persistence/CLI, `api/service/api_service/source_catalog.py`, their regression tests, `pyproject.toml`, `uv.lock`, root `README.md`, and the active field-contract/discovery/source-policy docs.
-- Verification: Worker `193/193` and API `220/220` unit tests passed. The foundation entrypoint passed repo doctor and baseline validation, then Admin typecheck/build (`23` pages) and Public typecheck/build (`7` pages). Live DB audit confirmed all representative runs terminal, current Oaken Savings at 2.80%, GIC rate evidence linked to the official `/gic-rates` section, retracted products inactive, commercial source inactive, and aggregate requests completed.
-- Known issues: three `rewards.nbc.ca` supporting pages remain blocked by the explicit fetch allowlist and one Oaken `open-an-investment` support page remains unavailable; neither is candidate-producing or needed for the verified fields. National Syncro/World Elite dynamic pricing remains in Review because the captured HTML exposes unresolved templates/variable rates. The Oaken GIC family remains review-first by design. No allowlist widening or product-boundary guess was made.
-- Next step: an operator may review the nine genuinely reviewable queued items, especially whether Oaken GIC variants should become separate canonical products. Any host allowlist expansion should be a separately approved security decision.
-
-## 2026-07-18 - FPDS Public Essential-Information UX And Responsive QA
-
-- WBS: `5.9`, `5.10`, `5.12`, `5.13`, `5.14`
-- Status: done
-- Goal: analyze the complete FPDS Public experience and reduce it to the information an anonymous financial-product user needs to choose Deposit or Loan, compare grounded public fields, and know what to recheck on the official bank page.
-- Why now: the live catalog stacked repeated purpose cards, a duplicate Top 5 request/list, filters, sort, an empty comparison panel, and result cards before users reached the core products. Detail repeated similar facts and used recommendation-adjacent wording. The active Stripe benchmark called for clearer hierarchy, progressive disclosure, compact states, and stronger responsive verification.
-- Outcome: Home now opens with one coherent Deposit snapshot, direct Deposit/Loan actions, two headline counts, a deposit-compatible ranking, and server-rendered bank-share bars. Deposit and Loan catalogs now show result count/freshness, progressively disclosed filters, one active-scope/sort toolbar, and a single card list. Each card exposes visible bank identity, one primary metric, at most two secondary facts, Compare, and Details. Comparison remains a compact counter until selection, then shows mobile cards and a desktop table without synthetic reason-to-compare text. Detail presents three primary facts, one available-facts section, applicable calculator/term-rate content, official verification, and Methodology without duplicate key-condition or `Best fit` panels. The footer is now a compact Home/Deposit/Loan/Methodology navigation and verification surface. Japanese calculator labels were completed; visible focus, reduced-motion handling, 44px navigation/locale controls, and horizontal-overflow protection were added.
-- Not done: no Public API, canonical product, aggregate refresh, evidence trace, recommendation model, eligibility score, account-opening flow, or product scope was added or changed. Not every benchmark pattern was adopted; FPDS keeps its own domain comparison, freshness, methodology, and public/private evidence boundaries.
-- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `product-grid-surface.tsx`, `product-compare-workspace.tsx`, `product-detail-surface.tsx`, `interest-calculator.tsx`, shared public shell components, `app/public/src/lib/public-locale.ts`, public route pages and styles, `app/public/README.md`, the active Product Grid and Insight Dashboard design docs, root `README.md`, and `docs/01-planning/WBS.md`.
-- Decisions: the old Top 5 catalog block and shared purpose-entry component were removed instead of hidden. Visible bank names were restored because logos can be delayed or unavailable. Official bank actions remain on detail, selected comparison, and dashboard ranking rather than competing with Compare and Details on every catalog card. Home defaults its data request to approved Deposit types so deposit rankings and counts remain semantically coherent while Loan remains a first-class entry. ISO freshness dates are retained for stable cross-locale scanning.
-- Verification: relevant API regression tests passed (`9`). Public typecheck and production build passed; the repository foundation entrypoint then passed repo doctor, foundation validation, Admin typecheck/build (`23` generated pages), and Public typecheck/build (`7` generated pages). Live-data production route smoke checks returned HTTP `200` for nine EN/KO/JA Home, Deposit, Loan, detail, and Methodology URLs. Chromium production QA covered `1440x1000`, `768x1024`, and exact `390x844` viewports for Home, Deposit, Loan, selected comparison, and Japanese detail; all reported document width equal to viewport width, no runtime errors, and comparison changed from `0/4` to `1/4` after selection.
-- Known issues: the current aggregate can contain distinct canonical records with the same visible bank/product name; the Public UI intentionally does not deduplicate or reinterpret canonical data. Some non-Big-5 logos still depend on official remote assets, so visible bank text and the existing code fallback remain required.
-- Next step: Product Owner visual review of the completed Public experience; any further change should be a new, bounded product or data-quality slice rather than reopening responsive QA by default.
-
-## 2026-07-17 - Multi-Bank Source And Review Queue Accuracy Hardening
-
-- WBS: `5.5`, `4.2`, `4.3`, `5.15`, cross-bank collection accuracy and operator safety
-- Status: done
-- Goal: inspect the live FPDS Admin sources and Review Queue, compare suspicious products with current official bank pages, fix reusable discovery/extraction/normalization/routing defects, and prove the changes through fresh Admin-path collection.
-- Why now: collection `collection_d6pt4EcvqMUn1HDm` reported all 35 runs completed but 30 were partial and only six candidates were produced. FNBC auto-published one composite `Term Deposits` product from five distinct official sections; FNBC Personal Loan mixed chequing/navigation copy; Haventree's rate-first GIC table shifted every rate onto the next term; a refinance advice page became a mortgage; HomeEquity stored its product name as a prepayment privilege; and `www` to apex redirects failed a literal host allowlist.
-- Outcome: generated registry allowlists now canonicalize only the leading `www.` label. Page identity keeps the first `h1`, multi-variant family pages carry `multi_product_family_overview`, validation emits error-level `ambiguous_product_boundary`, Review recommends `defer`, and auto-promotion independently blocks ambiguous or non-product sources. Mortgage advice/servicing pages and unrelated account supporting paths are excluded. Link exclusions use URL/action context instead of arbitrary `offer` substrings, allowing legitimate named mortgage cards to enter discovery. Term-rate extraction supports both table orientations; lending cleanup removes account-fee, navigation, prose-only amount, and non-prepayment contamination; CTA product names are never auto-published.
-- Official comparison: FNBC's official term-deposit page contains distinct non-redeemable, redeemable, short-term, and Wait-and-See products, so one merged minimum/rate/term is invalid. FNBC's personal-loan page contains Auto, Consolidation, and Home Reno products plus unrelated account blocks. Haventree's official GIC table is rate-first and currently pairs `1 year=3.33%`, `2 years=4.00%`; its refinance page is guidance, while Convertible, Fixed-rate, and Second Mortgage pages are named products. HomeEquity's CHIP page supports age/residence/value eligibility but not a product-name prepayment value. Fairstone's homepage supports `$500-$60,000` but does not expose a safe comparable rate and term.
-- Live verification: representative collection `collection_5STVFo2JD6F0mjXG` reran six affected scopes. FNBC GIC candidate `cand-b2f5a6bc065a7e12` is review-only with `ambiguous_product_boundary`; FNBC Personal Loan `cand-336920fbc127c050` no longer contains account fees/navigation and is deferred as a multi-product page. Haventree GIC `cand-a197817958bfc050` contains all ten correctly paired rows from `1 month=0.20%` through `5 years=4.00%`, with `1 year=3.33%` and `2 years=4.00%`; its CTA name is flagged for correction. HomeEquity `cand-3fcd2abb9adeda73` keeps grounded eligibility and no false prepayment field. Fairstone remains review-first for the two unavailable comparable fields. The first Haventree mortgage attempt safely produced zero candidates after rejecting refinance, exposed an `offer` substring discovery bug, and led to the generic link fix. Follow-up `collection_dU--lSIPAvSR8CmP` produced Convertible `cand-0b77caa12d17b6c6`, Fixed-rate `cand-73bdcb0a5d77f828`, and Second Mortgage `cand-920d5234960c8bbd`; each field-evidence set points only to its own official detail page and unpublished rates remain missing rather than inferred.
-- Decisions: ambiguity and unavailability are successful safety outcomes only when the candidate cannot auto-publish and the reviewer gets a concrete action. Existing persisted history is never silently deleted. After explicit Product Owner approval, the supported audited safety-remediation path rejected old composite FNBC candidate `cand-e9a6056377598a18`, inactivated product `prod_IAR52dJ--SkqWats`, and rejected old Haventree refinance candidate `cand-3555a7174d381872` with review `review-0646c01a528dd820`; no product field was patched directly.
-- Key files: `api/service/api_service/source_catalog.py`, `source_collection_runner.py`, `candidate_auto_promotion.py`, `review_diagnosis.py`, `worker/pipeline/fpds_extraction/service.py`, `fpds_normalization/service.py`, `fpds_rate_safety.py`, `fpds_validation_routing/service.py`, corresponding API/worker tests, `tmp/fpds_admin_collection_goal_tool.py`, and active discovery/field-contract docs.
-- Verification: final API suite `216` passed and final worker suite `146` passed. Repo doctor and foundation baseline passed. Foundation checks also completed Admin typecheck/build with `23` generated pages and Public typecheck/build with `7` generated pages. `git diff --check` passed after generated-test/build artifacts were restored without altering the user's pre-existing Public `next-env.d.ts` change. Post-approval DB assertions confirmed both candidates and the refinance review are `rejected`, the FNBC canonical/current payload is `inactive`, both `candidate_safety_retracted` audit events exist, and replacement aggregate request `aggreq_P4FiFELM3gVtq3Jy` completed as snapshot `agg_C-vi1yQZvz77u1ce`; that snapshot retains the product only as `inactive`, which Public queries exclude. The first manual runner invocation used the wrong working-directory module path and is intentionally retained as failed request `aggreq_VjQ6W9hnD39YWv_d`; the supported root-path replacement completed successfully.
-- Known issues: official personalized mortgage rates correctly remain review-required. FNBC family pages are safely blocked but are not yet section-split into separate normalized products; reviewers must defer them instead of approving a composite until product-scoped source boundaries are available.
-- Next step: process the remaining evidence-led Review Queue normally; any future family-overview extraction should preserve the same product-boundary and no-inference safeguards.
-
-## 2026-07-16 - Cross-Bank Product Field Contract And Official Recollection
-
-- WBS: `5.5`, `4.3`, `5.15`, cross-bank collection quality hardening
-- Status: done
-- Goal: compare actual FPDS Admin candidates with current official bank pages, correct semantic and type errors with reusable rules, and verify the result through fresh Admin-path recollection.
-- Why now: the development DB contained `49` active canonical records with `34` products carrying `36` field-type violations. Representative candidates also showed severe semantic errors: CIBC EasyBuilder's `20%` annual withdrawal privilege was stored as an interest rate, an overdraft service-fee waiver was stored as a chequing account fee, audience/navigation text became product flags, EQ GIC stored a compound sentence where a numeric rate belonged, supporting evidence could point to the target page instead of the source actually used, static Golden profiles overwrote live facts, and subtype changes could create duplicate products.
-- Outcome: added the executable field type/unit contract for deposit and lending fields, DB registry defaults, coercion and `invalid_field_type` validation, typed term-rate parsing, reviewer-visible `field_notes`, and type-safe manual overrides. Generic safety rules now reject withdrawal/redemption/prepayment, cashback, equity, down-payment, service-fee, cross-product application, audience, navigation, and unresolved-template contamination. Official supporting pages are filtered before the bounded source cap; relevant split GIC tables can be reconstructed and deduplicated while excluding savings/nearby-product rows. Every merged field retains the supporting source-document id. Golden product expansion is fixture-only and no longer overwrites or validates live collection. Canonical continuity ignores subtype drift for the same stable bank/family/type/product identity.
-- Official comparison: EQ Notice Savings official rates are `2.35%` for 10-day notice and `2.75%` for 30-day notice. EQ GIC official rates effective June 11, 2026 are represented as 13 typed rows from 3 months through 10 years. CIBC EasyBuilder officially requires `$2,500` total (`$500` in each of five 1-to-5-year terms) and permits withdrawal of `20%` of the initial investment each year; that withdrawal value must never be an annual rate.
-- Live verification: EQ GIC collection `collection_CSQ3guXCsbw4xhTa` produced candidate `cand-56f5f3c3459835de` with numeric `3.3%` representative/12-month rates and the exact 13-row official schedule; all four schedule/rate evidence links point to the official EQ rates page. Its inaccessible minimum-deposit fact remains `required_field_missing` in review rather than guessed. EQ Savings collection `collection_mAs5hMUDPfqCsNUk` produced approved candidate `cand-192c48fa466f7805` with numeric `2.35%` and only the official 10/30-day rows. CIBC GIC collection `collection_mVqp5f4m9z0NLLmk` completed `22/22` sources and produced seven product candidates with numeric minimum deposits and boolean redeemability; no candidate stored `20` as a rate. Final CIBC collection `collection_pQ8lvZqTMm43_BSk` completed with eight candidates and no source failure. Every candidate retained numeric money and boolean redeemability types, no rate field contained `20`, and the cross-product bank-account registration text was removed. The remaining online/branch application text was verified in the product's official `How to invest` section. Unresolved client-rendered CIBC rates remain `required_field_missing` in review and were not guessed or published.
-- Key files: `worker/pipeline/fpds_field_contract.py`, `fpds_rate_safety.py`, `fpds_extraction/service.py`, `fpds_normalization/service.py`, `fpds_normalization/supporting_merge.py`, `fpds_evidence_retrieval/service.py`, `fpds_validation_routing/service.py`, `api/service/api_service/product_types.py`, `source_catalog.py`, `review_detail.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `db/migrations/0024_deposit_field_contract_defaults.sql`, `docs/03-design/financial-product-field-contract.md`.
-- Decisions: the current official page and evidence lineage outrank stale Golden fixture prose. A comparable scalar never contains explanatory prose. If a current official value is dynamic, unresolved, inaccessible, or ambiguous, omit it and retain review rather than infer it. Bank-specific matching is used only to identify official source boundaries; the safety, typing, merge, evidence, and note rules apply across banks and registered product types.
-- Verification: Worker full suite `142` passed; API full suite `203` passed; focused extraction/normalization suite `98` passed. Repo doctor and foundation baseline passed. Admin typecheck/build passed with `23` generated pages; Public typecheck/build passed with `7` generated pages. Migration `0024` was applied to dev (`3` product-type rows and `167` active catalog rows updated, one history row inserted).
-- Known issues: official pages that render rates through unresolved client-side placeholders or omit an accessible fact correctly remain in review. EQ GIC minimum deposit is one such current fetched-source limitation. Review is intentional and does not block other typed, evidence-backed facts from being compared.
-- Next step: use the normal Review Queue for intentionally unresolved official values; future collection failures should add a regression case to the executable contract and evidence-scoped merge baseline before any narrower bank exception.
-
-## 2026-07-15 - Cross-Product Collection Accuracy And Concise Review Decisions
-
-- WBS: `4.2`, `4.5`, `5.15`, `5.16`, collection QA and Review UX hardening
-- Status: done
-- Goal: inspect the actual multi-bank Runs, collected Sources, and queued Review tasks; remove generalizable collection errors; and leave only clear, evidence-led human decisions.
-- Why now: collection `collection_yIwEWUvWHFGyljyx` completed 28 bank/product runs and produced 27 candidates with 12 active reviews, but broad page sections, navigation, unresolved rate templates, wrong-type flags, and cashback/prepayment/equity percentages were mapped as product terms. CIBC detail scope was broad, EQ GIC and Fairstone homepage discovery missed valid official pages, Canadian Tire returned a JavaScript-only shell, and the generic `manual_sampling` summary did not tell the reviewer what was actually wrong.
-- Outcome: operator-defined extraction and normalization are constrained to each registered `expected_fields` contract. Shared cleanup rejects unresolved templates, wrong-type booleans, duplicated/navigation/footer copy, term conflicts, non-value calculator/estimate fields, invalid amortization/payment/prepayment text, and percentages whose evidence describes rewards, prepayment, equity, down payment, loan-to-value, or unresolved template identifiers rather than interest. Lending/card requiredness is product-type aware. Homepage discovery can safely use a product-identifying homepage, a tightly gated deposit-family overview, or high-confidence title-led detail evidence; it retains candidate rejection counts, reports JavaScript shells actionably, and excludes retail business, editorial/resource, and mortgage switch/manage service-flow pages from standalone products.
-- Review UX: Queue/detail use the same diagnosis for missing fields, invalid types, templates, page copy, term conflicts, and source/product identity mismatch. Only affected fields open initially; other collected values, optional reason/note controls, model context, and history remain collapsed. Source facts are reduced to confidence, evidence coverage, role, and open-source action. Editorial/service-flow candidates recommend `reject` without asking the operator to repair irrelevant fields; valid incomplete products recommend inline edit/approve.
-- Live verification: EQ GIC run `collection_2LzrfqvnNHeabTeQ` completed with one clean candidate and no false `2.75%` account/footer rate; only minimum deposit, term, and rate remain for human verification because the fetched official page does not expose them. Fairstone Personal Loan run `collection_5zsPZaeDzBhu7fW3` promoted the product-identifying homepage, retained the grounded `$500-$60,000` amount, and asks only for interest rate and term. Final CIBC Mortgage run `collection_WMLQGKwDPmpNE7mr` completed `26/26` sources with no failures, produced four review-first candidates, and superseded three older logical duplicates. The earlier `20%` prepayment/equity-as-rate error plus amortization/payment/calculator page copy are gone. Fixed and Variable products now ask for the missing published mortgage rate; the Home Power Plan source also flags its Fixed-Rate product-name mismatch; and `Switch your mortgage` is clearly recommended for rejection as a service flow. Its source-time `5.25` template-derived value led to the final generic unresolved-template numeric-rate guard, and future switch/manage flows are excluded before candidate creation.
-- Queue recheck: all 12 original active tasks now have a concrete field-level outcome. Credit card, line-of-credit, mortgage, personal-loan, and HELOC cases identify only their bad/missing fields and use edit/approve; the EQ reverse-mortgage mismatch and CIBC cross-page mortgage identities are explicitly flagged; non-product source patterns use reject. No task was auto-approved or published as part of this slice.
-- Decisions: prefer conservative omission and human verification over inferring a rate from rewards, equity, template identifiers, or nearby account content. A family overview is candidate-producing only for deposit types under strict identity/AI/veto gates. Educational articles and operator service journeys cannot become products. JavaScript rendering is not silently widened; the Run directs the operator to add bounded official detail URLs or seek approval for a rendered-HTML discovery capability.
-- Key files: `api/service/api_service/source_catalog.py`, `review_diagnosis.py`, `review_queue.py`, `review_detail.py`, `worker/pipeline/fpds_extraction/service.py`, `fpds_normalization/service.py`, `fpds_rate_safety.py`, `fpds_validation_routing/service.py`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/README.md`, `worker/pipeline/README.md`, `docs/03-design/admin-information-architecture.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`.
-- Verification:
-  - API full suite: `200` passed.
-  - Worker main suite: `132` passed; regression suite: `2` passed.
-  - Foundation checks: repo doctor and baseline validation passed; Admin typecheck/build passed with all `23` routes generated; Public typecheck/build passed with all `7` routes generated.
-  - `git diff --check` passed.
-- Known issues: Canadian Tire's homepage response is an explicit JavaScript shell, so bounded HTML discovery cannot enumerate its products without official detail-source URLs or an approved rendered-HTML path. Dynamic/personalized official rate pages for EQ, Fairstone, and CIBC may still require a reviewer to enter a source-verified value or defer/reject; the system now makes that limitation explicit and prevents unsafe inference.
-- Next step: operators should reject the current CIBC switch-service task, correct or defer the explicitly listed missing/mismatched CIBC/EQ/Fairstone fields from official evidence, and add bounded Canadian Tire product-detail URLs unless the Product Owner chooses a rendered discovery follow-on.
-
-## 2026-07-14 - Review Detail Product-Style Candidate Presentation
-
-- WBS: `4.2`, `4.3`, `4.4`, Admin review UX follow-on
-- Status: done
-- Goal: present each review candidate as a financial product detail without weakening evidence-led human decision controls.
-- Outcome: the Review Detail now begins with a candidate product presentation aligned to Public detail hierarchy: product identity, source-derived description, three product-family-aware metrics, product facts, and key conditions. Lending prioritizes rate, rate type, term, amortization, payment, prepayment, amount/limit, and security; chequing prioritizes fee, balance, and transaction cues; deposit/term products prioritize rate, term, and entry amount. The overview uses the reviewer’s in-progress edits immediately, while the field list below remains the source of truth for agent value, effective value, inline evidence, correction, and approval decisions.
-- Decisions: retain the explicit `Candidate product` state and the Admin-only source link; do not reuse Public disclosure copy or expose the evidence workflow as consumer content. Duplicate source-link action was removed from the decision-facts card to keep the screen concise.
-- Key files: `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/README.md`, `docs/03-design/admin-information-architecture.md`.
-- Verification: `pnpm run typecheck` passed; `pnpm run build` passed and generated the protected Review Detail route; `git diff --check` passed.
-- Next step: use the new summary during the next queued Mortgage review and confirm field values against the linked bank source before approval.
-
-## 2026-07-14 - Public Loan Catalog Activation
-
-- WBS: `5.6`, `5.7`, `5.9`, `5.16`
-- Status: implemented; awaiting a required operator approval for the first public lending product
-- Goal: make review-approved loans discoverable in FPDS Public with the same safe publish boundary as deposits.
-- Why now: the Product Owner requested Loan discovery in Public and confirmed Mortgage, Personal Loan, and Line of Credit as the catalog scope. The registry was already active, but the public aggregate and navigation were deposit-only.
-- Outcome: Public now has a localized `/loans` catalog, enabled navigation/footer links, lending-aware list/detail/compare cards, and loan-specific rate, term, payment, amount, and prepayment fields. Deposit-only purpose/fee/minimum-deposit controls are not shown for loans. Aggregate refresh now projects active canonical Mortgage, Personal Loan, and Line of Credit rows, and preserves a safe numeric lending display rate from grounded payload fields. Credit Card remains outside this catalog. Collection plans now carry the registered lending family, preventing a mortgage collection from falling back to `deposit`.
-- Live verification: B2B Mortgage collection `collection_m5x_wgxkLzh42qgV` completed without failures. It created fresh `Mortgage renewal` (`cand-a5954efdbc6f297a`) and `Mortgage refinancing` (`cand-46a314440defa9cc`) candidates, both validation-pass and `in_review`; an older duplicate renewal candidate was superseded. No lending canonical product or public projection existed before this run, so no loan is publicly shown until an operator makes the required approval decision.
-- Decisions: never auto-publish a collection candidate solely to populate the Loan catalog. The user-approved catalog covers Mortgage, Personal Loan, and Line of Credit only; Credit Card stays separate.
-- Key files: `app/public/src/app/loans/page.tsx`, `product-grid-surface.tsx`, `product-detail-surface.tsx`, `public-query.ts`, `api/service/api_service/public_common.py`, `public_products.py`, `aggregate_refresh.py`, `worker/pipeline/fpds_aggregate_refresh/`, `source_catalog.py`.
-- Verification: API full suite `187` passed; Worker full suite `127` passed; Public `pnpm run typecheck` passed; Public `pnpm run build` passed and generated `/loans`; `git diff --check` passed.
-- Next step: review and approve or reject the two new B2B Mortgage candidates in Admin Review Queue. Once a candidate is approved and aggregate refresh completes, it will appear at `/loans` without any further code change.
-
-## 2026-07-14 - Multi-Bank Runs and Problem-First Review Hardening
-
-- WBS: `4.2`, `4.3`, `4.4`, `4.5`, `5.15`, `5.16`, collection QA hardening
-- Status: `done`
-- Goal: inspect the current Runs and active Review Queue, remove safely automatable duplicate/noise cases, improve future collection across banks and product types, and make unavoidable human decisions concise and field-editable.
-- Why now: collection `collection_TncoSuZwjn6Mhd9X` completed 21 runs but left eight active B2B reviews. Four GIC tasks represented two products through locale/host aliases, four Mortgage tasks represented two products twice, candidate fields contained navigation text, and all seven Bridgewater runs had failed because a `www` homepage redirected to the apex host outside the literal allowlist. Several BMO/B2B runs also rejected strong named-detail candidates after whole-page navigation terms inflated negative scores.
-- Outcome: homepage discovery now treats `www`/apex as one bounded bank host, permits high-confidence confirmed product identity to overcome navigation-wide negatives while retaining hard scope vetoes, collapses same-title/heading detail aliases, and deduplicates byte-identical target snapshots before normalization. Registered `product_family` is carried into collection plans. Final Runs summaries now represent the full source scope and preserve upstream failures instead of showing only the last stage. Normalization removes navigation and non-value rate copy, refuses corporate ownership percentages as deposit rates, prevents bank-name-only supporting evidence matches, and reduces broad withdrawal copy to an explicit limit. Newer exact logical-product review tasks supersede older active duplicates with system audit events.
-- Review UX: Queue and detail use one `review_diagnosis` contract with category, concise headline, affected fields, and an actual review action. Detail uses the union of expected, collected, evidence-linked, and current fields; missing/suspect rows come first, values are editable inline, evidence expands in the row, recommendation controls CTA priority, and arbitrary raw-field editing is an advanced fallback. Re-edits persist the prior approved payload so a later correction does not restore old agent values.
-- Live verification: first B2B GIC rerun `collection_tgiG0xYdX-gd15y_` reduced four detail candidates to two but exposed a corporate-form `25%` ownership value incorrectly merged as a rate. After the generic evidence-safety fix, `collection_Pme_NfK9hgLM2_7R` produced exactly two candidates with no `25%` rate and no navigation-contaminated description/application/deposit-insurance/post-maturity fields. Both remain review-required because the official detail pages do not publish required rate/minimum-deposit values. Its final Run correctly reports `3 of 19` sources not reaching the required terminal stage. Six older GIC duplicate/stale reviews and two same-run Mortgage duplicates were auditably superseded, leaving one task per logical product. Bridgewater Savings `collection_KWsPW9y_cgVSRZmj` passed the formerly failing apex redirect, captured `10/10` snapshots, produced one `2.70%` candidate, and created zero review tasks. Follow-up `collection_8enjijAejDwwJNjo` also produced one pass candidate and zero reviews; its final payload retains the grounded `2.70%` rate and CDIC evidence, removes `Home`/filler fields, and reduces withdrawal text to `One free withdrawal a month.`
-- Active Queue after cleanup: four tasks: B2B Short-Term GIC and Long-Term GIC (`missing_fields`, edit/approve after sourcing the unavailable values), plus Mortgage refinancing and renewal (`suspect_fields`, inline correction of listed navigation/non-value fields). Mortgage is active in the Product Type Registry under `lending`, with 28 active bank-coverage rows and an active Canadian generic taxonomy fallback; it can be recollected when current lending terms need to replace the older source-time payloads.
-- Key files: `api/service/api_service/source_catalog.py`, `source_collection_runner.py`, `review_diagnosis.py`, `review_queue.py`, `review_detail.py`, `worker/pipeline/fpds_normalization/service.py`, `supporting_merge.py`, `fpds_rate_safety.py`, `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `review-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `docs/03-design/admin-information-architecture.md`, `homepage-discovery-scoring-enhancement.md`
-- Decisions: duplicate review coalescing requires exact country/bank/family/type/product-name identity and detail-source roles; it never approves the proposal. Same-product page collapse requires confirmed page title and heading identity. Missing official values stay human-reviewable rather than being inferred. Domain aliases strip only a leading `www.` and do not widen the fetch allowlist to unrelated hosts.
-- Verification:
-  - API full suite: `186` passed.
-  - Worker full suite: `126` passed.
-  - Admin: `pnpm run typecheck` passed; `pnpm run build` passed with all `23` static pages generated.
-  - Focused post-live rate/normalization suite: `51` passed.
-  - `git diff --check` passed.
-- Known issues: B2B GIC official pages still omit comparable rates and minimum deposits, so two operator decisions remain legitimate. Existing Mortgage candidates retain source-time noisy values but the new Review UI identifies and edits them directly; Mortgage coverage is active and can be recollected when a fresh lending run is required. Local collection logs and registries remain as dev evidence.
-- Next step: review the four remaining B2B tasks through the normal UI; run Mortgage collection when a refreshed source payload is needed.
-
-## 2026-07-13 - Runs and Review Queue Collection Accuracy Hardening
-
-- WBS: `4.2`, `4.5`, `5.15`, `5.16`, collection QA hardening
-- Status: `done`
-- Goal: diagnose current Operations Runs and Queued Review Queue items, automate every safely resolvable case with bank/product-generic rules, and make any remaining human review faster and clearer.
-- Why now: the active Alterna queue contained savings/GIC candidates with missing rates plus a linked PDF treated as a product, while earlier completed-partial lending runs lacked retry and two bad auto-promotions remained active publicly.
-- Outcome: parser v2 preserves heading-only values and nested rate cards; parsed documents are now versioned per snapshot/parser; only `detail` sources produce candidates; generated supporting HTML is retained as evidence; retail discovery excludes clear business/commercial pages; rate safety suppresses redemption percentages; extraction fixes fee-waiver direction, registered/tax/navigation contamination, maturity-only redeemability, promotion boilerplate, and post-maturity noise. Generic supporting-rate merge now replaces invalid GIC zero placeholders and builds grounded term tables. Completed-partial collection runs are retryable. Review Queue rows now show source role, missing expected fields, and a suggested action. A newer approved same-detail-source candidate automatically supersedes older active reviews with audit history.
-- Live verification: Alterna Savings collection `collection_Goosj-QQ2YmvpPfC` approved `cand-706062bfb55d3fe6` at `1.05%` with no review. Alterna GIC collection `collection_IgRmWSN6nXoHbAJc` completed cleanly, approved `cand-9a2156c937e5e906`, and created zero review tasks; DB values are standard/public/12-month `2.65%` with 1/2/3/4/5-year term rates `2.65/2.85/3.10/3.25/3.30%`, while false introductory, registered-plan, and post-maturity fields are absent.
-- Database: applied `0023_versioned_parsed_documents.sql` to dev after the first parser-v2 run exposed the historical one-parsed-document-per-snapshot uniqueness constraint. The failed GIC attempt was retried through the supported run-retry path and completed.
-- Outcome after Product Owner approval: retracted `cand-324e94861d70de31` (linked PDF-derived 20% GIC), `cand-c93e5b9d7e13cec0` (out-of-scope Small Business eChequing), and `cand-db25b724324d7925` (linked-PDF Queue task). Products `prod_Dy_L58___l1FzOcS` and `prod_K-MXTPAc9ZP3JYQn` are `inactive`. Superseded same-source review tasks for `cand-e19255488c3ee953`, `cand-bef2904f4e538da8`, and `cand-44a408a2dce7636b` now have candidate state `superseded` and review state `rejected` with system audit events. Aggregate request `aggreq_2GRzBwVK_9HSsP_b` completed as snapshot `agg_9J6Z09MBdCIdwK8Y`; active Queue is `0`; public API-equivalent active-only retrieval has `20` products and excludes both retracted product ids.
-- Key files: `api/service/api_service/source_catalog.py`, `source_registry.py`, `source_catalog_collection_runner.py`, `candidate_auto_promotion.py`, `candidate_safety_remediation.py`, `review_queue.py`, `run_retry.py`, `worker/pipeline/fpds_parse_chunk/`, `fpds_extraction/service.py`, `fpds_normalization/supporting_merge.py`, `fpds_rate_safety.py`, `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `db/migrations/0023_versioned_parsed_documents.sql`
-- Decisions: supporting/linked sources are evidence-only; missing source role routes to review instead of publication; explicit non-detail role is rejected before canonical upsert; business/commercial pages do not enter retail product scope; exact same-detail-source success may close older queued/deferred tasks, but unrelated or genuinely ambiguous tasks remain human decisions.
-- Verification:
-  - API full suite: `179` passed.
-  - Worker full suite: `123` passed.
-  - Admin: `pnpm run typecheck` passed; `pnpm run build` passed with all `23` static pages generated.
-  - Focused extraction/normalization/evidence/rate suite: `93` passed.
-  - `git diff --check` passed.
-- Known issues: local collection logs/registry artifacts are retained as run evidence and were not deleted. Raw snapshot history retains inactive projection rows by design, while the public API always filters to `status='active'`.
-- Next step: resume normal multi-bank collection monitoring; new collection cases now use the generalized safety and review rules from this slice.
-
-## 2026-07-13 - Medium Reasoning for Quality-Sensitive Product Collection
-
-- WBS: `5.15`, `5.16`, AI-assisted discovery and worker-runtime hardening follow-on
-- Status: `done`
-- Goal: use GPT-5.6 Luna's default `medium` reasoning only for homepage product-detail classification and dynamic product extraction or normalization, while retaining `none` for the high-volume product-type keyword generator.
-- Why now: the Product Owner chose higher default reasoning for the collection decisions where semantic judgment and evidence-grounded mapping most affect product data quality.
-- Outcome: removed the explicit `reasoning.effort="none"` field from the homepage parallel scorer and the shared dynamic extraction/normalization Responses runtime. Omitting the field lets `gpt-5.6-luna` use its documented `medium` default. The product-type discovery-keyword generator remains explicitly at `none`; no prompt, JSON schema, parser, validation, or review-routing rule changed.
-- Key files: `api/service/api_service/source_catalog.py`, `worker/pipeline/fpds_ai_runtime.py`, `api/service/tests/test_source_catalog.py`, `worker/pipeline/tests/test_ai_runtime.py`, `docs/03-design/dev-prod-environment-spec.md`
-- Decisions: apply the higher effort only to the two quality-sensitive collection stages, not globally. This supersedes the prior all-path `none` compatibility baseline while preserving the keyword generator's low-latency behavior.
-- Verification:
-  - `uv run --directory api/service python -m unittest tests.test_source_catalog tests.test_product_types` -> `76` passed.
-  - `uv run python -m unittest worker.pipeline.tests.test_ai_runtime worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization` -> `81` passed.
-  - Request-construction tests confirm the homepage scorer and dynamic runtime omit `reasoning`; the stage-specific static test confirms the keyword generator retains `reasoning.effort="none"`.
-- Known issues: the first representative collection at `medium` has not yet been run, so its quality, latency, and cost effect is unmeasured in FPDS production-like data.
-- Next step: compare a representative collection's structured-output validity, false-positive detail rate, latency, and cost with the prior `none` baseline before expanding `medium` to any other stage.
-
-## 2026-07-13 - GPT-5.6 Luna Runtime Migration
-
-- WBS: `5.15`, AI-assisted discovery and worker-runtime hardening follow-on
-- Status: `done` for repository and configured dev environment
-- Goal: replace the active FPDS GPT-5.4 mini runtime defaults with the requested GPT-5.6 Luna model while preserving the existing Responses API structured-output contracts and the prior low-latency operating behavior.
-- Why now: the Product Owner requested that all current GPT-5.4 mini execution paths move to GPT-5.6 Luna.
-- Outcome: changed the Worker shared OpenAI runtime, Admin homepage parallel scorer, Product Type keyword generator, tracked dev/prod environment examples, and the configured dev environment to `gpt-5.6-luna`. The model is available to the configured dev API project (`GET /v1/models/gpt-5.6-luna` returned `200`). All three Responses request builders now explicitly send `reasoning.effort="none"`, preserving GPT-5.4 mini's effective default instead of silently taking GPT-5.6's `medium` default. Existing prompts, JSON schemas, endpoint choice, error handling, and token/cost aggregation were intentionally retained.
-- Not done: no optional GPT-5.6 Pro mode, persisted reasoning, prompt-cache change, Programmatic Tool Calling, multi-agent behavior, or prompt rewrite was added; there was no measured regression that required it.
-- Key files: `.env.dev.example`, `.env.prod.example`, `worker/pipeline/fpds_ai_runtime.py`, `worker/pipeline/tests/test_ai_runtime.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/product_types.py`, `api/service/tests/test_source_catalog.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `docs/03-design/dev-prod-environment-spec.md`
-- Decisions: `gpt-5.6-luna` is the exact API slug for the Product Owner's requested GPT-5.6 Luna tier; it fits FPDS's bounded extraction, classification, routing, and high-volume structured-output workloads. Keep `reasoning.effort=none` as the compatibility baseline and evaluate any higher effort separately with representative collection traces.
-- Verification:
-  - Official OpenAI model guidance confirmed the `gpt-5.6-luna` slug and Luna workload role.
-  - Configured dev OpenAI project model lookup: `gpt-5.6-luna`, HTTP `200`.
-  - `uv run --directory api/service python -m unittest tests.test_source_catalog tests.test_product_types` -> `75` passed.
-  - `uv run python -m unittest worker.pipeline.tests.test_ai_runtime worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization` -> `81` passed.
-  - `git diff --check` -> passed.
-- Known issues: a deployed production secret/configuration store is outside this workspace. Before production rollout, set `FPDS_LLM_MODEL=gpt-5.6-luna` there and verify model access with the production OpenAI project; the repository defaults and production example are already updated.
-- Next step: on the next representative production-like collection, compare structured-output validity, latency, token usage, and estimated cost against the prior GPT-5.4 mini baseline before considering a different reasoning effort.
-
-## 2026-07-13 - Unframed Bank Logos and Official Asset Refresh
-
-- WBS: `5.9`, `5.15` UI and bank-registry hardening follow-on
-- Status: `done`
-- Goal: show bank logos directly, without an unnecessary logo card, in both FPDS Public and Admin; replace unreliable favicon-only defaults with verified official brand assets wherever public assets are available.
-- Why now: the Public and Admin bank presentations used bordered white logo containers, while most recognized Canadian banks depended on a generic favicon URL that could be visually weak or fail to resolve.
-- Outcome: Public `BankLogo`, Admin bank-list marks, and the Admin bank-detail preview now render unframed. Public failures degrade to a plain, accessible bank-code identifier instead of a bordered placeholder. A new `0022` migration replaces 22 recognized-bank favicon defaults with official logo assets, preserves operator-supplied custom logo URLs, and was applied to dev. The active Canadian registry now has logo metadata for all 28 banks, including 22 full official logo assets; the remaining six use official favicon fallback because a full asset was blocked, retired, or not safely discoverable.
-- Not done: no inactive/retired institution was removed from the bank registry, and no unverified third-party logo asset was introduced.
-- Key files: `app/public/src/components/fpds/public/bank-logo.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/bank-detail-dialog-content.tsx`, `db/migrations/0022_bank_logo_asset_refresh.sql`, `db/README.md`, `app/public/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `api/service/tests/test_source_catalog.py`
-- Decisions: official bank-hosted assets are preferred; an official favicon is permitted only as a resilience fallback; logo metadata migrations update only the seed favicon value (or a missing value) and never replace an operator custom URL.
-- Verification:
-  - Verified all 22 refreshed official logo URLs returned `200`; SVG/PNG assets were returned for each (Oaken returns its binary logo behind a generic content-type header).
-  - Applied `db/migrations/0022_bank_logo_asset_refresh.sql` to the configured dev database: `UPDATE 22`, migration-history insert succeeded.
-  - Dev DB read-back: 28 active Canadian banks have `logo_url`; 22 use full official-logo assets; migration history confirms `0022_bank_logo_asset_refresh.sql`.
-  - `uv run --directory api/service python -m unittest tests.test_source_catalog` -> `57` passed.
-  - `pnpm run typecheck` in `app/public` and `app/admin` -> passed.
-  - `pnpm run build` in `app/public` and `app/admin` -> passed; Public generated 6 routes and Admin generated 23 routes.
-- Known issues: a small number of brands remain on official favicon fallback because their full logo asset cannot presently be verified without using an untrusted third-party source; their display is still stable and unframed.
-- Next step: re-check fallback brands only when their official sites publish stable public wordmark assets or when the Product Owner changes the recognized-bank registry scope.
-
-## 2026-07-13 - Review Queue False-Positive Collection Hardening
-
-- WBS: `4.2` to `4.4`, `5.15`, `5.16` hardening follow-on
-- Status: `done`
-- Goal: explain the four active queued tasks, prevent the same class of collection false positive across banks and Product Types, and make legitimate manual review faster and safer.
-- Why now: one Alterna chequing collection created four validation-error review tasks from support/service/rates pages even though the AI discovery scorer had classified every page as supporting rather than product detail.
-- Outcome: all four tasks came from `collection_xgYa5LlD31QA807u` / `run_20260705_045036_alterna_chequing_collect_ifLUf0ZH`: Wire Transfers (`0.5558`), Debit Cards (`0.5158`), External Account Transfers (`0.5919`), and Chequing & Savings Rates (`0.5968`). Each became `required_field_missing` because page evidence counted broad/repeated feature terms and `strong_page_evidence_detail_override` overruled the AI supporting/not-product classification. Discovery now separates product identity from attributes, counts distinct attribute terms, defines the AI score scale and constrained reasons, honors support/not-detail vetoes, and inactivates only explicitly rejected non-seed autogenerated detail rows after successful rediscovery. Review Detail now exposes discovery role/rationale and missing expected fields; Review Queue uses active bank registry options, keeps only safe bulk defer, and uses a Product Type-neutral field/evidence focus.
-- Not done: the four historical review tasks were deliberately not auto-resolved; they remain auditable legacy tasks for an operator to reject or otherwise decide. No validation/confidence threshold was lowered, and generic/new Product Types remain review-first.
-- Key files: `api/service/api_service/source_catalog.py`, `api/service/api_service/review_detail.py`, `api/service/tests/test_source_catalog.py`, `api/service/tests/test_review_detail.py`, `app/admin/src/app/admin/reviews/page.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`, `app/admin/src/components/fpds/admin/review-queue-results.tsx`, `app/admin/src/components/fpds/admin/review-detail-surface.tsx`, `app/admin/src/lib/admin-api.ts`, `app/admin/src/lib/admin-i18n.ts`, `README.md`, `app/admin/README.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
-- Decisions: valid ambiguity still routes to review; only explicit successful rejection can remove an autogenerated detail from active scope; transient fetch failures and seed sources are preserved; bulk approve/reject require task-level evidence inspection.
-- Verification:
-  - `api/service/.venv/Scripts/python.exe -m unittest tests.test_source_catalog tests.test_source_catalog_collection_runner tests.test_review_detail tests.test_review_detail_route tests.test_review_queue tests.test_candidate_auto_promotion` -> `81` passed.
-  - Full API discovery -> `166/167` passed in one run; the sole config-fixture failure was caused by the host `FPDS_ALLOWED_PUBLIC_ORIGINS` override, and `tests.test_config` passed `2/2` when rerun with that override cleared for the test process.
-  - `uv run python -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing` -> `92` passed.
-  - `pnpm run typecheck` in `app/admin` passed.
-  - `pnpm run build` in `app/admin` passed with all `23` static pages generated.
-  - Live dev rerun `collection_M0Rg6AfUkQgqZtw6` / `run_20260713_125516_alterna_chequing_collect_3XPixi_W` completed with `2/2` sources successful, two validation-pass candidates auto-promoted, no partial failure, and `0` new review tasks. Wire Transfers, External Account Transfers, and Chequing & Savings Rates are inactive with `rejected_by_homepage_detail_validation`; Debit Cards is no longer a candidate-producing detail.
-- Known issues: the active queue still includes the four historical tasks by design; their final rejection is an operator decision, not a collection repair side effect.
-- Next step: use Review Detail to reject the four historical support-page tasks when the Product Owner wants the queue cleared; monitor future bank/Product Type collections for newly observed false-positive patterns rather than weakening the general review safeguards.
-
-## 2026-07-05 - Canada Lending Product Type Baseline
-
-- WBS: `5.16`, lending product type onboarding follow-on
-- Status: `done`
-- Goal: register Canadian retail lending Product Types before the Product Owner runs future FPDS Admin collection, and make the existing collection path preserve lending family metadata.
-- Why now: the Product Owner requested Product Type registration for lending products while keeping actual product collection operator-triggered from FPDS Admin.
-- Outcome: added migration `0019_canada_lending_product_types.sql`, registered `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`, and added active generic `other` taxonomy fallback rows. Product Type list/map queries now include all product families, create/update can persist `product_family`, source collection plans carry product family into temporary registry payloads, and extraction artifacts derive `product_family` from source metadata instead of hard-coding `deposit`. Homepage discovery now has lending-specific profile, exclusion, supporting-source, and page-evidence terms.
-- Not done: no lending product collection run was started; no lending-specific parser, public dashboard behavior, or auto-publish path was added.
-- Key files: `db/migrations/0019_canada_lending_product_types.sql`, `api/service/api_service/product_types.py`, `api/service/api_service/source_catalog.py`, `api/service/api_service/source_registry.py`, `api/service/api_service/source_collection_runner.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_validation_routing/persistence.py`, `README.md`, `db/README.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`, `docs/03-design/homepage-discovery-scoring-enhancement.md`
-- Decisions: FPDS canonical codes use hyphens (`credit-card`, `personal-loan`, `line-of-credit`) even when an operator enters underscores; lending remains generic AI extraction/manual review until specialized lending parsers and publish rules are separately approved.
-- Verification:
-  - `uv run --directory api/service python -m unittest tests.test_product_types tests.test_source_catalog tests.test_source_registry tests.test_source_collection_runner tests.test_source_catalog_collection_runner`
-  - `uv run python -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_lending_source_metadata_sets_product_family_in_artifact`
-  - Applied migration `db/migrations/0019_canada_lending_product_types.sql` to the configured dev database.
-  - DB read-back confirmed four active lending Product Types with `fallback_policy=generic_ai_review` and four active `lending/*/other` taxonomy rows.
-- Known issues: the Product Owner still needs to add bank coverage and run actual lending source collection from FPDS Admin.
-- Next step: in FPDS Admin, attach the desired lending Product Types to banks, collect, then inspect generated sources and review-queued candidates before approving any canonical data.
-
-## 2026-06-16 - Dev Product Collection Incremental Reset For Recollection
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete the newly accumulated product-information collection artifacts while preserving bank and product-type setup before another recollection test.
-- Why now: the Product Owner requested deletion of all DB and S3-backed data produced by the product collection process, excluding bank and product-type information.
-- Outcome: deleted the new dev DB collection/downstream artifacts: generated source rows, ingestion run, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, canonical products, product versions, change events, aggregate refresh rows, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3 objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `tmp/fpds_admin_collection_goal_tool.py`, `docs/00-governance/development-journal.md`
-- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Pre-delete DB counts included `source_registry_item=10`, `ingestion_run=1`, `source_document=9`, `source_snapshot=9`, `run_source_item=9`, `parsed_document=9`, `evidence_chunk=354`, `evidence_chunk_embedding=354`, `model_execution=20`, `llm_usage_record=20`, `normalized_candidate=5`, `field_evidence_link=250`, `canonical_product=5`, `product_version=5`, `change_event=5`, `aggregate_refresh_request=1`, `aggregate_refresh_run=1`, `public_product_projection=5`, `dashboard_metric_snapshot=1`, `dashboard_ranking_snapshot=10`, and `dashboard_scatter_snapshot=5`.
-  - Deleted `65` S3 objects under `s3://fpds-dev-private/dev/`; post-delete object storage summary is `object_count=0`, `total_bytes=0`.
-  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
-  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
-  - Local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` are absent.
-- Known issues: no new collection run was started in this slice.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
-
-## 2026-06-16 - Dev Product Collection Data Reset For Recollection
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all product-information collection artifacts while preserving bank and product-type setup before a clean recollection test.
-- Why now: the Product Owner requested deletion of all DB and S3-backed data produced by the product collection process, excluding bank and product-type information.
-- Outcome: deleted dev DB collection/downstream artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, canonical products, product versions, change events, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3 objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `tmp/fpds_admin_collection_goal_tool.py`, `docs/00-governance/development-journal.md`
-- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Pre-delete DB counts included `source_registry_item=38`, `ingestion_run=4`, `source_document=31`, `source_snapshot=31`, `run_source_item=34`, `parsed_document=31`, `evidence_chunk=950`, `evidence_chunk_embedding=950`, `model_execution=72`, `llm_usage_record=71`, `normalized_candidate=17`, `field_evidence_link=794`, `canonical_product=17`, `product_version=17`, `change_event=17`, `aggregate_refresh_request=4`, `aggregate_refresh_run=4`, `public_product_projection=43`, `dashboard_metric_snapshot=4`, `dashboard_ranking_snapshot=50`, and `dashboard_scatter_snapshot=5`.
-  - Deleted `223` S3 objects under `s3://fpds-dev-private/dev/`; post-delete object storage summary is `object_count=0`, `total_bytes=0`.
-  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
-  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
-  - Local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` are absent.
-- Known issues: no new collection run was started in this slice.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
-
-## 2026-06-16 - Demo Architecture And Collection Process Rewrite
-
-- WBS: `5.15`, `5.16`, customer demo documentation
-- Status: `done`
-- Goal: rewrite the customer demo architecture and collection-process explanation from the Product Owner-provided FPDS architecture and collection process diagrams.
-- Why now: the Product Owner requested Section 6 of the demo scenario to explain architecture and collection flow based on the uploaded images.
-- Outcome: replaced the short Section 6 explanation with a clearer architecture overview covering external systems, FPDS platform boundary, public/operator consumers, data stores, public evidence boundary, and public projection rules. Rewrote the collection process as a 10-step evidence-to-public-projection flow from admin scope selection through source discovery, snapshot, parse/chunk, retrieval, extraction, normalization, validation, canonical upsert, audit, and aggregate refresh.
-- Not done: no implementation code, runtime behavior, database schema, or public/admin UI was changed.
-- Key files: `docs/01-planning/fpds-customer-demo-scenario.md`, `docs/00-governance/development-journal.md`
-- Decisions: kept BX-PF as interface-ready/future-facing in the demo explanation and kept public evidence trace explicitly admin-only.
-- Verification: reviewed the updated Section 6 rendered text in-place and checked the git diff is limited to the requested documentation section plus this journal entry.
-- Known issues: no runtime test was needed because this is a documentation-only update.
-- Next step: use the revised Section 6 as the narration baseline for the FPDS customer demo architecture/process walkthrough.
-
-## 2026-06-15 - Dev Product Collection Reset For Recollection Retest
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all data produced by product information collection while preserving bank and product-type setup before another clean recollection test.
-- Why now: the Product Owner requested removal of all product collection DB artifacts and S3-backed object storage artifacts, excluding bank and product-type information.
-- Outcome: deleted dev DB collection/downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, canonical products, product versions, change events, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3-compatible objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `tmp/fpds_admin_collection_goal_tool.py`, `docs/00-governance/development-journal.md`
-- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Pre-delete DB counts included `source_registry_item=38`, `ingestion_run=4`, `source_document=31`, `source_snapshot=31`, `run_source_item=34`, `parsed_document=31`, `evidence_chunk=950`, `evidence_chunk_embedding=950`, `model_execution=72`, `llm_usage_record=72`, `normalized_candidate=17`, `field_evidence_link=794`, `canonical_product=17`, `product_version=17`, `change_event=17`, `aggregate_refresh_request=4`, `aggregate_refresh_run=4`, `public_product_projection=45`, `dashboard_metric_snapshot=4`, `dashboard_ranking_snapshot=45`, and `dashboard_scatter_snapshot=10`.
-  - Deleted `223` S3-compatible objects under `s3://fpds-dev-private/dev/`; post-delete object storage summary is `object_count=0`, `total_bytes=0`.
-  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
-  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
-  - Local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` are absent.
-- Known issues: no new collection run was started in this slice.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
-
-## 2026-06-15 - Dev Product Collection Data And Storage Reset Before Recollection
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all data produced by product information collection while preserving bank and product-type setup before a clean recollection test.
-- Why now: the Product Owner requested removal of all product collection DB artifacts and S3-backed object storage artifacts, excluding bank and product-type information.
-- Outcome: deleted dev DB collection/downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3-compatible objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `tmp/fpds_admin_collection_goal_tool.py`, `docs/00-governance/development-journal.md`
-- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Pre-delete DB counts included `source_registry_item=129`, `ingestion_run=15`, `source_document=105`, `source_snapshot=109`, `parsed_document=107`, `evidence_chunk=2883`, `evidence_chunk_embedding=2883`, `model_execution=327`, `llm_usage_record=327`, `normalized_candidate=98`, `field_evidence_link=4588`, `canonical_product=98`, `product_version=98`, `change_event=98`, `aggregate_refresh_request=15`, `aggregate_refresh_run=15`, `public_product_projection=762`, `dashboard_metric_snapshot=15`, `dashboard_ranking_snapshot=265`, and `dashboard_scatter_snapshot=132`.
-  - Deleted `929` S3-compatible objects under `s3://fpds-dev-private/dev/`; post-delete object storage summary is `object_count=0`, `total_bytes=0`.
-  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
-  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
-  - Local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` are absent.
-- Known issues: no new collection run was started in this slice.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
-
-## 2026-06-11 - Public Main Screen Copy Simplification
-
-- WBS: `5.10`, `5.13`, public UI copy simplification
-- Status: `done`
-- Goal: remove Product Owner-specified explanatory copy from the FPDS public main screen: `Public snapshot`, the purpose-entry explanatory subtitle, and the scope/snapshot/official-bank trust cue block.
-- Why now: the Product Owner asked to simplify the public main screen by removing redundant snapshot/scope/process copy while keeping the comparison entry points.
-- Outcome: removed the Home hero eyebrow, removed the shared purpose-entry subtitle and compact trust cue block from public surfaces, changed the filtered Home reset action to use the existing common `Clear` label, and removed the matching EN/KO/JA locale keys. The footer no longer lists a `Public snapshot` item or repeats the aggregate snapshot sentence, while retaining the evidence-boundary note.
-- Not done: no public API, aggregate snapshot, product data, methodology route, collection pipeline, or product grid behavior contract was changed.
-- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/purpose-entry-points.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/public-footer.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/insight-dashboard-metric-definition.md`, `docs/03-design/product-grid-information-architecture.md`
-- Decisions: removed the copy at the shared component/locale-resource level instead of hiding only one dashboard instance, so the same explanatory block cannot reappear on `/products` through the shared purpose-entry component.
-- Verification:
-  - searched `app/public/src`, `app/public/README.md`, and the updated active IA docs for the removed visible English copy and removed locale/component keys
-  - in `app/public`: `pnpm run typecheck`
-  - in `app/public`: `pnpm run build`
-  - root `tests/regression` path is absent
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api\service\tests\regression -p "test_*.py"` (`9` tests)
-- Known issues: no browser visual QA was run against a live public API snapshot in this slice; production build verifies renderability but not final visual density with live data.
-- Next step: visually review `/dashboard` and `/products` with a live public API snapshot when available.
-
-## 2026-06-11 - Canonical Rate Safety Guardrail For Market-Linked Returns
-
-- WBS: `5.5`, `5.16`, collection quality hardening
-- Status: `done`
-- Goal: prevent market-linked return caps or full-term return percentages from being collected as canonical annual interest rates, after `Scotiabank Market Linked GICs` produced `60%` in `standard_rate` / `public_display_rate`.
-- Why now: the Product Owner reported an impossible collected interest rate and requested a generic fix that helps other banks and product types rather than a narrow Scotiabank exception.
-- Outcome: added a shared worker rate-safety guardrail that suppresses implausible annual deposit rates above 25% and percentage contexts that describe index return, full-term return, return caps, principal guarantee, or non-annual return semantics. Wired the guardrail into extraction percent fallback/direct extraction, normalization rate promotion, generic supporting-source rate merge, and validation routing. The specific Scotiabank `60% per year` limitation text no longer becomes `standard_rate` or `public_display_rate`; if such a value reaches validation from another path, it is routed as `invalid_numeric_range`.
-- Not done: existing collected DB rows were not mutated in this slice; affected collection output should be regenerated rather than manually patched.
-- Key files: `worker/pipeline/fpds_rate_safety.py`, `worker/pipeline/fpds_extraction/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/fpds_normalization/supporting_merge.py`, `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/tests/test_extraction.py`, `worker/pipeline/tests/test_normalization.py`, `worker/pipeline/tests/test_validation_routing.py`, `docs/03-design/domain-model-canonical-schema.md`
-- Decisions: kept `highest_rate` in the Phase 1 golden/profile contract separate because market-linked and fund-linked products may publish maximum full-term return values such as `21%` or `35%`; those values must stay explicitly tagged/noted and must not be reused as annual canonical rate fields.
-- Verification:
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_extraction.ExtractionServiceTests.test_rate_fallback_ignores_market_linked_return_cap_context worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_suppresses_market_linked_return_cap_as_canonical_rate worker.pipeline.tests.test_normalization.SupportingMergeTests.test_generic_supporting_merge_ignores_market_linked_return_cap_context worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_implausible_deposit_rate_is_invalid_numeric_range`
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_extraction worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests -p "test_*.py"` (`109` tests)
-  - root `tests/regression` path is absent
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api\service\tests\regression -p "test_*.py"` (`9` tests)
-- Known issues: a clean recollection is still required for persisted candidates that were already collected before this guardrail.
-- Next step: rerun the affected Scotiabank GIC collection and verify the Market Linked GIC candidate either omits annual canonical rate fields or uses only source-stated annual posted/guaranteed interest evidence.
-
-## 2026-06-10 - Dev Product Collection Data And Storage Reset Before Recollection
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all data produced by product information collection while preserving bank and product-type setup before a clean recollection test.
-- Why now: the Product Owner requested removal of all product collection DB artifacts and S3-backed object storage artifacts, excluding bank and product-type information.
-- Outcome: deleted dev DB collection/downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Deleted all S3-compatible objects under `s3://fpds-dev-private/dev/`. Removed local collection tmp artifact directories under `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `docs/00-governance/development-journal.md`
-- Decisions: preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows so the next admin recollection can start from the configured bank/product/source-catalog setup.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Pre-delete DB counts included `source_registry_item=39`, `ingestion_run=4`, `source_document=32`, `source_snapshot=32`, `parsed_document=32`, `evidence_chunk=989`, `evidence_chunk_embedding=989`, `model_execution=73`, `llm_usage_record=73`, `normalized_candidate=17`, `field_evidence_link=802`, `canonical_product=17`, `product_version=17`, `change_event=17`, `aggregate_refresh_run=4`, `public_product_projection=43`, `dashboard_metric_snapshot=4`, `dashboard_ranking_snapshot=50`, and `dashboard_scatter_snapshot=5`.
-  - Post-delete collection/output table counts are `0`, collection-related `audit_event` count is `0`, and preserved setup counts include `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`.
-  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` changed from `object_count=228`, `total_bytes=43,158,843` to `object_count=0`, `total_bytes=0`.
-  - Admin collection state reports 5 active banks, 3 active product types, 15 active catalog items, all artifact counts `0`, and no latest collections.
-- Known issues: local process command-line inspection through `Get-CimInstance Win32_Process` was denied by OS permissions, so no process list was captured; DB/S3 post-delete counts remained clean.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect refreshed candidates before approval or aggregate refresh decisions.
-
-## 2026-06-09 - Public Purpose Entry And Compare Workspace
-
-- WBS: `5.9`, `5.10`, `5.11`, `5.12`, `5.13`, public UI follow-on
-- Status: `done`
-- Goal: improve FPDS Public comparison usefulness using benchmark patterns for purpose-led entry, side-by-side comparison, and trust cues while staying inside the approved Canada Big 5 deposit scope.
-- Why now: the Product Owner asked for a production-quality public financial-product comparison experience, with benchmark-inspired improvements and no shortcut/demo-grade implementation.
-- Outcome: added shared purpose-first entry cards to `/dashboard` and `/products` for everyday banking cost, savings-rate, fixed-term return, and low-entry-amount paths. Added compact trust cues for scope, snapshot freshness, and official-bank confirmation. Added a client-side `/products` comparison workspace where users can select up to four currently rendered products and compare product, field-backed comparison reason, rate, monthly fee, entry amount, term, application method, and official bank page without changing public API contracts.
-- Not done: no personalized recommendation, eligibility scoring, account-opening flow, public evidence trace, Admin data model change, or new API endpoint was added.
-- Key files: `app/public/src/components/fpds/public/purpose-entry-points.tsx`, `app/public/src/components/fpds/public/product-compare-workspace.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`, `docs/03-design/insight-dashboard-metric-definition.md`
-- Decisions: kept the slice frontend-first because existing public product payloads already expose the needed rate, fee, balance/deposit, term, application, and official-page fields; used existing filters/sorts for purpose entry instead of adding a recommendation model.
-- Verification:
-  - In `app/public`: `pnpm run typecheck`
-  - In `app/public`: `pnpm run build`
-  - root `tests/regression` path is absent
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - Existing local public dev server on `http://localhost:3000`; `GET /dashboard`, `GET /products`, and `GET /methodology` returned HTTP `200`
-- Known issues: final visual QA should still be done in a browser with a live public API snapshot to inspect real product density, mobile compare-table scrolling, and localized text wrapping.
-- Next step: perform responsive browser QA for `/dashboard` and `/products`, especially compare selection and purpose-entry links, against current aggregate data.
-
-## 2026-06-09 - Public Dashboard Future-Product Footer Polish
-
-- WBS: `5.10`, `5.12`, `5.13`, `5.14` public UI follow-on
-- Status: `done`
-- Goal: adjust the FPDS Public Home surface so it no longer reads as deposit-only, simplify dashboard ranking/KPI presentation, and add a footer plus compact locale control pattern inspired by Revolut's footer structure.
-- Why now: the Product Owner noted that the current public dashboard only shows deposit products today but should not lock the Home copy to deposits because loan products are planned later.
-- Outcome: changed Home dashboard copy to product-neutral EN/KO/JA wording, removed the visible Methodology action from Home, moved the Banks KPI before Visible products, removed the visible Top Interest Rate KPI card, and simplified the Top 5 ranking numerals. Added a public footer with brand, route, coverage, data-boundary, and locale-control sections. Replaced the header language select with a compact globe/locale menu shared with the footer.
-- Not done: no backend/API contract change, no new public route, no public evidence exposure, and no Revolut branding, copy, or legal content reuse.
-- Key files: `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/components/fpds/public/public-locale-menu.tsx`, `app/public/src/components/fpds/public/public-footer.tsx`, `app/public/src/app/layout.tsx`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/insight-dashboard-metric-definition.md`
-- Decisions: kept `/products` labeled as the current Deposit catalog while making `/dashboard` product-neutral; kept `/methodology` implemented as a direct route but removed it from visible Home actions; used a footer-level data-boundary note instead of adding another methodology card to the main screen.
-- Verification:
-  - In `app/public`: `pnpm run typecheck`
-  - In `app/public`: `pnpm run build`
-  - root `tests/regression` path is absent
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - Local public dev server started from `app/public`; `GET http://localhost:3000/dashboard` returned HTTP `200`
-- Known issues: production build verifies renderability, but final visual QA should still be done against a running public API snapshot to inspect real product names, localized footer wrapping, and mobile menu placement.
-- Next step: run browser/mobile visual QA for `/dashboard` with the public API service and current aggregate snapshot available.
-
-## 2026-06-08 - Public Premium Fintech UI Simplification
-
-- WBS: `5.9`, `5.10`, `5.11`, `5.13`, `5.14` public UI follow-on
-- Status: `done`
-- Goal: refresh the FPDS Public dashboard, deposit list, and product detail screens toward a more polished premium fintech experience while keeping public API contracts, locale behavior, and evidence boundaries unchanged.
-- Why now: the Product Owner asked to remove low-value public information, simplify bank-logo presentation, add a sort-aware Top 5 list on the product catalog, remove the product-detail Decision Summary block, and raise the overall visual quality without copying Revolut branding.
-- Outcome: redesigned the public dashboard hero with live KPI cards, ranking-card presentation, bank coverage, optional single-type scatter, and no visible Recently Changed KPI/ranking, Products by type card, or inline Data notes card. Added a sort-aware Top 5 list above `/products` cards using the existing products API with `page_size=5`. Simplified product cards and product detail to show bank logos without redundant visible bank-name chrome, and moved product-detail official/similar actions into the hero while removing the Decision Summary card. Added a restrained light canvas/header treatment and EN/KO/JA Top 5 labels.
-- Not done: no backend/API contract change, no data mocking, no public evidence exposure, and no new UI/animation library.
-- Key files: `app/public/src/app/products/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/components/fpds/public/bank-logo.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/app/globals.css`, `app/public/src/lib/public-locale.ts`, `app/public/README.md`, `docs/03-design/product-grid-information-architecture.md`, `docs/03-design/insight-dashboard-metric-definition.md`
-- Decisions: kept the implementation frontend-only; treated the Top 5 list as a second read from the existing public products endpoint rather than a new API; preserved source-derived product text and the public/private evidence boundary; left methodology details on `/methodology` instead of repeating them on the public Home surface.
-- Verification:
-  - In `app/public`: `pnpm run typecheck`
-  - In `app/public`: `pnpm run build`
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - Local public dev server started from `app/public`; `GET http://localhost:3000/dashboard` returned HTTP `200`
-- Known issues: visual QA with real products still requires the public API service and a current aggregate snapshot running locally; without the API, the Next.js route correctly renders the existing API-unavailable state.
-- Next step: run browser/mobile QA against `/dashboard`, `/products`, and representative `/products/:productId` pages with the API service and current public aggregate snapshot available.
-
-## 2026-06-07 - Deposit List And Detail Benchmark UI Refresh
-
-- WBS: `5.9`, `5.13`, `5.14` public UI follow-on
-- Status: `done`
-- Goal: improve `/products` and `/products/[productId]` so users can scan, compare, and inspect deposit products more comfortably using financial comparison-site interaction patterns.
-- Why now: the Product Owner asked for the deposit product list and per-product detail screens to be upgraded for stronger usability, design, and UI/UX after reviewing benchmark sites.
-- Outcome: added a result-summary strip to the product list with product count, snapshot freshness, active scope, reset action, and dashboard handoff. Reworked product cards into bank/product-type headers, official-bank action, highlight/customer signals, a stable three-metric comparison strip, and a clearer detail action. Reorganized product detail into an overview, decision summary, product-type-specific metric tiles, calculator, product facts, optional term rates, key conditions, and public disclosure sequence. Added EN/KO/JA interface labels for the new UI copy.
-- Not done: no backend/API contract change, no source evidence exposure, no expansion beyond approved public deposit scope, and no scraping of benchmark sites.
-- Key files: `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/product-detail-surface.tsx`, `app/public/src/lib/public-locale.ts`, `docs/00-governance/development-journal.md`
-- Decisions: kept the slice frontend-only; preserved URL query state, locale fallback behavior, source-derived product text, and the public/private evidence boundary.
-- Verification:
-  - In `app/public`: `pnpm run typecheck`
-  - In `app/public`: `pnpm run build`
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-- Known issues: production build verifies renderability, but final visual QA should still be done against a running public API snapshot so real product names, translated labels, and mobile wrapping can be inspected with current data.
-- Next step: perform responsive browser QA for `/products` and representative `/products/:productId` records when the current aggregate snapshot is available.
-
-## 2026-06-07 - Public Benchmark Comparison UI Refresh
-
-- WBS: `5.9`, `5.10`, `5.11`, `5.14` public UI follow-on
-- Status: `done`
-- Goal: improve the FPDS Public Deposit catalog and dashboard against consumer financial-comparison benchmarks while preserving existing public API contracts, locale behavior, and evidence boundaries.
-- Why now: the Product Owner asked for the public site to feel more usable and polished for comparing products across banks, using financial comparison-site patterns as the benchmark.
-- Outcome: refreshed the dashboard into a stronger market overview with scope actions, active-scope chips, four KPI cards, bank/product-type composition charts, optional like-for-like scatter comparison, freshness/data-note panel, and scroll-safe ranking tables. Updated product cards with a stable three-signal comparison strip, clearer detail action, and safer long-text handling. Hardened the public navigation/header so localized labels can scroll instead of overlapping on narrow screens.
-- Not done: no backend/API contract change, no new public evidence exposure, no expansion beyond the approved Canada deposit public scope, and no external benchmark-site scraping was added.
-- Key files: `app/public/src/app/dashboard/page.tsx`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/components/fpds/public/public-nav.tsx`, `app/public/src/components/fpds/public/public-header.tsx`, `app/public/src/lib/public-locale.ts`
-- Decisions: kept the slice frontend-only and reused existing dashboard summary/ranking/scatter API contracts; scatter is requested opportunistically only when a single product-type comparison has a supported axis preset, and scatter failure does not take down the dashboard.
-- Verification:
-  - In `app/public`: `pnpm run typecheck`
-  - In `app/public`: `pnpm run build`
-  - `api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"` (`9` tests)
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-  - `git diff --check -- app/public/src/app/dashboard/page.tsx app/public/src/components/fpds/public/dashboard-surface.tsx app/public/src/components/fpds/public/product-grid-surface.tsx app/public/src/components/fpds/public/public-nav.tsx app/public/src/components/fpds/public/public-header.tsx app/public/src/lib/public-locale.ts goal.md`
-- Known issues: build-time verification only confirmed renderability without a live public API; visual review should be done against a running API snapshot to inspect real product names, chart density, and localized long-label behavior.
-- Next step: run responsive visual QA for `/dashboard`, `/products`, and representative `/products/:productId` states once the public API is running with the current aggregate snapshot.
-
-## 2026-06-01 - Dev Product Collection Data And Storage Reset Before Recollection
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all product information collection artifacts while preserving bank and product-type setup before a clean recollection test.
-- Why now: the Product Owner requested removal of all data created by product information collection, including S3-backed object storage artifacts, except bank and product-type information.
-- Outcome: deleted dev DB collection and downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows.
-- Object storage: deleted every object under the dev prefix `s3://fpds-dev-private/dev/`; pre-delete summary was 929 objects / 89,009,097 bytes, and post-delete summary was 0 objects / 0 bytes.
-- Local artifacts: removed the prior collection tmp artifact directories and report file under `tmp/source-catalog-collections/`, `tmp/source-collections/`, `tmp/aggregate-refresh/`, and `tmp/collection_7wJ2KRMYsDg9XEbn_golden_compare.json`.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `tmp/fpds_collection_reset_common.py`, `tmp/fpds_collection_reset_counts.py`, `tmp/fpds_collection_reset_execute.py`, `docs/00-governance/development-journal.md`
-- Decisions: kept the 15 active source catalog coverage rows as setup data needed to launch the next admin recollection; deleted generated `source_registry_item` rows so source details will be regenerated.
-- Verification:
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_counts.py --env-file .env.dev`
-  - `.\api\service\.venv\Scripts\python.exe tmp\fpds_collection_reset_execute.py --env-file .env.dev`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - Post-delete DB counts: `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`; collection/output tables including `source_registry_item`, `ingestion_run`, `source_document`, `source_snapshot`, `parsed_document`, `evidence_chunk`, `evidence_chunk_embedding`, `model_execution`, `llm_usage_record`, `normalized_candidate`, `field_evidence_link`, `review_task`, `canonical_product`, `product_version`, `aggregate_refresh_request`, `aggregate_refresh_run`, `public_product_projection`, and dashboard snapshot tables are `0`.
-  - `audit_event` retained 65 auth/config rows only: 35 auth rows and 30 config rows; collection-related audit count is `0`.
-  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` reports `object_count=0`, `total_bytes=0`.
-- Known issues: public products and canonical products are intentionally empty until the next collection plus auto-promotion/review/aggregate flow repopulates them.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect the new candidates before approval or publish decisions.
-
-## 2026-06-01 - Customer Demo Scenario Code Alignment Correction
-
-- WBS: customer demo planning, public surface communication support
-- Status: `done`
-- Goal: verify the customer demo scenario against the actual FPDS Public code after the Product Owner noted that `/methodology` is not a visible Public menu item.
-- Why now: the demo document needed to distinguish implemented routes from visible navigation so the customer walkthrough does not instruct the presenter to click a non-existent menu.
-- Outcome: confirmed `/methodology` is implemented as a direct Public route, while the Public top navigation only exposes Home(`/dashboard`), Deposit(`/products`), disabled Loan, and the language selector. Updated the demo scenario to describe Methodology as a direct URL/pre-opened tab and added a code-alignment note. Also confirmed the Product Grid bank and product type filters are checkbox-based and support multi-value BMO+TD and chequing+savings scope.
-- Not done: no product/runtime code changes.
-- Key files: `docs/01-planning/fpds-customer-demo-scenario.md`, `docs/00-governance/development-journal.md`
-- Decisions: keep `/methodology` in the governance portion of the demo because it exists and explains the public data boundary, but do not present it as a top-level menu.
-- Verification:
-  - `rg -n "methodology|방법론|BMO와 TD|chequing과 savings|bank filter|product type filter|Public 화면|Public surfaces|메뉴|navigation|필터" docs/01-planning/fpds-customer-demo-scenario.md -S`
-  - inspected `app/public/src/components/fpds/public/public-nav.tsx`
-  - inspected `app/public/src/components/fpds/public/product-grid-surface.tsx`
-  - inspected `app/public/src/app/methodology/page.tsx`
-- Known issues: none for the corrected navigation wording.
-- Next step: when preparing the live demo browser tabs, open `/dashboard`, `/products`, one product detail, and `/methodology` directly instead of relying on a Methodology menu item.
-
-## 2026-06-01 - Customer Demo Scenario For Admin Collection To Public Results
-
-- WBS: customer demo planning, `5.15`, `5.16`, public aggregate/admin observability communication support
-- Status: `done`
-- Goal: prepare a professional customer demo scenario for showing FPDS Admin collection of two banks' chequing and savings products, then FPDS Public product/grid dashboard results, with technical explanation of architecture, collection internals, AI-agent usage, and token usage.
-- Why now: the Product Owner needs to demonstrate the current FPDS build to a technically interested customer and asked for a presentation scenario, detailed demo procedure, and ChatGPT prompts for process/architecture visuals.
-- Outcome: added a customer demo scenario document covering BMO + TD chequing/savings scope, expected 17-product output, demo flow, environment/run preparation, UI procedure, AI-agent/token usage talking points, risk mitigations, customer Q&A, and separate ChatGPT image/prompts for architecture and collection-process diagrams.
-- Not done: did not launch a new live collection or modify product/runtime behavior; the document recommends pre-running the narrowed demo scope before the customer session and using completed run tabs as backup.
-- Key files: `docs/01-planning/fpds-customer-demo-scenario.md`, `docs/README.md`, `docs/00-governance/development-journal.md`
-- Decisions: recommended `BMO` and `TD` because their chequing/savings coverage gives a compact 17-product story while staying inside already validated Big 5 deposit scope; separated live collection kickoff from public-results proof to avoid relying on external bank-site latency during the customer meeting.
-- Verification:
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev state`
-  - `git diff --check`
-- Known issues: the helper `compare` command still validates against the full 98-product Big 5 golden dataset and should not be used directly for the 17-product demo subset without scope filtering.
-- Next step: before the customer demo, run the 4-scope BMO/TD chequing/savings collection or confirm the latest aggregate snapshot already contains the desired filtered public output.
-
-## 2026-05-30 - Admin Collection Golden Recollection Verification
-
-- WBS: `5.15`, `5.16`, admin collection QA verification
-- Status: `done`
-- Goal: use only the FPDS admin product collection flow to recollect all active registered bank/product-type coverage and compare the result to `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json`.
-- Why now: the Product Owner requested an end-to-end admin collection test after the dev product collection data reset, with the golden fixture as the acceptance target.
-- Outcome: launched FPDS admin collection `collection_7wJ2KRMYsDg9XEbn` across the 15 active source catalog items for the 5 active banks (`BMO`, `CIBC`, `RBC`, `SCOTIA`, `TD`) and 3 active deposit product types (`chequing`, `gic`, `savings`). All 15 ingestion runs completed and produced 98 normalized candidates. Golden comparison passed with `actual_count=98`, `golden_count=98`, and zero missing, extra, duplicate, or field-mismatched products across bank name, product name, highest rate, 12-month base rate, tags, product URL, signup amount, eligibility, application method, post-maturity interest, tax benefits, deposit insurance, and term rates.
-- Not done: no product pipeline behavior change was needed because the admin collection output already matched the golden fixture; no canonical approval or public publish step was run.
-- Key files: `tmp/fpds_admin_collection_goal_tool.py`, `tmp/collection_7wJ2KRMYsDg9XEbn_golden_compare.json`, `docs/00-governance/development-journal.md`
-- Decisions: kept verification on the admin source catalog collection path and did not seed, patch, or manually mutate collected product outputs.
-- Verification:
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev poll --collection-id collection_7wJ2KRMYsDg9XEbn --brief`
-  - `api\service\.venv\Scripts\python.exe tmp\fpds_admin_collection_goal_tool.py --env-file .env.dev compare --collection-id collection_7wJ2KRMYsDg9XEbn --report-path tmp\collection_7wJ2KRMYsDg9XEbn_golden_compare.json`
-  - From `api/service`: `.venv\Scripts\python.exe -m unittest discover -s tests\regression -p "test_*.py"` (`9` tests)
-  - From repo root: `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"` (`2` tests)
-- Known issues: local `tmp/source-catalog-collections/`, `tmp/source-collections/`, and `tmp/aggregate-refresh/` artifacts remain as run evidence; no root-level `tests/regression` directory exists.
-- Next step: if the Product Owner wants approval/publish validation, review the 98 candidates through the normal admin workflow rather than bypassing review state.
-
-## 2026-05-29 - Dev Product Collection Data And Storage Reset
-
-- WBS: `5.15`, `5.16`, admin collection retest preparation
-- Status: `done`
-- Goal: delete all data produced by the product information collection process before a clean recollection test, while preserving bank and product-type setup.
-- Why now: the Product Owner requested removal of product collection DB artifacts and all S3 objects accumulated by product collection, excluding bank and product-type information.
-- Outcome: deleted dev DB collection and downstream output artifacts: generated source rows, ingestion runs, run-source links, source documents, snapshots, parsed documents, evidence chunks and embeddings, model and LLM usage records, normalized candidates, field evidence links, review tasks/decisions, canonical products, product versions, change events, publish rows, aggregate refresh requests/runs, public projections, dashboard snapshots, and collection/review/run/product-targeted audit events. Preserved `bank`, `product_type_registry`, `taxonomy_registry`, `source_registry_catalog_item`, auth/session/signup, processing policy config, and migration history rows.
-- Object storage: deleted every object under the dev prefix `s3://fpds-dev-private/dev/`; pre-delete summary was 1,305 objects / 115,383,901 bytes, and post-delete summary was 0 objects / 0 bytes.
-- Not done: no bank, product-type, taxonomy, source-catalog configuration, auth/config, or migration rows were changed; no new collection run was started.
-- Key files: `docs/00-governance/development-journal.md`
-- Decisions: kept the 15 source catalog coverage rows as setup data needed to launch the next admin recollection; deleted generated `source_registry_item` rows so source details will be regenerated.
-- Verification:
-  - Post-delete DB counts: `bank=5`, `product_type_registry=3`, `taxonomy_registry=14`, `source_registry_catalog_item=15`; collection/output tables including `source_registry_item`, `ingestion_run`, `source_document`, `source_snapshot`, `parsed_document`, `evidence_chunk`, `evidence_chunk_embedding`, `model_execution`, `llm_usage_record`, `normalized_candidate`, `field_evidence_link`, `review_task`, `canonical_product`, `product_version`, `aggregate_refresh_request`, `aggregate_refresh_run`, `public_product_projection`, and dashboard snapshot tables are `0`.
-  - `audit_event` retained 62 auth/config rows only: auth sessions, bank configuration, product-type registry configuration, and source-catalog item configuration.
-  - S3-compatible storage prefix `s3://fpds-dev-private/dev/` reports `object_count=0`, `total_bytes=0`.
-  - Local collection tmp artifact directories were absent; only non-collection `tmp/admin-dev.log` remains.
-- Known issues: the next collection run will rebuild generated source registry details, evidence artifacts, candidates, review tasks, and aggregate outputs from scratch.
-- Next step: rerun the FPDS admin collection flow from the preserved bank/product/source-catalog setup and inspect the new candidates before approval or publish decisions.
-
-## 2026-05-29 - GIC Redeemability Flag Auto-Approval Hardening
-
-- WBS: `5.15`, `5.16`, admin collection QA hardening
-- Status: `done`
-- Goal: diagnose why the active Review Queue had 16 queued GIC candidates and improve the pipeline generally so future bank/product collections do not carry broad page-level GIC redeemability noise into validation errors.
-- Why now: the Product Owner reported 16 queued Review Queue items and asked whether GIC product types are inherently hard to auto-collect, with any improvement kept generic across banks and product types.
-- Outcome: active dev DB diagnosis showed all 16 queued tasks were `product_type=gic`, `queue_reason_code=validation_error`, and `validation_issue_codes=["inconsistent_cross_field_logic"]`. The issue was not that GIC cannot be collected; profile-expanded candidates inherited both `redeemable_flag=true` and `non_redeemable_flag=true` from broad GIC family/comparison page snippets. Normalization now resolves conflicting GIC redeemability flags from product-level subtype, product name, source subtype label, and tags. Clear redeemable/cashable products keep `redeemable_flag=true`; clear non-redeemable/non-cashable products keep `non_redeemable_flag=true`; mixed or ambiguous products drop those optional flags instead of forcing a false conflict.
-- Not done: did not mutate the existing 16 queued review tasks or approve current DB rows in place; a rerun or controlled revalidation is still needed if the current queue must reflect the new normalization behavior.
-- Key files: `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_normalization.py`, `docs/00-governance/development-journal.md`
-- Decisions: kept true cross-field conflicts review-blocking; the new rule only disambiguates or removes optional GIC redeemability flags when product-level signals are clearer than broad page evidence.
-- Verification:
-  - DB diagnosis: active queue count `16`; product type `gic=16`; queue reason `validation_error=16`; issue code `inconsistent_cross_field_logic=16`.
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_profile_gic_expansion_resolves_conflicting_redeemability_flags worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_expands_gic_rate_source_into_multiple_product_candidates worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_gic_cross_field_issue_stays_error_and_queues_reason worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_big5_deposit_golden_fixture_rows_auto_validate_under_phase1_contract`
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
-  - `$env:PYTHONPATH='api/service'; .\api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
-  - `git diff --check`
-- Known issues: the current DB queue remains stale relative to this code change until rerun or revalidation; no root-level `tests/regression` directory exists.
-- Next step: rerun the affected GIC collection or run a controlled revalidation/queue cleanup if the Product Owner wants the current dev DB queue to clear immediately.
-
-## 2026-05-26 - Golden-Pass Validator Alignment
-
-- WBS: `5.15`, `5.16`, admin collection QA hardening
-- Status: `done`
-- Goal: align validation and review routing with the Product Owner's Big 5 deposit golden fixture contract so golden-matching admin collection candidates can auto-validate instead of being forced into review by stricter canonical helper-field requirements.
-- Why now: the final admin collection matched `worker/pipeline/tests/fixtures/golden/canada_big5_deposit_products_golden_2026-05-23.json`, but all 98 candidates were still queued because validation required fields outside the golden contract and treated profile expansion evidence conflicts as force-review issues.
-- Outcome: validation now treats the approved Big 5 `chequing`, `savings`, and `gic` fixture fields as the Phase 1 pass contract. Golden-pass candidates may explicitly carry `null` or blank rate/signup/tax/maturity values when the official source does not publish a comparable value, and missing helper canonical fields such as `minimum_deposit`, `term_length_text`, `term_length_days`, `standard_rate`, or `public_display_rate` no longer create `required_field_missing` for those candidates. Profile expansion source-list conflicts no longer create `conflicting_evidence` when the final candidate satisfies the golden contract. Non-golden evidence conflicts still route to review.
-- Not done: did not mutate existing queued final-collection review tasks in this slice.
-- Key files: `worker/pipeline/fpds_validation_routing/service.py`, `worker/pipeline/fpds_normalization/service.py`, `worker/pipeline/tests/test_validation_routing.py`, `worker/pipeline/tests/test_normalization.py`, `docs/03-design/domain-model-canonical-schema.md`, `docs/03-design/workflow-state-ingestion-design.md`, `docs/03-design/review-run-publish-audit-state-design.md`, `docs/03-design/source-registry-refresh-and-approval-policy.md`
-- Decisions: use field presence rather than non-null value for golden fields where the fixture intentionally records unavailable official-source values as `null`; keep dynamic product types and non-golden conflicts on the manual-review path.
-- Verification:
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_big5_deposit_golden_fixture_rows_auto_validate_under_phase1_contract worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_golden_contract_deposit_candidate_auto_validates_despite_profile_source_conflict worker.pipeline.tests.test_validation_routing.ValidationRoutingServiceTests.test_non_golden_contract_evidence_conflict_still_routes_to_review worker.pipeline.tests.test_normalization.NormalizationServiceTests.test_expands_gic_rate_source_into_multiple_product_candidates`
-  - `.venv\Scripts\python.exe -m unittest worker.pipeline.tests.test_normalization worker.pipeline.tests.test_validation_routing`
-  - `$env:PYTHONPATH='api/service'; .\api\service\.venv\Scripts\python.exe -m unittest api.service.tests.test_candidate_auto_promotion api.service.tests.test_source_collection_runner api.service.tests.test_source_catalog_collection_runner`
-  - `$env:PYTHONPATH='api/service'; .\api\service\.venv\Scripts\python.exe -m unittest discover -s api/service/tests/regression -p "test_*.py"`
-  - `.venv\Scripts\python.exe -m unittest discover -s worker\pipeline\tests\regression -p "test_*.py"`
-  - `git diff --check`
-- Known issues: existing `collection_W8DiKS0ZtWJfRXKP` review tasks were created under the previous validator and remain queued until a rerun or explicit cleanup/revalidation path is applied.
-- Next step: rerun admin collection or run a controlled revalidation/queue cleanup if the Product Owner wants the current dev DB queue to reflect the new validator immediately.
-
-## 2026-05-26 - Stale Review Queue Cleanup And Auto-Approve Diagnosis
-
-- WBS: admin collection QA support
-- Status: `done`
-- Goal: remove stale duplicate review queue load from the first Big 5 admin collection and explain why the golden-matching collection did not auto-approve into public products.
-- Why now: the Product Owner reported zero visible public products and 196 admin review queue items after the admin collection golden-match test.
-- Outcome: closed the stale first collection `collection_DpQMudY5RunBRjLH` through the review decision path as `rejected`, with reason code `stale_duplicate_collection`; its 98 linked candidates are now `candidate_state=rejected`. Active review queue now contains only the final golden-passing collection `collection_W8DiKS0ZtWJfRXKP` with 98 queued tasks. Public remains empty because `canonical_product`, `aggregate_refresh_run`, and `public_product_projection` are still empty; no final candidates have been approved or auto-promoted.
-- Not done: did not force-approve or publish final collection candidates.
-- Key files: `docs/00-governance/development-journal.md`
-- Decisions: preserve stale run/review audit history instead of deleting rows; close stale tasks as rejected so active queue reflects only the latest collection.
-- Verification:
-  - Stale cleanup result: `collection_DpQMudY5RunBRjLH` has 98 `review_state=rejected` tasks and 98 `candidate_state=rejected` candidates.
-  - Active queue result: 98 `queued` review tasks remain, all from `collection_W8DiKS0ZtWJfRXKP`.
-  - Auto-approve diagnosis: final collection candidates all carry `conflicting_evidence`; 56 also carry `required_field_missing`, so force-review policy blocks auto-approve regardless of golden required-field equality.
-- Known issues: validation is stricter than the golden comparison contract. It treats multiple evidence-linked values for the same field as conflict and still requires canonical GIC/rate fields such as `minimum_deposit`, `term_length_text`/`term_length_days`, and canonical rate fields even when the golden fixture intentionally uses `highest_rate`, `base_12_month_rate`, `signup_amount`, and `term_rates`.
-- Next step: decide whether to harden validation/normalization so the final collection can auto-promote, or manually review/approve the final 98 candidates.

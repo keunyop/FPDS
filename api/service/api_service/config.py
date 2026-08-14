@@ -59,6 +59,15 @@ def _read_required(key: str) -> str:
     return value
 
 
+def _read_int(key: str, default: int, *, minimum: int, maximum: int) -> int:
+    raw = os.getenv(key)
+    try:
+        value = int(raw) if raw is not None else default
+    except ValueError:
+        value = default
+    return max(minimum, min(maximum, value))
+
+
 @dataclass(frozen=True)
 class Settings:
     env: str
@@ -84,6 +93,8 @@ class Settings:
     login_lock_threshold: int
     login_attempt_window_minutes: int
     login_attempt_ip_threshold: int
+    automation_scheduler_enabled: bool
+    automation_poll_seconds: int
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "Settings":
@@ -136,4 +147,11 @@ class Settings:
             login_lock_threshold=5,
             login_attempt_window_minutes=15,
             login_attempt_ip_threshold=10,
+            automation_scheduler_enabled=_read_bool("FPDS_AUTOMATION_SCHEDULER_ENABLED", True),
+            automation_poll_seconds=_read_int(
+                "FPDS_AUTOMATION_POLL_SECONDS",
+                900,
+                minimum=60,
+                maximum=86400,
+            ),
         )

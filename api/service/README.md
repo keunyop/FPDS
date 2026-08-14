@@ -1,6 +1,6 @@
 # FPDS API Service
 
-This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.15` plus the first public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
+This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.25` plus the public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
 
 Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read APIs
@@ -118,6 +118,11 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidenc
 psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0035_collection_publication_automation.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
 ```
 
 Create the first operator account:
@@ -145,6 +150,18 @@ cd api/service
 ## Notes
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- API lifespan starts one database-advisory-lock-elected collection scheduler
+  when `FPDS_AUTOMATION_SCHEDULER_ENABLED=true`. Policy rows from migration
+  `0035` control the weekly active-catalog cadence, six-scope batch size,
+  24-hour failed/partial retry, 12-hour stale-run recovery, and ten-task
+  current-contract Review recovery batch. `FPDS_AUTOMATION_POLL_SECONDS`
+  controls how often the leader checks for work; the database policy remains
+  fail-closed when migration `0035` is absent.
+- The scheduler uses actor type `scheduler`, preserves scheduled trigger
+  metadata on ingestion runs, globally recovers orphan `auto_validated`
+  candidates and eligible pre-policy Review tasks, and restarts queued
+  aggregate refresh work through the same canonical, audit, and Public
+  projection boundaries as interactive operations.
 - Public reads are country-scoped by bank-owned ISO alpha-2 codes.
   `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
   countries with active products in their latest completed public snapshot.
@@ -164,6 +181,13 @@ cd api/service
   and the runner claims pending work by country/scope instead of assuming
   Canada.
 - Source collection now runs the same audited canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are audit-logged and rejected before they can become public canonical products.
+- Exact-product discovery inspects selected detail pages for directly linked
+  pricing, fee, rate, account-guide, and agreement companions. It keeps this
+  relationship bounded (two per detail, 48 per scope), filters conflicting
+  Product Types, and stores the parent detail URL in private discovery
+  metadata. Product/document and market query keys remain part of source
+  identity so query-addressed US disclosures do not collapse into one row;
+  tracking, locale, and presentation keys are removed.
 - `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.
 - Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.
 - The settings loader now reads both `FPDS_ALLOWED_PUBLIC_ORIGINS` and `FPDS_ALLOWED_ADMIN_ORIGINS`, and the live CORS middleware allows the combined origin set because the same FastAPI service now fronts both public and admin browser surfaces.
@@ -178,7 +202,7 @@ cd api/service
   parameter in its PostgreSQL query, so psycopg prepared statements preserve
   the session/candidate country boundary without raising an ambiguous-parameter
   server error before model execution begins.
-- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v7 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary`. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
+- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v17 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary` or the card-specific `purchase_interest_rate_summary`. A current successful attempt is reusable for 24 hours only when its approval fields still match the candidate. For a US card, a deterministic fallback may repair only an exact `$0`/no-annual-fee quote and an exact Purchase APR range from the normalized product-detail route or a separately named exact-product agreement/disclosure; generic agreements, ellipses, and sibling products remain ineligible. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
 - Collection, Review, manual approval, and aggregate refresh resolve the same
   versioned `(country_code, product_type)` market profile. Generated source
   metadata records the profile key/version. US Checking does not inherit the
@@ -202,6 +226,11 @@ cd api/service
   US Savings requires a complete waiver when its monthly fee is positive and
   preserves new-customer, balance/timing, fallback-rate, date, and variability
   context for a conditional APY.
+  US card Purchase APR labels are recognized independently of the deposit-rate
+  plausibility ceiling. Public retains an exact source-language APR range and
+  its creditworthiness/variable-rate qualification in
+  `purchase_interest_rate_summary`. The qualified summary is the US card
+  essential; a scalar is optional and cannot replace the disclosed range.
   The `100%` official-grounding and fail-closed gates are unchanged.
 - Canonical continuity normalizes presentation-only product-name differences
   (trademark/punctuation and a trailing generic `account`) inside the same

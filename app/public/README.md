@@ -13,6 +13,8 @@ source traces remain inside FPDS Admin.
   equal next actions.
 - `/products` is the Deposit catalog for review-approved `chequing`, `savings`,
   and `gic` products.
+- `/cards` is the Credit Card catalog for review-approved `credit-card`
+  products with annual fee and purchase interest rate comparison.
 - `/loans` is the lending catalog for review-approved `mortgage`,
   `personal-loan`, and `line-of-credit` products.
 - `/products/[productId]` shows the selected product's available public facts,
@@ -105,7 +107,8 @@ pnpm run build
 ```
 
 The current production-rendered baseline was checked at `1440px`, `768px`, and
-exact `390px` widths across Home, Deposit, Loan, selected comparison, Deposit
-detail, Loan detail, and Methodology in EN, KO, and JA. The checks cover document
+exact `390px` widths across Home, Deposit, Credit Card, Loan, selected
+comparison, Deposit detail, Loan detail, and Methodology in EN, KO, and JA. The
+checks cover document
 overflow, language metadata, heading structure, touch targets, browser errors,
 comparison selection, reduced motion, and the live aggregate snapshot.

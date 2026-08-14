@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-08-09"
+MARKET_PROFILE_VERSION = "2026-08-12-v2"
 
 
 @dataclass(frozen=True)
@@ -169,7 +169,14 @@ _COUNTRY_OVERRIDES: dict[tuple[str, str], tuple[ComparisonRequirement, ...]] = {
     # future market change remain isolated to this registry.
     ("US", "credit-card"): (
         _requirement("annual_fee", "annual_fee"),
-        _requirement("purchase_rate", "purchase_interest_rate"),
+        # US issuers normally publish a creditworthiness-based variable APR
+        # range. The source-language summary is the preferred comparison fact;
+        # an exact scalar remains a valid alternative for fixed-rate cards.
+        _requirement(
+            "purchase_rate",
+            "purchase_interest_rate_summary",
+            "purchase_interest_rate",
+        ),
     ),
     # A standalone US mortgage scalar is misleading without its scenario. The
     # source-language summary retains APR/rate plus ZIP, LTV, points, credit,
@@ -196,6 +203,9 @@ _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
     # A simple APY needs no prose, but a new-customer, balance-qualified, or
     # relationship APY must carry its material conditions into Public.
     ("US", "savings"): ("interest_rate_summary",),
+    # Keep the scalar available for fixed-rate cards and numeric consumers; it
+    # is not required when the exact source-language range is present.
+    ("US", "credit-card"): ("purchase_interest_rate_summary",),
 }
 
 

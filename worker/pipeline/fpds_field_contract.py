@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Any
 
 
-FIELD_CONTRACT_VERSION = "2026-08-09"
+FIELD_CONTRACT_VERSION = "2026-08-12"
 
 
 @dataclass(frozen=True)
@@ -34,6 +34,7 @@ _STRING_FIELDS = {
     "cheque_book_info",
     "notes",
     "interest_rate_summary",
+    "purchase_interest_rate_summary",
     "rate_type",
     "amortization_text",
     "payment_frequency",

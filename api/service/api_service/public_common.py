@@ -10,7 +10,15 @@ if TYPE_CHECKING:
     from psycopg import Connection
 
 SUPPORTED_LOCALES = ("en", "ko", "ja")
-SUPPORTED_PRODUCT_TYPES = ("chequing", "savings", "gic", "mortgage", "personal-loan", "line-of-credit")
+SUPPORTED_PRODUCT_TYPES = (
+    "chequing",
+    "savings",
+    "gic",
+    "credit-card",
+    "mortgage",
+    "personal-loan",
+    "line-of-credit",
+)
 SUPPORTED_FEE_BUCKETS = ("free", "low_fee", "high_fee")
 SUPPORTED_MINIMUM_BALANCE_BUCKETS = ("none", "under_1000", "from_1000_to_4999", "5000_plus")
 SUPPORTED_MINIMUM_DEPOSIT_BUCKETS = ("none", "under_500", "from_500_to_4999", "5000_plus")
@@ -313,12 +321,31 @@ def load_public_projection_rows(
             COALESCE(p.refresh_metadata ->> 'product_url', official_source.normalized_source_url) AS product_url
         FROM public_product_projection AS p
         LEFT JOIN LATERAL (
-            SELECT sd.normalized_source_url
-            FROM field_evidence_link AS fel
-            JOIN source_document AS sd
-              ON sd.source_document_id = fel.source_document_id
-            WHERE fel.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
-            ORDER BY fel.created_at ASC, sd.normalized_source_url ASC
+            SELECT source.normalized_source_url
+            FROM (
+                SELECT
+                    candidate_source.normalized_source_url,
+                    0 AS source_priority,
+                    candidate_source.created_at
+                FROM product_version AS pv
+                JOIN normalized_candidate AS nc
+                  ON nc.candidate_id = pv.approved_candidate_id
+                JOIN source_document AS candidate_source
+                  ON candidate_source.source_document_id = nc.source_document_id
+                WHERE pv.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
+
+                UNION ALL
+
+                SELECT
+                    evidence_source.normalized_source_url,
+                    1 AS source_priority,
+                    fel.created_at
+                FROM field_evidence_link AS fel
+                JOIN source_document AS evidence_source
+                  ON evidence_source.source_document_id = fel.source_document_id
+                WHERE fel.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
+            ) AS source
+            ORDER BY source.source_priority ASC, source.created_at ASC, source.normalized_source_url ASC
             LIMIT 1
         ) AS official_source ON true
         WHERE p.snapshot_id = %(snapshot_id)s

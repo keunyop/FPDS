@@ -157,7 +157,7 @@ FROM (
     WHERE cp.country_code = :'country_code'
       AND (
             cp.product_family = 'deposit'
-            OR cp.product_type IN ('mortgage', 'personal-loan', 'line-of-credit')
+            OR cp.product_type IN ('credit-card', 'mortgage', 'personal-loan', 'line-of-credit')
           )
       AND (
             jsonb_array_length(:'bank_codes_json'::jsonb) = 0

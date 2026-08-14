@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 type ProductGridSurfaceProps = {
   apiUnavailable: boolean;
-  catalog: "deposit" | "loan";
+  catalog: "deposit" | "card" | "loan";
   filterOptions: PublicFiltersResponse | null;
   filters: ProductGridPageFilters;
   products: PublicProductsResponse | null;
@@ -29,7 +29,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
   const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
-  const catalogPath = catalog === "loan" ? "/loans" : "/products";
+  const catalogPath: CatalogPath = catalog === "loan" ? "/loans" : catalog === "card" ? "/cards" : "/products";
   const clearHref = buildCatalogHref(catalogPath, {
     ...filters,
     bankCodes: [],
@@ -74,6 +74,12 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
         { value: "bank_name", label: copy.grid.sortBankName, order: "asc" },
         { value: "product_name", label: copy.grid.sortProductName, order: "asc" }
       ]
+    : catalog === "card"
+      ? [
+          { value: "annual_fee", label: copy.grid.sortAnnualFee, order: "asc" },
+          { value: "display_rate", label: copy.grid.sortDisplayRate, order: "asc" },
+          { value: "bank_name", label: copy.grid.sortBankName, order: "asc" }
+        ]
     : [
         { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" },
         { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" },
@@ -86,8 +92,8 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
         <section className="border-y border-foreground/15 py-7 md:py-10">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
-              <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${catalog === "loan" ? "text-loan" : "text-deposit"}`}>
-                {catalog === "loan" ? designCopy.loanCoverage : designCopy.depositCoverage}
+              <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${catalog === "deposit" ? "text-deposit" : "text-loan"}`}>
+                {catalogCopy.coverage}
               </p>
               <h1 className="text-balance mt-3 font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground md:text-6xl">{catalogCopy.title}</h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{catalogCopy.description}</p>
@@ -234,7 +240,7 @@ function DiscoveryToolbar({
   options
 }: {
   activeChips: Array<{ group: string; href: string; label: string; value: string }>;
-  catalogPath: "/loans" | "/products";
+  catalogPath: CatalogPath;
   clearHref: string;
   filters: ProductGridPageFilters;
   options: SortOption[];
@@ -379,7 +385,7 @@ function SelectField({
   );
 }
 
-function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse, catalogPath: "/loans" | "/products") {
+function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse, catalogPath: CatalogPath) {
   const chips: Array<{ group: string; href: string; label: string; value: string }> = [];
 
   for (const bankCode of filters.bankCodes) {
@@ -427,7 +433,7 @@ function addSingleChip(
   }
 }
 
-function buildPagination(products: PublicProductsResponse, filters: ProductGridPageFilters, catalogPath: "/loans" | "/products") {
+function buildPagination(products: PublicProductsResponse, filters: ProductGridPageFilters, catalogPath: CatalogPath) {
   if (products.total_pages <= 1) {
     return null;
   }
@@ -440,9 +446,11 @@ function buildPagination(products: PublicProductsResponse, filters: ProductGridP
   };
 }
 
-function buildCatalogHref(catalogPath: "/loans" | "/products", filters: ProductGridPageFilters) {
+function buildCatalogHref(catalogPath: CatalogPath, filters: ProductGridPageFilters) {
   return buildPublicHref(catalogPath, filters);
 }
+
+type CatalogPath = "/cards" | "/loans" | "/products";
 
 function findLabel(options: Array<{ label: string; value: string }>, value: string) {
   return options.find((option) => option.value === value)?.label ?? value;

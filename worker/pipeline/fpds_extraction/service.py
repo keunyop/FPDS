@@ -62,6 +62,7 @@ _DEFAULT_EXTRACTABLE_FIELDS = (
     "deposit_insurance",
     "term_rate_table",
     "interest_rate_summary",
+    "purchase_interest_rate_summary",
     "interest_calculation_method",
     "interest_payment_frequency",
     "tiered_rate_flag",
@@ -932,6 +933,12 @@ def _extract_fields(
         requested_fields=requested_fields,
         extracted_fields=extracted,
     )
+    _append_purchase_apr_summary_fallback(
+        context=scoped_context,
+        candidates=candidates,
+        requested_fields=requested_fields,
+        extracted_fields=extracted,
+    )
     _append_rate_fallback_fields(
         context=scoped_context,
         candidates=candidates,
@@ -1486,6 +1493,13 @@ def _append_labeled_numeric_extension_fallback(
         field_name
         for field_name in set(requested_fields) - existing_fields
         if _is_numeric_extension_field(field_name)
+        or field_name
+        in {
+            "annual_fee",
+            "purchase_interest_rate",
+            "cash_advance_rate",
+            "balance_transfer_rate",
+        }
     }
     for field_name in sorted(extension_fields):
         ranked: list[tuple[int, int, int, EvidenceChunkCandidate, str, str, str]] = []
@@ -1540,6 +1554,71 @@ def _append_labeled_numeric_extension_fallback(
                 field_metadata={"labeled_numeric_extension_fallback": True},
             )
         )
+
+
+def _append_purchase_apr_summary_fallback(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+    requested_fields: set[str] | list[str],
+    extracted_fields: list[ExtractedFieldCandidate],
+) -> None:
+    field_name = "purchase_interest_rate_summary"
+    if field_name not in requested_fields or any(
+        item.field_name == field_name for item in extracted_fields
+    ):
+        return
+    ranked: list[tuple[int, int, EvidenceChunkCandidate, str, str]] = []
+    for candidate in candidates:
+        if _mentions_named_other_product_without_target(
+            context=context,
+            excerpt=candidate.evidence_excerpt,
+        ):
+            continue
+        scoped_excerpt, identity_score = _scope_excerpt_to_product_identity(
+            context=context,
+            excerpt=candidate.evidence_excerpt,
+        )
+        summary = _extract_purchase_interest_rate_summary(scoped_excerpt)
+        if summary is None:
+            continue
+        semantic_score = _numeric_extension_label_score(
+            field_name="purchase_interest_rate",
+            text=scoped_excerpt,
+        )
+        if semantic_score <= 0:
+            continue
+        ranked.append(
+            (
+                semantic_score,
+                identity_score,
+                candidate,
+                scoped_excerpt,
+                summary,
+            )
+        )
+    if not ranked:
+        return
+    ranked.sort(key=lambda item: (item[0], item[1], -item[2].chunk_index), reverse=True)
+    _, _, match, excerpt, summary = ranked[0]
+    extracted_fields.append(
+        ExtractedFieldCandidate(
+            field_name=field_name,
+            candidate_value=summary,
+            value_type="string",
+            confidence=0.82,
+            extraction_method="heuristic_purchase_apr_summary_fallback",
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            evidence_chunk_id=match.evidence_chunk_id,
+            evidence_text_excerpt=excerpt,
+            anchor_type=match.anchor_type,
+            anchor_value=match.anchor_value,
+            page_no=match.page_no,
+            chunk_index=match.chunk_index,
+            field_metadata={"purchase_apr_summary_fallback": True},
+        )
+    )
 
 
 def _scope_excerpt_to_product_identity(
@@ -2119,6 +2198,9 @@ def _extract_candidate_value(
     if field_name == "interest_rate_summary":
         return _extract_interest_rate_summary(text), "string", "heuristic_rate_summary", {}
 
+    if field_name == "purchase_interest_rate_summary":
+        return _extract_purchase_interest_rate_summary(text), "string", "heuristic_purchase_apr_summary", {}
+
     if field_name == "included_transactions":
         return _extract_included_transactions(text), "integer", "heuristic_transaction_count", {}
 
@@ -2264,6 +2346,20 @@ def _numeric_extension_labels(field_name: str) -> tuple[str, ...]:
             labels.append("transactions")
     if field_name == "balance_transfer_rate":
         labels.extend(("balance transfer", "balance transfers"))
+    if field_name == "purchase_interest_rate":
+        labels.extend(
+            (
+                "purchase apr",
+                "apr for purchase",
+                "apr for purchases",
+                "annual percentage rate for purchases",
+                "annual percentage rate",
+            )
+        )
+    if field_name == "cash_advance_rate":
+        labels.extend(("cash advance apr", "apr for cash advance", "apr for cash advances"))
+    if field_name == "balance_transfer_rate":
+        labels.extend(("balance transfer apr", "apr for balance transfer", "apr for balance transfers"))
     return tuple(dict.fromkeys(item for item in labels if item))
 
 
@@ -2275,13 +2371,18 @@ def _numeric_extension_label_score(*, field_name: str, text: str) -> int:
 
 def _extract_labeled_extension_rate(*, field_name: str, text: str) -> str | None:
     normalized = _normalize_text(text)
-    for label in _numeric_extension_labels(field_name):
+    label_patterns = [rf"\b{re.escape(label)}\b" for label in _numeric_extension_labels(field_name)]
+    if field_name == "purchase_interest_rate":
+        label_patterns.append(
+            r"\bannual\s+percentage\s+rate\s*(?:\(apr\))?\s+for\s+purchases?\b"
+        )
+    for label_pattern in label_patterns:
         patterns = [
-            rf"\b{re.escape(label)}\b[\s\S]{{0,180}}?(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%",
+            rf"{label_pattern}[\s\S]{{0,180}}?(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%",
         ]
         if field_name == "balance_transfer_rate":
             patterns.append(
-                rf"(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%[\s\S]{{0,90}}?\b{re.escape(label)}\b"
+                rf"(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%[\s\S]{{0,90}}?{label_pattern}"
             )
         for pattern in patterns:
             match = re.search(pattern, normalized, flags=re.IGNORECASE)
@@ -2293,7 +2394,21 @@ def _extract_labeled_extension_rate(*, field_name: str, text: str) -> str | None
                 value_start=match.start("rate"),
                 value_end=match.end("rate"),
             )
-            if canonical_deposit_rate_suppression_reason(value=rate, context=rate_context) is None:
+            suppression_reason = canonical_deposit_rate_suppression_reason(
+                value=rate,
+                context=rate_context,
+            )
+            if field_name in {
+                "purchase_interest_rate",
+                "cash_advance_rate",
+                "balance_transfer_rate",
+            }:
+                # US revolving-credit APRs routinely exceed the conservative
+                # deposit-yield ceiling and valid variable-APR copy references
+                # the Prime Rate. The exact card-rate label above is the safety
+                # boundary here, so deposit-specific suppressions do not apply.
+                suppression_reason = None
+            if suppression_reason is None:
                 return _normalize_decimal(rate)
     return None
 
@@ -3812,6 +3927,7 @@ def _coerce_ai_candidate_value(*, field_name: str, value: str, value_type: str) 
         "early_withdrawal_penalty": 500,
         "fee_waiver_condition": 500,
         "interest_rate_summary": 700,
+        "purchase_interest_rate_summary": 700,
         "tier_definition_text": 500,
     }.get(field_name, 280)
     if len(normalized_text) <= max_length:
@@ -5575,6 +5691,44 @@ def _extract_interest_rate_summary(text: str) -> str | None:
         normalized_summary = _normalize_text(summary)[:700]
         if contains_explicit_rate_percentage(normalized_summary):
             return normalized_summary
+    return None
+
+
+def _extract_purchase_interest_rate_summary(text: str) -> str | None:
+    normalized = _normalize_text(text)
+    if not normalized:
+        return None
+    sentences = [item.strip() for item in re.split(r"(?<=[.!?])\s+", normalized) if item.strip()]
+    purchase_label = re.compile(
+        r"\b(?:purchase\s+(?:interest\s+)?rate|purchase\s+apr|apr\s+for\s+purchases?|"
+        r"annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)\b",
+        flags=re.IGNORECASE,
+    )
+    for index, sentence in enumerate(sentences):
+        if purchase_label.search(sentence) is None or _PERCENT_RE.search(sentence) is None:
+            continue
+        summary_parts = [sentence]
+        for qualifier in sentences[index + 1 : index + 3]:
+            lowered = qualifier.lower()
+            if not any(
+                marker in lowered
+                for marker in (
+                    "after that",
+                    "based on your creditworthiness",
+                    "based on creditworthiness",
+                    "intro apr",
+                    "prime rate",
+                    "variable apr",
+                )
+            ):
+                break
+            summary_parts.append(qualifier)
+        summary = _normalize_text(" ".join(summary_parts))
+        if not contains_explicit_rate_percentage(summary):
+            continue
+        if len(summary) <= 700:
+            return summary
+        return _bounded_description_text(summary, max_length=700)
     return None
 
 

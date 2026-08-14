@@ -3,7 +3,34 @@ from __future__ import annotations
 from hashlib import sha1
 import json
 from pathlib import Path
-from urllib.parse import ParseResult, urlparse, urlunparse
+from urllib.parse import ParseResult, parse_qsl, urlencode, urlparse, urlunparse
+
+_SOURCE_IDENTITY_QUERY_KEYS = {
+    "accountid",
+    "accounttype",
+    "agreementid",
+    "cardid",
+    "disclosureid",
+    "documentid",
+    "market",
+    "product",
+    "productcode",
+    "productid",
+    "region",
+    "state",
+    "zip",
+    "zipcode",
+}
+_DISCLOSURE_IDENTITY_QUERY_KEYS = {"cid", "offerid", "pocd"}
+_DISCLOSURE_PATH_MARKERS = (
+    "agreement",
+    "disclosure",
+    "fee",
+    "pdf",
+    "pricing",
+    "rate",
+    "terms",
+)
 
 _SEED_BANK_NAMES = {
     "RBC": "Royal Bank of Canada",
@@ -40,14 +67,13 @@ def normalize_source_url(url: str) -> str:
     if not parsed.netloc:
         raise ValueError(f"Missing hostname in URL: {url}")
 
-    netloc = _normalize_netloc(parsed)
     path = _normalize_path(parsed.path)
     normalized = ParseResult(
         scheme=parsed.scheme.lower(),
-        netloc=netloc,
+        netloc=_normalize_netloc(parsed),
         path=path,
         params="",
-        query="",
+        query=_normalize_identity_query(parsed.query, path=path),
         fragment="",
     )
     return urlunparse(normalized)
@@ -204,20 +230,34 @@ def load_seed_source_catalog_items() -> list[dict[str, object]]:
 def _normalize_netloc(parsed: ParseResult) -> str:
     hostname = (parsed.hostname or "").lower()
     port = parsed.port
-    if (parsed.scheme.lower() == "https" and port == 443) or (parsed.scheme.lower() == "http" and port == 80):
+    if (parsed.scheme.lower() == "https" and port == 443) or (
+        parsed.scheme.lower() == "http" and port == 80
+    ):
         port = None
-    if port is None:
-        return hostname
-    return f"{hostname}:{port}"
+    return hostname if port is None else f"{hostname}:{port}"
 
 
 def _normalize_path(path: str) -> str:
     if not path:
         return "/"
+    while "//" in path:
+        path = path.replace("//", "/")
+    return path[:-1] if path != "/" and path.endswith("/") else path
 
-    normalized = path
-    while "//" in normalized:
-        normalized = normalized.replace("//", "/")
-    if normalized != "/" and normalized.endswith("/"):
-        normalized = normalized[:-1]
-    return normalized
+
+def _normalize_identity_query(query: str, *, path: str) -> str:
+    if not query:
+        return ""
+    disclosure_path = any(marker in path.lower() for marker in _DISCLOSURE_PATH_MARKERS)
+    kept: list[tuple[str, str]] = []
+    for key, value in parse_qsl(query, keep_blank_values=False):
+        normalized_key = key.strip().lower()
+        normalized_value = value.strip()
+        if not normalized_value:
+            continue
+        if normalized_key in _SOURCE_IDENTITY_QUERY_KEYS or (
+            disclosure_path and normalized_key in _DISCLOSURE_IDENTITY_QUERY_KEYS
+        ):
+            kept.append((normalized_key, normalized_value))
+    kept.sort(key=lambda item: (item[0], item[1]))
+    return urlencode(kept, doseq=True)

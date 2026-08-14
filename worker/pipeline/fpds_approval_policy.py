@@ -168,7 +168,7 @@ def _comparison_value_is_usable(*, field_name: str, value: object) -> bool:
         return value is True
     if field_name in {"redeemable_flag", "non_redeemable_flag"}:
         return isinstance(value, bool)
-    if field_name == "interest_rate_summary":
+    if field_name.endswith("rate_summary"):
         return contains_explicit_rate_percentage(value)
     if field_name == "annual_fee" or _looks_like_rate_field(field_name):
         if isinstance(value, bool):

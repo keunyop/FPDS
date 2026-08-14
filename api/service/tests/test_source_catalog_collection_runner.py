@@ -89,6 +89,48 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         self.assertIn("country_code = %(country_code)s", sql)
         self.assertEqual(params["country_code"], "US")
 
+    def test_active_card_scope_excludes_legacy_auto_loan_supporting_sources(self) -> None:
+        connection = _Connection(
+            [
+                [
+                    {
+                        "source_id": "CARD-DETAIL",
+                        "discovery_role": "detail",
+                        "source_name": "Travel Rewards Credit Card",
+                        "source_url": "https://www.bank.example/credit-cards/travel-rewards",
+                        "purpose": "detail",
+                        "expected_fields": [],
+                    },
+                    {
+                        "source_id": "CARD-PRICING",
+                        "discovery_role": "supporting_html",
+                        "source_name": "Pricing and terms",
+                        "source_url": "https://www.bank.example/disclosures/card?offerId=42",
+                        "purpose": "pricing companion",
+                        "expected_fields": [],
+                    },
+                    {
+                        "source_id": "AUTO-LOAN-RATES",
+                        "discovery_role": "supporting_html",
+                        "source_name": "Auto Loan Rates",
+                        "source_url": "https://www.bank.example/auto-loans/auto-loan-rates",
+                        "purpose": "legacy broad support",
+                        "expected_fields": [],
+                    },
+                ]
+            ]
+        )
+
+        scope = source_catalog_collection_runner._load_active_collection_scope(
+            connection,
+            bank_code="EX",
+            country_code="US",
+            product_type="credit-card",
+        )
+
+        self.assertEqual(scope["target_source_ids"], ["CARD-DETAIL"])
+        self.assertEqual(scope["collection_source_ids"], ["CARD-DETAIL", "CARD-PRICING"])
+
     def test_catalog_failure_metadata_retains_exact_worker_stage(self) -> None:
         failure = source_collection_runner.WorkerStageError(
             stage_name="fpds_snapshot",

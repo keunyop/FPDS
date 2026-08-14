@@ -11,6 +11,37 @@ from worker.pipeline.fpds_market_profile import market_profile_metadata
 
 
 class ComparisonQualityPolicyTests(unittest.TestCase):
+    def test_us_card_collection_prefers_range_summary_and_keeps_scalar_alternative(self) -> None:
+        fields = collection_fields_for_product_type(
+            product_type="credit-card",
+            country_code="US",
+            expected_fields=[],
+        )
+
+        self.assertIn("purchase_interest_rate", fields)
+        self.assertIn("purchase_interest_rate_summary", fields)
+
+        ranged = comparison_quality(
+            product_type="credit-card",
+            country_code="US",
+            expected_fields=fields,
+            candidate_payload={
+                "annual_fee": 0,
+                "purchase_interest_rate_summary": "Purchase APR 17.49%-27.49% variable",
+            },
+        )
+        fixed = comparison_quality(
+            product_type="credit-card",
+            country_code="US",
+            expected_fields=fields,
+            candidate_payload={"annual_fee": 95, "purchase_interest_rate": 19.99},
+        )
+
+        self.assertTrue(ranged.complete)
+        self.assertIn("purchase_interest_rate_summary", ranged.satisfied_fields)
+        self.assertTrue(fixed.complete)
+        self.assertIn("purchase_interest_rate", fixed.satisfied_fields)
+
     def test_personal_loan_accepts_evidence_preserving_apr_range(self) -> None:
         quality = comparison_quality(
             product_type="personal-loan",

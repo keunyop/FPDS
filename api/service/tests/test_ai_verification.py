@@ -319,6 +319,8 @@ class AiVerificationTests(TestCase):
                 "product_family": "lending",
                 "product_type": "credit-card",
                 "product_name": "Example Card",
+                "country_code": "US",
+                "currency": "USD",
                 "candidate_payload": {
                     "product_name": "Example Card",
                     "annual_fee": 0.0,
@@ -330,6 +332,7 @@ class AiVerificationTests(TestCase):
             "product_name",
             "annual_fee",
             "purchase_interest_rate",
+            "purchase_interest_rate_summary",
             "description_short",
         ]
         detail["review_field_items"] = [
@@ -360,10 +363,10 @@ class AiVerificationTests(TestCase):
 
         self.assertEqual(
             [item["field_name"] for item in payload["fields_to_verify"]],
-            ["product_name", "annual_fee", "purchase_interest_rate"],
+            ["product_name", "annual_fee", "purchase_interest_rate_summary"],
         )
         self.assertTrue(payload["fields_to_verify"][2]["missing"])
-        self.assertEqual(payload["approval_policy"]["contract_version"], "review-ai-verification-v7")
+        self.assertEqual(payload["approval_policy"]["contract_version"], "review-ai-verification-v17")
 
     def test_build_payload_requests_only_the_preferred_missing_rate_alternative(self):
         detail = _detail()
@@ -685,6 +688,157 @@ class AiVerificationTests(TestCase):
         self.assertEqual(statuses, {"standard_rate": "mismatch", "monthly_fee": "match"})
         self.assertEqual(result["proposed_corrections"], {"standard_rate": 3.25})
 
+    def test_sanitize_result_recovers_missing_us_card_values_from_exact_origin_quote(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {
+                "country_code": "US",
+                "currency": "USD",
+                "product_family": "lending",
+                "product_type": "credit-card",
+                "product_name": "Example Travel Card",
+                "candidate_payload": {"product_name": "Example Travel Card"},
+            }
+        )
+        detail["source_context"]["source_url"] = "https://bank.example/cards/example-travel-card"
+        detail["review_field_items"] = [
+            {"field_name": "annual_fee", "label": "Annual Fee"},
+            {"field_name": "purchase_interest_rate_summary", "label": "Purchase APR Summary"},
+        ]
+        source = {
+            "url": "https://bank.example/cards/example-travel-card?redirect_from=podpage",
+            "title": "Example Travel Card",
+        }
+        apr_quote = (
+            "0% Intro APR for the first 15 billing cycles for purchases. "
+            "After the intro APR ends, a Variable APR from 17.49% to 27.49% will apply."
+        )
+
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "The model found values but omitted its JSON value flag.",
+                "fields": [
+                    {
+                        "field_name": "annual_fee",
+                        "status": "unverified",
+                        "has_verified_value": True,
+                        "verified_value_json": "",
+                        "confidence": 0.99,
+                        "rationale": "Exact fee quote.",
+                        "evidence_quote": "No annual fee and no foreign transaction fees",
+                        "sources": [source],
+                    },
+                    {
+                        "field_name": "purchase_interest_rate_summary",
+                        "status": "unverified",
+                        "has_verified_value": False,
+                        "verified_value_json": "",
+                        "confidence": 0.99,
+                        "rationale": "Exact purchase APR quote.",
+                        "evidence_quote": apr_quote,
+                        "sources": [source],
+                    },
+                ],
+            },
+            detail=detail,
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(
+            result["proposed_corrections"],
+            {"annual_fee": 0.0, "purchase_interest_rate_summary": apr_quote},
+        )
+
+    def test_sanitize_result_does_not_recover_us_card_value_from_generic_origin(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {
+                "country_code": "US",
+                "product_type": "credit-card",
+                "product_name": "Example Travel Card",
+                "candidate_payload": {"product_name": "Example Travel Card"},
+            }
+        )
+        detail["source_context"]["source_url"] = "https://bank.example/cards/example-travel-card"
+        detail["review_field_items"] = [{"field_name": "annual_fee", "label": "Annual Fee"}]
+        generic_source = {"url": "https://bank.example/cards/fees", "title": "Card fees"}
+
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "Generic page.",
+                "fields": [
+                    {
+                        "field_name": "annual_fee",
+                        "status": "unverified",
+                        "has_verified_value": False,
+                        "verified_value_json": "",
+                        "confidence": 0.99,
+                        "rationale": "Not exact product origin.",
+                        "evidence_quote": "Annual Fee $0",
+                        "sources": [generic_source],
+                    }
+                ],
+            },
+            detail=detail,
+            sources=[generic_source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(result["proposed_corrections"], {})
+
+    def test_sanitize_result_replaces_overstated_us_card_summary_with_exact_prime_formula(self):
+        detail = _detail()
+        detail["candidate"].update(
+            {
+                "country_code": "US",
+                "currency": "USD",
+                "product_type": "credit-card",
+                "product_name": "Example Travel Card",
+                "candidate_payload": {
+                    "product_name": "Example Travel Card",
+                    "purchase_interest_rate_summary": "17.49%-27.49% based on creditworthiness",
+                },
+            }
+        )
+        detail["source_context"]["source_url"] = "https://bank.example/cards/example-travel-card"
+        detail["review_field_items"] = [
+            {"field_name": "purchase_interest_rate_summary", "label": "Purchase APR Summary"}
+        ]
+        source = {"url": "https://bank.example/content/documents/creditcard/example-agreement.pdf", "title": "Example Travel Card Agreement"}
+        quote = (
+            "Example Travel Card Agreement. Annual Percentage Rate (APR) for Purchases. These APRs vary with the Prime Rate "
+            "(as of 06/30/2026): Prime + 10.74% to Prime + 20.74%; APR 17.49% to 27.49%."
+        )
+
+        result = sanitize_ai_verification_result(
+            raw_result={
+                "summary": "The stored summary overstates the source.",
+                "fields": [
+                    {
+                        "field_name": "purchase_interest_rate_summary",
+                        "status": "mismatch",
+                        "has_verified_value": True,
+                        "verified_value_json": json.dumps(
+                            "17.49%-27.49% based on an unsupported creditworthiness assumption"
+                        ),
+                        "confidence": 0.99,
+                        "rationale": "Exact current purchase APR formula.",
+                        "evidence_quote": quote,
+                        "sources": [source],
+                    }
+                ],
+            },
+            detail=detail,
+            sources=[source],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(
+            result["proposed_corrections"],
+            {"purchase_interest_rate_summary": quote},
+        )
+
     def test_run_persists_model_usage_result_and_audit(self):
         connection = _RecordingConnection()
         source = {"url": "https://bank.example/rates", "title": "Official rates"}
@@ -745,7 +899,7 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             connection.execution_metadata["verification_contract_version"],
-            "review-ai-verification-v7",
+            "review-ai-verification-v17",
         )
         self.assertEqual(
             connection.execution_metadata["approval_field_names"],

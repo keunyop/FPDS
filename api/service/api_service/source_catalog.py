@@ -106,6 +106,52 @@ _EXCLUDED_LINK_KEYWORDS = (
     "shareholders",
 )
 _SUPPORTING_KEYWORDS = ("rate", "rates", "fee", "fees", "legal", "terms", "conditions", "service", "agreement", "disclosure")
+_DETAIL_COMPANION_ANCHOR_MARKERS = (
+    "account guide",
+    "cardmember agreement",
+    "clarity statement",
+    "consumer account addend",
+    "credit card agreement",
+    "current agreement",
+    "deposit account agreement",
+    "details of rate",
+    "fee schedule",
+    "important rates",
+    "interest rates and interest charges",
+    "pricing & terms",
+    "pricing and terms",
+    "rate and fee",
+    "rate, fee",
+    "rates and fees",
+    "schedule of fees",
+    "schumer",
+    "view disclosure",
+)
+_DETAIL_COMPANION_URL_MARKERS = (
+    "account-guide",
+    "account_guide",
+    "agreement",
+    "cardmember-agreement",
+    "disclosure",
+    "fee-schedule",
+    "get-disclosures",
+    "getdisclosure",
+    "pricing",
+    "rate-and-fee",
+    "rates-and-fees",
+    "schedule-of-fees",
+)
+_DETAIL_COMPANION_EXCLUDED_MARKERS = (
+    "accessibility",
+    "cookie-policy",
+    "legal-notice",
+    "online-banking/service-agreement",
+    "privacy",
+    "security-center",
+    "service-agreement.go",
+    "site-terms",
+    "terms-of-use",
+)
 _HUB_KEYWORDS = (
     "account",
     "accounts",
@@ -198,6 +244,10 @@ _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
         "line of credit",
         "home-equity-line",
         "home equity line",
+        "auto-loan",
+        "auto loan",
+        "vehicle-loan",
+        "vehicle loan",
     ),
     "mortgage": (
         "chequing-account",
@@ -370,6 +420,8 @@ _PAGE_EVIDENCE_MINIMUM_SCORE = 4
 _DISCOVERY_DETAIL_LINK_MAX = 36
 _DISCOVERY_SUPPORTING_LINK_MAX = 12
 _DISCOVERY_PDF_LINK_MAX = 8
+_DISCOVERY_DETAIL_COMPANION_MAX = 48
+_DISCOVERY_DETAIL_COMPANION_PER_DETAIL_MAX = 2
 _DISCOVERY_HUB_PAGE_MAX = 5
 _DISCOVERY_SECONDARY_HUB_PAGE_MAX = 8
 _AI_DISCOVERY_MAX_CANDIDATES = 48
@@ -470,6 +522,13 @@ class HomepageCandidate:
     source_name_hint: str | None
     priority_hint: str | None
     expected_fields_hint: list[str]
+
+
+@dataclass(frozen=True)
+class DetailCompanionLink:
+    link: ExtractedLink
+    parent_detail_url: str
+    score: int
 
 
 @dataclass(frozen=True)
@@ -1581,6 +1640,11 @@ def start_source_catalog_collection(
         collection_id=collection_id,
         correlation_id=correlation_id,
     )
+    run_trigger_type = (
+        "scheduled_source_collection"
+        if str(actor.get("actor_type") or "").lower() == "scheduler"
+        else "admin_source_collection"
+    )
 
     for group in plan["groups"]:
         _insert_collection_run_row(
@@ -1592,6 +1656,7 @@ def start_source_catalog_collection(
             collection_id=collection_id,
             group=group,
             pipeline_stage="source_catalog_collection",
+            trigger_type=run_trigger_type,
             retry_of_run_id=retry_of_run_id,
         )
 
@@ -1623,6 +1688,7 @@ def _build_source_catalog_collection_plan(
 ) -> dict[str, Any]:
     triggered_by = str(actor.get("email") or actor.get("display_name") or actor.get("user_id") or "admin")
     actor_payload = {
+        "actor_type": actor.get("actor_type"),
         "user_id": actor.get("user_id"),
         "email": actor.get("email"),
         "display_name": actor.get("display_name"),
@@ -1661,7 +1727,11 @@ def _build_source_catalog_collection_plan(
         "collection_id": collection_id,
         "correlation_id": correlation_id,
         "request_id": request_context.get("request_id"),
-        "trigger_type": "admin_source_catalog_collection",
+        "trigger_type": (
+            "scheduled_source_catalog_collection"
+            if str(actor.get("actor_type") or "").lower() == "scheduler"
+            else "admin_source_catalog_collection"
+        ),
         "triggered_by": triggered_by,
         "actor": actor_payload,
         "groups": groups,
@@ -1751,6 +1821,36 @@ def _materialize_sources_for_catalog_item(
         correlation_id=correlation_id,
         request_id=request_id,
     )
+    if not generation_result.detail_source_ids:
+        existing_detail_rows = _load_existing_detail_rows_for_companion_discovery(
+            connection,
+            bank_code=bank_code,
+            country_code=str(row["country_code"]),
+            product_type=product_type,
+        )
+        companion_rows, companion_notes = _generate_existing_detail_companion_rows(
+            bank_code=bank_code,
+            bank_name=str(row["bank_name"]),
+            country_code=str(row["country_code"]),
+            product_type=product_type,
+            product_type_definition=product_type_definition,
+            homepage_url=str(row["homepage_url"]),
+            coverage_source_url=_clean_text(row.get("coverage_source_url")),
+            coverage_source_metadata=_mapping(row.get("coverage_source_metadata")),
+            source_language=str(row.get("source_language") or "en"),
+            existing_detail_rows=existing_detail_rows,
+        )
+        if companion_rows:
+            generation_result = HomepageSourceGenerationResult(
+                rows=[*generation_result.rows, *companion_rows],
+                discovery_notes=_dedupe_preserve_order(
+                    [*generation_result.discovery_notes, *companion_notes]
+                ),
+                detail_source_ids=generation_result.detail_source_ids,
+                model_execution_records=generation_result.model_execution_records,
+                usage_records=generation_result.usage_records,
+                rejected_detail_urls=generation_result.rejected_detail_urls,
+            )
     generated_rows = _dedupe_generated_source_rows(generation_result.rows)
     discovery_notes = list(generation_result.discovery_notes)
     if product_type != original_product_type:
@@ -1812,6 +1912,139 @@ def _materialize_sources_for_catalog_item(
         model_execution_records=generation_result.model_execution_records,
         usage_records=generation_result.usage_records,
     )
+
+
+def _load_existing_detail_rows_for_companion_discovery(
+    connection: Connection,
+    *,
+    bank_code: str,
+    country_code: str,
+    product_type: str,
+) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT normalized_url, source_url
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND status = 'active'
+          AND discovery_role = 'detail'
+          AND source_type = 'html'
+        ORDER BY priority, source_id
+        LIMIT %(row_limit)s
+        """,
+        {
+            "bank_code": bank_code,
+            "country_code": country_code,
+            "product_type_scope": _product_type_scope_codes(product_type),
+            "row_limit": _DISCOVERY_DETAIL_LINK_MAX,
+        },
+    ).fetchall()
+    details: list[dict[str, Any]] = []
+    for row in rows:
+        normalized_url = normalize_source_url(str(row["normalized_url"] or row["source_url"]))
+        if _url_country_scope_conflicts(
+            country_code=country_code,
+            normalized_url=normalized_url,
+        ):
+            continue
+        details.append(
+            {
+                "normalized_url": normalized_url,
+                "raw_url": str(row["source_url"]),
+            }
+        )
+    return details
+
+
+def _generate_existing_detail_companion_rows(
+    *,
+    bank_code: str,
+    bank_name: str,
+    country_code: str,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+    homepage_url: str,
+    source_language: str,
+    existing_detail_rows: list[dict[str, Any]],
+    coverage_source_url: str | None = None,
+    coverage_source_metadata: dict[str, Any] | None = None,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    if not existing_detail_rows:
+        return [], []
+    localized_definition = localize_product_type_definition(
+        country_code=country_code,
+        definition=product_type_definition,
+    )
+    normalized_homepage_url = normalize_source_url(homepage_url)
+    hostname = urlparse(normalized_homepage_url).hostname
+    if not hostname:
+        return [], []
+    _, normalized_coverage_source_url = _normalize_coverage_source_url(
+        coverage_source_url,
+        normalized_homepage_url=normalized_homepage_url,
+        coverage_source_metadata=coverage_source_metadata,
+    )
+    allowed_domains = _coverage_allowed_domains(
+        normalized_homepage_url=normalized_homepage_url,
+        normalized_coverage_source_url=normalized_coverage_source_url,
+        coverage_source_metadata=coverage_source_metadata,
+    )
+    discovery_product_type = _product_type_discovery_profile(
+        product_type,
+        localized_definition,
+    )
+    companions, notes = _discover_detail_companion_links(
+        detail_rows=existing_detail_rows,
+        country_code=country_code,
+        product_type=discovery_product_type,
+        fetch_policy=DiscoveryFetchPolicy(allowed_domains=allowed_domains),
+        hostname=hostname,
+        allowed_domains=allowed_domains,
+        page_html_by_url={},
+    )
+    expected_fields = _product_type_expected_fields(
+        localized_definition,
+        country_code=country_code,
+    )
+    product_type_label = _product_type_label(localized_definition)
+    rows = [
+        _build_generated_source_row(
+            bank_code=bank_code,
+            country_code=country_code,
+            product_type=product_type,
+            source_language=source_language,
+            normalized_url=companion.link.normalized_url,
+            raw_url=companion.link.resolved_url,
+            source_name=_generated_link_name(
+                bank_name,
+                product_type_label,
+                companion.link.anchor_text,
+                fallback="pricing disclosure",
+                normalized_url=companion.link.normalized_url,
+            ),
+            discovery_role=(
+                "linked_pdf" if companion.link.source_type == "pdf" else "supporting_html"
+            ),
+            priority="P1",
+            purpose=f"Exact-product pricing or terms companion for {product_type_label}",
+            expected_fields=expected_fields,
+            discovery_metadata={
+                "selection_path": "selected_existing_detail_companion",
+                "selection_confidence": "high",
+                "selection_reason_codes": [
+                    "existing_exact_product_detail_link",
+                    "pricing_or_terms_companion",
+                ],
+                "candidate_origin": "existing_detail_outbound_link",
+                "parent_detail_url": companion.parent_detail_url,
+                "heuristic_score": companion.score,
+            },
+        )
+        for companion in companions
+    ]
+    return rows, notes
 
 
 def repair_catalog_coverage_route(
@@ -3060,6 +3293,7 @@ def _generate_sources_from_homepage(
     )
     discovery_notes.extend(ai_result.notes)
     page_evidence_by_url: dict[str, PageEvidenceAssessment] = {}
+    page_html_by_url: dict[str, str] = {}
     detail_rows, rejected_detail_urls, detail_notes = _promote_detail_candidates(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -3073,8 +3307,19 @@ def _generate_sources_from_homepage(
         ai_scores=ai_result.scores,
         ai_unavailable=ai_result.ai_unavailable,
         page_evidence_by_url=page_evidence_by_url,
+        page_html_by_url=page_html_by_url,
     )
     discovery_notes.extend(detail_notes)
+    detail_companions, detail_companion_notes = _discover_detail_companion_links(
+        detail_rows=detail_rows,
+        country_code=country_code,
+        product_type=discovery_product_type,
+        fetch_policy=fetch_policy,
+        hostname=hostname,
+        allowed_domains=allowed_domains,
+        page_html_by_url=page_html_by_url,
+    )
+    discovery_notes.extend(detail_companion_notes)
 
     should_emit_context_rows = bool(detail_rows) or bool(seed_entry_url)
     if should_emit_context_rows:
@@ -3111,6 +3356,40 @@ def _generate_sources_from_homepage(
     unavailable_supporting_count = 0
     locale_mismatch_supporting_count = 0
     if should_emit_context_rows:
+        for companion in detail_companions:
+            link = companion.link
+            if link.normalized_url in promoted_detail_urls or link.normalized_url in promoted_supporting_urls:
+                continue
+            source_rows.append(
+                _build_generated_source_row(
+                    bank_code=bank_code,
+                    country_code=country_code,
+                    product_type=product_type,
+                    source_language=source_language,
+                    normalized_url=link.normalized_url,
+                    raw_url=link.resolved_url,
+                    source_name=_generated_link_name(
+                        bank_name,
+                        product_type_label,
+                        link.anchor_text,
+                        fallback="pricing disclosure",
+                        normalized_url=link.normalized_url,
+                    ),
+                    discovery_role="linked_pdf" if link.source_type == "pdf" else "supporting_html",
+                    priority="P1",
+                    purpose=f"Exact-product pricing or terms companion for {product_type_label}",
+                    expected_fields=expected_fields,
+                    discovery_metadata={
+                        "selection_path": "selected_detail_companion",
+                        "selection_confidence": "high",
+                        "selection_reason_codes": ["exact_product_detail_link", "pricing_or_terms_companion"],
+                        "candidate_origin": "selected_detail_outbound_link",
+                        "parent_detail_url": companion.parent_detail_url,
+                        "heuristic_score": companion.score,
+                    },
+                )
+            )
+            promoted_supporting_urls.add(link.normalized_url)
         for hint in seed_supporting_hints:
             normalized_url = normalize_source_url(str(hint["source_url"]))
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=normalized_url):
@@ -4080,6 +4359,7 @@ def _promote_detail_candidates(
     ai_scores: dict[str, AiParallelCandidateScore],
     ai_unavailable: bool = False,
     page_evidence_by_url: dict[str, PageEvidenceAssessment] | None = None,
+    page_html_by_url: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str], list[str]]:
     product_type_label = _product_type_label(product_type_definition)
     expected_fields = _product_type_expected_fields(
@@ -4113,11 +4393,16 @@ def _promote_detail_candidates(
             rejection_counts["insufficient_candidate_signal"] += 1
             continue
         evaluated += 1
+        page_evidence_kwargs: dict[str, Any] = {
+            "raw_url": candidate.raw_url,
+            "fetch_policy": fetch_policy,
+            "product_type": discovery_product_type,
+            "product_type_definition": product_type_definition,
+        }
+        if page_html_by_url is not None:
+            page_evidence_kwargs["page_html_by_url"] = page_html_by_url
         page_evidence = _score_page_evidence(
-            raw_url=candidate.raw_url,
-            fetch_policy=fetch_policy,
-            product_type=discovery_product_type,
-            product_type_definition=product_type_definition,
+            **page_evidence_kwargs,
         )
         if page_evidence_by_url is not None:
             page_evidence_by_url[candidate.normalized_url] = page_evidence
@@ -4265,6 +4550,113 @@ def _promote_detail_candidates(
         _dedupe_preserve_order(rejected_detail_urls),
         _dedupe_preserve_order([note for note in notes if note]),
     )
+
+
+def _discover_detail_companion_links(
+    *,
+    detail_rows: list[dict[str, Any]],
+    country_code: str,
+    product_type: str,
+    fetch_policy: DiscoveryFetchPolicy,
+    hostname: str,
+    allowed_domains: tuple[str, ...],
+    page_html_by_url: dict[str, str],
+) -> tuple[list[DetailCompanionLink], list[str]]:
+    """Follow exact-product pricing/terms links from promoted detail pages.
+
+    US card and deposit sites commonly keep the customer-visible product name
+    on one page while placing the comparison-critical APR, fee table, or
+    account guide behind a directly linked disclosure. The parent detail link
+    is the bounded product relationship; unrelated site-wide legal links do
+    not satisfy the pricing marker policy below.
+    """
+
+    candidates: list[DetailCompanionLink] = []
+    unavailable_detail_count = 0
+    for detail_row in detail_rows:
+        parent_normalized_url = str(detail_row.get("normalized_url") or "")
+        parent_raw_url = str(detail_row.get("raw_url") or parent_normalized_url)
+        html_text = page_html_by_url.get(parent_normalized_url)
+        if html_text is None:
+            try:
+                html_text = fetch_text(parent_raw_url, fetch_policy)
+            except Exception:
+                unavailable_detail_count += 1
+                continue
+            page_html_by_url[parent_normalized_url] = html_text
+
+        per_detail: list[DetailCompanionLink] = []
+        for link in _extract_allowed_links(
+            html_text=html_text,
+            base_url=parent_raw_url,
+            hostname=hostname,
+            allowed_domains=allowed_domains,
+        ):
+            if link.normalized_url == parent_normalized_url:
+                continue
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+                continue
+            score = _detail_companion_link_score(
+                product_type=product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            )
+            if score <= 0:
+                continue
+            per_detail.append(
+                DetailCompanionLink(
+                    link=link,
+                    parent_detail_url=parent_normalized_url,
+                    score=score,
+                )
+            )
+        per_detail.sort(key=lambda item: (-item.score, item.link.normalized_url))
+        candidates.extend(per_detail[:_DISCOVERY_DETAIL_COMPANION_PER_DETAIL_MAX])
+
+    by_url: dict[str, DetailCompanionLink] = {}
+    for candidate in sorted(candidates, key=lambda item: (-item.score, item.link.normalized_url)):
+        by_url.setdefault(candidate.link.normalized_url, candidate)
+        if len(by_url) >= _DISCOVERY_DETAIL_COMPANION_MAX:
+            break
+
+    notes: list[str] = []
+    if by_url:
+        notes.append(
+            f"Preserved {len(by_url)} exact-product pricing, fee, or terms companion source(s) linked from selected detail pages."
+        )
+    if unavailable_detail_count:
+        notes.append(
+            f"Could not inspect {unavailable_detail_count} selected detail page(s) for linked pricing or terms companions."
+        )
+    return list(by_url.values()), notes
+
+
+def _detail_companion_link_score(*, product_type: str, normalized_url: str, anchor_text: str) -> int:
+    parsed = urlparse(normalized_url)
+    hostname = str(parsed.hostname or "").lower()
+    if not hostname or hostname.startswith(("help.", "support.")):
+        return 0
+    anchor = _collapse_whitespace(anchor_text).lower()
+    normalized_anchor = anchor.strip(" .:-|")
+    if normalized_anchor in {"apply", "apply now", "login", "log in", "open account", "sign in"}:
+        return 0
+    path_and_query = " ".join(part for part in (parsed.path.lower(), parsed.query.lower()) if part)
+    fingerprint = f"{path_and_query} {anchor}".strip()
+    if any(marker in fingerprint for marker in _DETAIL_COMPANION_EXCLUDED_MARKERS):
+        return 0
+    if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+        return 0
+
+    anchor_hits = sum(marker in anchor for marker in _DETAIL_COMPANION_ANCHOR_MARKERS)
+    url_hits = sum(marker in path_and_query for marker in _DETAIL_COMPANION_URL_MARKERS)
+    if not anchor_hits and not url_hits:
+        return 0
+    score = anchor_hits * 5 + url_hits * 3
+    if parsed.query:
+        score += 2
+    if infer_source_type(normalized_url) == "pdf" or "pdf" in anchor or "pdf" in parsed.path.lower():
+        score += 2
+    return score
 
 
 def _supporting_html_page_is_fetchable(
@@ -4952,6 +5344,7 @@ def _score_page_evidence(
     fetch_policy: DiscoveryFetchPolicy,
     product_type: str,
     product_type_definition: dict[str, Any],
+    page_html_by_url: dict[str, str] | None = None,
 ) -> PageEvidenceAssessment:
     try:
         html_text = fetch_text(raw_url, fetch_policy)
@@ -4966,6 +5359,9 @@ def _score_page_evidence(
             negative_signal_count=0,
             fetch_error=str(exc),
         )
+
+    if page_html_by_url is not None:
+        page_html_by_url[normalize_source_url(raw_url)] = html_text
 
     parser = _PageSignalParser()
     parser.feed(html_text)
@@ -6003,7 +6399,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         "gic": any(
             marker in source_slug
             for marker in ("gic", "term-deposit", "term_deposit", "bank-cd", "certificate-of-deposit")
-        ),
+        ) or bool(re.search(r"(?:^|-)cds?(?:-|$)", source_slug)),
     }
     explicit_other_types = {key for key, matched in explicit_slug_types.items() if matched and key != canonical_type}
     if canonical_type in explicit_slug_types and explicit_other_types and not explicit_slug_types[canonical_type]:
@@ -6019,7 +6415,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
             path_segments.intersection(
                 {"gic", "gics", "term-deposit", "term-deposits", "cd", "cds", "bank-cd", "certificate-of-deposit"}
             )
-        ),
+        ) or any(re.search(r"(?:^|-)cds?(?:-|$)", segment) for segment in path_segments),
     }
     explicit_other_path_types = {
         key for key, matched in explicit_path_types.items() if matched and key != canonical_type
@@ -6573,6 +6969,9 @@ def _record_catalog_audit_event(
     diff_summary: str,
     metadata: dict[str, Any],
 ) -> None:
+    actor_type = str(actor.get("actor_type") or "user").lower()
+    if actor_type not in {"system", "user", "service", "scheduler"}:
+        actor_type = "user"
     connection.execute(
         """
         INSERT INTO audit_event (
@@ -6596,7 +6995,7 @@ def _record_catalog_audit_event(
             %(audit_event_id)s,
             %(event_category)s,
             %(event_type)s,
-            'user',
+            %(actor_type)s,
             %(actor_id)s,
             %(actor_role_snapshot)s,
             %(target_type)s,
@@ -6614,6 +7013,7 @@ def _record_catalog_audit_event(
             "audit_event_id": new_id("audit"),
             "event_category": "config",
             "event_type": event_type,
+            "actor_type": actor_type,
             "actor_id": actor.get("user_id"),
             "actor_role_snapshot": actor.get("role"),
             "target_type": target_type,

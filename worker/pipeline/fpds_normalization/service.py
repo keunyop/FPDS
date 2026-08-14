@@ -2236,9 +2236,9 @@ def _apply_credit_card_labeled_fallback(
         return
 
     field_labels = {
-        "purchase_interest_rate": r"(?:current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate)",
-        "balance_transfer_rate": r"(?:interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
-        "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "purchase_interest_rate": r"(?:current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
+        "balance_transfer_rate": r"(?:interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
     }
     supplemented: list[str] = []
     for field_name, label_pattern in field_labels.items():
@@ -3779,9 +3779,9 @@ def _looks_like_credit_card_field_mismatch(
         except (TypeError, ValueError):
             return True
         labels = {
-            "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\))",
-            "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
-            "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|balance\s+transfers?\s+and\s+cash\s+advances?)",
+            "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
+            "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+            "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
         }
         value_pattern = re.escape(f"{numeric_value:g}")
         match = re.search(

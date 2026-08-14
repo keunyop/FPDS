@@ -141,6 +141,9 @@ class PublicProductsTests(unittest.TestCase):
         self.assertEqual(payload["items"][1]["product_id"], "gic-td-short")
         self.assertEqual(payload["freshness"]["status"], "fresh")
         self.assertEqual(payload["applied_filters"]["bank_code"], ["TD", "BMO"])
+        projection_sql = connection.calls[-1][0]
+        self.assertIn("JOIN normalized_candidate AS nc", projection_sql)
+        self.assertIn("candidate_source.source_document_id = nc.source_document_id", projection_sql)
 
     def test_load_public_products_visible_sort_options_are_stable(self) -> None:
         cases = [
@@ -177,6 +180,50 @@ class PublicProductsTests(unittest.TestCase):
 
                 self.assertEqual([item["product_id"] for item in payload["items"][: len(expected_prefix)]], expected_prefix)
                 self.assertEqual(payload["sort"], {"sort_by": sort_by, "sort_order": sort_order})
+
+    def test_credit_card_is_supported_serialized_and_sorted_by_annual_fee(self) -> None:
+        card_rows = [
+            _credit_card_projection("card-fee", annual_fee=120, purchase_rate=19.99),
+            _credit_card_projection(
+                "card-free",
+                annual_fee=0,
+                purchase_rate=21.99,
+                purchase_rate_summary="Purchase APR 21.99%-29.99% variable.",
+            ),
+        ]
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=card_rows,
+        )
+        query = normalize_public_products_query(
+            locale="en",
+            country_code="CA",
+            bank_codes=None,
+            product_types=["credit-card"],
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="annual_fee",
+            sort_order="asc",
+            page=1,
+            page_size=20,
+        )
+
+        payload = load_public_products(connection, query=query)
+
+        self.assertEqual(query.filters.product_types, ("credit-card",))
+        self.assertEqual([item["product_id"] for item in payload["items"]], ["card-free", "card-fee"])
+        self.assertEqual(payload["items"][0]["annual_fee"], 0.0)
+        self.assertEqual(payload["items"][0]["purchase_interest_rate"], 21.99)
+        self.assertEqual(
+            payload["items"][0]["purchase_interest_rate_summary"],
+            "Purchase APR 21.99%-29.99% variable.",
+        )
+        self.assertEqual(payload["items"][0]["product_type_label"], "Credit Card")
 
     def test_load_public_products_handles_bad_numeric_values_in_visible_sorts(self) -> None:
         bad_row = dict(_projection_rows()[0])
@@ -594,6 +641,49 @@ def _projection_rows() -> list[dict[str, object]]:
             "product_url": "https://www.td.com/ca/en/personal-banking/personal-investing/products/gic/cashable-gic",
         },
     ]
+
+
+def _credit_card_projection(
+    product_id: str,
+    *,
+    annual_fee: float,
+    purchase_rate: float,
+    purchase_rate_summary: str | None = None,
+) -> dict[str, object]:
+    return {
+        "product_id": product_id,
+        "bank_code": "CIBC",
+        "bank_name": "CIBC",
+        "country_code": "CA",
+        "product_family": "lending",
+        "product_type": "credit-card",
+        "subtype_code": "other",
+        "product_name": product_id,
+        "source_language": "en",
+        "currency": "CAD",
+        "status": "active",
+        "public_display_rate": Decimal(str(purchase_rate)),
+        "public_display_fee": None,
+        "monthly_fee": None,
+        "effective_fee": None,
+        "minimum_balance": None,
+        "minimum_deposit": None,
+        "term_length_days": None,
+        "product_highlight_badge_code": None,
+        "target_customer_tags": [],
+        "fee_bucket": None,
+        "minimum_balance_bucket": None,
+        "minimum_deposit_bucket": None,
+        "term_bucket": None,
+        "last_verified_at": datetime(2026, 8, 12, 0, 0, tzinfo=UTC),
+        "last_changed_at": datetime(2026, 8, 12, 0, 0, tzinfo=UTC),
+        "refresh_metadata": {
+            "annual_fee": annual_fee,
+            "purchase_interest_rate": purchase_rate,
+            "purchase_interest_rate_summary": purchase_rate_summary,
+        },
+        "product_url": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    }
 
 
 if __name__ == "__main__":

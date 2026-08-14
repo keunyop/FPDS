@@ -30,6 +30,7 @@ PRODUCT_SORT_OPTIONS = (
     "monthly_fee",
     "minimum_balance",
     "minimum_deposit",
+    "annual_fee",
     "last_changed_at",
 )
 
@@ -287,6 +288,31 @@ def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> lis
         return _sort_numeric_rows(rows, field_name="minimum_balance", descending=query.sort_order == "desc")
     if query.sort_by == "minimum_deposit":
         return _sort_numeric_rows(rows, field_name="minimum_deposit", descending=query.sort_order == "desc")
+    if query.sort_by == "annual_fee":
+        def annual_fee(row: dict[str, Any]) -> float | None:
+            return serialize_decimal(_coerce_metadata(row.get("refresh_metadata")).get("annual_fee"))
+
+        if query.sort_order == "desc":
+            return sorted(
+                rows,
+                key=lambda row: (
+                    annual_fee(row) is None,
+                    -(annual_fee(row) or 0.0),
+                    str(row.get("bank_name") or ""),
+                    str(row.get("product_name") or ""),
+                    str(row.get("product_id") or ""),
+                ),
+            )
+        return sorted(
+            rows,
+            key=lambda row: (
+                annual_fee(row) is None,
+                annual_fee(row) if annual_fee(row) is not None else float("inf"),
+                str(row.get("bank_name") or ""),
+                str(row.get("product_name") or ""),
+                str(row.get("product_id") or ""),
+            ),
+        )
     if query.sort_by == "last_changed_at":
         return sorted(
             rows,
@@ -354,6 +380,9 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "base_12_month_rate": serialize_decimal(base_12_month_rate if base_12_month_rate is not None else standard_rate),
         "public_display_rate": serialize_decimal(row.get("public_display_rate")),
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
+        "annual_fee": serialize_decimal(metadata.get("annual_fee")),
+        "purchase_interest_rate": serialize_decimal(metadata.get("purchase_interest_rate")),
+        "purchase_interest_rate_summary": _string_or_none(metadata.get("purchase_interest_rate_summary")),
         "minimum_balance": serialize_decimal(row.get("minimum_balance")),
         "minimum_deposit": serialize_decimal(row.get("minimum_deposit")),
         "fee_waiver_condition": _string_or_none(metadata.get("fee_waiver_condition")),

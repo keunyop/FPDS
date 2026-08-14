@@ -42,6 +42,7 @@ from worker.pipeline.fpds_normalization.service import (
     _field_is_comparison_calculator_copy,
     _infer_subtype_code,
     _looks_like_invalid_application_method,
+    _looks_like_credit_card_field_mismatch,
     _looks_like_broad_page_copy,
     _looks_like_non_rate_numeric_context,
     _looks_like_non_value_description,
@@ -68,6 +69,16 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_us_purchase_apr_label_is_valid_credit_card_rate_evidence(self) -> None:
+        self.assertFalse(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=19.49,
+                context="Purchase APR 19.49% to 27.49% variable, based on creditworthiness.",
+                product_type_family="credit-card",
+            )
+        )
+
     def test_unverified_lending_copy_is_omitted_while_official_fact_is_kept(self) -> None:
         payload = {
             "status": "active",
