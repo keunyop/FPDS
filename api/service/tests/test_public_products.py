@@ -225,6 +225,146 @@ class PublicProductsTests(unittest.TestCase):
         )
         self.assertEqual(payload["items"][0]["product_type_label"], "Credit Card")
 
+    def test_lending_card_rate_uses_lowest_explicit_range_and_preserves_summary(self) -> None:
+        requested_summary = (
+            "**Fixed rates from 5.15% to 18.00% APR; APR may differ based on loan amount, "
+            "term length, and credit profile; excellent credit is required for the lowest "
+            "rates; offers are subject to credit approval and may change without notice.**"
+        )
+        rows = [
+            _lending_projection(
+                "loan-higher-rate",
+                product_type="personal-loan",
+                rate_summary="Fixed rates from 8.01% to 11.49% APR.",
+            ),
+            _lending_projection(
+                "loan-requested-example",
+                product_type="personal-loan",
+                rate_summary=requested_summary,
+            ),
+            _lending_projection(
+                "line-reference-spread",
+                product_type="line-of-credit",
+                rate_summary="Variable interest rate is Prime Rate + 2.00%.",
+            ),
+        ]
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=rows,
+        )
+        query = normalize_public_products_query(
+            locale="en",
+            country_code="US",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="display_rate",
+            sort_order="asc",
+            page=1,
+            page_size=20,
+        )
+
+        payload = load_public_products(connection, query=query)
+
+        self.assertEqual(
+            [item["product_id"] for item in payload["items"]],
+            ["loan-requested-example", "loan-higher-rate", "line-reference-spread"],
+        )
+        requested = payload["items"][0]
+        self.assertEqual(requested["card_display_rate"], 5.15)
+        self.assertIsNone(requested["public_display_rate"])
+        self.assertEqual(requested["interest_rate_summary"], requested_summary)
+        self.assertIsNone(payload["items"][2]["card_display_rate"])
+
+    def test_card_rate_ignores_qualification_percentages_and_keeps_intro_apr(self) -> None:
+        mortgage = _lending_projection(
+            "mortgage-assumptions",
+            product_type="mortgage",
+            rate_summary=(
+                "Representative fixed-rate example: 6.625% interest rate and 6.794% APR "
+                "for a 30-year term, 25% down payment, and finance charges of 0.862% of "
+                "the base loan amount; below 20% down payment, insurance may be required."
+            ),
+        )
+        discounted_loan = _lending_projection(
+            "loan-discount-qualified",
+            product_type="personal-loan",
+            rate_summary=(
+                "Personal loan rates as low as 9.99% APR, including a 0.5% discount "
+                "for enrolling in automatic payments."
+            ),
+        )
+        formula_card = _credit_card_projection(
+            "card-formula-components",
+            annual_fee=0,
+            purchase_rate=27.74,
+            purchase_rate_summary=(
+                "18.24%–27.74% variable APR; variable rate components shown as a minimum "
+                "of (6.75% + 11.49%) and a minimum of (6.75% + 20.99%), subject to "
+                "the applicable rate cap of 29.99%."
+            ),
+        )
+        formula_card["public_display_rate"] = Decimal("3.0")
+        formula_card["refresh_metadata"]["purchase_interest_rate"] = None
+        multi_rate_mortgage = _lending_projection(
+            "mortgage-multiple-examples",
+            product_type="mortgage",
+            rate_summary=(
+                "Current representative mortgage-rate examples: 4.45% for a 5-year closed "
+                "variable-rate term (Prime + 0.00%) and 5.45% for a 5-year open "
+                "variable-rate term (Prime + 1.00%)."
+            ),
+        )
+        multi_rate_mortgage["public_display_rate"] = Decimal("4.94")
+        multi_rate_mortgage["refresh_metadata"]["mortgage_rate"] = "4.94"
+        card = _credit_card_projection(
+            "card-intro-apr",
+            annual_fee=0,
+            purchase_rate=19.49,
+            purchase_rate_summary=(
+                "0% Intro APR on purchases for 18 months. Then a variable APR, currently "
+                "19.49% to 27.49%, based on creditworthiness."
+            ),
+        )
+        card["public_display_rate"] = None
+        card["refresh_metadata"]["purchase_interest_rate"] = None
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=[mortgage, card, discounted_loan, formula_card, multi_rate_mortgage],
+        )
+        query = normalize_public_products_query(
+            locale="en",
+            country_code="US",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            sort_by="default",
+            sort_order="desc",
+            page=1,
+            page_size=20,
+        )
+
+        payload = load_public_products(connection, query=query)
+        by_id = {item["product_id"]: item for item in payload["items"]}
+
+        self.assertEqual(by_id["mortgage-assumptions"]["card_display_rate"], 6.625)
+        self.assertEqual(by_id["card-intro-apr"]["card_display_rate"], 0.0)
+        self.assertEqual(by_id["card-formula-components"]["card_display_rate"], 18.24)
+        self.assertEqual(by_id["loan-discount-qualified"]["card_display_rate"], 9.99)
+        self.assertEqual(by_id["mortgage-multiple-examples"]["card_display_rate"], 4.45)
+
     def test_load_public_products_handles_bad_numeric_values_in_visible_sorts(self) -> None:
         bad_row = dict(_projection_rows()[0])
         bad_row.update(
@@ -280,6 +420,7 @@ class PublicProductsTests(unittest.TestCase):
                 serialized_bad_row = next(item for item in payload["items"] if item["product_id"] == "bad-numeric-row")
 
                 self.assertIsNone(serialized_bad_row["public_display_rate"])
+                self.assertIsNone(serialized_bad_row["card_display_rate"])
                 self.assertIsNone(serialized_bad_row["public_display_fee"])
                 self.assertIsNone(serialized_bad_row["minimum_balance"])
                 self.assertIsNone(serialized_bad_row["minimum_deposit"])
@@ -683,6 +824,46 @@ def _credit_card_projection(
             "purchase_interest_rate_summary": purchase_rate_summary,
         },
         "product_url": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    }
+
+
+def _lending_projection(
+    product_id: str,
+    *,
+    product_type: str,
+    rate_summary: str,
+) -> dict[str, object]:
+    return {
+        "product_id": product_id,
+        "bank_code": "TEST",
+        "bank_name": "Test Bank",
+        "country_code": "US",
+        "product_family": "lending",
+        "product_type": product_type,
+        "subtype_code": "other",
+        "product_name": product_id,
+        "source_language": "en",
+        "currency": "USD",
+        "status": "active",
+        "public_display_rate": None,
+        "public_display_fee": None,
+        "monthly_fee": None,
+        "effective_fee": None,
+        "minimum_balance": None,
+        "minimum_deposit": None,
+        "term_length_days": None,
+        "product_highlight_badge_code": None,
+        "target_customer_tags": [],
+        "fee_bucket": None,
+        "minimum_balance_bucket": None,
+        "minimum_deposit_bucket": None,
+        "term_bucket": None,
+        "last_verified_at": datetime(2026, 8, 13, 0, 0, tzinfo=UTC),
+        "last_changed_at": datetime(2026, 8, 13, 0, 0, tzinfo=UTC),
+        "refresh_metadata": {
+            "interest_rate_summary": rate_summary,
+        },
+        "product_url": "https://example.com/product",
     }
 
 

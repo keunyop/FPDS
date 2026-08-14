@@ -14,6 +14,9 @@ Use this file to avoid opening every design doc.
 - `api-interface-contracts.md`: public, admin, internal, and external interface contracts
 - `security-access-control-design.md`: auth, RBAC, CSRF, SSRF, and browser security baseline
 - `source-registry-refresh-and-approval-policy.md`: source registry governance and admin update rules
+- `bounded-data-retention-policy.md`: active keep/expire/remove rules for
+  evidence, run metadata, Public snapshots, model executions, auth records,
+  and removed operational log tables
 
 ## Infrastructure Baselines
 

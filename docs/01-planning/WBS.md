@@ -101,7 +101,7 @@ Based on:
 - evidence linkage, canonical mapping, 내부 확인 UI 검증 완료
 
 ### Gate C. Phase 1 Expansion Gate
-- review queue / trace / run history / usage tracking 준비 완료
+- review queue / trace / run history / bounded operational state 준비 완료
 - canonical schema와 검증 규칙 안정화 완료
 
 ### Gate D. Release Gate
@@ -267,11 +267,11 @@ Based on:
 | 4.4 | Completed | evidence trace viewer 구현 | source, chunk, mapping, model run 표시 | Frontend, Backend | 3.4 | 2026-04-28 |
 | 4.5 | Completed | run status 화면 구현 | run list/detail/error summary | Frontend, Backend | 1.3.3 | 2026-04-28 |
 | 4.6 | Completed | change history 화면 구현 | change event 조회 | Frontend, Backend | 1.2.6 | 2026-04-29 |
-| 4.7 | Completed | audit log baseline 구현 | review/auth/publish 이력 저장 | Backend, Security | 1.3.5 | 2026-04-29 |
-| 4.8 | Completed | LLM usage tracking 구현 | run/agent/model별 usage 저장 | Backend, AI/Data | 1.5.3 | 2026-04-29 |
-| 4.9 | Completed | usage dashboard v1 구현 | token/cost trend 화면 | Frontend, Backend | 4.8 | 2026-05-04 |
+| 4.7 | Superseded | audit log baseline 구현 | historical delivery; generic ledger/route removed by `5.27` and `D044` | Backend, Security | 1.3.5 | 2026-08-13 |
+| 4.8 | Superseded | LLM usage tracking 구현 | historical delivery; standalone usage retention removed by `5.27` and `D044` | Backend, AI/Data | 1.5.3 | 2026-08-13 |
+| 4.9 | Superseded | usage dashboard v1 구현 | historical delivery; `/admin/usage` removed by `5.27` and `D044` | Frontend, Backend | 4.8 | 2026-08-13 |
 | 4.10 | Completed | 운영 시나리오 QA | review->approve->history 검증 | QA | 4.3, 4.4, 4.5, 4.6 | 2026-05-06 |
-| 4.11 | Completed | Review Detail AI verification | official-domain live comparison, cited differences, safe correction staging, usage/audit persistence | Frontend, Backend, AI/Data | 4.3, 4.4, 4.8 | 2026-07-28 |
+| 4.11 | Completed | Review Detail AI verification | official-domain live comparison, cited differences, safe correction staging, bounded result/source context | Frontend, Backend, AI/Data | 4.3, 4.4 | 2026-07-28 |
 
 ## WBS 5. Phase 1 Canada Expansion and Public Experience
 
@@ -299,16 +299,18 @@ Based on:
 | 5.14 | Completed | responsive QA 수행 | production-rendered desktop/tablet/mobile Home, Deposit, Loan, compare, detail 검증 | QA | 5.9, 5.10 | 2026-07-18 |
 | 5.15 | Completed | source registry admin MVP 구현 | DB-backed bank setup + source-catalog coverage management + candidate-producing collection + read-only generated source inspection | Backend, Frontend, AI/Data | 5.1, 4.10 | 2026-05-10 |
 | 5.16 | Completed | operator-managed product type onboarding 구현 | DB-managed product type registry + type-specific essential comparison contracts + AI-assisted discovery/extraction/normalization + full-essential official-grounding auto-validation + bounded residual Review AI autopilot | Backend, Frontend, AI/Data | 5.15 | 2026-05-17 |
-| 5.17 | Completed | vector-assisted evidence retrieval bootstrap | pgvector evidence chunk embedding side table + metadata-first vector ranking + metadata-only fallback | Backend, AI/Data | 3.4, 5.16 | 2026-05-17 |
+| 5.17 | Superseded | vector-assisted evidence retrieval bootstrap | historical delivery; embedding storage removed by `5.27`, metadata-only retrieval remains | Backend, AI/Data | 3.4, 5.16 | 2026-08-13 |
 | 5.18 | Completed | recognized Canada financial-institution registry baseline | 28 active Canada bank/direct-bank/credit-union profiles + logo metadata + full active Product Type source-catalog coverage | Backend, Frontend, AI/Data | 5.15, 5.16 | 2026-07-05 |
 | 5.19 | Completed | country-aware Public foundation | bank-owned ISO country invariant, country-specific refresh queue/runner, active-snapshot country API, country-preserved Public URLs, header country selector, footer language selector | Backend, Frontend, QA | 5.6, 5.7, 5.8, 5.11, 5.12 | 2026-07-29 |
-| 5.20 | Completed | country-scoped Admin and key integrity | login country selector, session-owned working country, persistent shell context, country-scoped bank/source/collection/run/review/change/usage operations, country-aware DB business keys and indexes | Backend, Frontend, Security, QA | 4.1-4.11, 5.15, 5.16, 5.19 | 2026-07-29 |
-| 5.21 | Completed | Admin country registry management | prepared ISO country catalog, admin-only activation/deactivation, protected current/last country, session revocation, audit trail, and responsive Countries UI | Backend, Frontend, Security, QA | 5.20 | 2026-07-29 |
-| 5.22 | Completed | Admin header country switching | active-country header dropdown, CSRF-protected session context switch, auth audit trail, locale-preserved Overview reset, and responsive confirmation UX | Backend, Frontend, Security, QA | 5.20, 5.21 | 2026-07-29 |
-| 5.23 | Completed | AI-assisted bank registry onboarding | session-country largest-missing-bank research, official homepage/logo/active Product Type evidence, readable display-name validation with private legal/ranking-name evidence, atomic registry write, usage/audit trail, EN/KO/JA modal, and verified shared-dev migration | Backend, Frontend, AI/Data, Security, QA | 4.8, 5.15, 5.16, 5.20 | 2026-07-30 |
+| 5.20 | Completed | country-scoped Admin and key integrity | login country selector, session-owned working country, persistent shell context, country-scoped bank/source/collection/run/review/change operations, country-aware DB business keys and indexes | Backend, Frontend, Security, QA | 4.1-4.11, 5.15, 5.16, 5.19 | 2026-07-29 |
+| 5.21 | Completed | Admin country registry management | prepared ISO country catalog, admin-only activation/deactivation, protected current/last country, session revocation, durable registry state, and responsive Countries UI | Backend, Frontend, Security, QA | 5.20 | 2026-07-29 |
+| 5.22 | Completed | Admin header country switching | active-country header dropdown, CSRF-protected session context switch, locale-preserved Overview reset, and responsive confirmation UX | Backend, Frontend, Security, QA | 5.20, 5.21 | 2026-07-29 |
+| 5.23 | Completed | AI-assisted bank registry onboarding | session-country largest-missing-bank research, official homepage/logo/active Product Type evidence, readable display-name validation with bounded private legal/ranking-name context, atomic registry write, EN/KO/JA modal, and verified shared-dev migration | Backend, Frontend, AI/Data, Security, QA | 5.15, 5.16, 5.20 | 2026-07-30 |
 | 5.24 | Completed | country-product collection/publication profiles | versioned market-profile registry, Canada-compatible baseline, unconfigured-country fail-closed gate, US Checking/Savings/CD/Mortgage/Personal Loan essentials including conditional pricing qualifications, exact-product supporting-source bundle merge, non-product source cleanup, Public market labels, migration, and shared-dev recollection evidence | Backend, AI/Data, Frontend, QA | 5.16, 5.19, 5.20, 5.23 | 2026-08-09 |
-| 5.25 | Completed | continuous collection-to-Public automation and Public cards | single-leader scheduled CA/US active-catalog collection, stale/failure recovery, bounded current-policy Review reconciliation, aggregate restart, scheduler audit lineage, credit-card projection/API/catalog/detail, shared-dev migration and readback | Backend, AI/Data, Frontend, QA | 5.6, 5.15, 5.16, 5.19, 5.24 | 2026-08-12 |
+| 5.25 | Completed | continuous collection-to-Public automation and Public cards | single-leader scheduled CA/US active-catalog collection, stale/failure recovery, bounded current-policy Review reconciliation, aggregate restart, scheduler identity metadata, credit-card projection/API/catalog/detail, shared-dev migration and readback | Backend, AI/Data, Frontend, QA | 5.6, 5.15, 5.16, 5.19, 5.24 | 2026-08-12 |
 | 5.26 | Completed | US pricing-evidence companion collection | official US UI pattern analysis, bounded detail-linked pricing/fee/agreement source discovery, query-aware disclosure identity, dynamic/browser and structured-payload extraction, range-preserving Purchase APR projection, shared-dev migration and targeted recollection | Backend, AI/Data, Frontend, QA | 5.16, 5.24, 5.25 | 2026-08-12 |
+| 5.27 | Completed | bounded operational storage and dev cleanup | obsolete audit/usage/embedding/dashboard tables removed, evidence/model/run/auth retention enforced, Admin routes retired, shared-dev data compacted without Public projection drift | Backend, AI/Data, Frontend, Security, QA | 4.3-4.6, 5.6-5.8, 5.25 | 2026-08-13 |
+| 5.28 | Completed | numeric Public catalog card rates | additive card-rate projection from current approved data, favorable explicit lending range/intro rate, formula/qualification exclusion, aligned sorting, full summary preservation on comparison/detail, no recollection | Backend, Frontend, QA | 5.7, 5.9, 5.25, 5.26 | 2026-08-13 |
 
 ### 5.5 Scope Baseline
 

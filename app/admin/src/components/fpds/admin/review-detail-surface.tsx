@@ -111,7 +111,7 @@ const REVIEW_DETAIL_COPY = {
     aiApplyAll: "Use all safe corrections",
     aiApplied: "AI corrections added to reviewed values.",
     aiNoCorrections: "No contract-safe corrections are available.",
-    aiRunRecorded: "The verification run and usage are recorded for audit.",
+    aiRunRecorded: "The latest verification result is available for this review.",
     aiLatestCheck: "Latest check",
     aiModel: "Model",
     confidence: "Confidence",
@@ -205,7 +205,7 @@ const REVIEW_DETAIL_COPY = {
     aiApplyAll: "안전한 보정값 모두 사용",
     aiApplied: "AI 보정값을 검토 값에 반영했습니다.",
     aiNoCorrections: "필드 계약을 통과한 보정값이 없습니다.",
-    aiRunRecorded: "검증 실행과 사용량은 감사 이력에 기록됩니다.",
+    aiRunRecorded: "최신 검증 결과를 이 검토에서 사용할 수 있습니다.",
     aiLatestCheck: "최근 검증",
     aiModel: "모델",
     backToQueue: "검토 대기열로",
@@ -334,7 +334,7 @@ const REVIEW_DETAIL_COPY = {
     aiApplyAll: "安全な補正値をすべて使用",
     aiApplied: "AI補正値をレビュー値に反映しました。",
     aiNoCorrections: "フィールド契約を満たす補正値はありません。",
-    aiRunRecorded: "検証実行と使用量は監査履歴に記録されます。",
+    aiRunRecorded: "最新の検証結果をこのレビューで利用できます。",
     aiLatestCheck: "最新の検証",
     aiModel: "モデル",
     backToQueue: "レビューキューへ",
@@ -1958,11 +1958,6 @@ function ModelExecutionCard({
   item: ReviewModelExecution;
   locale: AdminLocale;
 }) {
-  const tokenSummary =
-    item.usage.prompt_tokens !== null || item.usage.completion_tokens !== null
-      ? `${formatCount(locale, item.usage.prompt_tokens ?? 0)} / ${formatCount(locale, item.usage.completion_tokens ?? 0)} ${copy.tokens.toLocaleLowerCase(getAdminIntlLocale(locale))}`
-      : localizedMissing(locale);
-
   return (
     <div className="py-3 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1979,8 +1974,6 @@ function ModelExecutionCard({
       <dl className="mt-3 grid gap-2 text-sm">
         <MetaRow label={copy.started} value={formatTimestamp(item.started_at, locale)} />
         <MetaRow label={copy.completed} value={formatTimestamp(item.completed_at, locale)} />
-        <MetaRow label={copy.tokens} value={tokenSummary} />
-        <MetaRow label={copy.cost} value={formatCost(item.usage.estimated_cost, locale)} />
       </dl>
     </div>
   );
@@ -2212,18 +2205,6 @@ function formatConfidence(value: number | null, locale: AdminLocale) {
   return new Intl.NumberFormat(getAdminIntlLocale(locale), {
     style: "percent",
     maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatCost(value: number | null, locale: AdminLocale) {
-  if (value === null) {
-    return localizedMissing(locale);
-  }
-  return new Intl.NumberFormat(getAdminIntlLocale(locale), {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 6,
   }).format(value);
 }
 

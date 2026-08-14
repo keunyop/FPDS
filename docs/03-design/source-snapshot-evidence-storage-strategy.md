@@ -1,8 +1,8 @@
-﻿# FPDS Source Snapshot and Evidence Storage Strategy
+# FPDS Source Snapshot and Evidence Storage Strategy
 
-Version: 1.0  
-Date: 2026-04-01  
-Status: Approved Baseline for WBS 1.4.3  
+Version: 1.0
+Date: 2026-04-01
+Status: Approved Baseline for WBS 1.4.3
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/01-planning/plan.md`
@@ -15,6 +15,23 @@ Source Documents:
 
 ---
 
+## Current Retention Supersession - 2026-08-13
+
+Decision `D044` replaces the former unbounded-retention assumption. FPDS keeps
+only evidence required for an active workflow or an Admin field trace:
+
+- every chunk referenced by `field_evidence_link`;
+- chunks from the latest snapshot for each source document; and
+- chunks produced by an active ingestion run.
+
+Unlinked older chunks are deleted by the scheduled retention function. No
+embedding payload or embedding side table is retained. Raw/parsed object
+lifecycle remains a private storage concern and must not weaken Public or Admin
+field traceability. See `bounded-data-retention-policy.md` for the executable
+policy. Section 7.3 below is retained as historical context only.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.4.3 source snapshot/evidence 저장 전략 확정`을 닫기 위한 기준 문서다.
@@ -24,7 +41,7 @@ Source Documents:
 - object storage와 relational metadata store의 책임 분리를 명확히 한다.
 - admin trace, retrieval, change detection, auditability를 만족하는 최소 저장 전략을 정의한다.
 
-이 문서는 논리/운영 저장 전략을 정의한다.  
+이 문서는 논리/운영 저장 전략을 정의한다.
 exact bucket policy, object lifecycle rule, encryption setting, retention day 수치, vendor-specific storage class는 후속 infra/security 설정에서 구체화한다.
 
 ---
@@ -103,7 +120,7 @@ object storage에 저장하는 baseline artifact는 아래와 같다.
 {env}/parsed/{country_code}/{bank_code}/{source_document_id}/{parsed_document_id}/metadata.json
 ```
 
-위 key shape는 논리 예시다.  
+위 key shape는 논리 예시다.
 exact file naming, compression, checksum placement는 infra implementation에서 바뀔 수 있다.
 
 ---

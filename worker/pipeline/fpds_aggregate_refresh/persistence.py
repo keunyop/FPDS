@@ -194,15 +194,6 @@ FROM (
 BEGIN;
 SET LOCAL search_path TO {schema};
 
-DELETE FROM dashboard_scatter_snapshot
-WHERE snapshot_id = {_sql_literal(result.snapshot_id)};
-
-DELETE FROM dashboard_ranking_snapshot
-WHERE snapshot_id = {_sql_literal(result.snapshot_id)};
-
-DELETE FROM dashboard_metric_snapshot
-WHERE snapshot_id = {_sql_literal(result.snapshot_id)};
-
 DELETE FROM public_product_projection
 WHERE snapshot_id = {_sql_literal(result.snapshot_id)};
 
@@ -307,91 +298,6 @@ SELECT
     NULLIF(row ->> 'last_changed_at', '')::timestamptz,
     COALESCE(row -> 'refresh_metadata', '{{}}'::jsonb)
 FROM jsonb_array_elements({_json_sql_literal(result.projection_rows)}::jsonb) AS row;
-
-INSERT INTO dashboard_metric_snapshot (
-    snapshot_id,
-    scope_key,
-    total_active_products,
-    banks_in_scope,
-    highest_display_rate,
-    recently_changed_products_30d,
-    breakdown_payload,
-    freshness_payload,
-    completeness_note
-)
-SELECT
-    row ->> 'snapshot_id',
-    row ->> 'scope_key',
-    (row ->> 'total_active_products')::integer,
-    (row ->> 'banks_in_scope')::integer,
-    NULLIF(row ->> 'highest_display_rate', '')::numeric(12,4),
-    (row ->> 'recently_changed_products_30d')::integer,
-    COALESCE(row -> 'breakdown_payload', '{{}}'::jsonb),
-    COALESCE(row -> 'freshness_payload', '{{}}'::jsonb),
-    NULLIF(row ->> 'completeness_note', '')
-FROM jsonb_array_elements({_json_sql_literal(result.metric_snapshots)}::jsonb) AS row;
-
-INSERT INTO dashboard_ranking_snapshot (
-    snapshot_id,
-    ranking_key,
-    scope_key,
-    rank,
-    product_id,
-    bank_code,
-    bank_name,
-    product_name,
-    product_type,
-    metric_value,
-    metric_unit,
-    last_changed_at,
-    ranking_metadata
-)
-SELECT
-    row ->> 'snapshot_id',
-    row ->> 'ranking_key',
-    row ->> 'scope_key',
-    (row ->> 'rank')::integer,
-    row ->> 'product_id',
-    row ->> 'bank_code',
-    row ->> 'bank_name',
-    row ->> 'product_name',
-    row ->> 'product_type',
-    NULLIF(row ->> 'metric_value', '')::numeric(12,4),
-    row ->> 'metric_unit',
-    NULLIF(row ->> 'last_changed_at', '')::timestamptz,
-    COALESCE(row -> 'ranking_metadata', '{{}}'::jsonb)
-FROM jsonb_array_elements({_json_sql_literal(result.ranking_rows)}::jsonb) AS row;
-
-INSERT INTO dashboard_scatter_snapshot (
-    snapshot_id,
-    axis_preset,
-    scope_key,
-    product_id,
-    bank_code,
-    bank_name,
-    product_name,
-    product_type,
-    x_value,
-    y_value,
-    highlight_badge_code,
-    last_changed_at,
-    point_metadata
-)
-SELECT
-    row ->> 'snapshot_id',
-    row ->> 'axis_preset',
-    row ->> 'scope_key',
-    row ->> 'product_id',
-    row ->> 'bank_code',
-    row ->> 'bank_name',
-    row ->> 'product_name',
-    row ->> 'product_type',
-    (row ->> 'x_value')::numeric(12,4),
-    (row ->> 'y_value')::numeric(12,4),
-    NULLIF(row ->> 'highlight_badge_code', ''),
-    NULLIF(row ->> 'last_changed_at', '')::timestamptz,
-    COALESCE(row -> 'point_metadata', '{{}}'::jsonb)
-FROM jsonb_array_elements({_json_sql_literal(result.scatter_rows)}::jsonb) AS row;
 
 COMMIT;
 """

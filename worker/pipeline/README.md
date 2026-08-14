@@ -4,12 +4,12 @@ Use this area for ingestion pipeline stages after discovery.
 
 Current scope:
 - `fpds_parse_chunk/` implements `WBS 3.3` parsed text generation, chunk creation, parsed artifact storage, and DB persistence
-- `fpds_evidence_retrieval/` implements `WBS 3.4` metadata-only candidate chunk retrieval with field-aware scoring, DB reads, and pgvector-assisted candidate ranking when `evidence_chunk_embedding` rows are available
-- `fpds_extraction/` implements `WBS 3.5` sparse extracted draft generation, extracted artifact storage, `model_execution` persistence, and zero-token heuristic usage records
+- `fpds_evidence_retrieval/` implements `WBS 3.4` metadata-only candidate chunk retrieval with field-aware scoring and DB reads
+- `fpds_extraction/` implements `WBS 3.5` sparse extracted draft generation, extracted artifact storage, and bounded `model_execution` persistence
 - `fpds_normalization/` implements `WBS 3.6` canonical candidate mapping, `normalized_candidate` persistence, `field_evidence_link` persistence, and normalized artifact storage
 - `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
 - `fpds_result_viewer/` implements `WBS 3.8` read-only prototype viewer payload export from persisted run, candidate, and evidence rows
-- `fpds_aggregate_refresh/` implements `WBS 5.6` aggregate source dataset generation for `public_product_projection`, `dashboard_metric_snapshot`, `dashboard_ranking_snapshot`, and `dashboard_scatter_snapshot`
+- `fpds_aggregate_refresh/` implements `WBS 5.6` the retained aggregate source dataset in `public_product_projection`; dashboard metrics, rankings, and scatter are derived from it at read time
 
 Planned follow-on scope:
 - canonical upsert and change assessment
@@ -42,18 +42,9 @@ python -m worker.pipeline.fpds_evidence_retrieval `
   --field-name fee_waiver_condition
 ```
 
-Run vector-assisted evidence retrieval when `db/migrations/0012_evidence_chunk_embeddings.sql` has been applied and parsed chunks have embedding rows:
-
-```powershell
-python -m worker.pipeline.fpds_evidence_retrieval `
-  --env-file .env.dev `
-  --run-id run_20260410_3401 `
-  --source-id TD-SAV-007 `
-  --field-name monthly_fee `
-  --retrieval-mode vector-assisted
-```
-
-If the pgvector table or embedding rows are unavailable, the worker reports a runtime note and falls back to `metadata-only`.
+`0040_bounded_operational_storage.sql` removes the historical pgvector side
+table. Use metadata-only retrieval; the field-aware metadata scorer is the
+correctness baseline and does not duplicate every evidence chunk.
 
 Run extraction against stored parsed documents in dev:
 
@@ -110,7 +101,7 @@ What `WBS 3.5` stores today:
 - extracted draft JSON artifact per parsed document in object storage
 - metadata JSON artifact with counts and storage references
 - `model_execution` row per source extraction attempt
-- `llm_usage_record` row with `0` tokens and `heuristic-no-llm-call` metadata for the current baseline
+- no persisted zero-token usage row; heuristic execution state is already represented by `model_execution`
 - updated `run_source_item.stage_metadata` for extraction status and artifact linkage
 
 Current boundary:
@@ -138,7 +129,7 @@ What `WBS 3.6` stores today:
 - metadata JSON artifact with candidate id, validation status, and confidence
 - `normalized_candidate` row per source candidate
 - `field_evidence_link` rows tied to `candidate_id`
-- `model_execution` and zero-token `llm_usage_record` rows for normalization
+- bounded `model_execution` rows for normalization; no usage ledger row
 - updated `run_source_item.stage_metadata` for candidate id and normalization results
 - for selected savings products, missing rate fields can now be supplemented from product-matched supporting rate-page artifacts when available: `TD-SAV-005`, `BMO-SAV-006` for BMO Savings Amplifier, Savings Builder, and Premium Rate Savings, and `SCOTIA-SAV-006`
 - for the TD Savings prototype, noisy `interest_calculation_method` fields can now be replaced with stronger `TD-SAV-008` governing-PDF wording when the detail-page extraction only captured PDF link text
@@ -179,12 +170,12 @@ What `WBS 3.7` stores today:
 - updated `normalized_candidate` validation fields and `candidate_state`
 - validation routing treats dynamic-product runtime notes such as "no grounded product details" as `partial_source_failure`, preventing weak source captures from appearing as clean `pass` review tasks
 - `review_task` row per prototype candidate with `queued` review state
-- `model_execution` and zero-token `llm_usage_record` rows for validation/routing
+- bounded `model_execution` rows for validation/routing; no usage ledger row
 - updated `run_source_item.stage_metadata` for review queue linkage
 
 Current boundary:
 - Prototype routing mode sends every candidate to review even when validation passes
-- review decisions, canonical upsert, change history, and audit-event emission still belong to later stages
+- review decisions, canonical upsert, and change history still belong to later stages
 
 What `WBS 3.8` exports today:
 - static viewer payload JSON and browser-consumable JS for `app/prototype/index.html`
@@ -198,9 +189,7 @@ Current boundary:
 What `WBS 5.6` stores today:
 - one `aggregate_refresh_run` row per attempted snapshot
 - flattened `public_product_projection` rows with the shared filter vocabulary and approved bucket codes
-- `dashboard_metric_snapshot` rows for the current aggregate scope baseline
-- `dashboard_ranking_snapshot` rows for the approved ranking widget catalog
-- `dashboard_scatter_snapshot` rows for the approved scatter preset catalog
+- no duplicate dashboard snapshot rows; API reads derive summary, ranking, and scatter payloads from the latest retained projection
 
 Current boundary:
 - this slice builds aggregate source datasets only; it does not implement the public products API, dashboard APIs, or public UI

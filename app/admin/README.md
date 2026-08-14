@@ -1,7 +1,7 @@
 # FPDS Admin
 
 This package is the authenticated operator workspace. It keeps collection,
-review, canonical-change, and audit context private while the Public package
+review, and canonical-change context private while the Public package
 reads only approved projections.
 
 ## Operator Workflow
@@ -24,7 +24,7 @@ session, and returns to Overview in the same language so detail/filter state
 does not cross countries.
 
 The sidebar keeps less frequent tools available: Sources, Product Types,
-Countries, Changes, Audit Log, Usage, and Public Health. Countries is visible
+Countries, Changes, and Public Health. Countries is visible
 only to administrators and uses a prepared ISO list: activation adds a login
 country, while reversible deactivation preserves history and protects the
 current/last active country. Existing Bank and Source Catalog detail URLs
@@ -58,9 +58,9 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 - Preserve EN/KO/JA locale query propagation and source-language content.
 - Never treat a client query parameter as the Admin country authority. Reads
   and writes derive country from the authenticated server-side session.
-- Keep header switching limited to active countries, CSRF-protected, audited,
+- Keep header switching limited to active countries and CSRF-protected,
   and redirected to Overview rather than preserving a country-owned route.
-- Keep platform-wide account and audit administration conceptually separate
+- Keep platform-wide account administration conceptually separate
   from country-owned bank, source, collection, review, and product data.
 - Keep `Add banks with AI` admin-only and tied to the displayed server-session
   country. Its result must retain clickable ranking/homepage/coverage evidence

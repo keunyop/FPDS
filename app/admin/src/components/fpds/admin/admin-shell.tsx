@@ -13,9 +13,7 @@ import {
   History,
   LayoutDashboard,
   LogOut,
-  ScrollText,
   Shapes,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 
@@ -77,8 +75,6 @@ type NavItem = {
     | "productTypes"
     | "countries"
     | "changes"
-    | "audit"
-    | "usage"
     | "health";
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -104,8 +100,6 @@ const toolItems: NavItem[] = [
   { key: "productTypes", href: "/admin/product-types", icon: Shapes },
   { key: "countries", href: "/admin/countries", icon: Globe2 },
   { key: "changes", href: "/admin/changes", icon: History },
-  { key: "audit", href: "/admin/audit", icon: ScrollText },
-  { key: "usage", href: "/admin/usage", icon: Sparkles },
   { key: "health", href: "/admin/health/dashboard", icon: Gauge },
 ];
 
@@ -123,8 +117,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "Sources",
       productTypes: "Product types",
       changes: "Changes",
-      audit: "Audit log",
-      usage: "Usage",
       health: "Public health",
     },
   },
@@ -141,8 +133,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "소스",
       productTypes: "상품 유형",
       changes: "변경 이력",
-      audit: "감사 로그",
-      usage: "사용량",
       health: "공개 데이터 상태",
     },
   },
@@ -159,8 +149,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "ソース",
       productTypes: "商品タイプ",
       changes: "変更履歴",
-      audit: "監査ログ",
-      usage: "使用量",
       health: "公開データ状態",
     },
   },

@@ -33,7 +33,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 ## 2. Baseline Decisions Carried Forward
 
 1. The admin console is a browser-based operator surface protected by server-side session auth.
-2. Review, runs, change history, audit, publish, usage, and dashboard health remain separate operator surfaces.
+2. Review, runs, durable change history, publish, and dashboard health remain separate operator surfaces; generic audit and token/cost usage screens are intentionally removed.
 3. Source registry management is an operations surface, not a hidden settings page.
 4. The first source-registry slice is intentionally minimal: bank setup plus bank-owned coverage management, while generated source rows are inspectable and may only be operator-removed through an audit-visible `removed` status transition.
 5. Bulk collection may start from the bank list as long as the collect action still resolves down to the existing bank-plus-product coverage items.
@@ -49,7 +49,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 Included:
 - admin shell and primary navigation
 - contextual route ownership
-- overview, review, runs, change history, audit, publish, usage, dashboard health, bank registry, source catalog compatibility, source registry, and later product-type-management surfaces
+- overview, review, runs, change history, publish, dashboard health, bank registry, source catalog compatibility, source registry, and later product-type-management surfaces
 - cross-surface drilldown rules
 - role-visibility baseline
 - responsive and localization baseline
@@ -77,7 +77,7 @@ Not included:
 - `run` lives primarily in Runs
 - canonical change continuity lives primarily in Change History and Product Record
 - publish tracking lives primarily in Publish Monitor
-- usage and aggregate freshness live primarily in Observability
+- aggregate freshness lives primarily in Public Health; bounded model outcome context stays with the owning review/run
 - source registry ownership lives primarily in Source Registry
 
 ### 4.3 Preserve Context on Drilldown
@@ -130,8 +130,6 @@ choose an abstract module before finding a task.
 | More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
 | More tools | Countries | `/admin/countries` | admin-only operational country activation |
 | More tools | Change History | `/admin/changes` | canonical change chronology |
-| More tools | Audit Log | `/admin/audit` | append-only actor/request trail |
-| More tools | LLM Usage | `/admin/usage` | model/agent/run usage visibility |
 | More tools | Public Health | `/admin/health/dashboard` | public aggregate freshness and health |
 
 Publish Monitor remains approved follow-on scope but is not shown as a disabled
@@ -148,7 +146,7 @@ navigation item until a live route exists.
 | Source Registry Detail | `/admin/sources/:sourceId` | source registry list, source catalog detail, run detail, search |
 | Product Type Management | `/admin/product-types` | operator-managed product type registry, bank coverage search, and dynamic onboarding controls |
 | Country Management | `/admin/countries` | admin-only prepared-country activation and reversible deactivation |
-| Run Detail | `/admin/runs/:runId` | runs list, review detail, usage drilldown, source collection history, search |
+| Run Detail | `/admin/runs/:runId` | runs list, review detail, source collection history, search |
 | Product Record | `/admin/products/:productId` | change history, publish monitor, review result context, search |
 
 ### 5.4 Reserved Follow-On Navigation
@@ -223,9 +221,7 @@ Recommended result grouping:
 | Source Registry | Run Detail | inspect collection result |
 | Source Registry | Review Queue | inspect candidate/review outcome after collection |
 | Run Detail | Related Review Tasks | inspect run-created review workload |
-| Run Detail | LLM Usage | same-run cost drilldown |
 | Change History | Product Record | inspect current truth vs chronology |
-| Change History | Audit Log | inspect broader actor/request context |
 | Publish Monitor | Product Record | inspect publish target context |
 
 ---
@@ -399,7 +395,7 @@ Run summary rule:
 - a target source succeeds after validation/routing; an evidence-only supporting source succeeds after extraction
 - byte-identical target aliases may be counted as safely deduplicated rather than normalized into duplicate candidates
 - upstream source failures remain visible in the final partial-completion flag and error summary
-- usage summary
+- bounded model-stage status when it helps diagnose the run
 
 ### 7.6 Change History and Product Record
 
@@ -422,18 +418,10 @@ Purpose:
 
 ### 7.7 Audit Log
 
-Purpose:
-- append-only actor/request context trail
-
-`/admin/audit` minimum list:
-- event category
-- event type
-- occurred at
-- actor
-- target
-- state transition
-- reason
-- request context
+Removed by Decision `D044` on 2026-08-13. `/admin/audit` is not a live route,
+and generic actor/request or trace-view events are not retained. Operators use
+review decisions, canonical change history, run state, and publish state for
+the business chronology required by each workflow.
 
 ### 7.8 Publish Monitor
 
@@ -452,15 +440,9 @@ Minimum list information:
 
 ### 7.9 LLM Usage Dashboard
 
-Purpose:
-- usage and cost observability
-
-Minimum capabilities:
-- model breakdown
-- agent breakdown
-- run breakdown
-- time-range trend
-- anomaly drilldown
+Removed by Decision `D044` on 2026-08-13. `/admin/usage` is not a live route,
+and token/cost usage rows are not retained. The owning Review or Run surface may
+show bounded model completion/status context when needed for quality diagnosis.
 
 ### 7.10 Dashboard Health
 
@@ -469,9 +451,7 @@ Purpose:
 
 Minimum domain rows:
 - `public_product_projection`
-- `dashboard_metric_snapshot`
-- `dashboard_ranking_snapshot`
-- `dashboard_scatter_snapshot`
+- `aggregate_refresh_run`
 
 Minimum information:
 - latest successful refresh time
@@ -496,7 +476,6 @@ Minimum information:
 | Runs and run detail | O | O | O | diagnostic read |
 | Change history and product record | O | O | O | diagnostic read |
 | Publish monitor read | O | O | O | operational visibility |
-| Usage dashboard read | O | O | O | cost visibility |
 | Dashboard health read | O | O | O | aggregate health visibility |
 
 ---
@@ -536,8 +515,7 @@ Minimum information:
 | Trace viewer implementation | `4.4` |
 | Run status screen | `4.5` |
 | Change history screen | `4.6` |
-| Audit log implementation | `4.7` |
-| Usage dashboard implementation | `4.8`, `4.9` |
+| Bounded operational retention | `5.27`, Decision `D044` |
 | Publish monitor implementation | `6.4` |
 
 ---
@@ -549,8 +527,7 @@ Minimum information:
 - `4.4`: evidence trace viewer implementation
 - `4.5`: run status screen implementation
 - `4.6`: change history implementation
-- `4.7`: audit log implementation
-- `4.9`: usage dashboard v1 implementation
+- `5.27`: bounded operational retention and obsolete surface removal
 - `5.12`: EN/KO/JA admin locale rollout
 - `6.4`: publish monitor UI implementation
 

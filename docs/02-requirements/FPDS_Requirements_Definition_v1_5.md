@@ -4,6 +4,30 @@ Date: 2026-03-28
 Language: Korean-centered with English technical terms + English/Korean/Japanese UI support
 Status: Updated Draft for Product Owner Review (Security Requirements Added)
 
+## 0. Product Owner Storage Override - 2026-08-13
+
+The following current requirements supersede every conflicting Audit/Usage or
+unbounded evidence-retention statement later in this document:
+
+- FPDS does not retain a generic append-only audit log or per-call LLM token and
+  cost ledger. The Admin Audit Log and Usage dashboard are not product surfaces.
+- Security controls still retain only their bounded enforcement state: login
+  attempts for 24 hours and expired/revoked sessions for 7 days. Authentication,
+  authorization, CSRF, and login throttling are unchanged.
+- Operator and canonical chronology remains in `review_decision` and
+  `change_event`; current AI result/cache state remains in bounded
+  `model_execution` rows.
+- Evidence storage retains field-linked chunks, the latest reusable snapshot's
+  chunks per source, and active-run chunks. Older unlinked chunks are removed.
+- Public retains two completed projections per country/refresh scope. Dashboard
+  metrics, ranking, and scatter are derived from the latest projection instead
+  of separate snapshot tables.
+- The executable rules are defined in
+  `docs/03-design/bounded-data-retention-policy.md` and migration `0040`.
+
+Historical LLM usage, audit, dashboard-snapshot, and embedding-table clauses
+below remain only as provenance and are not active acceptance criteria.
+
 ---
 
 ## 1. Document Purpose
@@ -316,6 +340,16 @@ Phase 2 SaaS/Open API를 이용하는 외부 시스템 또는 기업 사용자
 - minimum balance or minimum deposit
 - target customer tag if available
 - freshness indicator or updated timestamp
+
+Product Owner clarification on `2026-08-13`: a Public catalog card presents
+interest rate as one numeric percentage whenever the approved projection
+contains an explicit absolute rate. For lending ranges, the card uses the
+lowest disclosed rate (for example, `5.15%` from `5.15% to 18.00% APR`). The
+complete range, eligibility, credit, term, and change qualifications remain on
+product detail and may remain in the comparison workspace. Reference-rate
+spreads and unrelated percentages must not be presented as absolute card
+rates. This is a presentation projection over current approved data and does
+not require recollection or canonical mutation.
 
 ### FR-PUB-005 Filtering
 사용자는 다음 필터를 사용할 수 있어야 하며, 필터 라벨은 선택된 locale에 따라 표시되어야 한다.

@@ -110,18 +110,6 @@
       "access": "authenticated"
     },
     {
-      "route": "/admin/audit",
-      "route_id": "admin.audit",
-      "implementation_path": "src/app/admin/audit/page.tsx",
-      "access": "authenticated"
-    },
-    {
-      "route": "/admin/usage",
-      "route_id": "admin.usage",
-      "implementation_path": "src/app/admin/usage/page.tsx",
-      "access": "authenticated"
-    },
-    {
       "route": "/admin/health/dashboard",
       "route_id": "admin.health_dashboard",
       "implementation_path": "src/app/admin/health/dashboard/page.tsx",

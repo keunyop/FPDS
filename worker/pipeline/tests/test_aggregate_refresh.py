@@ -341,7 +341,9 @@ class AggregateRefreshPersistenceTests(unittest.TestCase):
         self.assertEqual(load_variables["bank_codes_json"], '["TD"]')
         self.assertIn("cp.product_type IN ('credit-card', 'mortgage', 'personal-loan', 'line-of-credit')", runner.calls[2][1])
         self.assertIn("public_product_projection", runner.calls[3][1])
-        self.assertIn("dashboard_metric_snapshot", runner.calls[3][1])
+        self.assertNotIn("dashboard_metric_snapshot", runner.calls[3][1])
+        self.assertNotIn("dashboard_ranking_snapshot", runner.calls[3][1])
+        self.assertNotIn("dashboard_scatter_snapshot", runner.calls[3][1])
 
 
 class _FakeRunner:

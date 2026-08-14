@@ -427,6 +427,7 @@ class ParseChunkPersistenceTests(unittest.TestCase):
             self.assertIn("ON CONFLICT (snapshot_id, parser_version) DO NOTHING", runner.last_sql())
             self.assertIn("\"parsed_document_id\"", runner.last_sql())
             self.assertIn("\"evidence_chunk_id\"", runner.last_sql())
+            self.assertNotIn("evidence_chunk_embedding", runner.last_sql())
         finally:
             rmtree(temp_path, ignore_errors=True)
 

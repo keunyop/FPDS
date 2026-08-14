@@ -423,98 +423,6 @@ export type ChangeHistoryListResponse = {
   has_next_page: boolean;
 };
 
-export type AuditLogListItem = {
-  audit_event_id: string;
-  event_category: "review" | "run" | "publish" | "auth" | "config" | "usage";
-  event_type: string;
-  occurred_at: string;
-  actor_type: "system" | "user" | "service" | "scheduler";
-  actor: {
-    actor_id: string | null;
-    display_name: string | null;
-    email: string | null;
-    role_snapshot: string | null;
-    current_role: string | null;
-  };
-  target: {
-    target_type: string;
-    target_id: string;
-    display_name: string | null;
-  };
-  state_transition: {
-    previous_state: string | null;
-    new_state: string | null;
-  };
-  reason: {
-    reason_code: string | null;
-    reason_text: string | null;
-  };
-  request_context: {
-    request_id: string | null;
-    ip_address: string | null;
-    user_agent: string | null;
-  };
-  related_context: {
-    run_id: string | null;
-    run_type: string | null;
-    run_status: string | null;
-    candidate_id: string | null;
-    review_task_id: string | null;
-    product_id: string | null;
-    publish_item_id: string | null;
-    product_name: string | null;
-    bank_code: string | null;
-    bank_name: string | null;
-  };
-  diff_summary: string | null;
-  source_ref: string | null;
-  retention_class: string;
-  event_payload: Record<string, unknown>;
-};
-
-export type AuditLogListResponse = {
-  items: AuditLogListItem[];
-  summary: {
-    total_items: number;
-    category_counts: Record<string, number>;
-    actor_type_counts: Record<string, number>;
-    user_actor_items: number;
-  };
-  applied_filters: {
-    event_category: string | null;
-    event_type: string | null;
-    actor_type: string | null;
-    target_type: string | null;
-    actor_id: string | null;
-    target_id: string | null;
-    run_id: string | null;
-    review_task_id: string | null;
-    product_id: string | null;
-    publish_item_id: string | null;
-    occurred_from: string | null;
-    occurred_to: string | null;
-    search: string | null;
-    sort_by: string;
-    sort_order: "asc" | "desc";
-  };
-  page: number;
-  page_size: number;
-  total_items: number;
-  total_pages: number;
-  has_next_page: boolean;
-};
-
-export type LlmUsageDashboardResponse = {
-  totals: Record<string, unknown>;
-  by_model: Record<string, unknown>[];
-  by_agent: Record<string, unknown>[];
-  by_run: Record<string, unknown>[];
-  trend?: Record<string, unknown>[];
-  usage_trend?: Record<string, unknown>[];
-  anomaly_candidates: Record<string, unknown>[];
-  applied_filters?: Record<string, unknown>;
-};
-
 export type ReviewEvidenceLink = {
   field_name: string;
   label: string;
@@ -1133,14 +1041,6 @@ export async function fetchDashboardHealth(): Promise<DashboardHealthResponse | 
 
 export async function fetchChangeHistoryList(searchParams: URLSearchParams): Promise<ChangeHistoryListResponse | null> {
   return fetchAdminData<ChangeHistoryListResponse>("/api/admin/change-history", searchParams);
-}
-
-export async function fetchAuditLogList(searchParams: URLSearchParams): Promise<AuditLogListResponse | null> {
-  return fetchAdminData<AuditLogListResponse>("/api/admin/audit-log", searchParams);
-}
-
-export async function fetchLlmUsage(searchParams: URLSearchParams): Promise<LlmUsageDashboardResponse | null> {
-  return fetchAdminData<LlmUsageDashboardResponse>("/api/admin/llm-usage", searchParams);
 }
 
 export async function fetchSourceRegistryList(searchParams: URLSearchParams): Promise<SourceRegistryListResponse | null> {

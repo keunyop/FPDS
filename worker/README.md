@@ -119,7 +119,7 @@ Runtime invariants:
   omitted for Review; it is never blindly sliced mid-word or mid-clause.
 - country-specific Public projections retain only the resolved comparison
   fields plus identity, status/freshness, and official product link. Broader
-  normalized copy remains private for Admin evidence and audit.
+  normalized copy remains private for Admin evidence and review traceability.
 - credit-card projection is enabled through the same completeness gate and
   retains annual fee plus purchase interest rate for Public card list,
   comparison, and detail. US Purchase APR ranges retain their exact disclosed

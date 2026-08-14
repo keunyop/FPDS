@@ -282,9 +282,7 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
     addFact(
       facts,
       loanLabel("rate", locale),
-      product.country_code === "US" && product.product_type === "mortgage"
-        ? product.interest_rate_summary
-        : product.mortgage_rate ?? product.interest_rate ?? product.interest_rate_summary,
+      product.interest_rate_summary ?? product.mortgage_rate ?? product.interest_rate,
       locale
     );
     addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);

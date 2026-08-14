@@ -14,6 +14,14 @@ Source Documents:
 
 ---
 
+## Current Persistence Note - 2026-08-13
+
+The visualization rules remain active. Decision `D044` removes dedicated
+dashboard snapshot tables; visual datasets are derived from the latest
+successful `public_product_projection`.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.7.3 product-type별 시각화 원칙 확정`의 기준 문서다.
@@ -187,14 +195,14 @@ Product Grid card emphasis:
 | `savings` | `highest_display_rate` | `recently_changed_30d` | none by default | `savings_rate_vs_minimum_balance` |
 | `gic` | `highest_display_rate` | `lowest_minimum_deposit` | `recently_changed_30d` | `gic_rate_vs_minimum_deposit` with `gic_term_vs_rate` as alternate |
 
-이 matrix는 UI-level default emphasis를 정의한다.  
+이 matrix는 UI-level default emphasis를 정의한다.
 ranking catalog 자체는 `docs/03-design/insight-dashboard-metric-definition.md` 기준을 유지한다.
 
 ---
 
 ## 8. Product Grid Alignment
 
-`1.7.1`에서 Grid card는 최대 3개의 핵심 수치를 노출하도록 고정되었다.  
+`1.7.1`에서 Grid card는 최대 3개의 핵심 수치를 노출하도록 고정되었다.
 `1.7.3`은 그 우선순위를 아래처럼 닫는다.
 
 - `chequing`: fee -> minimum balance -> fee waiver/recent change

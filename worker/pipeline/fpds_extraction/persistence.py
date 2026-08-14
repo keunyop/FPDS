@@ -394,13 +394,7 @@ SELECT
     estimated_cost,
     usage_metadata,
     recorded_at
-FROM llm_usage_payload
-ON CONFLICT (llm_usage_id) DO UPDATE SET
-    prompt_tokens = EXCLUDED.prompt_tokens,
-    completion_tokens = EXCLUDED.completion_tokens,
-    estimated_cost = EXCLUDED.estimated_cost,
-    usage_metadata = EXCLUDED.usage_metadata,
-    recorded_at = EXCLUDED.recorded_at;
+FROM llm_usage_payload;
 
 WITH run_source_item_payload AS (
     SELECT *

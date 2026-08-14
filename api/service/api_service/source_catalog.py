@@ -1072,17 +1072,7 @@ def delete_bank_profile(
                 SELECT COUNT(*)
                 FROM public_product_projection
                 WHERE bank_code = %(bank_code)s
-            ) AS public_projection_count,
-            (
-                SELECT COUNT(*)
-                FROM dashboard_ranking_snapshot
-                WHERE bank_code = %(bank_code)s
-            ) AS dashboard_ranking_count,
-            (
-                SELECT COUNT(*)
-                FROM dashboard_scatter_snapshot
-                WHERE bank_code = %(bank_code)s
-            ) AS dashboard_scatter_count
+            ) AS public_projection_count
         """,
         {"bank_code": normalized_bank_code},
     ).fetchone()
@@ -1093,8 +1083,6 @@ def delete_bank_profile(
             "candidate_count",
             "canonical_product_count",
             "public_projection_count",
-            "dashboard_ranking_count",
-            "dashboard_scatter_count",
         )
     )
     if blocking_dependency_total > 0:
@@ -2896,13 +2884,6 @@ def _persist_source_catalog_usage_records(
                 %(usage_metadata)s::jsonb,
                 %(recorded_at)s
             )
-            ON CONFLICT (llm_usage_id) DO UPDATE SET
-                provider_request_id = EXCLUDED.provider_request_id,
-                prompt_tokens = EXCLUDED.prompt_tokens,
-                completion_tokens = EXCLUDED.completion_tokens,
-                estimated_cost = EXCLUDED.estimated_cost,
-                usage_metadata = EXCLUDED.usage_metadata,
-                recorded_at = EXCLUDED.recorded_at
             """,
             {
                 **item,

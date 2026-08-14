@@ -116,7 +116,7 @@ function ProductCompareCard({
   selected: boolean;
 }) {
   const copy = getPublicMessages(locale);
-  const metrics = buildComparisonMetrics(product, locale).slice(0, 3);
+  const metrics = buildComparisonMetrics(product, locale, "card").slice(0, 3);
   const [primaryMetric, ...secondaryMetrics] = metrics;
   const tags = product.target_customer_tag_labels.slice(0, 2);
   const detailHref = buildProductDetailHref(filters, product.product_id);
@@ -164,7 +164,7 @@ function ProductCompareCard({
             <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-verification">{primaryMetric.label}</dt>
             <dd className={cn(
               "mt-1 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums",
-              product.product_family === "lending" && product.public_display_rate === null ? "text-lg" : "text-3xl"
+              product.product_family === "lending" && !Number.isFinite(product.card_display_rate) ? "text-lg" : "text-3xl"
             )}>{primaryMetric.value}</dd>
           </div>
           <div className="grid grid-cols-2 divide-x divide-border border-t border-border">
@@ -288,8 +288,9 @@ function Badge({ children, muted = false }: { children: string; muted?: boolean 
   );
 }
 
-function buildComparisonMetrics(product: PublicProduct, locale: string) {
+function buildComparisonMetrics(product: PublicProduct, locale: string, presentation: "card" | "comparison" = "comparison") {
   const copy = getPublicMessages(locale);
+  const productRate = presentation === "card" ? formatRate(product.card_display_rate, locale) : formatProductRate(product, locale);
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
@@ -302,7 +303,7 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
 
   if (product.product_type === "gic") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: copy.grid.metricDisplayRate, value: productRate },
       { label: copy.grid.metricTerm, value: formatProductTerm(product, locale) },
       { label: copy.grid.metricMinDeposit, value: formatCurrency(product.minimum_deposit, product.currency, locale) },
       product.country_code === "US"
@@ -314,13 +315,16 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
   if (product.product_type === "credit-card") {
     return [
       { label: cardMetricLabel("annualFee", locale), value: formatCurrency(product.annual_fee, product.currency, locale) },
-      { label: cardMetricLabel("purchaseRate", locale), value: formatPurchaseRate(product, locale) }
+      {
+        label: cardMetricLabel("purchaseRate", locale),
+        value: presentation === "card" ? formatRate(product.card_display_rate, locale) : formatPurchaseRate(product, locale)
+      }
     ];
   }
 
   if (product.product_type === "mortgage") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: copy.grid.metricDisplayRate, value: productRate },
       { label: loanMetricLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
       { label: loanMetricLabel("term", locale), value: formatProductTerm(product, locale) }
     ];
@@ -328,7 +332,7 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
 
   if (product.product_type === "personal-loan") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: copy.grid.metricDisplayRate, value: productRate },
       { label: essentialMetricLabel("loanAmount", locale), value: product.loan_amount_text ?? copy.common.notDisclosed },
       { label: loanMetricLabel("term", locale), value: formatProductTerm(product, locale) }
     ];
@@ -336,14 +340,14 @@ function buildComparisonMetrics(product: PublicProduct, locale: string) {
 
   if (product.product_type === "line-of-credit") {
     return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+      { label: copy.grid.metricDisplayRate, value: productRate },
       { label: essentialMetricLabel("creditLimit", locale), value: product.credit_limit_text ?? copy.common.notDisclosed },
       { label: essentialMetricLabel("security", locale), value: formatSecurity(product, locale) }
     ];
   }
 
   return [
-    { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
+    { label: copy.grid.metricDisplayRate, value: productRate },
     { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
     { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
   ];

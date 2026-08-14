@@ -321,6 +321,15 @@ The publish tracker should support at least these reason codes.
 
 ## 6. Audit Trail Scope
 
+> **Superseded for current storage (2026-08-13):** Decision `D044` removes the
+> generic `audit_event` and `llm_usage_record` ledgers and their Admin routes.
+> Durable business truth remains in `review_decision`, `change_event`, canonical
+> versions, publish state, and bounded run/model records. Authentication tables
+> keep only the short operational windows defined in
+> `bounded-data-retention-policy.md`; read-only trace access is not logged.
+> Sections 6.1-6.7 below document the historical Phase 1 design and must not be
+> used to reintroduce unbounded logging.
+
 ### 6.1 Audit Objective
 
 Audit trail exists to answer:

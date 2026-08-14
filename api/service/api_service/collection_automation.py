@@ -13,6 +13,7 @@ from api_service.collection_ai_autopilot import (
     remediate_collection_review_task,
 )
 from api_service.config import Settings
+from api_service.data_retention import apply_data_retention
 from api_service.db import open_connection
 from api_service.source_catalog import _record_catalog_audit_event, start_source_catalog_collection
 from worker.pipeline.fpds_ai_runtime import llm_provider_configured
@@ -55,7 +56,10 @@ def run_collection_automation_scheduler(settings: Settings, stop_event: threadin
                 try:
                     while not stop_event.is_set():
                         try:
+                            retention = apply_data_retention(connection)
+                            connection.commit()
                             summary = run_collection_automation_cycle(connection)
+                            summary["retention"] = retention
                             LOGGER.info("FPDS collection automation cycle: %s", summary)
                         except Exception:
                             connection.rollback()

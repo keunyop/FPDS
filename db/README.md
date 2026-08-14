@@ -10,7 +10,9 @@ Current decisions:
   part of bank/source business uniqueness and country-owned lookup indexes,
   rather than being concatenated into every technical primary key.
 - Flexible candidate and canonical field payloads live in `jsonb` until the implementation needs stricter column-level expansion.
-- `pgvector` is intentionally deferred from the first migration. `0012_evidence_chunk_embeddings.sql` adds the first evidence-chunk embedding side table, while metadata-only retrieval fallback remains allowed when the migration or rows are unavailable in early `dev`.
+- `0012_evidence_chunk_embeddings.sql` is retained as migration history, but
+  `0040_bounded_operational_storage.sql` removes the embedding side table and
+  makes metadata-scored evidence retrieval the current baseline.
 - Runtime admin and API reads no longer auto-reseed `bank`, `product_type_registry`, `source_registry_catalog_item`, or `source_registry_item` from committed JSON seed baselines. Empty tables now remain empty until an explicit operator write, import step, or full migration replay repopulates them.
 
 Files:
@@ -83,6 +85,11 @@ Files:
   Purchase APR summary the preferred US credit-card rate requirement, leaving
   an exact fixed scalar rate as a bounded alternative rather than reducing a
   disclosed range to its lower endpoint
+- `migrations/0040_bounded_operational_storage.sql`: removes physical audit,
+  LLM usage, evidence embedding, and derived dashboard snapshot tables; adds
+  discard-only rolling-deployment views for the two obsolete log writers; and
+  installs bounded evidence, model execution, aggregate, auth, and run JSON
+  retention
 
 How to apply when a database is available:
 
@@ -121,12 +128,14 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions
 psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
 ```
 
 Notes:
 - `psql` is available in the prepared local toolchain, but the migrations still need a reachable Postgres target.
 - Use the connection target from `.env.dev.example` or `.env.prod.example`.
-- Keep future migrations additive and append-only where possible.
+- Prefer additive migrations, but use a reviewed destructive migration when a
+  Product Owner storage decision explicitly removes nonessential telemetry.
 - Put extension-specific or vendor-specific migrations in later numbered files.
 - Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set, and `0022_bank_logo_asset_refresh.sql` upgrades eligible favicon defaults to verified official logo assets. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.
 - `country_registry` is the operational allowlist for Admin login. Adding a new
@@ -136,7 +145,7 @@ Notes:
   preserving country-scoped foreign keys and historical records.
 - Apply `0027` before enabling AI bank onboarding. Standalone operational AI
   rows keep `run_id=NULL`; their country and operation lineage lives in
-  execution/usage metadata, while ingestion-backed executions remain linked to
+  execution metadata, while ingestion-backed executions remain linked to
   their run as before.
 - Apply `0028` before relying on AI onboarding coverage evidence as the
   collection entry route. Existing catalog rows remain valid with a null
@@ -162,4 +171,8 @@ Notes:
   the US market-profile essentials and retain their profile key/version. The
   migration changes source roles/status only for deterministic US legal,
   enrollment, service, and calculator non-product patterns; canonical product
-  status still changes only through the audited remediation workflow.
+  status still changes only through the guarded remediation workflow.
+- Apply `0040` after all earlier migrations. It is the active storage baseline:
+  audit/usage writes are discarded, evidence retrieval is metadata-only,
+  Public dashboard datasets derive from the latest projection, and the API
+  scheduler applies `fpds_apply_data_retention()` before each automation cycle.

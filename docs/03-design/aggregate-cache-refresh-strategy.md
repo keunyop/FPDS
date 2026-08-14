@@ -14,6 +14,19 @@ Source Documents:
 
 ---
 
+## Current Persistence Supersession - 2026-08-13
+
+Decision `D044` and migration `0040` replace the historical four-table
+aggregate layout. Only `public_product_projection` is persisted for Public
+serving. Summary, ranking, and scatter responses are derived at request time
+from the latest successful projection, so `dashboard_metric_snapshot`,
+`dashboard_ranking_snapshot`, and `dashboard_scatter_snapshot` no longer exist.
+Retention keeps the latest two completed aggregate runs per `(refresh_scope,
+country_code)` plus active and recent failed work. The older table references
+below remain as design history, not current runtime requirements.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.4.5 aggregate/cache refresh 전략 정의`를 닫기 위한 기준 문서다.

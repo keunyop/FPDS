@@ -1194,3 +1194,102 @@ Read before coding:
   or published.
 - Next step: operator review of the corrected Bank of America candidates;
   publication remains outside this hardening slice.
+
+## 2026-08-13 - Bounded Operational Storage and Dev Database Cleanup
+
+- WBS: `5.27`
+- Status: done
+- Goal: stop unbounded operational/audit/evidence growth and reclaim clearly
+  redundant shared-development data without changing Admin review quality,
+  canonical truth, or the latest Public datasets.
+- Outcome: migration `0040_bounded_operational_storage.sql` removes the
+  physical `audit_event`, `llm_usage_record`, `evidence_chunk_embedding`, and
+  three redundant dashboard snapshot tables. Empty discard-only compatibility
+  views temporarily preserve the two legacy relation shapes while storing zero
+  rows. Audit/Usage APIs and Admin routes are removed; Review/Run no longer show
+  token/cost data. Public dashboard responses continue to derive from the
+  latest successful `public_product_projection`.
+- Retention: the scheduler now runs `fpds_apply_data_retention()` before each
+  cycle. It protects field-linked/latest-source/active-run evidence, bounds
+  unreferenced model diagnostics and aggregate work to 14 days, keeps two
+  completed aggregate runs per country/scope, recovers runs abandoned for 12
+  hours, bounds login/session residue, and compacts old run/source JSON to the
+  fields used by Admin diagnosis and retry.
+- Shared dev cleanup: after a transactional dry run and explicit `dev`
+  environment/precondition checks, evidence chunks fell from `161,296` to
+  `62,944`, model executions from `9,913` to `5,039`, Public projection rows
+  from `19,978` to `576`, aggregate snapshots from `278` to `8`, and stale
+  started runs from `4` to `0`. Scoped `VACUUM FULL/ANALYZE` reclaimed roughly
+  `329 MB` including dropped relations. No synthetic bank, product, run, or
+  candidate marker was present; two URL substring matches were legitimate
+  CIBC/Manulife pages and were preserved.
+- Quality reconciliation: orphan field-evidence links remain `0`; Audit and
+  Usage compatibility views each contain `0` rows. Latest snapshot IDs and
+  counts are unchanged: all-active CA `107`, all-active US `2`, phase1-public
+  CA `140`, and phase1-public US `41`. Public CA/US catalog/dashboard reads and
+  the Admin queue/review-detail reads returned normally after cleanup.
+- Key files: migration `0040`, `api_service/data_retention.py`, collection
+  automation, parse and aggregate persistence, Admin route/API cleanup,
+  retention regression tests, `bounded-data-retention-policy.md`, requirements,
+  WBS, decision log, database/runtime READMEs, and affected design contracts.
+- Decisions: `D044` makes review decisions and canonical change events the
+  durable business chronology. Generic request/read audit events, standalone
+  token/cost usage, evidence embeddings, and dashboard materializations are not
+  product truth and are not retained. Metadata-only evidence retrieval is the
+  active path. Pre-`0040` writers using usage `ON CONFLICT` must be drained;
+  current writers use discard-compatible inserts.
+- Verification:
+  - API full suite: `395` tests
+  - worker full suite: `471` tests
+  - Admin typecheck and production build passed; the generated route list has
+    no Audit or Usage page
+  - rollback DB compatibility-write smoke passed with `0` stored rows
+  - migration/readback, relation-kind, row-count, orphan-link, latest-Public,
+    Admin/Public functional reads, and scoped post-vacuum size checks passed
+- Known issues: compatibility views remain temporarily because some retained
+  Review/AI code still performs optional legacy joins or discard-only inserts;
+  they consume no row storage and can be removed in a later coordinated schema
+  cleanup after those compatibility references are retired.
+- Next step: monitor the next scheduled collection cycle's retention summary
+  and relation growth; do not widen deletion into canonical/review history or
+  private object-storage lifecycle without a separate Product Owner decision.
+
+## 2026-08-13 - Numeric Interest Rates on Public Product Cards
+
+- WBS: `5.28`
+- Status: done
+- Goal: render one numeric, customer-favorable interest rate on Public catalog
+  cards from the current approved projection while retaining complete qualified
+  pricing text on comparison and product detail and avoiding recollection.
+- Outcome: the Public products API now adds `card_display_rate`. Deposit rows
+  keep their approved display-rate behavior; lending/card rows derive the
+  lowest explicit absolute scalar, range endpoint, or introductory APR.
+  `display_rate` sorting uses that same derivative. Catalog cards use only the
+  numeric value or the existing unavailable state, while comparison and detail
+  continue to use `interest_rate_summary` or
+  `purchase_interest_rate_summary`.
+- Safety: rate parsing excludes discounts, down payments, finance/origination
+  fees, LTV/CLTV, caps, and unresolved Prime/SOFR/reference/index spreads. For
+  Credit Cards, an explicit purchase-rate field/summary takes precedence over
+  a generic display-rate value so reward percentages cannot appear as interest.
+  No canonical row, evidence, Review state, or collection input was changed.
+- Shared-dev readback: the requested Truist `5.15%-18.00% APR` products return
+  `card_display_rate=5.15`; Citi's `9.99%` rate plus `0.5%` autopay discount
+  returns `9.99`; US card APR ranges return their absolute lower endpoints and
+  intro offers return `0`; the U.S. Bank representative mortgage returns
+  `6.625`; CIBC Costco returns its `21.75` purchase rate rather than `3%`
+  rewards; and the Manulife representative examples return `4.45`. The full
+  stored summaries were unchanged in every readback.
+- Key files: `api_service/public_products.py`, Public API type and catalog/detail
+  components, Public product API regressions, requirements, API/field/UI
+  contracts, Public README, WBS, and decision `D-045`.
+- Verification:
+  - focused Public products API suite: `11` tests
+  - API full suite: `397` tests
+  - Public typecheck and production build passed
+  - read-only CA/US shared-dev Public API readback passed
+  - final `git diff --check`
+- Known issues: a reference-rate-only formula intentionally remains unavailable
+  on the card until approved data contains an explicit resulting absolute rate.
+- Next step: no data recollection is required; monitor future summary wording
+  through the regression suite when new markets or rate formats are added.

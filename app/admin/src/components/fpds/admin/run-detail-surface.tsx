@@ -501,42 +501,6 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         <div className="grid gap-5">
           <article className="border border-border bg-card p-5">
             <SectionHeading
-              eyebrow={copy.usageSummary}
-              title={copy.modelTokenUsage}
-            />
-            <div className="mt-4 grid divide-y divide-border border border-border md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-1 xl:divide-x-0 xl:divide-y">
-              <SummaryStat label={copy.usageRecords} value={String(detail.usage_summary.usage_record_count)} />
-              <SummaryStat label={copy.modelExecutions} value={String(detail.usage_summary.model_execution_count)} />
-              <SummaryStat label={copy.totalTokens} value={detail.usage_summary.total_tokens.toLocaleString("en-CA")} />
-              <SummaryStat label={copy.estimatedCost} value={formatCost(detail.usage_summary.estimated_cost)} />
-            </div>
-
-            {detail.usage_summary.by_stage.length === 0 ? (
-              <p className="mt-6 text-sm leading-6 text-muted-foreground">{copy.noUsage}</p>
-            ) : (
-              <div className="mt-4 divide-y divide-border border-y border-border">
-                {detail.usage_summary.by_stage.map((item) => (
-                  <div className="py-4" key={item.stage_name}>
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-sm font-medium text-foreground">{item.stage_label}</p>
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                        {copy.records(item.usage_record_count)}
-                      </span>
-                    </div>
-                    <dl className="mt-4 grid gap-2 text-sm">
-                      <MetaRow label={copy.promptTokens} value={item.prompt_tokens.toLocaleString("en-CA")} />
-                      <MetaRow label={copy.completionTokens} value={item.completion_tokens.toLocaleString("en-CA")} />
-                      <MetaRow label={copy.totalTokens} value={item.total_tokens.toLocaleString("en-CA")} />
-                      <MetaRow label={copy.cost} value={formatCost(item.estimated_cost)} />
-                    </dl>
-                  </div>
-                ))}
-              </div>
-            )}
-          </article>
-
-          <article className="border border-border bg-card p-5">
-            <SectionHeading
               eyebrow={copy.relatedReviews}
               title={copy.reviewWorkload}
             />
@@ -626,10 +590,6 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 
 function formatTimestamp(value: string | null, missing = "n/a") {
   return formatAdminDateTimeValue(value, missing);
-}
-
-function formatCost(value: number) {
-  return `$${value.toFixed(6)}`;
 }
 
 function toTitleCase(value: string) {

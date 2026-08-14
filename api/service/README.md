@@ -8,34 +8,32 @@ Current scope:
 - DB-backed admin sessions
 - enabled-country discovery plus country-required login, logout, session
   introspection, and approval-gated signup-request routes
-- CSRF-protected, audited switching of the current Admin session to another
+- CSRF-protected switching of the current Admin session to another
   active working country
 - admin-only prepared-country registry listing, activation, reversible
-  deactivation, session revocation, and config auditing
+  deactivation and session revocation
 - review queue list route backed by `review_task` and `normalized_candidate`, including source role, missing expected fields, and a recommended next action
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
-- official-domain AI verification for a review task, with structured field comparison, safe correction proposals, model usage, source, and audit persistence
+- official-domain AI verification for a review task, with structured field comparison, safe correction proposals, bounded model-result state, and official sources
 - run list route backed by `ingestion_run` with protected run-state diagnostics
-- run detail read route with source processing summary, error summary, related review tasks, and usage summary
-- change-history list route backed by `change_event` with protected canonical chronology and manual-override audit context
-- audit-log list route backed by `audit_event` with protected append-only chronology, actor and target context, and review/run drilldowns
-- usage dashboard route backed by `llm_usage_record` with protected totals, richer scope metadata, per-model, per-agent, per-run, trend, and anomaly drilldown aggregations
+- run detail read route with source processing summary, error summary, and related review tasks
+- change-history list route backed by `change_event` with protected canonical chronology and review-decision context
 - bank registry list/detail/create/update routes backed by `bank`
 - admin-only, CSRF-protected AI bank onboarding for the session country, with
   required live web research, largest-first duplicate exclusion, official
   homepage/logo/active Product Type evidence, customer-facing display-name
-  validation, preserved legal/ranking names, atomic creation, usage, and audit
+  validation, preserved legal/ranking names, and atomic creation
 - guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
-- audited auto-promotion for `auto_validated` pass candidates after collection, including non-detail/non-product skip/reject guards and same-detail-source stale-review supersession
+- auto-promotion for `auto_validated` pass candidates after collection, including non-detail/non-product skip/reject guards and same-detail-source stale-review supersession
 - read-only source registry list/detail routes backed by generated `source_registry_item`
 - approve, reject, defer, and edit-approve review mutations
 - approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
 - canonical product/version creation or update side effects for approved decisions
 - edit-approve manual overrides can now carry reviewer-corrected product names and sync that name into both the canonical product record and the stored normalized candidate
-- review and manual-override audit events plus change-event emission
-- login failure tracking and auth audit events
+- review decisions plus canonical change-event emission
+- bounded login failure tracking for throttling and lockout enforcement
 - bootstrap CLI for the first operator account
 
 Current routes:
@@ -67,8 +65,6 @@ Current routes:
 - `GET /api/admin/dashboard-health`
 - `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
-- `GET /api/admin/audit-log`
-- `GET /api/admin/llm-usage`
 - `GET /api/admin/sources`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
@@ -160,7 +156,7 @@ cd api/service
 - The scheduler uses actor type `scheduler`, preserves scheduled trigger
   metadata on ingestion runs, globally recovers orphan `auto_validated`
   candidates and eligible pre-policy Review tasks, and restarts queued
-  aggregate refresh work through the same canonical, audit, and Public
+  aggregate refresh work through the same canonical and Public
   projection boundaries as interactive operations.
 - Public reads are country-scoped by bank-owned ISO alpha-2 codes.
   `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
@@ -180,7 +176,7 @@ cd api/service
 - Review approval and automatic promotion queue the approved product's country,
   and the runner claims pending work by country/scope instead of assuming
   Canada.
-- Source collection now runs the same audited canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are audit-logged and rejected before they can become public canonical products.
+- Source collection runs the same guarded canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are rejected before they can become public canonical products.
 - Exact-product discovery inspects selected detail pages for directly linked
   pricing, fee, rate, account-guide, and agreement companions. It keeps this
   relationship bounded (two per detail, 48 per scope), filters conflicting
@@ -197,12 +193,12 @@ cd api/service
 - Public signup creates a pending `user_signup_request`; it does not create an active account until an existing `admin` approves the request and assigns a role.
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
-- Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists execution/usage/sources/audit context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
+- Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists bounded execution/result/source context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
 - Review AI official-domain lookup explicitly types the optional country
   parameter in its PostgreSQL query, so psycopg prepared statements preserve
   the session/candidate country boundary without raising an ambiguous-parameter
   server error before model execution begins.
-- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records field mapping and `review_ai_corrections_applied` audit lineage, and stores the complete approval assessment in the model execution. Review AI v17 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary` or the card-specific `purchase_interest_rate_summary`. A current successful attempt is reusable for 24 hours only when its approval fields still match the candidate. For a US card, a deterministic fallback may repair only an exact `$0`/no-annual-fee quote and an exact Purchase APR range from the normalized product-detail route or a separately named exact-product agreement/disclosure; generic agreements, ellipses, and sibling products remain ineligible. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
+- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records bounded field-mapping/correction metadata, and stores the approval assessment in the model execution. Review AI v17 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary` or the card-specific `purchase_interest_rate_summary`. A current successful attempt is reusable for 24 hours only when its approval fields still match the candidate. For a US card, a deterministic fallback may repair only an exact `$0`/no-annual-fee quote and an exact Purchase APR range from the normalized product-detail route or a separately named exact-product agreement/disclosure; generic agreements, ellipses, and sibling products remain ineligible. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
 - Collection, Review, manual approval, and aggregate refresh resolve the same
   versioned `(country_code, product_type)` market profile. Generated source
   metadata records the profile key/version. US Checking does not inherit the
@@ -214,7 +210,7 @@ cd api/service
   Active-scope reads and all entry/seed/detail/supporting URL selections also
   enforce that country: explicit other-market paths/locales, subdomains, and
   country-code TLDs are rejected even on a shared official parent domain, and
-  stale generated details are inactivated auditably.
+  stale generated details are inactivated through guarded state changes.
   Masked financial templates and unrelated percentages, including
   transaction/conversion and ATM/ABM assessment fees, cannot satisfy a rate fact,
   country-specific Public projection omits optional Admin candidate copy, and
@@ -243,17 +239,16 @@ cd api/service
   reuses only completed v2 attempts after a runner restart. Failed,
   sub-threshold, identity-unverified, hard-blocked, or ambiguous candidates
   remain in Review; eligible candidates are system-approved through the
-  existing canonical/audit/country aggregate path.
-- After a rerun, an older active detail review is auditably superseded when its
+  existing canonical and country aggregate path.
+- After a rerun, an older active detail review is superseded when its
   logical name matches the new candidate or its normalized source URL has
   exactly one new active review candidate. The URL fallback permits corrected
   official naming without collapsing a genuine multi-product page.
-- Run status now returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, related review tasks, and usage aggregation.
+- Run status returns filtered run list rows plus run detail payloads for `/admin/runs` and `/admin/runs/:runId`, including run alias fields, source processing summary, derived stage summary, error events, and related review tasks.
 - Failed run detail now exposes retry availability for supported collection runs, and `POST /api/admin/runs/:runId/retry` requeues failed `source_catalog_collection` or `source_collection` attempts while linking the old run as `retried` and the new run as its next attempt.
 - Completed collection runs with `partial_completion_flag=true` expose the same retry path, while clean completed runs remain non-retryable.
-- Change history now returns filtered canonical change events for `/admin/changes`, including changed-field summaries, linked review/run context, and manual-override audit context when available.
-- Audit log now returns filtered append-only audit events for `/admin/audit`, including actor snapshots, target context, request metadata, and review/run drilldowns where those entities exist.
-- LLM usage now returns dashboard-v1 aggregates for `/api/admin/llm-usage`, including time-range, provider, stage, and search filters, scope coverage metadata, share percentages, daily trend deltas, and richer anomaly drilldown candidates.
+- Change history returns filtered canonical change events for `/admin/changes`, including changed-field summaries and linked review/run context.
+- Generic audit and LLM usage routes were removed by `0040`; durable business chronology remains in review decisions and change events.
 - Bank, product type, and source catalog management now treat the DB as the operational source of truth immediately; if those tables are empty, the admin/runtime surfaces now stay empty until an operator or explicit import/seed step repopulates them.
 - Bank creation now accepts optional initial coverage product types and creates the related `source_registry_catalog_item` rows in the same admin write flow so the bank modal can start with coverage already attached.
 - `POST /api/admin/banks/ai-onboard` accepts only a bounded count, derives the
@@ -262,9 +257,9 @@ cd api/service
   coverage set atomically. The model contract separates the official
   customer-facing display name from the full legal entity name and exact
   ranking-source label; observed US fixed-width report abbreviations are
-  rejected as display names while legal/ranking values remain in private
-  execution and audit evidence. It records standalone model usage and audit
-  context but does not launch collection or publish data. Migration `0027`
+  rejected as display names while legal/ranking values remain in bounded private
+  model-execution context. It does not persist a standalone usage/audit ledger,
+  launch collection, or publish data. Migration `0027`
   must be applied before the route is enabled against a database.
 - Bank create and update now accept homepage URLs without an explicit scheme by normalizing them to `https://...`, while still rejecting invalid non-http(s) values with a validation error instead of a server crash.
 - Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
@@ -347,8 +342,9 @@ cd api/service
   amount/limit/term/rate-type companions may use the same path only when their
   value and qualifying context are co-located; scalar rates and general prose
   remain provider-grounded or omitted.
-  Model usage and consulted sources are persisted with the
-  extraction execution, and AI failure does not bypass validation or review.
+  The bounded model result and consulted sources are persisted with the
+  extraction execution; standalone token/cost usage is discarded, and AI
+  failure does not bypass validation or review.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Snapshot capture now runs source fetches concurrently inside the same run, and the shared fetch timeout baseline moved to `90` seconds to better tolerate slower Big 5 pages without stretching bank-wide collection wall-clock time linearly per source.
@@ -366,9 +362,9 @@ cd api/service
 - No-detail Partial summaries prefer the bounded rejection aggregate and the
   decisive rejected product URL over an incidental earlier hub fetch error, so
   Runs exposes the actual promotion failure on the next attempt.
-- Review detail reads now emit `evidence_trace_viewed` audit events so sensitive trace access is queryable alongside decision and auth history.
+- Review detail reads do not persist view events. Field evidence links and the current evidence excerpt remain available for operator review without creating read-amplification logs.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.
 - Later admin write routes can keep reusing the same session and CSRF token model.
 - The settings loader now resolves a relative `FPDS_ENV_FILE` from either the current working directory or the repo root, so `.env.dev` works both from the workspace root and from inside `api/service`.
-- `api/service/tests/test_ops_scenario_qa.py` now gives the service layer a Gate C-focused operator scenario test that verifies review decision side effects, change history linkage, audit continuity, and run-detail drilldown context together.
+- `api/service/tests/test_ops_scenario_qa.py` gives the service layer a Gate C-focused operator scenario test that verifies review decision side effects, durable change-history linkage, and run-detail drilldown context together.

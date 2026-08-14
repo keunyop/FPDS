@@ -9,7 +9,7 @@ from typing import Any
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import BackgroundTasks, FastAPI, Query, Request, Response
+from fastapi import FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -38,14 +38,12 @@ from api_service.ai_verification import (
     load_latest_ai_verification,
     run_review_ai_verification,
 )
-from api_service.audit_log import load_audit_log_list, normalize_audit_log_filters
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.collection_automation import run_collection_automation_scheduler
 from api_service.config import Settings
 from api_service.countries import activate_country, deactivate_country, load_country_registry
 from api_service.db import open_connection
 from api_service.errors import SourceRegistryError
-from api_service.llm_usage import load_llm_usage_dashboard, normalize_llm_usage_filters
 from api_service.models import BankAiOnboardingRequest
 from api_service.models import BankWriteRequest
 from api_service.models import CountrySwitchRequest
@@ -86,7 +84,6 @@ from api_service.review_detail import (
     ReviewTaskError,
     apply_review_decision,
     load_review_task_detail,
-    record_evidence_trace_viewed_best_effort,
 )
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
 from api_service.run_retry import RunRetryError, retry_failed_run
@@ -1404,7 +1401,7 @@ async def review_tasks(
 
 
 @app.get("/api/admin/review-tasks/{review_task_id}")
-async def review_task_detail(request: Request, review_task_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
+async def review_task_detail(request: Request, review_task_id: str) -> JSONResponse:
     actor, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
@@ -1423,20 +1420,6 @@ async def review_task_detail(request: Request, review_task_id: str, background_t
             )
     if not payload:
         return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
-    _schedule_evidence_trace_viewed_audit(
-        background_tasks,
-        settings=settings,
-        actor=actor,
-        review_task_id=review_task_id,
-        run_id=payload["review_task"]["run_id"],
-        candidate_id=payload["review_task"]["candidate_id"],
-        product_id=payload["review_task"]["product_id"],
-        request_id=request.state.request_id,
-        ip_address=_request_ip(request),
-        user_agent=request.headers.get("user-agent"),
-        field_count=int(payload["evidence_summary"]["field_count"]),
-        evidence_item_count=int(payload["evidence_summary"]["item_count"]),
-    )
     return _success(payload, request)
 
 
@@ -1487,77 +1470,6 @@ def ai_verify_review_task(request: Request, review_task_id: str) -> JSONResponse
             },
         )
     return _success({"ai_verification": result["ai_verification"]}, request)
-
-
-def _schedule_evidence_trace_viewed_audit(
-    background_tasks: BackgroundTasks,
-    *,
-    settings: Settings,
-    actor: dict[str, Any],
-    review_task_id: str,
-    run_id: str,
-    candidate_id: str,
-    product_id: str | None,
-    request_id: str,
-    ip_address: str | None,
-    user_agent: str | None,
-    field_count: int,
-    evidence_item_count: int,
-) -> None:
-    background_tasks.add_task(
-        _record_evidence_trace_viewed_background,
-        settings=settings,
-        actor={
-            "user_id": actor.get("user_id"),
-            "role": actor.get("role"),
-        },
-        review_task_id=review_task_id,
-        run_id=run_id,
-        candidate_id=candidate_id,
-        product_id=product_id,
-        request_id=request_id,
-        ip_address=ip_address,
-        user_agent=user_agent,
-        field_count=field_count,
-        evidence_item_count=evidence_item_count,
-    )
-
-
-def _record_evidence_trace_viewed_background(
-    *,
-    settings: Settings,
-    actor: dict[str, Any],
-    review_task_id: str,
-    run_id: str,
-    candidate_id: str,
-    product_id: str | None,
-    request_id: str,
-    ip_address: str | None,
-    user_agent: str | None,
-    field_count: int,
-    evidence_item_count: int,
-) -> None:
-    try:
-        from psycopg import connect
-        from psycopg.rows import dict_row
-
-        with connect(settings.database_url, row_factory=dict_row, connect_timeout=3) as connection:
-            record_evidence_trace_viewed_best_effort(
-                connection,
-                actor=actor,
-                review_task_id=review_task_id,
-                run_id=run_id,
-                candidate_id=candidate_id,
-                product_id=product_id,
-                request_id=request_id,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                field_count=field_count,
-                evidence_item_count=evidence_item_count,
-                statement_timeout_ms=500,
-            )
-    except Exception:
-        return
 
 
 @app.get("/api/admin/runs")
@@ -1702,83 +1614,6 @@ async def change_history_list(
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
         payload = load_change_history_list(connection, filters=filters)
-    return _success(payload, request)
-
-
-@app.get("/api/admin/audit-log")
-async def audit_log_list(
-    request: Request,
-    event_category: Literal["review", "run", "publish", "auth", "config", "usage"] | None = None,
-    event_type: str | None = None,
-    actor_type: Literal["system", "user", "service", "scheduler"] | None = None,
-    target_type: str | None = None,
-    actor_id: str | None = None,
-    target_id: str | None = None,
-    run_id: str | None = None,
-    review_task_id: str | None = None,
-    product_id: str | None = None,
-    publish_item_id: str | None = None,
-    occurred_from: datetime | None = None,
-    occurred_to: datetime | None = None,
-    q: str | None = None,
-    sort_by: Literal["occurred_at", "event_category", "event_type", "target_type"] = "occurred_at",
-    sort_order: Literal["asc", "desc"] = "desc",
-    page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> JSONResponse:
-    _resolve_session(request)
-    filters = normalize_audit_log_filters(
-        event_category=event_category,
-        event_type=event_type,
-        actor_type=actor_type,
-        target_type=target_type,
-        actor_id=actor_id,
-        target_id=target_id,
-        run_id=run_id,
-        review_task_id=review_task_id,
-        product_id=product_id,
-        publish_item_id=publish_item_id,
-        occurred_from=occurred_from,
-        occurred_to=occurred_to,
-        search=q,
-        sort_by=sort_by,
-        sort_order=sort_order,
-        page=page,
-        page_size=page_size,
-    )
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        payload = load_audit_log_list(connection, filters=filters)
-    return _success(payload, request)
-
-
-@app.get("/api/admin/llm-usage")
-async def llm_usage_dashboard(
-    request: Request,
-    from_: Annotated[datetime | None, Query(alias="from")] = None,
-    to: Annotated[datetime | None, Query(alias="to")] = None,
-    run_id: str | None = None,
-    agent_name: str | None = None,
-    model_name: str | None = None,
-    provider_name: str | None = None,
-    stage: str | None = None,
-    q: str | None = None,
-) -> JSONResponse:
-    _actor, session_info = _resolve_session(request)
-    filters = normalize_llm_usage_filters(
-        country_code=_session_country(session_info),
-        recorded_from=from_,
-        recorded_to=to,
-        run_id=run_id,
-        agent_name=agent_name,
-        model_name=model_name,
-        provider_name=provider_name,
-        stage=stage,
-        search=q,
-    )
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        payload = load_llm_usage_dashboard(connection, filters=filters)
     return _success(payload, request)
 
 

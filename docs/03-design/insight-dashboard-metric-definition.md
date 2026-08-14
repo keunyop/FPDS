@@ -15,6 +15,14 @@ Source Documents:
 
 ---
 
+## Current Persistence Note - 2026-08-13
+
+Metric semantics remain active, but Decision `D044` removes separate dashboard
+metric/ranking/scatter snapshot tables. Each Public dashboard endpoint computes
+these views from the latest successful `public_product_projection`.
+
+---
+
 ## 1. Purpose
 
 This document closes `WBS 1.7.2 Insight Dashboard metric definition`.

@@ -214,10 +214,10 @@ sort availability는 product type과 field completeness에 따라 제한될 수 
 - `/cards` uses annual fee and purchase APR as the minimum comparison facts and
   shares the anonymous Public API, comparison workspace, detail route, locale,
   and private-evidence boundary with the other catalogs.
-- When an issuer discloses a purchase-APR range or qualification, list,
-  comparison, and detail show the approved source-language summary rather than
-  presenting its numeric lower bound as the whole offer. The numeric value may
-  still support deterministic sorting.
+- When an issuer discloses a purchase-APR range or qualification, comparison
+  and detail retain the approved source-language summary. Per the later
+  `2026-08-13` Product Owner direction in section 10.13, the list card presents
+  the lowest explicit absolute purchase APR as its numeric Interest rate value.
 
 ### 10.9 Current Public Catalog Simplification
 
@@ -302,6 +302,26 @@ These boundaries are the baseline for `5.6` aggregate projection generation and 
   rather than rendering an unavailable placeholder.
 - The surface remains factual and non-recommendatory and never exposes raw
   evidence, Review state, or internal traces.
+
+### 10.13 Numeric Public Card Rate
+
+Product Owner direction on `2026-08-13` supersedes earlier list-card prose
+rules while preserving evidence and detail completeness:
+
+- Deposit cards keep their approved `public_display_rate` semantics.
+- Lending and Credit Card list cards show only a numeric Interest rate value.
+  When approved data contains an explicit rate range, the card uses its lowest
+  disclosed absolute rate; an explicit introductory APR is eligible because it
+  is the customer-favorable currently disclosed value.
+- The card projection ignores down-payment, discount, fee, LTV/CLTV, cap, and
+  reference-rate component percentages. A formula such as `Prime + 2%` remains
+  unavailable unless an explicit resulting absolute rate is also present.
+- Comparison and product detail retain the complete source-language rate/APR
+  summary and its qualifications. The numeric card value is not a replacement
+  for canonical rate facts or evidence.
+- `display_rate` sorting uses the same numeric value rendered on cards. The
+  derivation runs from the current approved Public projection and does not
+  initiate recollection, Review, or canonical mutation.
 
 ## 11. Follow-On Items
 

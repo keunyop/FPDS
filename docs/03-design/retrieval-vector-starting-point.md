@@ -16,6 +16,15 @@ Source Documents:
 
 ---
 
+## Current Retrieval Supersession - 2026-08-13
+
+Decision `D044` removes `evidence_chunk_embedding` and stops embedding writes.
+The current worker always uses metadata/lexical retrieval over the bounded
+evidence set. The pgvector design below is retained as historical exploration,
+not as a live schema or runtime requirement.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.4.4 retrieval/vector 시작점 결정`을 닫기 위한 기준 문서다.

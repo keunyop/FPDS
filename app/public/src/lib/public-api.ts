@@ -34,6 +34,7 @@ export type PublicProduct = {
   standard_rate: number | null;
   base_12_month_rate: number | null;
   public_display_rate: number | null;
+  card_display_rate: number | null;
   public_display_fee: number | null;
   annual_fee: number | null;
   purchase_interest_rate: number | null;

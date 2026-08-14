@@ -37,10 +37,14 @@ actions. The metrics follow the resolved country-product essential contract.
 Canada shows Chequing fee/balance/transactions and GIC
 rate/term/minimum-deposit/redeemability. US Checking shows
 fee/opening-or-minimum-balance/fee-waiver activity, US CDs show
-rate/term/minimum-deposit/early-withdrawal penalty, and US Mortgage keeps its
-assumption-bearing rate/APR summary visible. Savings, Personal Loan, and Line
-of Credit likewise use their market profile. Incomplete governed products are
-excluded during aggregate refresh. Filters are progressively
+rate/term/minimum-deposit/early-withdrawal penalty. Lending and Credit Card
+catalog cards render one numeric Interest rate from the current approved
+projection; a disclosed range uses its lowest explicit absolute rate, while
+reference-rate components and qualification percentages are excluded. The
+complete assumption-bearing rate/APR summary remains visible in comparison and
+product detail. Savings, Personal Loan, and Line of Credit likewise use their
+market profile. Incomplete governed products are excluded during aggregate
+refresh. Filters are progressively
 disclosed and sort controls stay close to the results.
 
 Selecting up to four products opens a responsive comparison ledger. Differences

@@ -15,6 +15,16 @@ Source Documents:
 
 ---
 
+## Current Schema Supersession - 2026-08-13
+
+This ERD remains the historical Phase 1 draft. Decision `D044` and migration
+`0040` remove generic audit/usage storage, evidence embeddings, and dashboard
+metric/ranking/scatter snapshot tables. The current bounded table policy and
+retention relationships are defined in `bounded-data-retention-policy.md` and
+`db/migrations/0040_bounded_operational_storage.sql`.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.4.2 ERD 초안 작성`을 닫기 위한 기준 문서다.

@@ -20,6 +20,17 @@ Source Documents:
 
 ---
 
+## Current Contract Supersession - 2026-08-13
+
+Decision `D044` removes `GET /api/admin/audit-log` and
+`GET /api/admin/llm-usage`. Run detail no longer returns a token/cost usage
+summary. Public dashboard endpoints remain unchanged, but all three derive
+their response from the latest successful `public_product_projection` rather
+than separate dashboard snapshot tables. Historical route/table sections below
+are marked as removed and must not be treated as live contracts.
+
+---
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.5 API and Interface Contracts`를 닫기 위한 기준 문서다.
@@ -38,7 +49,7 @@ Source Documents:
 본 문서는 아래 확정 사항을 반영한다.
 
 1. public API는 익명 읽기 전용 경계이며 evidence raw artifact를 노출하지 않는다.
-2. admin API는 인증된 운영자 전용 경계이며 review, run, publish, usage, audit-facing 데이터를 조회하거나 변경한다.
+2. admin API는 인증된 운영자 전용 경계이며 review, run, canonical change, publish, registry, aggregate-health 데이터를 조회하거나 변경한다.
 3. internal orchestration interface는 browser-facing route가 아니라 private worker/service boundary다.
 4. approved normalized product의 target master store는 BX-PF이며, FPDS는 publish/reconciliation metadata를 유지한다.
 5. public dashboard/grid는 latest successful aggregate snapshot을 기준으로 서빙한다.
@@ -215,6 +226,7 @@ Country rules:
 | `standard_rate` | standard/source rate if available |
 | `base_12_month_rate` | base rate normalized for 12-month comparison if available |
 | `public_display_rate` | display rate snapshot |
+| `card_display_rate` | finite numeric percentage rendered on catalog cards; for lending ranges this is the lowest explicit absolute rate derivable from approved scalar/summary fields, while deposits retain `public_display_rate`; unrelated qualification percentages and unresolved reference-rate spreads return `null` |
 | `public_display_fee` | display fee snapshot |
 | `minimum_balance` | minimum balance if available |
 | `minimum_deposit` | minimum deposit if available |
@@ -238,6 +250,10 @@ Country rules:
 - `freshness`
 
 Numeric product fields are serialized as finite JSON numbers only. Missing, invalid, `NaN`, or infinite source values are returned as `null` so public sort/render paths can remain stable.
+`sort_by=display_rate` uses `card_display_rate`, keeping the visible catalog
+order aligned with the numeric card value. `public_display_rate`,
+`interest_rate_summary`, and `purchase_interest_rate_summary` remain unchanged
+for comparison/detail presentation and source-language condition disclosure.
 
 ### 4.4 `GET /api/public/products/{product_id}`
 
@@ -301,7 +317,7 @@ country names in product records.
 목적:
 - KPI cards와 freshness note를 제공한다.
 - serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 persisted `dashboard_metric_snapshot` freshness vocabulary를 유지하되, request scope가 precomputed dashboard scope보다 더 좁을 때는 latest successful `public_product_projection`에서 filtered summary를 재계산할 수 있다.
+- 구현은 latest successful `public_product_projection`에서 request-scope summary를 계산한다.
 - exact metric semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.metrics[]` baseline:
@@ -326,7 +342,7 @@ country names in product records.
 목적:
 - ranking widget dataset을 제공한다.
 - serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 persisted `dashboard_ranking_snapshot` catalog vocabulary를 유지하되, shared filter vocabulary를 반영하기 위해 latest successful `public_product_projection`에서 filtered ranking을 재계산할 수 있다.
+- 구현은 latest successful `public_product_projection`에서 shared filter vocabulary를 반영한 ranking을 계산한다.
 - exact ranking semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 응답 `data.widgets[]` baseline:
@@ -356,7 +372,7 @@ ranked row baseline:
 목적:
 - comparative scatter plot dataset을 제공한다.
 - serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 persisted `dashboard_scatter_snapshot` preset vocabulary를 유지하되, shared filter vocabulary를 반영하기 위해 latest successful `public_product_projection`에서 filtered scatter points를 재계산할 수 있다.
+- 구현은 latest successful `public_product_projection`에서 shared filter vocabulary를 반영한 scatter points를 계산한다.
 - exact preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
 
 추가 query:
@@ -410,10 +426,8 @@ point baseline:
 - bank registry and AI-assisted bank onboarding
 - review queue and decision
 - product detail and change history
-- audit log
 - run status
 - BX-PF integration status
-- usage dashboard
 - dashboard refresh and metric health
 
 ### 5.1A Admin Auth and Access Request Routes
@@ -458,15 +472,15 @@ Switch rules:
   context, not country-registry configuration or RBAC
 - validates that the target country is active, then updates only the current
   `admin_auth_session.country_code`
-- same-country selection is idempotent and emits no mutation audit event
-- a real transition emits `auth_country_switched` with previous and next
-  country codes
+- same-country selection is idempotent
+- a real transition updates the protected session country and revokes no
+  unrelated sessions
 - the client preserves locale and navigates to `/admin`; it does not carry a
   country-owned entity route, filter, or query state into the new context
 
 Country-owned Admin endpoints do not accept a client-selected country as their
 authority. Banks, generated sources, catalog coverage, collections, runs,
-review tasks, canonical change history, dashboard health, and LLM usage derive
+review tasks, canonical change history, and dashboard health derive
 scope from the authenticated session. A conflicting explicit country returns a
 country-scope error, and a direct cross-country entity ID is returned as not
 found.
@@ -487,8 +501,8 @@ Rules:
 - the current session country and final active country return `409` when a
   deactivation is attempted
 - deactivation revokes active sessions for the affected country
-- each real status transition emits a `config` audit event targeting
-  `country_registry`
+- each real status transition remains visible in the durable country-registry
+  state; no generic event ledger is created
 
 ### 5.1B `POST /api/admin/banks/ai-onboard`
 
@@ -522,11 +536,9 @@ Rules:
   official-domain `/favicon.ico` fallback
 - rejects the whole operation when fewer than `count` valid banks remain
 - creates all bank profiles and coverage rows in one nested transaction; a
-  race or validation failure rolls the bank batch back before failure
-  execution/usage/audit records are committed
-- persists standalone `model_execution` and `llm_usage_record` rows with null
-  ingestion `run_id`, plus country/operation metadata and a success/failure
-  config audit event
+  race or validation failure rolls the bank batch back
+- persists one bounded `model_execution` row with country/operation/result
+  metadata; no standalone usage or generic audit row is retained
 - does not start source collection or mutate candidate, canonical, aggregate,
   or Public state
 
@@ -613,7 +625,7 @@ Rules:
 | `validation_issues[]` | issue detail |
 | `decision_history[]` | previous decisions |
 | `model_executions[]` | relevant execution references |
-| `ai_verification` | latest official-domain AI verification attempt, result, sources, and usage |
+| `ai_verification` | latest official-domain AI verification attempt, result, and sources |
 
 `evidence_links[]`는 아래를 포함한다.
 
@@ -637,10 +649,10 @@ Contract:
 - forces a live OpenAI Responses web search restricted to domains registered for the candidate's bank;
 - returns field-level `match`, `mismatch`, or `unverified` status, collected and verified values, confidence, rationale, and clickable official sources;
 - returns `proposed_corrections` only for editable fields that pass the same type and range normalization as manual review overrides;
-- persists `model_execution`, `llm_usage_record`, official source metadata, and a success/failure `audit_event`;
+- persists bounded `model_execution` result and official source metadata;
 - never changes candidate, review, canonical product, or publish state.
 
-Repeated runs are append-only. `GET /api/admin/review-tasks/:id` exposes the newest attempt through `ai_verification`; provider, source, or schema failures remain readable and do not mutate product data.
+`GET /api/admin/review-tasks/:id` exposes the newest attempt through `ai_verification`; retention keeps the latest verification plus recent diagnostics, and provider, source, or schema failures do not mutate product data.
 
 ### 5.3B Collection and Existing Queue AI Correction
 
@@ -655,12 +667,12 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
   fields are `product_name` plus populated or blocking decision fields; empty
   optional and operational fields are not requested and do not lower the score;
 - requires verified `product_name`, an official source, no remaining correction,
-  no hard product-boundary/taxonomy/partial-source blocker, and score `>= 0.80`
+  no hard product-boundary/taxonomy/partial-source blocker, and score `= 1.0`
   for automatic approval;
 - invokes the existing review decision and country aggregate-refresh contracts
   for eligible candidates; lower scores remain `queued`/`deferred`;
-- persists the assessment in `model_execution.execution_metadata` and emits
-  `review_ai_corrections_applied` plus normal verification/approval audit events.
+- persists the bounded assessment in `model_execution.execution_metadata` and
+  uses the normal review decision/change-history path for approval.
 - reuses only a completed attempt and assessment under the current v2 contract
   after runner restart, and bounds automatic calls with
   `COLLECTION_AI_REVIEW_AUTOPILOT_MAX_CANDIDATES`.
@@ -764,7 +776,7 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 ### 5.8 `GET /api/admin/runs/:id`
 
 목적:
-- run detail, stage summary, failure summary, usage summary를 제공한다.
+- run detail, stage summary, failure summary, bounded model-stage status를 제공한다.
 
 응답 `data` baseline:
 
@@ -774,7 +786,6 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 | `source_items[]` | per-source processing summary |
 | `stage_summaries[]` | stage-level status and counts |
 | `error_events[]` | failure or degraded event summary |
-| `usage_summary` | token/cost summary |
 | `related_review_tasks[]` | queue items produced by run |
 
 ### 5.9 `GET /api/admin/change-history`
@@ -801,37 +812,10 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 - `review_task_id`
 - `actor_type`
 
-### 5.10 `GET /api/admin/audit-log`
+### 5.10 Removed: `GET /api/admin/audit-log`
 
-목적:
-- append-only audit event list를 제공한다.
-
-권장 query:
-- `event_category`
-- `event_type`
-- `actor_type`
-- `target_type`
-- `run_id`
-- `review_task_id`
-- `product_id`
-- `occurred_from`
-- `occurred_to`
-- `page`
-- `page_size`
-
-응답 `data.items[]` baseline:
-- `audit_event_id`
-- `event_category`
-- `event_type`
-- `occurred_at`
-- `actor_type`
-- `actor`
-- `target`
-- `state_transition`
-- `reason`
-- `request_context`
-- `related_context`
-- `diff_summary`
+Removed by Decision `D044`. Durable business chronology is available through
+review decisions, canonical change history, run state, and publish state.
 
 ### 5.11 `GET /api/admin/bxpf-publish`
 
@@ -859,27 +843,11 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 - `last_result_message`
 - `reconciliation_required`
 
-### 5.12 `GET /api/admin/llm-usage`
+### 5.12 Removed: `GET /api/admin/llm-usage`
 
-목적:
-- run, agent, model 단위 usage dashboard 데이터를 제공한다.
-
-권장 query:
-- `from`
-- `to`
-- `run_id`
-- `agent_name`
-- `model_name`
-
-응답 `data` baseline:
-
-| Field | Description |
-|---|---|
-| `totals` | aggregate tokens/cost |
-| `by_model[]` | per-model aggregation |
-| `by_agent[]` | per-agent aggregation |
-| `by_run[]` | per-run aggregation |
-| `anomaly_candidates[]` | unusual usage drilldown |
+Removed by Decision `D044`. Standalone token/cost usage rows are not retained.
+Review and Run keep only bounded model outcome/source context needed for quality
+diagnosis.
 
 ### 5.13 `GET /api/admin/dashboard-health`
 
@@ -936,7 +904,7 @@ domain row baseline:
 - retrieval
 - normalization
 - review queue create/update
-- usage capture
+- bounded model execution result capture
 
 이 계약은 public HTTP route 설계가 아니라 private service boundary 설계다.
 
@@ -984,7 +952,7 @@ request baseline:
 | `parsed_document_id` | parsed body reference |
 | `field_names[]` | target canonical fields |
 | `metadata_filters` | bank/product/source filters |
-| `retrieval_mode` | metadata-only or vector-assisted |
+| `retrieval_mode` | metadata-only (`vector-assisted` is a historical compatibility input) |
 
 response baseline:
 - `matches[]`
@@ -999,11 +967,11 @@ match baseline:
 - `source_snapshot_id`
 - `model_execution_id`
 
-Vector-assisted rules:
-- `vector-assisted` must apply metadata filters before vector ranking.
-- `score` may blend lexical and vector signals, but the response must remain traceable to an `evidence_chunk_id`.
-- vector-specific detail may appear in internal `match_metadata`, but public APIs must not expose vector metadata.
-- if pgvector infrastructure or embedding rows are unavailable, the worker must return `applied_retrieval_mode=metadata-only` with a runtime note instead of failing extraction.
+Retrieval rules:
+- metadata filters apply before lexical ranking;
+- every response remains traceable to an `evidence_chunk_id`;
+- a historical `vector-assisted` request resolves to
+  `applied_retrieval_mode=metadata-only` instead of failing extraction.
 
 ### 6.4A Collection Official-Grounding Interface
 
@@ -1020,7 +988,7 @@ The request requires live web search and structured `match`, `mismatch`, or
 value, selected `evidence_chunk_id`, exact quote, confidence, rationale, and at
 least one official URL present in the provider's consulted-source metadata.
 Off-domain, unconsulted, unquoted, malformed, or unverified results are ignored.
-Execution/usage/consulted-source metadata remains private and traceable.
+Bounded execution/result/consulted-source metadata remains private and traceable.
 Supporting/entry sources and unconfigured or failed providers retain the
 deterministic extraction path.
 
@@ -1068,24 +1036,11 @@ response baseline:
 - `review_state`
 - `queue_created_at`
 
-### 6.7 Usage Capture Interface
+### 6.7 Removed Usage Capture Interface
 
-request baseline:
-- `run_id`
-- `model_execution_id`
-- `agent_name`
-- `provider_name`
-- `model_name`
-- `input_tokens`
-- `output_tokens`
-- `estimated_cost`
-- `started_at`
-- `completed_at`
-- `execution_status`
-
-response baseline:
-- `llm_usage_record_id`
-- `recorded_at`
+Decision `D044` removes standalone token/cost capture. Model quality workflows
+store only bounded status, result, source, and safe diagnostic context on
+`model_execution`.
 
 ---
 
@@ -1358,10 +1313,10 @@ public/admin 전용 internal fields, evidence detail, review history는 포함�
 
 - review queue
 - run history
-- LLM usage
+- private model execution diagnostics
 - BX-PF connector status
 - raw evidence and trace viewer
-- admin-only audit events
+- private Admin workflow state
 
 ---
 

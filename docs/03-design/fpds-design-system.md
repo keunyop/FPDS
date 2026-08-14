@@ -77,7 +77,7 @@ Shadcnblocks is now the authority for:
 FPDS remains the authority for:
 - Public Product Grid meaning
 - Insight Dashboard metrics and visualization rules
-- review, trace, run, publish, usage, and health workflows
+- review, trace, run, publish, change-history, and health workflows
 - public evidence non-exposure
 - locale rules and source-language handling
 - domain status vocabulary
@@ -323,13 +323,12 @@ Typography direction:
 |---|---|---|
 | `/admin` | Admin Kit shell and dashboard structure | real-data Operational Attention Rail across Runs, Review, Public health, and access requests |
 | `/admin/reviews` | compact filters, responsive table/work cards, pagination | bank/product/problem-first scan order, review state, confidence, validation, bulk defer |
-| `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, official-domain AI verification band, affected fields, cited evidence, correction staging, diff preview, alternative review actions, audit consequence |
+| `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, official-domain AI verification band, affected fields, cited evidence, correction staging, diff preview, alternative review actions, durable decision consequence |
 | `/admin/runs` | compact filters, joined summary, bounded table | failure and partial-completion triage, live state, source/candidate impact |
 | `/admin/runs/:id` | lifecycle strip and diagnostic regions | stage sequence, failure-first alert, source impact, related review workload, guarded retry |
 | `/admin/banks`, `/admin/product-types`, `/admin/sources` | registry tables and focused dialogs | identity, coverage, generated-source state, safe collection/update/delete workflows |
-| `/admin/changes`, `/admin/audit` | chronology-first tables | time, actor, action, target, outcome, review/run traceability |
+| `/admin/changes` | chronology-first table | canonical time, change, outcome, and review/run traceability |
 | `/admin/publish` | Admin Kit tables and alert cards | retry/reconciliation behavior and publish risk messaging |
-| `/admin/usage` | operational signal band, compact filters, bounded tables | observed cost, anomaly candidates, model/agent/run concentration, trend |
 | `/admin/health/dashboard` | serving-state band and diagnostic rows | snapshot served to Public, freshness gap, pending work, fallback, attempt state, guarded recovery |
 | `/admin/login`, `/admin/signup` | secure two-zone entrance and forms | anonymous access boundary, operator authentication/request states, live feedback |
 
@@ -364,7 +363,7 @@ FPDS should own business-specific components such as:
 - review action bars
 - diff previews
 - publish risk and reconciliation panels
-- usage anomaly drilldowns
+- bounded model-stage diagnostics on the owning Review or Run surface
 - dashboard health domain summaries
 
 ## 8.3 Customization Boundary
@@ -416,7 +415,8 @@ Key rules:
 - overview is not a giant everything-dashboard
 - review queue is table-first
 - review detail is a domain page, not a generic template demo
-- publish, usage, and health remain separate operational surfaces
+- publish and health remain separate operational surfaces; model diagnostics
+  stay with the owning Review or Run
 - use a cool mineral canvas, deep operational frame, restrained teal action,
   and centralized info/success/warning/destructive tokens; no gradients or
   route-specific color families

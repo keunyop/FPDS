@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from api_service.public_common import (
     PublicQueryFilters,
@@ -32,6 +33,36 @@ PRODUCT_SORT_OPTIONS = (
     "minimum_deposit",
     "annual_fee",
     "last_changed_at",
+)
+
+_PERCENTAGE_PATTERN = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%")
+_INTRO_RATE_PATTERN = re.compile(
+    r"(?:(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%\s*(?:intro|introductory)\s+(?:APR|APY)|"
+    r"\b(?:intro|introductory)\s+(?:APR|APY)[^.;]{0,16}?(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%)",
+    re.IGNORECASE,
+)
+_RATE_RANGE_PATTERN = re.compile(
+    r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%\s*(?:APR|APY)?\s*"
+    r"(?:to|through|[-–—])\s*(\d{1,3}(?:\.\d+)?)\s*%",
+    re.IGNORECASE,
+)
+_RATE_LABEL_PATTERN = re.compile(
+    r"\b(?:APR|APY|annual percentage rate|interest rate|fixed rates?|variable rates?|"
+    r"loan rates?|mortgage[-\s]+rates?|purchase rates?)\b",
+    re.IGNORECASE,
+)
+_NON_PRODUCT_RATE_CONTEXT_PATTERN = re.compile(
+    r"\b(?:discount|down payment|LTV|CLTV|points?|finance charges?|origination fees?|"
+    r"maximum|not exceed|rate cap|prime rate was|reference rate|SOFR|index rate)\b",
+    re.IGNORECASE,
+)
+_REFERENCE_SPREAD_PATTERN = re.compile(
+    r"(?:prime|SOFR|reference|index)[^.;]{0,24}[+\-]\s*\d{1,3}(?:\.\d+)?\s*%",
+    re.IGNORECASE,
+)
+_REFERENCE_RANGE_PREFIX_PATTERN = re.compile(
+    r"(?:prime|SOFR|reference|index)(?:\s+rate)?\s*(?:plus|[+\-])\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -281,7 +312,12 @@ def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> lis
             reverse=query.sort_order == "desc",
         )
     if query.sort_by == "display_rate":
-        return _sort_numeric_rows(rows, field_name="public_display_rate", descending=query.sort_order == "desc")
+        return _sort_numeric_rows(
+            rows,
+            field_name="public_display_rate",
+            descending=query.sort_order == "desc",
+            value_builder=_card_display_rate,
+        )
     if query.sort_by == "monthly_fee":
         return _sort_numeric_rows(rows, field_name="effective_fee", descending=query.sort_order == "desc")
     if query.sort_by == "minimum_balance":
@@ -328,9 +364,15 @@ def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> lis
     return rows
 
 
-def _sort_numeric_rows(rows: list[dict[str, Any]], *, field_name: str, descending: bool) -> list[dict[str, Any]]:
+def _sort_numeric_rows(
+    rows: list[dict[str, Any]],
+    *,
+    field_name: str,
+    descending: bool,
+    value_builder: Callable[[dict[str, Any]], float | None] | None = None,
+) -> list[dict[str, Any]]:
     def numeric_value(row: dict[str, Any]) -> float | None:
-        return serialize_decimal(row.get(field_name))
+        return value_builder(row) if value_builder is not None else serialize_decimal(row.get(field_name))
 
     if descending:
         return sorted(
@@ -379,6 +421,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "standard_rate": serialize_decimal(standard_rate),
         "base_12_month_rate": serialize_decimal(base_12_month_rate if base_12_month_rate is not None else standard_rate),
         "public_display_rate": serialize_decimal(row.get("public_display_rate")),
+        "card_display_rate": _card_display_rate(row),
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
         "annual_fee": serialize_decimal(metadata.get("annual_fee")),
         "purchase_interest_rate": serialize_decimal(metadata.get("purchase_interest_rate")),
@@ -422,6 +465,77 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "last_verified_at": serialize_datetime(row.get("last_verified_at")),
         "last_changed_at": serialize_datetime(row.get("last_changed_at")),
     }
+
+
+def _card_display_rate(row: dict[str, Any]) -> float | None:
+    """Return a card-only numeric rate without flattening the stored detail summary."""
+
+    existing_rate = serialize_decimal(row.get("public_display_rate"))
+    if str(row.get("product_family") or "").strip().lower() != "lending":
+        return existing_rate
+
+    metadata = _coerce_metadata(row.get("refresh_metadata"))
+    product_type = str(row.get("product_type") or "").strip().lower()
+    candidates: list[float] = []
+
+    if product_type == "credit-card":
+        candidates.extend(_explicit_rate_candidates(metadata.get("purchase_interest_rate")))
+        candidates.extend(_explicit_rate_candidates(metadata.get("purchase_interest_rate_summary")))
+        valid_candidates = [candidate for candidate in candidates if 0 <= candidate <= 100]
+        if valid_candidates:
+            return min(valid_candidates)
+        return existing_rate if existing_rate is not None and 0 <= existing_rate <= 100 else None
+    else:
+        if existing_rate is not None:
+            candidates.append(existing_rate)
+        candidates.extend(_explicit_rate_candidates(metadata.get("mortgage_rate")))
+        candidates.extend(_explicit_rate_candidates(metadata.get("interest_rate")))
+        candidates.extend(_explicit_rate_candidates(metadata.get("interest_rate_summary")))
+
+    valid_candidates = [candidate for candidate in candidates if 0 <= candidate <= 100]
+    return min(valid_candidates) if valid_candidates else None
+
+
+def _explicit_rate_candidates(value: Any) -> list[float]:
+    numeric_value = serialize_decimal(value)
+    if numeric_value is not None and not isinstance(value, str):
+        return [numeric_value]
+    if not isinstance(value, str):
+        return []
+
+    text = " ".join(value.replace("**", "").replace("__", "").split())
+    if not text:
+        return []
+    plain_numeric = re.fullmatch(r"\s*(\d{1,3}(?:\.\d+)?)\s*%?\s*", text)
+    if plain_numeric:
+        return [float(plain_numeric.group(1))]
+
+    intro_candidates = [
+        float(next(group for group in match.groups() if group is not None))
+        for match in _INTRO_RATE_PATTERN.finditer(text)
+    ]
+    for match in _RATE_RANGE_PATTERN.finditer(text):
+        context = text[max(0, match.start() - 48) : min(len(text), match.end() + 48)]
+        exclusion_context = text[max(0, match.start() - 28) : min(len(text), match.end() + 32)]
+        range_prefix = text[max(0, match.start() - 32) : match.start()]
+        if not _RATE_LABEL_PATTERN.search(context):
+            continue
+        if _NON_PRODUCT_RATE_CONTEXT_PATTERN.search(exclusion_context):
+            continue
+        if _REFERENCE_RANGE_PREFIX_PATTERN.search(range_prefix):
+            continue
+        return intro_candidates + [float(match.group(1)), float(match.group(2))]
+
+    candidates = list(intro_candidates)
+    for match in _PERCENTAGE_PATTERN.finditer(text):
+        context = text[max(0, match.start() - 48) : min(len(text), match.end() + 48)]
+        exclusion_context = text[max(0, match.start() - 24) : min(len(text), match.end() + 28)]
+        if not _RATE_LABEL_PATTERN.search(context):
+            continue
+        if _NON_PRODUCT_RATE_CONTEXT_PATTERN.search(exclusion_context) or _REFERENCE_SPREAD_PATTERN.search(exclusion_context):
+            continue
+        candidates.append(float(match.group(1)))
+    return candidates
 
 
 def _coerce_metadata(value: Any) -> dict[str, Any]:

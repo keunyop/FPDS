@@ -236,6 +236,15 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     displayed lending rate includes a relationship or automatic-payment
     discount, the qualifying account/payment and existing-customer conditions
     remain attached as well.
+51. `card_display_rate` is a Public presentation derivative, not canonical
+    truth. Deposits reuse their approved `public_display_rate`. Lending and
+    Credit Card cards use the lowest explicit absolute rate available in the
+    current approved projection, including an explicit introductory APR or the
+    lower endpoint of a disclosed range. Down-payment, discount, fee, LTV/CLTV,
+    cap, and reference-rate component percentages are excluded; a formula such
+    as `Prime + 2%` is not converted into an absolute rate. Full qualified rate
+    summaries remain unchanged for comparison/detail, and card-rate derivation
+    never triggers recollection, Review, or canonical mutation.
 
 ## Runtime Validation
 
