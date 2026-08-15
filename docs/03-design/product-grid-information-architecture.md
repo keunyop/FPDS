@@ -323,6 +323,86 @@ rules while preserving evidence and detail completeness:
   derivation runs from the current approved Public projection and does not
   initiate recollection, Review, or canonical mutation.
 
+### 10.14 Launch Brand, Home, and Catalog Action Simplification
+
+Product Owner direction on `2026-08-14` establishes the launch presentation:
+
+- `BankingFacts` is the customer-facing Public name and `.com`-compatible brand
+  label. FPDS remains the internal platform name. The same code-native
+  list/check mark is used in the shell and favicon.
+- Home removes `Products by bank`, the provenance-step ledger, repeated
+  coverage blocks, and deposit ranking cards. It keeps one concise thesis,
+  current product/bank/freshness facts, direct catalog actions, and a Loan Top
+  5 list.
+- Loan Top 5 uses the existing Public products API, the current country/filter
+  scope, Loan Product Types, `display_rate asc`, and `page_size=5`. It labels
+  the list as the lowest disclosed numeric rates, excludes unavailable numeric
+  values, and tells users to compare full conditions before applying.
+- Catalog cards retain the comparison selector and internal product-name detail
+  link. The former `Compare details` secondary action is replaced by an
+  official bank-page action only when a public `product_url` exists. The link
+  opens in a new tab with `noopener noreferrer`; no destination is fabricated.
+- EN/KO/JA UI labels and metadata use the new customer brand while
+  source-derived institution/product content remains in its source language.
+
+### 10.15 BankTable Identity and Dual Home Ranking
+
+Product Owner follow-up on `2026-08-14` supersedes the `BankingFacts` identity
+and single Loan-list Home hierarchy in Section 10.14:
+
+- `BankTable` is the customer-facing Public name. Its code-native mark is one
+  rounded 2-by-2 comparison table with no check badge, secondary color, or
+  decorative detail. The same geometry is used in the shell and favicon.
+- Home presents two equal ranking regions. Deposit Top 5 occupies the left
+  column and Loan Top 5 the right column at desktop; both stack into one column
+  below the desktop breakpoint without document-level horizontal scrolling.
+- Deposit Top 5 requests the bounded Deposit Product Types with
+  `display_rate desc` and `page_size=5`. Loan Top 5 requests the bounded Loan
+  Product Types with `display_rate asc` and `page_size=5`.
+- Both lists omit unavailable numeric rates, retain source-derived bank and
+  product names, link product names to internal detail, expose the official
+  bank action only when `product_url` exists, and state that fees, terms,
+  eligibility, and other conditions still require comparison.
+- A failed list request renders a localized unavailable state rather than the
+  no-eligible-product empty state. Summary failure continues to use the full
+  Home unavailable state.
+- This refinement does not restore Products by bank, provenance steps, legacy
+  dashboard widgets, personalized ranking, or public evidence exposure.
+
+### 10.16 Home Ranking Group and Action Refinement
+
+Product Owner follow-up on `2026-08-14` refines the presentation and action
+hierarchy without changing Section 10.15 ranking semantics:
+
+- Each ranking region uses a family-specific top rail and quiet header tint,
+  plus an explicit Deposit or Loan label and family icon. Color supports the
+  distinction but is not its only cue.
+- Header-level View all buttons are removed. A localized, text-style catalog
+  link sits below each list with a `44px` minimum interaction target and a
+  directional icon.
+- Home row official-bank actions reuse the Product Grid card's exact text-link
+  composition: label plus external-link icon, `target="_blank"`, and
+  `rel="noopener noreferrer"`. They are not rendered as outline buttons.
+- Product count, rate ordering, independent unavailable states, internal
+  product-detail navigation, responsive stacking, and evidence/privacy
+  boundaries remain unchanged.
+
+### 10.17 Bankoom Identity and Paired-Eye Mark
+
+Product Owner direction on `2026-08-15` supersedes the customer-facing name and
+mark in Section 10.15 without changing Home or catalog behavior:
+
+- `Bankoom` is the customer-facing Public name; `FPDS` remains the internal
+  platform/runtime identity.
+- The paired `oo` is the defining brand feature. Two simple circular eyes look
+  outward to represent scanning two sides of a bank-product comparison.
+- The shell uses the paired-eye mark beside a wordmark whose `oo` receives the
+  visual emphasis. The favicon uses the same eye positions and outward pupils
+  on the existing evergreen field.
+- The mark stays code-native, flat, legible at small sizes, and free of
+  decorative illustration or motion.
+- EN/KO/JA metadata and customer-facing brand references use `Bankoom`.
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

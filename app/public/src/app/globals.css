@@ -105,9 +105,6 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background-image:
-      radial-gradient(circle at 8% 0%, rgb(255 255 255 / 0.72), transparent 32rem),
-      linear-gradient(180deg, #f8f6f0 0%, #f4f1e9 38%, #f4f1e9 100%);
     font-feature-settings: "rlig" 1, "calt" 1;
     font-variant-numeric: tabular-nums;
     min-height: 100vh;

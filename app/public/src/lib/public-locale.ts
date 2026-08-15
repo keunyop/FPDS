@@ -45,6 +45,8 @@ type PublicMessages = {
     loan: string;
     card: string;
     localeLabel: string;
+    primaryLabel: string;
+    footerLabel: string;
   };
   common: {
     active: string;
@@ -72,7 +74,6 @@ type PublicMessages = {
     title: string;
     description: string;
     currentScope: string;
-    compareDetails: string;
     productCount: string;
     snapshotUpdated: string;
     primaryFilter: string;
@@ -136,7 +137,6 @@ type PublicMessages = {
     kpiSubtitle: string;
     composition: string;
     compositionSubtitle: string;
-    productsByBank: string;
     productsByType: string;
     comparisonMap: string;
     comparisonSubtitle: string;
@@ -155,6 +155,17 @@ type PublicMessages = {
     banksInScope: string;
     peakRate: string;
     topInterestRateTitle: string;
+    rateSnapshotsLabel: string;
+    depositTopTitle: string;
+    depositTopSubtitle: string;
+    depositTopEmpty: string;
+    depositTopUnavailable: string;
+    moreDeposits: string;
+    loanTopTitle: string;
+    loanTopSubtitle: string;
+    loanTopEmpty: string;
+    loanTopUnavailable: string;
+    moreLoans: string;
     openInProducts: string;
     apiUnavailableTitle: string;
     apiUnavailableBody: string;
@@ -217,16 +228,18 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   en: {
     localeName: "English",
     shell: {
-      brand: "FPDS",
+      brand: "Bankoom",
       tagline: ""
     },
     nav: {
       dashboard: "Home",
-      products: "Deposit",
+      products: "Deposits",
       methodology: "Methodology",
-      loan: "Loan",
+      loan: "Loans",
       card: "Credit cards",
-      localeLabel: "Language"
+      localeLabel: "Language",
+      primaryLabel: "Main navigation",
+      footerLabel: "Footer navigation"
     },
     common: {
       active: "Active",
@@ -240,7 +253,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "No recent change",
       noSuccessfulSnapshot: "No successful public snapshot is available yet.",
       notDisclosed: "Unavailable",
-      bankPage: "Bank page",
+      bankPage: "View at bank",
       more: "More",
       open: "Open",
       pageLabel: "Page",
@@ -249,12 +262,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "Verified"
     },
     grid: {
-      pageTitle: "FPDS Deposits",
+      pageTitle: "Deposits",
       pageDescription: "Compare chequing, savings, and GIC products in the selected country.",
       title: "Compare deposits",
       description: "Chequing, savings, and GIC products from the latest public snapshot.",
       currentScope: "Current scope",
-      compareDetails: "Compare details",
       productCount: "{count} products",
       snapshotUpdated: "Snapshot {date}",
       primaryFilter: "Primary",
@@ -271,7 +283,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       searchConditions: "Search conditions",
       noActiveFilters: "All available products",
       noResultTitle: "No products matched this scope.",
-      noResultBody: "Clear filters or return to the dashboard for a broader market view.",
+      noResultBody: "Clear filters or return Home for a broader view.",
       retryTitle: "Products could not load.",
       retryBody: "The public API is not reachable.",
       retryButton: "Retry products",
@@ -310,15 +322,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "What to check"
     },
     dashboard: {
-      pageTitle: "FPDS Home",
-      pageDescription: "Public financial product comparison snapshot.",
-      title: "Compare the market, then the product",
+      pageTitle: "Home",
+      pageDescription: "Compare reviewed deposit, credit card, and loan facts.",
+      title: "Bank products, side by side",
       description: "",
       marketGreeting: "Compare {products} deposit products from {banks} banks in the latest public snapshot.",
       kpiSubtitle: "Deposit market snapshot",
       composition: "Market composition",
       compositionSubtitle: "Share of deposit products in the current snapshot.",
-      productsByBank: "Products by bank",
       productsByType: "Products by type",
       comparisonMap: "Comparison map",
       comparisonSubtitle: "Select one product type for a like-for-like chart.",
@@ -327,7 +338,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotes: "Data notes",
       dataNotesBody: "Metrics use public aggregate fields. Products missing required numeric values are excluded from affected comparisons.",
       freshness: "Freshness",
-      openProducts: "Deposit",
+      openProducts: "Browse deposits",
       noActiveFilters: "No filters active.",
       noRankingWidgets: "No ranking is eligible for this scope.",
       chartUnavailable: "Not enough eligible products for this chart.",
@@ -337,10 +348,21 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       banksInScope: "Banks",
       peakRate: "Top Interest Rate",
       topInterestRateTitle: "Top 5 Interest Rate",
+      rateSnapshotsLabel: "Deposit and loan rate snapshots",
+      depositTopTitle: "Deposit Top 5",
+      depositTopSubtitle: "The five highest disclosed numeric deposit rates in this snapshot. Compare fees, terms, and eligibility before choosing.",
+      depositTopEmpty: "No deposit products with a disclosed numeric rate are available in this scope.",
+      depositTopUnavailable: "Deposit rates could not be loaded right now.",
+      moreDeposits: "More deposits",
+      loanTopTitle: "Loan Top 5",
+      loanTopSubtitle: "Five loan products with the lowest disclosed numeric rates in this snapshot. Compare full conditions before applying.",
+      loanTopEmpty: "No loan products with a disclosed numeric rate are available in this scope.",
+      loanTopUnavailable: "Loan rates could not be loaded right now.",
+      moreLoans: "More loans",
       openInProducts: "Open in products",
-      apiUnavailableTitle: "Dashboard could not load.",
-      apiUnavailableBody: "The public aggregate API is not reachable.",
-      retryDashboard: "Retry dashboard",
+      apiUnavailableTitle: "Home could not load.",
+      apiUnavailableBody: "The latest public snapshot is temporarily unavailable.",
+      retryDashboard: "Try again",
       mixedMarket: "All products"
     },
     purpose: {
@@ -370,7 +392,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "Clear",
       remove: "Remove",
       emptyTitle: "No products selected yet.",
-      emptyBody: "Use Compare on any product card to build a focused comparison. FPDS does not score personal eligibility or submit applications.",
+      emptyBody: "Use Compare on any product card to compare published facts. Bankoom does not score eligibility or submit applications.",
       tableProduct: "Product",
       tableWhy: "Why compare",
       entryAmount: "Entry amount",
@@ -384,7 +406,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "Comparable public fields are available."
     },
     methodology: {
-      pageTitle: "FPDS Methodology",
+      pageTitle: "Methodology",
       pageDescription: "Public data notes and metric boundaries.",
       title: "Methodology",
       description: "What the public snapshot includes, excludes, and may leave unavailable.",
@@ -403,7 +425,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Evidence boundary",
-          body: "Raw evidence, source excerpts, and internal review traces are not exposed on FPDS."
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankoom."
         },
         {
           title: "Comparison and rankings",
@@ -419,7 +441,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "FPDS",
+      brand: "Bankoom",
       tagline: ""
     },
     nav: {
@@ -428,7 +450,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       methodology: "방법론",
       loan: "대출",
       card: "신용카드",
-      localeLabel: "언어"
+      localeLabel: "언어",
+      primaryLabel: "주요 메뉴",
+      footerLabel: "하단 메뉴"
     },
     common: {
       active: "활성",
@@ -442,7 +466,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "최근 변경 없음",
       noSuccessfulSnapshot: "아직 사용 가능한 공개 스냅샷이 없습니다.",
       notDisclosed: "정보 없음",
-      bankPage: "은행 페이지",
+      bankPage: "은행에서 보기",
       more: "더보기",
       open: "열기",
       pageLabel: "페이지",
@@ -451,12 +475,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "검증"
     },
     grid: {
-      pageTitle: "FPDS 예금",
+      pageTitle: "예금",
       pageDescription: "선택한 국가의 입출금, 저축, GIC 상품을 비교합니다.",
       title: "예금 비교",
       description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품입니다.",
       currentScope: "현재 범위",
-      compareDetails: "상세 비교",
       productCount: "{count}개 상품",
       snapshotUpdated: "스냅샷 {date}",
       primaryFilter: "주요",
@@ -473,7 +496,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       searchConditions: "검색조건",
       noActiveFilters: "전체 상품",
       noResultTitle: "현재 범위에 맞는 상품이 없습니다.",
-      noResultBody: "필터를 해제하거나 대시보드에서 더 넓은 시장을 확인하세요.",
+      noResultBody: "필터를 해제하거나 홈에서 더 넓은 범위를 확인하세요.",
       retryTitle: "상품을 불러오지 못했습니다.",
       retryBody: "공개 API에 연결할 수 없습니다.",
       retryButton: "상품 다시 불러오기",
@@ -512,15 +535,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "확인할 내용"
     },
     dashboard: {
-      pageTitle: "FPDS 대시보드",
-      pageDescription: "공개 금융상품 비교 스냅샷입니다.",
-      title: "시장부터 보고, 상품을 비교하세요",
-      description: "최신 공개 스냅샷 기준으로 현재 상품 범위를 빠르게 비교합니다.",
+      pageTitle: "홈",
+      pageDescription: "검토된 예금, 신용카드, 대출 상품 정보를 비교합니다.",
+      title: "은행 상품을, 한눈에 비교하세요",
+      description: "",
       marketGreeting: "최신 공개 스냅샷에서 {banks}개 은행의 예금 상품 {products}개를 비교하세요.",
       kpiSubtitle: "예금 시장 스냅샷",
       composition: "시장 구성",
       compositionSubtitle: "현재 스냅샷의 은행별 예금 상품 비중입니다.",
-      productsByBank: "은행별 상품",
       productsByType: "유형별 상품",
       comparisonMap: "비교 맵",
       comparisonSubtitle: "상품 유형 하나를 선택하면 같은 기준으로 비교합니다.",
@@ -529,7 +551,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotes: "데이터 기준",
       dataNotesBody: "지표는 공개 aggregate 필드를 사용하며, 필요한 숫자 값이 없는 상품은 해당 비교에서 제외됩니다.",
       freshness: "최신성",
-      openProducts: "상품 열기",
+      openProducts: "예금 둘러보기",
       noActiveFilters: "활성 필터 없음",
       noRankingWidgets: "현재 범위에서 표시할 순위가 없습니다.",
       chartUnavailable: "차트를 그릴 수 있는 상품 수가 부족합니다.",
@@ -539,10 +561,21 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       banksInScope: "은행",
       peakRate: "최고 금리",
       topInterestRateTitle: "상위 5개 금리",
+      rateSnapshotsLabel: "예금·대출 금리 비교",
+      depositTopTitle: "예금 Top 5",
+      depositTopSubtitle: "현재 스냅샷에서 숫자 금리가 공개된 예금 상품 중 높은 금리 순 5개입니다. 선택 전 수수료, 기간, 가입 조건을 함께 비교하세요.",
+      depositTopEmpty: "현재 범위에는 숫자 금리가 공개된 예금 상품이 없습니다.",
+      depositTopUnavailable: "현재 예금 금리를 불러올 수 없습니다.",
+      moreDeposits: "예금 더보기",
+      loanTopTitle: "대출 Top 5",
+      loanTopSubtitle: "현재 스냅샷에서 숫자 금리가 공개된 대출 상품 중 낮은 금리 순 5개입니다. 신청 전 전체 조건을 비교하세요.",
+      loanTopEmpty: "현재 범위에는 숫자 금리가 공개된 대출 상품이 없습니다.",
+      loanTopUnavailable: "현재 대출 금리를 불러올 수 없습니다.",
+      moreLoans: "대출 더보기",
       openInProducts: "상품에서 열기",
-      apiUnavailableTitle: "대시보드를 불러오지 못했습니다.",
-      apiUnavailableBody: "공개 aggregate API에 연결할 수 없습니다.",
-      retryDashboard: "대시보드 다시 불러오기",
+      apiUnavailableTitle: "홈을 불러오지 못했습니다.",
+      apiUnavailableBody: "최신 공개 스냅샷을 일시적으로 불러올 수 없습니다.",
+      retryDashboard: "다시 시도",
       mixedMarket: "전체 상품 유형"
     },
     purpose: {
@@ -572,7 +605,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "비우기",
       remove: "제거",
       emptyTitle: "아직 선택한 상품이 없습니다.",
-      emptyBody: "상품 카드의 비교 버튼으로 비교 패널을 구성하세요. FPDS는 개인별 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankoom은 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
       tableProduct: "상품",
       tableWhy: "비교 이유",
       entryAmount: "가입 금액",
@@ -586,7 +619,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "비교 가능한 공개 필드가 제공됩니다."
     },
     methodology: {
-      pageTitle: "FPDS 방법론",
+      pageTitle: "방법론",
       pageDescription: "공개 데이터 기준과 지표 경계입니다.",
       title: "방법론",
       description: "공개 스냅샷에 포함되는 정보, 제외되는 정보, 정보가 없을 때의 기준입니다.",
@@ -605,7 +638,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "증거 경계",
-          body: "원문 증거, 출처 발췌, 내부 검토 trace는 FPDS에 공개하지 않습니다."
+          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankoom에 공개하지 않습니다."
         },
         {
           title: "비교와 순위",
@@ -621,7 +654,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "FPDS",
+      brand: "Bankoom",
       tagline: ""
     },
     nav: {
@@ -630,7 +663,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       methodology: "データ基準",
       loan: "ローン",
       card: "クレジットカード",
-      localeLabel: "言語"
+      localeLabel: "言語",
+      primaryLabel: "メインナビゲーション",
+      footerLabel: "フッターナビゲーション"
     },
     common: {
       active: "有効",
@@ -644,7 +679,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       noRecentChange: "最近の変更なし",
       noSuccessfulSnapshot: "利用できる公開スナップショットはまだありません。",
       notDisclosed: "情報なし",
-      bankPage: "銀行ページ",
+      bankPage: "銀行サイトで見る",
       more: "もっと見る",
       open: "開く",
       pageLabel: "ページ",
@@ -653,12 +688,11 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "確認"
     },
     grid: {
-      pageTitle: "FPDS 預金",
+      pageTitle: "預金",
       pageDescription: "選択した国の当座、普通預金、GIC 商品を比較します。",
       title: "預金を比較",
       description: "最新の公開スナップショットにある当座、普通預金、GIC 商品です。",
       currentScope: "現在の範囲",
-      compareDetails: "詳細比較",
       productCount: "{count} 件の商品",
       snapshotUpdated: "スナップショット {date}",
       primaryFilter: "主要",
@@ -675,7 +709,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       searchConditions: "検索条件",
       noActiveFilters: "すべての商品",
       noResultTitle: "現在の範囲に一致する商品はありません。",
-      noResultBody: "フィルターを解除するか、ダッシュボードで広い市場を確認してください。",
+      noResultBody: "フィルターを解除するか、ホームでより広い範囲を確認してください。",
       retryTitle: "商品を読み込めませんでした。",
       retryBody: "公開 API に接続できません。",
       retryButton: "商品を再読み込み",
@@ -714,15 +748,14 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "確認ポイント"
     },
     dashboard: {
-      pageTitle: "FPDS ダッシュボード",
-      pageDescription: "公開金融商品の比較スナップショットです。",
-      title: "市場を見てから、商品を比較",
-      description: "最新の公開スナップショットをもとに現在の掲載範囲をすばやく比較します。",
+      pageTitle: "ホーム",
+      pageDescription: "レビュー済みの預金、クレジットカード、ローン情報を比較します。",
+      title: "銀行商品を、ひと目で",
+      description: "",
       marketGreeting: "最新の公開スナップショットで {banks} 行の預金商品 {products} 件を比較できます。",
       kpiSubtitle: "預金市場スナップショット",
       composition: "市場構成",
       compositionSubtitle: "現在のスナップショットにおける銀行別の預金商品比率です。",
-      productsByBank: "銀行別商品",
       productsByType: "タイプ別商品",
       comparisonMap: "比較マップ",
       comparisonSubtitle: "商品タイプを 1 つ選ぶと同じ意味の軸で比較します。",
@@ -731,7 +764,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       dataNotes: "データ基準",
       dataNotesBody: "指標は公開 aggregate フィールドを使います。必要な数値がない商品は該当比較から除外されます。",
       freshness: "鮮度",
-      openProducts: "商品を開く",
+      openProducts: "預金を見る",
       noActiveFilters: "有効なフィルターなし",
       noRankingWidgets: "現在の範囲で表示できる順位はありません。",
       chartUnavailable: "チャートに必要な商品数が不足しています。",
@@ -741,10 +774,21 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       banksInScope: "銀行",
       peakRate: "最高金利",
       topInterestRateTitle: "金利トップ5",
+      rateSnapshotsLabel: "預金・ローン金利比較",
+      depositTopTitle: "預金 Top 5",
+      depositTopSubtitle: "現在のスナップショットで数値金利が公開されている預金商品のうち、高い順の5件です。手数料、期間、利用条件も比較してください。",
+      depositTopEmpty: "現在の範囲には数値金利が公開された預金商品がありません。",
+      depositTopUnavailable: "現在、預金金利を読み込めません。",
+      moreDeposits: "預金をもっと見る",
+      loanTopTitle: "ローン Top 5",
+      loanTopSubtitle: "現在のスナップショットで数値金利が公開されているローン商品のうち、低い順の5件です。申込前に条件全体を比較してください。",
+      loanTopEmpty: "現在の範囲には数値金利が公開されたローン商品がありません。",
+      loanTopUnavailable: "現在、ローン金利を読み込めません。",
+      moreLoans: "ローンをもっと見る",
       openInProducts: "商品で開く",
-      apiUnavailableTitle: "ダッシュボードを読み込めませんでした。",
-      apiUnavailableBody: "公開 aggregate API に接続できません。",
-      retryDashboard: "ダッシュボードを再読み込み",
+      apiUnavailableTitle: "ホームを読み込めませんでした。",
+      apiUnavailableBody: "最新の公開スナップショットを一時的に読み込めません。",
+      retryDashboard: "もう一度試す",
       mixedMarket: "全商品タイプ"
     },
     purpose: {
@@ -774,7 +818,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "クリア",
       remove: "削除",
       emptyTitle: "まだ商品が選択されていません。",
-      emptyBody: "商品カードの比較ボタンで比較パネルを作成します。FPDS は個人別の加入可能性スコアや申込代行を提供しません。",
+      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankoom は加入可能性の採点や申込代行を行いません。",
       tableProduct: "商品",
       tableWhy: "比較理由",
       entryAmount: "加入金額",
@@ -788,7 +832,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "比較可能な公開フィールドがあります。"
     },
     methodology: {
-      pageTitle: "FPDS データ基準",
+      pageTitle: "データ基準",
       pageDescription: "公開データの基準と指標の境界です。",
       title: "データ基準",
       description: "公開スナップショットに含む情報、除外する情報、情報がない場合の扱いです。",
@@ -807,7 +851,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "証拠の境界",
-          body: "原文証拠、ソース抜粋、内部レビュー trace は FPDS では公開しません。"
+          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankoom では公開しません。"
         },
         {
           title: "比較とランキング",
@@ -826,7 +870,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   en: {
     asOf: "As of",
     availableFacts: "Available product facts",
-    compareBoundary: "FPDS compares published facts. It does not rank what is best for you.",
+    compareBoundary: "Bankoom compares published facts. It does not choose a product for you.",
     compareDifferences: "Differences are emphasized only where a public field is available.",
     coverage: "Current coverage",
     cardCoverage: "Credit cards",
@@ -834,13 +878,13 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
     fresh: "Current snapshot",
     freshness: "Snapshot freshness",
-    homeBody: "Orient across the selected market, shortlist products with comparable public facts, then confirm current terms with the institution.",
-    homeKicker: "Verified financial product records",
-    homeTitle: "A changing market, made legible.",
+    homeBody: "Compare reviewed rates, fees, and key terms from the latest public snapshot. Confirm current details with the bank.",
+    homeKicker: "Reviewed public product data",
+    homeTitle: "Bank products, side by side.",
     loanCoverage: "Mortgage, personal loan and line of credit",
-    methodologyIntro: "How source facts become comparable public records—and where FPDS deliberately stops.",
+    methodologyIntro: "How official product facts become comparable public records—and where Bankoom stops.",
     methodologySteps: [
-      { label: "01", title: "Official source", body: "Product facts begin with public institution sources captured by FPDS." },
+      { label: "01", title: "Official source", body: "Product facts begin with public institution sources." },
       { label: "02", title: "Reviewed record", body: "Only approved public fields enter the comparable product record." },
       { label: "03", title: "Public snapshot", body: "The latest successful aggregate snapshot powers every public view." },
       { label: "04", title: "Your verification", body: "Rates and conditions can change. Recheck the institution page before acting." }
@@ -862,7 +906,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ko: {
     asOf: "기준일",
     availableFacts: "확인 가능한 상품 정보",
-    compareBoundary: "FPDS는 공개된 사실을 비교하며, 개인에게 가장 좋은 상품을 순위로 추천하지 않습니다.",
+    compareBoundary: "Bankoom은 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
     compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
     coverage: "현재 제공 범위",
     cardCoverage: "신용카드",
@@ -870,11 +914,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
     fresh: "최신 스냅샷",
     freshness: "스냅샷 최신성",
-    homeBody: "선택한 금융시장을 한눈에 파악하고, 비교 가능한 공개 정보로 후보를 좁힌 뒤, 금융기관 공식 페이지에서 최신 조건을 확인하세요.",
-    homeKicker: "검증된 금융상품 기록",
-    homeTitle: "변하는 금융시장을, 읽을 수 있게.",
+    homeBody: "최신 공개 스냅샷에서 검토된 금리, 수수료, 주요 조건을 비교하고 은행 공식 페이지에서 최신 정보를 확인하세요.",
+    homeKicker: "검토된 공개 상품 데이터",
+    homeTitle: "은행 상품을, 한눈에 비교하세요.",
     loanCoverage: "모기지·개인대출·신용한도",
-    methodologyIntro: "공식 출처의 정보가 비교 가능한 공개 기록이 되는 과정과 FPDS가 의도적으로 멈추는 경계입니다.",
+    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankoom의 정보 제공 경계입니다.",
     methodologySteps: [
       { label: "01", title: "공식 출처", body: "금융기관이 공개한 상품 정보에서 기록이 시작됩니다." },
       { label: "02", title: "검토된 기록", body: "승인된 공개 필드만 비교 가능한 상품 기록에 포함됩니다." },
@@ -898,7 +942,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ja: {
     asOf: "基準日",
     availableFacts: "確認できる商品情報",
-    compareBoundary: "FPDS は公開された事実を比較し、個人に最適な商品をランキングしません。",
+    compareBoundary: "Bankoom は公開された事実を比較し、利用者の代わりに商品を選びません。",
     compareDifferences: "公開項目がある場合だけ差を強調します。",
     coverage: "現在の掲載範囲",
     cardCoverage: "クレジットカード",
@@ -906,11 +950,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
     fresh: "最新スナップショット",
     freshness: "スナップショットの鮮度",
-    homeBody: "選択した市場を把握し、比較できる公開情報で候補を絞り、金融機関の公式ページで最新条件を確認してください。",
-    homeKicker: "検証済み金融商品レコード",
-    homeTitle: "変わる市場を、読み解ける形に。",
+    homeBody: "最新の公開スナップショットで、レビュー済みの金利、手数料、主な条件を比較し、銀行公式ページで最新情報を確認してください。",
+    homeKicker: "レビュー済み公開商品データ",
+    homeTitle: "銀行商品を、ひと目で。",
     loanCoverage: "住宅ローン・個人ローン・与信枠",
-    methodologyIntro: "公式情報が比較できる公開レコードになる流れと、FPDS が意図的に設ける境界です。",
+    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankoom の情報提供範囲です。",
     methodologySteps: [
       { label: "01", title: "公式ソース", body: "金融機関が公開した商品情報からレコードが始まります。" },
       { label: "02", title: "レビュー済みレコード", body: "承認された公開項目だけが比較可能な商品レコードに入ります。" },
@@ -956,7 +1000,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   if (catalog === "card") {
     if (normalizePublicLocale(locale) === "ko") {
       return {
-        pageTitle: "FPDS 신용카드",
+        pageTitle: "신용카드",
         pageDescription: "선택한 국가의 검증된 신용카드 상품을 비교합니다.",
         title: "신용카드 비교",
         description: "최신 공개 스냅샷의 연회비와 구매 금리를 비교합니다.",
@@ -965,7 +1009,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     }
     if (normalizePublicLocale(locale) === "ja") {
       return {
-        pageTitle: "FPDS クレジットカード",
+        pageTitle: "クレジットカード",
         pageDescription: "選択した国の検証済みクレジットカード商品を比較します。",
         title: "クレジットカードを比較",
         description: "最新の公開スナップショットで年会費とショッピング金利を比較します。",
@@ -973,7 +1017,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
       };
     }
     return {
-      pageTitle: "FPDS Credit Cards",
+      pageTitle: "Credit Cards",
       pageDescription: "Compare verified credit card products in the selected country.",
       title: "Compare credit cards",
       description: "Annual fees and purchase interest rates from the latest public snapshot.",
@@ -982,7 +1026,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   }
   if (normalizePublicLocale(locale) === "ko") {
     return {
-      pageTitle: "FPDS 대출",
+      pageTitle: "대출",
       pageDescription: "선택한 국가의 대출 상품 카탈로그입니다.",
       title: "대출 상품",
       description: "최신 공개 스냅샷에서 활성 모기지, 개인 대출, 신용한도 대출 상품을 조회합니다.",
@@ -991,7 +1035,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   }
   if (normalizePublicLocale(locale) === "ja") {
     return {
-      pageTitle: "FPDS ローン",
+      pageTitle: "ローン",
       pageDescription: "選択した国のローン商品のカタログです。",
       title: "ローン商品",
       description: "最新の公開スナップショットから、有効な住宅ローン、個人ローン、ライン・オブ・クレジット商品を絞り込みます。",
@@ -999,7 +1043,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     };
   }
   return {
-    pageTitle: "FPDS Loan",
+    pageTitle: "Loans",
     pageDescription: "Compare mortgage, personal loan, and line of credit products in the selected country.",
     title: "Compare loans",
     description: "Mortgage, personal loan, and line of credit products from the latest public snapshot.",

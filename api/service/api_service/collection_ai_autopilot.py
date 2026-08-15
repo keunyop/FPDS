@@ -10,6 +10,7 @@ from api_service.review_ai_correction import (
     persist_review_ai_auto_approval_assessment,
 )
 from api_service.review_detail import ReviewRequestContext, apply_review_decision, load_review_task_detail
+from worker.pipeline.fpds_approval_policy import comparison_quality
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -225,6 +226,33 @@ def remediate_collection_review_task(
             "assessment": assessment,
         }
 
+    current_detail = load_review_task_detail(
+        connection,
+        review_task_id=review_task_id,
+        actor_role=str(active_actor["role"]),
+    )
+    guarded_assessment = _guard_assessment_against_current_comparison_contract(
+        assessment=assessment,
+        detail=current_detail,
+    )
+    if guarded_assessment != assessment:
+        assessment = guarded_assessment
+        persist_review_ai_auto_approval_assessment(
+            connection,
+            model_execution_id=model_execution_id,
+            assessment=assessment,
+        )
+    if not bool(assessment.get("eligible")):
+        return {
+            "review_task_id": review_task_id,
+            "model_execution_id": model_execution_id,
+            "status": "review_retained",
+            "approved": False,
+            "reused_verification": reused,
+            "changed_fields": list(correction_result.get("changed_fields") or []),
+            "assessment": assessment,
+        }
+
     approval_actor = {
         **active_actor,
         "ai_auto_approval_assessment": assessment,
@@ -271,6 +299,65 @@ def remediate_collection_review_task(
         "decision": decision,
         "aggregate_refresh": aggregate_refresh,
     }
+
+
+def _guard_assessment_against_current_comparison_contract(
+    *,
+    assessment: dict[str, Any],
+    detail: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Fail closed when corrections make new comparison fields essential."""
+
+    if not detail:
+        return _blocked_assessment(
+            assessment,
+            reason_code="review_detail_unavailable_before_approval",
+        )
+    candidate = _mapping(detail.get("candidate"))
+    candidate_payload = {
+        **_mapping(candidate.get("candidate_payload")),
+        "product_name": candidate.get("product_name"),
+    }
+    quality = comparison_quality(
+        product_type=str(candidate.get("product_type") or ""),
+        country_code=str(candidate.get("country_code") or ""),
+        expected_fields=[],
+        candidate_payload=candidate_payload,
+    )
+    if quality.applicable and (not quality.contract_defined or not quality.complete):
+        return _blocked_assessment(
+            assessment,
+            reason_code="essential_comparison_fields_missing_after_correction",
+            comparison_contract_defined=quality.contract_defined,
+            missing_comparison_fields=list(quality.missing_fields),
+        )
+    return assessment
+
+
+def _blocked_assessment(
+    assessment: dict[str, Any],
+    *,
+    reason_code: str,
+    comparison_contract_defined: bool | None = None,
+    missing_comparison_fields: list[str] | None = None,
+) -> dict[str, Any]:
+    reason_codes = [
+        str(item)
+        for item in assessment.get("reason_codes", [])
+        if str(item)
+    ] if isinstance(assessment.get("reason_codes"), list) else []
+    if reason_code not in reason_codes:
+        reason_codes.append(reason_code)
+    guarded = {
+        **assessment,
+        "eligible": False,
+        "reason_codes": reason_codes,
+    }
+    if comparison_contract_defined is not None:
+        guarded["comparison_contract_defined"] = comparison_contract_defined
+    if missing_comparison_fields is not None:
+        guarded["missing_comparison_fields"] = missing_comparison_fields
+    return guarded
 
 
 def _load_latest_verification_execution(

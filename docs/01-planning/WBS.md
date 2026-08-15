@@ -311,6 +311,10 @@ Based on:
 | 5.26 | Completed | US pricing-evidence companion collection | official US UI pattern analysis, bounded detail-linked pricing/fee/agreement source discovery, query-aware disclosure identity, dynamic/browser and structured-payload extraction, range-preserving Purchase APR projection, shared-dev migration and targeted recollection | Backend, AI/Data, Frontend, QA | 5.16, 5.24, 5.25 | 2026-08-12 |
 | 5.27 | Completed | bounded operational storage and dev cleanup | obsolete audit/usage/embedding/dashboard tables removed, evidence/model/run/auth retention enforced, Admin routes retired, shared-dev data compacted without Public projection drift | Backend, AI/Data, Frontend, Security, QA | 4.3-4.6, 5.6-5.8, 5.25 | 2026-08-13 |
 | 5.28 | Completed | numeric Public catalog card rates | additive card-rate projection from current approved data, favorable explicit lending range/intro rate, formula/qualification exclusion, aligned sorting, full summary preservation on comparison/detail, no recollection | Backend, Frontend, QA | 5.7, 5.9, 5.25, 5.26 | 2026-08-13 |
+| 5.29 | Completed | Public launch simplification and Review recovery guard | BankingFacts brand/logo/favicon, concise EN/KO/JA Home, Loan Top 5, official-bank card actions, post-correction essential-field approval guard | Frontend, Backend, QA | 5.14, 5.25, 5.28 | 2026-08-14 |
+| 5.30 | Completed | Public identity and dual Top 5 refinement | BankTable title, minimal table logo/favicon, localized Deposit Top 5 and Loan Top 5 split Home, independent list failure states, responsive QA | Frontend, UX, QA | 5.14, 5.29 | 2026-08-14 |
+| 5.31 | Completed | Home Top 5 group and action refinement | family-separated ranking regions, bottom more links, Product Grid-matched official-bank links, EN/KO/JA responsive QA | Frontend, UX, QA | 5.30 | 2026-08-14 |
+| 5.32 | Completed | Bankoom Public identity | Bankoom metadata and localized brand copy, paired-eye `oo` shell mark/wordmark, matching favicon, responsive brand verification | Frontend, UX, QA | 5.30, 5.31 | 2026-08-15 |
 
 ### 5.5 Scope Baseline
 

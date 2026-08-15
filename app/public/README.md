@@ -2,15 +2,21 @@
 
 This package is the anonymous FPDS market view and product catalog. It presents
 only review-approved public projections; raw evidence, review state, and private
-source traces remain inside FPDS Admin.
+source traces remain inside FPDS Admin. Its customer-facing identity is
+`Bankoom`; `FPDS` remains the internal platform/runtime name.
 
 ## Runtime Routes
 
 - `/` redirects to `/dashboard`.
-- `/dashboard` is the public Home view. Its first viewport pairs a clear market
-  thesis with a live verified-record ledger built from the current aggregate
-  product count, bank count, coverage, and freshness date. Deposit and Loan are
-  equal next actions.
+- `/dashboard` is the public Home view. Its first viewport pairs a short market
+  thesis with current product count, bank count, and freshness. Deposit, Credit
+  Card, and Loan are direct next actions. The main content places Deposit Top 5
+  on the left and Loan Top 5 on the right at desktop, stacking both lists below
+  that breakpoint. Deposit uses the highest disclosed numeric rates; Loan uses
+  the lowest disclosed numeric rates. Neither list is a personalized
+  recommendation. The two groups use distinct Deposit/Loan family rails,
+  labels, and icons; catalog navigation is a text-style more link below each
+  list rather than a competing header button.
 - `/products` is the Deposit catalog for review-approved `chequing`, `savings`,
   and `gic` products.
 - `/cards` is the Credit Card catalog for review-approved `credit-card`
@@ -24,16 +30,19 @@ source traces remain inside FPDS Admin.
 
 ## Experience Baseline
 
-The Public visual system uses a warm record-paper canvas, deep ink typography,
+The Public visual system uses a warm flat canvas, deep ink typography,
 evergreen verification states, maple selection emphasis, and ochre Loan cues.
-The code-native FPDS mark and the source-to-review-to-public ledger make verified
-financial records the signature visual idea. Generic dashboard-card repetition,
-decorative gradients, synthetic scores, and recommendation language are avoided.
+The code-native Bankoom mark uses the paired `oo` as two outward-looking eyes
+that scan products side by side. The same paired-eye geometry is shared by the
+shell and app icon. Generic dashboard-card repetition, decorative gradients,
+synthetic scores, and recommendation language are avoided.
 
 Home uses real snapshot values rather than invented illustration data. Catalog
 cards are product-family-aware records with visible institution identity, one
-primary metric, up to two supporting facts, and clear Compare and Details
-actions. The metrics follow the resolved country-product essential contract.
+primary metric, up to two supporting facts, a Compare control, and an official
+bank-page action when `product_url` is available. The product name still opens
+the internal detail route. The metrics follow the resolved country-product
+essential contract.
 Canada shows Chequing fee/balance/transactions and GIC
 rate/term/minimum-deposit/redeemability. US Checking shows
 fee/opening-or-minimum-balance/fee-waiver activity, US CDs show
@@ -46,6 +55,10 @@ product detail. Savings, Personal Loan, and Line of Credit likewise use their
 market profile. Incomplete governed products are excluded during aggregate
 refresh. Filters are progressively
 disclosed and sort controls stay close to the results.
+
+Home ranking rows reuse the same text-style official-bank action as catalog
+cards, including the external-link icon and safe new-tab attributes. They do
+not wrap that action in a secondary outline button.
 
 Selecting up to four products opens a responsive comparison ledger. Differences
 are highlighted without declaring a winner, and only the type-specific
@@ -99,7 +112,8 @@ the localized unavailable state instead of leaving navigation pending.
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an
 unframed, accessible bank-code mark while retaining the institution name for
-assistive technology.
+assistive technology. The Bankoom shell mark is implemented in
+`public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
 
 ## Verification
 

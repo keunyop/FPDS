@@ -228,6 +228,50 @@ Implemented verified-record Public Home presentation on `2026-07-27`:
   aggregate calculations, API contracts, canonical eligibility, or the public
   evidence boundary defined in this document.
 
+Implemented launch Home simplification on `2026-08-14`:
+
+- The visible Home no longer renders `products_by_bank`, the record-path
+  ledger, coverage tiles, or the legacy deposit ranking widgets. The API
+  summary/breakdown/ranking contracts remain available for other consumers.
+- The default summary is no longer forced into a Deposit-only scope. It reports
+  current product and bank counts for the active country/filter scope.
+- The primary list is Loan Top 5, fetched from the existing products endpoint
+  with the bounded Loan Product Types, `display_rate asc`, and `page_size=5`.
+  It is explicitly described as the five lowest disclosed numeric rates, not a
+  recommendation or eligibility judgment. Products without a numeric rate are
+  excluded from the visible list.
+- Like-for-like scatter remains conditional on one supported selected Product
+  Type. No mixed-product chart or score is introduced.
+- This supersedes the `2026-07-18` and `2026-07-27` visible Home hierarchy only;
+  metric formulas, endpoint contracts, public-snapshot sourcing, freshness,
+  and evidence privacy remain unchanged.
+
+Implemented dual Home ranking refinement on `2026-08-14`:
+
+- The single Loan list above is superseded by a two-column Deposit Top 5 and
+  Loan Top 5 presentation. Deposit uses the existing products endpoint with
+  the bounded Deposit Product Types, `display_rate desc`, and `page_size=5`;
+  Loan retains the bounded Loan Product Types, `display_rate asc`, and
+  `page_size=5`.
+- Deposit is explicitly the highest disclosed numeric rates and Loan the
+  lowest disclosed numeric rates. Products without an eligible numeric card
+  rate are excluded, and each list carries a full-condition caveat rather than
+  implying suitability.
+- The lists are independent request/error boundaries so an unavailable family
+  does not mislabel a request failure as an empty eligible set.
+- This is a Home composition decision. It does not alter the Section 6.1 API
+  ranking catalog, metric formulas, current projection, or evidence boundary.
+
+Implemented Home ranking visual/action refinement on `2026-08-14`:
+
+- Deposit and Loan regions now use distinct semantic rails, explicit family
+  labels, and family icons so recognition is not color-dependent.
+- Header View all controls are replaced by localized text-style catalog links
+  below the corresponding lists, while official-bank row actions reuse the
+  Product Grid card text-link pattern.
+- This presentation-only change does not alter eligibility, ordering, count,
+  request boundaries, endpoint contracts, or financial meaning.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

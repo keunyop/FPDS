@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, ExternalLink, GitCompareArrows, Plus, X } from "lucide-react";
+import { Check, ExternalLink, GitCompareArrows, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -181,10 +181,17 @@ function ProductCompareCard({
             {selected ? <Check className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}
             {selected ? copy.compare.selected : copy.compare.select}
           </Button>
-          <Link className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80" href={detailHref}>
-            {copy.grid.compareDetails}
-            <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
+          {product.product_url ? (
+            <a
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+              href={product.product_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {copy.common.bankPage}
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+            </a>
+          ) : null}
         </div>
         {compareDisabled ? <p className="mt-2 text-xs leading-5 text-muted-foreground">{copy.compare.limit}</p> : null}
       </div>

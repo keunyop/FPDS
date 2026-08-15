@@ -22,7 +22,7 @@ export function PublicNav() {
   ];
 
   return (
-    <nav className="flex max-w-full items-center gap-0.5 text-sm" aria-label="Public navigation">
+    <nav className="flex max-w-full items-center gap-0.5 text-sm" aria-label={copy.nav.primaryLabel}>
       {navItems.map((item) => {
         const active = item.href ? pathname === item.href || (item.href === "/dashboard" && pathname === "/") : false;
         const Icon = item.icon;

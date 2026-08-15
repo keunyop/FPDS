@@ -351,6 +351,12 @@ spreads and unrelated percentages must not be presented as absolute card
 rates. This is a presentation projection over current approved data and does
 not require recollection or canonical mutation.
 
+Product Owner clarification on `2026-08-14`: the product name remains the
+internal Public detail link. The card's former `Compare details` secondary
+action is an official bank product-page action when a safe public
+`product_url` exists. It opens in a new tab without opener access. A missing
+URL produces no fabricated or fallback external destination.
+
 ### FR-PUB-005 Filtering
 사용자는 다음 필터를 사용할 수 있어야 하며, 필터 라벨은 선택된 locale에 따라 표시되어야 한다.
 
@@ -402,6 +408,44 @@ insight dashboard는 사용자가 빠르게 시장을 파악할 수 있도록 **
 - 최근 변경 상품 Top 5
 
 > 실제 노출 ranking은 product type과 데이터 completeness를 고려해 선택적으로 조합할 수 있으나, 최소 2개 이상의 의미 있는 ranking widget이 Phase 1에 포함되어야 한다.
+
+Product Owner clarification on `2026-08-14` supersedes the visible Home
+composition and multi-ranking minimum in `FR-PUB-007` through `FR-PUB-009`.
+The launch Home is an equivalent simplified insight surface: one concise
+customer thesis, current Public product/bank/freshness facts, direct Deposit,
+Credit Card, and Loan catalog navigation, and a Loan Top 5 list ordered by the
+lowest disclosed numeric rate. `Products by bank`, repeated KPI cards,
+provenance steps, and legacy deposit rankings are not required on Home. The
+ranking must state its numeric ordering and full-condition caveat and must not
+claim personalized suitability. Existing dashboard endpoints and metric
+contracts remain compatible for non-Home consumers.
+
+Product Owner follow-up on `2026-08-14` supersedes the single Loan-list Home
+acceptance above. Home must show two equal ranking regions: Deposit Top 5 on
+the left and Loan Top 5 on the right at desktop, stacking on smaller screens.
+Deposit uses active Chequing, Savings, and GIC products ordered by
+`display_rate desc`; Loan uses active Mortgage, Personal Loan, and Line of
+Credit products ordered by `display_rate asc`. Each list excludes unavailable
+numeric rates, states its ordering and full-condition caveat, and remains
+factual rather than personalized. The customer-facing title is `BankTable`,
+with one simple table mark shared by the shell and favicon; FPDS remains the
+internal platform name.
+
+The later Home presentation refinement on `2026-08-14` keeps those ranking
+semantics but strengthens family recognition. Each region must pair its
+Deposit or Loan label with a family icon and semantic edge treatment so the
+distinction does not rely on color alone. Header-level View all buttons are
+removed; each list ends with one localized text-style catalog link with a
+minimum `44px` interaction target. The official-bank action in every Home row
+uses the same text-link composition, external-link icon, new-tab behavior, and
+`noopener noreferrer` protection as the Product Grid card action.
+
+Product Owner direction on `2026-08-15` supersedes only the customer-facing
+name and brand mark in the identity acceptance above. The Public title is
+`Bankoom`. Its paired `oo` is represented as two eyes scanning outward across
+bank products, with the same simple code-native geometry used by the shell and
+favicon. `FPDS` remains the internal platform/runtime name. Ranking, catalog,
+comparison, localization, and publication behavior are unchanged.
 
 ### FR-PUB-010 Comparative Scatter Plot
 insight dashboard는 상품 간 trade-off를 보여주는 scatter plot 또는 동등한 comparative chart를 제공해야 한다.
@@ -1291,6 +1335,23 @@ Acceptance Criteria:
 - chart가 선택된 product type과 충돌하지 않는 의미를 가져야 한다.
 - 주요 차트와 KPI는 최신 refresh 시각을 표시해야 한다.
 - chart title, axis label, methodology note는 EN/KO/JA locale을 지원해야 한다.
+
+`2026-08-14` launch acceptance supersedes the first two criteria above and the
+always-visible chart requirement: Home must show the bounded Loan Top 5 plus
+current product/bank/freshness facts. A scatter plot appears only for one
+supported selected Product Type with sufficient comparable values. Home must
+not show a cross-family chart, multiple legacy ranking blocks, or Products by
+bank simply to fill the page.
+
+The later `2026-08-14` follow-up replaces the single Loan ranking with the
+bounded Deposit Top 5 / Loan Top 5 pair. These two purpose-specific lists are
+the approved Home ranking surface and do not restore the removed legacy widget
+catalog, Products by bank, or an always-visible cross-family chart.
+
+The final Home action hierarchy uses distinct labeled/icon-led Deposit and
+Loan regions, one localized text-style more link below each list, and the same
+official-bank text-link pattern used by Product Grid cards. No View all button
+appears in either ranking header.
 
 ## 11.3 Admin Overview Dashboard
 운영자가 선택한 locale에 따라 navigation, widget title, status label을 EN / KO / JA로 볼 수 있어야 한다.

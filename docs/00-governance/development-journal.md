@@ -1293,3 +1293,164 @@ Read before coding:
   on the card until approved data contains an explicit resulting absolute rate.
 - Next step: no data recollection is required; monitor future summary wording
   through the regression suite when new markets or rate formats are added.
+
+## 2026-08-14 - BankingFacts Public Launch Polish and Review Recovery Guard
+
+- WBS: `5.29`
+- Status: done
+- Goal: simplify the anonymous Public experience for launch, establish a clear
+  customer brand and favicon, replace Home bank composition with Loan Top 5,
+  route catalog-card users to the official bank page, and stop Review recovery
+  from attempting approval after a correction creates a new conditional
+  essential field.
+- Outcome: customer-facing Public metadata, header, footer, EN/KO/JA copy, and
+  the shared code-native mark now use `BankingFacts`. Home is reduced to a
+  concise thesis, direct Deposit/Credit Card/Loan actions, current product/bank
+  freshness, and up to five Loan products ordered by the lowest disclosed
+  numeric rate. Products by bank, the provenance ledger, repeated coverage,
+  decorative page gradients, and legacy ranking cards were removed.
+- Catalog action: product names still open the internal detail route and Compare
+  remains available. `Compare details` is replaced by `View at bank` (localized)
+  only when the approved projection has `product_url`; the external link uses a
+  new tab with `noopener noreferrer` and no URL fallback is invented.
+- Recovery fix: after AI corrections and an otherwise eligible verification,
+  collection automation reloads the current Review detail and applies the same
+  market-profile comparison contract used by manual approval. If a positive US
+  monthly fee now requires a missing `fee_waiver_condition`, the assessment is
+  persisted as ineligible with the missing fields and the task remains in
+  Review. The approval function is not called, so the scheduler no longer emits
+  the reported unhandled `essential_fields_missing` traceback for this path.
+- Safety: no canonical product, Review decision, collection run, aggregate
+  snapshot, or shared-dev data was mutated. Existing anonymous, country-scoped,
+  evidence-private, source-language, and non-recommendatory boundaries remain.
+- Key files: Public layout/locale/shell/Home/catalog components and app icon,
+  collection AI autopilot plus focused regression, Public README, requirements,
+  IA/metric baseline, WBS, and decision `D-046`.
+- Verification:
+  - collection autopilot plus approval-policy focused suites: `24` tests
+  - API full suite: `398` tests
+  - Public typecheck passed
+  - Public production build passed, including `/icon.svg`
+  - EN/KO/JA static copy/metadata and official-link safety inspection passed
+  - production-rendered Home passed at `1440px` EN, `768px` KO, and exact
+    `390px` JA; Deposit `390px` KO and Loan `390px` EN also passed with no
+    document overflow, correct localized title/lang/H1, no Products by bank or
+    Compare details text, and safe official-bank links
+- Known issues: `BankingFacts` is a `.com`-compatible label, but domain
+  registration and trademark clearance are external launch decisions and were
+  not performed by this code slice.
+- Next step: confirm the chosen domain before DNS/production cutover and repeat
+  the same smoke against the deployment candidate.
+
+## 2026-08-14 - BankTable Identity and Dual Home Top 5
+
+- WBS: `5.30`
+- Status: done
+- Goal: simplify the Public logo further, replace the customer-facing title,
+  and balance Home with Deposit Top 5 on the left and Loan Top 5 on the right.
+- Outcome: the customer-facing title is now `BankTable`. The shell and favicon
+  share one flat 2-by-2 table mark with no check badge, second color, or shadow.
+  EN/KO/JA metadata, comparison boundaries, and methodology copy use the new
+  name while FPDS remains the internal platform/runtime identity.
+- Home: Deposit and Loan now use independent product requests and equal desktop
+  columns, stacking below `lg`. Deposit requests the approved Chequing,
+  Savings, and GIC scope with `display_rate desc`; Loan requests Mortgage,
+  Personal Loan, and Line of Credit with `display_rate asc`. Both cap at five,
+  omit missing numeric rates, keep internal detail and safe official-bank
+  links, and distinguish request failure from a genuinely empty eligible set.
+- Copy and safety: Deposit explicitly means highest disclosed numeric rates and
+  Loan lowest disclosed numeric rates. Localized caveats direct users to
+  compare fees, terms, eligibility, and full conditions; no suitability score,
+  application flow, canonical mutation, or public evidence exposure was added.
+- Key files: Public Home route/surface, locale resources, layout metadata,
+  code-native mark/favicon, Public README, requirements, Home IA/metric
+  baseline, decision `D-047`, and WBS `5.30`.
+- Verification:
+  - Public typecheck passed
+  - Public production build passed, including `/icon.svg`
+  - production-rendered Home passed at `1440px` EN, `768px` KO, and exact
+    `390px` JA with no document overflow, browser exception, or interactive
+    target below 44px
+  - all three widths rendered five Deposit rates in descending order
+    (`5`, `5`, `5`, `5`, `4.65`) and five Loan rates in ascending order
+    (`3.45`, `4.45`, `4.45`, `4.59`, `4.59`)
+  - desktop rendered equal left/right columns; tablet/mobile rendered the
+    intended stacked order; all ten official-bank links retained
+    `noopener noreferrer`
+  - `/icon.svg` returned `200 image/svg+xml` with the matching table geometry
+- Known issues: `banktable.com` is currently offered as a premium aftermarket
+  domain, not reserved by this code change. Purchase and formal trademark
+  clearance remain Product Owner launch decisions.
+- Next step: decide whether to acquire `banktable.com` before production DNS
+  cutover, or select another customer name before external brand investment.
+
+## 2026-08-14 - Home Top 5 Group and Action Refinement
+
+- WBS: `5.31`
+- Status: done
+- Goal: distinguish the parallel Deposit and Loan rankings more clearly,
+  reduce header button weight, and make Home official-bank actions consistent
+  with Product Grid cards.
+- Outcome: each ranking region now has a family-specific semantic top rail and
+  quiet header tint plus an explicit label and Deposit/Loan icon. Header View
+  all buttons are removed; localized text-style more links now follow each
+  list. Home official-bank actions use the same label, external-link icon,
+  classes, new-tab target, and `noopener noreferrer` protection as Product
+  Grid cards.
+- Scope: rate eligibility, Deposit descending order, Loan ascending order,
+  five-item caps, independent unavailable states, internal detail links, API
+  contracts, canonical data, and evidence boundaries are unchanged. Additional
+  title candidates were reviewed, but the runtime identity remains `BankTable`
+  pending a separate Product Owner choice and domain/trademark clearance.
+- Key files: Public Home surface and locale resources, Public README,
+  requirements, Product Grid/Home IA, metric baseline, decision `D-048`, and
+  WBS `5.31`.
+- Verification:
+  - Public typecheck and production build passed
+  - rendered Home passed at `1440px` EN, `768px` KO, and exact `390px` JA with
+    no document overflow, browser error, or interaction target below `44px`
+  - every viewport rendered five Deposit rates in descending order
+    (`5`, `5`, `5`, `5`, `4.65`) and five Loan rates in ascending order
+    (`3.45`, `4.45`, `4.45`, `4.59`, `4.59`)
+  - no header View all button remained; EN/KO/JA bottom more links rendered as
+    links, not buttons
+  - all ten official-bank actions matched the Product Grid card text-link
+    composition and were not wrapped by buttons
+- Known issue: title and `.com` availability are not changed or reserved by
+  this presentation slice; formal domain and trademark checks remain external
+  launch decisions.
+- Next step: choose the final customer-facing title before production DNS and
+  brand investment.
+
+## 2026-08-15 - Bankoom Public Identity
+
+- WBS: `5.32`
+- Status: done
+- Goal: replace the temporary Public title with `Bankoom` and make the paired
+  `oo` the defining logo idea as two eyes comparing bank products.
+- Outcome: Public metadata, EN/KO/JA customer copy, header, footer, and
+  methodology boundaries now use `Bankoom`. The shared code-native mark uses
+  two overlapping circular eyes with outward pupils; the wordmark emphasizes
+  its `oo`, and the favicon repeats the same eye geometry on evergreen.
+- Scope: FPDS remains the internal platform/runtime identity. Home rankings,
+  catalog actions, comparison semantics, APIs, canonical data, Review state,
+  and publication behavior are unchanged.
+- Key files: Public layout, locale resources, shared mark/wordmark, header,
+  footer, app icon, Public README, requirements, Product Grid/Home IA,
+  decision `D-049`, and WBS `5.32`.
+- Verification:
+  - Public typecheck passed
+  - Public production build passed, including static `/icon.svg`
+  - `/dashboard` returned `200` with `Bankoom` metadata and `/icon.svg`
+    returned `200 image/svg+xml`
+  - production-rendered header passed at `1440px` EN and exact `390x844` KO;
+    the mobile document stayed within the CSS viewport, the title resolved to
+    `홈 — Bankoom`, and the Home brand link retained its accessible name
+  - desktop and mobile unavailable states were inspected because the isolated
+    Public render had no API process; data-bearing Home content was unchanged
+    by this identity-only slice
+  - final stale-brand search and `git diff --check` passed
+- Known issue: domain registration and formal trademark clearance remain
+  external launch actions and are not performed by this code slice.
+- Next step: confirm the production domain/DNS and repeat the same brand smoke
+  against the deployment candidate.

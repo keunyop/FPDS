@@ -5,21 +5,21 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { PublicLocaleMenu } from "@/components/fpds/public/public-locale-menu";
-import { PublicMark } from "@/components/fpds/public/public-mark";
+import { PublicMark, PublicWordmark } from "@/components/fpds/public/public-mark";
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams } from "@/lib/public-query";
 
 const FOOTER_COPY: Record<PublicLocale, { brandNote: string; legalNote: string }> = {
   en: {
-    brandNote: "Comparable public financial product data.",
+    brandNote: "Reviewed bank products, in one place.",
     legalNote: "Information may change. Confirm rates and conditions on the bank's official page."
   },
   ko: {
-    brandNote: "비교 가능한 공개 금융상품 데이터.",
+    brandNote: "검토된 은행 상품을 한곳에서 비교하세요.",
     legalNote: "정보는 변경될 수 있습니다. 가입 전 은행 공식 페이지에서 금리와 조건을 확인하세요."
   },
   ja: {
-    brandNote: "比較できる公開金融商品データ。",
+    brandNote: "レビュー済みの銀行商品をひとつの場所で比較。",
     legalNote: "情報は変更される場合があります。申込前に銀行の公式ページで金利と条件を確認してください。"
   }
 };
@@ -41,13 +41,16 @@ function FooterContent() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-3">
-              <PublicMark className="bg-background text-foreground shadow-none" />
-              <span className="text-lg font-semibold text-background">{copy.shell.brand}</span>
+              <PublicMark className="text-background" />
+              <PublicWordmark
+                className="text-lg font-semibold tracking-[-0.035em] text-background"
+                eyeClassName="text-background"
+              />
             </Link>
             <p className="mt-1 text-sm text-background/65">{footerCopy.brandNote}</p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-background" aria-label="Footer navigation">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-background" aria-label={copy.nav.footerLabel}>
             <FooterLink href={dashboardHref}>{copy.nav.dashboard}</FooterLink>
             <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
             <FooterLink href={cardsHref}>{copy.nav.card}</FooterLink>

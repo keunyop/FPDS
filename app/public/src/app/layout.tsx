@@ -8,11 +8,12 @@ import { PublicLocaleSync } from "@/components/fpds/public/public-locale-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  applicationName: "Bankoom",
   title: {
-    default: "FPDS — Verified financial product records",
-    template: "%s — FPDS"
+    default: "Bankoom — Bank products, side by side",
+    template: "%s — Bankoom"
   },
-  description: "Compare reviewed public facts for deposit, credit card, and loan products by country."
+  description: "Compare reviewed deposit, credit card, and loan facts from the latest public snapshot."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

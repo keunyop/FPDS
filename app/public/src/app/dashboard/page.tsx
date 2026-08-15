@@ -4,12 +4,13 @@ import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 import {
   fetchPublicDashboardScatter,
-  fetchPublicDashboardRankings,
-  fetchPublicDashboardSummary
+  fetchPublicDashboardSummary,
+  fetchPublicProducts
 } from "@/lib/public-api";
 import {
   buildDashboardSearchParams,
   DEPOSIT_PRODUCT_TYPES,
+  LOAN_PRODUCT_TYPES,
   parseDashboardPageFilters,
   type DashboardPageFilters
 } from "@/lib/public-query";
@@ -34,23 +35,39 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const filters = parseDashboardPageFilters(resolvedSearchParams);
 
   let summary = null;
-  let rankings = null;
+  let depositProducts = null;
+  let loanProducts = null;
   let scatter = null;
   let apiUnavailable = false;
+  let depositProductsUnavailable = false;
+  let loanProductsUnavailable = false;
 
-  try {
-    const dashboardScope = filters.productTypes.length
-      ? filters
-      : { ...filters, productTypes: [...DEPOSIT_PRODUCT_TYPES] };
-    const search = buildDashboardSearchParams(dashboardScope);
-    const [summaryResponse, rankingsResponse] = await Promise.all([
-      fetchPublicDashboardSummary(search),
-      fetchPublicDashboardRankings(search)
-    ]);
-    summary = summaryResponse;
-    rankings = rankingsResponse;
+  const [summaryResult, depositProductsResult, loanProductsResult] = await Promise.allSettled([
+    fetchPublicDashboardSummary(buildDashboardSearchParams(filters)),
+    fetchPublicProducts(buildDepositProductsSearchParams(filters)),
+    fetchPublicProducts(buildLoanProductsSearchParams(filters))
+  ]);
 
-    const scatterFilters = buildScatterFilters(dashboardScope);
+  if (summaryResult.status === "fulfilled") {
+    summary = summaryResult.value;
+  } else {
+    apiUnavailable = true;
+  }
+
+  if (depositProductsResult.status === "fulfilled") {
+    depositProducts = depositProductsResult.value;
+  } else {
+    depositProductsUnavailable = true;
+  }
+
+  if (loanProductsResult.status === "fulfilled") {
+    loanProducts = loanProductsResult.value;
+  } else {
+    loanProductsUnavailable = true;
+  }
+
+  if (!apiUnavailable) {
+    const scatterFilters = buildScatterFilters(filters);
     if (scatterFilters) {
       try {
         scatter = await fetchPublicDashboardScatter(buildDashboardSearchParams(scatterFilters));
@@ -58,19 +75,50 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         scatter = null;
       }
     }
-  } catch {
-    apiUnavailable = true;
   }
 
   return (
     <DashboardSurface
       apiUnavailable={apiUnavailable}
+      depositProducts={depositProducts}
+      depositProductsUnavailable={depositProductsUnavailable}
       filters={filters}
-      rankings={rankings}
+      loanProducts={loanProducts}
+      loanProductsUnavailable={loanProductsUnavailable}
       scatter={scatter}
       summary={summary}
     />
   );
+}
+
+function buildDepositProductsSearchParams(filters: DashboardPageFilters) {
+  const params = buildDashboardSearchParams({
+    ...filters,
+    axisPreset: "",
+    productTypes: [...DEPOSIT_PRODUCT_TYPES]
+  });
+  params.set("page", "1");
+  params.set("page_size", "5");
+  params.set("sort_by", "display_rate");
+  params.set("sort_order", "desc");
+  return params;
+}
+
+function buildLoanProductsSearchParams(filters: DashboardPageFilters) {
+  const params = buildDashboardSearchParams({
+    ...filters,
+    axisPreset: "",
+    feeBucket: "",
+    minimumBalanceBucket: "",
+    minimumDepositBucket: "",
+    productTypes: [...LOAN_PRODUCT_TYPES],
+    termBucket: ""
+  });
+  params.set("page", "1");
+  params.set("page_size", "5");
+  params.set("sort_by", "display_rate");
+  params.set("sort_order", "asc");
+  return params;
 }
 
 function buildScatterFilters(filters: DashboardPageFilters): DashboardPageFilters | null {

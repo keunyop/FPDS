@@ -45,6 +45,22 @@ def _detail():
     }
 
 
+def _us_savings_detail(*, monthly_fee: float):
+    detail = _detail()
+    detail["candidate"].update(
+        {
+            "country_code": "US",
+            "product_type": "savings",
+            "candidate_payload": {
+                "standard_rate": 3.2,
+                "monthly_fee": monthly_fee,
+                "minimum_balance": 1500,
+            },
+        }
+    )
+    return detail
+
+
 class CollectionAiAutopilotTests(TestCase):
     def test_reuses_only_current_essential_field_contract_execution(self):
         connection = _QueryConnection([])
@@ -205,4 +221,77 @@ class CollectionAiAutopilotTests(TestCase):
         self.assertEqual(result["status"], "review_retained")
         self.assertTrue(result["reused_verification"])
         verify.assert_not_called()
+        decide.assert_not_called()
+
+    def test_retains_review_when_correction_introduces_missing_conditional_field(self):
+        first_execution = {
+            "model_execution_id": "modelexec-001",
+            "execution_status": "completed",
+            "execution_metadata": {"verification_result": {}},
+        }
+        corrected_execution = {
+            "model_execution_id": "modelexec-001",
+            "execution_status": "completed",
+            "execution_metadata": {"verification_result": {}},
+        }
+        assessment = {
+            "eligible": True,
+            "threshold": 1.0,
+            "requested_field_count": 4,
+            "passed_field_count": 4,
+            "pass_rate": 1.0,
+            "product_identity_verified": True,
+            "reason_codes": [],
+        }
+        connection = object()
+        with (
+            patch(
+                "api_service.collection_ai_autopilot.load_review_task_detail",
+                side_effect=[
+                    _us_savings_detail(monthly_fee=0),
+                    _us_savings_detail(monthly_fee=12),
+                ],
+            ),
+            patch("api_service.collection_ai_autopilot._load_latest_verification_execution", return_value=None),
+            patch(
+                "api_service.collection_ai_autopilot.run_review_ai_verification",
+                return_value={
+                    "ok": True,
+                    "ai_verification": {"latest_attempt": {"model_execution_id": "modelexec-001"}},
+                },
+            ),
+            patch(
+                "api_service.collection_ai_autopilot._load_verification_execution",
+                side_effect=[first_execution, corrected_execution],
+            ),
+            patch(
+                "api_service.collection_ai_autopilot.apply_review_ai_corrections",
+                return_value={"applied": True, "changed_fields": ["monthly_fee"]},
+            ),
+            patch(
+                "api_service.collection_ai_autopilot.assess_review_ai_auto_approval",
+                return_value=assessment,
+            ),
+            patch("api_service.collection_ai_autopilot.persist_review_ai_auto_approval_assessment") as persist,
+            patch("api_service.collection_ai_autopilot.apply_review_decision") as decide,
+        ):
+            result = remediate_collection_review_task(
+                connection,
+                review_task_id="review-001",
+                approval_threshold=1.0,
+                request_context={"request_id": "req-001"},
+            )
+
+        self.assertFalse(result["approved"])
+        self.assertEqual(result["status"], "review_retained")
+        self.assertEqual(result["changed_fields"], ["monthly_fee"])
+        self.assertEqual(
+            result["assessment"]["reason_codes"],
+            ["essential_comparison_fields_missing_after_correction"],
+        )
+        self.assertEqual(
+            result["assessment"]["missing_comparison_fields"],
+            ["fee_waiver_condition"],
+        )
+        self.assertEqual(persist.call_count, 2)
         decide.assert_not_called()

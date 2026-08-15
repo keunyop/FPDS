@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Check, ExternalLink, FilterX, Landmark, PiggyBank, RefreshCw } from "lucide-react";
+import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
@@ -8,35 +8,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import {
-  type PublicDashboardRankingsResponse,
   type PublicDashboardScatterResponse,
-  type PublicDashboardSummaryResponse
+  type PublicDashboardSummaryResponse,
+  type PublicProductsResponse
 } from "@/lib/public-api";
 import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 type DashboardSurfaceProps = {
   apiUnavailable: boolean;
+  depositProducts: PublicProductsResponse | null;
+  depositProductsUnavailable: boolean;
   filters: DashboardPageFilters;
-  rankings: PublicDashboardRankingsResponse | null;
+  loanProducts: PublicProductsResponse | null;
+  loanProductsUnavailable: boolean;
   scatter: PublicDashboardScatterResponse | null;
   summary: PublicDashboardSummaryResponse | null;
 };
 
-type CompositionChartItem = {
-  count: number;
-  key: string;
-  label: string;
-  share_percent: number;
-};
-
-type CompositionLinkItem = CompositionChartItem & {
-  href: string;
-};
-
-export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, summary }: DashboardSurfaceProps) {
+export function DashboardSurface({
+  apiUnavailable,
+  depositProducts,
+  depositProductsUnavailable,
+  filters,
+  loanProducts,
+  loanProductsUnavailable,
+  scatter,
+  summary
+}: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
+  const cardsHref = buildPublicHref("/cards", { ...filters, page: 1 });
   const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
   const clearHref = buildPublicHref("/dashboard", {
     ...filters,
@@ -50,7 +52,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
     axisPreset: ""
   });
 
-  if (apiUnavailable || !rankings || !summary) {
+  if (apiUnavailable || !summary) {
     return (
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Card className="border-destructive/25">
@@ -77,51 +79,54 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   const totalProducts = Number(getMetric(summary, "total_active_products")?.value ?? 0);
   const banksInScope = Number(getMetric(summary, "banks_in_scope")?.value ?? 0);
   const activeChips = buildScopeChips(filters, summary);
-  const bankComposition = buildBankComposition(filters, summary);
-  const productTypeLinks = buildProductTypeDashboardLinks(filters, summary);
-  const depositComparisonScope = summary.breakdowns.products_by_product_type.every((item) => ["chequing", "gic", "savings"].includes(item.product_type));
-  const decisionWidgets = depositComparisonScope
-    ? rankings.widgets.filter((widget) => widget.ranking_key !== "recently_changed_30d")
-    : [];
+  const rankedDeposits = (depositProducts?.items ?? [])
+    .filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate))
+    .slice(0, 5);
+  const rankedLoans = (loanProducts?.items ?? []).filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate)).slice(0, 5);
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
   const snapshotDate = formatSnapshotDate(summary.freshness.refreshed_at, copy.common.noDate);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
       <div className="flex flex-col gap-8 md:gap-12">
-        <section className="relative overflow-hidden border-y border-foreground/15 py-8 md:py-12">
-          <div className="ledger-rule pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] opacity-35 lg:block" aria-hidden="true" />
-          <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.72fr)] lg:items-center">
+        <section className="border-y border-foreground/15 py-8 md:py-12">
+          <div className="grid gap-9 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
             <div className="max-w-3xl">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-verification">{designCopy.homeKicker}</p>
-              <h1 className="text-balance mt-5 max-w-4xl font-display text-[clamp(2.4rem,7vw,6.4rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground md:leading-[0.94] md:tracking-[-0.065em]">
+              <p className="text-xs font-semibold tracking-[0.08em] text-verification">{designCopy.homeKicker}</p>
+              <h1 className="text-balance mt-4 max-w-4xl font-display text-[clamp(2.4rem,6vw,5rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground">
                 {designCopy.homeTitle}
               </h1>
-              <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg md:leading-8">{designCopy.homeBody}</p>
-              <div className="mt-7 flex flex-wrap gap-3">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">{designCopy.homeBody}</p>
+              <div className="mt-6 flex flex-wrap gap-2.5">
                 <Button asChild size="lg" className="min-h-12 rounded-full px-5">
-                <Link href={productsHref}>
-                  <PiggyBank className="size-4" aria-hidden="true" />
-                  {copy.nav.products}
-                </Link>
-              </Button>
-                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
-                <Link href={loansHref}>
-                  <Landmark className="size-4" aria-hidden="true" />
-                  {copy.nav.loan}
-                </Link>
-              </Button>
-              {activeChips.length ? (
-                <Button asChild variant="outline">
-                  <Link href={clearHref}>
-                    <FilterX className="size-4" aria-hidden="true" />
-                    {copy.common.clearFilters}
+                  <Link href={productsHref}>
+                    <PiggyBank className="size-4" aria-hidden="true" />
+                    {copy.nav.products}
                   </Link>
                 </Button>
-              ) : null}
+                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
+                  <Link href={cardsHref}>
+                    <CreditCard className="size-4" aria-hidden="true" />
+                    {copy.nav.card}
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
+                  <Link href={loansHref}>
+                    <Landmark className="size-4" aria-hidden="true" />
+                    {copy.nav.loan}
+                  </Link>
+                </Button>
+                {activeChips.length ? (
+                  <Button asChild variant="ghost">
+                    <Link href={clearHref}>
+                      <FilterX className="size-4" aria-hidden="true" />
+                      {copy.common.clearFilters}
+                    </Link>
+                  </Button>
+                ) : null}
               </div>
             </div>
-            <SnapshotLedger
+            <SnapshotSummary
               banks={formatCount(banksInScope, filters.locale)}
               date={snapshotDate}
               freshness={summary.freshness}
@@ -145,38 +150,33 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
           </section>
         ) : null}
 
-        <section aria-labelledby="coverage-title">
-          <div className="mb-5 flex items-end justify-between gap-4 border-b border-foreground/15 pb-4">
-            <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.coverage}</p>
-              <h2 id="coverage-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground md:text-3xl">{copy.dashboard.composition}</h2>
-            </div>
-            <span className="hidden font-mono text-xs text-muted-foreground sm:block">{designCopy.asOf} {snapshotDate}</span>
-          </div>
-          <div className="grid divide-y divide-border border-y border-border md:grid-cols-2 md:divide-x md:divide-y-0">
-            <CoverageEntry href={productsHref} icon={PiggyBank} label={copy.nav.products} text={designCopy.depositCoverage} tone="deposit" />
-            <CoverageEntry href={loansHref} icon={Landmark} label={copy.nav.loan} text={designCopy.loanCoverage} tone="loan" />
-          </div>
-        </section>
-
-        <section className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:gap-0">
-          <div className="space-y-4 lg:pr-8">
-            {decisionWidgets.length ? (
-              decisionWidgets.map((widget) => <RankingCards key={widget.ranking_key} filters={filters} locale={filters.locale} productsHref={productsHref} widget={widget} />)
-            ) : (
-              <EmptyPanel text={rankings.insufficiency_note ?? copy.dashboard.noRankingWidgets} />
-            )}
-          </div>
-
-          <div className="border-t border-foreground/15 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-            <div>
-              <h2 className="text-xl font-semibold tracking-[-0.02em]">{copy.dashboard.productsByBank}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{copy.dashboard.compositionSubtitle}</p>
-            </div>
-            <div className="mt-5 space-y-4">
-              {bankComposition.length ? <CoverageBars items={bankComposition} /> : <EmptyPanel text={copy.dashboard.noRankingWidgets} />}
-            </div>
-          </div>
+        <section className="grid items-start gap-6 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
+          <ProductTopFive
+            accent="deposit"
+            emptyText={copy.dashboard.depositTopEmpty}
+            filters={filters}
+            headingId="deposit-top-title"
+            href={productsHref}
+            linkLabel={copy.dashboard.moreDeposits}
+            products={rankedDeposits}
+            subtitle={copy.dashboard.depositTopSubtitle}
+            title={copy.dashboard.depositTopTitle}
+            unavailable={depositProductsUnavailable}
+            unavailableText={copy.dashboard.depositTopUnavailable}
+          />
+          <ProductTopFive
+            accent="loan"
+            emptyText={copy.dashboard.loanTopEmpty}
+            filters={filters}
+            headingId="loan-top-title"
+            href={loansHref}
+            linkLabel={copy.dashboard.moreLoans}
+            products={rankedLoans}
+            subtitle={copy.dashboard.loanTopSubtitle}
+            title={copy.dashboard.loanTopTitle}
+            unavailable={loanProductsUnavailable}
+            unavailableText={copy.dashboard.loanTopUnavailable}
+          />
         </section>
 
         {hasScatter || filters.productTypes.length === 1 ? (
@@ -194,7 +194,6 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
                     <p className="text-sm text-muted-foreground">
                       {scatter?.insufficiency_note ?? (filters.productTypes.length === 1 ? copy.dashboard.chartUnavailable : copy.dashboard.chartSingleTypeHint)}
                     </p>
-                    {productTypeLinks.length ? <CompositionLinks className="mt-4" items={productTypeLinks} /> : null}
                   </div>
                 )}
               </CardContent>
@@ -206,7 +205,7 @@ export function DashboardSurface({ apiUnavailable, filters, rankings, scatter, s
   );
 }
 
-function SnapshotLedger({
+function SnapshotSummary({
   banks,
   date,
   freshness,
@@ -221,9 +220,8 @@ function SnapshotLedger({
 }) {
   const copy = getPublicMessages(locale);
   const designCopy = getPublicDesignCopy(locale);
-  const steps = [designCopy.officialRecord, designCopy.reviewedRecord, designCopy.publicSnapshot];
   return (
-    <aside className="relative min-w-0 border border-foreground/20 bg-card/85 p-5 shadow-[8px_8px_0_rgba(28,39,35,0.06)] backdrop-blur-sm md:p-6 md:shadow-[10px_10px_0_rgba(28,39,35,0.06)]" aria-label={designCopy.recordPath}>
+    <aside className="min-w-0 border-y border-foreground/20 bg-card/55 px-1 py-5 md:px-5" aria-label={designCopy.publicSnapshot}>
       <div className="flex flex-col items-start gap-3 border-b border-border pb-4 sm:flex-row sm:justify-between">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.publicSnapshot}</p>
@@ -231,7 +229,7 @@ function SnapshotLedger({
         </div>
         <PublicFreshness compact freshness={freshness} locale={locale} />
       </div>
-      <div className="grid grid-cols-2 divide-x divide-border border-b border-border">
+      <div className="grid grid-cols-2 divide-x divide-border">
         <div className="py-5 pr-4">
           <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{products}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.visibleProducts}</p>
@@ -241,148 +239,109 @@ function SnapshotLedger({
           <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.banksInScope}</p>
         </div>
       </div>
-      <ol className="relative mt-5 grid gap-4 before:absolute before:bottom-2 before:left-[0.6875rem] before:top-2 before:w-px before:bg-verification/25">
-        {steps.map((step, index) => (
-          <li className="relative flex items-center gap-3 text-sm" key={step}>
-            <span className="relative z-10 grid size-[1.375rem] shrink-0 place-items-center rounded-full border border-verification/25 bg-verification-soft text-verification">
-              <Check className="size-3" aria-hidden="true" />
-            </span>
-            <span className="font-medium text-foreground">{step}</span>
-            <span className="ml-auto font-mono text-[10px] text-muted-foreground">0{index + 1}</span>
-          </li>
-        ))}
-      </ol>
-      <p className="mt-5 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
+      <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
     </aside>
   );
 }
 
-function CoverageEntry({
-  href,
-  icon: Icon,
-  label,
-  text,
-  tone,
-}: {
-  href: string;
-  icon: typeof PiggyBank;
-  label: string;
-  text: string;
-  tone: "deposit" | "loan";
-}) {
-  return (
-    <Link className="group flex min-h-28 items-center gap-4 px-1 py-5 transition-colors hover:bg-card/60 md:px-5" href={href}>
-      <span className={`grid size-11 shrink-0 place-items-center rounded-full ${tone === "deposit" ? "bg-verification-soft text-deposit" : "bg-accent text-loan"}`}>
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-lg font-semibold text-foreground">{label}</span>
-        <span className="mt-1 block text-sm text-muted-foreground">{text}</span>
-      </span>
-      <ArrowRight className="ml-auto size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" aria-hidden="true" />
-    </Link>
-  );
-}
-
-function RankingCards({
+function ProductTopFive({
+  accent,
+  emptyText,
   filters,
-  locale,
-  productsHref,
-  widget
+  headingId,
+  href,
+  linkLabel,
+  products,
+  subtitle,
+  title,
+  unavailable,
+  unavailableText
 }: {
+  accent: "deposit" | "loan";
+  emptyText: string;
   filters: DashboardPageFilters;
-  locale: string;
-  productsHref: string;
-  widget: PublicDashboardRankingsResponse["widgets"][number];
+  headingId: string;
+  href: string;
+  linkLabel: string;
+  products: PublicProductsResponse["items"];
+  subtitle: string;
+  title: string;
+  unavailable: boolean;
+  unavailableText: string;
 }) {
-  const copy = getPublicMessages(locale);
-  const title = widget.ranking_key === "highest_display_rate" ? copy.dashboard.topInterestRateTitle : widget.title;
+  const copy = getPublicMessages(filters.locale);
+  const accentClass = accent === "loan" ? "text-loan" : "text-primary";
+  const articleClass = accent === "loan"
+    ? "border-loan/30 border-t-loan"
+    : "border-primary/25 border-t-primary";
+  const headerClass = accent === "loan" ? "bg-loan/[0.045]" : "bg-primary/[0.04]";
+  const iconClass = accent === "loan" ? "bg-loan/10 text-loan" : "bg-primary/10 text-primary";
+  const metricClass = accent === "loan" ? "border-loan" : "border-primary";
+  const rowClass = accent === "loan" ? "divide-loan/15" : "divide-primary/15";
+  const familyLabel = accent === "loan" ? copy.nav.loan : copy.nav.products;
+  const FamilyIcon = accent === "loan" ? Landmark : PiggyBank;
 
   return (
-    <section className="overflow-hidden border-y border-foreground/15 bg-card/65" aria-labelledby={`${widget.ranking_key}-title`}>
-      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{widget.metric_label}</p>
-          <h2 id={`${widget.ranking_key}-title`} className="mt-1 text-xl font-semibold leading-tight text-foreground">
-            {title}
-          </h2>
-        </div>
-        <Button asChild variant="outline" size="sm" className="self-start sm:self-auto">
-          <Link href={productsHref}>
-            {copy.common.more}
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          </Link>
-        </Button>
-      </div>
-      <div className="grid divide-y divide-border/70">
-        {widget.items.slice(0, 5).map((item) => (
-          <div className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:items-center" key={item.product_id}>
-            <span className="w-6 text-left text-sm font-semibold text-muted-foreground tabular-nums sm:text-right">
-              {item.rank}
-            </span>
-            <BankLogo bankCode={item.bank_code} bankName={item.bank_name} size="sm" />
-            <div className="min-w-0">
-              <Link className="inline-flex min-h-11 items-center break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, item.product_id)}>
-                {item.product_name}
-              </Link>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.bank_name}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-              <span className="border-b-2 border-maple px-2 py-1 text-base font-semibold text-foreground tabular-nums">
-                {formatMetricValue(item.metric_value, item.metric_unit, locale)}
-              </span>
-              {item.product_url ? (
-                <Button asChild variant="outline" size="xs">
-                  <a href={item.product_url} target="_blank" rel="noreferrer">
-                    {copy.common.bankPage}
-                    <ExternalLink className="size-3" aria-hidden="true" />
-                  </a>
-                </Button>
-              ) : null}
-            </div>
+    <article className={`overflow-hidden border border-t-4 bg-card/70 ${articleClass}`} aria-labelledby={headingId}>
+      <div className={`min-h-[10.5rem] border-b border-border px-4 py-6 md:px-5 ${headerClass}`}>
+        <div className="flex items-start gap-3">
+          <span className={`grid size-9 shrink-0 place-items-center rounded-full ${iconClass}`} aria-hidden="true">
+            <FamilyIcon className="size-4.5" />
+          </span>
+          <div className="min-w-0">
+            <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${accentClass}`}>{familyLabel}</p>
+            <h2 id={headingId} className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-foreground">{title}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{subtitle}</p>
           </div>
-        ))}
+        </div>
       </div>
-    </section>
-  );
-}
-
-function CoverageBars({ items }: { items: CompositionLinkItem[] }) {
-  return (
-    <div className="grid gap-3">
-      {items.map((item) => (
-        <Link className="group grid min-h-11 content-center gap-1.5" href={item.href} key={item.key}>
-          <span className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate font-medium text-foreground group-hover:text-primary">{item.label}</span>
-            <span className="shrink-0 text-xs font-semibold text-muted-foreground tabular-nums">{item.count}</span>
-          </span>
-          <span className="h-1.5 overflow-hidden bg-muted">
-            <span className="block h-full bg-verification/70 transition-colors group-hover:bg-verification" style={{ width: `${Math.max(4, Math.min(100, item.share_percent))}%` }} />
-          </span>
+      {unavailable ? (
+        <div className="p-4 md:p-5">
+          <EmptyPanel text={unavailableText} />
+        </div>
+      ) : products.length ? (
+        <ol className={`grid divide-y ${rowClass}`}>
+          {products.map((product, index) => (
+            <li className="grid grid-cols-[1.5rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 md:px-5" key={product.product_id}>
+              <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
+              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+              <div className="min-w-0">
+                <Link className="inline-flex min-h-11 items-center break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
+                  {product.product_name}
+                </Link>
+                <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
+              </div>
+              <div className="col-start-3 mt-2 flex flex-wrap items-center justify-between gap-2">
+                <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(product.card_display_rate, "percent", filters.locale)}`}>
+                  {formatMetricValue(product.card_display_rate, "percent", filters.locale)}
+                </span>
+                {product.product_url ? (
+                  <a
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+                    href={product.product_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {copy.common.bankPage}
+                    <ExternalLink className="size-3.5" aria-hidden="true" />
+                  </a>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <div className="p-4 md:p-5">
+          <EmptyPanel text={emptyText} />
+        </div>
+      )}
+      <div className={`border-t px-4 py-2 md:px-5 ${accent === "loan" ? "border-loan/15" : "border-primary/15"}`}>
+        <Link className={`inline-flex min-h-11 items-center gap-2 text-sm font-semibold ${accentClass} hover:underline hover:underline-offset-4`} href={href}>
+          {linkLabel}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
         </Link>
-      ))}
-    </div>
-  );
-}
-
-function CompositionLinks({ className = "", items }: { className?: string; items: CompositionLinkItem[] }) {
-  if (!items.length) {
-    return null;
-  }
-
-  return (
-    <div className={`flex flex-wrap gap-2 ${className}`}>
-      {items.slice(0, 6).map((item) => (
-        <Link
-          key={item.key}
-          href={item.href}
-          className="inline-flex min-h-8 items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <span>{item.label}</span>
-          <span className="rounded bg-muted px-1.5 py-0.5 tabular-nums">{item.count}</span>
-        </Link>
-      ))}
-    </div>
+      </div>
+    </article>
   );
 }
 
@@ -428,39 +387,6 @@ function buildScopeChips(filters: DashboardPageFilters, summary: PublicDashboard
 function addBucketChip(chips: Array<{ href: string; key: string; label: string }>, key: string, value: string, href: string) {
   if (value) {
     chips.push({ href, key: `${key}-${value}`, label: formatBucketLabel(value) });
-  }
-}
-
-function buildBankComposition(filters: DashboardPageFilters, summary: PublicDashboardSummaryResponse): CompositionLinkItem[] {
-  return summary.breakdowns.products_by_bank.map((item) => ({
-    count: item.count,
-    href: buildPublicHref("/products", { ...filters, bankCodes: [item.bank_code], page: 1 }),
-    key: item.bank_code,
-    label: item.bank_name,
-    share_percent: item.share_percent
-  }));
-}
-
-function buildProductTypeDashboardLinks(filters: DashboardPageFilters, summary: PublicDashboardSummaryResponse): CompositionLinkItem[] {
-  return summary.breakdowns.products_by_product_type.map((item) => ({
-    count: item.count,
-    href: buildPublicHref("/dashboard", { ...filters, productTypes: [item.product_type], axisPreset: defaultAxisPreset(item.product_type) }),
-    key: item.product_type,
-    label: item.product_type_label,
-    share_percent: item.share_percent
-  }));
-}
-
-function defaultAxisPreset(productType: string) {
-  switch (productType) {
-    case "chequing":
-      return "chequing_fee_vs_minimum_balance";
-    case "savings":
-      return "savings_rate_vs_minimum_balance";
-    case "gic":
-      return "gic_rate_vs_minimum_deposit";
-    default:
-      return "";
   }
 }
 
